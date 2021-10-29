@@ -20,12 +20,13 @@ from argo.workflows.client import (
     V1Toleration,
     V1VolumeMount,
 )
+from pydantic import BaseModel
+
 from hera.v1.env import EnvSpec
 from hera.v1.input import InputFrom
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.toleration import Toleration
-from pydantic import BaseModel
 
 
 class Task:
@@ -483,8 +484,8 @@ class Task:
 
         Notes
         -----
-        If the task includes a GPU resource specification the client is responsible for specifying a GPU toleration. For
-        GKE and Azure workloads `hera.v1.tolerations.GPUToleration` can be specified.
+        If the task includes a GPU resource specification the client is responsible for specifying a GPU toleration.
+        For GKE and Azure workloads `hera.v1.tolerations.GPUToleration` can be specified.
         """
         if self.tolerations is None:
             return None

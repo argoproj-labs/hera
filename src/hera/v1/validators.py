@@ -35,7 +35,7 @@ def validate_storage_units(value: str) -> None:
         assert unit in supported_units, f'unsupported unit for parsed value {value}'
 
 
-def json_serializable(value: Any) -> True:  # type: ignore
+def json_serializable(value: Union[BaseModel, Any]) -> True:  # type: ignore
     """Check if the given value is JSON serializable.
 
     Parameters
