@@ -105,7 +105,7 @@ w.submit()
 
 # Examples
 
-See the [examples](https://github.com/argoproj-labs/hera/tree/main/examples) directory for a collection of Argo workflow
+See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of Argo workflow
 construction and submission via Hera!
 
 # Comparison
