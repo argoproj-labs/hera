@@ -14,6 +14,9 @@ Python functions are first class citizens in Hera - they are the atomic units (e
 remote execution. The framework makes it easy to wrap execution payloads into Argo Workflow tasks, set dependencies,
 resources, etc.
 
+You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 
+20 Oct 2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
+
 # Table of content
 
 - [Install](#installation)
