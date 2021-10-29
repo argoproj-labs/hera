@@ -1,0 +1,36 @@
+name: Hera PR build
+on: pull_request
+jobs:
+  hera-pr-build:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pipenv wheel
+
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        run: |
+          pipenv sync --dev --pre
+
+      - name: Run lint
+        run: |
+          pipenv run make lint
+
+      - name: Run typecheck
+        run: |
+          pipenv run make typecheck
+
+      - name: Run tests
+        run: |
+          pipenv run make test
