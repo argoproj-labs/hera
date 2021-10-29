@@ -19,10 +19,10 @@ resources, etc.
 - [Install](#installation)
 - [Assumptions](#assumptions)
 - [Installation](#installation)
+- [Contributing](#contributing)
 - [Concepts](#concepts)
 - [Examples](#examples)
 - [Comparison](#comparison)
-- [Contributing](#contributing)
 
 # Assumptions
 
@@ -55,7 +55,6 @@ Alternatively, you can clone this repository and then run the following to insta
 python setup.py install
 ```
 
-
 # Contributing
 
 If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `pipenv`:
@@ -65,6 +64,7 @@ pipenv shell
 pipenv sync --dev --pre
 ```
 
+Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
 
 # Concepts
 
@@ -239,7 +239,3 @@ class DagDiamond(Workflow):
 </p></td>
 </tr>
 </table>
-
-# Contributing
-
-See the [contributing guide](https://github.com/argoproj-labs/hera/blob/master/CONTRIBUTING.md)!
