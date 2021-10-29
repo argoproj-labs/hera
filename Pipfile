@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+hera = { editable = true, path = "." }
+
+[dev-packages]
+pytest = "*"
+black = "*"
+flake8 = "*"
+mypy = "*"
+tox = "<4"  # tox>=4 causes locking problems with import-metadatalib, take <4 until those are fixed
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
