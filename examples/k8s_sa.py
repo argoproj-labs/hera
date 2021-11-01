@@ -22,7 +22,7 @@ def get_sa_token(
         The service account to authenticate from.
     namespace: str = 'default'
         The K8S namespace the workflow service submits workflows to. This defaults to the `default` namespace.
-    config_file: str
+    config_file: Optional[str] = None
         The path to k8s configuration file.
     
      Raises
