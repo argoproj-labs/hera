@@ -11,9 +11,9 @@ setup(
                 'for constructing Argo workflows.',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://github.com/argoproj-labs/hera",
+    url="https://github.com/argoproj-labs/hera-workflows",
     project_urls={
-        "Bug Tracker": "https://github.com/argoproj-labs/hera/issues",
+        "Bug Tracker": "https://github.com/argoproj-labs/hera-workflows/issues",
     },
     author="Flaviu Vadan",
     author_email="flaviu.vadan@dynotx.com",
