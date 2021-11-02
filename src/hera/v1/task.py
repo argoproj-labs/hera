@@ -163,6 +163,32 @@ class Task:
         """
         return self.next(other)
 
+    def next_when(self, condition: str, other: 'Task') -> 'Task':
+        """Sets this task as a dependency of the other passed task if the condition match.
+
+        Parameters
+        ----------
+        condition: str
+            Expression which the task should match to execute.
+        other: Task
+            The other task to set a dependency for. The new dependency of the task is this task.
+
+        Returns
+        -------
+        Task
+            The other task that was specified.
+
+        Examples
+        --------
+        t1, t2, t3 = Task('t1'), Task('t2'), Task('t3')
+        t1.next_when("{{item.outputs.result}} == 't2'", t2)
+        t1.next_when("{{item.outputs.result}} == 't3'", t3)
+        """
+        assert isinstance(other, self.__class__)
+        condition = condition.replace("{{item.", f"{{{{tasks.{self.name}.")
+        other.argo_task._when = condition
+        return self.next(other)
+
     def validate(self):
         """
         Validates that the given function and corresponding params fit one another, raises AssertionError if

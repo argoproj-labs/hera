@@ -65,6 +65,17 @@ def test_next_and_shifting_set_correct_dependencies():
     assert t6.argo_task.dependencies == ['t5']
 
 
+def test_next_when_correct_expression_and_dependencies():
+    t1, t2, t3 = Task('t1', noop), Task('t2', noop), Task('t3', noop)
+    t1.next_when("{{item.outputs.result}} == 't2'", t2)
+    t1.next_when("{{item.outputs.result}} == 't3'", t3)
+    assert t2.argo_task.dependencies == ['t1']
+    assert t3.argo_task.dependencies == ['t1']
+
+    assert t2.argo_task._when == "{{tasks.t1.outputs.result}} == 't2'"
+    assert t3.argo_task._when == "{{tasks.t1.outputs.result}} == 't3'"
+
+
 def test_retry_limits_fail_validation():
     with pytest.raises(ValidationError):
         Retry(duration=5, max_duration=4)
