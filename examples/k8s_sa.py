@@ -11,9 +11,7 @@ from kubernetes import client, config
 import base64
 
 
-def get_sa_token(
-    service_account: str, namespace: str = "default", config_file: Optional[str] = None
-):
+def get_sa_token(service_account: str, namespace: str = "default", config_file: Optional[str] = None):
     """Get ServiceAccount token using kubernetes config.
 
      Parameters
@@ -24,7 +22,7 @@ def get_sa_token(
         The K8S namespace the workflow service submits workflows to. This defaults to the `default` namespace.
     config_file: Optional[str] = None
         The path to k8s configuration file.
-    
+
      Raises
     ------
     FileNotFoundError
@@ -35,9 +33,7 @@ def get_sa_token(
 
     config.load_kube_config(config_file=config_file)
     v1 = client.CoreV1Api()
-    secret_name = (
-        v1.read_namespaced_service_account(service_account, namespace).secrets[0].name
-    )
+    secret_name = v1.read_namespaced_service_account(service_account, namespace).secrets[0].name
     sec = v1.read_namespaced_secret(secret_name, namespace).data
     return base64.b64decode(sec["token"]).decode()
 
