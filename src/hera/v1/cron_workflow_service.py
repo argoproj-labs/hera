@@ -40,7 +40,7 @@ class CronWorkflowService:
         ----------
         cron_workflow: V1alpha1CronWorkflow
             The cron workflow to submit.
-        namespace: optional str
+        namespace: Optional[str] = None
             The K8S namespace of the Argo server to submit the cron workflow to.
 
         Raises
