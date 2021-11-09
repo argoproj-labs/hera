@@ -45,7 +45,7 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo.workflows.client.ApiException
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         namespace = namespace or self._namespace
         return self.service.create_cron_workflow(
@@ -68,7 +68,7 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo.workflows.client.ApiException
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         namespace = namespace or self._namespace
         return self.service.delete_cron_workflow(namespace, name)
@@ -89,7 +89,7 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo.workflows.client.ApiException
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         namespace = namespace or self._namespace
         return self.service.suspend_cron_workflow(
@@ -112,7 +112,7 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo.workflows.client.ApiException
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         namespace = namespace or self._namespace
         return self.service.resume_cron_workflow(
