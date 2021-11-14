@@ -1,5 +1,5 @@
 """Holds the cron workflow service that supports client cron workflow submissions"""
-from typing import Tuple, Optional
+from typing import Tuple
 
 from argo.workflows.client import (
     V1alpha1CronWorkflow,
@@ -33,33 +33,32 @@ class CronWorkflowService:
         api_client = Client(Config(domain), token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
-    def submit(self, cron_workflow: V1alpha1CronWorkflow, namespace: Optional[str] = None) -> V1alpha1CronWorkflow:
+    def submit(self, cron_workflow: V1alpha1CronWorkflow, namespace: str = 'default') -> V1alpha1CronWorkflow:
         """Submits the given cron workflow to the given namespace.
 
         Parameters
         ----------
         cron_workflow: V1alpha1CronWorkflow
             The cron workflow to submit.
-        namespace: Optional[str] = None
+        namespace: str = 'default'
             The K8S namespace of the Argo server to submit the cron workflow to.
 
         Raises
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        namespace = namespace or self._namespace
         return self.service.create_cron_workflow(
             namespace, V1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow)
         )
 
-    def delete(self, name: str, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+    def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
         """Deletes a cron workflow from the given namespace based on the specified name.
 
         Parameters
         ----------
         name: str
             The name of the cron workflow to delete.
-        namespace: optional str
+        namespace: str = 'default'
             The K8S namespace of the Argo server to delete the cron workflow from.
 
         Returns
@@ -70,17 +69,16 @@ class CronWorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        namespace = namespace or self._namespace
         return self.service.delete_cron_workflow(namespace, name)
 
-    def suspend(self, name: str, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+    def suspend(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
 
         Parameters
         ----------
         name: optional str
             The name of the cron workflow to suspend.
-        namespace: optional str
+        namespace: str = 'default'
             The K8S namespace of the Argo server to suspend the cron workflow on.
 
         Returns
@@ -91,19 +89,18 @@ class CronWorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        namespace = namespace or self._namespace
         return self.service.suspend_cron_workflow(
             namespace, name, body=V1alpha1CronWorkflowSuspendRequest(name=name, namespace=namespace)
         )
 
-    def resume(self, name: str, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+    def resume(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
         """Resumes execution of a cron workflow from the given namespace based on the specified name.
 
         Parameters
         ----------
         name: optional str
             The name of the cron workflow to resume.
-        namespace: optional str
+        namespace: str = 'default'
             The K8S namespace of the Argo server to resume the cron workflow on.
 
         Returns
@@ -114,19 +111,18 @@ class CronWorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        namespace = namespace or self._namespace
         return self.service.resume_cron_workflow(
             namespace, name, body=V1alpha1CronWorkflowResumeRequest(name=name, namespace=namespace)
         )
 
-    def get_cron_workflow_link(self, name: str, namespace: Optional[str] = None) -> str:
+    def get_cron_workflow_link(self, name: str, namespace: str = 'default') -> str:
         """Assembles a cron workflow link for the given cron workflow name. Note that the returned path works only for Argo.
 
         Parameters
         ----------
         name: optional str
             The name of the cron workflow to assemble a link for.
-        namespace: optional str
+        namespace: str = 'default'
             The K8S namespace of the Argo server to get the cron workflow link from.
 
         Returns
@@ -134,5 +130,4 @@ class CronWorkflowService:
         str
             The cron workflow link.
         """
-        namespace = namespace or self._namespace
         return f'https://{self._domain}/cron-workflows/{namespace}/{name}'
