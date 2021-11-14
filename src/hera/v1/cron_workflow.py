@@ -5,9 +5,14 @@ from uuid import uuid4
 
 from argo.workflows.client import (
     V1alpha1CronWorkflow,
-    V1alpha1CronWorkflowSpec, V1alpha1DAGTemplate, V1alpha1Template, V1ObjectMeta, V1alpha1WorkflowSpec,
+    V1alpha1CronWorkflowSpec,
     V1alpha1CronWorkflowStatus,
+    V1alpha1DAGTemplate,
+    V1alpha1Template,
+    V1alpha1WorkflowSpec,
+    V1ObjectMeta,
 )
+
 from hera.v1.cron_workflow_service import CronWorkflowService
 from hera.v1.task import Task
 

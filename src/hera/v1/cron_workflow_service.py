@@ -2,12 +2,13 @@
 from typing import Tuple
 
 from argo.workflows.client import (
-    V1alpha1CronWorkflow,
     CronWorkflowServiceApi,
     V1alpha1CreateCronWorkflowRequest,
-    V1alpha1CronWorkflowSuspendRequest,
+    V1alpha1CronWorkflow,
     V1alpha1CronWorkflowResumeRequest,
+    V1alpha1CronWorkflowSuspendRequest,
 )
+
 from hera.v1.client import Client
 from hera.v1.config import Config
 
