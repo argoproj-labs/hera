@@ -1,3 +1,5 @@
+import pytest
+
 from hera.v1.empty_dir_volume import EmptyDirVolume
 from hera.v1.existing_volume import ExistingVolume
 from hera.v1.resources import Resources
@@ -6,24 +8,29 @@ from hera.v1.volume import Volume
 from hera.v1.workflow import Workflow
 from hera.v1.workflow_service import WorkflowService
 
+@pytest.fixture
+def ws():
+    yield WorkflowService('abc.com', 'abc')
+
+
+@pytest.fixture
+def w(ws):
+    yield Workflow('cw', service=ws)
+
 
 def noop():
     pass
 
 
-def test_wf_does_not_add_empty_task():
+def test_wf_does_not_add_empty_task(w):
     t = None
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
     w.add_task(t)
 
     assert not w.dag_template.tasks
 
 
-def test_wf_adds_specified_tasks():
+def test_wf_adds_specified_tasks(w):
     n = 3
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
     ts = [Task(f't{i}', noop) for i in range(n)]
     w.add_tasks(*ts)
 
@@ -32,9 +39,7 @@ def test_wf_adds_specified_tasks():
         assert ts[i].name == t.name
 
 
-def test_wf_adds_task_volume():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_adds_task_volume(w):
     t = Task(
         't',
         noop,
@@ -49,9 +54,7 @@ def test_wf_adds_task_volume():
     assert claim.metadata.name == 'v'
 
 
-def test_wf_adds_task_existing_checkpoints_staging_volume():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_adds_task_existing_checkpoints_staging_volume(w):
     t = Task('t', noop, resources=Resources(existing_volume=ExistingVolume(name='v', mount_path='/')))
     w.add_task(t)
 
@@ -60,9 +63,7 @@ def test_wf_adds_task_existing_checkpoints_staging_volume():
     assert vol.persistent_volume_claim.claim_name == 'v'
 
 
-def test_wf_adds_task_existing_checkpoints_prod_volume():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_adds_task_existing_checkpoints_prod_volume(w):
     t = Task(
         't',
         noop,
@@ -75,9 +76,7 @@ def test_wf_adds_task_existing_checkpoints_prod_volume():
     assert vol.persistent_volume_claim.claim_name == 'vol'
 
 
-def test_wf_adds_task_empty_dir_volume():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_adds_task_empty_dir_volume(w):
     t = Task('t', noop, resources=Resources(empty_dir_volume=EmptyDirVolume(name='v')))
     w.add_task(t)
 
@@ -87,9 +86,7 @@ def test_wf_adds_task_empty_dir_volume():
     assert vol.empty_dir.medium == 'Memory'
 
 
-def test_wf_adds_head():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_adds_head(w):
     t1 = Task('t1', noop)
     t2 = Task('t2', noop)
     t1.next(t2)
@@ -102,9 +99,7 @@ def test_wf_adds_head():
     assert t2.argo_task.dependencies == ['t1', 'head']
 
 
-def test_wf_adds_tail():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_adds_tail(w):
     t1 = Task('t1', noop)
     t2 = Task('t2', noop)
     t1.next(t2)
@@ -118,9 +113,7 @@ def test_wf_adds_tail():
     assert t.argo_task.dependencies == ['t2']
 
 
-def test_wf_overwrites_head_and_tail():
-    ws = WorkflowService('abc.com', 'abc')
-    w = Workflow('w', service=ws)
+def test_wf_overwrites_head_and_tail(w):
     t1 = Task('t1', noop)
     t2 = Task('t2', noop)
     t1.next(t2)
