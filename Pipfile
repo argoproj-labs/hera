@@ -12,6 +12,7 @@ black = "*"
 flake8 = "*"
 mypy = "*"
 build = "*"
+isort = "*"
 
 [requires]
 python_version = "3.7"
