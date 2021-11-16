@@ -1,6 +1,5 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import uuid4
 
 from argo.workflows.client import (
@@ -144,14 +143,14 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: Optional[str] = None) -> None:
+    def submit(self, namespace: str = 'default') -> None:
         """Submits the cron workflow immediately, regardless of scheduling specification"""
         self.service.submit(self.workflow, namespace)
 
-    def suspend(self, name: str, namespace: Optional[str] = None):
+    def suspend(self, name: str, namespace: str = 'default'):
         """Suspends the cron workflow"""
         self.service.suspend(name, namespace)
 
-    def resume(self, name: str, namespace: Optional[str] = None):
+    def resume(self, name: str, namespace: str = 'default'):
         """Resumes execution of the cron workflow"""
         self.service.resume(name, namespace)
