@@ -27,7 +27,7 @@ class CronWorkflow:
     name: str
         The cron workflow name. Note that the cron workflow initiation will replace underscores with dashes.
     service: CronWorkflowService
-        A cron workflow service to use for submissions. See `hera.v1.cron_workflow_service.CronWorkflowService`.
+        A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
     schedule: str
         Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *
     parallelism: int = 50
@@ -143,9 +143,9 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: str = 'default') -> None:
-        """Submits the cron workflow immediately, regardless of scheduling specification"""
-        self.service.submit(self.workflow, namespace)
+    def create(self, namespace: str = 'default') -> None:
+        """Creates the cron workflow in the server"""
+        self.service.create(self.workflow, namespace)
 
     def suspend(self, name: str, namespace: str = 'default'):
         """Suspends the cron workflow"""
