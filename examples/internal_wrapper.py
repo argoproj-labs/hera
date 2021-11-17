@@ -5,6 +5,8 @@ top of Hera to support consistency in submission across users, teams, etc.
 
 from typing import Callable, Dict, List, Optional, Union
 
+from pydantic import BaseModel
+
 from hera.v1.env import EnvSpec
 from hera.v1.existing_volume import ExistingVolume
 from hera.v1.input import InputFrom
@@ -14,7 +16,6 @@ from hera.v1.task import Task
 from hera.v1.toleration import Toleration
 from hera.v1.workflow import Workflow
 from hera.v1.workflow_service import WorkflowService
-from pydantic import BaseModel
 
 
 def generate_token() -> str:
