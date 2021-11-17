@@ -1,14 +1,14 @@
 """This example showcases the hello world example of Hera using kubernetes user token"""
-from typing import Optional
+import base64
 import errno
 import os
+from typing import Optional
+
+from kubernetes import client, config
 
 from hera.v1.task import Task
 from hera.v1.workflow import Workflow
 from hera.v1.workflow_service import WorkflowService
-
-from kubernetes import client, config
-import base64
 
 
 def get_sa_token(service_account: str, namespace: str = "default", config_file: Optional[str] = None):
