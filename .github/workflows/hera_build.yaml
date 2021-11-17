@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'VERSION'
 jobs:
   hera-main-build:
     timeout-minutes: 10
@@ -39,4 +41,8 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+          # want to get rich logs in case `twine upload` fails for some reason
           verbose: true
+          # just in case someone publishes another version by accidentally adding a new line to VERSION
+          # we want to skip the existing package and not fail with a 400 if a publish attempt is performed
+          skip_existing: true
