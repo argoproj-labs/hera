@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 0.1.0 - DATE 03/11/2021
+
+### Added
+
+- added initial support for cron workflows 
+ 
 # 0.0.0
 
 ### Added

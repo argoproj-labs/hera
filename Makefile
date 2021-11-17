@@ -8,6 +8,9 @@ lint:
 format:
 	black --verbose $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER)
 
+isort:
+	isort $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER)
+
 typecheck:
 	mypy --namespace-packages --explicit-package-bases -p hera
 	mypy --namespace-packages tests
