@@ -32,7 +32,7 @@ setup(
     package_data={
         'hera': ['py.typed'],
     },
-    data_files=[('', ['VERSION', 'README.md'])],
+    data_files=[('', ['VERSION', 'README.md', 'CHANGELOG.md', 'LICENSE'])],
     include_package_data=True,
     python_requires='>=3.7',
     install_requires=[

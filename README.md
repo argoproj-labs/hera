@@ -50,21 +50,21 @@ There are multiple ways to install Hera:
 
 1. You can install from [PyPi](https://pypi.org/project/hera-workflows/):
 
-```shell
-pip install hera-workflows
-```
+  ```shell
+  pip install hera-workflows
+  ```
 
 2. Install it directly from this repository using:
 
-```shell
-python -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed
-```
+  ```shell
+  python -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed
+  ```
 
 3. Alternatively, you can clone this repository and then run the following to install:
 
-```shell
-python setup.py install
-```
+  ```shell
+  python setup.py install
+  ```
 
 # Contributing
 
