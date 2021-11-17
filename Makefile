@@ -19,4 +19,4 @@ verify: lint typecheck test
 	echo "Lint, typecheck, test successfully completed!"
 
 build:
-	python -m build -w
+	python -m build --sdist --wheel --outdir dist/ .
