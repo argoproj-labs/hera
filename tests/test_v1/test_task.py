@@ -1,8 +1,8 @@
 from typing import Dict, List, Tuple
 
+import pytest
 from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
 from pydantic import BaseModel, ValidationError
-import pytest
 
 from hera.v1.empty_dir_volume import EmptyDirVolume
 from hera.v1.existing_volume import ExistingVolume
