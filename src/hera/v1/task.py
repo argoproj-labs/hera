@@ -180,8 +180,8 @@ class Task:
         Examples
         --------
         t1, t2, t3 = Task('t1'), Task('t2'), Task('t3')
-        t1.next_when("{{item.outputs.result}} == 't2'", t2)
-        t1.next_when("{{item.outputs.result}} == 't3'", t3)
+        t2.when(t1, Operator.equals, "t2")
+        t3.when(t1, Operator.equals, "t3")
         """
         self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator} {value}'
         return other.next(self)
