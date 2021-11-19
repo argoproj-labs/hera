@@ -27,6 +27,7 @@ from hera.v1.input import InputFrom
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.toleration import Toleration
+from hera.v1.operator import Operator
 
 
 class Task:
@@ -163,13 +164,11 @@ class Task:
         """
         return self.next(other)
 
-    def next_when(self, condition: str, other: 'Task') -> 'Task':
+    def when(self, other: 'Task', operator: 'Operator', value: str):
         """Sets this task as a dependency of the other passed task if the condition match.
 
         Parameters
         ----------
-        condition: str
-            Expression which the task should match to execute.
         other: Task
             The other task to set a dependency for. The new dependency of the task is this task.
 
@@ -184,10 +183,8 @@ class Task:
         t1.next_when("{{item.outputs.result}} == 't2'", t2)
         t1.next_when("{{item.outputs.result}} == 't3'", t3)
         """
-        assert isinstance(other, self.__class__)
-        condition = condition.replace("{{item.", f"{{{{tasks.{self.name}.")
-        other.argo_task._when = condition
-        return self.next(other)
+        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator} {value}'
+        return other.next(self)
 
     def validate(self):
         """

@@ -26,8 +26,8 @@ r = Task("r", random_code)
 h = Task("h", heads)
 t = Task("t", tails)
 
-r.next_when("{{item.outputs.result}} == 'heads'", h)
-r.next_when("{{item.outputs.result}} == 'tails'", t)
+h.when(r, Operator.equals, "heads")
+t.when(r, Operator.equals, "tails")
 
 w.add_tasks(r, h, t)
 w.submit()
