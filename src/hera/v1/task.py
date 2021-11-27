@@ -164,7 +164,7 @@ class Task:
         """
         return self.next(other)
 
-    def when(self, other: 'Task', operator: 'Operator', value: str):
+    def when(self, other: 'Task', operator: Operator, value: str):
         """Sets this task as a dependency of the other passed task if the condition match.
 
         Parameters
@@ -183,7 +183,7 @@ class Task:
         t2.when(t1, Operator.equals, "t2")
         t3.when(t1, Operator.equals, "t3")
         """
-        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator} {value}'
+        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
         return other.next(self)
 
     def validate(self):

@@ -1,4 +1,7 @@
-class Operator:
+from enum import Enum
+
+
+class Operator(Enum):
     """Operator is an logic representation.
 
      This can be used on conditional tasks workflow.
@@ -9,25 +12,9 @@ class Operator:
          The value of an operator in str.
     """
 
-    value: str
-
-    equals: 'Operator' = None
-    greater: 'Operator' = None
-    lower: 'Operator' = None
-    greater_equals: 'Operator' = None
-    lower_equals: 'Operator' = None
-    not_equals: 'Operator' = None
-
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return self.value
-
-
-Operator.equals = Operator('==')
-Operator.greater = Operator('>')
-Operator.lower = Operator('<')
-Operator.greater_equals = Operator('>=')
-Operator.lower_equals = Operator('<=')
-Operator.not_equals = Operator('!=')
+    equals = '=='
+    greater = '>'
+    lower = '<'
+    greater_equal = '>='
+    lower_equal = '<='
+    not_equal = '!='
