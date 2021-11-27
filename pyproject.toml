@@ -10,3 +10,8 @@ include = '\.pyi?$'
 
 [tool.pytest.ini_options]
 addopts = "-ra -q"
+
+[tool.isort]
+profile = "black"
+skip_gitignore = true
+skip_glob = [".venv/*", ".mypy_cache/*", ".pytest_cache/*", ".github/*", ".git/*"]

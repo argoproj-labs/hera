@@ -29,7 +29,20 @@ The general format is:
 
 ```
 
-# 0.0.0
+# 0.1.1 - DATE (17/11/2021)
+
+### Changed
+
+- the publication step of Hera. The `python` command will now build an `sdist` and a `wheel` for the package
+- relocked the project to include `wheel` as a development dependency
+
+# 0.1.0 - DATE (03/11/2021)
+
+### Added
+
+- added initial support for cron workflows
+
+# 0.0.0 - DATE (28/10/2021)
 
 ### Added
 

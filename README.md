@@ -3,6 +3,7 @@
 ```text
 The Argo was constructed by the shipwright Argus, and its crew were specially protected by the goddess Hera.
 ```
+
 (https://en.wikipedia.org/wiki/Argo)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -14,12 +15,11 @@ Python functions are first class citizens in Hera - they are the atomic units (e
 remote execution. The framework makes it easy to wrap execution payloads into Argo Workflow tasks, set dependencies,
 resources, etc.
 
-You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 
-20 Oct 2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
+You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 20 Oct
+2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
 
 # Table of content
 
-- [Install](#installation)
 - [Assumptions](#assumptions)
 - [Installation](#installation)
 - [Contributing](#contributing)
@@ -46,17 +46,25 @@ server for workflow submission.
 
 # Installation
 
-Hera can currently be installed directly from this repository using:
+There are multiple ways to install Hera:
 
-```shell
-python3 -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed
-```
+1. You can install from [PyPi](https://pypi.org/project/hera-workflows/):
 
-Alternatively, you can clone this repository and then run the following to install:
+  ```shell
+  pip install hera-workflows
+  ```
 
-```shell
-python setup.py install
-```
+2. Install it directly from this repository using:
+
+  ```shell
+  python -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed
+  ```
+
+3. Alternatively, you can clone this repository and then run the following to install:
+
+  ```shell
+  python setup.py install
+  ```
 
 # Contributing
 
@@ -76,7 +84,6 @@ consistent with:
 
 - `Task` - the object that holds the Python function for remote execution/the atomic unit of execution;
 - `Workflow` - the higher level representation of a collection of tasks.
-
 
 # Examples
 
@@ -105,8 +112,8 @@ w.submit()
 
 # Examples
 
-See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of Argo workflow
-construction and submission via Hera!
+See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
+Argo workflow construction and submission via Hera!
 
 # Comparison
 

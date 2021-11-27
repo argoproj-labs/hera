@@ -1,5 +1,5 @@
-from typing import Optional
 import uuid
+from typing import Optional
 
 from argo.workflows.client import (
     V1ObjectMeta,
@@ -8,8 +8,9 @@ from argo.workflows.client import (
     V1ResourceRequirements,
     V1VolumeMount,
 )
-from hera.v1.validators import validate_storage_units
 from pydantic import BaseModel, validator
+
+from hera.v1.validators import validate_storage_units
 
 
 class Volume(BaseModel):
