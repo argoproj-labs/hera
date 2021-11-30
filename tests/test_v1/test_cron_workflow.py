@@ -15,12 +15,33 @@ def cws():
 
 
 @pytest.fixture
-def cw(cws):
-    yield CronWorkflow('cw', "* * * * *", service=cws)
+def schedule():
+    yield "* * * * *"
+
+
+@pytest.fixture
+def cw(cws, schedule):
+    yield CronWorkflow('cw', schedule, service=cws)
 
 
 def noop():
     pass
+
+
+def test_wf_contains_specified_service_account(cws, schedule):
+    w = CronWorkflow('w', schedule, service=cws, service_account_name='w-sa')
+
+    expected_sa = 'w-sa'
+    assert w.spec.service_account_name == expected_sa
+    assert w.spec.templates[0].service_account_name == expected_sa
+
+
+def test_wf_does_not_contain_sa_if_one_is_not_specified(cws, schedule):
+    w = CronWorkflow('w', schedule, service=cws)
+
+    expected_sa = None
+    assert w.spec.service_account_name == expected_sa
+    assert w.spec.templates[0].service_account_name == expected_sa
 
 
 def test_cwf_does_not_add_empty_task(cw):
