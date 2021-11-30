@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 0.3.0 - DATE (30/11/2021)
+
+### Added
+
+- added support to `when` workflows API.
+
 # 0.2.0 - DATE (30/11/2021)
 
 ### Added
