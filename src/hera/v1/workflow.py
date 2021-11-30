@@ -1,4 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
+from typing import Optional
 from uuid import uuid4
 
 from argo.workflows.client import (
@@ -29,16 +30,30 @@ class Workflow:
         A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
+    service_account_name: Optional[str] = None
+        The name of the service account to use in all workflow tasks.
     """
 
-    def __init__(self, name: str, service: WorkflowService, parallelism: int = 50):
+    def __init__(
+        self, name: str, service: WorkflowService, parallelism: int = 50, service_account_name: Optional[str] = None
+    ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.service = service
+        self.parallelism = parallelism
+        self.service_account_name = service_account_name
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
-        self.template = V1alpha1Template(name=self.name, steps=[], dag=self.dag_template, parallelism=parallelism)
+        self.template = V1alpha1Template(
+            name=self.name,
+            steps=[],
+            dag=self.dag_template,
+            parallelism=self.parallelism,
+            service_account_name=self.service_account_name,
+        )
         self.metadata = V1ObjectMeta(name=self.name)
-        self.spec = V1alpha1WorkflowSpec(templates=[self.template], entrypoint=self.name)
+        self.spec = V1alpha1WorkflowSpec(
+            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
+        )
         self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
     def add_task(self, t: Task) -> None:

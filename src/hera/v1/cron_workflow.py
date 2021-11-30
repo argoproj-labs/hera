@@ -1,5 +1,6 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from datetime import datetime, timezone
+from typing import Optional
 from uuid import uuid4
 
 from argo.workflows.client import (
@@ -32,6 +33,8 @@ class CronWorkflow:
         Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
+    service_account_name: Optional[str] = None
+        The name of the service account to use in all workflow tasks.
     """
 
     def __init__(
@@ -40,16 +43,26 @@ class CronWorkflow:
         schedule: str,
         service: CronWorkflowService,
         parallelism: int = 50,
+        service_account_name: Optional[str] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
         self.schedule = schedule
         self.service = service
         self.parallelism = parallelism
+        self.service_account_name = service_account_name
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
-        self.template = V1alpha1Template(name=self.name, steps=[], dag=self.dag_template, parallelism=self.parallelism)
+        self.template = V1alpha1Template(
+            name=self.name,
+            steps=[],
+            dag=self.dag_template,
+            parallelism=self.parallelism,
+            service_account_name=self.service_account_name,
+        )
         self.metadata = V1ObjectMeta(name=self.name)
-        self.spec = V1alpha1WorkflowSpec(templates=[self.template], entrypoint=self.name)
+        self.spec = V1alpha1WorkflowSpec(
+            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
+        )
 
         self.cron_spec = V1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
         self.workflow = V1alpha1CronWorkflow(
