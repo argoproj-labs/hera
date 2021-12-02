@@ -27,6 +27,7 @@ from hera.v1.input import InputFrom
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.toleration import Toleration
+from hera.v1.operator import Operator
 
 
 class Task:
@@ -162,6 +163,28 @@ class Task:
         t1 >> t2  # this makes t2 execute AFTER t1
         """
         return self.next(other)
+
+    def when(self, other: 'Task', operator: Operator, value: str) -> 'Task':
+        """Sets this task as a dependency of the other passed task if the condition match.
+
+        Parameters
+        ----------
+        other: Task
+            The other task to set a dependency for. The new dependency of the task is this task.
+
+        Returns
+        -------
+        Task
+            The other task that was specified.
+
+        Examples
+        --------
+        t1, t2, t3 = Task('t1'), Task('t2'), Task('t3')
+        t2.when(t1, Operator.equals, "t2")
+        t3.when(t1, Operator.equals, "t3")
+        """
+        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
+        return other.next(self)
 
     def validate(self):
         """

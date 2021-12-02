@@ -11,6 +11,7 @@ from hera.v1.retry import Retry
 from hera.v1.task import Task
 from hera.v1.toleration import GPUToleration
 from hera.v1.volume import Volume
+from hera.v1.operator import Operator
 
 
 class MockModel(BaseModel):
@@ -63,6 +64,18 @@ def test_next_and_shifting_set_correct_dependencies():
     t4 >> t5 >> t6
     assert t5.argo_task.dependencies == ['t4']
     assert t6.argo_task.dependencies == ['t5']
+
+
+def test_when_correct_expression_and_dependencies():
+    t1, t2, t3 = Task('t1', noop), Task('t2', noop), Task('t3', noop)
+    t2.when(t1, Operator.equals, "t2")
+    t3.when(t1, Operator.equals, "t3")
+
+    assert t2.argo_task.dependencies == ['t1']
+    assert t3.argo_task.dependencies == ['t1']
+
+    assert t2.argo_task._when == "{{tasks.t1.outputs.result}} == t2"
+    assert t3.argo_task._when == "{{tasks.t1.outputs.result}} == t3"
 
 
 def test_retry_limits_fail_validation():
