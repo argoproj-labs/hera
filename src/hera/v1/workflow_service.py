@@ -1,7 +1,12 @@
 """Holds the workflow service that supports client workflow submissions"""
 from typing import Tuple
 
-from argo.workflows.client import V1alpha1Workflow, V1alpha1WorkflowCreateRequest, WorkflowServiceApi
+from argo.workflows.client import (
+    V1alpha1Workflow,
+    V1alpha1WorkflowCreateRequest,
+    WorkflowServiceApi,
+)
+
 from hera.v1.client import Client
 from hera.v1.config import Config
 

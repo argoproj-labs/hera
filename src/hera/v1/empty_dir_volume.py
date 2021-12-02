@@ -1,6 +1,6 @@
 """Holds the empty directory volume object"""
-from typing import Optional
 import uuid
+from typing import Optional
 
 from argo.workflows.client import V1EmptyDirVolumeSource, V1Volume, V1VolumeMount
 from pydantic import BaseModel, validator
