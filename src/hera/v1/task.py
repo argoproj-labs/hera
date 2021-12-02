@@ -164,7 +164,7 @@ class Task:
         """
         return self.next(other)
 
-    def when(self, other: 'Task', operator: Operator, value: str):
+    def when(self, other: 'Task', operator: Operator, value: str) -> 'Task':
         """Sets this task as a dependency of the other passed task if the condition match.
 
         Parameters
