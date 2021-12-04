@@ -33,6 +33,7 @@ class EnvSpec(BaseModel):
     def check_value_json_serializable(cls, value):
         """Verifies that the specific environment value"""
         assert json_serializable(value), 'specified value is not JSON serializable'
+        return value
 
     @property
     def argo_spec(self) -> V1EnvVar:

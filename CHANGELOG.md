@@ -28,6 +28,11 @@ The general format is:
 - C from D
 
 ```
+# 0.3.1 - DATE (04/12/2021)
+
+### Changed
+
+- fix returned value of validator method in EnvSpec class
 
 # 0.3.0 - DATE (30/11/2021)
 
