@@ -28,6 +28,14 @@ The general format is:
 - C from D
 
 ```
+
+# 0.4.0 - DATE (05/12/2021)
+
+### Added
+
+- a `verify` flag to `WorkflowService` and `CronWorkflowService` to allow clients to skip TLS/SSL certificate validation
+  when submitting workflows
+
 # 0.3.1 - DATE (04/12/2021)
 
 ### Changed

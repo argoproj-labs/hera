@@ -6,12 +6,12 @@ from pydantic import BaseModel, ValidationError
 
 from hera.v1.empty_dir_volume import EmptyDirVolume
 from hera.v1.existing_volume import ExistingVolume
+from hera.v1.operator import Operator
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.task import Task
 from hera.v1.toleration import GPUToleration
 from hera.v1.volume import Volume
-from hera.v1.operator import Operator
 
 
 class MockModel(BaseModel):

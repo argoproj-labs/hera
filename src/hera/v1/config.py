@@ -17,19 +17,21 @@ class Config:
     Parameters
     ----------
     domain: str
-        The domain of the Argo
+        The domain of the Argo server.
+    verify: bool = True
+        Whether to perform SSL/TLS certificate validation when performing requests.
     """
 
-    def __init__(self, domain: str):
+    def __init__(self, domain: str, verify: bool = True):
         self._domain = domain
+        self._verify = verify
         self._config = self.__get_config()
 
     def __get_config(self) -> ArgoConfig:
         """Assembles the Argo configuration.
 
-        This attempts to get environment variables that are typically
-        shared with all the deployments of K8S. If those are not specified, it uses the passed in domain to configure
-        the address.
+        This attempts to get environment variables that are typically shared with all the deployments of K8S.
+        If those are not specified, it uses the passed in domain to configure the address.
 
         Notes
         -----
@@ -39,12 +41,12 @@ class Config:
 
         Use this together with Client to instantiate a WorkflowServiceApi.
         """
-        scheme = 'https'
+        scheme = 'https' if self._verify else 'http'
         config = ArgoConfig()
 
-        argo_tcp_addr = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR')
-        if argo_tcp_addr:
-            host = argo_tcp_addr
+        argo_tcp_address = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR')
+        if argo_tcp_address:
+            host = argo_tcp_address
         else:
             host = self._domain
 
@@ -53,12 +55,11 @@ class Config:
             # K8S deployments in a namespace that has an Argo deployment get Argo specific environment variables,
             # so this _should_ be safe
             assert port, 'unspecified port'
-            config.verify_ssl = False
+            config.verify_ssl = self._verify
         else:
             port = ''
 
-        addr = f'{scheme}://{host}:{port}' if port else f'{scheme}://{host}'
-        config.host = addr
+        config.host = f'{scheme}://{host}:{port}' if port else f'{scheme}://{host}'
         return config
 
     @property

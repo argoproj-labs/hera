@@ -23,12 +23,17 @@ class WorkflowService:
         deployment/service that can intercept a request and check the Bearer token.
     namespace: str = 'default'
         The K8S namespace the workflow service submits workflows to. This defaults to the `default` namespace.
+    verify: bool = True
+        Whether to perform SSL/TLS certificate validation when performing requests. This defaults to `True` to perform
+        certificate validation by default. However, clients might want to skip certificate validation when submitting
+        workflows through localhost/127.0.0.1 to deployments with self-signed certificates.
     """
 
-    def __init__(self, domain: str, token: str, namespace: str = 'default'):
+    def __init__(self, domain: str, token: str, namespace: str = 'default', verify: bool = True):
         self._domain = domain
         self._namespace = namespace
-        api_client = Client(Config(domain), token).api_client
+        self._verify = verify
+        api_client = Client(Config(domain, verify=verify), token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
     def submit(self, workflow: V1alpha1Workflow, namespace: str = 'default') -> V1alpha1Workflow:

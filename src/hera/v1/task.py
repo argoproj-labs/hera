@@ -24,10 +24,10 @@ from pydantic import BaseModel
 
 from hera.v1.env import EnvSpec
 from hera.v1.input import InputFrom
+from hera.v1.operator import Operator
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.toleration import Toleration
-from hera.v1.operator import Operator
 
 
 class Task:

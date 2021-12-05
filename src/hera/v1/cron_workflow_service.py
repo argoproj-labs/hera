@@ -26,12 +26,16 @@ class CronWorkflowService:
     namespace: str = 'default'
         The K8S namespace the cron workflow service creates cron workflows in.
         This defaults to the `default` namespace.
+    verify: bool = True
+        Whether to perform SSL/TLS certificate validation when performing requests. This defaults to `True` to perform
+        certificate validation by default. However, clients might want to skip certificate validation when submitting
+        workflows through localhost/127.0.0.1 to deployments with self-signed certificates.
     """
 
-    def __init__(self, domain: str, token: str, namespace: str = 'default'):
+    def __init__(self, domain: str, token: str, namespace: str = 'default', verify: bool = True):
         self._domain = domain
         self._namespace = namespace
-        api_client = Client(Config(domain), token).api_client
+        api_client = Client(Config(domain, verify=verify), token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
     def create(self, cron_workflow: V1alpha1CronWorkflow, namespace: str = 'default') -> V1alpha1CronWorkflow:
