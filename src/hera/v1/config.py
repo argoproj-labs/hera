@@ -55,9 +55,9 @@ class Config:
             # K8S deployments in a namespace that has an Argo deployment get Argo specific environment variables,
             # so this _should_ be safe
             assert port, 'unspecified port'
-            config.verify_ssl = self._verify
         else:
             port = ''
+        config.verify_ssl = self._verify
 
         config.host = f'{scheme}://{host}:{port}' if port else f'{scheme}://{host}'
         return config
