@@ -1,4 +1,5 @@
 """This example showcases the classic conditional workflow coin-flip."""
+from hera.v1.operator import Operator
 from hera.v1.task import Task
 from hera.v1.workflow import Workflow
 from hera.v1.workflow_service import WorkflowService
