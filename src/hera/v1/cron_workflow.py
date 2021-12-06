@@ -10,6 +10,7 @@ from argo.workflows.client import (
     V1alpha1DAGTemplate,
     V1alpha1Template,
     V1alpha1WorkflowSpec,
+    V1LocalObjectReference,
     V1ObjectMeta,
 )
 
@@ -69,7 +70,9 @@ class CronWorkflow:
             metadata=self.metadata,
             spec=self.cron_spec,
             status=V1alpha1CronWorkflowStatus(
-                active=[], conditions=[], last_scheduled_time=datetime.now(timezone.utc)
+                active=[V1LocalObjectReference()],
+                conditions=[V1LocalObjectReference()],
+                last_scheduled_time=datetime.now(timezone.utc),
             ),
         )
 

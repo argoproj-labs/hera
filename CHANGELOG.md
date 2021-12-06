@@ -28,6 +28,11 @@ The general format is:
 - C from D
 
 ```
+# 0.3.2 - DATE (06/12/2021)
+
+### Changed
+
+  - fix cron workflow active and conditions nullity 
 # 0.3.1 - DATE (04/12/2021)
 
 ### Changed
