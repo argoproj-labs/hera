@@ -1,11 +1,11 @@
 from typing import Dict, List, Tuple
 
-from pydantic import BaseModel
 import pytest
+from pydantic import BaseModel
 
+from hera.v1.artifact import InputArtifact, OutputArtifact
 from hera.v1.workflow import Workflow
 from hera.v1.workflow_service import WorkflowService
-from hera.v1.artifact import InputArtifact, OutputArtifact
 
 
 @pytest.fixture(scope='session')

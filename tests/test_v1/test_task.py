@@ -4,16 +4,16 @@ import pytest
 from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
 from pydantic import BaseModel, ValidationError
 
+from hera.v1.artifact import InputArtifact, OutputArtifact
 from hera.v1.empty_dir_volume import EmptyDirVolume
 from hera.v1.existing_volume import ExistingVolume
+from hera.v1.input import InputFrom
+from hera.v1.operator import Operator
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.task import Task
 from hera.v1.toleration import GPUToleration
 from hera.v1.volume import Volume
-from hera.v1.operator import Operator
-from hera.v1.artifact import InputArtifact, OutputArtifact
-from hera.v1.input import InputFrom
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):

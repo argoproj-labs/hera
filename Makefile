@@ -1,6 +1,7 @@
 SRC_FOLDER=src
 TEST_FOLDER=tests
 EXAMPLES_FOLDER=examples
+CONFTEST=conftest.py
 
 # we mark all commands as `phony` to avoid any potential conflict with files in the CICD environment
 .PHONY: lint format isort typecheck typecheck verify build
@@ -8,11 +9,11 @@ EXAMPLES_FOLDER=examples
 lint:
 	flake8 $(SRC_FOLDER)
 
-format:
-	black --verbose $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER)
+format: isort
+	black --verbose $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER) ${CONFTEST}
 
 isort:
-	isort $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER)
+	isort $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER) ${CONFTEST}
 
 typecheck:
 	mypy --namespace-packages --explicit-package-bases -p hera

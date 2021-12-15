@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from argo.workflows.client import (
     V1alpha1Arguments,
     V1alpha1Artifact,
+    V1alpha1Backoff,
     V1alpha1DAGTask,
     V1alpha1Inputs,
     V1alpha1Outputs,
@@ -20,17 +21,16 @@ from argo.workflows.client import (
     V1ResourceRequirements,
     V1Toleration,
     V1VolumeMount,
-    V1alpha1Backoff,
 )
 from pydantic import BaseModel
 
 from hera.v1.artifact import InputArtifact, OutputArtifact
 from hera.v1.env import EnvSpec
 from hera.v1.input import InputFrom
+from hera.v1.operator import Operator
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.toleration import Toleration
-from hera.v1.operator import Operator
 
 
 class Task:
