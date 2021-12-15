@@ -8,9 +8,10 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from argo.workflows.client import (
     V1alpha1Arguments,
-    V1alpha1Backoff,
+    V1alpha1Artifact,
     V1alpha1DAGTask,
     V1alpha1Inputs,
+    V1alpha1Outputs,
     V1alpha1Parameter,
     V1alpha1RetryStrategy,
     V1alpha1ScriptTemplate,
@@ -19,9 +20,11 @@ from argo.workflows.client import (
     V1ResourceRequirements,
     V1Toleration,
     V1VolumeMount,
+    V1alpha1Backoff,
 )
 from pydantic import BaseModel
 
+from hera.v1.artifact import InputArtifact, OutputArtifact
 from hera.v1.env import EnvSpec
 from hera.v1.input import InputFrom
 from hera.v1.resources import Resources
@@ -84,6 +87,8 @@ class Task:
         func: Callable,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
+        input_artifacts: Optional[List[InputArtifact]] = None,
+        output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
         command: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
@@ -97,6 +102,8 @@ class Task:
         self.func = func
         self.func_params = func_params
         self.input_from = input_from
+        self.input_artifacts = input_artifacts
+        self.output_artifacts = output_artifacts
         self.validate()
 
         self.image = image
@@ -109,8 +116,11 @@ class Task:
         self.node_selectors = node_selectors
 
         self.parameters = self.get_parameters()
+        self.argo_input_artifacts = self.get_argo_input_artifacts()
+        self.argo_output_artifacts = self.get_argo_output_artifacts()
         self.arguments = self.get_arguments()
         self.inputs = self.get_inputs()
+        self.outputs = self.get_outputs()
         self.argo_resources = self.get_resources()
         self.script_extra = self.get_param_script_portion()
         self.script = self.get_script()
@@ -191,9 +201,21 @@ class Task:
         Validates that the given function and corresponding params fit one another, raises AssertionError if
         conditions are not satisfied.
         """
+        # verify artifacts are uniquely names
+        if self.input_artifacts:
+            assert len(set([i.name for i in self.input_artifacts])) == len(
+                self.input_artifacts
+            ), 'input artifact names must be unique'
+        if self.output_artifacts:
+            assert len(set([i.name for i in self.output_artifacts])) == len(
+                self.output_artifacts
+            ), 'output artifact names must be unique'
+
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
+                assert self.input_artifacts is None, 'cannot supply both InputFrom and Artifacts'
+
                 # input_from denotes the task will receive input from another step. This leaves it up to the
                 # client to set up the proper output in a previous task
                 if self.func_params:
@@ -222,13 +244,42 @@ class Task:
             for params in self.func_params:
                 assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
 
+    def get_argo_input_artifacts(self) -> Optional[List[V1alpha1Artifact]]:
+        """Assembles and returns a list of artifacts assembled from the Hera internal input artifact representation"""
+        if not self.input_artifacts:
+            return None
+        input_artifacts = [i.get_spec() for i in self.input_artifacts]
+        return input_artifacts if input_artifacts else None
+
+    def get_argo_output_artifacts(self) -> Optional[List[V1alpha1Artifact]]:
+        """Assembles and returns a list of artifacts assembled from the Hera internal output artifact representation"""
+        if not self.output_artifacts:
+            return None
+        output_artifacts = [o.get_spec() for o in self.output_artifacts]
+        return output_artifacts if output_artifacts else None
+
     def get_arguments(self) -> V1alpha1Arguments:
         """Assembles and returns the task arguments"""
-        return V1alpha1Arguments(parameters=self.parameters)
+        return V1alpha1Arguments(parameters=self.parameters, artifacts=self.argo_input_artifacts)
 
     def get_inputs(self) -> V1alpha1Inputs:
-        """Assembles and returns the task inputs"""
-        return V1alpha1Inputs(parameters=self.parameters)
+        """Assembles the inputs of the task.
+        Returns
+        -------
+        V1alpha1Inputs
+
+        Notes
+        -----
+        Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
+        """
+        input_art = None
+        if self.argo_input_artifacts:
+            input_art = [V1alpha1Artifact(name=a.name, path=a.path) for a in self.argo_input_artifacts]
+        return V1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
+
+    def get_outputs(self) -> V1alpha1Outputs:
+        """Assembles and returns the task outputs"""
+        return V1alpha1Outputs(artifacts=self.argo_output_artifacts)
 
     def get_command(self) -> List[str]:
         """
@@ -478,6 +529,7 @@ class Task:
             script=self.script_def,
             arguments=self.arguments,
             inputs=self.inputs,
+            outputs=self.outputs,
             node_selector=self.node_selectors,
             tolerations=self.get_tolerations(),
             retry_strategy=self.get_retry_strategy(),

@@ -28,6 +28,13 @@ The general format is:
 - C from D
 
 ```
+
+# 0.4.0 - DATE (15/12/2021)
+
+### Added
+
+- input/output artifact specifications
+
 # 0.3.1 - DATE (04/12/2021)
 
 ### Changed
