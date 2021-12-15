@@ -29,7 +29,7 @@ class Config:
 
         This attempts to get environment variables that are typically
         shared with all the deployments of K8S. If those are not specified, it uses the passed in domain to configure
-        the address.from dyno.ml.training.checkpoint import EarlyStoppingCallback, load_checkpoint
+        the address.
 
         Notes
         -----
