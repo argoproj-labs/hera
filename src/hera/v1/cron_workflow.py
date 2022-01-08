@@ -61,7 +61,11 @@ class CronWorkflow:
         )
         self.metadata = ObjectMeta(name=self.name)
         self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name, volume_claim_templates=[], volumes=[]
+            templates=[self.template],
+            entrypoint=self.name,
+            service_account_name=self.service_account_name,
+            volume_claim_templates=[],
+            volumes=[],
         )
 
         self.cron_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
