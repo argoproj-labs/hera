@@ -36,7 +36,7 @@ setup(
     include_package_data=True,
     python_requires='>=3.7',
     install_requires=[
-        "argo-workflows",
+        "argo_workflows @ git+https://github.com/argoproj/argo-workflows@master#subdirectory=sdks/python/client",
         "pydantic",
         "python-dateutil",
         "urllib3",
