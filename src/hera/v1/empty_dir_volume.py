@@ -46,8 +46,7 @@ class EmptyDirVolume(BaseModel):
         V1Volume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        size_limit = self.size if self.size else None
-        empty_dir = EmptyDirVolumeSource(medium='Memory', size_limit=size_limit)
+        empty_dir = EmptyDirVolumeSource(medium='Memory', size_limit=self.size)
         return Volume(name=self.name, empty_dir=empty_dir)
 
     def get_mount(self) -> VolumeMount:

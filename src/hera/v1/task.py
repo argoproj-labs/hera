@@ -304,7 +304,7 @@ class Task:
         t2.when(t1, Operator.equals, "t2")
         t3.when(t1, Operator.equals, "t3")
         """
-        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
+        setattr(self.argo_task, 'when', f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}')
         return other.next(self)
 
     def validate(self):
@@ -355,14 +355,14 @@ class Task:
             for params in self.func_params:
                 assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
 
-    def get_argo_input_artifacts(self) -> Optional[List[IoArgoprojWorkflowV1alpha1Artifact]]:
+    def get_argo_input_artifacts(self) -> List[IoArgoprojWorkflowV1alpha1Artifact]:
         """Assembles and returns a list of artifacts assembled from the Hera internal input artifact representation"""
         if not self.input_artifacts:
             return []
         input_artifacts = [i.get_spec() for i in self.input_artifacts]
         return input_artifacts if input_artifacts else None
 
-    def get_argo_output_artifacts(self) -> Optional[List[IoArgoprojWorkflowV1alpha1Artifact]]:
+    def get_argo_output_artifacts(self) -> List[IoArgoprojWorkflowV1alpha1Artifact]:
         """Assembles and returns a list of artifacts assembled from the Hera internal output artifact representation"""
         if not self.output_artifacts:
             return []
@@ -405,7 +405,7 @@ class Task:
         assert self.command
         return [str(cc) for cc in self.command]
 
-    def get_env(self, specs: List[EnvSpec]) -> Optional[List[EnvVar]]:
+    def get_env(self, specs: List[EnvSpec]) -> List[EnvVar]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
 
         Parameters
@@ -415,11 +415,12 @@ class Task:
 
         Returns
         -------
-        Optional[List[V1EnvVar]]
+        List[V1EnvVar]
             A list of Argo environment specifications, if any specs are provided.
         """
         if not specs:
-            return None
+            return []
+
         r = []
         for spec in specs:
             r.append(spec.argo_spec)
@@ -685,12 +686,12 @@ class Task:
             return IoArgoprojWorkflowV1alpha1RetryStrategy(limit=str(self.retry.get_limit()), retry_policy='Always')
         return None
 
-    def get_tolerations(self) -> Optional[List[ArgoToleration]]:
+    def get_tolerations(self) -> List[ArgoToleration]:
         """Assembles and returns the pod toleration objects required for scheduling a task.
 
         Returns
         -------
-        Optional[List[ArgoToleration]]
+        List[ArgoToleration]
             The list of assembled tolerations.
 
         Notes
@@ -699,13 +700,13 @@ class Task:
         For GKE and Azure workloads `hera.v1.tolerations.GPUToleration` can be specified.
         """
         if self.tolerations is None:
-            return None
+            return []
 
         ts = []
         for t in self.tolerations:
             ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
 
-        return ts if ts else None
+        return ts if ts else []
 
     def get_task_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
@@ -731,7 +732,7 @@ class Task:
                 dependencies=[],
                 arguments=self.arguments,
                 with_items=items,
-                _check_type=False,
+                _check_type=False,  # this is required because of the _Item custom ModelSimple
             )
         return IoArgoprojWorkflowV1alpha1DAGTask(
             name=self.name, template=self.argo_template.name, dependencies=[], arguments=self.arguments

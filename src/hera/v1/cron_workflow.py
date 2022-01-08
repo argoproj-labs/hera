@@ -50,21 +50,25 @@ class CronWorkflow:
         self.service_account_name = service_account_name
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+
         self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
             dag=self.dag_template,
             parallelism=self.parallelism,
-            service_account_name=self.service_account_name,
         )
+
         self.metadata = ObjectMeta(name=self.name)
         self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
             templates=[self.template],
             entrypoint=self.name,
-            service_account_name=self.service_account_name,
             volume_claim_templates=[],
             volumes=[],
         )
+
+        if self.service_account_name:
+            setattr(self.template, 'service_account_name', self.service_account_name)
+            setattr(self.spec, 'service_account_name', self.service_account_name)
 
         self.cron_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
