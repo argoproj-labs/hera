@@ -9,7 +9,7 @@ The Argo was constructed by the shipwright Argus, and its crew were specially pr
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo
-Workflows more accessible by abstracting away some setup that is typically necessary for constructing Argo workflows.
+Workflows more accessible by abstracting away some setup that is typically necessary for constructing workflows.
 
 Python functions are first class citizens in Hera - they are the atomic units (execution payload) that are submitted for
 remote execution. The framework makes it easy to wrap execution payloads into Argo Workflow tasks, set dependencies,
