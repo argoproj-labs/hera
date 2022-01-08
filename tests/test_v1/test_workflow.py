@@ -6,7 +6,6 @@ from hera.v1.resources import Resources
 from hera.v1.task import Task
 from hera.v1.volume import Volume
 from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
 
 
 def test_wf_contains_specified_service_account(ws):

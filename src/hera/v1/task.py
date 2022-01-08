@@ -13,11 +13,11 @@ from argo_workflows.model_utils import (
     convert_js_args_to_python_args,
 )
 from argo_workflows.models import (
+    EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
-    EnvVar,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
     IoArgoprojWorkflowV1alpha1RetryStrategy,

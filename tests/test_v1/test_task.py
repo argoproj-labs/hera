@@ -1,7 +1,11 @@
 from typing import Dict, List, Tuple
 
 import pytest
-from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Arguments,
+    IoArgoprojWorkflowV1alpha1Inputs,
+    Toleration,
+)
 from pydantic import BaseModel, ValidationError
 
 from hera.v1.artifact import InputArtifact, OutputArtifact
@@ -221,8 +225,8 @@ def test_task_template_does_not_contain_gpu_references(op):
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.arguments, V1alpha1Arguments)
-    assert isinstance(tt.inputs, V1alpha1Inputs)
+    assert isinstance(tt.arguments, IoArgoprojWorkflowV1alpha1Arguments)
+    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
     assert tt.node_selector is None
     assert tt.tolerations is None
     assert tt.retry_strategy is None
@@ -242,11 +246,11 @@ def test_task_template_contains_expected_field_values_and_types(op):
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.arguments, V1alpha1Arguments)
-    assert isinstance(tt.inputs, V1alpha1Inputs)
+    assert isinstance(tt.arguments, IoArgoprojWorkflowV1alpha1Arguments)
+    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
     assert isinstance(tt.node_selector, dict)
     assert isinstance(tt.tolerations, list)
-    assert all([isinstance(x, V1Toleration) for x in tt.tolerations])
+    assert all([isinstance(x, Toleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
     assert tt.arguments.parameters[0].name == 'a'
