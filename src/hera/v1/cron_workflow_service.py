@@ -52,7 +52,7 @@ class CronWorkflowService:
         """
         return self.service.create_cron_workflow(
             namespace,
-            IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(namespace=namespace, cron_workflow=cron_workflow),
+            IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, namespace=namespace),
         )
 
     def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
@@ -94,7 +94,7 @@ class CronWorkflowService:
         argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.suspend_cron_workflow(
-            namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(namespace=namespace, name=name)
+            namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(name=name, namespace=namespace)
         )
 
     def resume(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
@@ -116,11 +116,11 @@ class CronWorkflowService:
         argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.resume_cron_workflow(
-            namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest(namespace=namespace, name=name)
+            namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest(name=name, namespace=namespace)
         )
 
     def get_cron_workflow_link(self, name: str, namespace: str = 'default') -> str:
-        """Assembles a cron workflow link for the given cron workflow name. Note that the returned path works only for Argo.
+        """Assembles a cron workflow link for the given cron workflow name.
 
         Parameters
         ----------
@@ -133,5 +133,9 @@ class CronWorkflowService:
         -------
         str
             The cron workflow link.
+
+        Notes
+        -----
+        The returned path works only for Argo.
         """
         return f'https://{self._domain}/cron-workflows/{namespace}/{name}'
