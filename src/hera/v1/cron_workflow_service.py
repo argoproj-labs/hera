@@ -46,13 +46,18 @@ class CronWorkflowService:
         namespace: str = 'default'
             The K8S namespace of the Argo server to create the cron workflow in.
 
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1CronWorkflow - created workflow.
+
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
         """
         return self.service.create_cron_workflow(
             namespace,
             IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, namespace=namespace),
+            _check_return_type=False,
         )
 
     def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
@@ -71,9 +76,9 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
         """
-        return self.service.delete_cron_workflow(namespace, name)
+        return self.service.delete_cron_workflow(namespace, name, _check_return_type=False)
 
     def suspend(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
@@ -91,10 +96,13 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
         """
         return self.service.suspend_cron_workflow(
-            namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(name=name, namespace=namespace)
+            namespace,
+            name,
+            IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(name=name, namespace=namespace),
+            _check_return_type=False,
         )
 
     def resume(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
@@ -113,7 +121,7 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
         """
         return self.service.resume_cron_workflow(
             namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest(name=name, namespace=namespace)
