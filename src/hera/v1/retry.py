@@ -26,3 +26,13 @@ class Retry(BaseModel):
         if max_duration is not None:
             assert duration <= max_duration, 'duration cannot be greater than the max duration'
         return values
+
+    def get_limit(self) -> int:
+        """Returns the number of retries computed based on `max_duration` and `duration`.
+
+        Returns
+        -------
+        int
+            The limit on the number of retries.
+        """
+        return self.max_duration // self.duration
