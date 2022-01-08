@@ -91,7 +91,7 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.suspend_cron_workflow(
             namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(namespace=namespace, name=name)
