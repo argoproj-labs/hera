@@ -37,8 +37,8 @@ class Retry(BaseModel):
 
         Notes
         -----
-        It used to be the case that the Argo SDK required a `duration`/`max_duration` specification. However, that is no
-        longer the case post-refactoring to the new SDK, which takes a `limit`. Until Hera migrates to V2, we can
+        It used to be the case that the Argo SDK required a `duration`/`max_duration` specification. However, that is
+        no longer the case post-refactoring to the new SDK, which takes a `limit`. Until Hera migrates to V2, we can
         compute the limit from the specific `max_duration` and `duration`.
         """
         return self.max_duration // self.duration

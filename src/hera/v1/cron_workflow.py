@@ -1,12 +1,10 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
-from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflow,
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
-    IoArgoprojWorkflowV1alpha1CronWorkflowStatus,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,

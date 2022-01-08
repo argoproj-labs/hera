@@ -24,9 +24,9 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
-    Toleration,
-    VolumeMount,
 )
+from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
 from hera.v1.artifact import InputArtifact, OutputArtifact
@@ -45,10 +45,10 @@ class _Item(ModelSimple):
     list of `with_items` as a non-primitive type, ultimately attempting to convert it to an internal representation,
     which, clearly, does not exist. This happens during the call to `argo_workflows.model_utils.model_to_dict()`, which
     recursively calls `model_to_dict` on the elements present in `with_items`. Since each element is a primitive `dict`
-    that does not have the methods necessary for `model_to_dict`, we get SDK exceptions during workflow/task submission.
-    To overcome this by not modifying the SDK, we can implement our own wrapper around a primitive type by using
-    `ModelSimple`. The `ParallelSteps` construct, of the SDK, is a wrapper around a primitive `list`/`array`, and it
-    uses a similar structure. This implementation is very similar to `ParallelSteps` but uses `dict` rather than
+    that does not have the methods necessary for `model_to_dict`, we get SDK exceptions during workflow/task
+    submission. To overcome this by not modifying the SDK, we can implement our own wrapper around a primitive type by
+    using `ModelSimple`. The `ParallelSteps` construct, of the SDK, is a wrapper around a primitive `list`/`array`,
+    and it uses a similar structure. This implementation is very similar to `ParallelSteps` but uses `dict` rather than
     internal `str` and `list`.
     """
 
@@ -685,12 +685,12 @@ class Task:
             return IoArgoprojWorkflowV1alpha1RetryStrategy(limit=str(self.retry.get_limit()), retry_policy='Always')
         return None
 
-    def get_tolerations(self) -> Optional[List[Toleration]]:
+    def get_tolerations(self) -> Optional[List[ArgoToleration]]:
         """Assembles and returns the pod toleration objects required for scheduling a task.
 
         Returns
         -------
-        Optional[List[Toleration]]
+        Optional[List[ArgoToleration]]
             The list of assembled tolerations.
 
         Notes
@@ -703,7 +703,7 @@ class Task:
 
         ts = []
         for t in self.tolerations:
-            ts.append(Toleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
+            ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
 
         return ts if ts else None
 
