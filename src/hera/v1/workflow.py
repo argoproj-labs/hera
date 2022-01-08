@@ -2,12 +2,12 @@
 from typing import Optional
 from uuid import uuid4
 
-from argo.workflows.client import (
-    V1alpha1DAGTemplate,
-    V1alpha1Template,
-    V1alpha1Workflow,
-    V1alpha1WorkflowSpec,
-    V1ObjectMeta,
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1DAGTemplate,
+    IoArgoprojWorkflowV1alpha1Template,
+    IoArgoprojWorkflowV1alpha1Workflow,
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
+    ObjectMeta,
 )
 
 from hera.v1.task import Task
@@ -42,19 +42,19 @@ class Workflow:
         self.parallelism = parallelism
         self.service_account_name = service_account_name
 
-        self.dag_template = V1alpha1DAGTemplate(tasks=[])
-        self.template = V1alpha1Template(
+        self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
             dag=self.dag_template,
             parallelism=self.parallelism,
             service_account_name=self.service_account_name,
         )
-        self.metadata = V1ObjectMeta(name=self.name)
-        self.spec = V1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
+        self.metadata = ObjectMeta(name=self.name)
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+            templates=[self.template], entrypoint=self.name, volume_claim_templates=[], volumes=[]
         )
-        self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
+        self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
     def add_task(self, t: Task) -> None:
         """Adds a single task to the workflow"""
