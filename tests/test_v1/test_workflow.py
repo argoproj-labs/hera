@@ -6,7 +6,6 @@ from hera.v1.resources import Resources
 from hera.v1.task import Task
 from hera.v1.volume import Volume
 from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
 
 
 def test_wf_contains_specified_service_account(ws):
@@ -20,9 +19,8 @@ def test_wf_contains_specified_service_account(ws):
 def test_wf_does_not_contain_sa_if_one_is_not_specified(ws):
     w = Workflow('w', service=ws)
 
-    expected_sa = None
-    assert w.spec.service_account_name == expected_sa
-    assert w.spec.templates[0].service_account_name == expected_sa
+    assert not hasattr(w.spec, 'service_account_name')
+    assert not hasattr(w.spec.templates[0], 'service_account_name')
 
 
 def test_wf_does_not_add_empty_task(w):
