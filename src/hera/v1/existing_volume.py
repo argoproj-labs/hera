@@ -1,9 +1,5 @@
 """Holds the existing volume specification"""
-from argo.workflows.client import (
-    V1PersistentVolumeClaimVolumeSource,
-    V1Volume,
-    V1VolumeMount,
-)
+from argo_workflows.models import PersistentVolumeClaimVolumeSource, Volume, VolumeMount
 from pydantic import BaseModel, validator
 
 
@@ -29,7 +25,7 @@ class ExistingVolume(BaseModel):
         assert '_' not in value, 'existing volume name cannot contain underscores, see RFC1123'
         return value
 
-    def get_volume(self) -> V1Volume:
+    def get_volume(self) -> Volume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
@@ -37,10 +33,10 @@ class ExistingVolume(BaseModel):
         V1Volume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        claim = V1PersistentVolumeClaimVolumeSource(claim_name=self.name)
-        return V1Volume(name=self.name, persistent_volume_claim=claim)
+        claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
+        return Volume(name=self.name, persistent_volume_claim=claim)
 
-    def get_mount(self) -> V1VolumeMount:
+    def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
@@ -48,4 +44,4 @@ class ExistingVolume(BaseModel):
         V1VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(name=self.name, mount_path=self.mount_path)
+        return VolumeMount(name=self.name, mount_path=self.mount_path)

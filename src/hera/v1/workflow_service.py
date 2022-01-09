@@ -1,10 +1,10 @@
 """Holds the workflow service that supports client workflow submissions"""
 from typing import Tuple
 
-from argo.workflows.client import (
-    V1alpha1Workflow,
-    V1alpha1WorkflowCreateRequest,
-    WorkflowServiceApi,
+from argo_workflows.apis import WorkflowServiceApi
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Workflow,
+    IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
 )
 
 from hera.v1.client import Client
@@ -31,21 +31,27 @@ class WorkflowService:
         api_client = Client(Config(domain), token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
-    def submit(self, workflow: V1alpha1Workflow, namespace: str = 'default') -> V1alpha1Workflow:
+    def submit(
+        self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = 'default'
+    ) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Submits the given workflow to the given namespace.
 
         Parameters
         ----------
-        workflow: V1alpha1Workflow
+        workflow: IoArgoprojWorkflowV1alpha1Workflow
             The workflow to submit.
         namespace: str
             The K8S namespace of the Argo server to submit the workflow to.
 
         Raises
         ------
-        argo.workflows.client.ApiException
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
         """
-        return self.service.create_workflow(namespace, V1alpha1WorkflowCreateRequest(workflow=workflow))
+        return self.service.create_workflow(
+            namespace,
+            IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, namespace=namespace),
+            _check_return_type=False,
+        )
 
     def delete(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow from the given namespace based on the specified name.
@@ -61,9 +67,9 @@ class WorkflowService:
 
         Raises
         ------
-        argo.workflows.client.ApiException
+        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
         """
-        return self.service.delete_workflow(self._namespace, name)
+        return self.service.delete_workflow(self._namespace, name, _check_return_type=False)
 
     def get_workflow_link(self, name: str) -> str:
         """Assembles a workflow link for the given workflow name. Note that the returned path works only for Argo.

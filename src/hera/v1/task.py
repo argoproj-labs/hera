@@ -4,24 +4,29 @@ import copy
 import inspect
 import json
 import textwrap
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from argo.workflows.client import (
-    V1alpha1Arguments,
-    V1alpha1Artifact,
-    V1alpha1Backoff,
-    V1alpha1DAGTask,
-    V1alpha1Inputs,
-    V1alpha1Outputs,
-    V1alpha1Parameter,
-    V1alpha1RetryStrategy,
-    V1alpha1ScriptTemplate,
-    V1alpha1Template,
-    V1EnvVar,
-    V1ResourceRequirements,
-    V1Toleration,
-    V1VolumeMount,
+from argo_workflows.model_utils import (
+    ApiTypeError,
+    ModelSimple,
+    cached_property,
+    convert_js_args_to_python_args,
 )
+from argo_workflows.models import (
+    EnvVar,
+    IoArgoprojWorkflowV1alpha1Arguments,
+    IoArgoprojWorkflowV1alpha1Artifact,
+    IoArgoprojWorkflowV1alpha1DAGTask,
+    IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1Outputs,
+    IoArgoprojWorkflowV1alpha1Parameter,
+    IoArgoprojWorkflowV1alpha1RetryStrategy,
+    IoArgoprojWorkflowV1alpha1ScriptTemplate,
+    IoArgoprojWorkflowV1alpha1Template,
+    ResourceRequirements,
+)
+from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
 from hera.v1.artifact import InputArtifact, OutputArtifact
@@ -31,6 +36,108 @@ from hera.v1.operator import Operator
 from hera.v1.resources import Resources
 from hera.v1.retry import Retry
 from hera.v1.toleration import Toleration
+
+
+class _Item(ModelSimple):
+    """
+    When we use a DAG task's `with_items` field, we typically pass in a list of dictionaries as (str, str). The problem
+    with the auto-generated `argo_workflows` SDK, however, is that it will attempt to interpret each element in this
+    list of `with_items` as a non-primitive type, ultimately attempting to convert it to an internal representation,
+    which, clearly, does not exist. This happens during the call to `argo_workflows.model_utils.model_to_dict()`, which
+    recursively calls `model_to_dict` on the elements present in `with_items`. Since each element is a primitive `dict`
+    that does not have the methods necessary for `model_to_dict`, we get SDK exceptions during workflow/task
+    submission. To overcome this by not modifying the SDK, we can implement our own wrapper around a primitive type by
+    using `ModelSimple`. The `ParallelSteps` construct, of the SDK, is a wrapper around a primitive `list`/`array`,
+    and it uses a similar structure. This implementation is very similar to `ParallelSteps` but uses `dict` rather than
+    internal `str` and `list`.
+    """
+
+    allowed_values: Dict[Any, Any] = {}
+
+    validations: Dict[Any, Any] = {}
+
+    @cached_property
+    def openapi_types():  # type: ignore
+        """
+        This must be a method because a model may have properties that are of type self, this must run
+        after the class is loaded.
+        """
+        return {
+            'value': (dict,),
+        }
+
+    @cached_property
+    def discriminator():  # type: ignore
+        """
+        Typically returns an internal SDK class that can be used to discriminate between inheriting
+        classes, not necessary in this case.
+        """
+        return None
+
+    attribute_map: Dict[Any, Any] = {}
+    read_only_vars: Set[Any] = set()
+    _composed_schemas = None
+    required_properties = set(
+        [
+            '_data_store',
+            '_check_type',
+            '_spec_property_naming',
+            '_path_to_item',
+            '_configuration',
+            '_visited_composed_classes',
+        ]
+    )
+
+    @convert_js_args_to_python_args
+    def __init__(self, *args, **kwargs):
+        # required up here when default value is not given
+        _path_to_item = kwargs.pop('_path_to_item', ())
+
+        if 'value' in kwargs:
+            value = kwargs.pop('value')
+        elif args:
+            args = list(args)  # type: ignore
+            value = args.pop(0)  # type: ignore
+        else:
+            raise ApiTypeError(
+                "value is required, but not passed in args or kwargs and doesn't have default",
+                path_to_item=_path_to_item,
+                valid_classes=(self.__class__,),
+            )
+
+        _check_type = kwargs.pop('_check_type', True)
+        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
+        _configuration = kwargs.pop('_configuration', None)
+        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
+
+        if args:
+            raise ApiTypeError(
+                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
+                % (
+                    args,
+                    self.__class__.__name__,
+                ),
+                path_to_item=_path_to_item,
+                valid_classes=(self.__class__,),
+            )
+
+        self._data_store = {}
+        self._check_type = _check_type
+        self._spec_property_naming = _spec_property_naming
+        self._path_to_item = _path_to_item
+        self._configuration = _configuration
+        self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
+        self.value = value
+        if kwargs:
+            raise ApiTypeError(
+                "Invalid named arguments=%s passed to %s. Remove those invalid named arguments."
+                % (
+                    kwargs,
+                    self.__class__.__name__,
+                ),
+                path_to_item=_path_to_item,
+                valid_classes=(self.__class__,),
+            )
 
 
 class Task:
@@ -113,7 +220,7 @@ class Task:
         self.working_dir = working_dir
         self.retry = retry
         self.tolerations = tolerations
-        self.node_selectors = node_selectors
+        self.node_selectors = node_selectors or {}
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -181,6 +288,10 @@ class Task:
         ----------
         other: Task
             The other task to set a dependency for. The new dependency of the task is this task.
+        operator: Operator
+            Comparison operation between the result of `other` and `value`.
+        value: str
+            Value to compare the output of `other` again to determine whether to execute `self` Task.
 
         Returns
         -------
@@ -193,7 +304,7 @@ class Task:
         t2.when(t1, Operator.equals, "t2")
         t3.when(t1, Operator.equals, "t3")
         """
-        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
+        setattr(self.argo_task, 'when', f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}')
         return other.next(self)
 
     def validate(self):
@@ -244,42 +355,47 @@ class Task:
             for params in self.func_params:
                 assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
 
-    def get_argo_input_artifacts(self) -> Optional[List[V1alpha1Artifact]]:
+    def get_argo_input_artifacts(self) -> List[IoArgoprojWorkflowV1alpha1Artifact]:
         """Assembles and returns a list of artifacts assembled from the Hera internal input artifact representation"""
         if not self.input_artifacts:
-            return None
+            return []
         input_artifacts = [i.get_spec() for i in self.input_artifacts]
         return input_artifacts if input_artifacts else None
 
-    def get_argo_output_artifacts(self) -> Optional[List[V1alpha1Artifact]]:
+    def get_argo_output_artifacts(self) -> List[IoArgoprojWorkflowV1alpha1Artifact]:
         """Assembles and returns a list of artifacts assembled from the Hera internal output artifact representation"""
         if not self.output_artifacts:
-            return None
+            return []
         output_artifacts = [o.get_spec() for o in self.output_artifacts]
         return output_artifacts if output_artifacts else None
 
-    def get_arguments(self) -> V1alpha1Arguments:
+    def get_arguments(self) -> IoArgoprojWorkflowV1alpha1Arguments:
         """Assembles and returns the task arguments"""
-        return V1alpha1Arguments(parameters=self.parameters, artifacts=self.argo_input_artifacts)
+        return IoArgoprojWorkflowV1alpha1Arguments(
+            parameters=self.parameters, artifacts=self.argo_input_artifacts or []
+        )
 
-    def get_inputs(self) -> V1alpha1Inputs:
+    def get_inputs(self) -> IoArgoprojWorkflowV1alpha1Inputs:
         """Assembles the inputs of the task.
+
         Returns
         -------
-        V1alpha1Inputs
+        IoArgoprojWorkflowV1alpha1Inputs
 
         Notes
         -----
         Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
         """
-        input_art = None
+        artifacts = None
         if self.argo_input_artifacts:
-            input_art = [V1alpha1Artifact(name=a.name, path=a.path) for a in self.argo_input_artifacts]
-        return V1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
+            artifacts = [
+                IoArgoprojWorkflowV1alpha1Artifact(name=a.name, path=a.path) for a in self.argo_input_artifacts
+            ]
+        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=artifacts or [])
 
-    def get_outputs(self) -> V1alpha1Outputs:
+    def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
         """Assembles and returns the task outputs"""
-        return V1alpha1Outputs(artifacts=self.argo_output_artifacts)
+        return IoArgoprojWorkflowV1alpha1Outputs(artifacts=self.argo_output_artifacts or [])
 
     def get_command(self) -> List[str]:
         """
@@ -289,7 +405,7 @@ class Task:
         assert self.command
         return [str(cc) for cc in self.command]
 
-    def get_env(self, specs: List[EnvSpec]) -> Optional[List[V1EnvVar]]:
+    def get_env(self, specs: List[EnvSpec]) -> List[EnvVar]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
 
         Parameters
@@ -299,22 +415,23 @@ class Task:
 
         Returns
         -------
-        Optional[List[V1EnvVar]]
+        List[V1EnvVar]
             A list of Argo environment specifications, if any specs are provided.
         """
         if not specs:
-            return None
+            return []
+
         r = []
         for spec in specs:
             r.append(spec.argo_spec)
         return r
 
-    def get_parameters(self) -> List[V1alpha1Parameter]:
+    def get_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:
         """Returns a list of Argo workflow task parameters based on the specified task function parameters.
 
         Returns
         -------
-        List[V1alpha1Parameter]
+        List[IoArgoprojWorkflowV1alpha1Parameter]
             The list of constructed Argo parameters.
 
         Notes
@@ -331,7 +448,7 @@ class Task:
             # that come in from other tasks
             args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
             for arg in args:
-                parameters.append(V1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+                parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
 
         # if there are any keyword arguments associated with the function signature, we set them as default values
         # so Argo passes them in
@@ -352,7 +469,7 @@ class Task:
                         value = param_value.json()
                     else:
                         value = json.dumps(param_value)
-                    parameters.append(V1alpha1Parameter(name=param_name, value=value))
+                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=value))
                     param_name_cache.add(param_name)
             elif len(self.func_params) > 1:
                 # at this point the init passed validation, so this condition is always false when self.input_from
@@ -361,7 +478,9 @@ class Task:
                 # if there's more than 1 input, it's a parallel task so we map the param names of the
                 # first series of params to item.param_name since the keys are all the same for the func_params
                 for param_name in self.func_params[0].keys():
-                    parameters.append(V1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}'))
+                    parameters.append(
+                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}')
+                    )
                     param_name_cache.add(param_name)
 
         for name, value in keywords:
@@ -371,14 +490,15 @@ class Task:
                 value = json.dumps(value)
             if name in param_name_cache:
                 continue  # user override of a kwarg
-            parameters.append(V1alpha1Parameter(name=name, value=value))
+            parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, value=value))
         return parameters
 
     def get_param_script_portion(self) -> str:
-        """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
-        parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
-        script that automatically imports json and loads/adds code to interpret each independent argument into the
-        script.
+        """Constructs and returns a script that loads the parameters of the specified arguments.
+
+        Argo passes parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that.
+        This creates a script that automatically imports json and loads/adds code to interpret each independent
+        argument into the script.
 
         Returns
         -------
@@ -400,10 +520,11 @@ class Task:
         return textwrap.dedent(extract)
 
     def get_script(self) -> str:
-        """Assembles and returns a script representation of the given function, along with the extra script material
-        prefixed to the string. The script is expected to be a callable function the client is interested in submitting
-        for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
-        through get_param_script_portion.
+        """Assembles a script representation of the given task function.
+
+        The script is expected to be a callable function the client is interested in submitting for execution on Argo
+        and the script_extra material represents the parameter loading part obtained, likely,
+        through `get_param_script_portion`.
 
         Returns
         -------
@@ -430,17 +551,17 @@ class Task:
         script += textwrap.dedent(s)
         return textwrap.dedent(script)
 
-    def get_resources(self) -> V1ResourceRequirements:
+    def get_resources(self) -> ResourceRequirements:
         """Assembles an Argo resource requirements object with the given resource configuration.
 
         Returns
         -------
-        V1ResourceRequirements
+        ResourceRequirements
             A configured Argo resource requirement with the given configuration.
         """
         max_cpu = self.resources.max_cpu is not None
         max_mem = self.resources.max_mem is not None
-        resource = V1ResourceRequirements(
+        resource = ResourceRequirements(
             requests={
                 'cpu': str(self.resources.min_cpu),
                 'memory': self.resources.min_mem,
@@ -456,7 +577,7 @@ class Task:
             resource.limits['nvidia.com/gpu'] = str(self.resources.gpus)
         return resource
 
-    def get_parallel_items(self) -> List[Dict[str, str]]:
+    def get_parallel_items(self) -> List[_Item]:
         """Constructs a list of items to be used in a parallel task. This is typically consumed in order to be passed
         to the with_items field of an Argo DAG task.
 
@@ -465,7 +586,7 @@ class Task:
         List[Dict[str, str]]
             A list of dictionaries keyed by the argument name to the argument value.
         """
-        items: List[Dict[str, Any]] = []
+        items: List[_Item] = []
         if not self.func_params:
             return items
 
@@ -476,15 +597,15 @@ class Task:
                     item[k] = v.json()
                 else:
                     item[k] = json.dumps(v)
-            items.append(item)
+            items.append(_Item(item))
         return items
 
-    def get_volume_mounts(self) -> List[V1VolumeMount]:
+    def get_volume_mounts(self) -> List[VolumeMount]:
         """Assembles the list of volumes to be mounted by the task.
 
         Returns
         -------
-        List[V1VolumeMount]
+        List[VolumeMount]
             The list of volume mounts to be added to the task specification.
         """
         volumes = []
@@ -496,15 +617,15 @@ class Task:
             volumes.append(self.resources.empty_dir_volume.get_mount())
         return volumes
 
-    def get_script_def(self) -> V1alpha1ScriptTemplate:
+    def get_script_def(self) -> IoArgoprojWorkflowV1alpha1ScriptTemplate:
         """Assembles and returns the script template that contains the definition of the script to run in a task.
 
         Returns
         -------
-        V1alpha1ScriptTemplate
+        IoArgoprojWorkflowV1alpha1ScriptTemplate
             The script template representation of the task.
         """
-        return V1alpha1ScriptTemplate(
+        return IoArgoprojWorkflowV1alpha1ScriptTemplate(
             name=self.name,
             command=self.get_command(),
             source=self.script,
@@ -512,49 +633,65 @@ class Task:
             env=self.env,
             resources=self.argo_resources,
             volume_mounts=self.get_volume_mounts(),
-            working_dir=self.working_dir,
+            working_dir=self.working_dir or '',
         )
 
-    def get_task_template(self) -> V1alpha1Template:
+    def get_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
         configuration required for the task be executed.
 
         Returns
         -------
-        V1alpha1Template
+        IoArgoprojWorkflowV1alpha1Template
             The template representation of the task.
         """
-        return V1alpha1Template(
+        retry_strategy = self.get_retry_strategy()
+        if retry_strategy:
+            return IoArgoprojWorkflowV1alpha1Template(
+                name=self.name,
+                script=self.script_def,
+                inputs=self.inputs,
+                outputs=self.outputs,
+                node_selector=self.node_selectors,
+                tolerations=self.get_tolerations(),
+                retry_strategy=retry_strategy,
+            )
+        return IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             script=self.script_def,
-            arguments=self.arguments,
             inputs=self.inputs,
             outputs=self.outputs,
             node_selector=self.node_selectors,
             tolerations=self.get_tolerations(),
-            retry_strategy=self.get_retry_strategy(),
         )
 
-    def get_retry_strategy(self) -> Optional[V1alpha1RetryStrategy]:
+    def get_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:
         """Assembles and returns a retry strategy for the task. This is dictated by the task `retry_limit`.
 
         Returns
         -------
-        Optional[V1alpha1RetryStrategy]
-            A V1alpha1RetryStrategy object if `retry_limit` is specified, None otherwise.
+        Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]
+            A IoArgoprojWorkflowV1alpha1RetryStrategy object if `retry_limit` is specified, None otherwise.
+
+        Notes
+        -----
+        There are multiple types of retry strategies:
+            - OnFailure - when the code executed by Argo fails for some reason
+            - OnError - when there are infrastructure errors
+            - OnTransientError - when there are network errors such as TLS handshakes and connection timeouts
+            - Always - everything
+        The retry strategy uses Always by default.
         """
-        if self.retry is not None:
-            return V1alpha1RetryStrategy(
-                backoff=V1alpha1Backoff(duration=str(self.retry.duration), max_duration=str(self.retry.max_duration))
-            )
+        if self.retry:
+            return IoArgoprojWorkflowV1alpha1RetryStrategy(limit=str(self.retry.get_limit()), retry_policy='Always')
         return None
 
-    def get_tolerations(self) -> Optional[List[V1Toleration]]:
+    def get_tolerations(self) -> List[ArgoToleration]:
         """Assembles and returns the pod toleration objects required for scheduling a task.
 
         Returns
         -------
-        Optional[List[V1Toleration]]
+        List[ArgoToleration]
             The list of assembled tolerations.
 
         Notes
@@ -563,32 +700,40 @@ class Task:
         For GKE and Azure workloads `hera.v1.tolerations.GPUToleration` can be specified.
         """
         if self.tolerations is None:
-            return None
+            return []
 
         ts = []
         for t in self.tolerations:
-            ts.append(V1Toleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
+            ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
 
-        return ts if ts else None
+        return ts if ts else []
 
-    def get_task_spec(self) -> V1alpha1DAGTask:
+    def get_task_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
 
         Returns
         -------
-        V1alpha1DAGTask
+        IoArgoprojWorkflowV1alpha1DAGTask
             The graph task representation.
         """
         if self.input_from:
-            return V1alpha1DAGTask(
+            return IoArgoprojWorkflowV1alpha1DAGTask(
                 name=self.name,
                 template=self.argo_template.name,
+                dependencies=[],
                 arguments=self.arguments,
                 with_param=f'{{{{tasks.{self.input_from.name}.outputs.result}}}}',
             )
         if self.func_params and len(self.func_params) > 1:
             items = self.get_parallel_items()
-            return V1alpha1DAGTask(
-                name=self.name, template=self.argo_template.name, arguments=self.arguments, with_items=items
+            return IoArgoprojWorkflowV1alpha1DAGTask(
+                name=self.name,
+                template=self.argo_template.name,
+                dependencies=[],
+                arguments=self.arguments,
+                with_items=items,
+                _check_type=False,  # this is required because of the _Item custom ModelSimple
             )
-        return V1alpha1DAGTask(name=self.name, template=self.argo_template.name, arguments=self.arguments)
+        return IoArgoprojWorkflowV1alpha1DAGTask(
+            name=self.name, template=self.argo_template.name, dependencies=[], arguments=self.arguments
+        )
