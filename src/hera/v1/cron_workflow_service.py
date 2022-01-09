@@ -1,12 +1,12 @@
 """Holds the cron workflow service that supports client cron workflow creations"""
 from typing import Tuple
 
-from argo_workflows.apis import CronWorkflowServiceApi
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest,
-    IoArgoprojWorkflowV1alpha1CronWorkflow,
-    IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest,
-    IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest,
+from argo.workflows.client import (
+    CronWorkflowServiceApi,
+    V1alpha1CreateCronWorkflowRequest,
+    V1alpha1CronWorkflow,
+    V1alpha1CronWorkflowResumeRequest,
+    V1alpha1CronWorkflowSuspendRequest,
 )
 
 from hera.v1.client import Client
@@ -34,9 +34,7 @@ class CronWorkflowService:
         api_client = Client(Config(domain), token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
-    def create(
-        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = 'default'
-    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+    def create(self, cron_workflow: V1alpha1CronWorkflow, namespace: str = 'default') -> V1alpha1CronWorkflow:
         """Creates given cron workflow in the argo server.
 
         Parameters
@@ -46,18 +44,12 @@ class CronWorkflowService:
         namespace: str = 'default'
             The K8S namespace of the Argo server to create the cron workflow in.
 
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1CronWorkflow - created workflow.
-
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.create_cron_workflow(
-            namespace,
-            IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, namespace=namespace),
-            _check_return_type=False,
+            namespace, V1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow)
         )
 
     def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
@@ -76,9 +68,9 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return self.service.delete_cron_workflow(namespace, name, _check_return_type=False)
+        return self.service.delete_cron_workflow(namespace, name)
 
     def suspend(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
@@ -96,13 +88,10 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.suspend_cron_workflow(
-            namespace,
-            name,
-            IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(name=name, namespace=namespace),
-            _check_return_type=False,
+            namespace, name, body=V1alpha1CronWorkflowSuspendRequest(name=name, namespace=namespace)
         )
 
     def resume(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
@@ -121,14 +110,14 @@ class CronWorkflowService:
 
         Raises
         ------
-        argo_workflows.exceptions.ApiException: Raised upon any HTTP-related errors.
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.resume_cron_workflow(
-            namespace, name, body=IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest(name=name, namespace=namespace)
+            namespace, name, body=V1alpha1CronWorkflowResumeRequest(name=name, namespace=namespace)
         )
 
     def get_cron_workflow_link(self, name: str, namespace: str = 'default') -> str:
-        """Assembles a cron workflow link for the given cron workflow name.
+        """Assembles a cron workflow link for the given cron workflow name. Note that the returned path works only for Argo.
 
         Parameters
         ----------
@@ -141,9 +130,5 @@ class CronWorkflowService:
         -------
         str
             The cron workflow link.
-
-        Notes
-        -----
-        The returned path works only for Argo.
         """
         return f'https://{self._domain}/cron-workflows/{namespace}/{name}'

@@ -1,7 +1,7 @@
 import json
 from typing import Any, Optional, Union
 
-from argo_workflows.models import EnvVar, EnvVarSource, SecretKeySelector
+from argo.workflows.client import V1EnvVar, V1EnvVarSource, V1SecretKeySelector
 from pydantic import BaseModel, validator
 
 from hera.v1.validators import json_serializable
@@ -36,10 +36,10 @@ class EnvSpec(BaseModel):
         return value
 
     @property
-    def argo_spec(self) -> EnvVar:
+    def argo_spec(self) -> V1EnvVar:
         """Constructs and returns the Argo environment specification"""
         value = self.value.json() if isinstance(self.value, BaseModel) else json.dumps(self.value)
-        return EnvVar(name=self.name, value=value)
+        return V1EnvVar(name=self.name, value=value)
 
 
 class SecretEnvSpec(EnvSpec):
@@ -57,9 +57,9 @@ class SecretEnvSpec(EnvSpec):
     secret_key: str
 
     @property
-    def argo_spec(self) -> EnvVar:
+    def argo_spec(self) -> V1EnvVar:
         """Constructs and returns the Argo environment specification"""
-        return EnvVar(
+        return V1EnvVar(
             name=self.name,
-            value_from=EnvVarSource(secret_key_ref=SecretKeySelector(name=self.secret_name, key=self.secret_key)),
+            value_from=V1EnvVarSource(secret_key_ref=V1SecretKeySelector(name=self.secret_name, key=self.secret_key)),
         )

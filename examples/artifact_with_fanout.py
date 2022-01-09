@@ -29,7 +29,7 @@ def consumer(i: int):
 
 
 ws = WorkflowService('my-argo-server.com', 'my-auth-token')
-w = Workflow('artifact-with-fanout', ws)
+w = Workflow('fv-testing', ws)
 w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
 f_t = Task(
     'fanout',

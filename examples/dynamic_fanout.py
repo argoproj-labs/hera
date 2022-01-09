@@ -24,7 +24,7 @@ def consume(value: int):
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService('my-argo-server.com', 'my-auth-token')
-w = Workflow('dynamic-fanout', ws)
+w = Workflow('dynamic-fan-out', ws)
 generate_task = Task('generate', generate)
 consume_task = Task('consume', consume, input_from=InputFrom(name='generate', parameters=['value']))
 

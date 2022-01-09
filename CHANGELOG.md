@@ -29,12 +29,6 @@ The general format is:
 
 ```
 
-# 0.4.1 - DATE (08/01/2022)
-
-### Changed
-
-- underlying Argo SDK dependency from the current PyPi argo-workflows to the Argo Workflows repo unpublished SDK
-
 # 0.4.0 - DATE (15/12/2021)
 
 ### Added
