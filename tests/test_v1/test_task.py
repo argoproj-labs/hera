@@ -1,11 +1,7 @@
 from typing import Dict, List, Tuple
 
 import pytest
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Arguments,
-    IoArgoprojWorkflowV1alpha1Inputs,
-    Toleration,
-)
+from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
 from pydantic import BaseModel, ValidationError
 
 from hera.v1.artifact import InputArtifact, OutputArtifact
@@ -40,8 +36,8 @@ def test_when_correct_expression_and_dependencies(no_op):
     assert t2.argo_task.dependencies == ['t1']
     assert t3.argo_task.dependencies == ['t1']
 
-    assert t2.argo_task.when == "{{tasks.t1.outputs.result}} == t2"
-    assert t3.argo_task.when == "{{tasks.t1.outputs.result}} == t3"
+    assert t2.argo_task._when == "{{tasks.t1.outputs.result}} == t2"
+    assert t3.argo_task._when == "{{tasks.t1.outputs.result}} == t3"
 
 
 def test_retry_limits_fail_validation():
@@ -82,7 +78,7 @@ def test_param_getter_parses_single_param_val_on_json_payload(op):
 
 
 def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, op):
-    t = Task('t', op, [{'a': mock_model}])
+    t = Task('t', op, [{'a': mock_model()}])
     param = t.get_parameters()[0]
     assert param.name == 'a'
     assert param.value == '{"field1": 1, "field2": 2}'
@@ -155,16 +151,16 @@ def test_parallel_items_assemble_base_models(multi_op, mock_model):
         't',
         multi_op,
         [
-            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model},
-            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model},
-            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
         ],
     )
     items = t.get_parallel_items()
     for item in items:
-        assert item.value['a'] == '1'
-        assert item.value['b'] == '{"d": 2, "e": 3}'
-        assert item.value['c'] == '{"field1": 1, "field2": 2}'
+        assert item['a'] == '1'
+        assert item['b'] == '{"d": 2, "e": 3}'
+        assert item['c'] == '{"field1": 1, "field2": 2}'
 
 
 def test_volume_mounts_returns_expected_volumes(no_op):
@@ -192,7 +188,7 @@ def test_gpu_toleration_returns_expected_toleration():
 
 
 def test_task_command_parses(mock_model, op):
-    t = Task('t', op, [{'a': mock_model}])
+    t = Task('t', op, [{'a': mock_model()}])
     assert t.get_command() == ['python']
 
 
@@ -205,7 +201,7 @@ def test_task_spec_returns_with_parallel_items(op):
     assert s.template == 't'
     assert len(s.arguments.parameters) == 1
     assert len(s.with_items) == 3
-    assert [i.value for i in s.with_items] == items
+    assert s.with_items == items
 
 
 def test_task_spec_returns_with_single_values(op):
@@ -223,40 +219,46 @@ def test_task_template_does_not_contain_gpu_references(op):
     t = Task('t', op, [{'a': 1}], resources=Resources())
     tt = t.get_task_template()
 
-    assert tt.tolerations == []
-    assert not hasattr(tt, 'retry_strategy')
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
-    assert hasattr(tt, 'node_selector')
-    assert tt.node_selector == {}
+    assert isinstance(tt.arguments, V1alpha1Arguments)
+    assert isinstance(tt.inputs, V1alpha1Inputs)
+    assert tt.node_selector is None
+    assert tt.tolerations is None
+    assert tt.retry_strategy is None
 
 
 def test_task_template_contains_expected_field_values_and_types(op):
-    t = Task('t', op, [{'a': 1}], resources=Resources(gpus=1), retry=Retry(duration=1,max_duration=2), node_selectors={'cloud.google.com/gke-accelerator': 'nvidia-tesla-k80'},tolerations=[GPUToleration])
+    t = Task(
+        't',
+        op,
+        [{'a': 1}],
+        resources=Resources(gpus=1),
+        tolerations=[GPUToleration],
+        node_selectors={'abc': '123-gpu'},
+        retry=Retry(duration=1, max_duration=2),
+    )
     tt = t.get_task_template()
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
+    assert isinstance(tt.arguments, V1alpha1Arguments)
+    assert isinstance(tt.inputs, V1alpha1Inputs)
+    assert isinstance(tt.node_selector, dict)
     assert isinstance(tt.tolerations, list)
-    assert all([isinstance(x, Toleration) for x in tt.tolerations])
+    assert all([isinstance(x, V1Toleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
+    assert tt.arguments.parameters[0].name == 'a'
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
     assert tt.tolerations[0].effect == 'NoSchedule'
     assert tt.tolerations[0].operator == 'Equal'
     assert tt.tolerations[0].value == 'present'
-    assert tt.retry_strategy.limit == '2'
-    assert tt.retry_strategy.retry_policy == 'Always'
-    assert not hasattr(tt.retry_strategy, 'affinity')
-    assert not hasattr(tt.retry_strategy, 'backoff')
-    assert not hasattr(tt.retry_strategy, 'expression')
-    assert isinstance(tt.node_selector, dict)
-    assert hasattr(tt, 'node_selector')
-    assert tt.node_selector == {'cloud.google.com/gke-accelerator': 'nvidia-tesla-k80'}
+    assert tt.retry_strategy is not None
+    assert tt.retry_strategy.backoff.duration == '1'
+    assert tt.retry_strategy.backoff.max_duration == '2'
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -268,8 +270,11 @@ def test_task_template_contains_expected_retry_strategy(no_op):
     tt = t.get_task_template()
     tr = t.get_retry_strategy()
 
-    assert tr.limit == '3'
-    assert tr.retry_policy == 'Always'
+    template_backoff = tt.retry_strategy.backoff
+    retry_backoff = tr.backoff
+
+    assert int(template_backoff.duration) == int(retry_backoff.duration)
+    assert int(template_backoff.max_duration) == int(retry_backoff.max_duration)
 
 
 def test_task_get_retry_returns_expected_none(no_op):
@@ -313,6 +318,7 @@ def test_task_input_artifact_returns_expected_list(no_op, out_artifact, in_artif
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
     artifact = t.inputs.artifacts[0]
+    assert artifact._from is None
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
 

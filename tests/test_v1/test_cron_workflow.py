@@ -39,8 +39,9 @@ def test_wf_contains_specified_service_account(cws, schedule):
 def test_wf_does_not_contain_sa_if_one_is_not_specified(cws, schedule):
     w = CronWorkflow('w', schedule, service=cws)
 
-    assert not hasattr(w.spec, 'service_account_name')
-    assert not hasattr(w.spec.templates[0], 'service_account_name')
+    expected_sa = None
+    assert w.spec.service_account_name == expected_sa
+    assert w.spec.templates[0].service_account_name == expected_sa
 
 
 def test_cwf_does_not_add_empty_task(cw):
