@@ -29,6 +29,17 @@ The general format is:
 
 ```
 
+# 1.0.0 - DATE (10/01/2022)
+
+### Removed
+
+- `v1` submodule of Hera to avoid internal versioning and external/package versioning
+
+### Changed
+
+- location of all files from `v1` up one folder to `hera`. Now everything will take the import form
+  of `from hera.module import Object` rather than `from hera.v1.module import Object`
+
 # 0.4.0 - DATE (15/12/2021)
 
 ### Added
