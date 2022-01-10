@@ -5,11 +5,11 @@ from hera.v1.workflow_service import WorkflowService
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService('my-argo-server.com', 'my-auth-token')
-w = Workflow('fv-testing', ws)
+w = Workflow('container', ws)
 
-# notice the placeholder `lambda: _`, for now this is required because
+# notice the placeholder `lambda: None`, for now this is required because
 # func is a required parameter, by design. Perhaps this can be made
 # `Optional[Callable]` in the future
-t = Task('cowsay', lambda: _, image='docker/whalesay', command=['cowsay', 'foo'])
+t = Task('cowsay', lambda: None, image='docker/whalesay', command=['cowsay', 'foo'])
 w.add_task(t)
 w.submit()

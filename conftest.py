@@ -34,7 +34,7 @@ def mock_model():
         field1: int = 1
         field2: int = 2
 
-    yield MockModel
+    yield MockModel()
 
 
 @pytest.fixture(scope='session')
