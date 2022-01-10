@@ -1,5 +1,6 @@
 """Holds the configurations required for submitting workflows to the Argo server"""
 import os
+from typing import Optional
 
 import urllib3
 from argo.workflows.client import Configuration as ArgoConfig
@@ -16,13 +17,31 @@ class Config:
 
     Parameters
     ----------
-    domain: str
-        The domain of the Argo
+    host: Optional[str] = None
+        The host of the Argo server to submit workflows to. An attempt to assemble a host from Argo K8S cluster
+        environment variables is pursued if this is not specified.
+    verify_ssl: bool = True
+        Whether to perform SSL/TLS verification. Set this to false to skip verifying SSL certificate when submitting
+        workflows from an HTTPS server.
     """
 
-    def __init__(self, domain: str):
-        self._domain = domain
-        self._config = self.__get_config()
+    def __init__(self, host: Optional[str] = None, verify_ssl: bool = True):
+        self._host = host or self._assemble_host()
+        self._verify_ssl = verify_ssl
+
+    def _assemble_host(self):
+        """Assembles a host from the default K8S cluster env variables with Argo's address.
+
+        Notes
+        -----
+        The pod containers should have an environment variable with the address of the Argo server, and this is
+        # the default one. Users who wish to assemble this on their own can do so and submit the result via the `host`
+        """
+        tcp_addr = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR', None)
+        assert tcp_addr is not None, 'A configuration/service host is required for submitting workflows'
+
+        tcp_port = os.getenv('ARGO_SERVER_PORT_2746_TCP_PORT', None)
+        return f'https://{tcp_addr}:{tcp_port}' if tcp_port else f'https://{tcp_addr}'
 
     def __get_config(self) -> ArgoConfig:
         """Assembles the Argo configuration.
@@ -37,28 +56,10 @@ class Config:
         to force skip SSL verification on the ApiClient side (Argo client inside the containers of the ArgoApi clients)
         for otherwise the connection fails.
 
-        Use this together with Client to instantiate a WorkflowServiceApi.
+        Use this together with Client to instantiate a WorkflowService/CronWorkflowService.
         """
-        scheme = 'https'
-        config = ArgoConfig()
-
-        argo_tcp_addr = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR')
-        if argo_tcp_addr:
-            host = argo_tcp_addr
-        else:
-            host = self._domain
-
-        if host != self._domain:
-            port = os.getenv('ARGO_SERVER_PORT_2746_TCP_PORT')
-            # K8S deployments in a namespace that has an Argo deployment get Argo specific environment variables,
-            # so this _should_ be safe
-            assert port, 'unspecified port'
-            config.verify_ssl = False
-        else:
-            port = ''
-
-        addr = f'{scheme}://{host}:{port}' if port else f'{scheme}://{host}'
-        config.host = addr
+        config = ArgoConfig(host=self._host)
+        config.verify_ssl = self._verify_ssl
         return config
 
     @property
