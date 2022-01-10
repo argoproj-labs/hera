@@ -1,12 +1,12 @@
 import pytest
 
-from hera.v1.cron_workflow import CronWorkflow
-from hera.v1.cron_workflow_service import CronWorkflowService
-from hera.v1.empty_dir_volume import EmptyDirVolume
-from hera.v1.existing_volume import ExistingVolume
-from hera.v1.resources import Resources
-from hera.v1.task import Task
-from hera.v1.volume import Volume
+from hera.cron_workflow import CronWorkflow
+from hera.cron_workflow_service import CronWorkflowService
+from hera.empty_dir_volume import EmptyDirVolume
+from hera.existing_volume import ExistingVolume
+from hera.resources import Resources
+from hera.task import Task
+from hera.volume import Volume
 
 
 @pytest.fixture

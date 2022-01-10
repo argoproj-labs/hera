@@ -4,7 +4,7 @@ from typing import Any, Optional, Union
 from argo.workflows.client import V1EnvVar, V1EnvVarSource, V1SecretKeySelector
 from pydantic import BaseModel, validator
 
-from hera.v1.validators import json_serializable
+from hera.validators import json_serializable
 
 
 class EnvSpec(BaseModel):

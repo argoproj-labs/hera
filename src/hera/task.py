@@ -24,13 +24,13 @@ from argo.workflows.client import (
 )
 from pydantic import BaseModel
 
-from hera.v1.artifact import InputArtifact, OutputArtifact
-from hera.v1.env import EnvSpec
-from hera.v1.input import InputFrom
-from hera.v1.operator import Operator
-from hera.v1.resources import Resources
-from hera.v1.retry import Retry
-from hera.v1.toleration import Toleration
+from hera.artifact import InputArtifact, OutputArtifact
+from hera.env import EnvSpec
+from hera.input import InputFrom
+from hera.operator import Operator
+from hera.resources import Resources
+from hera.retry import Retry
+from hera.toleration import Toleration
 
 
 class Task:

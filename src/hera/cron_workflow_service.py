@@ -9,8 +9,8 @@ from argo.workflows.client import (
     V1alpha1CronWorkflowSuspendRequest,
 )
 
-from hera.v1.client import Client
-from hera.v1.config import Config
+from hera.client import Client
+from hera.config import Config
 
 
 class CronWorkflowService:

@@ -3,9 +3,9 @@ from typing import Dict, List, Tuple
 import pytest
 from pydantic import BaseModel
 
-from hera.v1.artifact import InputArtifact, OutputArtifact
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.artifact import InputArtifact, OutputArtifact
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 @pytest.fixture(scope='session')

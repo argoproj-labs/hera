@@ -10,7 +10,7 @@ from argo.workflows.client import (
 )
 from pydantic import BaseModel, validator
 
-from hera.v1.validators import validate_storage_units
+from hera.validators import validate_storage_units
 
 
 class Volume(BaseModel):

@@ -1,9 +1,9 @@
 """This example showcases how clients can schedule tasks that provision independent volumes"""
 from hera.v1.resources import Resources
 from hera.v1.task import Task
-from hera.v1.volume import Volume
 from hera.v1.workflow import Workflow
 from hera.v1.workflow_service import WorkflowService
+from hera.volume import Volume
 
 
 def do():

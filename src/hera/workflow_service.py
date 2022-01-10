@@ -7,8 +7,8 @@ from argo.workflows.client import (
     WorkflowServiceApi,
 )
 
-from hera.v1.client import Client
-from hera.v1.config import Config
+from hera.client import Client
+from hera.config import Config
 
 
 class WorkflowService:
