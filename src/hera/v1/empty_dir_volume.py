@@ -2,7 +2,7 @@
 import uuid
 from typing import Optional
 
-from argo_workflows.models import EmptyDirVolumeSource, Volume, VolumeMount
+from argo.workflows.client import V1EmptyDirVolumeSource, V1Volume, V1VolumeMount
 from pydantic import BaseModel, validator
 
 
@@ -38,7 +38,7 @@ class EmptyDirVolume(BaseModel):
             return str(uuid.uuid4())
         return value
 
-    def get_volume(self) -> Volume:
+    def get_volume(self) -> V1Volume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
@@ -46,10 +46,11 @@ class EmptyDirVolume(BaseModel):
         V1Volume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        empty_dir = EmptyDirVolumeSource(medium='Memory', size_limit=self.size)
-        return Volume(name=self.name, empty_dir=empty_dir)
+        size_limit = self.size if self.size else None
+        empty_dir = V1EmptyDirVolumeSource(medium='Memory', size_limit=size_limit)
+        return V1Volume(name=self.name, empty_dir=empty_dir)
 
-    def get_mount(self) -> VolumeMount:
+    def get_mount(self) -> V1VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
@@ -57,4 +58,4 @@ class EmptyDirVolume(BaseModel):
         V1VolumeMount
             The Argo model for mounting volumes.
         """
-        return VolumeMount(mount_path=self.mount_path, name=self.name)
+        return V1VolumeMount(mount_path=self.mount_path, name=self.name)
