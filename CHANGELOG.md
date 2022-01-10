@@ -39,6 +39,9 @@ The general format is:
 
 - location of all files from `v1` up one folder to `hera`. Now everything will take the import form
   of `from hera.module import Object` rather than `from hera.v1.module import Object`
+- interface of services to take a full host rather than a single domain and put in effort to compute the final host.
+  This will offer more freedom to users to select their own host scheme, for example. A flag for SSL verification was
+  also introduced
 
 # 0.4.0 - DATE (15/12/2021)
 

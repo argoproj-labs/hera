@@ -4,18 +4,35 @@ import pytest
 from pydantic import BaseModel
 
 from hera.artifact import InputArtifact, OutputArtifact
+from hera.cron_workflow import CronWorkflow
+from hera.cron_workflow_service import CronWorkflowService
 from hera.workflow import Workflow
 from hera.workflow_service import WorkflowService
 
 
 @pytest.fixture(scope='session')
 def ws():
-    yield WorkflowService('abc.com', 'abc')
+    yield WorkflowService(host='https://abc.com', token='abc')
 
 
 @pytest.fixture(scope='function')
 def w(ws):
     yield Workflow('w', service=ws)
+
+
+@pytest.fixture(scope='function')
+def cws():
+    yield CronWorkflowService(host='https://abc.com', token='abc')
+
+
+@pytest.fixture(scope='session')
+def schedule():
+    yield "* * * * *"
+
+
+@pytest.fixture(scope='function')
+def cw(cws, schedule):
+    yield CronWorkflow('cw', schedule, service=cws)
 
 
 @pytest.fixture(scope='session')

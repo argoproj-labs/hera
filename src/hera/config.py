@@ -28,6 +28,7 @@ class Config:
     def __init__(self, host: Optional[str] = None, verify_ssl: bool = True):
         self._host = host or self._assemble_host()
         self._verify_ssl = verify_ssl
+        self._config = self.__get_config()
 
     def _assemble_host(self):
         """Assembles a host from the default K8S cluster env variables with Argo's address.

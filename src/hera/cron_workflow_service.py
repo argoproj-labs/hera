@@ -1,5 +1,5 @@
 """Holds the cron workflow service that supports client cron workflow creations"""
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 from argo.workflows.client import (
     CronWorkflowServiceApi,
@@ -32,11 +32,17 @@ class CronWorkflowService:
         This defaults to the `default` namespace.
     """
 
-    def __init__(self, host: Optional[str] = None, verify_ssl: bool = True, token: Optional[str] = None,
-                 namespace: str = 'default'):
+    def __init__(
+        self,
+        host: Optional[str] = None,
+        verify_ssl: bool = True,
+        token: Optional[str] = None,
+        namespace: str = 'default',
+    ):
         self._host = host
+        self._verify_ssl = verify_ssl
         self._namespace = namespace
-        api_client = Client(Config(host=self._host, verify_ssl=verify_ssl), token).api_client
+        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
     def create(self, cron_workflow: V1alpha1CronWorkflow, namespace: str = 'default') -> V1alpha1CronWorkflow:
