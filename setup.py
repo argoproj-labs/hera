@@ -36,12 +36,16 @@ setup(
     include_package_data=True,
     python_requires='>=3.7',
     install_requires=[
-        "argo-workflows",
         "pydantic",
         "python-dateutil",
         "urllib3",
         "certifi"
     ],
+    dependency_links=[
+        # TODO: argo_workflows did not make it into a release that would have published an official
+        # TODO: PyPi version. Once that happens, which is likely in 3.2+, this dependency can be changed safely
+        # TODO: Also, move this to `install_requires`
+        "git+https://github.com/argoproj/argo-workflows@master#subdirectory=sdks/python/client"
+    ],
     zip_safe=False
 )
-

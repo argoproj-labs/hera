@@ -26,3 +26,19 @@ class Retry(BaseModel):
         if max_duration is not None:
             assert duration <= max_duration, 'duration cannot be greater than the max duration'
         return values
+
+    def get_limit(self) -> int:
+        """Returns the number of retries computed based on `max_duration` and `duration`.
+
+        Returns
+        -------
+        int
+            The limit on the number of retries.
+
+        Notes
+        -----
+        It used to be the case that the Argo SDK required a `duration`/`max_duration` specification. However, that is
+        no longer the case post-refactoring to the new SDK, which takes a `limit`. Until Hera migrates to V2, we can
+        compute the limit from the specific `max_duration` and `duration`.
+        """
+        return self.max_duration // self.duration
