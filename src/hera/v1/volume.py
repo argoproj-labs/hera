@@ -1,12 +1,12 @@
 import uuid
 from typing import Optional
 
-from argo_workflows.models import (
-    ObjectMeta,
-    PersistentVolumeClaim,
-    PersistentVolumeClaimSpec,
-    ResourceRequirements,
-    VolumeMount,
+from argo.workflows.client import (
+    V1ObjectMeta,
+    V1PersistentVolumeClaim,
+    V1PersistentVolumeClaimSpec,
+    V1ResourceRequirements,
+    V1VolumeMount,
 )
 from pydantic import BaseModel, validator
 
@@ -57,7 +57,7 @@ class Volume(BaseModel):
         validate_storage_units(value)
         return value
 
-    def get_mount(self) -> VolumeMount:
+    def get_mount(self) -> V1VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
@@ -65,9 +65,9 @@ class Volume(BaseModel):
         V1VolumeMount
             The Argo model for mounting volumes.
         """
-        return VolumeMount(mount_path=self.mount_path, name=self.name)
+        return V1VolumeMount(mount_path=self.mount_path, name=self.name)
 
-    def get_claim_spec(self) -> PersistentVolumeClaim:
+    def get_claim_spec(self) -> V1PersistentVolumeClaim:
         """Constructs and returns an Argo volume claim representation for tasks. This is typically used by workflows
         to dynamically provision volumes and discard them upon completion.
 
@@ -76,15 +76,15 @@ class Volume(BaseModel):
         V1PersistentVolumeClaim
             The claim to be used by the Argo workflow.
         """
-        spec = PersistentVolumeClaimSpec(
+        spec = V1PersistentVolumeClaimSpec(
             # GKE does not accept ReadWriteMany for dynamically provisioned disks, default to ReadWriteOnce
             access_modes=['ReadWriteOnce'],
-            resources=ResourceRequirements(
+            resources=V1ResourceRequirements(
                 requests={
                     'storage': self.size,
                 }
             ),
             storage_class_name=self.storage_class_name,
         )
-        metadata = ObjectMeta(name=self.name)
-        return PersistentVolumeClaim(spec=spec, metadata=metadata)
+        metadata = V1ObjectMeta(name=self.name)
+        return V1PersistentVolumeClaim(spec=spec, metadata=metadata)

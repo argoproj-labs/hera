@@ -1,4 +1,4 @@
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1Artifact
+from argo.workflows.client import V1alpha1Artifact
 from pydantic import BaseModel
 
 
@@ -25,9 +25,9 @@ class Artifact(BaseModel):
     name: str
     path: str
 
-    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+    def get_spec(self) -> V1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
-        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
+        return V1alpha1Artifact(name=self.name, path=self.path)
 
 
 class OutputArtifact(Artifact):
@@ -57,7 +57,7 @@ class InputArtifact(Artifact):
     from_task: str
     artifact_name: str
 
-    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+    def get_spec(self) -> V1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
         _from = f"{{{{tasks.{self.from_task}.outputs.artifacts.{self.artifact_name}}}}}"
-        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=_from)
+        return V1alpha1Artifact(name=self.name, path=self.path, _from=_from)

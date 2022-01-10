@@ -20,6 +20,6 @@ def random_fail():
 # TODO: replace the domain and token with your own
 ws = WorkflowService('my-argo-server.com', 'my-auth-token')
 w = Workflow('retry', ws)
-t = Task('fail', random_fail, retry=Retry(duration=3, max_duration=9))
+t = Task('fail', random_fail, retry=Retry(duration=5, max_duration=60))
 w.add_task(t)
 w.submit()
