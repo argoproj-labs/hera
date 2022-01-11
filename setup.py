@@ -1,6 +1,6 @@
 from setuptools import find_namespace_packages, setup
 
-VERSION = open('VERSION').read()
+VERSION = open('VERSION').read().strip()
 LONG_DESCRIPTION = open('README.md').read()
 
 setup(
