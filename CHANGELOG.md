@@ -29,6 +29,25 @@ The general format is:
 
 ```
 
+# 0.4.2 - DATE (10/01/2022)
+
+### Added
+
+- an `overwrite_maxs` to `Resource` to allow users to set whether max resources should be set to min values when they
+  are not specified
+
+# 0.4.1 - DATE (09/01/2022)
+
+### Changed
+
+- underlying SDK of Hera, which moved from `argo-workflows` to the Argo Workflows repository (unpublished on PyPi)
+  Python SDK. This was originally released in https://github.com/argoproj-labs/hera-workflows/pull/38 but the
+  publication process to PyPi failed. A fix was attempted in https://github.com/argoproj-labs/hera-workflows/pull/43
+  but that published a broken version because the `dependency_links` of `setup.py` did not actually install the
+  necessary dependency. As a consequence, the release was quickly deleted from PyPi because it was broken. The best
+  course of action was to wait for the official release of the new SDK under `argo-workflows==6.0.0`, in collaboration
+  with the maintainers of https://github.com/argoproj/argo-workflows
+
 # 0.4.0 - DATE (15/12/2021)
 
 ### Added
