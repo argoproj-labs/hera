@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.0.1 - DATE (11/01/2022)
+
+### Changed
+
+- `setup.py` packages field to include hera exclusively post-removal of the underlying `v1` directory
+
 # 1.0.0 - DATE (10/01/2022)
 
 ### Removed
