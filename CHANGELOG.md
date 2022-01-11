@@ -29,6 +29,22 @@ The general format is:
 
 ```
 
+# 1.0.0 - DATE (10/01/2022)
+
+### Removed
+
+- `v1` submodule of Hera to avoid internal versioning and external/package versioning
+
+### Changed
+
+- location of all files from `v1` up one folder to `hera`. Now everything will take the import form
+  of `from hera.module import Object` rather than `from hera.v1.module import Object`
+- interface of services to take a full host rather than a single domain and put in effort to compute the final host.
+  This will offer more freedom to users to select their own host scheme, for example. A flag for SSL verification was
+  also introduced
+- all volume types (existing, empty dir, and regular volume) are now packaged in the volumes module rather than
+  separated
+
 # 0.4.2 - DATE (10/01/2022)
 
 ### Added

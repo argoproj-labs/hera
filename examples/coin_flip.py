@@ -1,8 +1,8 @@
 """This example showcases the classic conditional workflow coin-flip."""
-from hera.v1.operator import Operator
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.operator import Operator
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def random_code():
@@ -21,7 +21,7 @@ def tails():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
 w = Workflow("coin-flip", ws)
 r = Task("r", random_code)
 h = Task("h", heads)

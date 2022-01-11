@@ -1,5 +1,5 @@
 """Holds the cron workflow service that supports client cron workflow creations"""
-from typing import Tuple
+from typing import Optional, Tuple
 
 from argo.workflows.client import (
     CronWorkflowServiceApi,
@@ -9,8 +9,8 @@ from argo.workflows.client import (
     V1alpha1CronWorkflowSuspendRequest,
 )
 
-from hera.v1.client import Client
-from hera.v1.config import Config
+from hera.client import Client
+from hera.config import Config
 
 
 class CronWorkflowService:
@@ -18,9 +18,13 @@ class CronWorkflowService:
 
     Parameters
     ----------
-    domain: str
-        The Argo deployment domain to create cron workflows in.
-    token: str
+    host: Optional[str] = None
+        The host of the Argo server to submit workflows to. An attempt to assemble a host from Argo K8S cluster
+        environment variables is pursued if this is not specified.
+    verify_ssl: bool = True
+        Whether to perform SSL/TLS verification. Set this to false to skip verifying SSL certificate when submitting
+        workflows from an HTTPS server.
+    token: Optional[str] = None
         The token to use for authentication purposes. Note that this assumes the Argo deployment is fronted with a
         deployment/service that can intercept a request and check the Bearer token.
     namespace: str = 'default'
@@ -28,10 +32,17 @@ class CronWorkflowService:
         This defaults to the `default` namespace.
     """
 
-    def __init__(self, domain: str, token: str, namespace: str = 'default'):
-        self._domain = domain
+    def __init__(
+        self,
+        host: Optional[str] = None,
+        verify_ssl: bool = True,
+        token: Optional[str] = None,
+        namespace: str = 'default',
+    ):
+        self._host = host
+        self._verify_ssl = verify_ssl
         self._namespace = namespace
-        api_client = Client(Config(domain), token).api_client
+        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
     def create(self, cron_workflow: V1alpha1CronWorkflow, namespace: str = 'default') -> V1alpha1CronWorkflow:
@@ -131,4 +142,4 @@ class CronWorkflowService:
         str
             The cron workflow link.
         """
-        return f'https://{self._domain}/cron-workflows/{namespace}/{name}'
+        return f'{self._host}/cron-workflows/{namespace}/{name}'

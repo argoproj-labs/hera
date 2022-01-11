@@ -1,8 +1,8 @@
-from hera.v1.artifact import InputArtifact, OutputArtifact
-from hera.v1.input import InputFrom
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.artifact import InputArtifact, OutputArtifact
+from hera.input import InputFrom
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def writer():
@@ -28,7 +28,7 @@ def consumer(i: int):
     print(i)
 
 
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
 w = Workflow('fv-testing', ws)
 w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
 f_t = Task(

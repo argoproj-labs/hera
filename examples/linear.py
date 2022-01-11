@@ -1,7 +1,7 @@
 """This example showcases how to structure a linear chain of tasks"""
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def task_1():
@@ -21,7 +21,7 @@ def task_4():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
 w = Workflow('linear', ws)
 t1 = Task('t1', task_1)
 t2 = Task('t2', task_2)

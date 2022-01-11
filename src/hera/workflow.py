@@ -1,36 +1,33 @@
-"""The implementation of a Hera cron workflow for Argo-based cron workflows"""
-from datetime import datetime, timezone
+"""The implementation of a Hera workflow for Argo-based workflows"""
 from typing import Optional
 from uuid import uuid4
 
 from argo.workflows.client import (
-    V1alpha1CronWorkflow,
-    V1alpha1CronWorkflowSpec,
-    V1alpha1CronWorkflowStatus,
     V1alpha1DAGTemplate,
     V1alpha1Template,
+    V1alpha1Workflow,
     V1alpha1WorkflowSpec,
     V1ObjectMeta,
 )
 
-from hera.v1.cron_workflow_service import CronWorkflowService
-from hera.v1.task import Task
+from hera.task import Task
+from hera.workflow_service import WorkflowService
 
 
-class CronWorkflow:
-    """A cron workflow representation.
+class Workflow:
+    """A workflow representation.
 
-    CronWorkflow are workflows that run on a preset schedule.
-    In essence, CronWorkflow = Workflow + some specific cron options.
+    The workflow is used as a functional representation for a collection of tasks and
+    steps. The workflow context controls the overall behaviour of tasks, such as whether to notify completion, whether
+    to execute retires, overall parallelism, etc. The workflow can be constructed and submitted to multiple Argo
+    endpoints as long as a token can be associated with the endpoint at the given domain.
 
     Parameters
     ----------
     name: str
-        The cron workflow name. Note that the cron workflow initiation will replace underscores with dashes.
-    service: CronWorkflowService
-        A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
-    schedule: str
-        Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *
+        The workflow name. Note that the workflow initiation will replace underscores with dashes.
+    service: WorkflowService
+        A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
@@ -38,15 +35,9 @@ class CronWorkflow:
     """
 
     def __init__(
-        self,
-        name: str,
-        schedule: str,
-        service: CronWorkflowService,
-        parallelism: int = 50,
-        service_account_name: Optional[str] = None,
+        self, name: str, service: WorkflowService, parallelism: int = 50, service_account_name: Optional[str] = None
     ):
-        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
-        self.schedule = schedule
+        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
@@ -63,15 +54,7 @@ class CronWorkflow:
         self.spec = V1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
         )
-
-        self.cron_spec = V1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
-        self.workflow = V1alpha1CronWorkflow(
-            metadata=self.metadata,
-            spec=self.cron_spec,
-            status=V1alpha1CronWorkflowStatus(
-                active=[], conditions=[], last_scheduled_time=datetime.now(timezone.utc)
-            ),
-        )
+        self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
     def add_task(self, t: Task) -> None:
         """Adds a single task to the workflow"""
@@ -156,14 +139,6 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def create(self, namespace: str = 'default') -> None:
-        """Creates the cron workflow in the server"""
-        self.service.create(self.workflow, namespace)
-
-    def suspend(self, name: str, namespace: str = 'default'):
-        """Suspends the cron workflow"""
-        self.service.suspend(name, namespace)
-
-    def resume(self, name: str, namespace: str = 'default'):
-        """Resumes execution of the cron workflow"""
-        self.service.resume(name, namespace)
+    def submit(self, namespace: str = 'default') -> None:
+        """Submits the workflow"""
+        self.service.submit(self.workflow, namespace)

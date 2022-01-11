@@ -3,10 +3,11 @@
 The first task, t1, creates a file located at `/file` containing a message. The second
 task, t2, takes this artifact, places it at its own `/file` path, and print out the content.
 """
-from hera.v1.artifact import InputArtifact, OutputArtifact
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+
+from hera.artifact import InputArtifact, OutputArtifact
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def writer():
@@ -20,7 +21,7 @@ def consumer():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
 w = Workflow('artifact-passing', ws)
 w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
 c_t = Task(

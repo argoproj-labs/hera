@@ -1,9 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from hera.v1.existing_volume import ExistingVolume
-from hera.v1.resources import Resources
-from hera.v1.volume import Volume
+from hera.resources import Resources
+from hera.volumes import ExistingVolume, Volume
 
 
 def test_init_raises_on_invalid_mem():

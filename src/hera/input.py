@@ -20,9 +20,9 @@ class InputFrom(BaseModel):
     --------
     This is a potential task definition:
 
-    from hera.v1.task import Task
-    from hera.v1.workflow import Workflow
-    from hera.v1.input import InputFrom
+    from hera.task import Task
+    from hera.workflow import Workflow
+    from hera.input import InputFrom
 
     def generate():
         import json

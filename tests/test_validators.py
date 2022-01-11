@@ -1,6 +1,6 @@
 import pytest
 
-from hera.v1.validators import validate_storage_units
+from hera.validators import validate_storage_units
 
 
 def test_storage_validation_passes():

@@ -1,7 +1,7 @@
 """This example showcases the cron hello world example of Hera"""
-from hera.v1.cron_workflow import CronWorkflow
-from hera.v1.cron_workflow_service import CronWorkflowService
-from hera.v1.task import Task
+from hera.cron_workflow import CronWorkflow
+from hera.cron_workflow_service import CronWorkflowService
+from hera.task import Task
 
 
 def hello():
@@ -9,7 +9,7 @@ def hello():
 
 
 # TODO: replace the domain and token with your own
-cws = CronWorkflowService('my-argo-server.com', 'my-auth-token')
+cws = CronWorkflowService(host='https://my-argo-server.com', token='my-auth-token')
 cw = CronWorkflow('hello-hera', "5 4 * * *", cws)
 t = Task('t', hello)
 cw.add_task(t)
