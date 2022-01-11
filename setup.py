@@ -26,8 +26,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.7",
     ],
-
-    packages=find_namespace_packages(include=['hera.*'], where="src"),
+    packages=["hera"],
     package_dir={'': 'src'},
     package_data={
         'hera': ['py.typed'],
