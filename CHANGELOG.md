@@ -29,6 +29,15 @@ The general format is:
 
 ```
 
+# 1.0.1 - DATE (11/01/2022)
+
+### Changed
+
+- `setup.py` packages field to include hera exclusively post-removal of the underlying `v1` directory. With the removal
+  of the underlying versioned subpackage (`v1`) in 1.0.0 the `setup.py` file no longer installed the necessary modules
+  as the wheel only included references for whatever subpackages were in `hera.*` but not `hera`
+  itself (as a module)
+
 # 1.0.0 - DATE (10/01/2022)
 
 ### Removed
