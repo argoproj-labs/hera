@@ -43,3 +43,19 @@ def test_init_passes():
     assert r.volume.size == '10Gi'
     assert r.volume.mount_path == '/path'
     assert r.existing_volume.mount_path == '/path2'
+
+
+def test_max_set_to_min_if_max_not_specified_with_overwrite():
+    r = Resources()
+    assert r.min_cpu == r.max_cpu == 1
+    assert r.min_mem == r.max_mem == '4Gi'
+    assert r.overwrite_maxs
+
+
+def test_max_not_set_to_min_if_max_not_specified_with_no_overwrite():
+    r = Resources(overwrite_maxs=False)
+    assert r.min_cpu == 1
+    assert r.max_cpu is None
+    assert r.min_mem == '4Gi'
+    assert r.max_mem is None
+    assert r.overwrite_maxs is False
