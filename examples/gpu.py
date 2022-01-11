@@ -2,11 +2,11 @@
 This task showcases how clients can request a particular number of GPUs to be available for a task and the specific
 type of GPU to request. The task uses the Horovod image as it provides Python and NVIDIA SMI.
 """
-from hera.v1.resources import Resources
-from hera.v1.task import Task
-from hera.v1.toleration import GPUToleration
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.resources import Resources
+from hera.task import Task
+from hera.toleration import GPUToleration
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def do():
@@ -41,7 +41,7 @@ def do():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
 w = Workflow('gpu', ws)
 gke_k80_gpu = {'cloud.google.com/gke-accelerator': 'nvidia-tesla-k80'}
 d = Task(

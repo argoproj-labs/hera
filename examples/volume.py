@@ -1,9 +1,9 @@
 """This example showcases how clients can schedule tasks that provision independent volumes"""
-from hera.v1.resources import Resources
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
-from hera.volume import Volume
+from hera.resources import Resources
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
+from hera.volumes import Volume
 
 
 def do():
@@ -24,7 +24,7 @@ def do():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
 w = Workflow('volume-provision', ws)
 d = Task(
     'do',

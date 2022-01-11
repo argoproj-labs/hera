@@ -3,10 +3,10 @@ This example showcases how clients can use Hera to dynamically generate tasks th
 parallel. This is useful for batch jobs and instances where clients do not know ahead of time how many tasks/entities
 they may need to process.
 """
-from hera.v1.input import InputFrom
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.input import InputFrom
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def generate():
@@ -23,7 +23,7 @@ def consume(value: int):
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
 w = Workflow('dynamic-fan-out', ws)
 generate_task = Task('generate', generate)
 consume_task = Task('consume', consume, input_from=InputFrom(name='generate', parameters=['value']))

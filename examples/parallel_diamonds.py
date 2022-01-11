@@ -1,7 +1,7 @@
 """This example showcases how one can schedule a diamond structure with parallel processing through Hera"""
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def say(message: str):
@@ -9,7 +9,7 @@ def say(message: str):
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
 w = Workflow('paralell-diamonds', ws)
 a = Task(
     'A', say, [{'message': 'This is task A.1!'}, {'message': 'This is task A.2!'}, {'message': 'This is task A.3!'}]

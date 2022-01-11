@@ -1,12 +1,7 @@
-import pytest
-
-from hera.empty_dir_volume import EmptyDirVolume
-from hera.existing_volume import ExistingVolume
 from hera.resources import Resources
 from hera.task import Task
-from hera.volume import Volume
+from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
 
 
 def test_wf_contains_specified_service_account(ws):

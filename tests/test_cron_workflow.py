@@ -1,9 +1,7 @@
 from hera.cron_workflow import CronWorkflow
-from hera.empty_dir_volume import EmptyDirVolume
-from hera.existing_volume import ExistingVolume
 from hera.resources import Resources
 from hera.task import Task
-from hera.volume import Volume
+from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 
 
 def test_wf_contains_specified_service_account(cws, schedule):

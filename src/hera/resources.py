@@ -3,10 +3,8 @@ from typing import Optional, Union
 
 from pydantic import BaseModel, root_validator, validator
 
-from hera.empty_dir_volume import EmptyDirVolume
-from hera.existing_volume import ExistingVolume
 from hera.validators import validate_storage_units
-from hera.volume import Volume
+from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 
 
 class Resources(BaseModel):

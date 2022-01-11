@@ -2,10 +2,10 @@
 This example showcases how to set a retry on a task. The retry will make the task back off for 5 seconds
 post-failure and allow the retries to occur over a duration of 60 seconds.
 """
-from hera.v1.retry import Retry
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.retry import Retry
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def random_fail():
@@ -18,7 +18,7 @@ def random_fail():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
 w = Workflow('retry', ws)
 t = Task('fail', random_fail, retry=Retry(duration=5, max_duration=60))
 w.add_task(t)

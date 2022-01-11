@@ -7,15 +7,15 @@ from typing import Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
-from hera.v1.env import EnvSpec
-from hera.v1.existing_volume import ExistingVolume
-from hera.v1.input import InputFrom
-from hera.v1.resources import Resources
-from hera.v1.retry import Retry
-from hera.v1.task import Task
-from hera.v1.toleration import Toleration
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.env import EnvSpec
+from hera.input import InputFrom
+from hera.resources import Resources
+from hera.retry import Retry
+from hera.task import Task
+from hera.toleration import Toleration
+from hera.volumes import ExistingVolume
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def generate_token() -> str:
@@ -26,8 +26,8 @@ def generate_token() -> str:
 class MyWorkflowService(WorkflowService):
     """Internal WorkflowService wrapper around Hera's WorkflowService to support consistency in auth token generation"""
 
-    def __init__(self, domain: str = 'my-argo-domain.com', token: str = generate_token(), namespace: str = 'default'):
-        super(MyWorkflowService, self).__init__(domain, token, namespace=namespace)
+    def __init__(self, host: str = 'https://my-argo-domain.com', token: str = generate_token()):
+        super(MyWorkflowService, self).__init__(host=host, token=token, namespace='my-default-k8s-namespace')
 
 
 class MyWorkflow(Workflow):
