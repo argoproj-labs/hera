@@ -8,6 +8,7 @@ from argo.workflows.client import (
     V1alpha1Workflow,
     V1alpha1WorkflowSpec,
     V1ObjectMeta,
+    V1PodSecurityContext,
 )
 
 from hera.task import Task
@@ -32,15 +33,23 @@ class Workflow:
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
+    security_context: Optional[V1PodSecurityContext] = None
+        The security context object which defines privilege and access control settings.
     """
 
     def __init__(
-        self, name: str, service: WorkflowService, parallelism: int = 50, service_account_name: Optional[str] = None
+        self,
+        name: str,
+        service: WorkflowService,
+        parallelism: int = 50,
+        service_account_name: Optional[str] = None,
+        security_context: Optional[V1PodSecurityContext] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
+        self.security_context = security_context
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
@@ -49,10 +58,14 @@ class Workflow:
             dag=self.dag_template,
             parallelism=self.parallelism,
             service_account_name=self.service_account_name,
+            security_context=self.security_context,
         )
         self.metadata = V1ObjectMeta(name=self.name)
         self.spec = V1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
+            templates=[self.template],
+            entrypoint=self.name,
+            service_account_name=self.service_account_name,
+            security_context=self.security_context,
         )
         self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 

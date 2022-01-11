@@ -28,6 +28,12 @@ The general format is:
 - C from D
 
 ```
+# 1.0.1 - DATE (11/01/2022)
+
+### Added
+
+- ability to provide a security context object to a workflow. This is currently set on the workflow level only,
+  which makes all the pods of tasks in a workflow use the same security context.
 
 # 1.0.0 - DATE (10/01/2022)
 

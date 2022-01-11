@@ -1,7 +1,25 @@
+from argo.workflows.client import V1PodSecurityContext
+
 from hera.resources import Resources
 from hera.task import Task
 from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 from hera.workflow import Workflow
+
+
+def test_wf_contains_specified_fs_group(ws):
+    w = Workflow('w', service=ws, security_context=V1PodSecurityContext(fs_group=888))
+
+    expected_fs_group = 888
+    assert w.spec.security_context.fs_group == expected_fs_group
+    assert w.spec.templates[0].security_context.fs_group == expected_fs_group
+
+
+def test_wf_does_not_contain_security_context_if_one_is_not_specified(ws):
+    w = Workflow('w', service=ws)
+
+    expected_security_context = None
+    assert w.spec.security_context == expected_security_context
+    assert w.spec.templates[0].security_context == expected_security_context
 
 
 def test_wf_contains_specified_service_account(ws):
