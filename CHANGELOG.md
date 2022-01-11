@@ -42,6 +42,8 @@ The general format is:
 - interface of services to take a full host rather than a single domain and put in effort to compute the final host.
   This will offer more freedom to users to select their own host scheme, for example. A flag for SSL verification was
   also introduced
+- all volume types (existing, empty dir, and regular volume) are now packaged in the volumes module rather than
+  separated
 
 # 0.4.2 - DATE (10/01/2022)
 
