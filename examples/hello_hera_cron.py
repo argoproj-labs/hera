@@ -10,7 +10,7 @@ def hello():
 
 # TODO: replace the domain and token with your own
 cws = CronWorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-cw = CronWorkflow('hello-hera', "5 4 * * *", cws)
+cw = CronWorkflow('hello-hera', "5 4 * * *", cws, timezone="UTC")
 t = Task('t', hello)
 cw.add_task(t)
 cw.create()

@@ -29,6 +29,13 @@ The general format is:
 
 ```
 
+# 1.2.0 - DATE (13/01/2022)
+
+### Added
+
+- add support for the timezone attribute of CronWorkflow and validate the specified timezone
+- introduce `pytz` dependency for timezone validation
+
 # 1.1.0 - DATE (17/01/2022)
 
 ### Added
