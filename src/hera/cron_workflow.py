@@ -1,8 +1,10 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
-from datetime import datetime, timezone
+from datetime import datetime
+from datetime import timezone as tz
 from typing import Optional
 from uuid import uuid4
 
+import pytz
 from argo.workflows.client import (
     V1alpha1CronWorkflow,
     V1alpha1CronWorkflowSpec,
@@ -29,6 +31,8 @@ class CronWorkflow:
         The cron workflow name. Note that the cron workflow initiation will replace underscores with dashes.
     service: CronWorkflowService
         A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
+    timezone: str
+        Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles
     schedule: str
         Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *
     parallelism: int = 50
@@ -42,11 +46,16 @@ class CronWorkflow:
         name: str,
         schedule: str,
         service: CronWorkflowService,
+        timezone: Optional[str] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
     ):
+        if timezone and timezone not in pytz.all_timezones:
+            raise ValueError(f'{timezone} is not a valid timezone')
+
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
         self.schedule = schedule
+        self.timezone = timezone
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
@@ -64,13 +73,13 @@ class CronWorkflow:
             templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
         )
 
-        self.cron_spec = V1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
+        self.cron_spec = V1alpha1CronWorkflowSpec(
+            schedule=self.schedule, timezone=self.timezone, workflow_spec=self.spec
+        )
         self.workflow = V1alpha1CronWorkflow(
             metadata=self.metadata,
             spec=self.cron_spec,
-            status=V1alpha1CronWorkflowStatus(
-                active=[], conditions=[], last_scheduled_time=datetime.now(timezone.utc)
-            ),
+            status=V1alpha1CronWorkflowStatus(active=[], conditions=[], last_scheduled_time=datetime.now(tz.utc)),
         )
 
     def add_task(self, t: Task) -> None:

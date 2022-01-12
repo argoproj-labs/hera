@@ -1,3 +1,5 @@
+import pytest
+
 from hera.cron_workflow import CronWorkflow
 from hera.resources import Resources
 from hera.task import Task
@@ -134,5 +136,17 @@ def test_cwf_overwrites_head_and_tail(cw, no_op):
 def test_cwf_valid_field_set(cws):
     cw = CronWorkflow('cw', "* * * * *", service=cws, parallelism=33)
     assert cw.schedule == "* * * * *"
+    assert cw.timezone is None
     assert cw.service == cws
     assert cw.parallelism == 33
+
+
+def test_cwf_valid_timezone_set(cws):
+    cw = CronWorkflow('cw', "* * * * *", timezone="UTC", service=cws)
+    assert cw.timezone == "UTC"
+
+
+def test_cwf_invalid_timezone_set(cws):
+    with pytest.raises(ValueError) as e:
+        cw = CronWorkflow('cw', "* * * * *", timezone="foobar", service=cws)
+    assert 'foobar is not a valid timezone' in str(e)

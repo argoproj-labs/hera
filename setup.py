@@ -39,7 +39,8 @@ setup(
         "pydantic",
         "python-dateutil",
         "urllib3",
-        "certifi"
+        "certifi",
+        "pytz"
     ],
     zip_safe=False
 )
