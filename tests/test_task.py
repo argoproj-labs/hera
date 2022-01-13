@@ -259,7 +259,6 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.daemon == True
     
 
-
 def test_task_template_contains_expected_retry_strategy(no_op):
     r = Retry(duration=3, max_duration=9)
     t = Task('t', no_op, retry=r)
