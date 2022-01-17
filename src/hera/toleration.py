@@ -27,7 +27,7 @@ class Toleration(BaseModel):
     key: str
     effect: str
     operator: str
-    value: Optional[str] = ""
+    value: Optional[str] = None
 
 
 GPUToleration = Toleration(key='nvidia.com/gpu', effect='NoSchedule', operator='Equal', value='present')
