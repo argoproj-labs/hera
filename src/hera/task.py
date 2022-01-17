@@ -57,7 +57,7 @@ class Task:
         that are set.
     image: str = 'python:3.7'
         The image to use in the execution of the function.
-    daemon: bool = False
+    daemon: Optional[bool] = None
         Wether to run the the task as daemon.
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
@@ -92,7 +92,7 @@ class Task:
         input_artifacts: Optional[List[InputArtifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
-        daemon: bool = False,
+        daemon: Optional[bool] = None,
         command: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
         resources: Resources = Resources(),
