@@ -90,9 +90,9 @@ consistent with:
 A very primitive example of submitting a task within a workflow through Hera is:
 
 ```python
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def say(message: str):
@@ -109,8 +109,6 @@ t = Task('say', say, [{'message': 'Hello, world!'}])
 w.add_task(t)
 w.submit()
 ```
-
-# Examples
 
 See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
 Argo workflow construction and submission via Hera!
@@ -140,9 +138,9 @@ executable payloads rather than workflow setup. Here's a side by side comparison
 <td valign="top"><p>
 
 ```python
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def say(message: str):
