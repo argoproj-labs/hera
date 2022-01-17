@@ -29,7 +29,7 @@ The general format is:
 
 ```
 
-# 1.0.2 - DATE (17/01/2022)
+# 1.1.0 - DATE (17/01/2022)
 
 ### Added
   - The `daemon` keyword to the Task. `deamon` will allow a workflow to proceed to the next task,
