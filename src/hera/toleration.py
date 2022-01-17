@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -25,7 +27,7 @@ class Toleration(BaseModel):
     key: str
     effect: str
     operator: str
-    value: str
+    value: Optional[str] = ""
 
 
 GPUToleration = Toleration(key='nvidia.com/gpu', effect='NoSchedule', operator='Equal', value='present')

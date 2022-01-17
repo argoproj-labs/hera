@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.0.2 - DATE (17/01/2022)
+
+### Changed
+
+- Make value in Tolerations optional, as per Kubernetes requirements
+
 # 1.0.1 - DATE (11/01/2022)
 
 ### Changed
