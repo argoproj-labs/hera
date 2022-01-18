@@ -239,6 +239,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
         tolerations=[GPUToleration],
         node_selectors={'abc': '123-gpu'},
         retry=Retry(duration=1, max_duration=2),
+        daemon=True
     )
     tt = t.get_task_template()
 
@@ -248,6 +249,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.inputs, V1alpha1Inputs)
     assert isinstance(tt.node_selector, dict)
     assert isinstance(tt.tolerations, list)
+    assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, V1Toleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
@@ -261,7 +263,8 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy is not None
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
-
+    assert tt.daemon == True
+    
 
 def test_task_template_contains_expected_retry_strategy(no_op):
     r = Retry(duration=3, max_duration=9)
