@@ -34,6 +34,11 @@ The general format is:
 ### Added
   - The `daemon` keyword to the Task. `deamon` will allow a workflow to proceed to the next task,
     so long as the container reaches readiness.
+# 1.0.2 - DATE (17/01/2022)
+
+### Changed
+
+- Make value in Tolerations optional, as per Kubernetes requirements
 
 # 1.0.1 - DATE (11/01/2022)
 
