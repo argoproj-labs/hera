@@ -7,7 +7,7 @@ from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.task import Task
-from hera.toleration import GPUToleration
+from hera.toleration import GPUToleration, Toleration
 from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 
 
@@ -180,6 +180,13 @@ def test_gpu_toleration_returns_expected_toleration():
     assert tn.effect == 'NoSchedule'
     assert tn.operator == 'Equal'
     assert tn.value == 'present'
+
+
+def test_task_with_default_value_in_toleration(no_op):
+    toleration = Toleration(key="nvidia.com/gpu", effect="NoSchedule", operator="Equal")
+    t = Task('t', no_op, tolerations=[toleration])
+
+    assert t.tolerations[0].value == None
 
 
 def test_task_command_parses(mock_model, op):
