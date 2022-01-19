@@ -43,7 +43,12 @@ class EnvSpec(BaseModel):
     @property
     def argo_spec(self) -> V1EnvVar:
         """Constructs and returns the Argo environment specification"""
-        value = self.value.json() if isinstance(self.value, BaseModel) else json.dumps(self.value)
+        if isinstance(self.value, BaseModel):
+            value = self.value.json()
+        elif isinstance(self.value, str):
+            value = self.value
+        else:
+            value = json.dumps(self.value)
         return V1EnvVar(name=self.name, value=value)
 
 
