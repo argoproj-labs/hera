@@ -239,7 +239,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
         tolerations=[GPUToleration],
         node_selectors={'abc': '123-gpu'},
         retry=Retry(duration=1, max_duration=2),
-        daemon=True
+        daemon=True,
     )
     tt = t.get_task_template()
 
@@ -264,7 +264,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
     assert tt.daemon == True
-    
+
 
 def test_task_template_contains_expected_retry_strategy(no_op):
     r = Retry(duration=3, max_duration=9)
