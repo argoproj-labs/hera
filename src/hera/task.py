@@ -89,7 +89,7 @@ class Task:
     def __init__(
         self,
         name: str,
-        func: Callable,
+        func: Callable = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
         input_artifacts: Optional[List[InputArtifact]] = None,
@@ -131,9 +131,6 @@ class Task:
         self.inputs = self.get_inputs()
         self.outputs = self.get_outputs()
         self.argo_resources = self.get_resources()
-        self.script_extra = self.get_param_script_portion()
-        self.script = self.get_script()
-        self.script_def = self.get_script_def()
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_task_spec()
 
@@ -220,6 +217,10 @@ class Task:
                 self.output_artifacts
             ), 'output artifact names must be unique'
 
+        if self.func:
+            self._validate_func()
+
+    def _validate_func(self):
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
@@ -332,7 +333,6 @@ class Task:
         task function parameters.
         """
         parameters = []
-        param_name_cache = set()
 
         if self.input_from:
             # this represents input from another step, which only requires parameter name specifications
@@ -341,7 +341,15 @@ class Task:
             args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
             for arg in args:
                 parameters.append(V1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+        
+        if self.func:
+            parameters += self._get_func_parameters()
 
+        return parameters
+
+    def _get_func_parameters(self):
+        parameters = []
+        param_name_cache = set()
         # if there are any keyword arguments associated with the function signature, we set them as default values
         # so Argo passes them in
         signature = inspect.signature(self.func)
@@ -372,7 +380,7 @@ class Task:
                 for param_name in self.func_params[0].keys():
                     parameters.append(V1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}'))
                     param_name_cache.add(param_name)
-
+            
         for name, value in keywords:
             if isinstance(value, BaseModel):
                 value = value.json()
@@ -381,6 +389,7 @@ class Task:
             if name in param_name_cache:
                 continue  # user override of a kwarg
             parameters.append(V1alpha1Parameter(name=name, value=value))
+        
         return parameters
 
     def get_param_script_portion(self) -> str:
@@ -419,9 +428,11 @@ class Task:
         str
             Final formatted script.
         """
+        script_extra = self.get_param_script_portion()
+
         script = ''
-        if self.script_extra:
-            script = copy.deepcopy(self.script_extra)
+        if script_extra:
+            script = copy.deepcopy(script_extra)
             script += '\n'
 
         # content represents the function components, separated by new lines
@@ -515,10 +526,13 @@ class Task:
         V1alpha1ScriptTemplate
             The script template representation of the task.
         """
+        if self.func is None:
+            return None
+
         return V1alpha1ScriptTemplate(
             name=self.name,
             command=self.get_command(),
-            source=self.script,
+            source=self.get_script(),
             image=self.image,
             env=self.env,
             resources=self.argo_resources,
@@ -538,7 +552,7 @@ class Task:
         return V1alpha1Template(
             name=self.name,
             daemon=self.daemon,
-            script=self.script_def,
+            script=self.get_script_def(),
             arguments=self.arguments,
             inputs=self.inputs,
             outputs=self.outputs,

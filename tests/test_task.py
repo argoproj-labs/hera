@@ -344,8 +344,13 @@ def test_task_template_has_correct_labels(op):
     assert tt.metadata.labels == expected_labels
 
 
+<<<<<<< HEAD
 def test_task_with_config_map_env_variable(no_op):
     t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
     tt = t.get_task_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
+=======
+def test_task_should_create_task_with_empty_func():
+    t = Task('t')
+>>>>>>> 256fa94 (make func optional)
