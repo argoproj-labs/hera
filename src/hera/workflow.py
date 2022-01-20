@@ -1,5 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import Optional
+from typing import Dict, Optional
 from uuid import uuid4
 
 from argo.workflows.client import (
@@ -35,12 +35,18 @@ class Workflow:
     """
 
     def __init__(
-        self, name: str, service: WorkflowService, parallelism: int = 50, service_account_name: Optional[str] = None
+        self,
+        name: str,
+        service: WorkflowService,
+        parallelism: int = 50,
+        service_account_name: Optional[str] = None,
+        labels: Optional[Dict[str, str]] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
+        self.labels = labels
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
@@ -50,7 +56,7 @@ class Workflow:
             parallelism=self.parallelism,
             service_account_name=self.service_account_name,
         )
-        self.metadata = V1ObjectMeta(name=self.name)
+        self.metadata = V1ObjectMeta(name=self.name, labels=self.labels)
         self.spec = V1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
         )

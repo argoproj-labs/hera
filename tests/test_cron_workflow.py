@@ -150,3 +150,10 @@ def test_cwf_invalid_timezone_set(cws):
     with pytest.raises(ValueError) as e:
         cw = CronWorkflow('cw', "* * * * *", timezone="foobar", service=cws)
     assert 'foobar is not a valid timezone' in str(e)
+
+
+def test_cwf_contains_specified_labels(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'})
+
+    expected_labels = {'foo': 'bar'}
+    assert w.metadata.labels == expected_labels

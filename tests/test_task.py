@@ -334,3 +334,10 @@ def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     artifact = t.outputs.artifacts[0]
     assert artifact.name == out_artifact.name
     assert artifact.path == out_artifact.path
+
+
+def test_task_template_has_correct_labels(op):
+    t = Task('t', op, [{'a': 1}], resources=Resources(), labels={'foo': 'bar'})
+    tt = t.get_task_template()
+    expected_labels = {'foo': 'bar'}
+    assert tt.metadata.labels == expected_labels

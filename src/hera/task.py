@@ -12,6 +12,7 @@ from argo.workflows.client import (
     V1alpha1Backoff,
     V1alpha1DAGTask,
     V1alpha1Inputs,
+    V1alpha1Metadata,
     V1alpha1Outputs,
     V1alpha1Parameter,
     V1alpha1RetryStrategy,
@@ -100,6 +101,7 @@ class Task:
         retry: Optional[Retry] = None,
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
+        labels: Optional[Dict[str, str]] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -118,6 +120,7 @@ class Task:
         self.retry = retry
         self.tolerations = tolerations
         self.node_selectors = node_selectors
+        self.labels = labels
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -538,6 +541,7 @@ class Task:
             node_selector=self.node_selectors,
             tolerations=self.get_tolerations(),
             retry_strategy=self.get_retry_strategy(),
+            metadata=V1alpha1Metadata(labels=self.labels),
         )
 
     def get_retry_strategy(self) -> Optional[V1alpha1RetryStrategy]:
