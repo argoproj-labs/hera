@@ -1,7 +1,7 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from datetime import datetime
 from datetime import timezone as tz
-from typing import Optional
+from typing import Dict, Optional
 from uuid import uuid4
 
 import pytz
@@ -39,6 +39,8 @@ class CronWorkflow:
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
+    labels: Optional[Dict[str, str]] = None
+        A Dict of labels to attach to the CronWorkflow object metadata
     """
 
     def __init__(
@@ -49,6 +51,7 @@ class CronWorkflow:
         timezone: Optional[str] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
+        labels: Optional[Dict[str, str]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -59,6 +62,7 @@ class CronWorkflow:
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
+        self.labels = labels
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
@@ -68,7 +72,7 @@ class CronWorkflow:
             parallelism=self.parallelism,
             service_account_name=self.service_account_name,
         )
-        self.metadata = V1ObjectMeta(name=self.name)
+        self.metadata = V1ObjectMeta(name=self.name, labels=self.labels)
         self.spec = V1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
         )
