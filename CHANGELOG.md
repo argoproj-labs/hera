@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.3.0 - DATE (20/01/2022)
+
+### Added
+
+- add support for specifying labels on Workflows, CronWorkflows and Tasks
+
 # 1.2.0 - DATE (18/01/2022)
 
 ### Added

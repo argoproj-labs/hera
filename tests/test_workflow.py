@@ -129,3 +129,10 @@ def test_wf_overwrites_head_and_tail(w, no_op):
     assert h2.argo_task.dependencies == ['head1']
     assert t1.argo_task.dependencies == ['head2', 'head1']
     assert t2.argo_task.dependencies == ['t1', 'head2', 'head1']
+
+
+def test_wf_contains_specified_labels(ws):
+    w = Workflow('w', service=ws, labels={'foo': 'bar'})
+
+    expected_labels = {'foo': 'bar'}
+    assert w.metadata.labels == expected_labels
