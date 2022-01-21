@@ -532,6 +532,9 @@ class Task:
             image=self.image,
             command=self.get_command(),
             source=self.get_script(),
+            working_dir=self.working_dir,
+            env=self.env,
+            resources=self.argo_resources,
         )
 
     def get_container(self) -> V1Container:
@@ -560,11 +563,9 @@ class Task:
         V1alpha1Template
             The template representation of the task.
         """
-        return V1alpha1Template(
+        template = V1alpha1Template(
             name=self.name,
             daemon=self.daemon,
-            container=self.get_container(),
-            script=self.get_script_def(),
             arguments=self.arguments,
             inputs=self.inputs,
             outputs=self.outputs,
@@ -573,6 +574,11 @@ class Task:
             retry_strategy=self.get_retry_strategy(),
             metadata=V1alpha1Metadata(labels=self.labels),
         )
+        if self.get_script_def():
+            template.script = self.get_script_def()
+        else:
+            template.container = self.get_container()
+        return template
 
     def get_retry_strategy(self) -> Optional[V1alpha1RetryStrategy]:
         """Assembles and returns a retry strategy for the task. This is dictated by the task `retry_limit`.
