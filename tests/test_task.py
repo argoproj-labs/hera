@@ -353,4 +353,7 @@ def test_task_with_config_map_env_variable(no_op):
 
 def test_task_should_create_task_with_no_func():
     t = Task('t', command=["cowsay"])
-    assert t.command[0] == "cowsay"
+    tt = t.get_task_template()
+
+    assert tt.container.image == "python:3.7"
+    assert tt.container.command[0] == "cowsay"
