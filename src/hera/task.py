@@ -22,6 +22,7 @@ from argo.workflows.client import (
     V1ResourceRequirements,
     V1Toleration,
     V1VolumeMount,
+    V1Container
 )
 from pydantic import BaseModel
 
@@ -531,13 +532,25 @@ class Task:
 
         return V1alpha1ScriptTemplate(
             name=self.name,
-            command=self.get_command(),
-            source=self.get_script(),
             image=self.image,
-            env=self.env,
-            resources=self.argo_resources,
+            source=self.get_script(),
+        )
+    
+    def get_container(self) -> V1Container:
+        """Assembles and returns the container for the task to run in.
+
+        Returns
+        -------
+        V1alpha1ScriptTemplate
+            The script template representation of the task.
+        """
+        return V1Container(
+            image=self.image,
+            command=self.get_command(),
             volume_mounts=self.get_volume_mounts(),
             working_dir=self.working_dir,
+            env=self.env,
+            resources=self.argo_resources,
         )
 
     def get_task_template(self) -> V1alpha1Template:
@@ -552,6 +565,7 @@ class Task:
         return V1alpha1Template(
             name=self.name,
             daemon=self.daemon,
+            container=self.get_container(),
             script=self.get_script_def(),
             arguments=self.arguments,
             inputs=self.inputs,
