@@ -18,11 +18,11 @@ from argo.workflows.client import (
     V1alpha1RetryStrategy,
     V1alpha1ScriptTemplate,
     V1alpha1Template,
+    V1Container,
     V1EnvVar,
     V1ResourceRequirements,
     V1Toleration,
     V1VolumeMount,
-    V1Container
 )
 from pydantic import BaseModel
 
@@ -342,7 +342,6 @@ class Task:
             args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
             for arg in args:
                 parameters.append(V1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
-        
         if self.func:
             parameters += self._get_func_parameters()
 
@@ -381,7 +380,6 @@ class Task:
                 for param_name in self.func_params[0].keys():
                     parameters.append(V1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}'))
                     param_name_cache.add(param_name)
-            
         for name, value in keywords:
             if isinstance(value, BaseModel):
                 value = value.json()
@@ -390,7 +388,6 @@ class Task:
             if name in param_name_cache:
                 continue  # user override of a kwarg
             parameters.append(V1alpha1Parameter(name=name, value=value))
-        
         return parameters
 
     def get_param_script_portion(self) -> str:
@@ -533,9 +530,10 @@ class Task:
         return V1alpha1ScriptTemplate(
             name=self.name,
             image=self.image,
+            command=self.get_command(),
             source=self.get_script(),
         )
-    
+
     def get_container(self) -> V1Container:
         """Assembles and returns the container for the task to run in.
 
