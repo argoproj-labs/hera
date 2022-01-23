@@ -3,7 +3,7 @@ import pytest
 from hera.cron_workflow import CronWorkflow
 from hera.resources import Resources
 from hera.task import Task
-from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
+from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
 
 
 def test_wf_contains_specified_service_account(cws, schedule):
@@ -52,6 +52,15 @@ def test_cwf_adds_task_volume(cw, no_op):
     assert claim.spec.resources.requests['storage'] == '1Gi'
     assert claim.spec.storage_class_name == 'custom'
     assert claim.metadata.name == 'v'
+
+
+def test_wf_adds_task_secret_volume(cw, no_op):
+    t = Task('t', no_op, resources=Resources(secret_volume=SecretVolume(name='s', secret_name='sn', mount_path='/')))
+    cw.add_task(t)
+
+    vol = cw.spec.volumes[0]
+    assert vol.name == 's'
+    assert vol.secret.secret_name == 'sn'
 
 
 def test_cwf_adds_task_existing_checkpoints_staging_volume(cw, no_op):

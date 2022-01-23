@@ -503,6 +503,8 @@ class Task:
             volumes.append(self.resources.existing_volume.get_mount())
         if self.resources.empty_dir_volume:
             volumes.append(self.resources.empty_dir_volume.get_mount())
+        if self.resources.secret_volume:
+            volumes.append(self.resources.secret_volume.get_mount())
         return volumes
 
     def get_script_def(self) -> V1alpha1ScriptTemplate:

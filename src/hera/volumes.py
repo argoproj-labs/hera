@@ -8,6 +8,7 @@ from argo.workflows.client import (
     V1PersistentVolumeClaimSpec,
     V1PersistentVolumeClaimVolumeSource,
     V1ResourceRequirements,
+    V1SecretVolumeSource,
     V1Volume,
     V1VolumeMount,
 )
@@ -103,6 +104,46 @@ class ExistingVolume(BaseModel):
         """
         claim = V1PersistentVolumeClaimVolumeSource(claim_name=self.name)
         return V1Volume(name=self.name, persistent_volume_claim=claim)
+
+    def get_mount(self) -> V1VolumeMount:
+        """Constructs and returns an Argo volume mount representation for tasks.
+
+        Returns
+        -------
+        V1VolumeMount
+            The Argo model for mounting volumes.
+        """
+        return V1VolumeMount(name=self.name, mount_path=self.mount_path)
+
+
+class SecretVolume(BaseModel):
+    """A volume representing a secret. This can be used to mount secrets to paths inside a task
+
+    Attributes
+    ----------
+    name: str
+        The name of the volume
+    secret_name: str
+        The name of the secret existing in the task namespace
+    mount_path: str
+        The mounting point in the task e.g /mnt/my_path. The secrets will be mounted to this path, with the names
+        being used as file names, and the values in those files
+    """
+
+    name: str
+    secret_name: str
+    mount_path: str
+
+    def get_volume(self) -> V1Volume:
+        """Constructs an Argo volume representation for a secret in the task namespace
+
+        Returns
+        -------
+        V1Volume
+            The volume representation that can be mounted in workflow steps/tasks.
+        """
+        secret = V1SecretVolumeSource(secret_name=self.secret_name)
+        return V1Volume(name=self.name, secret=secret)
 
     def get_mount(self) -> V1VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.

@@ -95,6 +95,12 @@ class Workflow:
                 else:
                     self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
 
+            if t.resources.secret_volume:
+                if not self.spec.volumes:
+                    self.spec.volumes = [t.resources.secret_volume.get_volume()]
+                else:
+                    self.spec.volumes.append(t.resources.secret_volume.get_volume())
+
             self.dag_template.tasks.append(t.argo_task)
 
     def add_head(self, t: Task, append: bool = True) -> None:
