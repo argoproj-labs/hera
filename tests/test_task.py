@@ -2,6 +2,7 @@ import pytest
 from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
 from pydantic import ValidationError
 
+from hera.env import ConfigMapEnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
@@ -341,3 +342,10 @@ def test_task_template_has_correct_labels(op):
     tt = t.get_task_template()
     expected_labels = {'foo': 'bar'}
     assert tt.metadata.labels == expected_labels
+
+
+def test_task_with_config_map_env_variable(no_op):
+    t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
+    tt = t.get_task_template()
+    assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
+    assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
