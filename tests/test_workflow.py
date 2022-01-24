@@ -1,6 +1,6 @@
 from hera.resources import Resources
 from hera.task import Task
-from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
+from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
 from hera.workflow import Workflow
 
 
@@ -50,6 +50,15 @@ def test_wf_adds_task_volume(w, no_op):
     assert claim.spec.resources.requests['storage'] == '1Gi'
     assert claim.spec.storage_class_name == 'custom'
     assert claim.metadata.name == 'v'
+
+
+def test_wf_adds_task_secret_volume(w, no_op):
+    t = Task('t', no_op, resources=Resources(secret_volume=SecretVolume(name='s', secret_name='sn', mount_path='/')))
+    w.add_task(t)
+
+    vol = w.spec.volumes[0]
+    assert vol.name == 's'
+    assert vol.secret.secret_name == 'sn'
 
 
 def test_wf_adds_task_existing_checkpoints_staging_volume(w, no_op):

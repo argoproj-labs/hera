@@ -29,6 +29,11 @@ The general format is:
 
 ```
 
+# 1.4.0 - DATE (23/01/2022)
+
+### Added
+
+- add support for attaching a secret volume to Workflows and CronWorkflows
 # 1.3.0 - DATE (20/01/2022)
 
 ### Added

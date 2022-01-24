@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from hera.resources import Resources
-from hera.volumes import ExistingVolume, Volume
+from hera.volumes import ExistingVolume, SecretVolume, Volume
 
 
 def test_init_raises_on_invalid_mem():
@@ -33,6 +33,7 @@ def test_init_passes():
         gpus=1,
         volume=Volume(size='10Gi', mount_path='/path'),
         existing_volume=ExistingVolume(name='test', mount_path='/path2'),
+        secret_volume=SecretVolume(name='secret', secret_name='secret_name', mount_path="/path3"),
     )
     assert r.min_cpu == 1
     assert r.max_cpu == 2
@@ -42,6 +43,7 @@ def test_init_passes():
     assert r.volume.size == '10Gi'
     assert r.volume.mount_path == '/path'
     assert r.existing_volume.mount_path == '/path2'
+    assert r.secret_volume.mount_path == '/path3'
 
 
 def test_max_set_to_min_if_max_not_specified_with_overwrite():
@@ -58,3 +60,7 @@ def test_max_not_set_to_min_if_max_not_specified_with_no_overwrite():
     assert r.min_mem == '4Gi'
     assert r.max_mem is None
     assert r.overwrite_maxs is False
+
+def test_secret_volume_name_generated_when_not_specified():
+    r = Resources(secret_volume=SecretVolume(secret_name="sn", mount_path="/path"))
+    assert r.secret_volume.name
