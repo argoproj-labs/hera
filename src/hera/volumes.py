@@ -134,11 +134,12 @@ class SecretVolume(BaseModel):
     secret_name: str
     mount_path: str
 
-    @property
-    def volume_name(self):
-        if self.name:
-            return self.name
-        return self.secret_name
+    @validator('name', always=True)
+    def check_name(cls, value):
+        """Validates that a name is specified. If not, it sets it"""
+        if not value:
+            return str(uuid.uuid4())
+        return value
 
     def get_volume(self) -> V1Volume:
         """Constructs an Argo volume representation for a secret in the task namespace
@@ -149,7 +150,7 @@ class SecretVolume(BaseModel):
             The volume representation that can be mounted in workflow steps/tasks.
         """
         secret = V1SecretVolumeSource(secret_name=self.secret_name)
-        return V1Volume(name=self.volume_name, secret=secret)
+        return V1Volume(name=self.name, secret=secret)
 
     def get_mount(self) -> V1VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
@@ -159,7 +160,7 @@ class SecretVolume(BaseModel):
         V1VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(name=self.volume_name, mount_path=self.mount_path)
+        return V1VolumeMount(name=self.name, mount_path=self.mount_path)
 
 
 class Volume(BaseModel):
