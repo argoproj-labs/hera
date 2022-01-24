@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.4.0 - DATE (24/01/2022)
+
+### Added
+
+- add support for running a task as privileged
+
 # 1.3.0 - DATE (20/01/2022)
 
 ### Added

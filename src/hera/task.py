@@ -20,6 +20,7 @@ from argo.workflows.client import (
     V1alpha1Template,
     V1EnvVar,
     V1ResourceRequirements,
+    V1SecurityContext,
     V1Toleration,
     V1VolumeMount,
 )
@@ -84,6 +85,8 @@ class Task:
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Task Template object metadata
+    privileged: Optional[bool] = None
+        A bool value, whether to run the task as privileged
     """
 
     def __init__(
@@ -104,6 +107,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
+        privileged: Optional[bool] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -123,6 +127,7 @@ class Task:
         self.tolerations = tolerations
         self.node_selectors = node_selectors
         self.labels = labels
+        self.privileged = privileged
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -522,6 +527,7 @@ class Task:
             resources=self.argo_resources,
             volume_mounts=self.get_volume_mounts(),
             working_dir=self.working_dir,
+            security_context=V1SecurityContext(privileged=self.privileged),
         )
 
     def get_task_template(self) -> V1alpha1Template:

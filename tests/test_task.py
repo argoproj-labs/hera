@@ -341,3 +341,9 @@ def test_task_template_has_correct_labels(op):
     tt = t.get_task_template()
     expected_labels = {'foo': 'bar'}
     assert tt.metadata.labels == expected_labels
+
+
+def test_task_set_as_privaliged(no_op):
+    t = Task('t', no_op, privileged=True)
+    tt = t.get_task_template()
+    assert tt.script.security_context.privileged
