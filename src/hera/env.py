@@ -1,7 +1,12 @@
 import json
 from typing import Any, Optional, Union
 
-from argo.workflows.client import V1EnvVar, V1EnvVarSource, V1SecretKeySelector
+from argo.workflows.client import (
+    V1ConfigMapKeySelector,
+    V1EnvVar,
+    V1EnvVarSource,
+    V1SecretKeySelector,
+)
 from pydantic import BaseModel, validator
 
 from hera.validators import json_serializable
@@ -62,4 +67,29 @@ class SecretEnvSpec(EnvSpec):
         return V1EnvVar(
             name=self.name,
             value_from=V1EnvVarSource(secret_key_ref=V1SecretKeySelector(name=self.secret_name, key=self.secret_key)),
+        )
+
+
+class ConfigMapEnvSpec(EnvSpec):
+    """Environment variable specification from K8S config map.
+
+    Attributes
+    ----------
+    config_map_name: str
+        The name of the config map to load values from.
+    config_map_key: str
+        The key of the value within the config map.
+    """
+
+    config_map_name: str
+    config_map_key: str
+
+    @property
+    def argo_spec(self) -> V1EnvVar:
+        """Constructs and returns the Argo environment specification"""
+        return V1EnvVar(
+            name=self.name,
+            value_from=V1EnvVarSource(
+                config_map_key_ref=V1ConfigMapKeySelector(name=self.config_map_name, key=self.config_map_key)
+            ),
         )

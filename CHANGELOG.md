@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.5.0 - DATE (24/01/2022)
+
+### Added
+
+- add support for exposing config map keys via env vars in Tasks
+
 # 1.4.0 - DATE (23/01/2022)
 
 ### Added

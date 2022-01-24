@@ -61,6 +61,7 @@ def test_max_not_set_to_min_if_max_not_specified_with_no_overwrite():
     assert r.max_mem is None
     assert r.overwrite_maxs is False
 
+
 def test_secret_volume_name_generated_when_not_specified():
     r = Resources(secret_volume=SecretVolume(secret_name="sn", mount_path="/path"))
     assert r.secret_volume.name
