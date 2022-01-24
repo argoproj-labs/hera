@@ -20,7 +20,7 @@ w = Workflow('volume-provision', ws)
 d = Task(
     'use_secret',
     use_secret,
-    resources=Resources(secret_volume=SecretVolume(name='secret', mount_path='/secret/')),
+    resources=Resources(secret_volume=SecretVolume(secret_name='secret-file', mount_path='/secret/')),
 )
 
 w.add_task(d)

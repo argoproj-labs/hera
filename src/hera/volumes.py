@@ -121,8 +121,8 @@ class SecretVolume(BaseModel):
 
     Attributes
     ----------
-    name: str
-        The name of the volume
+    name: Optional[str]
+        The name of the volume, if not supplied the secret name will be used as volume name
     secret_name: str
         The name of the secret existing in the task namespace
     mount_path: str
@@ -130,9 +130,15 @@ class SecretVolume(BaseModel):
         being used as file names, and the values in those files
     """
 
-    name: str
+    name: Optional[str] = None
     secret_name: str
     mount_path: str
+
+    @property
+    def volume_name(self):
+        if self.name:
+            return self.name
+        return self.secret_name
 
     def get_volume(self) -> V1Volume:
         """Constructs an Argo volume representation for a secret in the task namespace
@@ -143,7 +149,7 @@ class SecretVolume(BaseModel):
             The volume representation that can be mounted in workflow steps/tasks.
         """
         secret = V1SecretVolumeSource(secret_name=self.secret_name)
-        return V1Volume(name=self.name, secret=secret)
+        return V1Volume(name=self.volume_name, secret=secret)
 
     def get_mount(self) -> V1VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
@@ -153,7 +159,7 @@ class SecretVolume(BaseModel):
         V1VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(name=self.name, mount_path=self.mount_path)
+        return V1VolumeMount(name=self.volume_name, mount_path=self.mount_path)
 
 
 class Volume(BaseModel):
