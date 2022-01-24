@@ -265,6 +265,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
     assert tt.daemon == True
+    assert not tt.container
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -343,11 +344,6 @@ def test_task_template_has_correct_labels(op):
     expected_labels = {'foo': 'bar'}
     assert tt.metadata.labels == expected_labels
 
-def test_dont_create_container_template_when_using_script_type(no_op):
-    t = Task('t', no_op)
-    tt = t.get_task_template()
-
-    assert not tt.container
 
 def test_task_with_config_map_env_variable(no_op):
     t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
