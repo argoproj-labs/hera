@@ -45,7 +45,7 @@ class Task:
     ----------
     name: str
         The name of the task to submit as part of a workflow.
-    func: Callable
+    func: Optional[Callable]
         The function to execute remotely.
     func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None
         The parameters of the function to execute. Note that this works together with parallel. If the params are
@@ -90,7 +90,7 @@ class Task:
     def __init__(
         self,
         name: str,
-        func: Callable = None,
+        func: Optional[Callable] = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
         input_artifacts: Optional[List[InputArtifact]] = None,
@@ -347,7 +347,7 @@ class Task:
 
         return parameters
 
-    def _get_func_parameters(self):
+    def _get_func_parameters(self) -> List[V1alpha1Parameter]:
         parameters = []
         param_name_cache = set()
         # if there are any keyword arguments associated with the function signature, we set them as default values
@@ -542,8 +542,8 @@ class Task:
 
         Returns
         -------
-        V1alpha1ScriptTemplate
-            The script template representation of the task.
+        V1Container
+            The container template representation of the task.
         """
         return V1Container(
             image=self.image,
