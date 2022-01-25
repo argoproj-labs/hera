@@ -28,6 +28,14 @@ The general format is:
 - C from D
 
 ```
+
+# 1.6.0 - DATE (26/01/2022)
+
+### Added
+
+- add default name/namespace handling to CronWorkflow create/suspend/resume methods
+
+
 # 1.5.1 - DATE (25/01/2022)
 
 ### Changed

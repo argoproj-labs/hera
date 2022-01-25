@@ -41,6 +41,8 @@ class CronWorkflow:
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the CronWorkflow object metadata
+    namespace: Optional[str]
+        The namespace to use as a default when calling create/suspend/resume
     """
 
     def __init__(
@@ -52,6 +54,7 @@ class CronWorkflow:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
+        namespace: Optional[str] = 'default',
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -63,6 +66,7 @@ class CronWorkflow:
         self.parallelism = parallelism
         self.service_account_name = service_account_name
         self.labels = labels
+        self.namespace = namespace
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
@@ -175,14 +179,24 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def create(self, namespace: str = 'default') -> None:
+    def create(self, namespace: str = None) -> None:
         """Creates the cron workflow in the server"""
+        if namespace is None:
+            namespace = self.namespace
         self.service.create(self.workflow, namespace)
 
-    def suspend(self, name: str, namespace: str = 'default'):
+    def suspend(self, name: str = None, namespace: str = None):
         """Suspends the cron workflow"""
+        if name is None:
+            name = self.name
+        if namespace is None:
+            namespace = self.namespace
         self.service.suspend(name, namespace)
 
-    def resume(self, name: str, namespace: str = 'default'):
+    def resume(self, name: str = None, namespace: str = None):
         """Resumes execution of the cron workflow"""
+        if name is None:
+            name = self.name
+        if namespace is None:
+            namespace = self.namespace
         self.service.resume(name, namespace)
