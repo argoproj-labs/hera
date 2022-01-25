@@ -28,6 +28,11 @@ The general format is:
 - C from D
 
 ```
+# 1.5.1 - DATE (25/01/2022)
+
+### Changed
+- `EnvSpec` to return the `value` if `value` is of type string 
+
 
 # 1.5.0 - DATE (24/01/2022)
 
