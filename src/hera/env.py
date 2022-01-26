@@ -32,7 +32,7 @@ class EnvSpec(BaseModel):
     """
 
     name: str
-    value: Optional[Union[BaseModel, Any]]
+    value: Optional[Any] = None
 
     @validator('value')
     def check_value_json_serializable(cls, value):
