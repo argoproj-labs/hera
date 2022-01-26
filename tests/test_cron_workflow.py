@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 
 from hera.cron_workflow import CronWorkflow
@@ -166,3 +168,30 @@ def test_cwf_contains_specified_labels(ws):
 
     expected_labels = {'foo': 'bar'}
     assert w.metadata.labels == expected_labels
+
+
+def test_cwf_contains_specified_namespace(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
+
+    assert w.namespace == "test"
+
+
+def test_cwf_create_with_defaults(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
+    w.service = Mock()
+    w.create()
+    w.service.create.assert_called_with(w.workflow, w.namespace)
+
+
+def test_cwf_resume_with_defaults(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
+    w.service = Mock()
+    w.resume()
+    w.service.resume.assert_called_with(w.name, w.namespace)
+
+
+def test_cwf_suspend_with_defaults(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
+    w.service = Mock()
+    w.suspend()
+    w.service.suspend.assert_called_with(w.name, w.namespace)
