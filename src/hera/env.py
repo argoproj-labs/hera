@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from argo.workflows.client import (
     V1ConfigMapKeySelector,
@@ -19,7 +19,7 @@ class EnvSpec(BaseModel):
     ----------
     name: str
         The name of the variable.
-    value: Optional[Union[BaseModel, Any]]
+    value: Optional[Any] = None
         The value of the variable. This value is serialized for the client. If a pydantic BaseModel is passed in the
         corresponding `.json()` method will be used for serialization. It is up to the client to deserialize the value
         in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
