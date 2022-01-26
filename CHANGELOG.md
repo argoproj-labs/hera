@@ -29,18 +29,24 @@ The general format is:
 
 ```
 
+# 1.6.1 - DATE (26/01/2022)
+
+### Changed
+
+- the type for the `value` field of `EnvSpec` from `Optional[Union[BaseModel, Any]]` to only `Optional[Any]` as
+  dictionary values were not serialized/set properly as a consequence of Pydantic validation
+
 # 1.6.0 - DATE (26/01/2022)
 
 ### Added
 
 - add default name/namespace handling to CronWorkflow create/suspend/resume methods
 
-
 # 1.5.1 - DATE (25/01/2022)
 
 ### Changed
-- `EnvSpec` to return the `value` if `value` is of type string 
 
+- `EnvSpec` to return the `value` if `value` is of type string
 
 # 1.5.0 - DATE (24/01/2022)
 
@@ -53,6 +59,7 @@ The general format is:
 ### Added
 
 - add support for attaching a secret volume to Workflows and CronWorkflows
+
 # 1.3.0 - DATE (20/01/2022)
 
 ### Added
@@ -69,8 +76,10 @@ The general format is:
 # 1.1.0 - DATE (17/01/2022)
 
 ### Added
-  - The `daemon` keyword to the Task. `deamon` will allow a workflow to proceed to the next task,
-    so long as the container reaches readiness.
+
+- The `daemon` keyword to the Task. `deamon` will allow a workflow to proceed to the next task, so long as the container
+  reaches readiness.
+
 # 1.0.2 - DATE (17/01/2022)
 
 ### Changed
