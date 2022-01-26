@@ -34,6 +34,8 @@ class Workflow:
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
+    namespace: Optional[str] = 'default'
+        The namespace to use for creating the Workflow.  Defaults to "default"
     """
 
     def __init__(
@@ -43,8 +45,10 @@ class Workflow:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
+        namespace: Optional[str] = 'default',
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
+        self.namespace = namespace
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
@@ -153,6 +157,8 @@ class Workflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: str = 'default') -> None:
+    def submit(self, namespace: Optional[str] = None) -> None:
         """Submits the workflow"""
+        if namespace is None:
+            namespace = self.namespace
         self.service.submit(self.workflow, namespace)

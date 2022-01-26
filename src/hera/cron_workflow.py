@@ -41,8 +41,8 @@ class CronWorkflow:
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the CronWorkflow object metadata
-    namespace: Optional[str]
-        The namespace to use as a default when calling create/suspend/resume
+    namespace: Optional[str] = 'default'
+        The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
     """
 
     def __init__(
@@ -179,13 +179,13 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def create(self, namespace: str = None) -> None:
+    def create(self, namespace: Optional[str] = None) -> None:
         """Creates the cron workflow in the server"""
         if namespace is None:
             namespace = self.namespace
         self.service.create(self.workflow, namespace)
 
-    def suspend(self, name: str = None, namespace: str = None):
+    def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None):
         """Suspends the cron workflow"""
         if name is None:
             name = self.name
@@ -193,7 +193,7 @@ class CronWorkflow:
             namespace = self.namespace
         self.service.suspend(name, namespace)
 
-    def resume(self, name: str = None, namespace: str = None):
+    def resume(self, name: Optional[str] = None, namespace: Optional[str] = None):
         """Resumes execution of the cron workflow"""
         if name is None:
             name = self.name

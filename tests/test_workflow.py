@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 from hera.resources import Resources
 from hera.task import Task
 from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
@@ -145,3 +147,10 @@ def test_wf_contains_specified_labels(ws):
 
     expected_labels = {'foo': 'bar'}
     assert w.metadata.labels == expected_labels
+
+
+def test_wf_submit_with_default(ws):
+    w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test")
+    w.service = Mock()
+    w.submit()
+    w.service.submit.assert_called_with(w.workflow, w.namespace)
