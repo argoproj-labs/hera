@@ -154,3 +154,16 @@ def test_wf_submit_with_default(ws):
     w.service = Mock()
     w.submit()
     w.service.submit.assert_called_with(w.workflow, w.namespace)
+
+
+def test_wf_contains_unique_name(ws):
+    w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test")
+    expected_name = 'w'
+    assert w.name != expected_name
+
+
+def test_wf_contains_specified_name(ws):
+    w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test", use_unique_name=False)
+    expected_name = 'w'
+    assert w.name == w.metadata.name == expected_name
+    assert w.template.name != expected_name

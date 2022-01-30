@@ -195,3 +195,18 @@ def test_cwf_suspend_with_defaults(ws):
     w.service = Mock()
     w.suspend()
     w.service.suspend.assert_called_with(w.name, w.namespace)
+
+
+def test_cwf_contains_unique_name(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
+    expected_name = 'w'
+    assert w.name != expected_name
+
+
+def test_cwf_contains_specified_name(ws):
+    w = CronWorkflow(
+        'w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test", use_unique_name=False
+    )
+    expected_name = 'w'
+    assert w.name == w.metadata.name == expected_name
+    assert w.template.name != expected_name

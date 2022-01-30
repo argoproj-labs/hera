@@ -43,6 +43,10 @@ class CronWorkflow:
         A Dict of labels to attach to the CronWorkflow object metadata
     namespace: Optional[str] = 'default'
         The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
+    use_unique_name: Optional[bool] = True
+        Flag to indicate whether the name should be made unique by appending a uuid4() substring.
+        Defaults to True to preserve existing functionality.
+        Note that the V1alpha1Template name will continue to use the unique name.
     """
 
     def __init__(
@@ -55,11 +59,14 @@ class CronWorkflow:
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = 'default',
+        use_unique_name: Optional[bool] = True,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
-
-        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
+        self.name = name.replace("_", "-")
+        self.unique_name = f'{self.name}-{str(uuid4()).split("-")[0]}'
+        if use_unique_name:
+            self.name = self.unique_name
         self.schedule = schedule
         self.timezone = timezone
         self.service = service
@@ -70,7 +77,7 @@ class CronWorkflow:
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
-            name=self.name,
+            name=self.unique_name,
             steps=[],
             dag=self.dag_template,
             parallelism=self.parallelism,
