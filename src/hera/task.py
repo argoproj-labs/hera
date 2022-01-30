@@ -343,11 +343,11 @@ class Task:
             for arg in args:
                 parameters.append(V1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
         if self.func:
-            parameters += self._get_func_parameters()
+            parameters += self.get_func_parameters()
 
         return parameters
 
-    def _get_func_parameters(self) -> List[V1alpha1Parameter]:
+    def get_func_parameters(self) -> List[V1alpha1Parameter]:
         parameters = []
         param_name_cache = set()
         # if there are any keyword arguments associated with the function signature, we set them as default values
