@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.6.2 - DATE (30/01/2022)
+
+### Changed
+
+- fix where a subclass of a Task could not have the parent type as dependancy 
+
 # 1.6.1 - DATE (26/01/2022)
 
 ### Changed
