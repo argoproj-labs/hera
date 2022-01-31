@@ -359,3 +359,13 @@ def test_task_should_create_task_with_container_template():
     assert tt.container.image == "python:3.7"
     assert tt.container.command[0] == "cowsay"
     assert tt.container.resources.requests["memory"] == '4Gi'
+
+
+def test_task_allow_subclassing_when_assigned_next(no_op):
+    class SubclassTask(Task):
+        pass
+
+    t = SubclassTask('t', no_op)
+    t2 = Task('t2', no_op)
+    t.next(t2)
+    assert t2.argo_task.dependencies[0] == 't'

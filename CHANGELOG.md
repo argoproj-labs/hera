@@ -34,6 +34,12 @@ The general format is:
 
 - don't require func to be specified when creating a task, running the task as only a container with commands
 
+# 1.6.2 - DATE (30/01/2022)
+
+### Changed
+
+- fix where a subclass of a Task could not have the parent type as dependancy 
+
 # 1.6.1 - DATE (26/01/2022)
 
 ### Changed
