@@ -348,6 +348,13 @@ class Task:
         return parameters
 
     def get_func_parameters(self) -> List[V1alpha1Parameter]:
+        """Returns a list of Argo workflow parameters that are for the function passed to the task
+
+        Returns
+        -------
+        List[V1alpha1Parameter]
+            The list of constructed Argo parameters.
+        """
         parameters = []
         param_name_cache = set()
         # if there are any keyword arguments associated with the function signature, we set them as default values
