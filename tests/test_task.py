@@ -265,6 +265,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
     assert tt.daemon == True
+    assert not tt.container
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -349,6 +350,15 @@ def test_task_with_config_map_env_variable(no_op):
     tt = t.get_task_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
+
+
+def test_task_should_create_task_with_container_template():
+    t = Task('t', command=["cowsay"])
+    tt = t.get_task_template()
+
+    assert tt.container.image == "python:3.7"
+    assert tt.container.command[0] == "cowsay"
+    assert tt.container.resources.requests["memory"] == '4Gi'
 
 
 def test_task_allow_subclassing_when_assigned_next(no_op):

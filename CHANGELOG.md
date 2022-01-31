@@ -28,6 +28,11 @@ The general format is:
 - C from D
 
 ```
+# 1.7.0 - DATE (30/01/2022)
+
+### Added
+
+- don't require func to be specified when creating a task, running the task as only a container with commands
 
 # 1.6.2 - DATE (30/01/2022)
 
