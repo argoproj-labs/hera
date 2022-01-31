@@ -349,3 +349,13 @@ def test_task_with_config_map_env_variable(no_op):
     tt = t.get_task_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
+
+
+def test_task_allow_subclassing_when_assigned_next(no_op):
+    class SubclassTask(Task):
+        pass
+
+    t = SubclassTask('t', no_op)
+    t2 = Task('t2', no_op)
+    t.next(t2)
+    assert t2.argo_task.dependencies[0] == 't'

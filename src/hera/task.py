@@ -155,7 +155,7 @@ class Task:
         t1, t2, t3 = Task('t1'), Task('t2'), Task('t3')
         t1.next(t2).next(t3)
         """
-        assert isinstance(other, self.__class__)
+        assert issubclass(other.__class__, Task)
         if not other.argo_task.dependencies:
             other.argo_task.dependencies = [self.argo_task.name]
         else:
