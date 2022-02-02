@@ -1,11 +1,11 @@
 """Holds the workflow service that supports client workflow submissions"""
 from typing import Optional, Tuple
 
+from argo_workflows.apis import WorkflowServiceApi
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
 )
-from argo_workflows.apis import WorkflowServiceApi
 
 from hera.client import Client
 from hera.config import Config
@@ -43,7 +43,9 @@ class WorkflowService:
         api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
-    def submit(self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = 'default') -> IoArgoprojWorkflowV1alpha1Workflow:
+    def submit(
+        self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = 'default'
+    ) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Submits the given workflow to the given namespace.
 
         Parameters
@@ -62,7 +64,11 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException
         """
-        return self.service.create_workflow(namespace, IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False), _check_return_type=False)
+        return self.service.create_workflow(
+            namespace,
+            IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
+            _check_return_type=False,
+        )
 
     def delete(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow from the given namespace based on the specified name.

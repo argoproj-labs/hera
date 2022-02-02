@@ -7,24 +7,23 @@ import textwrap
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from argo_workflows.models import (
+    Container,
+    EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1Backoff,
-    IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
     IoArgoprojWorkflowV1alpha1RetryStrategy,
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
-    Container,
-    IoArgoprojWorkflowV1alpha1Metadata,
-    EnvVar,
+    IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
-    Toleration as ArgoToleration,
-    VolumeMount,
 )
-
+from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
 from hera.artifact import InputArtifact, OutputArtifact
@@ -286,8 +285,9 @@ class Task:
         """
         input_art = []
         if self.argo_input_artifacts:
-            input_art = [IoArgoprojWorkflowV1alpha1Artifact(name=a.name, path=a.path) for a in
-                         self.argo_input_artifacts]
+            input_art = [
+                IoArgoprojWorkflowV1alpha1Artifact(name=a.name, path=a.path) for a in self.argo_input_artifacts
+            ]
         return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
@@ -388,7 +388,8 @@ class Task:
                 # first series of params to item.param_name since the keys are all the same for the func_params
                 for param_name in self.func_params[0].keys():
                     parameters.append(
-                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}'))
+                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}')
+                    )
                     param_name_cache.add(param_name)
         for name, value in keywords:
             if isinstance(value, BaseModel):
@@ -598,8 +599,9 @@ class Task:
         """
         if self.retry is not None:
             return IoArgoprojWorkflowV1alpha1RetryStrategy(
-                backoff=IoArgoprojWorkflowV1alpha1Backoff(duration=str(self.retry.duration),
-                                                          max_duration=str(self.retry.max_duration))
+                backoff=IoArgoprojWorkflowV1alpha1Backoff(
+                    duration=str(self.retry.duration), max_duration=str(self.retry.max_duration)
+                )
             )
         return None
 
@@ -644,5 +646,6 @@ class Task:
             return IoArgoprojWorkflowV1alpha1DAGTask(
                 name=self.name, template=self.argo_template.name, arguments=self.arguments, with_items=items
             )
-        return IoArgoprojWorkflowV1alpha1DAGTask(name=self.name, template=self.argo_template.name,
-                                                 arguments=self.arguments)
+        return IoArgoprojWorkflowV1alpha1DAGTask(
+            name=self.name, template=self.argo_template.name, arguments=self.arguments
+        )
