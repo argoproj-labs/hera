@@ -1,5 +1,5 @@
 import pytest
-from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1Arguments, IoArgoprojWorkflowV1alpha1Inputs, Toleration as ArgoToleration
 from pydantic import ValidationError
 
 from hera.env import ConfigMapEnvSpec
@@ -32,8 +32,8 @@ def test_when_correct_expression_and_dependencies(no_op):
     assert t2.argo_task.dependencies == ['t1']
     assert t3.argo_task.dependencies == ['t1']
 
-    assert t2.argo_task._when == "{{tasks.t1.outputs.result}} == t2"
-    assert t3.argo_task._when == "{{tasks.t1.outputs.result}} == t3"
+    assert t2.argo_task.when == "{{tasks.t1.outputs.result}} == t2"
+    assert t3.argo_task.when == "{{tasks.t1.outputs.result}} == t3"
 
 
 def test_retry_limits_fail_validation():
@@ -187,7 +187,10 @@ def test_task_with_default_value_in_toleration(no_op):
     toleration = Toleration(key="nvidia.com/gpu", effect="NoSchedule", operator="Equal")
     t = Task('t', no_op, tolerations=[toleration])
 
-    assert t.tolerations[0].value == None
+    assert t.tolerations[0].value == ""
+    assert t.tolerations[0].key == 'nvidia.com/gpu'
+    assert t.tolerations[0].effect == 'NoSchedule'
+    assert t.tolerations[0].operator == 'Equal'
 
 
 def test_task_command_parses(mock_model, op):
@@ -222,13 +225,13 @@ def test_task_template_does_not_contain_gpu_references(op):
     t = Task('t', op, [{'a': 1}], resources=Resources())
     tt = t.get_task_template()
 
+    assert tt.tolerations == []
+    assert not hasattr(tt, 'retry_strategy')
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.arguments, V1alpha1Arguments)
-    assert isinstance(tt.inputs, V1alpha1Inputs)
-    assert tt.node_selector is None
-    assert tt.tolerations is None
-    assert tt.retry_strategy is None
+    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
+    assert hasattr(tt, 'node_selector')
+    assert tt.node_selector == {}
 
 
 def test_task_template_contains_expected_field_values_and_types(op):
@@ -246,15 +249,13 @@ def test_task_template_contains_expected_field_values_and_types(op):
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.arguments, V1alpha1Arguments)
-    assert isinstance(tt.inputs, V1alpha1Inputs)
+    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
     assert isinstance(tt.node_selector, dict)
     assert isinstance(tt.tolerations, list)
     assert isinstance(tt.daemon, bool)
-    assert all([isinstance(x, V1Toleration) for x in tt.tolerations])
+    assert all([isinstance(x, ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
-    assert tt.arguments.parameters[0].name == 'a'
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
@@ -264,8 +265,8 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy is not None
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
-    assert tt.daemon == True
-    assert not tt.container
+    assert tt.daemon
+    assert not hasattr(tt, 'container')
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -321,11 +322,11 @@ def test_task_validation_fails_on_input_from_plus_input_artifact(op, in_artifact
     assert str(e.value) == 'cannot supply both InputFrom and Artifacts'
 
 
-def test_task_input_artifact_returns_expected_list(no_op, out_artifact, in_artifact):
+def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
     artifact = t.inputs.artifacts[0]
-    assert artifact._from is None
+    assert not hasattr(artifact, '_from')
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
 
