@@ -28,6 +28,7 @@ The general format is:
 - C from D
 
 ```
+
 # 1.7.0 - DATE (30/01/2022)
 
 ### Added
@@ -38,7 +39,7 @@ The general format is:
 
 ### Changed
 
-- fix where a subclass of a Task could not have the parent type as dependancy 
+- fix where a subclass of a Task could not have the parent type as dependancy
 
 # 1.6.1 - DATE (26/01/2022)
 
