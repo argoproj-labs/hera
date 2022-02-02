@@ -1,8 +1,8 @@
-from argo.workflows.client import V1alpha1Artifact
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1Artifact
 from pydantic import BaseModel
 
 
-class Artifact(BaseModel):
+class _Artifact(BaseModel):
     """An artifact represents an object that Argo creates for a specific task's output.
 
     The output of a task payload can store specific results at a path, which can then be consumed by
@@ -25,18 +25,18 @@ class Artifact(BaseModel):
     name: str
     path: str
 
-    def get_spec(self) -> V1alpha1Artifact:
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
-        return V1alpha1Artifact(name=self.name, path=self.path)
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
 
-class OutputArtifact(Artifact):
+class OutputArtifact(_Artifact):
     """An output artifact representation"""
 
     pass
 
 
-class InputArtifact(Artifact):
+class InputArtifact(_Artifact):
     """An input artifact representation.
 
     This artifact is used to represent a task's input from the output of another task's artifact.
@@ -57,7 +57,7 @@ class InputArtifact(Artifact):
     from_task: str
     artifact_name: str
 
-    def get_spec(self) -> V1alpha1Artifact:
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
         _from = f"{{{{tasks.{self.from_task}.outputs.artifacts.{self.artifact_name}}}}}"
-        return V1alpha1Artifact(name=self.name, path=self.path, _from=_from)
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=_from)
