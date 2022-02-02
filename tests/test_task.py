@@ -1,6 +1,6 @@
 import pytest
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
-from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
 from hera.env import ConfigMapEnvSpec
@@ -155,9 +155,9 @@ def test_parallel_items_assemble_base_models(multi_op, mock_model):
     )
     items = t.get_parallel_items()
     for item in items:
-        assert item['a'] == '1'
-        assert item['b'] == '{"d": 2, "e": 3}'
-        assert item['c'] == '{"field1": 1, "field2": 2}'
+        assert item.value['a'] == '1'
+        assert item.value['b'] == '{"d": 2, "e": 3}'
+        assert item.value['c'] == '{"field1": 1, "field2": 2}'
 
 
 def test_volume_mounts_returns_expected_volumes(no_op):
@@ -208,7 +208,7 @@ def test_task_spec_returns_with_parallel_items(op):
     assert s.template == 't'
     assert len(s.arguments.parameters) == 1
     assert len(s.with_items) == 3
-    assert s.with_items == items
+    assert [i.value for i in s.with_items] == items
 
 
 def test_task_spec_returns_with_single_values(op):
@@ -254,7 +254,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.node_selector, dict)
     assert isinstance(tt.tolerations, list)
     assert isinstance(tt.daemon, bool)
-    assert all([isinstance(x, ArgoToleration) for x in tt.tolerations])
+    assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
     assert tt.inputs.parameters[0].name == 'a'
