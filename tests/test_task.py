@@ -1,5 +1,6 @@
 import pytest
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1Arguments, IoArgoprojWorkflowV1alpha1Inputs, Toleration as ArgoToleration
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
+from argo_workflows.models import Toleration as ArgoToleration
 from pydantic import ValidationError
 
 from hera.env import ConfigMapEnvSpec

@@ -5,9 +5,8 @@ from argo_workflows.models import (
     ConfigMapKeySelector,
     EnvVar,
     EnvVarSource,
-    SecretKeySelector
+    SecretKeySelector,
 )
-
 from pydantic import BaseModel, validator
 
 from hera.validators import json_serializable

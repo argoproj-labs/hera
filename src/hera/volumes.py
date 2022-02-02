@@ -1,7 +1,6 @@
 import uuid
 from typing import Optional
 
-
 from argo_workflows.models import (
     EmptyDirVolumeSource,
     ObjectMeta,
@@ -10,9 +9,9 @@ from argo_workflows.models import (
     PersistentVolumeClaimVolumeSource,
     ResourceRequirements,
     SecretVolumeSource,
-    Volume,
-    VolumeMount,
 )
+from argo_workflows.models import Volume as ArgoVolume
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel, validator
 
 from hera.validators import validate_storage_units
@@ -50,7 +49,7 @@ class EmptyDirVolume(BaseModel):
             return str(uuid.uuid4())
         return value
 
-    def get_volume(self) -> Volume:
+    def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
@@ -58,9 +57,9 @@ class EmptyDirVolume(BaseModel):
         Volume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        size_limit = self.size if self.size else None
+        size_limit = self.size if self.size else ""
         empty_dir = EmptyDirVolumeSource(medium='Memory', size_limit=size_limit)
-        return Volume(name=self.name, empty_dir=empty_dir)
+        return ArgoVolume(name=self.name, empty_dir=empty_dir)
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
@@ -95,16 +94,16 @@ class ExistingVolume(BaseModel):
         assert '_' not in value, 'existing volume name cannot contain underscores, see RFC1123'
         return value
 
-    def get_volume(self) -> Volume:
+    def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
         -------
-        Volume
+        ArgoVolume
             The volume representation that can be mounted in workflow steps/tasks.
         """
         claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
-        return Volume(name=self.name, persistent_volume_claim=claim)
+        return ArgoVolume(name=self.name, persistent_volume_claim=claim)
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
@@ -142,16 +141,16 @@ class SecretVolume(BaseModel):
             return str(uuid.uuid4())
         return value
 
-    def get_volume(self) -> Volume:
+    def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for a secret in the task namespace
 
         Returns
         -------
-        V1Volume
+        ArgoVolume
             The volume representation that can be mounted in workflow steps/tasks.
         """
         secret = SecretVolumeSource(secret_name=self.secret_name)
-        return Volume(name=self.name, secret=secret)
+        return ArgoVolume(name=self.name, secret=secret)
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
