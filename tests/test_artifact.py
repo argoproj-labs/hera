@@ -1,5 +1,6 @@
-from hera.artifact import OutputArtifact, InputArtifact
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Artifact
+
+from hera.artifact import InputArtifact, OutputArtifact
 
 
 def test_output_artifact_contains_expected_fields():
@@ -17,9 +18,7 @@ def test_input_artifact_contains_expected_fields():
     from_task = 'test'
     artifact_name = 'test-artifact'
     expected = IoArgoprojWorkflowV1alpha1Artifact(
-        name=name,
-        path=path,
-        _from=f"{{{{tasks.{from_task}.outputs.artifacts.{artifact_name}}}}}"
+        name=name, path=path, _from=f"{{{{tasks.{from_task}.outputs.artifacts.{artifact_name}}}}}"
     )
     actual = InputArtifact(name=name, path=path, from_task=from_task, artifact_name=artifact_name).get_spec()
     assert actual.name == expected.name
