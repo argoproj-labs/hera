@@ -462,7 +462,7 @@ class Task:
 
         Returns
         -------
-        List[V1alpha1Parameter]
+        List[IoArgoprojWorkflowV1alpha1Parameter]
             The list of constructed Argo parameters.
         """
         parameters = []
@@ -563,7 +563,7 @@ class Task:
 
         Returns
         -------
-        V1ResourceRequirements
+        ResourceRequirements
             A configured Argo resource requirement with the given configuration.
         """
         max_cpu = self.resources.max_cpu is not None
@@ -590,7 +590,7 @@ class Task:
 
         Returns
         -------
-        List[Dict[str, str]]
+        List[_Item]
             A list of dictionaries keyed by the argument name to the argument value.
         """
         items: List[_Item] = []
@@ -612,7 +612,7 @@ class Task:
 
         Returns
         -------
-        List[V1VolumeMount]
+        List[VolumeMount]
             The list of volume mounts to be added to the task specification.
         """
         volumes = []
@@ -631,7 +631,7 @@ class Task:
 
         Returns
         -------
-        V1alpha1ScriptTemplate
+        Optional[IoArgoprojWorkflowV1alpha1ScriptTemplate]
             The script template representation of the task.
         """
         if self.func is None:
@@ -655,7 +655,7 @@ class Task:
 
         Returns
         -------
-        V1Container
+        Container
             The container template representation of the task.
         """
         container = Container(
@@ -702,7 +702,7 @@ class Task:
 
         Returns
         -------
-        Optional[V1alpha1RetryStrategy]
+        Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]
             A V1alpha1RetryStrategy object if `retry_limit` is specified, None otherwise.
         """
         if self.retry is not None:
@@ -718,7 +718,7 @@ class Task:
 
         Returns
         -------
-        Optional[List[_ArgoToleration]]
+        List[_ArgoToleration]
             The list of assembled tolerations.
 
         Notes
@@ -739,7 +739,7 @@ class Task:
 
         Returns
         -------
-        V1alpha1DAGTask
+        IoArgoprojWorkflowV1alpha1DAGTask
             The graph task representation.
         """
         if self.input_from:

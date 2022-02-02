@@ -157,7 +157,7 @@ class SecretVolume(BaseModel):
 
         Returns
         -------
-        V1VolumeMount
+        VolumeMount
             The Argo model for mounting volumes.
         """
         return VolumeMount(name=self.name, mount_path=self.mount_path)
@@ -223,7 +223,7 @@ class Volume(BaseModel):
 
         Returns
         -------
-        V1PersistentVolumeClaim
+        PersistentVolumeClaim
             The claim to be used by the Argo workflow.
         """
         spec = PersistentVolumeClaimSpec(

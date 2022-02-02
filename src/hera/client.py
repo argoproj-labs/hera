@@ -1,5 +1,5 @@
 """Holds client configurations for communicating with Argo APIs"""
-from argo_workflows.api_client import ApiClient as ArgoApiClient
+from argo_workflows.api_client import ApiClient as _ArgoApiClient
 
 from hera.config import Config
 
@@ -25,13 +25,13 @@ class Client:
     """
 
     def __init__(self, config: Config, token: str):
-        self._client = ArgoApiClient(
+        self._client = _ArgoApiClient(
             configuration=config.config,
             header_name='Authorization',
             header_value=f'Bearer {token}',
         )
 
     @property
-    def api_client(self) -> ArgoApiClient:
+    def api_client(self) -> _ArgoApiClient:
         """Returns the Argo API client that was configured with the class token"""
         return self._client

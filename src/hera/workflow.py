@@ -160,8 +160,8 @@ class Workflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: Optional[str] = None) -> None:
+    def submit(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Submits the workflow"""
         if namespace is None:
             namespace = self.namespace
-        self.service.submit(self.workflow, namespace)
+        return self.service.submit(self.workflow, namespace)

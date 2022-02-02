@@ -1,7 +1,7 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from datetime import datetime
 from datetime import timezone as tz
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 from uuid import uuid4
 
 import pytz
@@ -184,24 +184,24 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def create(self, namespace: Optional[str] = None) -> None:
+    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow in the server"""
         if namespace is None:
             namespace = self.namespace
-        self.service.create(self.workflow, namespace)
+        return self.service.create(self.workflow, namespace)
 
-    def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None):
+    def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""
         if name is None:
             name = self.name
         if namespace is None:
             namespace = self.namespace
-        self.service.suspend(name, namespace)
+        return self.service.suspend(name, namespace)
 
-    def resume(self, name: Optional[str] = None, namespace: Optional[str] = None):
+    def resume(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Resumes execution of the cron workflow"""
         if name is None:
             name = self.name
         if namespace is None:
             namespace = self.namespace
-        self.service.resume(name, namespace)
+        return self.service.resume(name, namespace)

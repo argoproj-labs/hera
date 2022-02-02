@@ -80,7 +80,7 @@ class WorkflowService:
 
         Returns
         -------
-            Tuple(object, status_code(int), headers(HTTPHeaderDict))
+        Tuple(object, status_code(int), headers(HTTPHeaderDict))
 
         Raises
         ------
