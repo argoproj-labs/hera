@@ -1,8 +1,10 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import datetime
+from datetime import timezone as tz
+from typing import Dict, Optional
 from uuid import uuid4
 
+import pytz
 from argo.workflows.client import (
     V1alpha1CronWorkflow,
     V1alpha1CronWorkflowSpec,
@@ -29,12 +31,18 @@ class CronWorkflow:
         The cron workflow name. Note that the cron workflow initiation will replace underscores with dashes.
     service: CronWorkflowService
         A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
+    timezone: str
+        Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles
     schedule: str
         Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
+    labels: Optional[Dict[str, str]] = None
+        A Dict of labels to attach to the CronWorkflow object metadata
+    namespace: Optional[str] = 'default'
+        The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
     """
 
     def __init__(
@@ -42,14 +50,23 @@ class CronWorkflow:
         name: str,
         schedule: str,
         service: CronWorkflowService,
+        timezone: Optional[str] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
+        labels: Optional[Dict[str, str]] = None,
+        namespace: Optional[str] = 'default',
     ):
+        if timezone and timezone not in pytz.all_timezones:
+            raise ValueError(f'{timezone} is not a valid timezone')
+
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
         self.schedule = schedule
+        self.timezone = timezone
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
+        self.labels = labels
+        self.namespace = namespace
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
@@ -59,18 +76,18 @@ class CronWorkflow:
             parallelism=self.parallelism,
             service_account_name=self.service_account_name,
         )
-        self.metadata = V1ObjectMeta(name=self.name)
+        self.metadata = V1ObjectMeta(name=self.name, labels=self.labels)
         self.spec = V1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
         )
 
-        self.cron_spec = V1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
+        self.cron_spec = V1alpha1CronWorkflowSpec(
+            schedule=self.schedule, timezone=self.timezone, workflow_spec=self.spec
+        )
         self.workflow = V1alpha1CronWorkflow(
             metadata=self.metadata,
             spec=self.cron_spec,
-            status=V1alpha1CronWorkflowStatus(
-                active=[], conditions=[], last_scheduled_time=datetime.now(timezone.utc)
-            ),
+            status=V1alpha1CronWorkflowStatus(active=[], conditions=[], last_scheduled_time=datetime.now(tz.utc)),
         )
 
     def add_task(self, t: Task) -> None:
@@ -103,6 +120,12 @@ class CronWorkflow:
                     self.spec.volumes = [t.resources.empty_dir_volume.get_volume()]
                 else:
                     self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
+
+            if t.resources.secret_volume:
+                if not self.spec.volumes:
+                    self.spec.volumes = [t.resources.secret_volume.get_volume()]
+                else:
+                    self.spec.volumes.append(t.resources.secret_volume.get_volume())
 
             self.dag_template.tasks.append(t.argo_task)
 
@@ -156,14 +179,24 @@ class CronWorkflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def create(self, namespace: str = 'default') -> None:
+    def create(self, namespace: Optional[str] = None) -> None:
         """Creates the cron workflow in the server"""
+        if namespace is None:
+            namespace = self.namespace
         self.service.create(self.workflow, namespace)
 
-    def suspend(self, name: str, namespace: str = 'default'):
+    def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None):
         """Suspends the cron workflow"""
+        if name is None:
+            name = self.name
+        if namespace is None:
+            namespace = self.namespace
         self.service.suspend(name, namespace)
 
-    def resume(self, name: str, namespace: str = 'default'):
+    def resume(self, name: Optional[str] = None, namespace: Optional[str] = None):
         """Resumes execution of the cron workflow"""
+        if name is None:
+            name = self.name
+        if namespace is None:
+            namespace = self.namespace
         self.service.resume(name, namespace)

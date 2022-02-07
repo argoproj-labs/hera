@@ -1,6 +1,6 @@
 from setuptools import find_namespace_packages, setup
 
-VERSION = open('VERSION').read()
+VERSION = open('VERSION').read().strip()
 LONG_DESCRIPTION = open('README.md').read()
 
 setup(
@@ -26,8 +26,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.7",
     ],
-
-    packages=find_namespace_packages(include=['hera.*'], where="src"),
+    packages=["hera"],
     package_dir={'': 'src'},
     package_data={
         'hera': ['py.typed'],
@@ -40,7 +39,8 @@ setup(
         "pydantic",
         "python-dateutil",
         "urllib3",
-        "certifi"
+        "certifi",
+        "pytz"
     ],
     zip_safe=False
 )

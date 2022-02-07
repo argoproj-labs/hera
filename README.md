@@ -1,11 +1,18 @@
 # Hera (hera-workflows)
 
 ```text
-The Argo was constructed by the shipwright Argus, and its crew were specially protected by the goddess Hera.
+The Argo was constructed by the shipwright Argus, 
+and its crew were specially protected by the goddess Hera.
 ```
 
 (https://en.wikipedia.org/wiki/Argo)
 
+[![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/hera_build_and_publish.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/hera_build_and_publish.yaml)
+[![Pypi](https://img.shields.io/pypi/v/hera-workflows.svg)](https://pypi.python.org/pypi/hera-workflows)
+[![Downloads](https://pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
+[![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
+[![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
+[![Versions](https://img.shields.io/pypi/pyversions/hera-workflows.svg)](https://github.com/argoproj-labs/hera-workflows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo
@@ -90,9 +97,9 @@ consistent with:
 A very primitive example of submitting a task within a workflow through Hera is:
 
 ```python
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def say(message: str):
@@ -109,8 +116,6 @@ t = Task('say', say, [{'message': 'Hello, world!'}])
 w.add_task(t)
 w.submit()
 ```
-
-# Examples
 
 See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
 Argo workflow construction and submission via Hera!
@@ -140,9 +145,9 @@ executable payloads rather than workflow setup. Here's a side by side comparison
 <td valign="top"><p>
 
 ```python
-from hera.v1.task import Task
-from hera.v1.workflow import Workflow
-from hera.v1.workflow_service import WorkflowService
+from hera.task import Task
+from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 
 
 def say(message: str):

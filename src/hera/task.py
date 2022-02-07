@@ -12,11 +12,13 @@ from argo.workflows.client import (
     V1alpha1Backoff,
     V1alpha1DAGTask,
     V1alpha1Inputs,
+    V1alpha1Metadata,
     V1alpha1Outputs,
     V1alpha1Parameter,
     V1alpha1RetryStrategy,
     V1alpha1ScriptTemplate,
     V1alpha1Template,
+    V1Container,
     V1EnvVar,
     V1ResourceRequirements,
     V1Toleration,
@@ -43,7 +45,7 @@ class Task:
     ----------
     name: str
         The name of the task to submit as part of a workflow.
-    func: Callable
+    func: Optional[Callable]
         The function to execute remotely.
     func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None
         The parameters of the function to execute. Note that this works together with parallel. If the params are
@@ -57,6 +59,8 @@ class Task:
         that are set.
     image: str = 'python:3.7'
         The image to use in the execution of the function.
+    daemon: Optional[bool] = None
+        Wether to run the the task as daemon.
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
         the specified function is parsed, stored as a string, and ultimately placed in a separate file inside the task
@@ -79,17 +83,20 @@ class Task:
         requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
+    labels: Optional[Dict[str, str]] = None
+        A Dict of labels to attach to the Task Template object metadata
     """
 
     def __init__(
         self,
         name: str,
-        func: Callable,
+        func: Optional[Callable] = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
         input_artifacts: Optional[List[InputArtifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
+        daemon: Optional[bool] = None,
         command: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
         resources: Resources = Resources(),
@@ -97,6 +104,7 @@ class Task:
         retry: Optional[Retry] = None,
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
+        labels: Optional[Dict[str, str]] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -107,6 +115,7 @@ class Task:
         self.validate()
 
         self.image = image
+        self.daemon = daemon
         self.command = command if command else ['python']
         self.env = self.get_env(env_specs)
         self.resources = resources
@@ -114,6 +123,7 @@ class Task:
         self.retry = retry
         self.tolerations = tolerations
         self.node_selectors = node_selectors
+        self.labels = labels
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -122,9 +132,6 @@ class Task:
         self.inputs = self.get_inputs()
         self.outputs = self.get_outputs()
         self.argo_resources = self.get_resources()
-        self.script_extra = self.get_param_script_portion()
-        self.script = self.get_script()
-        self.script_def = self.get_script_def()
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_task_spec()
 
@@ -146,7 +153,7 @@ class Task:
         t1, t2, t3 = Task('t1'), Task('t2'), Task('t3')
         t1.next(t2).next(t3)
         """
-        assert isinstance(other, self.__class__)
+        assert issubclass(other.__class__, Task)
         if not other.argo_task.dependencies:
             other.argo_task.dependencies = [self.argo_task.name]
         else:
@@ -211,6 +218,10 @@ class Task:
                 self.output_artifacts
             ), 'output artifact names must be unique'
 
+        if self.func:
+            self._validate_func()
+
+    def _validate_func(self):
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
@@ -323,7 +334,6 @@ class Task:
         task function parameters.
         """
         parameters = []
-        param_name_cache = set()
 
         if self.input_from:
             # this represents input from another step, which only requires parameter name specifications
@@ -332,7 +342,21 @@ class Task:
             args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
             for arg in args:
                 parameters.append(V1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+        if self.func:
+            parameters += self.get_func_parameters()
 
+        return parameters
+
+    def get_func_parameters(self) -> List[V1alpha1Parameter]:
+        """Returns a list of Argo workflow parameters that are for the function passed to the task
+
+        Returns
+        -------
+        List[V1alpha1Parameter]
+            The list of constructed Argo parameters.
+        """
+        parameters = []
+        param_name_cache = set()
         # if there are any keyword arguments associated with the function signature, we set them as default values
         # so Argo passes them in
         signature = inspect.signature(self.func)
@@ -363,7 +387,6 @@ class Task:
                 for param_name in self.func_params[0].keys():
                     parameters.append(V1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}'))
                     param_name_cache.add(param_name)
-
         for name, value in keywords:
             if isinstance(value, BaseModel):
                 value = value.json()
@@ -410,9 +433,11 @@ class Task:
         str
             Final formatted script.
         """
+        script_extra = self.get_param_script_portion()
+
         script = ''
-        if self.script_extra:
-            script = copy.deepcopy(self.script_extra)
+        if script_extra:
+            script = copy.deepcopy(script_extra)
             script += '\n'
 
         # content represents the function components, separated by new lines
@@ -494,6 +519,8 @@ class Task:
             volumes.append(self.resources.existing_volume.get_mount())
         if self.resources.empty_dir_volume:
             volumes.append(self.resources.empty_dir_volume.get_mount())
+        if self.resources.secret_volume:
+            volumes.append(self.resources.secret_volume.get_mount())
         return volumes
 
     def get_script_def(self) -> V1alpha1ScriptTemplate:
@@ -504,15 +531,34 @@ class Task:
         V1alpha1ScriptTemplate
             The script template representation of the task.
         """
+        if self.func is None:
+            return None
+
         return V1alpha1ScriptTemplate(
             name=self.name,
-            command=self.get_command(),
-            source=self.script,
             image=self.image,
+            command=self.get_command(),
+            source=self.get_script(),
+            working_dir=self.working_dir,
             env=self.env,
             resources=self.argo_resources,
+        )
+
+    def get_container(self) -> V1Container:
+        """Assembles and returns the container for the task to run in.
+
+        Returns
+        -------
+        V1Container
+            The container template representation of the task.
+        """
+        return V1Container(
+            image=self.image,
+            command=self.get_command(),
             volume_mounts=self.get_volume_mounts(),
             working_dir=self.working_dir,
+            env=self.env,
+            resources=self.argo_resources,
         )
 
     def get_task_template(self) -> V1alpha1Template:
@@ -524,16 +570,22 @@ class Task:
         V1alpha1Template
             The template representation of the task.
         """
-        return V1alpha1Template(
+        template = V1alpha1Template(
             name=self.name,
-            script=self.script_def,
+            daemon=self.daemon,
             arguments=self.arguments,
             inputs=self.inputs,
             outputs=self.outputs,
             node_selector=self.node_selectors,
             tolerations=self.get_tolerations(),
             retry_strategy=self.get_retry_strategy(),
+            metadata=V1alpha1Metadata(labels=self.labels),
         )
+        if self.get_script_def():
+            template.script = self.get_script_def()
+        else:
+            template.container = self.get_container()
+        return template
 
     def get_retry_strategy(self) -> Optional[V1alpha1RetryStrategy]:
         """Assembles and returns a retry strategy for the task. This is dictated by the task `retry_limit`.

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "583c783c704112ce4a76bfd1f718e33badaca811e7a38396e394fcbaeef978f5"
+            "sha256": "7ebe00cf62c9904a0e384aea0e79664d30c74d0d419e80302d975410c83e0d99"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -86,6 +86,14 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
             "version": "==2.8.2"
+        },
+        "pytz": {
+            "hashes": [
+                "sha256:3672058bc3453457b622aab7a1c3bfd5ab0bdae451512f6cf25f64ed37f5b87c",
+                "sha256:acad2d8b20a1af07d4e4c9d2e9285c5ed9104354062f275f3fcd88dcef4f1326"
+            ],
+            "index": "pypi",
+            "version": "==2021.3"
         },
         "six": {
             "hashes": [
@@ -324,7 +332,7 @@
                 "sha256:ca9e8300d8ba0b66d140820cf463438c8e7b4cdc6fd710c059bfcfb1531d03fb",
                 "sha256:de4ecae89c7d8b56169473e08f6bfd2df7f95015591f43126e4ea7865928677e"
             ],
-            "markers": "python_version < '3.8'",
+            "markers": "python_version < '3.8' and implementation_name == 'cpython'",
             "version": "==1.5.1"
         },
         "typing-extensions": {

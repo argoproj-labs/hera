@@ -2,12 +2,13 @@ import pytest
 from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
 from pydantic import ValidationError
 
+from hera.env import ConfigMapEnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.task import Task
-from hera.toleration import GPUToleration
+from hera.toleration import GPUToleration, Toleration
 from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 
 
@@ -182,6 +183,13 @@ def test_gpu_toleration_returns_expected_toleration():
     assert tn.value == 'present'
 
 
+def test_task_with_default_value_in_toleration(no_op):
+    toleration = Toleration(key="nvidia.com/gpu", effect="NoSchedule", operator="Equal")
+    t = Task('t', no_op, tolerations=[toleration])
+
+    assert t.tolerations[0].value == None
+
+
 def test_task_command_parses(mock_model, op):
     t = Task('t', op, [{'a': mock_model()}])
     assert t.get_command() == ['python']
@@ -232,6 +240,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
         tolerations=[GPUToleration],
         node_selectors={'abc': '123-gpu'},
         retry=Retry(duration=1, max_duration=2),
+        daemon=True,
     )
     tt = t.get_task_template()
 
@@ -241,6 +250,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.inputs, V1alpha1Inputs)
     assert isinstance(tt.node_selector, dict)
     assert isinstance(tt.tolerations, list)
+    assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, V1Toleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
@@ -254,6 +264,8 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy is not None
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
+    assert tt.daemon == True
+    assert not tt.container
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -324,3 +336,36 @@ def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     artifact = t.outputs.artifacts[0]
     assert artifact.name == out_artifact.name
     assert artifact.path == out_artifact.path
+
+
+def test_task_template_has_correct_labels(op):
+    t = Task('t', op, [{'a': 1}], resources=Resources(), labels={'foo': 'bar'})
+    tt = t.get_task_template()
+    expected_labels = {'foo': 'bar'}
+    assert tt.metadata.labels == expected_labels
+
+
+def test_task_with_config_map_env_variable(no_op):
+    t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
+    tt = t.get_task_template()
+    assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
+    assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
+
+
+def test_task_should_create_task_with_container_template():
+    t = Task('t', command=["cowsay"])
+    tt = t.get_task_template()
+
+    assert tt.container.image == "python:3.7"
+    assert tt.container.command[0] == "cowsay"
+    assert tt.container.resources.requests["memory"] == '4Gi'
+
+
+def test_task_allow_subclassing_when_assigned_next(no_op):
+    class SubclassTask(Task):
+        pass
+
+    t = SubclassTask('t', no_op)
+    t2 = Task('t2', no_op)
+    t.next(t2)
+    assert t2.argo_task.dependencies[0] == 't'

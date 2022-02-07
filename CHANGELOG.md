@@ -28,12 +28,90 @@ The general format is:
 - C from D
 
 ```
-# 1.0.1 - DATE (11/01/2022)
+# 1.8.0 - DATE (07/02/2022)
 
 ### Added
 
-- ability to provide a security context object to a workflow. This is currently set on the workflow level only,
-  which makes all the pods of tasks in a workflow use the same security context.
+- ability to provide the fs_group parameter in the security context of a workflow. This is currently set on
+  the workflow level only, which makes all the pods of tasks in a workflow use the same fs_group.
+
+# 1.7.0 - DATE (30/01/2022)
+
+### Added
+
+- don't require func to be specified when creating a task, running the task as only a container with commands
+
+# 1.6.2 - DATE (30/01/2022)
+
+### Changed
+
+- fix where a subclass of a Task could not have the parent type as dependancy 
+
+# 1.6.1 - DATE (26/01/2022)
+
+### Changed
+
+- the type for the `value` field of `EnvSpec` from `Optional[Union[BaseModel, Any]]` to only `Optional[Any]` as
+  dictionary values were not serialized/set properly as a consequence of Pydantic validation
+
+# 1.6.0 - DATE (26/01/2022)
+
+### Added
+
+- add default name/namespace handling to CronWorkflow create/suspend/resume methods
+
+# 1.5.1 - DATE (25/01/2022)
+
+### Changed
+
+- `EnvSpec` to return the `value` if `value` is of type string
+
+# 1.5.0 - DATE (24/01/2022)
+
+### Added
+
+- add support for exposing config map keys via env vars in Tasks
+
+# 1.4.0 - DATE (23/01/2022)
+
+### Added
+
+- add support for attaching a secret volume to Workflows and CronWorkflows
+
+# 1.3.0 - DATE (20/01/2022)
+
+### Added
+
+- add support for specifying labels on Workflows, CronWorkflows and Tasks
+
+# 1.2.0 - DATE (18/01/2022)
+
+### Added
+
+- add support for the timezone attribute of CronWorkflow and validate the specified timezone
+- introduce `pytz` dependency for timezone validation
+
+# 1.1.0 - DATE (17/01/2022)
+
+### Added
+
+- The `daemon` keyword to the Task. `deamon` will allow a workflow to proceed to the next task, so long as the container
+  reaches readiness.
+
+# 1.0.2 - DATE (17/01/2022)
+
+### Changed
+
+- Make value in Tolerations optional, as per Kubernetes requirements
+
+# 1.0.1 - DATE (11/01/2022)
+
+### Changed
+
+- `setup.py` packages field to include hera exclusively post-removal of the underlying `v1` directory. With the removal
+  of the underlying versioned subpackage (`v1`) in 1.0.0 the `setup.py` file no longer installed the necessary modules
+  as the wheel only included references for whatever subpackages were in `hera.*` but not `hera`
+  itself (as a module)
 
 # 1.0.0 - DATE (10/01/2022)
 

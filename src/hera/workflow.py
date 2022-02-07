@@ -1,5 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import Optional
+from typing import Dict, Optional
 from uuid import uuid4
 
 from argo.workflows.client import (
@@ -33,8 +33,12 @@ class Workflow:
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
-    security_context: Optional[V1PodSecurityContext] = None
-        The security context object which defines privilege and access control settings.
+    labels: Optional[Dict[str, str]] = None
+        A Dict of labels to attach to the Workflow object metadata
+    namespace: Optional[str] = 'default'
+        The namespace to use for creating the Workflow.  Defaults to "default"
+    fs_group: Optional[int] = None
+        The fs_group parameter in the security context, which defines privilege and access control settings.
     """
 
     def __init__(
@@ -43,13 +47,17 @@ class Workflow:
         service: WorkflowService,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
-        security_context: Optional[V1PodSecurityContext] = None,
+        labels: Optional[Dict[str, str]] = None,
+        namespace: Optional[str] = 'default',
+        fs_group: Optional[int] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
+        self.namespace = namespace
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
-        self.security_context = security_context
+        self.labels = labels
+        self.fs_group = fs_group
 
         self.dag_template = V1alpha1DAGTemplate(tasks=[])
         self.template = V1alpha1Template(
@@ -58,14 +66,14 @@ class Workflow:
             dag=self.dag_template,
             parallelism=self.parallelism,
             service_account_name=self.service_account_name,
-            security_context=self.security_context,
+            security_context=V1PodSecurityContext(fs_group=self.fs_group),
         )
-        self.metadata = V1ObjectMeta(name=self.name)
+        self.metadata = V1ObjectMeta(name=self.name, labels=self.labels)
         self.spec = V1alpha1WorkflowSpec(
             templates=[self.template],
             entrypoint=self.name,
             service_account_name=self.service_account_name,
-            security_context=self.security_context,
+            security_context=V1PodSecurityContext(fs_group=self.fs_group),
         )
         self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
@@ -99,6 +107,12 @@ class Workflow:
                     self.spec.volumes = [t.resources.empty_dir_volume.get_volume()]
                 else:
                     self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
+
+            if t.resources.secret_volume:
+                if not self.spec.volumes:
+                    self.spec.volumes = [t.resources.secret_volume.get_volume()]
+                else:
+                    self.spec.volumes.append(t.resources.secret_volume.get_volume())
 
             self.dag_template.tasks.append(t.argo_task)
 
@@ -152,6 +166,8 @@ class Workflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: str = 'default') -> None:
+    def submit(self, namespace: Optional[str] = None) -> None:
         """Submits the workflow"""
+        if namespace is None:
+            namespace = self.namespace
         self.service.submit(self.workflow, namespace)
