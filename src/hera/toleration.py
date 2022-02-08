@@ -20,14 +20,12 @@ class Toleration(BaseModel):
         The operator to use when matching the key to the value.
     value: str
         The value to scan for matching against a taint.
-
-    return V1Toleration(key='nvidia.com/gpu', effect='NoSchedule', operator='Equal', value='present')
     """
 
     key: str
     effect: str
     operator: str
-    value: Optional[str] = None
+    value: Optional[str] = ""
 
 
 GPUToleration = Toleration(key='nvidia.com/gpu', effect='NoSchedule', operator='Equal', value='present')

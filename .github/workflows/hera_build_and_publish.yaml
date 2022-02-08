@@ -1,0 +1,125 @@
+name: Hera `main` build and publish
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'VERSION'
+jobs:
+  # First, build Hera and publish the package to the PyPi test index. This ensures that Hera's `setup.py`
+  # is structured correctly, includes the right references, files, etc, its dependencies are installable,
+  # and a wheel can be built and published successfully.
+  test-index-build-and-publish:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Install core dependencies
+        run: |
+          python -m pip install --upgrade pip wheel pipenv
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Install everything in a virtual environment for the initial publication process since this is the
+      # same as the official "prod" process.
+      - name: Sync virtual environment
+        run: |
+          pipenv sync --dev --pre
+
+      - name: Run build
+        run: |
+          pipenv run make build
+
+      # Publish to the Test PyPi index, with verbose logs in case anything needs to be reported in rich format.
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
+          verbose: true
+          repository_url: https://test.pypi.org/legacy/
+
+  # Second, install Hera from the Test PyPi index and run tests again. While it may seem redundant to re-run tests,
+  # this helps capture any failures that may occur as a failure of installation, not of running. Plus, tests run
+  # quickly, and the cost of publishing a broken package is much higher than running tests some small N number of times.
+  test-index-install-and-run-tests:
+    needs:
+      - test-index-build-and-publish
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install core dependencies
+        run: |
+          python -m pip install --upgrade pip wheel pytest
+
+      # Install Hera specifically from the Test index URL. Note that this script "sleeps" for 60 seconds. This hacky
+      # approach was introduced in order to wait for Test PyPI to update the index with the new Hera version so it's
+      # available for installation.
+      - name: Install published test package
+        run: |
+          sleep 60s
+          HERA_VERSION=$(cat VERSION)
+          python -m pip install \
+            --index-url https://test.pypi.org/simple/ hera-workflows==$HERA_VERSION \
+            --extra-index-url=https://pypi.org/simple/
+
+      # If this succeeds, Hera is ready for publication.
+      - name: Run tests with published package
+        run: |
+          python -m pytest --durations=5 tests
+
+  # Last, run the official "production"/ready to publish workflow that builds Hera and releases it to the official
+  # PyPi main index.
+  main-build-and-publish:
+    needs:
+      - test-index-install-and-run-tests
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pipenv wheel
+
+      # Cache dependencies based on the hash of the lockfile. When the lockfile changes it means the virtual
+      # environment needs to change, which is when the `Install dependencies` step has to re-sync a virtual environment.
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        run: |
+          pipenv sync --dev --pre
+
+      - name: Run build
+        run: |
+          pipenv run make build
+
+      # Finally, publish an official version of Hera!
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+          skip_existing: true

@@ -1,13 +1,11 @@
 import pytest
-from argo.workflows.client import (
-    V1alpha1Arguments,
-    V1alpha1Inputs,
-    V1Capabilities,
-    V1SecurityContext,
-    V1Toleration,
-)
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
+from argo_workflows.model.capabilities import Capabilities
+from argo_workflows.model.security_context import SecurityContext
+from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
+from hera.env import ConfigMapEnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
@@ -15,7 +13,7 @@ from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.task import Task
 from hera.toleration import GPUToleration, Toleration
-from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
+from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -38,8 +36,8 @@ def test_when_correct_expression_and_dependencies(no_op):
     assert t2.argo_task.dependencies == ['t1']
     assert t3.argo_task.dependencies == ['t1']
 
-    assert t2.argo_task._when == "{{tasks.t1.outputs.result}} == t2"
-    assert t3.argo_task._when == "{{tasks.t1.outputs.result}} == t3"
+    assert t2.argo_task.when == "{{tasks.t1.outputs.result}} == t2"
+    assert t3.argo_task.when == "{{tasks.t1.outputs.result}} == t3"
 
 
 def test_retry_limits_fail_validation():
@@ -160,9 +158,9 @@ def test_parallel_items_assemble_base_models(multi_op, mock_model):
     )
     items = t.get_parallel_items()
     for item in items:
-        assert item['a'] == '1'
-        assert item['b'] == '{"d": 2, "e": 3}'
-        assert item['c'] == '{"field1": 1, "field2": 2}'
+        assert item.value['a'] == '1'
+        assert item.value['b'] == '{"d": 2, "e": 3}'
+        assert item.value['c'] == '{"field1": 1, "field2": 2}'
 
 
 def test_volume_mounts_returns_expected_volumes(no_op):
@@ -170,6 +168,7 @@ def test_volume_mounts_returns_expected_volumes(no_op):
         volume=Volume(name='v1', size='1Gi', mount_path='/v1'),
         existing_volume=ExistingVolume(name='v2', mount_path='/v2'),
         empty_dir_volume=EmptyDirVolume(name='v3'),
+        config_map_volume=ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
     )
     t = Task('t', no_op, resources=r)
     vs = t.get_volume_mounts()
@@ -179,6 +178,8 @@ def test_volume_mounts_returns_expected_volumes(no_op):
     assert vs[1].mount_path == '/v2'
     assert vs[2].name == 'v3'
     assert vs[2].mount_path == '/dev/shm'
+    assert vs[3].name
+    assert vs[3].mount_path == "/v3"
 
 
 def test_gpu_toleration_returns_expected_toleration():
@@ -193,7 +194,10 @@ def test_task_with_default_value_in_toleration(no_op):
     toleration = Toleration(key="nvidia.com/gpu", effect="NoSchedule", operator="Equal")
     t = Task('t', no_op, tolerations=[toleration])
 
-    assert t.tolerations[0].value == None
+    assert t.tolerations[0].value == ""
+    assert t.tolerations[0].key == 'nvidia.com/gpu'
+    assert t.tolerations[0].effect == 'NoSchedule'
+    assert t.tolerations[0].operator == 'Equal'
 
 
 def test_task_command_parses(mock_model, op):
@@ -210,7 +214,7 @@ def test_task_spec_returns_with_parallel_items(op):
     assert s.template == 't'
     assert len(s.arguments.parameters) == 1
     assert len(s.with_items) == 3
-    assert s.with_items == items
+    assert [i.value for i in s.with_items] == items
 
 
 def test_task_spec_returns_with_single_values(op):
@@ -228,13 +232,12 @@ def test_task_template_does_not_contain_gpu_references(op):
     t = Task('t', op, [{'a': 1}], resources=Resources())
     tt = t.get_task_template()
 
+    assert tt.tolerations == []
+    assert not hasattr(tt, 'retry_strategy')
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.arguments, V1alpha1Arguments)
-    assert isinstance(tt.inputs, V1alpha1Inputs)
-    assert tt.node_selector is None
-    assert tt.tolerations is None
-    assert tt.retry_strategy is None
+    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
+    assert not hasattr(tt, 'node_selector')
 
 
 def test_task_template_contains_expected_field_values_and_types(op):
@@ -246,19 +249,19 @@ def test_task_template_contains_expected_field_values_and_types(op):
         tolerations=[GPUToleration],
         node_selectors={'abc': '123-gpu'},
         retry=Retry(duration=1, max_duration=2),
+        daemon=True,
     )
     tt = t.get_task_template()
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
-    assert isinstance(tt.arguments, V1alpha1Arguments)
-    assert isinstance(tt.inputs, V1alpha1Inputs)
-    assert isinstance(tt.node_selector, dict)
+    assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
+    assert not hasattr(tt, 'node_selectors')
     assert isinstance(tt.tolerations, list)
-    assert all([isinstance(x, V1Toleration) for x in tt.tolerations])
+    assert isinstance(tt.daemon, bool)
+    assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
     assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
-    assert tt.arguments.parameters[0].name == 'a'
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
@@ -268,6 +271,9 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy is not None
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
+    assert tt.daemon
+    assert hasattr(tt, 'node_selector')
+    assert not hasattr(tt, 'container')
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -323,11 +329,11 @@ def test_task_validation_fails_on_input_from_plus_input_artifact(op, in_artifact
     assert str(e.value) == 'cannot supply both InputFrom and Artifacts'
 
 
-def test_task_input_artifact_returns_expected_list(no_op, out_artifact, in_artifact):
+def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
     artifact = t.inputs.artifacts[0]
-    assert artifact._from is None
+    assert not hasattr(artifact, '_from')
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
 
@@ -345,7 +351,7 @@ def test_task_contains_specified_security_context(no_op):
     run_as_group = 1001
     run_as_non_root = True
     additional_capabilities = ["SYS_RAWIO"]
-    expected_capabilities = V1Capabilities(add=additional_capabilities)
+    expected_capabilities = Capabilities(add=additional_capabilities)
     tsc = TaskSecurityContext(
         run_as_user=run_as_user,
         run_as_group=run_as_group,
@@ -353,7 +359,7 @@ def test_task_contains_specified_security_context(no_op):
         additional_capabilities=additional_capabilities,
     )
     t = Task('t', no_op, security_context=tsc)
-    expected_security_context = V1SecurityContext(
+    expected_security_context = SecurityContext(
         run_as_group=run_as_group,
         run_as_user=run_as_user,
         run_as_non_root=run_as_non_root,
@@ -367,3 +373,35 @@ def test_task_does_not_contain_specified_security_context(no_op):
 
     expected_security_context = None
     assert t.argo_template.security_context == expected_security_context
+
+def test_task_template_has_correct_labels(op):
+    t = Task('t', op, [{'a': 1}], resources=Resources(), labels={'foo': 'bar'})
+    tt = t.get_task_template()
+    expected_labels = {'foo': 'bar'}
+    assert tt.metadata.labels == expected_labels
+
+
+def test_task_with_config_map_env_variable(no_op):
+    t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
+    tt = t.get_task_template()
+    assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
+    assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
+
+
+def test_task_should_create_task_with_container_template():
+    t = Task('t', command=["cowsay"])
+    tt = t.get_task_template()
+
+    assert tt.container.image == "python:3.7"
+    assert tt.container.command[0] == "cowsay"
+    assert tt.container.resources.requests["memory"] == '4Gi'
+
+
+def test_task_allow_subclassing_when_assigned_next(no_op):
+    class SubclassTask(Task):
+        pass
+
+    t = SubclassTask('t', no_op)
+    t2 = Task('t2', no_op)
+    t.next(t2)
+    assert t2.argo_task.dependencies[0] == 't'

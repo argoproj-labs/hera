@@ -1,5 +1,5 @@
 """Holds client configurations for communicating with Argo APIs"""
-from argo.workflows.client import ApiClient as ArgoApiClient
+from argo_workflows.api_client import ApiClient as ArgoApiClient
 
 from hera.config import Config
 

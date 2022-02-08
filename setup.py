@@ -35,11 +35,12 @@ setup(
     include_package_data=True,
     python_requires='>=3.7',
     install_requires=[
-        "argo-workflows",
+        "argo-workflows==6.3.0rc2",
         "pydantic",
         "python-dateutil",
         "urllib3",
-        "certifi"
+        "certifi",
+        "pytz"
     ],
     zip_safe=False
 )

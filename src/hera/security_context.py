@@ -1,10 +1,9 @@
 from typing import List, Optional
 
-from argo.workflows.client import (
-    V1Capabilities,
-    V1PodSecurityContext,
-    V1SecurityContext,
-)
+from argo_workflows.model.capabilities import Capabilities
+from argo_workflows.model.pod_security_context import PodSecurityContext
+from argo_workflows.model.security_context import SecurityContext
+
 from pydantic import BaseModel
 
 
@@ -28,8 +27,8 @@ class WorkflowSecurityContext(BaseModel):
     fs_group: Optional[int] = None
     run_as_non_root: Optional[bool] = None
 
-    def get_security_context(self) -> V1PodSecurityContext:
-        return V1PodSecurityContext(
+    def get_security_context(self) -> PodSecurityContext:
+        return PodSecurityContext(
             run_as_user=self.run_as_user,
             run_as_group=self.run_as_group,
             fs_group=self.fs_group,
@@ -59,11 +58,11 @@ class TaskSecurityContext(BaseModel):
     additional_capabilities: List[str] = None
 
     def _get_capabilties(self):
-        return V1Capabilities(add=self.additional_capabilities)
+        return Capabilities(add=self.additional_capabilities)
 
-    def get_security_context(self) -> V1SecurityContext:
+    def get_security_context(self) -> SecurityContext:
         capabilities = self._get_capabilties()
-        return V1SecurityContext(
+        return SecurityContext(
             run_as_user=self.run_as_user,
             run_as_group=self.run_as_group,
             run_as_non_root=self.run_as_non_root,

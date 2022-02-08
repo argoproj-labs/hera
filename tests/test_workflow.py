@@ -1,9 +1,17 @@
-from argo.workflows.client import V1PodSecurityContext
+from unittest.mock import Mock
+
+from argo_workflows.model.pod_security_context import PodSecurityContext
 
 from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
-from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
+from hera.volumes import (
+    ConfigMapVolume,
+    EmptyDirVolume,
+    ExistingVolume,
+    SecretVolume,
+    Volume,
+)
 from hera.workflow import Workflow
 
 
@@ -18,9 +26,7 @@ def test_wf_contains_specified_service_account(ws):
 def test_wf_does_not_contain_sa_if_one_is_not_specified(ws):
     w = Workflow('w', service=ws)
 
-    expected_sa = None
-    assert w.spec.service_account_name == expected_sa
-    assert w.spec.templates[0].service_account_name == expected_sa
+    assert not hasattr(w.spec, 'service_account_name')
 
 
 def test_wf_contains_specified_security_context(ws):
@@ -33,7 +39,7 @@ def test_wf_contains_specified_security_context(ws):
     )
     w = Workflow('w', service=ws, service_account_name='w-sa', security_context=wsc)
 
-    expected_security_context = V1PodSecurityContext(
+    expected_security_context = PodSecurityContext(
         fs_group=fs_group, run_as_group=run_as_group, run_as_user=run_as_user, run_as_non_root=run_as_non_root
     )
     assert w.spec.security_context == expected_security_context
@@ -76,6 +82,23 @@ def test_wf_adds_task_volume(w, no_op):
     assert claim.spec.resources.requests['storage'] == '1Gi'
     assert claim.spec.storage_class_name == 'custom'
     assert claim.metadata.name == 'v'
+
+
+def test_wf_adds_task_secret_volume(w, no_op):
+    t = Task('t', no_op, resources=Resources(secret_volume=SecretVolume(name='s', secret_name='sn', mount_path='/')))
+    w.add_task(t)
+
+    vol = w.spec.volumes[0]
+    assert vol.name == 's'
+    assert vol.secret.secret_name == 'sn'
+
+
+def test_wf_adds_task_config_map_volume(w):
+    t = Task('t', resources=Resources(config_map_volume=ConfigMapVolume(config_map_name='cmn', mount_path='/')))
+    w.add_task(t)
+
+    assert w.spec.volumes[0].name
+    assert w.spec.volumes[0].config_map.name == "cmn"
 
 
 def test_wf_adds_task_existing_checkpoints_staging_volume(w, no_op):
@@ -132,7 +155,7 @@ def test_wf_adds_tail(w, no_op):
     t = Task('tail', no_op)
     w.add_tail(t)
 
-    assert not t1.argo_task.dependencies
+    assert not hasattr(t1.argo_task, 'dependencies')
     assert t2.argo_task.dependencies == ['t1']
     assert t.argo_task.dependencies == ['t2']
 
@@ -156,3 +179,16 @@ def test_wf_overwrites_head_and_tail(w, no_op):
     assert t1.argo_task.dependencies == ['head2', 'head1']
     assert t2.argo_task.dependencies == ['t1', 'head2', 'head1']
     
+
+def test_wf_contains_specified_labels(ws):
+    w = Workflow('w', service=ws, labels={'foo': 'bar'})
+
+    expected_labels = {'foo': 'bar'}
+    assert w.metadata.labels == expected_labels
+
+
+def test_wf_submit_with_default(ws):
+    w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test")
+    w.service = Mock()
+    w.submit()
+    w.service.submit.assert_called_with(w.workflow, w.namespace)

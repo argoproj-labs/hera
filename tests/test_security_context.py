@@ -1,11 +1,9 @@
 import random
 
 import pytest
-from argo.workflows.client import (
-    V1Capabilities,
-    V1PodSecurityContext,
-    V1SecurityContext,
-)
+from argo_workflows.model.capabilities import Capabilities
+from argo_workflows.model.pod_security_context import PodSecurityContext
+from argo_workflows.model.security_context import SecurityContext
 
 from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
 
@@ -51,7 +49,7 @@ def test_workflow_get_security_context(run_as_user, run_as_group, fs_group, run_
         run_as_user=run_as_user, run_as_group=run_as_group, fs_group=fs_group, run_as_non_root=run_as_non_root
     )
     sc = wsc.get_security_context()
-    assert isinstance(sc, V1PodSecurityContext)
+    assert isinstance(sc, PodSecurityContext)
     assert sc.run_as_user == run_as_user
     assert sc.run_as_group == run_as_group
     assert sc.fs_group == fs_group
@@ -80,8 +78,8 @@ def test_task_get_security_context(run_as_user, run_as_group, run_as_non_root, a
         additional_capabilities=additional_capabilities,
     )
     sc = tsc.get_security_context()
-    capabilities = V1Capabilities(add=additional_capabilities)
-    assert isinstance(sc, V1SecurityContext)
+    capabilities = Capabilities(add=additional_capabilities)
+    assert isinstance(sc, SecurityContext)
     assert sc.run_as_user == run_as_user
     assert sc.run_as_group == run_as_group
     assert sc.run_as_non_root == run_as_non_root
