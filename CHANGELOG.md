@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.8.0rc1 - DATE (08/02/2022)
+
+### Changed
+
+- the underlying SDK from argo-workflows v5 to argo-workflows v6.3rc2
+
 # 1.7.0 - DATE (30/01/2022)
 
 ### Added
