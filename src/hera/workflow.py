@@ -34,7 +34,7 @@ class Workflow:
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
     security_context:  Optional[WorkflowSecurityContext] = None
-        A workflow security context to define security settings for all containers in the workflow.
+        Define security settings for all containers in the workflow.
     """
 
     def __init__(
