@@ -123,7 +123,7 @@ class SecretVolume(BaseModel):
     Attributes
     ----------
     name: Optional[str]
-        The name of the volume, if not supplied the a random unique id will be generated for the name
+        The name of the volume, if not supplied a unique id will be generated for the name
     secret_name: str
         The name of the secret existing in the task namespace
     mount_path: str
@@ -170,7 +170,7 @@ class ConfigMapVolume(BaseModel):
     Attributes
     ----------
     name: Optional[str]
-        The name of the volume, if not supplied the a random unique id will be generated for the name
+        The name of the volume, if not supplied a unique id will be generated for the name
     config_map_name: str
         The name of the config map existing in the task namespace
     mount_path: str
