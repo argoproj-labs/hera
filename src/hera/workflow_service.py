@@ -1,10 +1,10 @@
 """Holds the workflow service that supports client workflow submissions"""
 from typing import Optional, Tuple
 
-from argo.workflows.client import (
-    V1alpha1Workflow,
-    V1alpha1WorkflowCreateRequest,
-    WorkflowServiceApi,
+from argo_workflows.apis import WorkflowServiceApi
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Workflow,
+    IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
 )
 
 from hera.client import Client
@@ -43,7 +43,9 @@ class WorkflowService:
         api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
-    def submit(self, workflow: V1alpha1Workflow, namespace: str = 'default') -> V1alpha1Workflow:
+    def submit(
+        self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = 'default'
+    ) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Submits the given workflow to the given namespace.
 
         Parameters
@@ -53,11 +55,20 @@ class WorkflowService:
         namespace: str
             The K8S namespace of the Argo server to submit the workflow to.
 
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1Workflow
+            The submitted workflow.
+
         Raises
         ------
         argo.workflows.client.ApiException
         """
-        return self.service.create_workflow(namespace, V1alpha1WorkflowCreateRequest(workflow=workflow))
+        return self.service.create_workflow(
+            namespace,
+            IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
+            _check_return_type=False,
+        )
 
     def delete(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow from the given namespace based on the specified name.
@@ -69,7 +80,7 @@ class WorkflowService:
 
         Returns
         -------
-            Tuple(object, status_code(int), headers(HTTPHeaderDict))
+        Tuple(object, status_code(int), headers(HTTPHeaderDict))
 
         Raises
         ------

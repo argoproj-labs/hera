@@ -2,12 +2,12 @@
 from typing import Dict, Optional
 from uuid import uuid4
 
-from argo.workflows.client import (
-    V1alpha1DAGTemplate,
-    V1alpha1Template,
-    V1alpha1Workflow,
-    V1alpha1WorkflowSpec,
-    V1ObjectMeta,
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1DAGTemplate,
+    IoArgoprojWorkflowV1alpha1Template,
+    IoArgoprojWorkflowV1alpha1Workflow,
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
+    ObjectMeta,
 )
 
 from hera.task import Task
@@ -45,28 +45,32 @@ class Workflow:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
-        namespace: Optional[str] = 'default',
+        namespace: Optional[str] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
-        self.namespace = namespace
+        self.namespace = namespace or 'default'
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
         self.labels = labels
 
-        self.dag_template = V1alpha1DAGTemplate(tasks=[])
-        self.template = V1alpha1Template(
+        self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
             dag=self.dag_template,
             parallelism=self.parallelism,
-            service_account_name=self.service_account_name,
         )
-        self.metadata = V1ObjectMeta(name=self.name, labels=self.labels)
-        self.spec = V1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
-        )
-        self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(templates=[self.template], entrypoint=self.name)
+        if self.service_account_name:
+            setattr(self.template, 'service_account_name', self.service_account_name)
+            setattr(self.spec, 'service_account_name', self.service_account_name)
+
+        self.metadata = ObjectMeta(name=self.name)
+        if self.labels:
+            setattr(self.metadata, 'labels', self.labels)
+
+        self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
     def add_task(self, t: Task) -> None:
         """Adds a single task to the workflow"""
@@ -76,34 +80,36 @@ class Workflow:
         """Adds multiple tasks to the workflow"""
         if not all(ts):
             return
-        if not self.spec.volume_claim_templates:
-            self.spec.volume_claim_templates = []
+
+        if not hasattr(self.spec, 'volume_claim_templates'):
+            setattr(self.spec, 'volume_claim_templates', [])
+
         for t in ts:
             self.spec.templates.append(t.argo_template)
 
             if t.resources.volume:
-                if not self.spec.volume_claim_templates:
-                    self.spec.volume_claim_templates = [t.resources.volume.get_claim_spec()]
-                else:
+                if hasattr(self.spec, 'volume_claim_template'):
                     self.spec.volume_claim_templates.append(t.resources.volume.get_claim_spec())
+                else:
+                    setattr(self.spec, 'volume_claim_templates', [t.resources.volume.get_claim_spec()])
 
             if t.resources.existing_volume:
-                if not self.spec.volumes:
-                    self.spec.volumes = [t.resources.existing_volume.get_volume()]
-                else:
+                if hasattr(self.spec, 'volumes'):
                     self.spec.volumes.append(t.resources.existing_volume.get_volume())
+                else:
+                    setattr(self.spec, 'volumes', [t.resources.existing_volume.get_volume()])
 
             if t.resources.empty_dir_volume:
-                if not self.spec.volumes:
-                    self.spec.volumes = [t.resources.empty_dir_volume.get_volume()]
-                else:
+                if hasattr(self.spec, 'volumes'):
                     self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
+                else:
+                    setattr(self.spec, 'volumes', [t.resources.empty_dir_volume.get_volume()])
 
             if t.resources.secret_volume:
-                if not self.spec.volumes:
-                    self.spec.volumes = [t.resources.secret_volume.get_volume()]
-                else:
+                if hasattr(self.spec, 'volumes'):
                     self.spec.volumes.append(t.resources.secret_volume.get_volume())
+                else:
+                    setattr(self.spec, 'volumes', [t.resources.secret_volume.get_volume()])
 
             self.dag_template.tasks.append(t.argo_task)
 
@@ -124,10 +130,10 @@ class Workflow:
 
         for template_task in self.dag_template.tasks:
             if template_task.name != t.name:
-                if template_task.dependencies:
+                if hasattr(template_task, 'dependencies'):
                     template_task.dependencies.append(t.name)
                 else:
-                    template_task.dependencies = [t.name]
+                    setattr(template_task, 'dependencies', [t.name])
 
     def add_tail(self, t: Task, append: bool = True) -> None:
         """Adds a task as the tail of the workflow so the workflow ends with the given task.
@@ -147,7 +153,7 @@ class Workflow:
         dependencies = set()
         task_name_to_task = dict()
         for template_task in self.dag_template.tasks:
-            if template_task.dependencies:
+            if hasattr(template_task, 'dependencies'):
                 dependencies.update(template_task.dependencies)
             if template_task.name != t.name:
                 task_name_to_task[template_task.name] = template_task
@@ -157,8 +163,8 @@ class Workflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: Optional[str] = None) -> None:
+    def submit(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Submits the workflow"""
         if namespace is None:
             namespace = self.namespace
-        self.service.submit(self.workflow, namespace)
+        return self.service.submit(self.workflow, namespace)

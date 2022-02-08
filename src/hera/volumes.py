@@ -1,17 +1,17 @@
 import uuid
 from typing import Optional
 
-from argo.workflows.client import (
-    V1EmptyDirVolumeSource,
-    V1ObjectMeta,
-    V1PersistentVolumeClaim,
-    V1PersistentVolumeClaimSpec,
-    V1PersistentVolumeClaimVolumeSource,
-    V1ResourceRequirements,
-    V1SecretVolumeSource,
-    V1Volume,
-    V1VolumeMount,
+from argo_workflows.models import (
+    EmptyDirVolumeSource,
+    ObjectMeta,
+    PersistentVolumeClaim,
+    PersistentVolumeClaimSpec,
+    PersistentVolumeClaimVolumeSource,
+    ResourceRequirements,
+    SecretVolumeSource,
 )
+from argo_workflows.models import Volume as ArgoVolume
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel, validator
 
 from hera.validators import validate_storage_units
@@ -49,27 +49,27 @@ class EmptyDirVolume(BaseModel):
             return str(uuid.uuid4())
         return value
 
-    def get_volume(self) -> V1Volume:
+    def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
         -------
-        V1Volume
+        Volume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        size_limit = self.size if self.size else None
-        empty_dir = V1EmptyDirVolumeSource(medium='Memory', size_limit=size_limit)
-        return V1Volume(name=self.name, empty_dir=empty_dir)
+        size_limit = self.size if self.size else ""
+        empty_dir = EmptyDirVolumeSource(medium='Memory', size_limit=size_limit)
+        return ArgoVolume(name=self.name, empty_dir=empty_dir)
 
-    def get_mount(self) -> V1VolumeMount:
+    def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
         -------
-        V1VolumeMount
+        VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(mount_path=self.mount_path, name=self.name)
+        return VolumeMount(mount_path=self.mount_path, name=self.name)
 
 
 class ExistingVolume(BaseModel):
@@ -94,18 +94,18 @@ class ExistingVolume(BaseModel):
         assert '_' not in value, 'existing volume name cannot contain underscores, see RFC1123'
         return value
 
-    def get_volume(self) -> V1Volume:
+    def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
         -------
-        V1Volume
+        _ArgoVolume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        claim = V1PersistentVolumeClaimVolumeSource(claim_name=self.name)
-        return V1Volume(name=self.name, persistent_volume_claim=claim)
+        claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
+        return ArgoVolume(name=self.name, persistent_volume_claim=claim)
 
-    def get_mount(self) -> V1VolumeMount:
+    def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
@@ -113,7 +113,7 @@ class ExistingVolume(BaseModel):
         V1VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(name=self.name, mount_path=self.mount_path)
+        return VolumeMount(name=self.name, mount_path=self.mount_path)
 
 
 class SecretVolume(BaseModel):
@@ -141,26 +141,26 @@ class SecretVolume(BaseModel):
             return str(uuid.uuid4())
         return value
 
-    def get_volume(self) -> V1Volume:
+    def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for a secret in the task namespace
 
         Returns
         -------
-        V1Volume
+        _ArgoVolume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        secret = V1SecretVolumeSource(secret_name=self.secret_name)
-        return V1Volume(name=self.name, secret=secret)
+        secret = SecretVolumeSource(secret_name=self.secret_name)
+        return ArgoVolume(name=self.name, secret=secret)
 
-    def get_mount(self) -> V1VolumeMount:
+    def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
         -------
-        V1VolumeMount
+        VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(name=self.name, mount_path=self.mount_path)
+        return VolumeMount(name=self.name, mount_path=self.mount_path)
 
 
 class Volume(BaseModel):
@@ -207,34 +207,34 @@ class Volume(BaseModel):
         validate_storage_units(value)
         return value
 
-    def get_mount(self) -> V1VolumeMount:
+    def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.
 
         Returns
         -------
-        V1VolumeMount
+        VolumeMount
             The Argo model for mounting volumes.
         """
-        return V1VolumeMount(mount_path=self.mount_path, name=self.name)
+        return VolumeMount(mount_path=self.mount_path, name=self.name)
 
-    def get_claim_spec(self) -> V1PersistentVolumeClaim:
+    def get_claim_spec(self) -> PersistentVolumeClaim:
         """Constructs and returns an Argo volume claim representation for tasks. This is typically used by workflows
         to dynamically provision volumes and discard them upon completion.
 
         Returns
         -------
-        V1PersistentVolumeClaim
+        PersistentVolumeClaim
             The claim to be used by the Argo workflow.
         """
-        spec = V1PersistentVolumeClaimSpec(
+        spec = PersistentVolumeClaimSpec(
             # GKE does not accept ReadWriteMany for dynamically provisioned disks, default to ReadWriteOnce
             access_modes=['ReadWriteOnce'],
-            resources=V1ResourceRequirements(
+            resources=ResourceRequirements(
                 requests={
                     'storage': self.size,
                 }
             ),
             storage_class_name=self.storage_class_name,
         )
-        metadata = V1ObjectMeta(name=self.name)
-        return V1PersistentVolumeClaim(spec=spec, metadata=metadata)
+        metadata = ObjectMeta(name=self.name)
+        return PersistentVolumeClaim(spec=spec, metadata=metadata)

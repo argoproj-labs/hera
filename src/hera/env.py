@@ -1,11 +1,11 @@
 import json
 from typing import Any, Optional
 
-from argo.workflows.client import (
-    V1ConfigMapKeySelector,
-    V1EnvVar,
-    V1EnvVarSource,
-    V1SecretKeySelector,
+from argo_workflows.models import (
+    ConfigMapKeySelector,
+    EnvVar,
+    EnvVarSource,
+    SecretKeySelector,
 )
 from pydantic import BaseModel, validator
 
@@ -41,7 +41,7 @@ class EnvSpec(BaseModel):
         return value
 
     @property
-    def argo_spec(self) -> V1EnvVar:
+    def argo_spec(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
         if isinstance(self.value, BaseModel):
             value = self.value.json()
@@ -49,7 +49,7 @@ class EnvSpec(BaseModel):
             value = self.value
         else:
             value = json.dumps(self.value)
-        return V1EnvVar(name=self.name, value=value)
+        return EnvVar(name=self.name, value=value)
 
 
 class SecretEnvSpec(EnvSpec):
@@ -67,11 +67,11 @@ class SecretEnvSpec(EnvSpec):
     secret_key: str
 
     @property
-    def argo_spec(self) -> V1EnvVar:
+    def argo_spec(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
-        return V1EnvVar(
+        return EnvVar(
             name=self.name,
-            value_from=V1EnvVarSource(secret_key_ref=V1SecretKeySelector(name=self.secret_name, key=self.secret_key)),
+            value_from=EnvVarSource(secret_key_ref=SecretKeySelector(name=self.secret_name, key=self.secret_key)),
         )
 
 
@@ -90,11 +90,11 @@ class ConfigMapEnvSpec(EnvSpec):
     config_map_key: str
 
     @property
-    def argo_spec(self) -> V1EnvVar:
+    def argo_spec(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
-        return V1EnvVar(
+        return EnvVar(
             name=self.name,
-            value_from=V1EnvVarSource(
-                config_map_key_ref=V1ConfigMapKeySelector(name=self.config_map_name, key=self.config_map_key)
+            value_from=EnvVarSource(
+                config_map_key_ref=ConfigMapKeySelector(name=self.config_map_name, key=self.config_map_key)
             ),
         )

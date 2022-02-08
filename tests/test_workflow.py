@@ -17,9 +17,7 @@ def test_wf_contains_specified_service_account(ws):
 def test_wf_does_not_contain_sa_if_one_is_not_specified(ws):
     w = Workflow('w', service=ws)
 
-    expected_sa = None
-    assert w.spec.service_account_name == expected_sa
-    assert w.spec.templates[0].service_account_name == expected_sa
+    assert not hasattr(w.spec, 'service_account_name')
 
 
 def test_wf_does_not_add_empty_task(w):
@@ -117,7 +115,7 @@ def test_wf_adds_tail(w, no_op):
     t = Task('tail', no_op)
     w.add_tail(t)
 
-    assert not t1.argo_task.dependencies
+    assert not hasattr(t1.argo_task, 'dependencies')
     assert t2.argo_task.dependencies == ['t1']
     assert t.argo_task.dependencies == ['t2']
 

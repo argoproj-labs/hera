@@ -3,7 +3,7 @@ import os
 from typing import Optional
 
 import urllib3
-from argo.workflows.client import Configuration as ArgoConfig
+from argo_workflows.api_client import Configuration as ArgoConfig
 
 # __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
 # explicitly asked for it to disable SSL, it's safe to ignore the warning.
@@ -30,13 +30,18 @@ class Config:
         self._verify_ssl = verify_ssl
         self._config = self.__get_config()
 
-    def _assemble_host(self):
+    def _assemble_host(self) -> str:
         """Assembles a host from the default K8S cluster env variables with Argo's address.
 
         Notes
         -----
         The pod containers should have an environment variable with the address of the Argo server, and this is
         # the default one. Users who wish to assemble this on their own can do so and submit the result via the `host`
+
+        Returns
+        -------
+        str
+            Assembled host.
         """
         tcp_addr = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR', None)
         assert tcp_addr is not None, 'A configuration/service host is required for submitting workflows'
@@ -50,6 +55,11 @@ class Config:
         This attempts to get environment variables that are typically
         shared with all the deployments of K8S. If those are not specified, it uses the passed in domain to configure
         the address.
+
+        Returns
+        -------
+        _ArgoConfig
+            The Argo service configuration.
 
         Notes
         -----
