@@ -32,15 +32,15 @@ class CronWorkflow:
     service: CronWorkflowService
         A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
     timezone: str
-        Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles
+        Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles.
     schedule: str
-        Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *
+        Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *.
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
-        A Dict of labels to attach to the CronWorkflow object metadata
+        A Dict of labels to attach to the CronWorkflow object metadata.
     namespace: Optional[str] = 'default'
         The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
     """
@@ -54,7 +54,7 @@ class CronWorkflow:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
-        namespace: Optional[str] = None,
+        namespace: Optional[str] = "default",
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -65,8 +65,8 @@ class CronWorkflow:
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
-        self.labels = labels or {}
-        self.namespace = namespace or 'default'
+        self.labels = labels
+        self.namespace = namespace
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -84,7 +84,10 @@ class CronWorkflow:
         if self.timezone:
             setattr(self.cron_spec, 'timezone', self.timezone)
 
-        self.metadata = ObjectMeta(name=self.name, labels=self.labels)
+        self.metadata = ObjectMeta(name=self.name)
+        if self.labels:
+            setattr(self.metadata, 'labels', self.labels)
+
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,
             spec=self.cron_spec,

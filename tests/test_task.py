@@ -231,8 +231,7 @@ def test_task_template_does_not_contain_gpu_references(op):
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
     assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
-    assert hasattr(tt, 'node_selector')
-    assert tt.node_selector == {}
+    assert not hasattr(tt, 'node_selector')
 
 
 def test_task_template_contains_expected_field_values_and_types(op):
@@ -251,7 +250,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
     assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
-    assert isinstance(tt.node_selector, dict)
+    assert not hasattr(tt, 'node_selectors')
     assert isinstance(tt.tolerations, list)
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
@@ -267,6 +266,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.retry_strategy.backoff.duration == '1'
     assert tt.retry_strategy.backoff.max_duration == '2'
     assert tt.daemon
+    assert hasattr(tt, 'node_selector')
     assert not hasattr(tt, 'container')
 
 

@@ -192,7 +192,7 @@ class Task:
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
-        A Dict of labels to attach to the Task Template object metadata
+        A Dict of labels to attach to the Task Template object metadata.
     """
 
     def __init__(
@@ -229,8 +229,8 @@ class Task:
         self.resources = resources
         self.working_dir = working_dir
         self.retry = retry
-        self.tolerations = tolerations or []
-        self.node_selectors = node_selectors or {}
+        self.tolerations = tolerations
+        self.node_selector = node_selectors
         self.labels = labels or {}
 
         self.parameters = self.get_parameters()
@@ -684,17 +684,20 @@ class Task:
             daemon=self.daemon,
             inputs=self.inputs,
             outputs=self.outputs,
-            node_selector=self.node_selectors,
             tolerations=self.get_tolerations(),
             metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels),
         )
+        if self.node_selector:
+            setattr(template, 'node_selector', self.node_selector)
+
         retry_strategy = self.get_retry_strategy()
         if retry_strategy:
             setattr(template, 'retry_strategy', retry_strategy)
+
         if self.get_script_def():
-            template.script = self.get_script_def()
+            setattr(template, 'script', self.get_script_def())
         else:
-            template.container = self.get_container()
+            setattr(template, 'container', self.get_container())
         return template
 
     def get_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:
@@ -705,7 +708,7 @@ class Task:
         Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]
             A V1alpha1RetryStrategy object if `retry_limit` is specified, None otherwise.
         """
-        if self.retry is not None:
+        if self.retry:
             return IoArgoprojWorkflowV1alpha1RetryStrategy(
                 backoff=IoArgoprojWorkflowV1alpha1Backoff(
                     duration=str(self.retry.duration), max_duration=str(self.retry.max_duration)
@@ -718,7 +721,7 @@ class Task:
 
         Returns
         -------
-        List[_ArgoToleration]
+        Optional[List[_ArgoToleration]]
             The list of assembled tolerations.
 
         Notes
@@ -739,7 +742,7 @@ class Task:
 
         Returns
         -------
-        IoArgoprojWorkflowV1alpha1DAGTask
+        V1alpha1DAGTask
             The graph task representation.
         """
         if self.input_from:

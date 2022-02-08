@@ -52,7 +52,7 @@ class Workflow:
         self.service = service
         self.parallelism = parallelism
         self.service_account_name = service_account_name
-        self.labels = labels or {}
+        self.labels = labels
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -66,7 +66,10 @@ class Workflow:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
 
-        self.metadata = ObjectMeta(name=self.name, labels=self.labels)
+        self.metadata = ObjectMeta(name=self.name)
+        if self.labels:
+            setattr(self.metadata, 'labels', self.labels)
+
         self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
     def add_task(self, t: Task) -> None:
