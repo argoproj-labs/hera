@@ -28,8 +28,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
 )
-from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
@@ -193,10 +193,10 @@ class Task:
         requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
-    security_context: Optional[TaskSecurityContext] = None
-        Define security settings for the task container, overrides workflow security context.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Task Template object metadata.
+    security_context: Optional[TaskSecurityContext] = None
+        Define security settings for the task container, overrides workflow security context.
     """
 
     def __init__(
@@ -216,8 +216,8 @@ class Task:
         retry: Optional[Retry] = None,
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
-        security_context: Optional[TaskSecurityContext] = None,
         labels: Optional[Dict[str, str]] = None,
+        security_context: Optional[TaskSecurityContext] = None
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -235,9 +235,9 @@ class Task:
         self.working_dir = working_dir
         self.retry = retry
         self.tolerations = tolerations
-        self.security_context = security_context
         self.node_selector = node_selectors
         self.labels = labels or {}
+        self.security_context = security_context
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -677,18 +677,16 @@ class Task:
         if self.working_dir:
             setattr(container, 'working_dir', self.working_dir)
         return container
-
+    
     def get_security_context(self) -> SecurityContext:
-        """Assembles the security context for the task
-
+        """Assembles the security context for the task.
         Returns
         -------
         SecurityContext
             The security settings to apply to the task's container.
         """
-        if self.security_context is not None:
+        if self.security_context:
             return self.security_context.get_security_context()
-        return None
 
     def get_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
@@ -705,13 +703,15 @@ class Task:
             inputs=self.inputs,
             outputs=self.outputs,
             tolerations=self.get_tolerations(),
-            retry_strategy=self.get_retry_strategy(),
-            security_context=self.get_security_context(),
             metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels),
         )
         if self.node_selector:
             setattr(template, 'node_selector', self.node_selector)
 
+        security_context = self.get_security_context()
+        if security_context:
+            setattr(template, 'security_context', security_context)
+        
         retry_strategy = self.get_retry_strategy()
         if retry_strategy:
             setattr(template, 'retry_strategy', retry_strategy)

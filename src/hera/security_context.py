@@ -48,7 +48,7 @@ class TaskSecurityContext(BaseModel):
         Sets the group id of the user running in the task's container.
     run_as_non_root: Optional[bool]
         Validates that the tasks container does not run as root, i.e UID does not equal 0.
-    add_capabilities: List[str]
+    additional_capabilities: List[str]
         List of POSIX capabilities to add to the task's container.
     """
 
@@ -58,13 +58,17 @@ class TaskSecurityContext(BaseModel):
     additional_capabilities: List[str] = None
 
     def _get_capabilties(self):
-        return Capabilities(add=self.additional_capabilities)
+        if self.additional_capabilities:
+            return Capabilities(add=self.additional_capabilities)
 
     def get_security_context(self) -> SecurityContext:
         capabilities = self._get_capabilties()
-        return SecurityContext(
+        security_context = SecurityContext(
             run_as_user=self.run_as_user,
             run_as_group=self.run_as_group,
             run_as_non_root=self.run_as_non_root,
             capabilities=capabilities,
         )
+        if capabilities:
+            setattr(security_context, 'capabilities', capabilities)
+        return security_context

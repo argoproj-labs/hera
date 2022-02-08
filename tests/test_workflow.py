@@ -37,7 +37,7 @@ def test_wf_contains_specified_security_context(ws):
     wsc = WorkflowSecurityContext(
         run_as_user=run_as_user, run_as_group=run_as_group, fs_group=fs_group, run_as_non_root=run_as_non_root
     )
-    w = Workflow('w', service=ws, service_account_name='w-sa', security_context=wsc)
+    w = Workflow('w', service=ws, security_context=wsc)
 
     expected_security_context = PodSecurityContext(
         fs_group=fs_group, run_as_group=run_as_group, run_as_user=run_as_user, run_as_non_root=run_as_non_root
@@ -47,9 +47,8 @@ def test_wf_contains_specified_security_context(ws):
 
 def test_wf_does_not_contain_specified_security_context(ws):
     w = Workflow('w', service=ws)
-
-    expected_sc = None
-    assert w.spec.security_context == expected_sc
+    
+    assert "security_context" not in w.spec
 
 
 def test_wf_does_not_add_empty_task(w):

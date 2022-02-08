@@ -371,8 +371,7 @@ def test_task_contains_specified_security_context(no_op):
 def test_task_does_not_contain_specified_security_context(no_op):
     t = Task('t', no_op)
 
-    expected_security_context = None
-    assert t.argo_template.security_context == expected_security_context
+    assert "security_context" not in t.argo_template.security_context
 
 def test_task_template_has_correct_labels(op):
     t = Task('t', op, [{'a': 1}], resources=Resources(), labels={'foo': 'bar'})
