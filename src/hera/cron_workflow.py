@@ -17,6 +17,7 @@ from argo_workflows.models import (
 
 from hera.cron_workflow_service import CronWorkflowService
 from hera.task import Task
+from hera.volumes import Volume
 
 
 class CronWorkflow:
@@ -107,30 +108,17 @@ class CronWorkflow:
         if not all(ts):
             return
 
-        if not hasattr(self.spec, 'volume_claim_templates'):
-            setattr(self.spec, 'volume_claim_templates', [])
-
         for t in ts:
             self.spec.templates.append(t.argo_template)
 
             if t.resources.volumes:
                 for vol in t.resources.volumes:
-                    self.spec.volume_claim_templates.append(vol.get_claim_spec())
-
-            if t.resources.existing_volumes:
-                for existing_volume in t.resources.existing_volumes:
-                    self.spec.volumes.append(existing_volume.get_volume())
-
-            if t.resources.empty_dir_volume:
-                self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
-
-            if t.resources.secret_volumes:
-                for secret_volume in t.resources.secret_volumes:
-                    self.spec.volumes.append(secret_volume.get_volume())
-
-            if t.resources.config_map_volumes:
-                for config_map_volume in t.resources.config_map_volumes:
-                    self.spec.volumes.append(config_map_volume.get_volume())
+                    if isinstance(vol, Volume):
+                        print('adding claim')
+                        # dynamically provisioned volumes need associated claims on the workflow spec
+                        self.spec.volume_claim_templates.append(vol.get_claim_spec())
+                    else:
+                        self.spec.volumes.append(vol.get_volume())
 
             self.dag_template.tasks.append(t.argo_task)
 

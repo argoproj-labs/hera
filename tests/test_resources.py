@@ -21,7 +21,7 @@ def test_init_raises_on_invalid_cpu():
 
 def test_init_volume_error_propagates():
     with pytest.raises(ValidationError):
-        Resources(volume=Volume(size='1', mount_path='/path'))
+        Resources(volumes=[Volume(size='1', mount_path='/path')])
 
 
 def test_init_passes():
@@ -31,9 +31,11 @@ def test_init_passes():
         min_mem='2Gi',
         max_mem='3Gi',
         gpus=1,
-        volumes=[Volume(size='10Gi', mount_path='/path')],
-        existing_volumes=[ExistingVolume(name='test', mount_path='/path2')],
-        secret_volumes=[SecretVolume(name='secret', secret_name='secret_name', mount_path="/path3")],
+        volumes=[
+            Volume(size='10Gi', mount_path='/path'),
+            ExistingVolume(name='test', mount_path='/path2'),
+            SecretVolume(name='secret', secret_name='secret_name', mount_path="/path3"),
+        ],
     )
     assert r.min_cpu == 1
     assert r.max_cpu == 2
@@ -42,14 +44,17 @@ def test_init_passes():
     assert r.gpus == 1
 
     vol = r.volumes[0]
+    assert isinstance(vol, Volume)
     assert vol.size == '10Gi'
     assert vol.mount_path == '/path'
 
-    ex_vol = r.existing_volumes[0]
+    ex_vol = r.volumes[1]
+    assert isinstance(ex_vol, ExistingVolume)
     assert ex_vol.name == 'test'
     assert ex_vol.mount_path == '/path2'
 
-    sc_vol = r.secret_volumes[0]
+    sc_vol = r.volumes[2]
+    assert isinstance(sc_vol, SecretVolume)
     assert sc_vol.name == 'secret'
     assert sc_vol.secret_name == 'secret_name'
     assert sc_vol.mount_path == '/path3'

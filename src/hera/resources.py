@@ -1,16 +1,10 @@
 """Holds the resource specification"""
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, root_validator, validator
 
 from hera.validators import validate_storage_units
-from hera.volumes import (
-    ConfigMapVolume,
-    EmptyDirVolume,
-    ExistingVolume,
-    SecretVolume,
-    Volume,
-)
+from hera.volumes import BaseVolume, EmptyDirVolume
 
 
 class Resources(BaseModel):
@@ -30,14 +24,8 @@ class Resources(BaseModel):
         `overwrite_maxs` is True.
     gpus: Optional[int]
         The number of GPUs to request as part of the workflow.
-    volumes: Optional[List[Volume]] = None
-        Volumes to dynamically provision and mount as resources.
-    existing_volumes: Optional[List[ExistingVolume]] = None
-        Existing volumes to mount as resources.
-    secret_volumes: Optional[List[SecretVolume]] = None
-        Any secrets to mount as volumes.
-    config_map_volumes: Optional[List[ConfigMapVolume]] = None
-        Any config maps to mount as volumes.
+    volumes: Optional[List[BaseVolume]] = None
+        List of available Hera volumes [ConfigMapVolume, EmptyDirVolume, ExistingVolume, SecretVolume, Volume].
     overwrite_maxs: bool = True
         Whether to override `max_cpu` and `max_mem` with corresponding min values when they are not specified.
     """
@@ -50,12 +38,7 @@ class Resources(BaseModel):
 
     gpus: Optional[int] = None
 
-    volumes: Optional[List[Volume]] = None
-    existing_volumes: Optional[List[ExistingVolume]] = None
-    secret_volumes: Optional[List[SecretVolume]] = None
-    config_map_volumes: Optional[List[ConfigMapVolume]] = None
-
-    empty_dir_volume: Optional[EmptyDirVolume] = None
+    volumes: Optional[List[BaseVolume]] = None
 
     overwrite_maxs: bool = True
 
@@ -63,6 +46,22 @@ class Resources(BaseModel):
     def valid_units(cls, value):
         """Validates that memory specifications have correct units"""
         validate_storage_units(value)
+        return value
+
+    @validator('volumes')
+    def valid_volume_frequencies(cls, value):
+        """Validates that a single EmptyDir volume is specified (K8S limitation)"""
+        freqs: Dict[str, int] = {}
+        if value:
+            for volume in value:
+                if volume.__class__.__name__ in freqs:
+                    freqs[volume.__class__.__name__] += 1
+                else:
+                    freqs[volume.__class__.__name__] = 1
+                if volume.__class__ == EmptyDirVolume:
+                    assert (
+                        EmptyDirVolume.__class__.__name__ not in freqs or freqs[EmptyDirVolume.__class__.__name__] <= 1
+                    )
         return value
 
     @root_validator
