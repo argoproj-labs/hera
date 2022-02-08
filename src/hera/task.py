@@ -393,7 +393,11 @@ class Task:
         """
         input_art = []
         if self.argo_input_artifacts:
-            input_art = self.argo_input_artifacts
+            for artifact in self.argo_input_artifacts:
+                if hasattr(artifact, "_from"):
+                    input_art.append(IoArgoprojWorkflowV1alpha1Artifact(name=artifact.name, path=artifact.path))
+                else:
+                    input_art.append(artifact)
         return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
