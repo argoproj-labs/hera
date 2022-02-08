@@ -336,15 +336,16 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
 
 
 def test_task_adds_s3_input_artifact():
-    t = Task('t', input_artifacts=[S3InputArtifact(name="n", path="/p", bucket_name="b", key="key")])
+    t = Task('t', input_artifacts=[S3InputArtifact(name="n", path="/p", bucket="b", key="key")])
 
     artifact = t.inputs.artifacts[0]
     assert artifact.name == "n"
     assert artifact.s3.bucket == "b"
     assert artifact.s3.key == "key"
 
+
 def test_task_adds_gcs_input_artifact():
-    t = Task('t', input_artifacts=[GCSInputArtifact(name="n", path="/p", bucket_name="b", key="key")])
+    t = Task('t', input_artifacts=[GCSInputArtifact(name="n", path="/p", bucket="b", key="key")])
 
     artifact = t.inputs.artifacts[0]
     assert artifact.name == "n"
