@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.8.0rc5 - DATE (08/02/2022)
+
+### Added
+
+- add image pull policy on tasks
+
 # 1.8.0rc4 - DATE (08/02/2022)
 
 ### Added
