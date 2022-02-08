@@ -32,7 +32,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
-from hera.artifact import InputArtifact, OutputArtifact
+from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -201,7 +201,7 @@ class Task:
         func: Optional[Callable] = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
-        input_artifacts: Optional[List[InputArtifact]] = None,
+        input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
         daemon: bool = False,
@@ -393,9 +393,7 @@ class Task:
         """
         input_art = []
         if self.argo_input_artifacts:
-            input_art = [
-                IoArgoprojWorkflowV1alpha1Artifact(name=a.name, path=a.path) for a in self.argo_input_artifacts
-            ]
+            input_art = self.argo_input_artifacts
         return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:

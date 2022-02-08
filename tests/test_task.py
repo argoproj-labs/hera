@@ -3,6 +3,7 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
+from hera.artifact import S3InputArtifact
 from hera.env import ConfigMapEnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -330,9 +331,17 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
     artifact = t.inputs.artifacts[0]
-    assert not hasattr(artifact, '_from')
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
+
+
+def test_task_adds_s3_input_artifact():
+    t = Task('t', input_artifacts=[S3InputArtifact(name="n", path="/p", bucket_name="b", s3_key="key")])
+
+    artifact = t.inputs.artifacts[0]
+    assert artifact.name == "n"
+    assert artifact.s3.bucket == "b"
+    assert artifact.s3.key == "key"
 
 
 def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
