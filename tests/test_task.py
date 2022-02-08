@@ -165,7 +165,7 @@ def test_volume_mounts_returns_expected_volumes(no_op):
         volume=Volume(name='v1', size='1Gi', mount_path='/v1'),
         existing_volume=ExistingVolume(name='v2', mount_path='/v2'),
         empty_dir_volume=EmptyDirVolume(name='v3'),
-        config_map_volume=ConfigMapVolume(config_map_name="cfm", mount_path="/v3")
+        config_map_volume=ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
     )
     t = Task('t', no_op, resources=r)
     vs = t.get_volume_mounts()

@@ -111,7 +111,7 @@ class Workflow:
                     self.spec.volumes.append(t.resources.secret_volume.get_volume())
                 else:
                     setattr(self.spec, 'volumes', [t.resources.secret_volume.get_volume()])
-            
+
             if t.resources.config_map_volume:
                 if hasattr(self.spec, 'volumes'):
                     self.spec.volumes.append(t.resources.config_map_volume.get_volume())

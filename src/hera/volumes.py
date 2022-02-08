@@ -2,6 +2,7 @@ import uuid
 from typing import Optional
 
 from argo_workflows.models import (
+    ConfigMapVolumeSource,
     EmptyDirVolumeSource,
     ObjectMeta,
     PersistentVolumeClaim,
@@ -9,7 +10,6 @@ from argo_workflows.models import (
     PersistentVolumeClaimVolumeSource,
     ResourceRequirements,
     SecretVolumeSource,
-    ConfigMapVolumeSource
 )
 from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
@@ -163,6 +163,7 @@ class SecretVolume(BaseModel):
         """
         return VolumeMount(name=self.name, mount_path=self.mount_path)
 
+
 class ConfigMapVolume(BaseModel):
     """A volume representing a config map. This can be used to mount config maps to paths inside a task
 
@@ -208,8 +209,6 @@ class ConfigMapVolume(BaseModel):
             The Argo model for mounting volumes.
         """
         return VolumeMount(name=self.name, mount_path=self.mount_path)
-        
-    
 
 
 class Volume(BaseModel):
