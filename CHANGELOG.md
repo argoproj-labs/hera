@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 1.8.0rc7 - DATE (08/02/2022)
+
+### Added
+
+- add support for bucket resource inputs with key only
+
 # 1.8.0rc6 - DATE (08/02/2022)
 
 ### Changed
