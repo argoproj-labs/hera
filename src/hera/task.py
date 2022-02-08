@@ -28,7 +28,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
 )
-from argo_workflows.models import Toleration as _ArgoToleration
+from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
@@ -713,7 +713,7 @@ class Task:
             )
         return None
 
-    def get_tolerations(self) -> List[_ArgoToleration]:
+    def get_tolerations(self) -> List[ArgoToleration]:
         """Assembles and returns the pod toleration objects required for scheduling a task.
 
         Returns
@@ -731,7 +731,7 @@ class Task:
 
         ts = []
         for t in self.tolerations:
-            ts.append(_ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
+            ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
         return ts if ts else []
 
     def get_task_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:

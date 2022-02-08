@@ -3,7 +3,7 @@ import os
 from typing import Optional
 
 import urllib3
-from argo_workflows.api_client import Configuration as _ArgoConfig
+from argo_workflows.api_client import Configuration as ArgoConfig
 
 # __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
 # explicitly asked for it to disable SSL, it's safe to ignore the warning.
@@ -49,7 +49,7 @@ class Config:
         tcp_port = os.getenv('ARGO_SERVER_PORT_2746_TCP_PORT', None)
         return f'https://{tcp_addr}:{tcp_port}' if tcp_port else f'https://{tcp_addr}'
 
-    def __get_config(self) -> _ArgoConfig:
+    def __get_config(self) -> ArgoConfig:
         """Assembles the Argo configuration.
 
         This attempts to get environment variables that are typically
@@ -69,11 +69,11 @@ class Config:
 
         Use this together with Client to instantiate a WorkflowService/CronWorkflowService.
         """
-        config = _ArgoConfig(host=self._host)
+        config = ArgoConfig(host=self._host)
         config.verify_ssl = self._verify_ssl
         return config
 
     @property
-    def config(self) -> _ArgoConfig:
+    def config(self) -> ArgoConfig:
         """Returns the Argo configuration that was assembled by the class"""
         return self._config
