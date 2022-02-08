@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from hera.resources import Resources
 from hera.task import Task
-from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
+from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, SecretVolume, Volume
 from hera.workflow import Workflow
 
 
@@ -59,6 +59,13 @@ def test_wf_adds_task_secret_volume(w, no_op):
     vol = w.spec.volumes[0]
     assert vol.name == 's'
     assert vol.secret.secret_name == 'sn'
+
+def test_wf_adds_task_config_map_volume(w):
+    t = Task('t', resources=Resources(config_map_volume=ConfigMapVolume(config_map_name='cmn', mount_path='/')))
+    w.add_task(t)
+
+    assert w.spec.volumes[0].name
+    assert w.spec.volumes[0].config_map.name == "cmn"
 
 
 def test_wf_adds_task_existing_checkpoints_staging_volume(w, no_op):

@@ -10,7 +10,7 @@ from hera.resources import Resources
 from hera.retry import Retry
 from hera.task import Task
 from hera.toleration import GPUToleration, Toleration
-from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
+from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -165,6 +165,7 @@ def test_volume_mounts_returns_expected_volumes(no_op):
         volume=Volume(name='v1', size='1Gi', mount_path='/v1'),
         existing_volume=ExistingVolume(name='v2', mount_path='/v2'),
         empty_dir_volume=EmptyDirVolume(name='v3'),
+        config_map_volume=ConfigMapVolume(config_map_name="cfm", mount_path="/v3")
     )
     t = Task('t', no_op, resources=r)
     vs = t.get_volume_mounts()
@@ -174,6 +175,8 @@ def test_volume_mounts_returns_expected_volumes(no_op):
     assert vs[1].mount_path == '/v2'
     assert vs[2].name == 'v3'
     assert vs[2].mount_path == '/dev/shm'
+    assert vs[3].name
+    assert vs[3].mount_path == "/v3"
 
 
 def test_gpu_toleration_returns_expected_toleration():

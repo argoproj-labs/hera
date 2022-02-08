@@ -4,7 +4,7 @@ from typing import Optional, Union
 from pydantic import BaseModel, root_validator, validator
 
 from hera.validators import validate_storage_units
-from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
+from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, SecretVolume, Volume
 
 
 class Resources(BaseModel):
@@ -42,6 +42,7 @@ class Resources(BaseModel):
     existing_volume: Optional[ExistingVolume] = None
     empty_dir_volume: Optional[EmptyDirVolume] = None
     secret_volume: Optional[SecretVolume] = None
+    config_map_volume: Optional[ConfigMapVolume] = None
 
     overwrite_maxs: bool = True
 
