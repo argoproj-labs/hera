@@ -9,7 +9,6 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     ObjectMeta,
 )
-from attr import has
 
 from hera.task import Task
 from hera.workflow_service import WorkflowService
