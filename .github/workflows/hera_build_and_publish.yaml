@@ -63,16 +63,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel pytest
 
-      # Install Hera specifically from the Test index URL. Note that this script "sleeps" for 15 seconds. This hacky
+      # Install Hera specifically from the Test index URL. Note that this script "sleeps" for 60 seconds. This hacky
       # approach was introduced in order to wait for Test PyPI to update the index with the new Hera version so it's
       # available for installation.
       - name: Install published test package
         run: |
-          sleep 15s
+          sleep 60s
           HERA_VERSION=$(cat VERSION)
           python -m pip install \
             --index-url https://test.pypi.org/simple/ hera-workflows==$HERA_VERSION \
-            --extra-index-url https://pypi.org/simple
+            --extra-index-url=https://pypi.org/simple/
 
       # If this succeeds, Hera is ready for publication.
       - name: Run tests with published package
