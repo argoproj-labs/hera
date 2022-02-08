@@ -1,11 +1,12 @@
 import pytest
-from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration
+from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration, V1SecurityContext, V1Capabilities
 from pydantic import ValidationError
 
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
+from hera.security_context import TaskSecurityContext
 from hera.task import Task
 from hera.toleration import GPUToleration, Toleration
 from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
@@ -333,5 +334,30 @@ def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     assert artifact.path == out_artifact.path
 
 
-def test_task_security_context():
-    assert False
+def test_task_contains_specified_security_context(no_op):
+    run_as_user = 1000
+    run_as_group = 1001
+    run_as_non_root = True
+    additional_capabilities = ["SYS_RAWIO"]
+    expected_capabilities = V1Capabilities(add=additional_capabilities)
+    tsc = TaskSecurityContext(
+        run_as_user=run_as_user,
+        run_as_group=run_as_group,
+        run_as_non_root=run_as_non_root,
+        additional_capabilities=additional_capabilities,
+    )
+    t = Task('t', no_op, security_context=tsc)
+    expected_security_context = V1SecurityContext(
+        run_as_group=run_as_group,
+        run_as_user=run_as_user,
+        run_as_non_root=run_as_non_root,
+        capabilities=expected_capabilities,
+    )
+    assert t.argo_template.security_context == expected_security_context
+
+
+def test_task_does_not_contain_specified_security_context(no_op):
+    t = Task('t', no_op)
+    
+    expected_security_context = None
+    assert t.argo_template.security_context == expected_security_context

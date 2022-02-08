@@ -19,6 +19,7 @@ from argo.workflows.client import (
     V1alpha1Template,
     V1EnvVar,
     V1ResourceRequirements,
+    V1SecurityContext,
     V1Toleration,
     V1VolumeMount,
 )
@@ -29,6 +30,7 @@ from hera.env import EnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
+from hera.security_context import TaskSecurityContext
 from hera.retry import Retry
 from hera.toleration import Toleration
 
@@ -79,6 +81,8 @@ class Task:
         requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
+    security_context: Optional[TaskSecurityContext] = None
+        Define security settings for the task container, overrides workflow security context.
     """
 
     def __init__(
@@ -97,6 +101,7 @@ class Task:
         retry: Optional[Retry] = None,
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
+        security_context: Optional[TaskSecurityContext] = None
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -114,6 +119,7 @@ class Task:
         self.retry = retry
         self.tolerations = tolerations
         self.node_selectors = node_selectors
+        self.security_context = security_context
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -515,6 +521,18 @@ class Task:
             working_dir=self.working_dir,
         )
 
+    def get_security_context(self) -> V1SecurityContext:
+        """Assembles the security context for the task
+
+        Returns
+        -------
+        V1SecurityContext
+            The security settings to apply to the task's container.
+        """
+        if self.security_context is not None:
+            return self.security_context.get_security_context()
+        return None
+    
     def get_task_template(self) -> V1alpha1Template:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
         configuration required for the task be executed.
@@ -533,6 +551,7 @@ class Task:
             node_selector=self.node_selectors,
             tolerations=self.get_tolerations(),
             retry_strategy=self.get_retry_strategy(),
+            security_context=self.get_security_context()
         )
 
     def get_retry_strategy(self) -> Optional[V1alpha1RetryStrategy]:
