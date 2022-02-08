@@ -3,7 +3,7 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
-from hera.artifact import GCSInputArtifact, S3InputArtifact
+from hera.artifact import GCSArtifact, S3Artifact
 from hera.env import ConfigMapEnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -336,20 +336,18 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
 
 
 def test_task_adds_s3_input_artifact():
-    t = Task('t', input_artifacts=[S3InputArtifact(name="n", path="/p", bucket="b", key="key")])
+    t = Task('t', input_artifacts=[S3Artifact(name="n", path="/p", key="key")])
 
     artifact = t.inputs.artifacts[0]
     assert artifact.name == "n"
-    assert artifact.s3.bucket == "b"
     assert artifact.s3.key == "key"
 
 
 def test_task_adds_gcs_input_artifact():
-    t = Task('t', input_artifacts=[GCSInputArtifact(name="n", path="/p", bucket="b", key="key")])
+    t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", key="key")])
 
     artifact = t.inputs.artifacts[0]
     assert artifact.name == "n"
-    assert artifact.gcs.bucket == "b"
     assert artifact.gcs.key == "key"
 
 

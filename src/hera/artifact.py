@@ -33,6 +33,10 @@ class Artifact(BaseModel):
         """Constructs the corresponding Argo artifact representation"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Constructs the corresponding Argo artifact inputs representation"""
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
+
 
 class OutputArtifact(Artifact):
     """An output artifact representation"""
@@ -79,8 +83,6 @@ class BucketArtifact(Artifact):
     path: str
         The path where to store the input artifact. Note that this path is isolated from the output artifact path
         of the previous task artifact.
-    bucket: str
-        Name of the bucket to retrieve the artifact from.
     key: str
         Key of the artifact in the bucket.
 
@@ -89,23 +91,30 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact
     """
 
-    bucket: str
     key: str
 
 
-class S3InputArtifact(BucketArtifact):
+class S3Artifact(BucketArtifact):
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket, key=self.key),
+            s3=IoArgoprojWorkflowV1alpha1S3Artifact(key=self.key),
         )
 
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Constructs the corresponding Argo artifact inputs representation"""
+        return self.get_spec()
 
-class GCSInputArtifact(BucketArtifact):
+
+class GCSArtifact(BucketArtifact):
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(bucket=self.bucket, key=self.key),
+            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(key=self.key),
         )
+
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Constructs the corresponding Argo artifact inputs representation"""
+        return self.get_spec()

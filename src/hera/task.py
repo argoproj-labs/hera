@@ -391,14 +391,10 @@ class Task:
         -----
         Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
         """
-        input_art = []
+        artifacts = []
         if self.argo_input_artifacts:
-            for artifact in self.argo_input_artifacts:
-                if hasattr(artifact, "_from"):
-                    input_art.append(IoArgoprojWorkflowV1alpha1Artifact(name=artifact.name, path=artifact.path))
-                else:
-                    input_art.append(artifact)
-        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
+            artifacts = [i.get_input_spec() for i in self.input_artifacts]
+        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=artifacts)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
         """Assembles and returns the task outputs"""
