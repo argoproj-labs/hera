@@ -1,5 +1,11 @@
 import pytest
-from argo.workflows.client import V1alpha1Arguments, V1alpha1Inputs, V1Toleration, V1SecurityContext, V1Capabilities
+from argo.workflows.client import (
+    V1alpha1Arguments,
+    V1alpha1Inputs,
+    V1Capabilities,
+    V1SecurityContext,
+    V1Toleration,
+)
 from pydantic import ValidationError
 
 from hera.input import InputFrom
@@ -358,6 +364,6 @@ def test_task_contains_specified_security_context(no_op):
 
 def test_task_does_not_contain_specified_security_context(no_op):
     t = Task('t', no_op)
-    
+
     expected_security_context = None
     assert t.argo_template.security_context == expected_security_context

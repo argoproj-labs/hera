@@ -1,10 +1,13 @@
 import random
 
 import pytest
+from argo.workflows.client import (
+    V1Capabilities,
+    V1PodSecurityContext,
+    V1SecurityContext,
+)
 
-from argo.workflows.client import V1SecurityContext, V1PodSecurityContext, V1Capabilities
-
-from hera.security_context import WorkflowSecurityContext, TaskSecurityContext
+from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
 
 
 @pytest.fixture
