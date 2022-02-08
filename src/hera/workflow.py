@@ -10,6 +10,7 @@ from argo.workflows.client import (
     V1ObjectMeta,
 )
 
+from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.workflow_service import WorkflowService
 
@@ -32,10 +33,17 @@ class Workflow:
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
+    security_context:  Optional[WorkflowSecurityContext] = None
+        A workflow security context to define security settings for all containers in the workflow.
     """
 
     def __init__(
-        self, name: str, service: WorkflowService, parallelism: int = 50, service_account_name: Optional[str] = None
+        self,
+        name: str,
+        service: WorkflowService,
+        parallelism: int = 50,
+        service_account_name: Optional[str] = None,
+        security_context: Optional[WorkflowSecurityContext] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.service = service
@@ -51,8 +59,13 @@ class Workflow:
             service_account_name=self.service_account_name,
         )
         self.metadata = V1ObjectMeta(name=self.name)
+        if security_context is not None:
+            security_context = security_context.get_security_context()
         self.spec = V1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, service_account_name=self.service_account_name
+            templates=[self.template],
+            entrypoint=self.name,
+            service_account_name=self.service_account_name,
+            security_context=security_context,
         )
         self.workflow = V1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 

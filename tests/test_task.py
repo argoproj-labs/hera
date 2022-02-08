@@ -331,3 +331,7 @@ def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     artifact = t.outputs.artifacts[0]
     assert artifact.name == out_artifact.name
     assert artifact.path == out_artifact.path
+
+
+def test_task_security_context():
+    assert False

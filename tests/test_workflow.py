@@ -1,4 +1,7 @@
+from argo.workflows.client import V1PodSecurityContext
+
 from hera.resources import Resources
+from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.volumes import EmptyDirVolume, ExistingVolume, Volume
 from hera.workflow import Workflow
@@ -19,6 +22,29 @@ def test_wf_does_not_contain_sa_if_one_is_not_specified(ws):
     assert w.spec.service_account_name == expected_sa
     assert w.spec.templates[0].service_account_name == expected_sa
 
+
+def test_wf_contains_specified_security_context(ws):
+    run_as_user = 1000
+    run_as_group = 1001
+    fs_group = 1002
+    run_as_non_root = True
+    wsc = WorkflowSecurityContext(run_as_user=run_as_user,
+                                  run_as_group=run_as_group,
+                                  fs_group=fs_group,
+                                  run_as_non_root=run_as_non_root)
+    w = Workflow('w', service=ws, service_account_name='w-sa', security_context=wsc)
+    
+    expected_security_context = V1PodSecurityContext(fs_group=fs_group,
+                                                     run_as_group=run_as_group,
+                                                     run_as_user=run_as_user,
+                                                     run_as_non_root=run_as_non_root)
+    assert w.spec.security_context == expected_security_context
+
+def test_wf_does_not_contain_specified_security_context(ws):
+    w = Workflow('w', service=ws)
+    
+    expected_sc = None
+    assert w.spec.security_context == expected_sc
 
 def test_wf_does_not_add_empty_task(w):
     t = None
