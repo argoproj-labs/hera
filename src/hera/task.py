@@ -568,6 +568,8 @@ class Task:
         """
         max_cpu = self.resources.max_cpu is not None
         max_mem = self.resources.max_mem is not None
+        max_custom = self.resources.max_custom_resources is not None
+
         resource = ResourceRequirements(
             requests={
                 'cpu': str(self.resources.min_cpu),
@@ -578,6 +580,14 @@ class Task:
                 'memory': self.resources.max_mem if max_mem else self.resources.min_mem,
             },
         )
+
+        if self.resources.min_custom_resources is not None:
+            resource.requests.update(**self.resources.min_custom_resources)
+
+        if max_custom:
+            resource.limits.update(**self.resources.max_custom_resources)
+        elif self.resources.min_custom_resources:
+            resource.limits.update(**self.resources.min_custom_resources)
 
         if self.resources.gpus:
             resource.requests['nvidia.com/gpu'] = str(self.resources.gpus)
