@@ -118,19 +118,19 @@ class CronWorkflow:
                     self.spec.volume_claim_templates.append(vol.get_claim_spec())
 
             if t.resources.existing_volumes:
-                for vol in t.resources.existing_volumes:
-                    self.spec.volumes.append(vol.get_volume())
+                for existing_volume in t.resources.existing_volumes:
+                    self.spec.volumes.append(existing_volume.get_volume())
 
             if t.resources.empty_dir_volume:
                 self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
 
             if t.resources.secret_volumes:
-                for vol in t.resources.secret_volumes:
-                    self.spec.volumes.append(vol.get_volume())
+                for secret_volume in t.resources.secret_volumes:
+                    self.spec.volumes.append(secret_volume.get_volume())
 
             if t.resources.config_map_volumes:
-                for vol in t.resources.config_map_volumes:
-                    self.spec.volumes.append(vol.get_volume())
+                for config_map_volume in t.resources.config_map_volumes:
+                    self.spec.volumes.append(config_map_volume.get_volume())
 
             self.dag_template.tasks.append(t.argo_task)
 

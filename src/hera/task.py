@@ -617,23 +617,23 @@ class Task:
         """
         volumes = []
         if self.resources.volumes:
-            for vol in self.resources.volumes:
-                volumes.append(vol.get_mount())
+            for volume in self.resources.volumes:
+                volumes.append(volume.get_mount())
 
         if self.resources.existing_volumes:
-            for vol in self.resources.existing_volumes:
-                volumes.append(vol.get_mount())
+            for existing_volume in self.resources.existing_volumes:
+                volumes.append(existing_volume.get_mount())
 
         if self.resources.empty_dir_volume:
             volumes.append(self.resources.empty_dir_volume.get_mount())
 
         if self.resources.secret_volumes:
-            for vol in self.resources.secret_volumes:
-                volumes.append(vol.get_mount())
+            for secret_volume in self.resources.secret_volumes:
+                volumes.append(secret_volume.get_mount())
 
         if self.resources.config_map_volumes:
-            for vol in self.resources.config_map_volumes:
-                volumes.append(vol.get_mount())
+            for config_map_volume in self.resources.config_map_volumes:
+                volumes.append(config_map_volume.get_mount())
         return volumes
 
     def get_script_def(self) -> Optional[IoArgoprojWorkflowV1alpha1ScriptTemplate]:
