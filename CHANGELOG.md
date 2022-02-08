@@ -29,6 +29,36 @@ The general format is:
 
 ```
 
+# 1.8.0rc6 - DATE (08/02/2022)
+
+### Changed
+
+- wait time for Test PyPi in CICD from 30 to 60 seconds
+
+# 1.8.0rc5 - DATE (08/02/2022)
+
+### Added
+
+- add image pull policy on tasks
+
+# 1.8.0rc4 - DATE (08/02/2022)
+
+### Added
+
+- add ability to mount config maps as volume in a task
+
+# 1.8.0rc3 - DATE (08/02/2022)
+
+### Added
+
+- a `sleep` step to the new Hera version installation from Test PyPI to wait for PyPI indexing
+
+# 1.8.0rc2 - DATE (08/02/2022)
+
+### Changed
+
+- GitHub test index installation for CICD
+
 # 1.8.0rc1 - DATE (08/02/2022)
 
 ### Changed

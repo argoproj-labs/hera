@@ -2,6 +2,7 @@ import uuid
 from typing import Optional
 
 from argo_workflows.models import (
+    ConfigMapVolumeSource,
     EmptyDirVolumeSource,
     ObjectMeta,
     PersistentVolumeClaim,
@@ -122,7 +123,7 @@ class SecretVolume(BaseModel):
     Attributes
     ----------
     name: Optional[str]
-        The name of the volume, if not supplied the secret name will be used as volume name
+        The name of the volume, if not supplied a unique id will be generated for the name
     secret_name: str
         The name of the secret existing in the task namespace
     mount_path: str
@@ -146,11 +147,58 @@ class SecretVolume(BaseModel):
 
         Returns
         -------
-        _ArgoVolume
+        ArgoVolume
             The volume representation that can be mounted in workflow steps/tasks.
         """
         secret = SecretVolumeSource(secret_name=self.secret_name)
         return ArgoVolume(name=self.name, secret=secret)
+
+    def get_mount(self) -> VolumeMount:
+        """Constructs and returns an Argo volume mount representation for tasks.
+
+        Returns
+        -------
+        VolumeMount
+            The Argo model for mounting volumes.
+        """
+        return VolumeMount(name=self.name, mount_path=self.mount_path)
+
+
+class ConfigMapVolume(BaseModel):
+    """A volume representing a config map. This can be used to mount config maps to paths inside a task
+
+    Attributes
+    ----------
+    name: Optional[str]
+        The name of the volume, if not supplied a unique id will be generated for the name
+    config_map_name: str
+        The name of the config map existing in the task namespace
+    mount_path: str
+        The mounting point in the task e.g /mnt/my_path. The config map will be mounted to this path, with the keys
+        being used as file names, and the values in those files
+    """
+
+    name: Optional[str] = None
+    config_map_name: str
+    mount_path: str
+
+    @validator('name', always=True)
+    def check_name(cls, value):
+        """Validates that a name is specified. If not, it sets it"""
+        if not value:
+            return str(uuid.uuid4())
+        return value
+
+    def get_volume(self) -> ArgoVolume:
+        """Constructs an Argo volume representation for a config map in the task namespace
+
+        Returns
+        -------
+        ArgoVolume
+            The volume representation that can be mounted in workflow steps/tasks.
+        """
+        config_map = ConfigMapVolumeSource(name=self.config_map_name)
+        return ArgoVolume(name=self.name, config_map=config_map)
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks.

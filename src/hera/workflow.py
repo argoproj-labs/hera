@@ -111,6 +111,12 @@ class Workflow:
                 else:
                     setattr(self.spec, 'volumes', [t.resources.secret_volume.get_volume()])
 
+            if t.resources.config_map_volume:
+                if hasattr(self.spec, 'volumes'):
+                    self.spec.volumes.append(t.resources.config_map_volume.get_volume())
+                else:
+                    setattr(self.spec, 'volumes', [t.resources.config_map_volume.get_volume()])
+
             self.dag_template.tasks.append(t.argo_task)
 
     def add_head(self, t: Task, append: bool = True) -> None:
