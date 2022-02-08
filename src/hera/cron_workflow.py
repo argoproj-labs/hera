@@ -114,7 +114,6 @@ class CronWorkflow:
             if t.resources.volumes:
                 for vol in t.resources.volumes:
                     if isinstance(vol, Volume):
-                        print('adding claim')
                         # dynamically provisioned volumes need associated claims on the workflow spec
                         self.spec.volume_claim_templates.append(vol.get_claim_spec())
                     else:
