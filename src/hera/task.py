@@ -4,6 +4,8 @@ import copy
 import inspect
 import json
 import textwrap
+from ast import arg
+from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from argo_workflows.model_utils import (
@@ -23,6 +25,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
+    IoArgoprojWorkflowV1alpha1ResourceTemplate,
     IoArgoprojWorkflowV1alpha1RetryStrategy,
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
@@ -206,6 +209,7 @@ class Task:
         image: str = 'python:3.7',
         daemon: bool = False,
         command: Optional[List[str]] = None,
+        args: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
         resources: Resources = Resources(),
         working_dir: Optional[str] = None,
@@ -224,7 +228,8 @@ class Task:
 
         self.image = image
         self.daemon = daemon
-        self.command = command if command else ['python']
+        self.command = command
+        self.args = args
         self.env = self.get_env(env_specs)
         self.resources = resources
         self.working_dir = working_dir
@@ -407,8 +412,14 @@ class Task:
         Parses and returns the specified task command. This will attempt to stringify every command option and
         raise a ValueError on failure.
         """
-        assert self.command
+        if not self.command:
+            return None
         return [str(cc) for cc in self.command]
+
+    def get_args(self) -> List[str]:
+        if not self.args:
+            return None
+        return [str(arg) for arg in self.args]
 
     def get_env(self, specs: List[EnvSpec]) -> Optional[List[EnvVar]]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
@@ -637,17 +648,18 @@ class Task:
         if self.func is None:
             return None
 
-        template = IoArgoprojWorkflowV1alpha1ScriptTemplate(
-            name=self.name,
-            image=self.image,
-            command=self.get_command(),
-            source=self.get_script(),
-            resources=self.argo_resources,
-        )
-        if self.working_dir:
-            setattr(template, 'working_dir', self.working_dir)
-        if self.env:
-            setattr(template, 'env', self.env)
+        script_kargs = {
+            "name": self.name,
+            "image": self.image,
+            "command": self.get_command(),
+            "args": self.get_args(),
+            "source": self.get_script(),
+            "resources": self.argo_resources,
+            "env": self.env,
+            "working_dir": self.working_dir,
+        }
+        script_kargs = {k: v for k, v in script_kargs.items() if v}
+        template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**script_kargs)
         return template
 
     def get_container(self) -> Container:
@@ -658,16 +670,17 @@ class Task:
         Container
             The container template representation of the task.
         """
-        container = Container(
-            image=self.image,
-            command=self.get_command(),
-            volume_mounts=self.get_volume_mounts(),
-            resources=self.argo_resources,
-        )
-        if self.env:
-            setattr(container, 'env', self.env)
-        if self.working_dir:
-            setattr(container, 'working_dir', self.working_dir)
+        container_args = {
+            "image": self.image,
+            "command": self.get_command(),
+            "volume_mounts": self.get_volume_mounts(),
+            "resources": self.argo_resources,
+            "args": self.get_args(),
+            "env": self.env,
+            "working_dir": self.working_dir,
+        }
+        container_args = {k: v for k, v in container_args.items() if v}
+        container = Container(**container_args)
         return container
 
     def get_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
