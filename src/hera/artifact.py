@@ -1,5 +1,6 @@
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Artifact,
+    IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
 )
 from pydantic import BaseModel
@@ -66,10 +67,10 @@ class InputArtifact(Artifact):
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=_from)
 
 
-class S3InputArtifact(Artifact):
+class _BucketArtifact(Artifact):
     """An input artifact representation.
 
-    This artifact is used to represent a task's input from the output of another task's artifact.
+    This artifact is used to represent a bucket object
 
     Attributes
     ----------
@@ -79,17 +80,65 @@ class S3InputArtifact(Artifact):
         The path where to store the input artifact. Note that this path is isolated from the output artifact path
         of the previous task artifact.
     bucket_name: str
-        Name of the s3 bucket to download the artifact from.
-    s3_key: str
-        Key of the s3 artifact in the bucket.
+        Name of the bucket to retrieve the artifact from.
+    key: str
+        Key of the artifact in the bucket.
+    Notes
+    -----
+    Don't use this directly. Use S3InputArtifact or GCSInputArtifact
     """
 
     bucket_name: str
-    s3_key: str
+    key: str
+
+
+class S3InputArtifact(_BucketArtifact):
+    """An input artifact representation.
+
+    This artifact is used to represent a task input from a S3 bucket.
+
+    Attributes
+    ----------
+    name: str
+        The name of the input artifact.
+    path: str
+        The path where to store the input artifact. Note that this path is isolated from the output artifact path
+        of the previous task artifact.
+    bucket_name: str
+        Name of the s3 bucket to retreive the artifact from.
+    key: str
+        Key of the s3 artifact in the bucket.
+    """
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket_name, key=self.s3_key),
+            s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket_name, key=self.key),
+        )
+
+
+class GCSInputArtifact(_BucketArtifact):
+    """An input artifact representation.
+
+    This artifact is used to represent a task input from a GCS bucket.
+
+    Attributes
+    ----------
+    name: str
+        The name of the input artifact.
+    path: str
+        The path where to store the input artifact. Note that this path is isolated from the output artifact path
+        of the previous task artifact.
+    bucket_name: str
+        Name of the GCS bucket to retreive the artifact from.
+    key: str
+        Key of the GCS artifact in the bucket.
+    """
+
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return IoArgoprojWorkflowV1alpha1Artifact(
+            name=self.name,
+            path=self.path,
+            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(bucket=self.bucket_name, key=self.key),
         )
