@@ -33,6 +33,12 @@ The general format is:
 
 ### Added
 
+- add ability to mount config maps as volume in a task
+
+# 1.8.0rc3 - DATE (08/02/2022)
+
+### Added
+
 - a `sleep` step to the new Hera version installation from Test PyPI to wait for PyPI indexing
 
 # 1.8.0rc2 - DATE (08/02/2022)
