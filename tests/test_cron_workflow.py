@@ -43,7 +43,7 @@ def test_cwf_adds_task_volume(cw, no_op):
     t = Task(
         't',
         no_op,
-        resources=Resources(volume=Volume(name='v', size='1Gi', mount_path='/', storage_class_name='custom')),
+        resources=Resources(volumes=[Volume(name='v', size='1Gi', mount_path='/', storage_class_name='custom')]),
     )
     cw.add_task(t)
 
@@ -55,7 +55,9 @@ def test_cwf_adds_task_volume(cw, no_op):
 
 
 def test_wf_adds_task_secret_volume(cw, no_op):
-    t = Task('t', no_op, resources=Resources(secret_volume=SecretVolume(name='s', secret_name='sn', mount_path='/')))
+    t = Task(
+        't', no_op, resources=Resources(secret_volumes=[SecretVolume(name='s', secret_name='sn', mount_path='/')])
+    )
     cw.add_task(t)
 
     vol = cw.spec.volumes[0]
@@ -64,7 +66,7 @@ def test_wf_adds_task_secret_volume(cw, no_op):
 
 
 def test_cwf_adds_task_existing_checkpoints_staging_volume(cw, no_op):
-    t = Task('t', no_op, resources=Resources(existing_volume=ExistingVolume(name='v', mount_path='/')))
+    t = Task('t', no_op, resources=Resources(existing_volumes=[ExistingVolume(name='v', mount_path='/')]))
     cw.add_task(t)
 
     vol = cw.spec.volumes[0]
@@ -76,7 +78,7 @@ def test_cwf_adds_task_existing_checkpoints_prod_volume(cw, no_op):
     t = Task(
         't',
         no_op,
-        resources=Resources(existing_volume=ExistingVolume(name='vol', mount_path='/')),
+        resources=Resources(existing_volumes=[ExistingVolume(name='vol', mount_path='/')]),
     )
     cw.add_task(t)
 

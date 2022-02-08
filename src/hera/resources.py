@@ -1,5 +1,5 @@
 """Holds the resource specification"""
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -30,8 +30,14 @@ class Resources(BaseModel):
         `overwrite_maxs` is True.
     gpus: Optional[int]
         The number of GPUs to request as part of the workflow.
-    volumes: Optional[Volume]
-        The volumes to dynamically provision.
+    volumes: Optional[List[Volume]] = None
+        Volumes to dynamically provision and mount as resources.
+    existing_volumes: Optional[List[ExistingVolume]] = None
+        Existing volumes to mount as resources.
+    secret_volumes: Optional[List[SecretVolume]] = None
+        Any secrets to mount as volumes.
+    config_map_volumes: Optional[List[ConfigMapVolume]] = None
+        Any config maps to mount as volumes.
     overwrite_maxs: bool = True
         Whether to override `max_cpu` and `max_mem` with corresponding min values when they are not specified.
     """
@@ -44,11 +50,12 @@ class Resources(BaseModel):
 
     gpus: Optional[int] = None
 
-    volume: Optional[Volume] = None
-    existing_volume: Optional[ExistingVolume] = None
+    volumes: Optional[List[Volume]] = None
+    existing_volumes: Optional[List[ExistingVolume]] = None
+    secret_volumes: Optional[List[SecretVolume]] = None
+    config_map_volumes: Optional[List[ConfigMapVolume]] = None
+
     empty_dir_volume: Optional[EmptyDirVolume] = None
-    secret_volume: Optional[SecretVolume] = None
-    config_map_volume: Optional[ConfigMapVolume] = None
 
     overwrite_maxs: bool = True
 

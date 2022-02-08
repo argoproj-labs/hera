@@ -616,16 +616,24 @@ class Task:
             The list of volume mounts to be added to the task specification.
         """
         volumes = []
-        if self.resources.volume:
-            volumes.append(self.resources.volume.get_mount())
-        if self.resources.existing_volume:
-            volumes.append(self.resources.existing_volume.get_mount())
+        if self.resources.volumes:
+            for vol in self.resources.volumes:
+                volumes.append(vol.get_mount())
+
+        if self.resources.existing_volumes:
+            for vol in self.resources.existing_volumes:
+                volumes.append(vol.get_mount())
+
         if self.resources.empty_dir_volume:
             volumes.append(self.resources.empty_dir_volume.get_mount())
-        if self.resources.secret_volume:
-            volumes.append(self.resources.secret_volume.get_mount())
-        if self.resources.config_map_volume:
-            volumes.append(self.resources.config_map_volume.get_mount())
+
+        if self.resources.secret_volumes:
+            for vol in self.resources.secret_volumes:
+                volumes.append(vol.get_mount())
+
+        if self.resources.config_map_volumes:
+            for vol in self.resources.config_map_volumes:
+                volumes.append(vol.get_mount())
         return volumes
 
     def get_script_def(self) -> Optional[IoArgoprojWorkflowV1alpha1ScriptTemplate]:

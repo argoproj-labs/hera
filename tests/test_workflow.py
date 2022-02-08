@@ -47,7 +47,7 @@ def test_wf_adds_task_volume(w, no_op):
     t = Task(
         't',
         no_op,
-        resources=Resources(volume=Volume(name='v', size='1Gi', mount_path='/', storage_class_name='custom')),
+        resources=Resources(volumes=[Volume(name='v', size='1Gi', mount_path='/', storage_class_name='custom')]),
     )
     w.add_task(t)
 
@@ -59,7 +59,9 @@ def test_wf_adds_task_volume(w, no_op):
 
 
 def test_wf_adds_task_secret_volume(w, no_op):
-    t = Task('t', no_op, resources=Resources(secret_volume=SecretVolume(name='s', secret_name='sn', mount_path='/')))
+    t = Task(
+        't', no_op, resources=Resources(secret_volumes=[SecretVolume(name='s', secret_name='sn', mount_path='/')])
+    )
     w.add_task(t)
 
     vol = w.spec.volumes[0]
@@ -68,7 +70,7 @@ def test_wf_adds_task_secret_volume(w, no_op):
 
 
 def test_wf_adds_task_config_map_volume(w):
-    t = Task('t', resources=Resources(config_map_volume=ConfigMapVolume(config_map_name='cmn', mount_path='/')))
+    t = Task('t', resources=Resources(config_map_volumes=[ConfigMapVolume(config_map_name='cmn', mount_path='/')]))
     w.add_task(t)
 
     assert w.spec.volumes[0].name
@@ -76,7 +78,7 @@ def test_wf_adds_task_config_map_volume(w):
 
 
 def test_wf_adds_task_existing_checkpoints_staging_volume(w, no_op):
-    t = Task('t', no_op, resources=Resources(existing_volume=ExistingVolume(name='v', mount_path='/')))
+    t = Task('t', no_op, resources=Resources(existing_volumes=[ExistingVolume(name='v', mount_path='/')]))
     w.add_task(t)
 
     vol = w.spec.volumes[0]
@@ -88,7 +90,7 @@ def test_wf_adds_task_existing_checkpoints_prod_volume(w, no_op):
     t = Task(
         't',
         no_op,
-        resources=Resources(existing_volume=ExistingVolume(name='vol', mount_path='/')),
+        resources=Resources(existing_volumes=[ExistingVolume(name='vol', mount_path='/')]),
     )
     w.add_task(t)
 

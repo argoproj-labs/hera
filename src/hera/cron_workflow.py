@@ -75,7 +75,9 @@ class CronWorkflow:
             dag=self.dag_template,
             parallelism=self.parallelism,
         )
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(templates=[self.template], entrypoint=self.name)
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+            templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
+        )
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
@@ -111,29 +113,24 @@ class CronWorkflow:
         for t in ts:
             self.spec.templates.append(t.argo_template)
 
-            if t.resources.volume:
-                if hasattr(self.spec, 'volume_claim_template'):
-                    self.spec.volume_claim_templates.append(t.resources.volume.get_claim_spec())
-                else:
-                    setattr(self.spec, 'volume_claim_templates', [t.resources.volume.get_claim_spec()])
+            if t.resources.volumes:
+                for vol in t.resources.volumes:
+                    self.spec.volume_claim_templates.append(vol.get_claim_spec())
 
-            if t.resources.existing_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.existing_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.existing_volume.get_volume()])
+            if t.resources.existing_volumes:
+                for vol in t.resources.existing_volumes:
+                    self.spec.volumes.append(vol.get_volume())
 
             if t.resources.empty_dir_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.empty_dir_volume.get_volume()])
+                self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
 
-            if t.resources.secret_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.secret_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.secret_volume.get_volume()])
+            if t.resources.secret_volumes:
+                for vol in t.resources.secret_volumes:
+                    self.spec.volumes.append(vol.get_volume())
+
+            if t.resources.config_map_volumes:
+                for vol in t.resources.config_map_volumes:
+                    self.spec.volumes.append(vol.get_volume())
 
             self.dag_template.tasks.append(t.argo_task)
 
