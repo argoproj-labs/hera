@@ -9,8 +9,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     ObjectMeta,
 )
-from hera.security_context import WorkflowSecurityContext
 
+from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.workflow_service import WorkflowService
 
@@ -49,7 +49,7 @@ class Workflow:
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = None,
-        security_context: Optional[WorkflowSecurityContext] = None
+        security_context: Optional[WorkflowSecurityContext] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -66,9 +66,8 @@ class Workflow:
             dag=self.dag_template,
             parallelism=self.parallelism,
         )
-        
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(templates=[self.template],
-                                                           entrypoint=self.name)
+
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(templates=[self.template], entrypoint=self.name)
         if self.security_context:
             security_context = self.security_context.get_security_context()
             setattr(self.spec, 'security_context', security_context)

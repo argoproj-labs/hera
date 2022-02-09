@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 
+import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
 
 from hera.resources import Resources
@@ -29,25 +30,37 @@ def test_wf_does_not_contain_sa_if_one_is_not_specified(ws):
     assert not hasattr(w.spec, 'service_account_name')
 
 
-def test_wf_contains_specified_security_context(ws):
-    run_as_user = 1000
-    run_as_group = 1001
-    fs_group = 1002
-    run_as_non_root = True
-    wsc = WorkflowSecurityContext(
-        run_as_user=run_as_user, run_as_group=run_as_group, fs_group=fs_group, run_as_non_root=run_as_non_root
-    )
+@pytest.fixture
+def workflow_security_context_kwargs():
+    sc_kwargs = {
+        "run_as_user": 1000,
+        "run_as_group": 1001,
+        "fs_group": 1002,
+        "run_as_non_root": False,
+    }
+    return sc_kwargs
+
+
+def test_wf_contains_specified_security_context(ws, workflow_security_context_kwargs):
+    wsc = WorkflowSecurityContext(**workflow_security_context_kwargs)
     w = Workflow('w', service=ws, security_context=wsc)
 
-    expected_security_context = PodSecurityContext(
-        fs_group=fs_group, run_as_group=run_as_group, run_as_user=run_as_user, run_as_non_root=run_as_non_root
-    )
+    expected_security_context = PodSecurityContext(**workflow_security_context_kwargs)
+    assert w.spec.security_context == expected_security_context
+
+
+@pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "fs_group", "run_as_non_root"])
+def test_wf_specified_partial_security_context(ws, set_only, workflow_security_context_kwargs):
+    one_param_kwargs = {set_only: workflow_security_context_kwargs[set_only]}
+    wsc = WorkflowSecurityContext(**one_param_kwargs)
+    w = Workflow('w', service=ws, security_context=wsc)
+    expected_security_context = PodSecurityContext(**one_param_kwargs)
     assert w.spec.security_context == expected_security_context
 
 
 def test_wf_does_not_contain_specified_security_context(ws):
     w = Workflow('w', service=ws)
-    
+
     assert "security_context" not in w.spec
 
 
@@ -177,7 +190,7 @@ def test_wf_overwrites_head_and_tail(w, no_op):
     assert h2.argo_task.dependencies == ['head1']
     assert t1.argo_task.dependencies == ['head2', 'head1']
     assert t2.argo_task.dependencies == ['t1', 'head2', 'head1']
-    
+
 
 def test_wf_contains_specified_labels(ws):
     w = Workflow('w', service=ws, labels={'foo': 'bar'})

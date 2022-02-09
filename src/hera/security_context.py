@@ -3,7 +3,6 @@ from typing import List, Optional
 from argo_workflows.model.capabilities import Capabilities
 from argo_workflows.model.pod_security_context import PodSecurityContext
 from argo_workflows.model.security_context import SecurityContext
-
 from pydantic import BaseModel
 
 
@@ -28,12 +27,16 @@ class WorkflowSecurityContext(BaseModel):
     run_as_non_root: Optional[bool] = None
 
     def get_security_context(self) -> PodSecurityContext:
-        return PodSecurityContext(
-            run_as_user=self.run_as_user,
-            run_as_group=self.run_as_group,
-            fs_group=self.fs_group,
-            run_as_non_root=self.run_as_non_root,
-        )
+        security_context = PodSecurityContext()
+        if self.run_as_user:
+            setattr(security_context, 'run_as_user', self.run_as_user)
+        if self.run_as_group:
+            setattr(security_context, 'run_as_group', self.run_as_group)
+        if self.fs_group:
+            setattr(security_context, 'fs_group', self.fs_group)
+        if self.run_as_non_root is not None:
+            setattr(security_context, 'run_as_non_root', self.run_as_non_root)
+        return security_context
 
 
 class TaskSecurityContext(BaseModel):
@@ -68,7 +71,7 @@ class TaskSecurityContext(BaseModel):
             setattr(security_context, 'run_as_user', self.run_as_user)
         if self.run_as_group:
             setattr(security_context, 'run_as_group', self.run_as_group)
-        if self.run_as_non_root:
+        if self.run_as_non_root is not None:
             setattr(security_context, 'run_as_non_root', self.run_as_non_root)
         if capabilities:
             setattr(security_context, 'capabilities', capabilities)

@@ -6,6 +6,7 @@ import json
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.model_utils import (
     ApiTypeError,
     ModelSimple,
@@ -29,7 +30,6 @@ from argo_workflows.models import (
     ResourceRequirements,
 )
 from argo_workflows.models import Toleration as ArgoToleration
-from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 

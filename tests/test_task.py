@@ -1,7 +1,7 @@
 import pytest
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.model.capabilities import Capabilities
 from argo_workflows.model.security_context import SecurityContext
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
@@ -351,7 +351,7 @@ def task_security_context_kwargs():
     sc_kwargs = {
         "run_as_user": 1000,
         "run_as_group": 1001,
-        "run_as_non_root": True,
+        "run_as_non_root": False,
         "additional_capabilities": ["SYS_RAWIO"],
     }
     return sc_kwargs
