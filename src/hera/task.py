@@ -4,8 +4,6 @@ import copy
 import inspect
 import json
 import textwrap
-from ast import arg
-from importlib import resources
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from argo_workflows.model_utils import (
@@ -25,7 +23,6 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
-    IoArgoprojWorkflowV1alpha1ResourceTemplate,
     IoArgoprojWorkflowV1alpha1RetryStrategy,
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
