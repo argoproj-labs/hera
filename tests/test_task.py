@@ -376,3 +376,27 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
     t2 = Task('t2', no_op)
     t.next(t2)
     assert t2.argo_task.dependencies[0] == 't'
+
+
+def test_task_adds_custom_resources(no_op):
+    t = Task(
+        't',
+        no_op,
+        resources=Resources(
+            min_custom_resources={
+                'custom-1': '1',
+                'custom-2': '42Gi',
+            }
+        ),
+    )
+    r = t.get_resources()
+
+    assert r.requests['cpu'] == '1'
+    assert r.requests['memory'] == '4Gi'
+    assert r.requests['custom-1'] == '1'
+    assert r.requests['custom-2'] == '42Gi'
+
+    assert r.limits['cpu'] == '1'
+    assert r.limits['memory'] == '4Gi'
+    assert r.limits['custom-1'] == '1'
+    assert r.limits['custom-2'] == '42Gi'

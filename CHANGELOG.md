@@ -29,7 +29,13 @@ The general format is:
 
 ```
 
-# 2.0.0rc1 - DATE (08/02)
+# 2.1.0rc1 - DATE (08/02/2022)
+
+### Added
+
+- support for custom resources on `Resource` definitions
+
+# 2.0.0rc1 - DATE (08/02/2022)
 
 ### Added
 
