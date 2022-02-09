@@ -217,7 +217,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
-        security_context: Optional[TaskSecurityContext] = None
+        security_context: Optional[TaskSecurityContext] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -652,11 +652,23 @@ class Task:
             source=self.get_script(),
             resources=self.argo_resources,
         )
+        if self.security_context:
+            security_context = self.security_context.get_security_context()
+            setattr(template, 'security_context', security_context)
         if self.working_dir:
             setattr(template, 'working_dir', self.working_dir)
         if self.env:
             setattr(template, 'env', self.env)
         return template
+
+    def get_security_context(self) -> SecurityContext:
+        """Assembles the security context for the task.
+        Returns
+        -------
+        SecurityContext
+            The security settings to apply to the task's container.
+        """
+        return self.security_context.get_security_context()
 
     def get_container(self) -> Container:
         """Assembles and returns the container for the task to run in.
@@ -672,21 +684,14 @@ class Task:
             volume_mounts=self.get_volume_mounts(),
             resources=self.argo_resources,
         )
+        if self.security_context:
+            security_context = self.get_security_context()
+            setattr(container, 'env', security_context)
         if self.env:
             setattr(container, 'env', self.env)
         if self.working_dir:
             setattr(container, 'working_dir', self.working_dir)
         return container
-    
-    def get_security_context(self) -> SecurityContext:
-        """Assembles the security context for the task.
-        Returns
-        -------
-        SecurityContext
-            The security settings to apply to the task's container.
-        """
-        if self.security_context:
-            return self.security_context.get_security_context()
 
     def get_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
@@ -708,10 +713,6 @@ class Task:
         if self.node_selector:
             setattr(template, 'node_selector', self.node_selector)
 
-        security_context = self.get_security_context()
-        if security_context:
-            setattr(template, 'security_context', security_context)
-        
         retry_strategy = self.get_retry_strategy()
         if retry_strategy:
             setattr(template, 'retry_strategy', retry_strategy)

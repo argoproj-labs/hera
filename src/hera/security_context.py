@@ -63,12 +63,13 @@ class TaskSecurityContext(BaseModel):
 
     def get_security_context(self) -> SecurityContext:
         capabilities = self._get_capabilties()
-        security_context = SecurityContext(
-            run_as_user=self.run_as_user,
-            run_as_group=self.run_as_group,
-            run_as_non_root=self.run_as_non_root,
-            capabilities=capabilities,
-        )
+        security_context = SecurityContext()
+        if self.run_as_user:
+            setattr(security_context, 'run_as_user', self.run_as_user)
+        if self.run_as_group:
+            setattr(security_context, 'run_as_group', self.run_as_group)
+        if self.run_as_non_root:
+            setattr(security_context, 'run_as_non_root', self.run_as_non_root)
         if capabilities:
             setattr(security_context, 'capabilities', capabilities)
         return security_context

@@ -346,32 +346,50 @@ def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     assert artifact.path == out_artifact.path
 
 
-def test_task_contains_specified_security_context(no_op):
-    run_as_user = 1000
-    run_as_group = 1001
-    run_as_non_root = True
-    additional_capabilities = ["SYS_RAWIO"]
-    expected_capabilities = Capabilities(add=additional_capabilities)
-    tsc = TaskSecurityContext(
-        run_as_user=run_as_user,
-        run_as_group=run_as_group,
-        run_as_non_root=run_as_non_root,
-        additional_capabilities=additional_capabilities,
-    )
+@pytest.fixture
+def task_security_context_kwargs():
+    sc_kwargs = {
+        "run_as_user": 1000,
+        "run_as_group": 1001,
+        "run_as_non_root": True,
+        "additional_capabilities": ["SYS_RAWIO"],
+    }
+    return sc_kwargs
+
+
+def test_task_contains_specified_security_context(no_op, task_security_context_kwargs):
+    tsc = TaskSecurityContext(**task_security_context_kwargs)
     t = Task('t', no_op, security_context=tsc)
+    additional_capabilities = task_security_context_kwargs["additional_capabilities"]
+    expected_capabilities = Capabilities(add=additional_capabilities)
+    task_security_context_kwargs.pop("additional_capabilities")
     expected_security_context = SecurityContext(
-        run_as_group=run_as_group,
-        run_as_user=run_as_user,
-        run_as_non_root=run_as_non_root,
+        **task_security_context_kwargs,
         capabilities=expected_capabilities,
     )
-    assert t.argo_template.security_context == expected_security_context
+    assert t.argo_template.script.security_context == expected_security_context
+
+
+@pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "run_as_non_root", "additional_capabilities"])
+def test_task_specified_partial_security_context(no_op, set_only, task_security_context_kwargs):
+    one_param_kwargs = {set_only: task_security_context_kwargs[set_only]}
+    tsc = TaskSecurityContext(**one_param_kwargs)
+    t = Task('t', no_op, security_context=tsc)
+    if set_only == "additional_capabilities":
+        expected_security_context = SecurityContext()
+        additional_capabilities = task_security_context_kwargs["additional_capabilities"]
+        expected_capabilities = Capabilities(add=additional_capabilities)
+        setattr(expected_security_context, "capabilities", expected_capabilities)
+    else:
+        expected_security_context = SecurityContext(**one_param_kwargs)
+    assert t.argo_template.script.security_context == expected_security_context
 
 
 def test_task_does_not_contain_specified_security_context(no_op):
     t = Task('t', no_op)
 
-    assert "security_context" not in t.argo_template.security_context
+    assert "security_context" not in t.argo_template.script
+
 
 def test_task_template_has_correct_labels(op):
     t = Task('t', op, [{'a': 1}], resources=Resources(), labels={'foo': 'bar'})
