@@ -37,4 +37,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pipenv run make test
+          pipenv run tox
