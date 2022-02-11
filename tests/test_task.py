@@ -163,10 +163,12 @@ def test_parallel_items_assemble_base_models(multi_op, mock_model):
 
 def test_volume_mounts_returns_expected_volumes(no_op):
     r = Resources(
-        volume=Volume(name='v1', size='1Gi', mount_path='/v1'),
-        existing_volume=ExistingVolume(name='v2', mount_path='/v2'),
-        empty_dir_volume=EmptyDirVolume(name='v3'),
-        config_map_volume=ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
+        volumes=[
+            Volume(name='v1', size='1Gi', mount_path='/v1'),
+            ExistingVolume(name='v2', mount_path='/v2'),
+            EmptyDirVolume(name='v3'),
+            ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
+        ],
     )
     t = Task('t', no_op, resources=r)
     vs = t.get_volume_mounts()
@@ -390,3 +392,27 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
     t2 = Task('t2', no_op)
     t.next(t2)
     assert t2.argo_task.dependencies[0] == 't'
+
+
+def test_task_adds_custom_resources(no_op):
+    t = Task(
+        't',
+        no_op,
+        resources=Resources(
+            min_custom_resources={
+                'custom-1': '1',
+                'custom-2': '42Gi',
+            }
+        ),
+    )
+    r = t.get_resources()
+
+    assert r.requests['cpu'] == '1'
+    assert r.requests['memory'] == '4Gi'
+    assert r.requests['custom-1'] == '1'
+    assert r.requests['custom-2'] == '42Gi'
+
+    assert r.limits['cpu'] == '1'
+    assert r.limits['memory'] == '4Gi'
+    assert r.limits['custom-1'] == '1'
+    assert r.limits['custom-2'] == '42Gi'

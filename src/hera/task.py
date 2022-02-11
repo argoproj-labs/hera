@@ -566,6 +566,8 @@ class Task:
         """
         max_cpu = self.resources.max_cpu is not None
         max_mem = self.resources.max_mem is not None
+        max_custom = self.resources.max_custom_resources is not None
+
         resource = ResourceRequirements(
             requests={
                 'cpu': str(self.resources.min_cpu),
@@ -576,6 +578,14 @@ class Task:
                 'memory': self.resources.max_mem if max_mem else self.resources.min_mem,
             },
         )
+
+        if self.resources.min_custom_resources is not None:
+            resource.requests.update(**self.resources.min_custom_resources)
+
+        if max_custom:
+            resource.limits.update(**self.resources.max_custom_resources)
+        elif self.resources.min_custom_resources:
+            resource.limits.update(**self.resources.min_custom_resources)
 
         if self.resources.gpus:
             resource.requests['nvidia.com/gpu'] = str(self.resources.gpus)
@@ -614,16 +624,9 @@ class Task:
             The list of volume mounts to be added to the task specification.
         """
         volumes = []
-        if self.resources.volume:
-            volumes.append(self.resources.volume.get_mount())
-        if self.resources.existing_volume:
-            volumes.append(self.resources.existing_volume.get_mount())
-        if self.resources.empty_dir_volume:
-            volumes.append(self.resources.empty_dir_volume.get_mount())
-        if self.resources.secret_volume:
-            volumes.append(self.resources.secret_volume.get_mount())
-        if self.resources.config_map_volume:
-            volumes.append(self.resources.config_map_volume.get_mount())
+        if self.resources.volumes:
+            for volume in self.resources.volumes:
+                volumes.append(volume.get_mount())
         return volumes
 
     def get_script_def(self) -> Optional[IoArgoprojWorkflowV1alpha1ScriptTemplate]:
