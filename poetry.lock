@@ -1,10 +1,14 @@
 [[package]]
 name = "argo-workflows"
-version = "5.0.0"
-description = "Community Maintained Python client for Argo Workflows"
+version = "6.3.0rc4"
+description = "Argo Workflows API"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
+
+[package.dependencies]
+python-dateutil = "*"
+urllib3 = ">=1.25.3"
 
 [[package]]
 name = "atomicwrites"
@@ -416,12 +420,12 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <3.11"
-content-hash = "4a1293e9fbb41b44717d6ae3b301c315abbb8b732b732fcbe1b68a889b18ad02"
+content-hash = "07f263800afdd23b496f80f74904ccea38191afb3f14e85549a712a903dbbc8d"
 
 [metadata.files]
 argo-workflows = [
-    {file = "argo-workflows-5.0.0.tar.gz", hash = "sha256:50aa8d9b1c9c54b457775a7d751a3c5c2fccdf91f28964834c6a597ebee69783"},
-    {file = "argo_workflows-5.0.0-py3-none-any.whl", hash = "sha256:97ae1068ba61f493bad82633dda4035e71991db1ed0c4965a08d72efe3811243"},
+    {file = "argo-workflows-6.3.0rc4.tar.gz", hash = "sha256:434990ed2305206e13f2bde5db4866185899e8d3aca2d64e61c71e5798fd0ec2"},
+    {file = "argo_workflows-6.3.0rc4-py3-none-any.whl", hash = "sha256:db302604314730e425772124dbfbff15dda6df3cd6460c72f7c54127f86f3392"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},

@@ -1,0 +1,38 @@
+name: Hera `main` build and publish
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'VERSION'
+jobs:
+  hera-main-build:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade poetry wheel
+
+      - name: Run build
+        run: |
+          poetry install
+          poetry build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          # want to get rich logs in case `twine upload` fails for some reason
+          verbose: true
+          # just in case someone publishes another version by accidentally adding a new line to VERSION
+          # we want to skip the existing package and not fail with a 400 if a publish attempt is performed
+          skip_existing: true
