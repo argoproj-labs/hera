@@ -71,7 +71,6 @@ class TaskSecurityContext(BaseSecurityContext):
         return settable_attributes
 
     def get_security_context(self) -> SecurityContext:
-        self._get_capabilties()
         settable_attributes = self._get_settable_attributes_as_kwargs()
         security_context = SecurityContext(**settable_attributes)
         return security_context
