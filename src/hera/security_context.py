@@ -6,7 +6,15 @@ from argo_workflows.model.security_context import SecurityContext
 from pydantic import BaseModel
 
 
-class WorkflowSecurityContext(BaseModel):
+class BaseSecurityContext(BaseModel):
+    """Abstract class to accomedate the shared functionallity of task and workflow context."""
+
+    run_as_user: Optional[int] = None
+    run_as_group: Optional[int] = None
+    run_as_non_root: Optional[bool] = None
+
+
+class WorkflowSecurityContext(BaseSecurityContext):
     """Defines workflow level sercurity attributes and settings.
 
     Attributes
@@ -21,10 +29,7 @@ class WorkflowSecurityContext(BaseModel):
         Validates that all the tasks container does not run as root, i.e UID does not equal 0.
     """
 
-    run_as_user: Optional[int] = None
-    run_as_group: Optional[int] = None
     fs_group: Optional[int] = None
-    run_as_non_root: Optional[bool] = None
 
     def get_security_context(self) -> PodSecurityContext:
         security_context = PodSecurityContext()
@@ -39,7 +44,7 @@ class WorkflowSecurityContext(BaseModel):
         return security_context
 
 
-class TaskSecurityContext(BaseModel):
+class TaskSecurityContext(BaseSecurityContext):
     """Defines task level sercurity attributes and settings,
     overrides the WorkflowSecurityContext settings.
 
@@ -55,9 +60,6 @@ class TaskSecurityContext(BaseModel):
         List of POSIX capabilities to add to the task's container.
     """
 
-    run_as_user: Optional[int] = None
-    run_as_group: Optional[int] = None
-    run_as_non_root: Optional[bool] = None
     additional_capabilities: List[str] = None
 
     def _get_capabilties(self):
