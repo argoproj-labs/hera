@@ -7,7 +7,7 @@ CONFTEST=conftest.py
 .PHONY: lint format isort typecheck typecheck verify build
 
 lint:
-	flake8 $(SRC_FOLDER)
+	pflake8 $(SRC_FOLDER)
 
 format: isort
 	black --verbose $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER) ${CONFTEST}
@@ -16,8 +16,8 @@ isort:
 	isort $(SRC_FOLDER) $(TEST_FOLDER) $(EXAMPLES_FOLDER) ${CONFTEST}
 
 typecheck:
-	mypy --namespace-packages --explicit-package-bases -p hera
-	mypy --namespace-packages tests
+	mypy --explicit-package-bases -p hera
+	mypy tests
 
 test:
 	pytest -c tox.ini $(TEST_FOLDER)
