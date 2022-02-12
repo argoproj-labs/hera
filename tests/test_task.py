@@ -5,6 +5,7 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
+from hera.artifact import GCSArtifact, S3Artifact
 from hera.env import ConfigMapEnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -165,10 +166,12 @@ def test_parallel_items_assemble_base_models(multi_op, mock_model):
 
 def test_volume_mounts_returns_expected_volumes(no_op):
     r = Resources(
-        volume=Volume(name='v1', size='1Gi', mount_path='/v1'),
-        existing_volume=ExistingVolume(name='v2', mount_path='/v2'),
-        empty_dir_volume=EmptyDirVolume(name='v3'),
-        config_map_volume=ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
+        volumes=[
+            Volume(name='v1', size='1Gi', mount_path='/v1'),
+            ExistingVolume(name='v2', mount_path='/v2'),
+            EmptyDirVolume(name='v3'),
+            ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
+        ],
     )
     t = Task('t', no_op, resources=r)
     vs = t.get_volume_mounts()
@@ -333,9 +336,24 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
     artifact = t.inputs.artifacts[0]
-    assert not hasattr(artifact, '_from')
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
+
+
+def test_task_adds_s3_input_artifact():
+    t = Task('t', input_artifacts=[S3Artifact(name="n", path="/p", key="key")])
+
+    artifact = t.inputs.artifacts[0]
+    assert artifact.name == "n"
+    assert artifact.s3.key == "key"
+
+
+def test_task_adds_gcs_input_artifact():
+    t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", key="key")])
+
+    artifact = t.inputs.artifacts[0]
+    assert artifact.name == "n"
+    assert artifact.gcs.key == "key"
 
 
 def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
@@ -422,3 +440,27 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
     t2 = Task('t2', no_op)
     t.next(t2)
     assert t2.argo_task.dependencies[0] == 't'
+
+
+def test_task_adds_custom_resources(no_op):
+    t = Task(
+        't',
+        no_op,
+        resources=Resources(
+            min_custom_resources={
+                'custom-1': '1',
+                'custom-2': '42Gi',
+            }
+        ),
+    )
+    r = t.get_resources()
+
+    assert r.requests['cpu'] == '1'
+    assert r.requests['memory'] == '4Gi'
+    assert r.requests['custom-1'] == '1'
+    assert r.requests['custom-2'] == '42Gi'
+
+    assert r.limits['cpu'] == '1'
+    assert r.limits['memory'] == '4Gi'
+    assert r.limits['custom-1'] == '1'
+    assert r.limits['custom-2'] == '42Gi'

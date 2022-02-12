@@ -12,6 +12,7 @@ from argo_workflows.models import (
 
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.volumes import Volume
 from hera.workflow_service import WorkflowService
 
 
@@ -67,7 +68,9 @@ class Workflow:
             parallelism=self.parallelism,
         )
 
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(templates=[self.template], entrypoint=self.name)
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+            templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
+        )
         if self.security_context:
             security_context = self.security_context.get_security_context()
             setattr(self.spec, 'security_context', security_context)
@@ -91,41 +94,16 @@ class Workflow:
         if not all(ts):
             return
 
-        if not hasattr(self.spec, 'volume_claim_templates'):
-            setattr(self.spec, 'volume_claim_templates', [])
-
         for t in ts:
             self.spec.templates.append(t.argo_template)
 
-            if t.resources.volume:
-                if hasattr(self.spec, 'volume_claim_template'):
-                    self.spec.volume_claim_templates.append(t.resources.volume.get_claim_spec())
-                else:
-                    setattr(self.spec, 'volume_claim_templates', [t.resources.volume.get_claim_spec()])
-
-            if t.resources.existing_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.existing_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.existing_volume.get_volume()])
-
-            if t.resources.empty_dir_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.empty_dir_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.empty_dir_volume.get_volume()])
-
-            if t.resources.secret_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.secret_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.secret_volume.get_volume()])
-
-            if t.resources.config_map_volume:
-                if hasattr(self.spec, 'volumes'):
-                    self.spec.volumes.append(t.resources.config_map_volume.get_volume())
-                else:
-                    setattr(self.spec, 'volumes', [t.resources.config_map_volume.get_volume()])
+            if t.resources.volumes:
+                for vol in t.resources.volumes:
+                    if isinstance(vol, Volume):
+                        # dynamically provisioned volumes need associated claims on the workflow spec
+                        self.spec.volume_claim_templates.append(vol.get_claim_spec())
+                    else:
+                        self.spec.volumes.append(vol.get_volume())
 
             self.dag_template.tasks.append(t.argo_task)
 
