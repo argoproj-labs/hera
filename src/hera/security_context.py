@@ -13,6 +13,11 @@ class BaseSecurityContext(BaseModel):
     run_as_group: Optional[int] = None
     run_as_non_root: Optional[bool] = None
 
+    def _get_settable_attributes_as_kwargs(self):
+        attributes = dict(self)
+        settable_attributes = {k: v for k, v in attributes.items() if v is not None}
+        return settable_attributes
+
 
 class WorkflowSecurityContext(BaseSecurityContext):
     """Defines workflow level sercurity attributes and settings.
@@ -32,15 +37,8 @@ class WorkflowSecurityContext(BaseSecurityContext):
     fs_group: Optional[int] = None
 
     def get_security_context(self) -> PodSecurityContext:
-        security_context = PodSecurityContext()
-        if self.run_as_user:
-            setattr(security_context, 'run_as_user', self.run_as_user)
-        if self.run_as_group:
-            setattr(security_context, 'run_as_group', self.run_as_group)
-        if self.fs_group:
-            setattr(security_context, 'fs_group', self.fs_group)
-        if self.run_as_non_root is not None:
-            setattr(security_context, 'run_as_non_root', self.run_as_non_root)
+        settable_attributes = self._get_settable_attributes_as_kwargs()
+        security_context = PodSecurityContext(**settable_attributes)
         return security_context
 
 
@@ -66,15 +64,14 @@ class TaskSecurityContext(BaseSecurityContext):
         if self.additional_capabilities:
             return Capabilities(add=self.additional_capabilities)
 
+    def _get_settable_attributes_as_kwargs(self):
+        settable_attributes = super()._get_settable_attributes_as_kwargs()
+        if settable_attributes.pop("additional_capabilities", None):
+            settable_attributes["capabilities"] = self._get_capabilties()
+        return settable_attributes
+
     def get_security_context(self) -> SecurityContext:
-        capabilities = self._get_capabilties()
-        security_context = SecurityContext()
-        if self.run_as_user:
-            setattr(security_context, 'run_as_user', self.run_as_user)
-        if self.run_as_group:
-            setattr(security_context, 'run_as_group', self.run_as_group)
-        if self.run_as_non_root is not None:
-            setattr(security_context, 'run_as_non_root', self.run_as_non_root)
-        if capabilities:
-            setattr(security_context, 'capabilities', capabilities)
+        self._get_capabilties()
+        settable_attributes = self._get_settable_attributes_as_kwargs()
+        security_context = SecurityContext(**settable_attributes)
         return security_context
