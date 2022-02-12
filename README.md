@@ -82,11 +82,10 @@ There are multiple ways to install Hera:
 
 # Contributing
 
-If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `pipenv`:
+If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry`:
 
 ```shell
-pipenv shell
-pipenv sync --dev --pre
+poetry install
 ```
 
 In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, e.g.:
