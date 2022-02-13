@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 2.1.0 - DATE (13/02/2022)
+
+### Added
+
+- support for setting args instead of command
+
 # 2.0.0 - DATE (08/02/2022)
 
 ### Added
