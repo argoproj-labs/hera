@@ -201,7 +201,7 @@ def test_task_with_default_value_in_toleration(no_op):
 
 
 def test_task_command_parses(mock_model, op):
-    t = Task('t', op, command=['python'], func_params=[{'a': mock_model()}])
+    t = Task('t', op, func_params=[{'a': mock_model()}])
     assert t.get_command() == ['python']
 
 

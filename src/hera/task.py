@@ -172,9 +172,14 @@ class Task:
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
         the specified function is parsed, stored as a string, and ultimately placed in a separate file inside the task
-        and invoked via `python script_file.py`. This command offers users the opportunity to start up the script in a
-        different way e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows
-        training models on multiple GPUs, etc.
+        and invoked via `python script_file.py`. Also, note that when neither command nor args are set, the command
+        will default to python. This command offers users the opportunity to start up the script in a different way
+        e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows training models
+        on multiple GPUs, etc.
+    args: Optionals[List[str]] = None
+        Optional list of arguments to run in the container. This can be used as an alternative to command, with the
+        advantage of not overriding the set entrypoint of the container. Note that when argo is using the emissary
+        executor command but be set.
     env_specs: Optional[List[EnvSpec]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
@@ -405,9 +410,11 @@ class Task:
     def get_command(self) -> List[str]:
         """
         Parses and returns the specified task command. This will attempt to stringify every command option and
-        raise a ValueError on failure.
+        raise a ValueError on failure. If not command is specified and no args, than this defaults to python.
         """
-        if not self.command:
+        if not self.command and not self.args:
+            return ["python"]
+        elif not self.command:
             return None
         return [str(cc) for cc in self.command]
 
@@ -648,7 +655,7 @@ class Task:
         if self.func is None:
             return None
 
-        script_kargs = {
+        script_kwargs = {
             "name": self.name,
             "image": self.image,
             "command": self.get_command(),
@@ -658,7 +665,7 @@ class Task:
             "env": self.env,
             "working_dir": self.working_dir,
         }
-        script_kargs = {k: v for k, v in script_kargs.items() if v}
+        script_kargs = {k: v for k, v in script_kwargs.items() if v is not None}
         template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**script_kargs)
         return template
 
@@ -670,7 +677,7 @@ class Task:
         Container
             The container template representation of the task.
         """
-        container_args = {
+        container_kwargs = {
             "image": self.image,
             "command": self.get_command(),
             "volume_mounts": self.get_volume_mounts(),
@@ -679,7 +686,7 @@ class Task:
             "env": self.env,
             "working_dir": self.working_dir,
         }
-        container_args = {k: v for k, v in container_args.items() if v}
+        container_args = {k: v for k, v in container_kwargs.items() if v is not None}
         container = Container(**container_args)
         return container
 
