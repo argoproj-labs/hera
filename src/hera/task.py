@@ -32,7 +32,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
-from hera.artifact import InputArtifact, OutputArtifact
+from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -201,7 +201,7 @@ class Task:
         func: Optional[Callable] = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
-        input_artifacts: Optional[List[InputArtifact]] = None,
+        input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
         daemon: bool = False,
@@ -393,12 +393,10 @@ class Task:
         -----
         Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
         """
-        input_art = []
+        artifacts = []
         if self.argo_input_artifacts:
-            input_art = [
-                IoArgoprojWorkflowV1alpha1Artifact(name=a.name, path=a.path) for a in self.argo_input_artifacts
-            ]
-        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=input_art)
+            artifacts = [i.get_input_spec() for i in self.input_artifacts]
+        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=artifacts)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
         """Assembles and returns the task outputs"""
@@ -576,6 +574,8 @@ class Task:
         """
         max_cpu = self.resources.max_cpu is not None
         max_mem = self.resources.max_mem is not None
+        max_custom = self.resources.max_custom_resources is not None
+
         resource = ResourceRequirements(
             requests={
                 'cpu': str(self.resources.min_cpu),
@@ -586,6 +586,14 @@ class Task:
                 'memory': self.resources.max_mem if max_mem else self.resources.min_mem,
             },
         )
+
+        if self.resources.min_custom_resources is not None:
+            resource.requests.update(**self.resources.min_custom_resources)
+
+        if max_custom:
+            resource.limits.update(**self.resources.max_custom_resources)
+        elif self.resources.min_custom_resources:
+            resource.limits.update(**self.resources.min_custom_resources)
 
         if self.resources.gpus:
             resource.requests['nvidia.com/gpu'] = str(self.resources.gpus)
@@ -624,16 +632,9 @@ class Task:
             The list of volume mounts to be added to the task specification.
         """
         volumes = []
-        if self.resources.volume:
-            volumes.append(self.resources.volume.get_mount())
-        if self.resources.existing_volume:
-            volumes.append(self.resources.existing_volume.get_mount())
-        if self.resources.empty_dir_volume:
-            volumes.append(self.resources.empty_dir_volume.get_mount())
-        if self.resources.secret_volume:
-            volumes.append(self.resources.secret_volume.get_mount())
-        if self.resources.config_map_volume:
-            volumes.append(self.resources.config_map_volume.get_mount())
+        if self.resources.volumes:
+            for volume in self.resources.volumes:
+                volumes.append(volume.get_mount())
         return volumes
 
     def get_script_def(self) -> Optional[IoArgoprojWorkflowV1alpha1ScriptTemplate]:
