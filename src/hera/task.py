@@ -34,7 +34,7 @@ from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
-from hera.input import InputFrom
+from hera.input import InputFrom, InputParameterAsEnv
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
@@ -213,6 +213,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
+        variables: Optional[List[InputParameterAsEnv]] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -225,13 +226,15 @@ class Task:
         self.image = image
         self.daemon = daemon
         self.command = command if command else ['python']
-        self.env = self.get_env(env_specs)
         self.resources = resources
         self.working_dir = working_dir
         self.retry = retry
         self.tolerations = tolerations
         self.node_selector = node_selectors
         self.labels = labels or {}
+        self.variables = variables or []
+        env_specs = env_specs or []
+        self.env = self.get_env(env_specs)
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -242,6 +245,10 @@ class Task:
         self.argo_resources = self.get_resources()
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_task_spec()
+
+    @property
+    def ip(self):
+        return f"{{{{tasks.{self.name}.ip}}}}"
 
     def next(self, other: 'Task') -> 'Task':
         """Sets this task as a dependency of the other passed task.
@@ -421,11 +428,13 @@ class Task:
         Optional[List[EnvVar]]
             A list of Argo environment specifications, if any specs are provided.
         """
-        if not specs:
-            return None
         r = []
         for spec in specs:
             r.append(spec.argo_spec)
+
+        for variable in self.variables:
+            if self.variables and isinstance(variable, InputParameterAsEnv):
+                r.append(variable.get_env_spec().argo_spec)
         return r
 
     def get_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:
@@ -450,6 +459,8 @@ class Task:
             args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
             for arg in args:
                 parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+        if self.variables:
+            parameters += [variable.get_argument_parameter() for variable in self.variables]
         if self.func:
             parameters += self.get_func_parameters()
 
@@ -519,7 +530,7 @@ class Task:
             The string representation of the script to load.
         """
         extract = "import json\n"
-        for param in self.arguments.parameters:
+        for param in self.parameters:
             extract += f"""{param.name} = json.loads('{{{{inputs.parameters.{param.name}}}}}')\n"""
         return textwrap.dedent(extract)
 

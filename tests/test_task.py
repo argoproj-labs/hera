@@ -1,11 +1,12 @@
 import pytest
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
+from click import argument
 from pydantic import ValidationError
 
 from hera.artifact import GCSArtifact, S3Artifact
 from hera.env import ConfigMapEnvSpec
-from hera.input import InputFrom
+from hera.input import InputFrom, InputParameterAsEnv
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
@@ -416,3 +417,14 @@ def test_task_adds_custom_resources(no_op):
     assert r.limits['memory'] == '4Gi'
     assert r.limits['custom-1'] == '1'
     assert r.limits['custom-2'] == '42Gi'
+
+
+def test_task_adds_variable_as_env_var():
+    t = Task('t')
+    t1 = Task('t1', variables=[InputParameterAsEnv(name="IP", value=t.ip)])
+
+    assert t1.env[0].name == "IP"
+    assert t1.env[0].value == "{{inputs.parameters.IP}}"
+
+    assert t1.arguments.parameters[0].name == "IP"
+    assert t1.arguments.parameters[0].value == "{{tasks.t.ip}}"
