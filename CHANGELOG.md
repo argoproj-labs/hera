@@ -28,6 +28,12 @@ The general format is:
 - C from D
 
 ```
+# 2.1.0 - DATE (15/02/2022)
+
+### Added
+
+- Added `TaskSecurityContext` to allow setting security settings to the task container.
+- Added `WorkflowSecurityContext` to allow setting security settings to all of the containers in the workflow.
 
 # 2.0.0 - DATE (08/02/2022)
 
