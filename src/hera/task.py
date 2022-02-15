@@ -664,7 +664,7 @@ class Task:
 
     def get_security_context(self) -> SecurityContext:
         """Assembles the security context for the task.
-        
+
         Returns
         -------
         SecurityContext
