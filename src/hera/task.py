@@ -652,6 +652,7 @@ class Task:
             command=self.get_command(),
             source=self.get_script(),
             resources=self.argo_resources,
+            volume_mounts=self.get_volume_mounts(),
         )
         if self.security_context:
             security_context = self.security_context.get_security_context()

@@ -442,6 +442,14 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
     assert t2.argo_task.dependencies[0] == 't'
 
 
+def test_task_script_def_volume_template(no_op):
+    t = Task('t', no_op, resources=Resources(volumes=[Volume(size="1Gi", mount_path="/tmp")]))
+
+    template = t.get_script_def()
+    assert len(template.volume_mounts) == 1
+    assert template.volume_mounts[0].mount_path == "/tmp"
+
+
 def test_task_adds_custom_resources(no_op):
     t = Task(
         't',
