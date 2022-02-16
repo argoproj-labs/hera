@@ -28,6 +28,13 @@ The general format is:
 - C from D
 
 ```
+# 2.1.1 - DATE (16/02/2022)
+
+
+### Changed
+
+- Added `volume_mounts` definition back to script template in `Task.get_script_def`.
+
 # 2.1.0 - DATE (15/02/2022)
 
 ### Added
