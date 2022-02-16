@@ -4,7 +4,7 @@ import copy
 import inspect
 import json
 import textwrap
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.model_utils import (
@@ -41,6 +41,7 @@ from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.toleration import Toleration
+from hera.json_utils import JSONType, encode_json, create_param_extraction
 
 
 class _Item(ModelSimple):
@@ -57,9 +58,9 @@ class _Item(ModelSimple):
     than internal `str` and `list`.
     """
 
-    allowed_values: Dict[Any, Any] = {}
+    allowed_values: Dict[Any, JSONType] = {}
 
-    validations: Dict[Any, Any] = {}
+    validations: Dict[Any, JSONType] = {}
 
     @cached_property
     def openapi_types():  # type: ignore
@@ -157,7 +158,7 @@ class Task:
         The name of the task to submit as part of a workflow.
     func: Optional[Callable]
         The function to execute remotely.
-    func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None
+    func_params: Optional[List[Dict[str, JSONType]]] = None
         The parameters of the function to execute. Note that this works together with parallel. If the params are
         constructed using a single list of values and parallel is False, it is going to be interpreted as a single
         function call with the given parameters. Otherwise, if parallel is False and the list of params is a list of
@@ -203,7 +204,7 @@ class Task:
         self,
         name: str,
         func: Optional[Callable] = None,
-        func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
+        func_params: Optional[List[Dict[str, JSONType]]] = None,
         input_from: Optional[InputFrom] = None,
         input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
@@ -486,10 +487,7 @@ class Task:
                 # if there's a single func_param dict, then we need to map each input key and value pair to a valid
                 # JSON parameter entry
                 for param_name, param_value in self.func_params[0].items():
-                    if isinstance(param_value, BaseModel):
-                        value = param_value.json()
-                    else:
-                        value = json.dumps(param_value)
+                    value = encode_json(param_value)
                     parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=value))
                     param_name_cache.add(param_name)
             elif len(self.func_params) > 1:
@@ -504,10 +502,7 @@ class Task:
                     )
                     param_name_cache.add(param_name)
         for name, value in keywords:
-            if isinstance(value, BaseModel):
-                value = value.json()
-            else:
-                value = json.dumps(value)
+            value = encode_json(value)
             if name in param_name_cache:
                 continue  # user override of a kwarg
             parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, value=value))
@@ -526,7 +521,7 @@ class Task:
         """
         extract = "import json\n"
         for param in self.arguments.parameters:
-            extract += f"""{param.name} = json.loads('{{{{inputs.parameters.{param.name}}}}}')\n"""
+            extract += create_param_extraction(param.name)
         return textwrap.dedent(extract)
 
     def get_script(self) -> str:
@@ -614,10 +609,11 @@ class Task:
         for func_param in self.func_params:
             item = {}
             for k, v in func_param.items():
-                if isinstance(v, BaseModel):
-                    item[k] = v.json()
-                else:
-                    item[k] = json.dumps(v)  # type: ignore
+                v_json = encode_json(v)
+                try:
+                    item[k] = json.loads(v_json)
+                except json.JSONDecodeError:
+                    item[k] = v_json
             items.append(_Item(value=item))
         return items
 

@@ -15,6 +15,7 @@ from hera.security_context import TaskSecurityContext
 from hera.task import Task
 from hera.toleration import GPUToleration, Toleration
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
+from hera.json_utils import create_param_extraction
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -88,44 +89,37 @@ def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_param_script_portion()
-    assert script == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n'
+    assert script == f"import json\n{create_param_extraction('a')}"
 
 
 def test_script_getter_returns_expected_string(op, typed_op):
+    script_preface = f"import json\n{create_param_extraction('a')}"
     t = Task('t', op, [{'a': 1}])
-    script = t.get_script()
-    assert script == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
+    script = t.get_script().strip()
+    assert script == f"{script_preface}\nprint(a)"
 
     t = Task('t', typed_op, [{'a': 1}])
-    script = t.get_script()
-    assert script == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+    script = t.get_script().strip()
+    assert script == f"{script_preface}\nprint(a)\nreturn [{{'a': (a, a)}}]"
 
 
 def test_script_getter_parses_multi_line_function(long_op):
+    params = {
+        'very_long_parameter_name': 1,
+        'very_very_long_parameter_name': 2,
+        'very_very_very_long_parameter_name': 3,
+        'very_very_very_very_long_parameter_name': 4,
+        'very_very_very_very_very_long_parameter_name': 5,
+    }
     t = Task(
         't',
         long_op,
-        [
-            {
-                'very_long_parameter_name': 1,
-                'very_very_long_parameter_name': 2,
-                'very_very_very_long_parameter_name': 3,
-                'very_very_very_very_long_parameter_name': 4,
-                'very_very_very_very_very_long_parameter_name': 5,
-            }
-        ],
+        [params],
     )
 
-    expected_script = """import json
-very_long_parameter_name = json.loads('{{inputs.parameters.very_long_parameter_name}}')
-very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_long_parameter_name}}')
-very_very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_very_long_parameter_name}}')
-very_very_very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_very_very_long_parameter_name}}')
-very_very_very_very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_very_very_very_long_parameter_name}}')
-
-print(42)
-"""
-    script = t.get_script()
+    extraction = "".join(create_param_extraction(name) for name in params.keys())
+    expected_script = f"import json\n{extraction}\nprint(42)" ""
+    script = t.get_script().strip()
     assert script == expected_script
 
 
@@ -159,9 +153,9 @@ def test_parallel_items_assemble_base_models(multi_op, mock_model):
     )
     items = t.get_parallel_items()
     for item in items:
-        assert item.value['a'] == '1'
-        assert item.value['b'] == '{"d": 2, "e": 3}'
-        assert item.value['c'] == '{"field1": 1, "field2": 2}'
+        assert item.value['a'] == 1
+        assert item.value['b'] == {"d": 2, "e": 3}
+        assert item.value['c'] == {"field1": 1, "field2": 2}
 
 
 def test_volume_mounts_returns_expected_volumes(no_op):
@@ -209,9 +203,9 @@ def test_task_command_parses(mock_model, op):
 
 
 def test_task_spec_returns_with_parallel_items(op):
-    t = Task('t', op, [{'a': 1}, {'a': 1}, {'a': 1}])
+    items = [{'a': 1}, {'a': 1}, {'a': 1}]
+    t = Task('t', op, func_params=items)
     s = t.get_task_spec()
-    items = [{'a': '1'}, {'a': '1'}, {'a': '1'}]
 
     assert s.name == 't'
     assert s.template == 't'
@@ -264,7 +258,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
-    assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
+    assert tt.script.source.strip() == f"import json\n{create_param_extraction('a')}\nprint(a)"
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'

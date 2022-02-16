@@ -1,4 +1,3 @@
-import json
 from typing import Any, Optional
 
 from argo_workflows.models import (
@@ -10,6 +9,7 @@ from argo_workflows.models import (
 from pydantic import BaseModel, validator
 
 from hera.validators import json_serializable
+from hera.json_utils import encode_json
 
 
 class EnvSpec(BaseModel):
@@ -20,11 +20,9 @@ class EnvSpec(BaseModel):
     name: str
         The name of the variable.
     value: Optional[Any] = None
-        The value of the variable. This value is serialized for the client. If a pydantic BaseModel is passed in the
-        corresponding `.json()` method will be used for serialization. It is up to the client to deserialize the value
-        in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
-        performed.
-
+        The value of the variable. This value is serialized for the client.
+        This uses hera.json_utils.encode_json to encode the supplied value to
+        json.
     Raises
     ------
     AssertionError
@@ -43,12 +41,7 @@ class EnvSpec(BaseModel):
     @property
     def argo_spec(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
-        if isinstance(self.value, BaseModel):
-            value = self.value.json()
-        elif isinstance(self.value, str):
-            value = self.value
-        else:
-            value = json.dumps(self.value)
+        value = encode_json(self.value)
         return EnvVar(name=self.name, value=value)
 
 
