@@ -180,9 +180,9 @@ class Task:
         on multiple GPUs, etc.
     args: Optionals[List[str]] = None
         Optional list of arguments to run in the container. This can be used as an alternative to command, with the
-        advantage of not overriding the set entrypoint of the container. As an example, a container by default may enter
-        via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`. See notes,
-        for when running with emissary executor.
+        advantage of not overriding the set entrypoint of the container. As an example, a container by default may
+        enter via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`.
+        See notes, for when running with emissary executor.
     env_specs: Optional[List[EnvSpec]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
@@ -203,10 +203,10 @@ class Task:
         A Dict of labels to attach to the Task Template object metadata.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
-    
+
     Notes
     ------
-    When argo is using the emissary executor, the command must be set even when using args. See, 
+    When argo is using the emissary executor, the command must be set even when using args. See,
     https://argoproj.github.io/argo-workflows/workflow-executors/#emissary-emissary for how to get a containers
     entrypoint, inorder to set it as the command and to be able to set args on the Tasks.
     """
