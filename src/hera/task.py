@@ -6,6 +6,7 @@ import json
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.model_utils import (
     ApiTypeError,
     ModelSimple,
@@ -38,6 +39,7 @@ from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
+from hera.security_context import TaskSecurityContext
 from hera.toleration import Toleration
 
 
@@ -198,6 +200,8 @@ class Task:
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Task Template object metadata.
+    security_context: Optional[TaskSecurityContext] = None
+        Define security settings for the task container, overrides workflow security context.
     """
 
     def __init__(
@@ -219,6 +223,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
+        security_context: Optional[TaskSecurityContext] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -239,6 +244,7 @@ class Task:
         self.tolerations = tolerations
         self.node_selector = node_selectors
         self.labels = labels or {}
+        self.security_context = security_context
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -664,10 +670,24 @@ class Task:
             "resources": self.argo_resources,
             "env": self.env,
             "working_dir": self.working_dir,
+            "volume_mounts": self.get_volume_mounts(),
+            "security_context": self.get_security_context(),
         }
         script_kargs = {k: v for k, v in script_kwargs.items() if v is not None}
         template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**script_kargs)
         return template
+
+    def get_security_context(self) -> SecurityContext:
+        """Assembles the security context for the task.
+
+        Returns
+        -------
+        SecurityContext
+            The security settings to apply to the task's container.
+        """
+        if not self.security_context:
+            return None
+        return self.security_context.get_security_context()
 
     def get_container(self) -> Container:
         """Assembles and returns the container for the task to run in.
@@ -685,6 +705,7 @@ class Task:
             "args": self.get_args(),
             "env": self.env,
             "working_dir": self.working_dir,
+            "security_context": self.get_security_context(),
         }
         container_args = {k: v for k, v in container_kwargs.items() if v is not None}
         container = Container(**container_args)
