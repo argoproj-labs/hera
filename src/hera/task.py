@@ -6,6 +6,7 @@ import json
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.model_utils import (
     ApiTypeError,
     ModelSimple,
@@ -38,6 +39,7 @@ from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
+from hera.security_context import TaskSecurityContext
 from hera.toleration import Toleration
 from hera.variable import VariableAsEnv
 
@@ -196,6 +198,8 @@ class Task:
         A Dict of labels to attach to the Task Template object metadata.
     variables: Optional[List[VariableAsEnv]] = None
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
+    security_context: Optional[TaskSecurityContext] = None
+        Define security settings for the task container, overrides workflow security context.
     """
 
     def __init__(
@@ -217,6 +221,7 @@ class Task:
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
         variables: Optional[List[VariableAsEnv]] = None,
+        security_context: Optional[TaskSecurityContext] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -238,6 +243,7 @@ class Task:
         self.variables = variables or []
         env_specs = env_specs or []
         self.env = self.get_env(env_specs)
+        self.security_context = security_context
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -660,12 +666,26 @@ class Task:
             command=self.get_command(),
             source=self.get_script(),
             resources=self.argo_resources,
+            volume_mounts=self.get_volume_mounts(),
         )
+        if self.security_context:
+            security_context = self.security_context.get_security_context()
+            setattr(template, 'security_context', security_context)
         if self.working_dir:
             setattr(template, 'working_dir', self.working_dir)
         if self.env:
             setattr(template, 'env', self.env)
         return template
+
+    def get_security_context(self) -> SecurityContext:
+        """Assembles the security context for the task.
+
+        Returns
+        -------
+        SecurityContext
+            The security settings to apply to the task's container.
+        """
+        return self.security_context.get_security_context()
 
     def get_container(self) -> Container:
         """Assembles and returns the container for the task to run in.
@@ -681,6 +701,9 @@ class Task:
             volume_mounts=self.get_volume_mounts(),
             resources=self.argo_resources,
         )
+        if self.security_context:
+            security_context = self.get_security_context()
+            setattr(container, 'env', security_context)
         if self.env:
             setattr(container, 'env', self.env)
         if self.working_dir:

@@ -10,6 +10,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.volumes import Volume
 from hera.workflow_service import WorkflowService
@@ -33,6 +34,8 @@ class Workflow:
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
+    security_context:  Optional[WorkflowSecurityContext] = None
+        Define security settings for all containers in the workflow.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
     namespace: Optional[str] = 'default'
@@ -47,11 +50,13 @@ class Workflow:
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = None,
+        security_context: Optional[WorkflowSecurityContext] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.namespace = namespace or 'default'
         self.service = service
         self.parallelism = parallelism
+        self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
 
@@ -62,9 +67,14 @@ class Workflow:
             dag=self.dag_template,
             parallelism=self.parallelism,
         )
+
         self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
         )
+        if self.security_context:
+            security_context = self.security_context.get_security_context()
+            setattr(self.spec, 'security_context', security_context)
+
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
