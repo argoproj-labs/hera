@@ -14,6 +14,7 @@ from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.task import Task
 from hera.toleration import GPUToleration, Toleration
+from hera.variable import VariableAsEnv
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
 
 
@@ -204,7 +205,7 @@ def test_task_with_default_value_in_toleration(no_op):
 
 
 def test_task_command_parses(mock_model, op):
-    t = Task('t', op, [{'a': mock_model()}])
+    t = Task('t', op, func_params=[{'a': mock_model()}])
     assert t.get_command() == ['python']
 
 
@@ -442,6 +443,12 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
     assert t2.argo_task.dependencies[0] == 't'
 
 
+def test_supply_args():
+    t = Task('t', args=["arg"])
+    assert t.argo_template.container.args == ["arg"]
+    assert 'command' not in t.argo_template.container
+
+
 def test_task_script_def_volume_template(no_op):
     t = Task('t', no_op, resources=Resources(volumes=[Volume(size="1Gi", mount_path="/tmp")]))
 
@@ -472,3 +479,14 @@ def test_task_adds_custom_resources(no_op):
     assert r.limits['memory'] == '4Gi'
     assert r.limits['custom-1'] == '1'
     assert r.limits['custom-2'] == '42Gi'
+
+
+def test_task_adds_variable_as_env_var():
+    t = Task('t')
+    t1 = Task('t1', variables=[VariableAsEnv(name="IP", value=t.ip)])
+
+    assert t1.env[0].name == "IP"
+    assert t1.env[0].value == "{{inputs.parameters.IP}}"
+
+    assert t1.arguments.parameters[0].name == "IP"
+    assert t1.arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
