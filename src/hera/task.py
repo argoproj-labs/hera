@@ -174,14 +174,15 @@ class Task:
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
         the specified function is parsed, stored as a string, and ultimately placed in a separate file inside the task
-        and invoked via `python script_file.py`. Also, note that when neither command nor args are set, the command
+        and invoked via `python script_file.py`. Also note, that when neither command nor args are set, the command
         will default to python. This command offers users the opportunity to start up the script in a different way
         e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows training models
         on multiple GPUs, etc.
     args: Optionals[List[str]] = None
         Optional list of arguments to run in the container. This can be used as an alternative to command, with the
-        advantage of not overriding the set entrypoint of the container. Note that when argo is using the emissary
-        executor command but be set.
+        advantage of not overriding the set entrypoint of the container. As an example, a container by default may enter
+        via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`. See notes,
+        for when running with emissary executor.
     env_specs: Optional[List[EnvSpec]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
@@ -202,6 +203,12 @@ class Task:
         A Dict of labels to attach to the Task Template object metadata.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
+    
+    Notes
+    ------
+    When argo is using the emissary executor, the command must be set even when using args. See, 
+    https://argoproj.github.io/argo-workflows/workflow-executors/#emissary-emissary for how to get a containers
+    entrypoint, inorder to set it as the command and to be able to set args on the Tasks.
     """
 
     def __init__(
@@ -416,7 +423,7 @@ class Task:
     def get_command(self) -> List[str]:
         """
         Parses and returns the specified task command. This will attempt to stringify every command option and
-        raise a ValueError on failure. If not command is specified and no args, than this defaults to python.
+        raise a ValueError on failure. This defaults to Python if `command` and `args` are not specified.
         """
         if not self.command and not self.args:
             return ["python"]

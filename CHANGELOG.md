@@ -28,6 +28,12 @@ The general format is:
 - C from D
 
 ```
+# 2.3.0 - DATE (13/02/2022)
+
+### Added
+
+- support for setting args instead of command
+
 # 2.1.1 - DATE (16/02/2022)
 
 
@@ -41,12 +47,6 @@ The general format is:
 
 - Added `TaskSecurityContext` to allow setting security settings to the task container.
 - Added `WorkflowSecurityContext` to allow setting security settings to all of the containers in the workflow.
-
-# 2.1.0 - DATE (13/02/2022)
-
-### Added
-
-- support for setting args instead of command
 
 # 2.0.0 - DATE (08/02/2022)
 
