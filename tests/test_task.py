@@ -3,7 +3,6 @@ from argo_workflows.model.capabilities import Capabilities
 from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
-from click import argument
 from pydantic import ValidationError
 
 from hera.artifact import GCSArtifact, S3Artifact
