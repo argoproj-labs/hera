@@ -28,6 +28,12 @@ The general format is:
 - C from D
 
 ```
+# 2.2.0 - DATE (16/02/2022)
+
+
+### Added
+
+- Add support for sharing the IP of one Task to another Task, via env variables
 # 2.1.1 - DATE (16/02/2022)
 
 
