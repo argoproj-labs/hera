@@ -205,7 +205,7 @@ def test_task_with_default_value_in_toleration(no_op):
 
 
 def test_task_command_parses(mock_model, op):
-    t = Task('t', op, [{'a': mock_model()}])
+    t = Task('t', op, func_params=[{'a': mock_model()}])
     assert t.get_command() == ['python']
 
 
@@ -441,6 +441,12 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
     t2 = Task('t2', no_op)
     t.next(t2)
     assert t2.argo_task.dependencies[0] == 't'
+
+
+def test_supply_args():
+    t = Task('t', args=["arg"])
+    assert t.argo_template.container.args == ["arg"]
+    assert 'command' not in t.argo_template.container
 
 
 def test_task_script_def_volume_template(no_op):

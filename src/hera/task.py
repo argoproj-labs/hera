@@ -175,9 +175,15 @@ class Task:
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
         the specified function is parsed, stored as a string, and ultimately placed in a separate file inside the task
-        and invoked via `python script_file.py`. This command offers users the opportunity to start up the script in a
-        different way e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows
-        training models on multiple GPUs, etc.
+        and invoked via `python script_file.py`. Also note, that when neither command nor args are set, the command
+        will default to python. This command offers users the opportunity to start up the script in a different way
+        e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows training models
+        on multiple GPUs, etc.
+    args: Optionals[List[str]] = None
+        Optional list of arguments to run in the container. This can be used as an alternative to command, with the
+        advantage of not overriding the set entrypoint of the container. As an example, a container by default may
+        enter via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`.
+        See notes, for when running with emissary executor.
     env_specs: Optional[List[EnvSpec]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
@@ -200,6 +206,12 @@ class Task:
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
+
+    Notes
+    ------
+    When argo is using the emissary executor, the command must be set even when using args. See,
+    https://argoproj.github.io/argo-workflows/workflow-executors/#emissary-emissary for how to get a containers
+    entrypoint, inorder to set it as the command and to be able to set args on the Tasks.
     """
 
     def __init__(
@@ -213,6 +225,7 @@ class Task:
         image: str = 'python:3.7',
         daemon: bool = False,
         command: Optional[List[str]] = None,
+        args: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
         resources: Resources = Resources(),
         working_dir: Optional[str] = None,
@@ -233,7 +246,8 @@ class Task:
 
         self.image = image
         self.daemon = daemon
-        self.command = command if command else ['python']
+        self.command = command
+        self.args = args
         self.resources = resources
         self.working_dir = working_dir
         self.retry = retry
@@ -419,10 +433,18 @@ class Task:
     def get_command(self) -> List[str]:
         """
         Parses and returns the specified task command. This will attempt to stringify every command option and
-        raise a ValueError on failure.
+        raise a ValueError on failure. This defaults to Python if `command` and `args` are not specified.
         """
-        assert self.command
+        if not self.command and not self.args:
+            return ["python"]
+        elif not self.command:
+            return None
         return [str(cc) for cc in self.command]
+
+    def get_args(self) -> List[str]:
+        if not self.args:
+            return None
+        return [str(arg) for arg in self.args]
 
     def get_env(self, specs: List[EnvSpec]) -> Optional[List[EnvVar]]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
@@ -660,21 +682,20 @@ class Task:
         if self.func is None:
             return None
 
-        template = IoArgoprojWorkflowV1alpha1ScriptTemplate(
-            name=self.name,
-            image=self.image,
-            command=self.get_command(),
-            source=self.get_script(),
-            resources=self.argo_resources,
-            volume_mounts=self.get_volume_mounts(),
-        )
-        if self.security_context:
-            security_context = self.security_context.get_security_context()
-            setattr(template, 'security_context', security_context)
-        if self.working_dir:
-            setattr(template, 'working_dir', self.working_dir)
-        if self.env:
-            setattr(template, 'env', self.env)
+        script_kwargs = {
+            "name": self.name,
+            "image": self.image,
+            "command": self.get_command(),
+            "args": self.get_args(),
+            "source": self.get_script(),
+            "resources": self.argo_resources,
+            "env": self.env,
+            "working_dir": self.working_dir,
+            "volume_mounts": self.get_volume_mounts(),
+            "security_context": self.get_security_context(),
+        }
+        script_kargs = {k: v for k, v in script_kwargs.items() if v is not None}
+        template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**script_kargs)
         return template
 
     def get_security_context(self) -> SecurityContext:
@@ -685,6 +706,8 @@ class Task:
         SecurityContext
             The security settings to apply to the task's container.
         """
+        if not self.security_context:
+            return None
         return self.security_context.get_security_context()
 
     def get_container(self) -> Container:
@@ -695,19 +718,18 @@ class Task:
         Container
             The container template representation of the task.
         """
-        container = Container(
-            image=self.image,
-            command=self.get_command(),
-            volume_mounts=self.get_volume_mounts(),
-            resources=self.argo_resources,
-        )
-        if self.security_context:
-            security_context = self.get_security_context()
-            setattr(container, 'env', security_context)
-        if self.env:
-            setattr(container, 'env', self.env)
-        if self.working_dir:
-            setattr(container, 'working_dir', self.working_dir)
+        container_kwargs = {
+            "image": self.image,
+            "command": self.get_command(),
+            "volume_mounts": self.get_volume_mounts(),
+            "resources": self.argo_resources,
+            "args": self.get_args(),
+            "env": self.env,
+            "working_dir": self.working_dir,
+            "security_context": self.get_security_context(),
+        }
+        container_args = {k: v for k, v in container_kwargs.items() if v is not None}
+        container = Container(**container_args)
         return container
 
     def get_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
