@@ -34,11 +34,12 @@ from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
-from hera.input import InputFrom, InputParameterAsEnv
+from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.toleration import Toleration
+from hera.variable import VariableAsEnv
 
 
 class _Item(ModelSimple):
@@ -193,6 +194,8 @@ class Task:
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Task Template object metadata.
+    variables: Optional[List[VariableAsEnv]] = None
+        A list of variable for a Task. Allows passing information about other Tasks into this Task.
     """
 
     def __init__(
@@ -213,7 +216,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
-        variables: Optional[List[InputParameterAsEnv]] = None,
+        variables: Optional[List[VariableAsEnv]] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -248,7 +251,7 @@ class Task:
 
     @property
     def ip(self):
-        return f"{{{{tasks.{self.name}.ip}}}}"
+        return f"\"{{{{tasks.{self.name}.ip}}}}\""
 
     def next(self, other: 'Task') -> 'Task':
         """Sets this task as a dependency of the other passed task.
@@ -433,7 +436,7 @@ class Task:
             r.append(spec.argo_spec)
 
         for variable in self.variables:
-            if self.variables and isinstance(variable, InputParameterAsEnv):
+            if self.variables and isinstance(variable, VariableAsEnv):
                 r.append(variable.get_env_spec().argo_spec)
         return r
 

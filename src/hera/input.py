@@ -1,13 +1,7 @@
 """Holds input model specifications"""
 from typing import List
 
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Inputs,
-    IoArgoprojWorkflowV1alpha1Parameter,
-)
 from pydantic import BaseModel
-
-from hera.env import EnvSpec
 
 
 class InputFrom(BaseModel):
@@ -54,17 +48,3 @@ class InputFrom(BaseModel):
 
     name: str
     parameters: List[str]
-
-
-class InputParameterAsEnv(BaseModel):
-    name: str
-    value: str
-
-    def get_argument_parameter(self):
-        return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value=self.value)
-
-    def get_input_parameter(self):
-        return IoArgoprojWorkflowV1alpha1Inputs(name=self.name)
-
-    def get_env_spec(self):
-        return EnvSpec(name=self.name, value=f"{{{{inputs.parameters.{self.name}}}}}")

@@ -6,12 +6,13 @@ from pydantic import ValidationError
 
 from hera.artifact import GCSArtifact, S3Artifact
 from hera.env import ConfigMapEnvSpec
-from hera.input import InputFrom, InputParameterAsEnv
+from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.task import Task
 from hera.toleration import GPUToleration, Toleration
+from hera.variable import VariableAsEnv
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
 
 
@@ -421,10 +422,10 @@ def test_task_adds_custom_resources(no_op):
 
 def test_task_adds_variable_as_env_var():
     t = Task('t')
-    t1 = Task('t1', variables=[InputParameterAsEnv(name="IP", value=t.ip)])
+    t1 = Task('t1', variables=[VariableAsEnv(name="IP", value=t.ip)])
 
     assert t1.env[0].name == "IP"
     assert t1.env[0].value == "{{inputs.parameters.IP}}"
 
     assert t1.arguments.parameters[0].name == "IP"
-    assert t1.arguments.parameters[0].value == "{{tasks.t.ip}}"
+    assert t1.arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
