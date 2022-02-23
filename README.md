@@ -82,6 +82,20 @@ pipenv shell
 pipenv sync --dev --pre
 ```
 
+In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, e.g.:
+
+```shell
+make test
+```
+
+To run tests on all supported python versions run [tox](https://tox.wiki/en/latest/):
+
+```shell
+tox
+```
+
+> See project `tox.ini` for more details
+
 Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
 
 # Concepts
