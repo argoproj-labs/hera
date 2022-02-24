@@ -20,7 +20,13 @@ typecheck:
 	mypy --namespace-packages tests
 
 test:
-	pytest --durations=5 $(TEST_FOLDER)
+	pytest -c tox.ini $(TEST_FOLDER)
+
+cov-report:
+	ls -la coverage/
+	coverage combine coverage
+	coverage report
+	coverage html
 
 verify: lint typecheck test
 	echo "Lint, typecheck, test successfully completed!"
