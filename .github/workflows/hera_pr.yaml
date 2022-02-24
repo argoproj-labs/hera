@@ -3,7 +3,7 @@ name: Hera PR build
 on: pull_request
 
 jobs:
-  hera-pr-build:
+  build-linux:
 
     timeout-minutes: 10
 
@@ -25,7 +25,7 @@ jobs:
 
       - name: Install base dependencies
         run: |
-          python -m pip install --upgrade "tox<4.0"
+          python -m pip install --upgrade "tox<4.0" twine
 
       - name: Run lint
         env:
@@ -41,6 +41,91 @@ jobs:
 
       - name: Run tests
         env:
+          ENABLE_BDIST_EXT_MODULE: 'yes'
           TOXENV: python${{ matrix.python-version }}
         run: |
           tox
+
+      - name: Check build
+        run: |
+          twine check .tox/dist/*
+
+      - name: store build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pypi-build-arts
+          path: .tox/dist
+
+      - name: store coverage files
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: coverage
+
+  coverage-report:
+    needs: [build-linux]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: get coverage files
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage
+          path: coverage
+
+      - name: list coverage files
+        run: |
+          ls -la coverage/
+
+      - name: install coverage
+        run: |
+          python -m pip install --upgrade coverage
+
+      - name: create coverage report
+        run: |
+          make cov-report
+
+      - name: store coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-html
+          path: htmlcov
+
+  publish-test:
+    needs: [coverage-report]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: get pypi build arts
+        uses: actions/download-artifact@v2
+        with:
+          name: pypi-build-arts
+          path: dist
+
+      - name: list pypi build arts
+        run: |
+          ls -la dist/
+
+      - name: install twine
+        run: |
+          python -m pip install --upgrade coverage
+
+      - name: Check build
+        run: |
+          twine check dist/*
