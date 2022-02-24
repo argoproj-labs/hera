@@ -1,7 +1,26 @@
-from setuptools import find_namespace_packages, setup
+import os
+from setuptools import setup, Distribution
 
 VERSION = open('VERSION').read().strip()
 LONG_DESCRIPTION = open('README.md').read()
+
+
+class BinaryDistribution(Distribution):
+    """Distribution which enables a binary package with platform name
+
+    Will build `none-any` wheels by default, e.g. -
+
+        hera_workflows-1.8.0-py3-none-any.whl
+
+    If the env var ENABLE_BDIST_EXT_MODULE=yes is defined built wheel will have platform and
+    python version info, e.g. -
+    Used to create wheels for specific OS and Python version, e.g. -
+
+        hera_workflows-1.8.0-cp37-cp37m-macosx_10_9_x86_64.whl
+    """
+    def has_ext_modules(foo):
+        return True if os.environ.get('ENABLE_BDIST_EXT_MODULE') == 'yes' else False
+
 
 setup(
     name='hera-workflows',
@@ -45,6 +64,7 @@ setup(
         "certifi",
         "pytz"
     ],
-    zip_safe=False
+    zip_safe=False,
+    distclass=BinaryDistribution
 )
 
