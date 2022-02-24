@@ -1,7 +1,7 @@
 # Hera (hera-workflows)
 
 ```text
-The Argo was constructed by the shipwright Argus, 
+The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
 
@@ -57,21 +57,27 @@ There are multiple ways to install Hera:
 
 1. You can install from [PyPi](https://pypi.org/project/hera-workflows/):
 
-  ```shell
-  pip install hera-workflows
-  ```
+   ```shell
+   pip install hera-workflows
+   ```
 
-2. Install it directly from this repository using:
+2. You can install from [conda](https://anaconda.org/conda-forge/hera-workflows):
 
-  ```shell
-  python -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed
-  ```
+   ```shell
+   conda install -c conda-forge hera-workflows
+   ```
 
-3. Alternatively, you can clone this repository and then run the following to install:
+3. Install it directly from this repository using:
 
-  ```shell
-  python setup.py install
-  ```
+   ```shell
+   python -m pip install git+https://github.com/argoproj-labs/hera-workflows  --ignore-installed
+   ```
+
+4. Alternatively, you can clone this repository and then run the following to install:
+
+   ```shell
+   pip install .
+   ```
 
 # Contributing
 
@@ -81,6 +87,20 @@ If you plan to submit contributions to Hera you can install Hera in a virtual en
 pipenv shell
 pipenv sync --dev --pre
 ```
+
+In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, e.g.:
+
+```shell
+make test
+```
+
+To run tests on all supported python versions run [tox](https://tox.wiki/en/latest/):
+
+```shell
+tox
+```
+
+> See project `tox.ini` for more details
 
 Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
 
