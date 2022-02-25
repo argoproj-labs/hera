@@ -9,6 +9,7 @@ and its crew were specially protected by the goddess Hera.
 
 [![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/hera_build_and_publish.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/hera_build_and_publish.yaml)
 [![Pypi](https://img.shields.io/pypi/v/hera-workflows.svg)](https://pypi.python.org/pypi/hera-workflows)
+[![CondaForge](https://img.shields.io/conda/v/conda-forge/hera-workflows.svg)](https://anaconda.org/conda-forge/hera-workflows)
 [![Downloads](https://pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
 [![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
