@@ -1,4 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
+import warnings
 from typing import Dict, Optional
 from uuid import uuid4
 
@@ -14,6 +15,10 @@ from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.volumes import Volume
 from hera.workflow_service import WorkflowService
+
+# by default, `DeprecationWarning`s are silenced, this removes the warning from the filter so it
+# can be issued to users
+warnings.simplefilter('always', DeprecationWarning)
 
 
 class Workflow:
@@ -158,7 +163,19 @@ class Workflow:
         t.argo_task.dependencies = list(free_tasks)
 
     def submit(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
-        """Submits the workflow"""
+        """Submits the workflow.
+
+        Notes
+        -----
+        This method is deprecated in favor of `workflow.create(...)`.
+        """
+        warnings.warn("`submit` is deprecated in favor of `create`", DeprecationWarning, stacklevel=2)
+        if namespace is None:
+            namespace = self.namespace
+        return self.service.submit(self.workflow, namespace)
+
+    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
+        """Creates the workflow"""
         if namespace is None:
             namespace = self.namespace
         return self.service.submit(self.workflow, namespace)
