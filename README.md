@@ -107,6 +107,12 @@ To run tests for a specific python version with coverage run:
 tox -e python3.7 coverage
 ```
 
+To list all available `tox` envs run:
+
+```shell
+tox -a
+```
+
 > See project `tox.ini` for more details
 
 Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
