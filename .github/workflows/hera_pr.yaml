@@ -102,7 +102,7 @@ jobs:
           path: .tox/htmlcov
 
   publish:
-    needs: [coverage-report]
+    needs: [coverage]
 
     runs-on: ubuntu-latest
 
