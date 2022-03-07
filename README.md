@@ -95,10 +95,16 @@ In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, 
 make test
 ```
 
-To run tests on all supported python versions run [tox](https://tox.wiki/en/latest/):
+To run tests on all supported python versions with coverage run [tox](https://tox.wiki/en/latest/):
 
 ```shell
 tox
+```
+
+To run tests for a specific python version with coverage run:
+
+```shell
+tox -e python3.7 coverage
 ```
 
 > See project `tox.ini` for more details
