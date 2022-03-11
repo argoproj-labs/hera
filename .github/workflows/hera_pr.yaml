@@ -3,16 +3,16 @@ name: Hera PR build
 on: pull_request
 
 jobs:
-  build-linux:
-
+  build:
+    name: build py${{ matrix.python-version }} on ${{ matrix.os }}
     timeout-minutes: 10
-
-    runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
+        os: [linux, macos, windows]
         python-version: ['3.7', '3.8', '3.9', '3.10']
+
+    runs-on: ${{ matrix.os }}-latest
 
     steps:
       - name: Set up python ${{ matrix.python-version }}
@@ -63,7 +63,7 @@ jobs:
           path: ".tox/.coverage.*"
 
   coverage:
-    needs: [build-linux]
+    needs: [build]
 
     runs-on: ubuntu-latest
 
@@ -114,20 +114,24 @@ jobs:
         with:
           python-version: '3.7'
 
-      - name: get pypi build arts
+      - name: get distribution wheels
         uses: actions/download-artifact@v2
         with:
           name: pypi-build-arts
           path: dist
 
-      - name: list pypi build arts
+      - name: install base dependencies
+        run: |
+          python -m pip install --upgrade twine build
+
+      - name: build py3-none-any wheel and distribution
+        run: |
+          python -m build --sdist --wheel --outdir dist/
+
+      - name: list all pypi build arts
         run: |
           ls -la dist/
 
-      - name: install twine
-        run: |
-          python -m pip install --upgrade twine
-
-      - name: Check build
+      - name: Check pypi artifacts
         run: |
           twine check dist/*
