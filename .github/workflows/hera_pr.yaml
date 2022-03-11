@@ -9,8 +9,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macos, windows]
+        os: [linux, macos]
         python-version: ['3.7', '3.8', '3.9', '3.10']
+    env:
+      PYVER: ${{ matrix.python-version }}
+      OS: ${{ matrix.os }}
 
     runs-on: ${{ matrix.os }}-latest
 
@@ -60,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: coverage-data
-          path: ".tox/.coverage.*"
+          path: ".tox/.coverage_*"
 
   coverage:
     needs: [build]
@@ -83,7 +86,7 @@ jobs:
 
       - name: list coverage files
         run: |
-          find .tox -name ".coverage*"
+          find .tox -name ".coverage_*"
 
       - name: install tox
         run: |
