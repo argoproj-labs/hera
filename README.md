@@ -101,17 +101,19 @@ To run tests on all supported python versions with coverage run [tox](https://to
 tox
 ```
 
-To run tests for a specific python version with coverage run:
-
-```shell
-tox -e python3.7 coverage
-```
-
 To list all available `tox` envs run:
 
 ```shell
 tox -a
 ```
+
+To run selected tox envs, e.g. for a specific python version with coverage run:
+
+```shell
+tox -e python3.7,coverage
+```
+
+As `coverage` *dependes* on `python3.7`, it will run *after* `python3.8`
 
 > See project `tox.ini` for more details
 
@@ -137,7 +139,7 @@ from hera.workflow_service import WorkflowService
 
 def say(message: str):
     """
-    This can be anything as long as the Docker image satisfies the dependencies. You can import anything Python 
+    This can be anything as long as the Docker image satisfies the dependencies. You can import anything Python
     that is in your container e.g torch, tensorflow, scipy, biopython, etc - just provide an image to the task!
     """
     print(message)
