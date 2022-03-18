@@ -18,7 +18,7 @@ class BinaryDistribution(Distribution):
 
         hera_workflows-1.8.0-cp37-cp37m-macosx_10_9_x86_64.whl
     """
-    def has_ext_modules(foo):
+    def has_ext_modules(self):
         return os.environ.get('ENABLE_BDIST_EXT_MODULE') == 'yes'
 
 

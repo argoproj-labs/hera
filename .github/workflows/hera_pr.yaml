@@ -1,21 +1,25 @@
-name: Hera PR build
+name: hera cicd
 
-on: pull_request
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
 
 jobs:
-  build:
+  test:
     name: build py${{ matrix.python-version }} on ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macos]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.7', '3.8']
     env:
       PYVER: ${{ matrix.python-version }}
       OS: ${{ matrix.os }}
 
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Set up python ${{ matrix.python-version }}
@@ -49,7 +53,7 @@ jobs:
         run: |
           tox
 
-      - name: Check build
+      - name: twine check
         run: |
           twine check .tox/dist/*
 
@@ -65,8 +69,45 @@ jobs:
           name: coverage-data
           path: ".tox/.coverage_*"
 
+  build-py3-none-any:
+    name: build py3-none-any on linux
+    timeout-minutes: 10
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up python3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install base dependencies
+        run: |
+          python -m pip install --upgrade build twine
+
+      - name: create sdist ( no test )
+        run: |
+          python -m build --sdist --wheel --outdir .tox/dist/
+
+      - name: list artifacts
+        run: |
+          ls -l .tox/dist
+
+      - name: twine check
+        run: |
+          twine check .tox/dist/*
+
+      - name: upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pypi-build-arts
+          path: .tox/dist
+
   coverage:
-    needs: [build]
+    needs: [test]
 
     runs-on: ubuntu-latest
 
@@ -105,8 +146,8 @@ jobs:
           path: .tox/htmlcov
 
   publish:
-    needs: [coverage]
-
+    needs: [coverage, test, build-py3-none-any]
+    if: github.ref == 'refs/heads/cicd-improvements'
     runs-on: ubuntu-latest
 
     steps:
@@ -123,18 +164,23 @@ jobs:
           name: pypi-build-arts
           path: dist
 
-      - name: install base dependencies
-        run: |
-          python -m pip install --upgrade twine build
-
-      - name: build py3-none-any wheel and distribution
-        run: |
-          python -m build --sdist --wheel --outdir dist/
-
       - name: list all pypi build arts
         run: |
           ls -la dist/
 
-      - name: Check pypi artifacts
+      - name: install check dependencies
+        run: |
+          python -m pip install --upgrade twine
+
+      - name: check pypi artifacts
         run: |
           twine check dist/*
+
+      - name: publish package to pypi ( test )
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
+          verbose: true
+          repository_url: https://test.pypi.org/legacy/
+
