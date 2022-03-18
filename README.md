@@ -113,7 +113,7 @@ To run selected tox envs, e.g. for a specific python version with coverage run:
 tox -e python3.7,coverage
 ```
 
-As `coverage` *dependes* on `python3.7`, it will run *after* `python3.8`
+As `coverage` *dependes* on `python3.7`, it will run *after* `python3.7`
 
 > See project `tox.ini` for more details
 
