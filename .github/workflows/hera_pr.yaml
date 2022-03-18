@@ -147,7 +147,7 @@ jobs:
 
   publish:
     needs: [coverage, test, build-py3-none-any]
-    if: github.ref == 'refs/heads/cicd-improvements'
+    if: success() && ( github.ref == 'refs/heads/main' || true )
     runs-on: ubuntu-latest
 
     steps:
