@@ -8,13 +8,13 @@ on:
 
 jobs:
   test:
-    name: build py${{ matrix.python-version }} on ${{ matrix.os }}
+    name: build + test py${{ matrix.python-version }} on ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ['3.7', '3.8']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     env:
       PYVER: ${{ matrix.python-version }}
       OS: ${{ matrix.os }}
@@ -22,31 +22,31 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Set up python ${{ matrix.python-version }}
+      - name: setup python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v2
 
-      - name: Install base dependencies
+      - name: install base dependencies
         run: |
           python -m pip install --upgrade "tox<4.0" tox-wheel twine
 
-      - name: Run lint
+      - name: lint
         env:
           TOXENV: lint
         run: |
           tox
 
-      - name: Run typecheck
+      - name: typecheck
         env:
           TOXENV: typecheck
         run: |
           tox
 
-      - name: Run tests
+      - name: tests
         env:
           ENABLE_BDIST_EXT_MODULE: 'yes'
           TOXENV: python${{ matrix.python-version }}
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up python3.7
+      - name: setup python3.7
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
@@ -88,7 +88,7 @@ jobs:
         run: |
           python -m pip install --upgrade build twine
 
-      - name: create sdist ( no test )
+      - name: build sdist and wheel ( no test )
         run: |
           python -m build --sdist --wheel --outdir .tox/dist/
 
@@ -114,12 +114,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up python 3.7
+      - name: setup python 3.7
         uses: actions/setup-python@v2
         with:
           python-version: '3.7'
 
-      - name: get coverage files
+      - name: download coverage files
         uses: actions/download-artifact@v2
         with:
           name: coverage-data
@@ -153,7 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up python 3.7
+      - name: setup python 3.7
         uses: actions/setup-python@v2
         with:
           python-version: '3.7'
@@ -183,4 +183,3 @@ jobs:
           password: ${{ secrets.PYPI_TEST_API_TOKEN }}
           verbose: true
           repository_url: https://test.pypi.org/legacy/
-
