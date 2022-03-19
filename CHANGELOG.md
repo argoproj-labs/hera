@@ -28,15 +28,28 @@ The general format is:
 - C from D
 
 ```
-# 2.2.0 - DATE (17/02/2022)
 
+# 2.3.0 - DATE (05/03/2022)
+
+### Added
+
+- ability to set the `access_modes` for dynamically privisioned volumes 
+
+# 2.2.1 - DATE (05/03/2022)
+
+### Fixed
+
+- inconsistency between `create` and `submit` between Hera and Argo. Now users are provided with a `create` command and
+  will receive a `DeprecationWarning` when the `submit` is invoked
+
+# 2.2.0 - DATE (17/02/2022)
 
 ### Added
 
 - Add support for sharing the IP of one Task to another Task, via env variables
 - support for setting args instead of command
-# 2.1.1 - DATE (16/02/2022)
 
+# 2.1.1 - DATE (16/02/2022)
 
 ### Changed
 

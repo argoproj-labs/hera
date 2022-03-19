@@ -1,5 +1,6 @@
 import uuid
-from typing import Optional
+from enum import Enum
+from typing import List, Optional
 
 from argo_workflows.models import (
     ConfigMapVolumeSource,
@@ -16,6 +17,30 @@ from argo_workflows.models import VolumeMount
 from pydantic import BaseModel, validator
 
 from hera.validators import validate_storage_units
+
+
+class AccessMode(Enum):
+    """A representations of the volume access modes for Kubernetes.
+
+    Notes
+    -----
+        See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
+    """
+
+    ReadWriteOnce = "ReadWriteOnce"
+    """the volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple
+    pods to access the volume when the pods are running on the same node."""
+
+    ReadOnlyMany = "ReadOnlyMany"
+    """the volume can be mounted as read-only by many nodes"""
+
+    ReadWriteMany = "ReadWriteMany"
+    """the volume can be mounted as read-write by many nodes"""
+
+    ReadWriteOncePod = "ReadWriteOncePod"
+    """the volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to
+    ensure that only one pod across whole cluster can read that PVC or write to it. This is only supported for CSI
+    volumes and Kubernetes version 1.22+"""
 
 
 class BaseVolume(BaseModel):
@@ -165,15 +190,27 @@ class Volume(BaseVolume):
     name: Optional[str]
         The name of the volume. One will be generated if the name is not specified. It is recommended to not pass a
         name to avoid any potential naming conflicts with existing volumes.
+    access
 
     Raises
     ------
     ValueError or AssertionError upon failure to validate the units of the size. See
     `hera.v1.validators.validate_storage_units`.
+
+    Notes
+    -----
+    A volume can only be mounted using one access mode at a time, even if it supports many. For example, a
+    GCEPersistentDisk can be mounted as ReadWriteOnce by a single node or ReadOnlyMany by many nodes, but not at
+    the same time.
     """
 
     size: str
     storage_class_name: str = 'standard'
+    # note that different cloud providers support different types of access modes
+    access_modes: List[AccessMode] = [AccessMode.ReadWriteOnce]
+
+    class Config:
+        use_enum_values = True
 
     @validator('size')
     def valid_units(cls, value):
@@ -196,7 +233,7 @@ class Volume(BaseVolume):
         """
         spec = PersistentVolumeClaimSpec(
             # GKE does not accept ReadWriteMany for dynamically provisioned disks, default to ReadWriteOnce
-            access_modes=['ReadWriteOnce'],
+            access_modes=[am.value if isinstance(am, AccessMode) else am for am in self.access_modes],
             resources=ResourceRequirements(
                 requests={
                     'storage': self.size,
