@@ -115,7 +115,7 @@ tox -e python3.7,coverage
 
 As `coverage` *dependes* on `python3.7`, it will run *after* `python3.7`
 
-> See project `tox.ini` for more details
+See project `tox.ini` for more details
 
 Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
 
