@@ -170,6 +170,9 @@ class Task:
         that are set.
     image: str = 'python:3.7'
         The image to use in the execution of the function.
+    image_pull_policy: str = 'IfNotPresent'
+        The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image
+        or not. IN case of local development/testing this can be set to 'Never'.
     daemon: Optional[bool] = None
         Wether to run the the task as daemon.
     command: Optional[List[str]] = None
@@ -223,6 +226,7 @@ class Task:
         input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
+        image_pull_policy: str = 'IfNotPresent',
         daemon: bool = False,
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
@@ -245,6 +249,7 @@ class Task:
         self.validate()
 
         self.image = image
+        self.image_pull_policy = image_pull_policy
         self.daemon = daemon
         self.command = command
         self.args = args
@@ -720,6 +725,7 @@ class Task:
         """
         container_kwargs = {
             "image": self.image,
+            "image_pull_policy": self.image_pull_policy,
             "command": self.get_command(),
             "volume_mounts": self.get_volume_mounts(),
             "resources": self.argo_resources,
