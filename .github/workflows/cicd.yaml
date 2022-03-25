@@ -147,7 +147,7 @@ jobs:
 
   publish:
     needs: [coverage, test, build-py3-none-any]
-    if: success() && ( github.ref == 'refs/heads/main' || true )
+    if: success() && ( github.ref == 'refs/heads/main' )
     runs-on: ubuntu-latest
 
     steps:
@@ -176,7 +176,7 @@ jobs:
         run: |
           twine check dist/*
 
-      - name: publish package to pypi ( test )
+      - name: publish package to pypi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
