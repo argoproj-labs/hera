@@ -96,7 +96,7 @@ jobs:
 
       - name: list artifacts
         run: |
-          ls -l .tox/dist
+          ls -l dist
 
       - name: twine check
         run: |
