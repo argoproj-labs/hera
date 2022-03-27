@@ -7,8 +7,9 @@ and its crew were specially protected by the goddess Hera.
 
 (https://en.wikipedia.org/wiki/Argo)
 
-[![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/hera_build_and_publish.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/hera_build_and_publish.yaml)
+[![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/cicd.yaml)
 [![Pypi](https://img.shields.io/pypi/v/hera-workflows.svg)](https://pypi.python.org/pypi/hera-workflows)
+[![CondaForge](https://img.shields.io/conda/v/conda-forge/hera-workflows.svg)](https://anaconda.org/conda-forge/hera-workflows)
 [![Downloads](https://pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
 [![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
@@ -94,13 +95,27 @@ In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, 
 make test
 ```
 
-To run tests on all supported python versions run [tox](https://tox.wiki/en/latest/):
+To run tests on all supported python versions with coverage run [tox](https://tox.wiki/en/latest/):
 
 ```shell
 tox
 ```
 
-> See project `tox.ini` for more details
+To list all available `tox` envs run:
+
+```shell
+tox -a
+```
+
+To run selected tox envs, e.g. for a specific python version with coverage run:
+
+```shell
+tox -e python3.7,coverage
+```
+
+As `coverage` *dependes* on `python3.7`, it will run *after* `python3.7`
+
+See project `tox.ini` for more details
 
 Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
 
@@ -124,7 +139,7 @@ from hera.workflow_service import WorkflowService
 
 def say(message: str):
     """
-    This can be anything as long as the Docker image satisfies the dependencies. You can import anything Python 
+    This can be anything as long as the Docker image satisfies the dependencies. You can import anything Python
     that is in your container e.g torch, tensorflow, scipy, biopython, etc - just provide an image to the task!
     """
     print(message)
