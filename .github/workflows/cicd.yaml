@@ -100,7 +100,7 @@ jobs:
 
       - name: twine check
         run: |
-          twine check .tox/dist/*
+          twine check dist/*
 
       - name: upload build artifacts
         uses: actions/upload-artifact@v2
