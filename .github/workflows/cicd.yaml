@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request: {}
+  pull_request: { }
 
 jobs:
   test:
@@ -13,8 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        os: [ ubuntu-latest, macos-latest ]
+        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
     env:
       PYVER: ${{ matrix.python-version }}
       OS: ${{ matrix.os }}
@@ -107,7 +107,7 @@ jobs:
           path: .tox/dist
 
   coverage:
-    needs: [test]
+    needs: [ test ]
 
     runs-on: ubuntu-latest
 
@@ -146,7 +146,7 @@ jobs:
           path: .tox/htmlcov
 
   publish:
-    needs: [coverage, test, build-py3-none-any]
+    needs: [ coverage, test, build-py3-none-any ]
     if: success() && ( github.ref == 'refs/heads/main' )
     runs-on: ubuntu-latest
 
