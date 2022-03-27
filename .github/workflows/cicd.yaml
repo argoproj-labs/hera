@@ -180,6 +180,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_TEST_API_TOKEN }}
+          password: ${{ secrets.PYPI_API_TOKEN }}
           verbose: true
-          repository_url: https://test.pypi.org/legacy/
+          skip_existing: true
