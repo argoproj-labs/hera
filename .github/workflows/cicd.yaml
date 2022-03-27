@@ -57,11 +57,13 @@ jobs:
         run: |
           twine check .tox/dist/*
 
-      - name: upload build artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: pypi-build-arts
-          path: .tox/dist
+# TODO: wheels for linux_x86_64 cannot be uploaded. Rather, this needs manylinux distributions, which can be installed
+# TODO: via cibuildwheel
+#      - name: upload build artifacts
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: pypi-build-arts
+#          path: .tox/dist
 
       - name: upload coverage files
         uses: actions/upload-artifact@v2
@@ -90,21 +92,21 @@ jobs:
 
       - name: build sdist and wheel ( no test )
         run: |
-          python -m build --sdist --wheel --outdir .tox/dist/
+          python -m build --sdist --wheel
 
       - name: list artifacts
         run: |
-          ls -l .tox/dist
+          ls -l dist
 
       - name: twine check
         run: |
-          twine check .tox/dist/*
+          twine check dist/*
 
       - name: upload build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: pypi-build-arts
-          path: .tox/dist
+          path: dist
 
   coverage:
     needs: [ test ]
