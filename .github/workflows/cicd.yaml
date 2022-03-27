@@ -57,8 +57,8 @@ jobs:
         run: |
           twine check .tox/dist/*
 
-# TODO: wheels for linux_x86_64 cannot be uploaded. Rather, this needs manylinux distributions, which can be installed
-# TODO: via cibuildwheel
+# TODO: wheels for linux_x86_64 cannot be uploaded. Rather, this needs manylinux distributions, which can be built
+# TODO: using `cibuildwheel` in a separate step / job, and not as part of tox test task
 #      - name: upload build artifacts
 #        uses: actions/upload-artifact@v2
 #        with:
@@ -92,7 +92,7 @@ jobs:
 
       - name: build sdist and wheel ( no test )
         run: |
-          python -m build --sdist --wheel
+          python -m build --sdist --wheel --out-dir dist
 
       - name: list artifacts
         run: |
