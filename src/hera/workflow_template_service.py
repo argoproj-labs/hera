@@ -77,6 +77,7 @@ class WorkflowTemplateService:
         Returns
         -------
             Tuple(object, status_code(int), headers(HTTPHeaderDict))
+            
         Raises
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
