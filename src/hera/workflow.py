@@ -47,7 +47,10 @@ class Workflow:
     namespace: Optional[str] = 'default'
         The namespace to use for creating the Workflow.  Defaults to "default"
     workflow_template_ref: Optional[str] = None
-        The name of the workflowTemplate reference
+        The name of the workflowTemplate reference. WorkflowTemplateRef is a reference to a WorkflowTemplate resource.
+        If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
+        you can reference it again and again when you create a new Workflow without specifying the same tasks and
+        dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
     """
 
     def __init__(
@@ -62,7 +65,6 @@ class Workflow:
         workflow_template_ref: Optional[str] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
-        self.name_original = name
         self.namespace = namespace or 'default'
         self.service = service
         self.parallelism = parallelism

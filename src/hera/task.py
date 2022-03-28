@@ -35,6 +35,7 @@ from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
+from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
@@ -170,9 +171,9 @@ class Task:
         that are set.
     image: str = 'python:3.7'
         The image to use in the execution of the function.
-    image_pull_policy: str = 'IfNotPresent'
-        The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image
-        or not. IN case of local development/testing this can be set to 'Never'.
+    image_pull_policy: ImagePullPolicy = 'Always'
+        The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image or not.
+        In case of local development/testing this can be set to 'Never'.
     daemon: Optional[bool] = None
         Wether to run the the task as daemon.
     command: Optional[List[str]] = None
@@ -226,7 +227,7 @@ class Task:
         input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
-        image_pull_policy: str = 'IfNotPresent',
+        image_pull_policy: Optional[ImagePullPolicy] = ImagePullPolicy.Always,
         daemon: bool = False,
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
@@ -690,6 +691,7 @@ class Task:
         script_kwargs = {
             "name": self.name,
             "image": self.image,
+            "image_pull_policy": self.image_pull_policy,
             "command": self.get_command(),
             "args": self.get_args(),
             "source": self.get_script(),
@@ -725,7 +727,7 @@ class Task:
         """
         container_kwargs = {
             "image": self.image,
-            "image_pull_policy": self.image_pull_policy,
+            "image_pull_policy": self.image_pull_policy.value,
             "command": self.get_command(),
             "volume_mounts": self.get_volume_mounts(),
             "resources": self.argo_resources,

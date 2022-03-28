@@ -1,4 +1,4 @@
-"""The implementation of a Hera workflow for Argo-based workflows"""
+"""The implementation of a Hera workflowTemplate for Argo-based workflowTemplates"""
 import warnings
 from typing import Dict, Optional
 
@@ -15,9 +15,6 @@ from hera.task import Task
 from hera.volumes import Volume
 from hera.workflow_template_service import WorkflowTemplateService
 
-# from uuid import uuid4
-
-
 # by default, `DeprecationWarning`s are silenced, this removes the warning from the filter so it
 # can be issued to users
 warnings.simplefilter('always', DeprecationWarning)
@@ -25,9 +22,11 @@ warnings.simplefilter('always', DeprecationWarning)
 
 class WorkflowTemplate:
     """A workflowTemplate representation.
+
     The WorkflowTemplate is used as a functional representation for a collection of tasks and
     steps. The WorkflowTemplate is basically the same as a Workflow but with a template you don't
     have to write the same steps, you can reuse it over and over.
+
     Parameters
     ----------
     name: str
@@ -57,7 +56,7 @@ class WorkflowTemplate:
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
     ):
-        self.name = name  # f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
+        self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
         self.service = service
         self.parallelism = parallelism
@@ -157,17 +156,6 @@ class WorkflowTemplate:
         # e.g if A -> B -> C then B.deps = [A] and C.deps = [B] but nothing lists C so C is "free"
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
-
-    def submit(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
-        """Submits the workflow.
-        Notes
-        -----
-        This method is deprecated in favor of `workflow.create(...)`.
-        """
-        warnings.warn("`submit` is deprecated in favor of `create`", DeprecationWarning, stacklevel=2)
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.create(self.workflow_template, namespace)
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""

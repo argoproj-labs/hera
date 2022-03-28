@@ -1,4 +1,4 @@
-"""Custom WorkflowTemplate class"""
+"""Custom WorkflowTemplate Service class"""
 from typing import Optional, Tuple
 
 from argo_workflows.apis import WorkflowTemplateServiceApi
@@ -13,6 +13,7 @@ from hera.config import Config
 
 class WorkflowTemplateService:
     """Argo workflowTemplate service for performing actions against workflowTemplate - creations, deletions
+
     Parameters
     ----------
     host: Optional[str] = None
@@ -27,6 +28,7 @@ class WorkflowTemplateService:
     namespace: str = 'default'
         The K8S namespace the workflowTemplate service creates workflowTemplate in.
         This defaults to the `default` namespace.
+
     """
 
     def __init__(
@@ -46,16 +48,19 @@ class WorkflowTemplateService:
         self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate, namespace: str = 'default'
     ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates given workflowTemplate in the argo server.
+
         Parameters
         ----------
         workflow_template: V1alpha1WorkflowTemplate
             The workflowTemplate to create.
         namespace: str = 'default'
             The K8S namespace of the Argo server to create the workflowTemplate in.
+
         Returns
         -------
         IoArgoprojWorkflowV1alpha1WorkflowTemplate
             The created workflowTemplate.
+
         Raises
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
@@ -68,15 +73,18 @@ class WorkflowTemplateService:
 
     def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
         """Deletes a workflow template from the given namespace based on the specified name.
+
         Parameters
         ----------
         name: str
             The name of the workflow template to delete.
         namespace: str = 'default'
             The K8S namespace of the Argo server to delete the workflow template from.
+
         Returns
         -------
             Tuple(object, status_code(int), headers(HTTPHeaderDict))
+
         Raises
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
