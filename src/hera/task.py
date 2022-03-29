@@ -364,6 +364,7 @@ class Task:
         if hasattr(self.argo_task, 'continue_on'):
             continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
             setattr(continue_on, 'failed', True)
+            setattr(self.argo_task, 'continue_on', continue_on)
         else:
             setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
 
@@ -376,6 +377,7 @@ class Task:
         if hasattr(self.argo_task, 'continue_on'):
             continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
             setattr(continue_on, 'error', True)
+            setattr(self.argo_task, 'continue_on', continue_on)
         else:
             setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
 
