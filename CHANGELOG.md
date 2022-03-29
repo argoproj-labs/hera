@@ -36,6 +36,7 @@ The general format is:
 - image pull secrets option on workflows
 - ability to set a task dependency and execution based on the success, failure, or error of another task (similar
   to `when`)
+- support for `env_from` option
 
 # 2.4.0 - DATE (22/03/2022)
 

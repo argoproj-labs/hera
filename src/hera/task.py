@@ -36,6 +36,7 @@ from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
+from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -192,6 +193,8 @@ class Task:
     env_specs: Optional[List[EnvSpec]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
+    env_from_specs: Optional[List[BaseEnvFromSpec]] = None
+        The environment specifications to load from ConfigMap or Secret.
     resources: Resources = Resources()
         A task resources configuration. See `hera.v1.resources.Resources`.
     working_dir: Optional[str] = None
@@ -237,6 +240,7 @@ class Task:
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
+        env_from_specs: Optional[List[BaseEnvFromSpec]] = None,
         resources: Resources = Resources(),
         working_dir: Optional[str] = None,
         retry: Optional[Retry] = None,
@@ -270,6 +274,8 @@ class Task:
         self.variables = variables or []
         env_specs = env_specs or []
         self.env = self.get_env(env_specs)
+        env_from_specs = env_from_specs or []
+        self.env_from = [e.argo_spec for e in env_from_specs]
         self.security_context = security_context
         self.continue_on_fail = continue_on_fail
         self.continue_on_error = continue_on_error
@@ -740,6 +746,7 @@ class Task:
             "source": self.get_script(),
             "resources": self.argo_resources,
             "env": self.env,
+            "env_from": self.env_from,
             "working_dir": self.working_dir,
             "volume_mounts": self.get_volume_mounts(),
             "security_context": self.get_security_context(),
@@ -776,6 +783,7 @@ class Task:
             "resources": self.argo_resources,
             "args": self.get_args(),
             "env": self.env,
+            "env_from": self.env_from,
             "working_dir": self.working_dir,
             "security_context": self.get_security_context(),
         }
