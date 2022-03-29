@@ -28,6 +28,15 @@ The general format is:
 - C from D
 
 ```
+
+# 2.5.0 - DATE (29/03/2022)
+
+### Added
+
+- image pull secrets option on workflows
+- ability to set a task dependency and execution based on the success, failure, or error of another task (similar
+  to `when`)
+
 # 2.4.0 - DATE (22/03/2022)
 
 ### Added

@@ -12,6 +12,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
     LocalObjectReference,
     ObjectMeta,
 )
@@ -51,6 +52,11 @@ class CronWorkflow:
     image_pull_secrets: Optional[List[str]] = None
         A list of image pull secrets. This is used to authenticate with the private image registry of the images
         used by tasks.
+    workflow_template_ref: Optional[str] = None
+        The name of the workflowTemplate reference. WorkflowTemplateRef is a reference to a WorkflowTemplate resource.
+        If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
+        you can reference it again and again when you create a new Workflow without specifying the same tasks and
+        dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
     """
 
     def __init__(
@@ -65,6 +71,7 @@ class CronWorkflow:
         namespace: Optional[str] = "default",
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
+        workflow_template_ref: Optional[str] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -79,6 +86,7 @@ class CronWorkflow:
         self.namespace = namespace
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
+        self.workflow_template_ref = workflow_template_ref
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -87,9 +95,20 @@ class CronWorkflow:
             dag=self.dag_template,
             parallelism=self.parallelism,
         )
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
-        )
+
+        if self.workflow_template_ref:
+            self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplateRef(name=self.workflow_template_ref)
+            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+                workflow_template_ref=self.workflow_template,
+                entrypoint=self.workflow_template_ref,
+                volumes=[],
+                volume_claim_templates=[],
+            )
+        else:
+            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+                templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
+            )
+
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)

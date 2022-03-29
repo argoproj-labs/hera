@@ -66,8 +66,8 @@ class Workflow:
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
-        workflow_template_ref: Optional[str] = None,
         image_pull_secrets: Optional[List[str]] = None,
+        workflow_template_ref: Optional[str] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -76,8 +76,8 @@ class Workflow:
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
-        self.workflow_template_ref = workflow_template_ref
         self.image_pull_secrets = image_pull_secrets
+        self.workflow_template_ref = workflow_template_ref
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -87,11 +87,8 @@ class Workflow:
             parallelism=self.parallelism,
         )
 
-        # if a template ref was passed then the Workflow is gonna be
-        # created from that template, otherwise a new Workflow
         if self.workflow_template_ref:
             self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplateRef(name=self.workflow_template_ref)
-
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
                 workflow_template_ref=self.workflow_template,
                 entrypoint=self.workflow_template_ref,
