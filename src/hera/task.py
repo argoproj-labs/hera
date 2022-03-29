@@ -691,7 +691,7 @@ class Task:
         script_kwargs = {
             "name": self.name,
             "image": self.image,
-            "image_pull_policy": self.image_pull_policy,
+            "image_pull_policy": self.image_pull_policy.value,
             "command": self.get_command(),
             "args": self.get_args(),
             "source": self.get_script(),
