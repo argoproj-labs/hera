@@ -30,6 +30,14 @@ def test_next_and_shifting_set_correct_dependencies(no_op):
     assert t6.argo_task.dependencies == ['t5']
 
 
+def test_next_does_not_set_dependency_multiple_times():
+    t1, t2 = Task('t1'), Task('t2')
+    t1 >> t2
+    assert t2.argo_task.dependencies == ['t1']
+    t1 >> t2
+    assert t2.argo_task.dependencies == ['t1']
+
+
 def test_when_correct_expression_and_dependencies(no_op):
     t1, t2, t3 = Task('t1', no_op), Task('t2', no_op), Task('t3', no_op)
     t2.when(t1, Operator.equals, "t2")
@@ -490,3 +498,35 @@ def test_task_adds_variable_as_env_var():
 
     assert t1.arguments.parameters[0].name == "IP"
     assert t1.arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
+
+
+def test_task_adds_other_task_on_success():
+    t = Task('t')
+    o = Task('o')
+
+    t.on_success(o)
+    assert t.argo_task.when == '{{tasks.o.status}} == Succeeded'
+
+
+def test_task_adds_other_task_on_failure():
+    t = Task('t')
+    o = Task('o')
+
+    t.on_failure(o)
+    assert t.argo_task.when == '{{tasks.o.status}} == Failed'
+    assert t.argo_task.continue_on.failed
+
+
+def test_task_adds_other_task_on_error():
+    t = Task('t')
+    o = Task('o')
+
+    t.on_error(o)
+    assert t.argo_task.when == '{{tasks.o.status}} == Error'
+    assert t.argo_task.continue_on.error
+
+
+def test_task_sets_continue_behavior():
+    t = Task('t', continue_on_fail=True, continue_on_error=True)
+    assert t.argo_task.continue_on.error
+    assert t.argo_task.continue_on.failed
