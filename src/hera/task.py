@@ -15,6 +15,7 @@ from argo_workflows.model_utils import (
 )
 from argo_workflows.models import (
     Container,
+    EnvFromSource,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Artifact,
@@ -272,10 +273,9 @@ class Task:
         self.node_selector = node_selectors
         self.labels = labels or {}
         self.variables = variables or []
-        env_specs = env_specs or []
+
         self.env = self.get_env(env_specs)
-        env_from_specs = env_from_specs or []
-        self.env_from = [e.argo_spec for e in env_from_specs]
+        self.env_from = self.get_env_from_source(env_from_specs)
         self.security_context = security_context
         self.continue_on_fail = continue_on_fail
         self.continue_on_error = continue_on_error
@@ -501,12 +501,12 @@ class Task:
             return None
         return [str(arg) for arg in self.args]
 
-    def get_env(self, specs: List[EnvSpec]) -> Optional[List[EnvVar]]:
+    def get_env(self, specs: Optional[List[EnvSpec]]) -> Optional[List[EnvVar]]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
 
         Parameters
         ----------
-        specs: List[EnvSpec]
+        specs: Optional[List[EnvSpec]]
             Hera environment specifications.
 
         Returns
@@ -521,6 +521,24 @@ class Task:
         for variable in self.variables:
             if self.variables and isinstance(variable, VariableAsEnv):
                 r.append(variable.get_env_spec().argo_spec)
+        return r
+
+    def get_env_from_source(self, specs: Optional[List[BaseEnvFromSpec]]) -> Optional[List[EnvFromSource]]:
+        """Returns a list of Argo environment variables based on the Hera environment from source specifications.
+
+        Parameters
+        ----------
+        Optional[List[BaseEnvFromSpec]]
+            Hera environment from specifications.
+
+        Returns
+        -------
+        Optional[List[EnvFromSource]]
+            A list of env variables from specified sources.
+        """
+        r = []
+        for spec in specs:
+            r.append(spec.argo_spec)
         return r
 
     def get_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:

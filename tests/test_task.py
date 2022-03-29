@@ -1,6 +1,5 @@
 import pytest
 from argo_workflows.model.capabilities import Capabilities
-from argo_workflows.model.config_map_env_source import ConfigMapEnvSource
 from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
@@ -435,9 +434,7 @@ def test_task_with_config_map_env_variable(no_op):
 
 
 def test_task_with_config_map_env_from(no_op):
-    t = Task(
-        't', no_op, env_from_specs=[ConfigMapEnvFromSpec(prefix='p', config_map_name='cn')]
-    )
+    t = Task('t', no_op, env_from_specs=[ConfigMapEnvFromSpec(prefix='p', config_map_name='cn')])
     tt = t.get_task_template()
     assert tt.script.env_from[0].prefix == 'p'
     assert tt.script.env_from[0].config_map_ref.name == 'cn'
