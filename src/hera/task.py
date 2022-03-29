@@ -485,7 +485,7 @@ class Task:
         """Assembles and returns the task outputs"""
         return IoArgoprojWorkflowV1alpha1Outputs(artifacts=self.argo_output_artifacts)
 
-    def get_command(self) -> List[str]:
+    def get_command(self) -> Optional[List[str]]:
         """
         Parses and returns the specified task command. This will attempt to stringify every command option and
         raise a ValueError on failure. This defaults to Python if `command` and `args` are not specified.
@@ -496,7 +496,7 @@ class Task:
             return None
         return [str(cc) for cc in self.command]
 
-    def get_args(self) -> List[str]:
+    def get_args(self) -> Optional[List[str]]:
         if not self.args:
             return None
         return [str(arg) for arg in self.args]
@@ -515,12 +515,15 @@ class Task:
             A list of Argo environment specifications, if any specs are provided.
         """
         r = []
-        for spec in specs:
-            r.append(spec.argo_spec)
 
-        for variable in self.variables:
-            if self.variables and isinstance(variable, VariableAsEnv):
-                r.append(variable.get_env_spec().argo_spec)
+        if specs:
+            for spec in specs:
+                r.append(spec.argo_spec)
+
+        if self.variables:
+            for variable in self.variables:
+                if self.variables and isinstance(variable, VariableAsEnv):
+                    r.append(variable.get_env_spec().argo_spec)
         return r
 
     def get_env_from_source(self, specs: Optional[List[BaseEnvFromSpec]]) -> Optional[List[EnvFromSource]]:
@@ -537,8 +540,10 @@ class Task:
             A list of env variables from specified sources.
         """
         r = []
-        for spec in specs:
-            r.append(spec.argo_spec)
+
+        if specs:
+            for spec in specs:
+                r.append(spec.argo_spec)
         return r
 
     def get_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:
@@ -773,12 +778,12 @@ class Task:
         template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**script_kargs)
         return template
 
-    def get_security_context(self) -> SecurityContext:
+    def get_security_context(self) -> Optional[SecurityContext]:
         """Assembles the security context for the task.
 
         Returns
         -------
-        SecurityContext
+        Optional[SecurityContext]
             The security settings to apply to the task's container.
         """
         if not self.security_context:
