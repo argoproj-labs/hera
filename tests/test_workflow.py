@@ -202,5 +202,5 @@ def test_wf_contains_specified_labels(ws):
 def test_wf_submit_with_default(ws):
     w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test")
     w.service = Mock()
-    w.submit()
+    w.create()
     w.service.submit.assert_called_with(w.workflow, w.namespace)
