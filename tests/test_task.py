@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from hera.artifact import GCSArtifact, S3Artifact
 from hera.env import ConfigMapEnvSpec
+from hera.env_from import ConfigMapEnvFromSpec
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
@@ -28,6 +29,14 @@ def test_next_and_shifting_set_correct_dependencies(no_op):
     t4 >> t5 >> t6
     assert t5.argo_task.dependencies == ['t4']
     assert t6.argo_task.dependencies == ['t5']
+
+
+def test_next_does_not_set_dependency_multiple_times():
+    t1, t2 = Task('t1'), Task('t2')
+    t1 >> t2
+    assert t2.argo_task.dependencies == ['t1']
+    t1 >> t2
+    assert t2.argo_task.dependencies == ['t1']
 
 
 def test_when_correct_expression_and_dependencies(no_op):
@@ -424,6 +433,13 @@ def test_task_with_config_map_env_variable(no_op):
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
 
 
+def test_task_with_config_map_env_from(no_op):
+    t = Task('t', no_op, env_from_specs=[ConfigMapEnvFromSpec(prefix='p', config_map_name='cn')])
+    tt = t.get_task_template()
+    assert tt.script.env_from[0].prefix == 'p'
+    assert tt.script.env_from[0].config_map_ref.name == 'cn'
+
+
 def test_task_should_create_task_with_container_template():
     t = Task('t', command=["cowsay"])
     tt = t.get_task_template()
@@ -490,3 +506,35 @@ def test_task_adds_variable_as_env_var():
 
     assert t1.arguments.parameters[0].name == "IP"
     assert t1.arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
+
+
+def test_task_adds_other_task_on_success():
+    t = Task('t')
+    o = Task('o')
+
+    t.on_success(o)
+    assert t.argo_task.when == '{{tasks.o.status}} == Succeeded'
+
+
+def test_task_adds_other_task_on_failure():
+    t = Task('t')
+    o = Task('o')
+
+    t.on_failure(o)
+    assert t.argo_task.when == '{{tasks.o.status}} == Failed'
+    assert t.argo_task.continue_on.failed
+
+
+def test_task_adds_other_task_on_error():
+    t = Task('t')
+    o = Task('o')
+
+    t.on_error(o)
+    assert t.argo_task.when == '{{tasks.o.status}} == Error'
+    assert t.argo_task.continue_on.error
+
+
+def test_task_sets_continue_behavior():
+    t = Task('t', continue_on_fail=True, continue_on_error=True)
+    assert t.argo_task.continue_on.error
+    assert t.argo_task.continue_on.failed

@@ -15,10 +15,12 @@ from argo_workflows.model_utils import (
 )
 from argo_workflows.models import (
     Container,
+    EnvFromSource,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1Backoff,
+    IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
     IoArgoprojWorkflowV1alpha1Metadata,
@@ -35,6 +37,7 @@ from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
+from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.operator import Operator
@@ -191,6 +194,8 @@ class Task:
     env_specs: Optional[List[EnvSpec]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
+    env_from_specs: Optional[List[BaseEnvFromSpec]] = None
+        The environment specifications to load from ConfigMap or Secret.
     resources: Resources = Resources()
         A task resources configuration. See `hera.v1.resources.Resources`.
     working_dir: Optional[str] = None
@@ -210,6 +215,10 @@ class Task:
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
+    continue_on_fail: bool = False
+        Whether to continue task chain execution when this task fails.
+    continue_on_error: bool = False
+        Whether to continue task chain execution this task errors.
 
     Notes
     ------
@@ -232,6 +241,7 @@ class Task:
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
+        env_from_specs: Optional[List[BaseEnvFromSpec]] = None,
         resources: Resources = Resources(),
         working_dir: Optional[str] = None,
         retry: Optional[Retry] = None,
@@ -240,6 +250,8 @@ class Task:
         labels: Optional[Dict[str, str]] = None,
         variables: Optional[List[VariableAsEnv]] = None,
         security_context: Optional[TaskSecurityContext] = None,
+        continue_on_fail: bool = False,
+        continue_on_error: bool = False,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -261,9 +273,12 @@ class Task:
         self.node_selector = node_selectors
         self.labels = labels or {}
         self.variables = variables or []
-        env_specs = env_specs or []
+
         self.env = self.get_env(env_specs)
+        self.env_from = self.get_env_from_source(env_from_specs)
         self.security_context = security_context
+        self.continue_on_fail = continue_on_fail
+        self.continue_on_error = continue_on_error
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -301,6 +316,9 @@ class Task:
         if not hasattr(other.argo_task, 'dependencies'):
             setattr(other.argo_task, 'dependencies', [self.argo_task.name])
         else:
+            if self.argo_task.name in other.argo_task.dependencies:
+                # already a dependency
+                return other
             other.argo_task.dependencies.append(self.argo_task.name)
         return other
 
@@ -345,6 +363,37 @@ class Task:
         t3.when(t1, Operator.equals, "t3")
         """
         self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
+        return other.next(self)
+
+    def on_success(self, other: 'Task') -> 'Task':
+        """Execute `other` when this task succeeds"""
+        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Succeeded'
+        return other.next(self)
+
+    def on_failure(self, other: 'Task') -> 'Task':
+        """Execute `other` when this task fails. This forces `continue_on_fail` to be True"""
+        self.continue_on_fail = True
+        if hasattr(self.argo_task, 'continue_on'):
+            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
+            setattr(continue_on, 'failed', True)
+            setattr(self.argo_task, 'continue_on', continue_on)
+        else:
+            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
+
+        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Failed'
+        return other.next(self)
+
+    def on_error(self, other: 'Task') -> 'Task':
+        """Execute `other` when this task errors. This forces `continue_on_error` to be True"""
+        self.continue_on_error = True
+        if hasattr(self.argo_task, 'continue_on'):
+            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
+            setattr(continue_on, 'error', True)
+            setattr(self.argo_task, 'continue_on', continue_on)
+        else:
+            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
+
+        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Error'
         return other.next(self)
 
     def validate(self):
@@ -436,7 +485,7 @@ class Task:
         """Assembles and returns the task outputs"""
         return IoArgoprojWorkflowV1alpha1Outputs(artifacts=self.argo_output_artifacts)
 
-    def get_command(self) -> List[str]:
+    def get_command(self) -> Optional[List[str]]:
         """
         Parses and returns the specified task command. This will attempt to stringify every command option and
         raise a ValueError on failure. This defaults to Python if `command` and `args` are not specified.
@@ -447,17 +496,17 @@ class Task:
             return None
         return [str(cc) for cc in self.command]
 
-    def get_args(self) -> List[str]:
+    def get_args(self) -> Optional[List[str]]:
         if not self.args:
             return None
         return [str(arg) for arg in self.args]
 
-    def get_env(self, specs: List[EnvSpec]) -> Optional[List[EnvVar]]:
+    def get_env(self, specs: Optional[List[EnvSpec]]) -> Optional[List[EnvVar]]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
 
         Parameters
         ----------
-        specs: List[EnvSpec]
+        specs: Optional[List[EnvSpec]]
             Hera environment specifications.
 
         Returns
@@ -466,12 +515,35 @@ class Task:
             A list of Argo environment specifications, if any specs are provided.
         """
         r = []
-        for spec in specs:
-            r.append(spec.argo_spec)
 
-        for variable in self.variables:
-            if self.variables and isinstance(variable, VariableAsEnv):
-                r.append(variable.get_env_spec().argo_spec)
+        if specs:
+            for spec in specs:
+                r.append(spec.argo_spec)
+
+        if self.variables:
+            for variable in self.variables:
+                if self.variables and isinstance(variable, VariableAsEnv):
+                    r.append(variable.get_env_spec().argo_spec)
+        return r
+
+    def get_env_from_source(self, specs: Optional[List[BaseEnvFromSpec]]) -> Optional[List[EnvFromSource]]:
+        """Returns a list of Argo environment variables based on the Hera environment from source specifications.
+
+        Parameters
+        ----------
+        Optional[List[BaseEnvFromSpec]]
+            Hera environment from specifications.
+
+        Returns
+        -------
+        Optional[List[EnvFromSource]]
+            A list of env variables from specified sources.
+        """
+        r = []
+
+        if specs:
+            for spec in specs:
+                r.append(spec.argo_spec)
         return r
 
     def get_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:
@@ -697,6 +769,7 @@ class Task:
             "source": self.get_script(),
             "resources": self.argo_resources,
             "env": self.env,
+            "env_from": self.env_from,
             "working_dir": self.working_dir,
             "volume_mounts": self.get_volume_mounts(),
             "security_context": self.get_security_context(),
@@ -705,12 +778,12 @@ class Task:
         template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**script_kargs)
         return template
 
-    def get_security_context(self) -> SecurityContext:
+    def get_security_context(self) -> Optional[SecurityContext]:
         """Assembles the security context for the task.
 
         Returns
         -------
-        SecurityContext
+        Optional[SecurityContext]
             The security settings to apply to the task's container.
         """
         if not self.security_context:
@@ -733,6 +806,7 @@ class Task:
             "resources": self.argo_resources,
             "args": self.get_args(),
             "env": self.env,
+            "env_from": self.env_from,
             "working_dir": self.working_dir,
             "security_context": self.get_security_context(),
         }
@@ -815,14 +889,17 @@ class Task:
         V1alpha1DAGTask
             The graph task representation.
         """
+        continue_on = IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error, failed=self.continue_on_fail)
         if self.input_from:
             return IoArgoprojWorkflowV1alpha1DAGTask(
                 name=self.name,
                 template=self.argo_template.name,
                 arguments=self.arguments,
                 with_param=f'{{{{tasks.{self.input_from.name}.outputs.result}}}}',
+                continue_on=continue_on,
+                _check_type=False,
             )
-        if self.func_params and len(self.func_params) > 1:
+        elif self.func_params and len(self.func_params) > 1:
             items = self.get_parallel_items()
             return IoArgoprojWorkflowV1alpha1DAGTask(
                 name=self.name,
@@ -830,8 +907,13 @@ class Task:
                 dependencies=[],
                 arguments=self.arguments,
                 with_items=items,
+                continue_on=continue_on,
                 _check_type=False,
             )
         return IoArgoprojWorkflowV1alpha1DAGTask(
-            name=self.name, template=self.argo_template.name, arguments=self.arguments
+            name=self.name,
+            template=self.argo_template.name,
+            arguments=self.arguments,
+            continue_on=continue_on,
+            _check_type=False,
         )

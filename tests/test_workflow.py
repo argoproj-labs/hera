@@ -204,3 +204,10 @@ def test_wf_submit_with_default(ws):
     w.service = Mock()
     w.create()
     w.service.submit.assert_called_with(w.workflow, w.namespace)
+
+
+def test_wf_adds_image_pull_secrets(ws):
+    w = Workflow('w', service=ws, image_pull_secrets=['secret0', 'secret1'])
+    secrets = [{'name': secret.name} for secret in w.spec.get('image_pull_secrets')]
+    assert secrets[0] == {'name': 'secret0'}
+    assert secrets[1] == {'name': 'secret1'}
