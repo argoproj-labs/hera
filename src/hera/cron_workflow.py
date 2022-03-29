@@ -1,7 +1,7 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from datetime import datetime
 from datetime import timezone as tz
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 from uuid import uuid4
 
 import pytz
@@ -12,10 +12,12 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
+    LocalObjectReference,
     ObjectMeta,
 )
 
 from hera.cron_workflow_service import CronWorkflowService
+from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.volumes import Volume
 
@@ -44,6 +46,11 @@ class CronWorkflow:
         A Dict of labels to attach to the CronWorkflow object metadata.
     namespace: Optional[str] = 'default'
         The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
+    security_context:  Optional[WorkflowSecurityContext] = None
+        Define security settings for all containers in the workflow.
+    image_pull_secrets: Optional[List[str]] = None
+        A list of image pull secrets. This is used to authenticate with the private image registry of the images
+        used by tasks.
     """
 
     def __init__(
@@ -56,6 +63,8 @@ class CronWorkflow:
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = "default",
+        security_context: Optional[WorkflowSecurityContext] = None,
+        image_pull_secrets: Optional[List[str]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -68,6 +77,8 @@ class CronWorkflow:
         self.service_account_name = service_account_name
         self.labels = labels
         self.namespace = namespace
+        self.security_context = security_context
+        self.image_pull_secrets = image_pull_secrets
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -82,6 +93,14 @@ class CronWorkflow:
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
+
+        if self.security_context:
+            security_context = self.security_context.get_security_context()
+            setattr(self.spec, 'security_context', security_context)
+
+        if self.image_pull_secrets:
+            secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
+            setattr(self.spec, 'image_pull_secrets', secret_refs)
 
         self.cron_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
         if self.timezone:
