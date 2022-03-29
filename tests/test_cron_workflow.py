@@ -193,3 +193,10 @@ def test_cwf_suspend_with_defaults(ws):
     w.service = Mock()
     w.suspend()
     w.service.suspend.assert_called_with(w.name, w.namespace)
+
+
+def test_cwf_adds_image_pull_secrets(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, image_pull_secrets=['secret0', 'secret1'])
+    secrets = [{'name': secret.name} for secret in w.spec.get('image_pull_secrets')]
+    assert secrets[0] == {'name': 'secret0'}
+    assert secrets[1] == {'name': 'secret1'}

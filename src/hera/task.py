@@ -19,6 +19,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1Backoff,
+    IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
     IoArgoprojWorkflowV1alpha1Metadata,
@@ -213,6 +214,10 @@ class Task:
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
+    continue_on_fail: bool = False
+        Whether to continue task chain execution when this task fails.
+    continue_on_error: bool = False
+        Whether to continue task chain execution this task errors.
 
     Notes
     ------
@@ -244,6 +249,8 @@ class Task:
         labels: Optional[Dict[str, str]] = None,
         variables: Optional[List[VariableAsEnv]] = None,
         security_context: Optional[TaskSecurityContext] = None,
+        continue_on_fail: bool = False,
+        continue_on_error: bool = False,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -270,6 +277,8 @@ class Task:
         env_from_specs = env_from_specs or []
         self.env_from = [e.argo_spec for e in env_from_specs]
         self.security_context = security_context
+        self.continue_on_fail = continue_on_fail
+        self.continue_on_error = continue_on_error
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -307,6 +316,9 @@ class Task:
         if not hasattr(other.argo_task, 'dependencies'):
             setattr(other.argo_task, 'dependencies', [self.argo_task.name])
         else:
+            if self.argo_task.name in other.argo_task.dependencies:
+                # already a dependency
+                return other
             other.argo_task.dependencies.append(self.argo_task.name)
         return other
 
@@ -351,6 +363,37 @@ class Task:
         t3.when(t1, Operator.equals, "t3")
         """
         self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
+        return other.next(self)
+
+    def on_success(self, other: 'Task') -> 'Task':
+        """Execute `other` when this task succeeds"""
+        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Succeeded'
+        return other.next(self)
+
+    def on_failure(self, other: 'Task') -> 'Task':
+        """Execute `other` when this task fails. This forces `continue_on_fail` to be True"""
+        self.continue_on_fail = True
+        if hasattr(self.argo_task, 'continue_on'):
+            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
+            setattr(continue_on, 'failed', True)
+            setattr(self.argo_task, 'continue_on', continue_on)
+        else:
+            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
+
+        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Failed'
+        return other.next(self)
+
+    def on_error(self, other: 'Task') -> 'Task':
+        """Execute `other` when this task errors. This forces `continue_on_error` to be True"""
+        self.continue_on_error = True
+        if hasattr(self.argo_task, 'continue_on'):
+            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
+            setattr(continue_on, 'error', True)
+            setattr(self.argo_task, 'continue_on', continue_on)
+        else:
+            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
+
+        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Error'
         return other.next(self)
 
     def validate(self):
@@ -823,14 +866,17 @@ class Task:
         V1alpha1DAGTask
             The graph task representation.
         """
+        continue_on = IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error, failed=self.continue_on_fail)
         if self.input_from:
             return IoArgoprojWorkflowV1alpha1DAGTask(
                 name=self.name,
                 template=self.argo_template.name,
                 arguments=self.arguments,
                 with_param=f'{{{{tasks.{self.input_from.name}.outputs.result}}}}',
+                continue_on=continue_on,
+                _check_type=False,
             )
-        if self.func_params and len(self.func_params) > 1:
+        elif self.func_params and len(self.func_params) > 1:
             items = self.get_parallel_items()
             return IoArgoprojWorkflowV1alpha1DAGTask(
                 name=self.name,
@@ -838,8 +884,13 @@ class Task:
                 dependencies=[],
                 arguments=self.arguments,
                 with_items=items,
+                continue_on=continue_on,
                 _check_type=False,
             )
         return IoArgoprojWorkflowV1alpha1DAGTask(
-            name=self.name, template=self.argo_template.name, arguments=self.arguments
+            name=self.name,
+            template=self.argo_template.name,
+            arguments=self.arguments,
+            continue_on=continue_on,
+            _check_type=False,
         )

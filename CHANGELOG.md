@@ -28,6 +28,16 @@ The general format is:
 - C from D
 
 ```
+
+# 2.5.0 - DATE (29/03/2022)
+
+### Added
+
+- image pull secrets option on workflows
+- ability to set a task dependency and execution based on the success, failure, or error of another task (similar
+  to `when`)
+- support for `env_from` option
+
 # 2.4.0 - DATE (22/03/2022)
 
 ### Added
@@ -36,17 +46,13 @@ The general format is:
 - WorkflowTemplate Service and WorkflowTemplate implementation
 - Option to create a Workflow with a WorkflowTemplate
 
-# 2.4.0 - DATE (28/03/2022)
+# 2.3.0 - DATE (29/03/2022)
 
 ### Added
 
-- support for `env_from` option
-
-# 2.3.0 - DATE (05/03/2022)
-
-### Added
-
-- ability to set the `access_modes` for dynamically privisioned volumes
+- ability to set the `access_modes` for dynamically provisioned volumes
+- security context on cron workflows
+- image pull secrets specification on workflows and cron workflows
 
 # 2.2.1 - DATE (05/03/2022)
 
