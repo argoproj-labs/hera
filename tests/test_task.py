@@ -538,3 +538,9 @@ def test_task_sets_continue_behavior():
     t = Task('t', continue_on_fail=True, continue_on_error=True)
     assert t.argo_task.continue_on.error
     assert t.argo_task.continue_on.failed
+
+
+def test_task_has_expected_retry_limit():
+    t = Task('t', retry=Retry(limit=5))
+    tt = t.get_task_template()
+    assert tt.retry_strategy.limit == '5'
