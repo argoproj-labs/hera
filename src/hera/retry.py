@@ -16,8 +16,9 @@ class Retry(BaseModel):
         retries.
     """
 
-    duration: int
+    duration: Optional[int]
     max_duration: Optional[int]
+    limit: Optional[int]
 
     @root_validator()
     def check_durations(cls, values):

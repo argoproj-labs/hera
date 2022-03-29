@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 2.6.0 - DATE (29/03/2022)
+
+### Added
+
+- retry limit
+
 # 2.5.0 - DATE (29/03/2022)
 
 ### Added

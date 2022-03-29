@@ -853,11 +853,19 @@ class Task:
             A V1alpha1RetryStrategy object if `retry_limit` is specified, None otherwise.
         """
         if self.retry:
-            return IoArgoprojWorkflowV1alpha1RetryStrategy(
-                backoff=IoArgoprojWorkflowV1alpha1Backoff(
-                    duration=str(self.retry.duration), max_duration=str(self.retry.max_duration)
+            strategy = IoArgoprojWorkflowV1alpha1RetryStrategy()
+            if self.retry.duration is not None and self.retry.max_duration is not None:
+                setattr(
+                    strategy,
+                    'backoff',
+                    IoArgoprojWorkflowV1alpha1Backoff(
+                        duration=str(self.retry.duration), max_duration=str(self.retry.max_duration)
+                    ),
                 )
-            )
+            if self.retry.limit is not None:
+                setattr(strategy, 'limit', str(self.retry.limit))
+
+            return strategy
         return None
 
     def get_tolerations(self) -> List[ArgoToleration]:
