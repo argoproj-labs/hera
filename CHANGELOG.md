@@ -28,6 +28,13 @@ The general format is:
 - C from D
 
 ```
+# 2.4.0 - DATE (22/03/2022)
+
+### Added
+
+- Set image_pull_policy on a Task level
+- WorkflowTemplate Service and WorkflowTemplate implementation
+- Option to create a Workflow with a WorkflowTemplate
 
 # 2.3.0 - DATE (29/03/2022)
 

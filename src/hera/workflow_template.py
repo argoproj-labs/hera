@@ -1,83 +1,68 @@
-"""The implementation of a Hera workflow for Argo-based workflows"""
+"""The implementation of a Hera workflowTemplate for Argo-based workflowTemplates"""
 import warnings
-from typing import Dict, List, Optional
-from uuid import uuid4
+from typing import Dict, Optional
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
-    IoArgoprojWorkflowV1alpha1Workflow,
-    IoArgoprojWorkflowV1alpha1WorkflowSpec,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
-    LocalObjectReference,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplate,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec,
     ObjectMeta,
 )
 
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.volumes import Volume
-from hera.workflow_service import WorkflowService
+from hera.workflow_template_service import WorkflowTemplateService
 
 # by default, `DeprecationWarning`s are silenced, this removes the warning from the filter so it
 # can be issued to users
 warnings.simplefilter('always', DeprecationWarning)
 
 
-class Workflow:
-    """A workflow representation.
+class WorkflowTemplate:
+    """A workflowTemplate representation.
 
-    The workflow is used as a functional representation for a collection of tasks and
-    steps. The workflow context controls the overall behaviour of tasks, such as whether to notify completion, whether
-    to execute retires, overall parallelism, etc. The workflow can be constructed and submitted to multiple Argo
-    endpoints as long as a token can be associated with the endpoint at the given domain.
+    The WorkflowTemplate is used as a functional representation for a collection of tasks and
+    steps. The WorkflowTemplate is basically the same as a Workflow but with a template you don't
+    have to write the same steps, you can reuse it over and over.
 
     Parameters
     ----------
     name: str
-        The workflow name. Note that the workflow initiation will replace underscores with dashes.
+        The workflowTemplate name. Note that the workflowTemplate initiation will replace underscores with dashes.
     service: WorkflowService
-        A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
+        A workflowTemplate service to use for submissions.
+        See `hera.v1.workflow_template_service.WorkflowTemplateService`.
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
+    security_context:  Optional[WorkflowSecurityContext] = None
+        Define security settings for all containers in the workflow.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
     namespace: Optional[str] = 'default'
-        The namespace to use for creating the Workflow.  Defaults to "default"
-    security_context:  Optional[WorkflowSecurityContext] = None
-        Define security settings for all containers in the workflow.
-    image_pull_secrets: Optional[List[str]] = None
-        A list of image pull secrets. This is used to authenticate with the private image registry of the images
-        used by tasks.
-    workflow_template_ref: Optional[str] = None
-        The name of the workflowTemplate reference. WorkflowTemplateRef is a reference to a WorkflowTemplate resource.
-        If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
-        you can reference it again and again when you create a new Workflow without specifying the same tasks and
-        dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+        The namespace to use for creating the WorkflowTemplate.  Defaults to "default"
     """
 
     def __init__(
         self,
         name: str,
-        service: WorkflowService,
+        service: WorkflowTemplateService,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
-        workflow_template_ref: Optional[str] = None,
-        image_pull_secrets: Optional[List[str]] = None,
     ):
-        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
+        self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
         self.service = service
         self.parallelism = parallelism
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
-        self.workflow_template_ref = workflow_template_ref
-        self.image_pull_secrets = image_pull_secrets
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -87,22 +72,9 @@ class Workflow:
             parallelism=self.parallelism,
         )
 
-        # if a template ref was passed then the Workflow is gonna be
-        # created from that template, otherwise a new Workflow
-        if self.workflow_template_ref:
-            self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplateRef(name=self.workflow_template_ref)
-
-            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                workflow_template_ref=self.workflow_template,
-                entrypoint=self.workflow_template_ref,
-                volumes=[],
-                volume_claim_templates=[],
-            )
-        else:
-            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
-            )
-
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec(
+            templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
+        )
         if self.security_context:
             security_context = self.security_context.get_security_context()
             setattr(self.spec, 'security_context', security_context)
@@ -111,15 +83,11 @@ class Workflow:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
 
-        if self.image_pull_secrets:
-            secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
-            setattr(self.spec, 'image_pull_secrets', secret_refs)
-
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
 
-        self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
+        self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 
     def add_task(self, t: Task) -> None:
         """Adds a single task to the workflow"""
@@ -145,9 +113,7 @@ class Workflow:
 
     def add_head(self, t: Task, append: bool = True) -> None:
         """Adds a task at the head of the workflow so the workflow start with the given task.
-
         This sets the given task as a dependency of the starting tasks of the workflow.
-
         Parameters
         ----------
         t: Task
@@ -167,9 +133,7 @@ class Workflow:
 
     def add_tail(self, t: Task, append: bool = True) -> None:
         """Adds a task as the tail of the workflow so the workflow ends with the given task.
-
         This sets the given task's dependencies to all the tasks that are not listed as dependencies in the workflow.
-
         Parameters
         ----------
         t: Task
@@ -193,20 +157,8 @@ class Workflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
-        """Submits the workflow.
-
-        Notes
-        -----
-        This method is deprecated in favor of `workflow.create(...)`.
-        """
-        warnings.warn("`submit` is deprecated in favor of `create`", DeprecationWarning, stacklevel=2)
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.submit(self.workflow, namespace)
-
-    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
+    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""
         if namespace is None:
             namespace = self.namespace
-        return self.service.submit(self.workflow, namespace)
+        return self.service.create(self.workflow_template, namespace)
