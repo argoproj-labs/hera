@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 class BaseSecurityContext(BaseModel):
-    """Abstract class to accomedate the shared functionallity of task and workflow context."""
+    """Abstract class to accommodate the shared functionality of task and workflow context."""
 
     run_as_user: Optional[int] = None
     run_as_group: Optional[int] = None
@@ -24,14 +24,14 @@ class WorkflowSecurityContext(BaseSecurityContext):
 
     Attributes
     ----------
-    run_as_user: Optinal[int]
-        Sets the user id of the user running in all of the containers in the workflow.
-    run_as_group: Optinal[int]
-        Sets the user id of the user running in all of the containers in the workflow.
+    run_as_user: Optional[int]
+        Sets the user id of the user running in all the containers in the workflow.
+    run_as_group: Optional[int]
+        Sets the user id of the user running in all the containers in the workflow.
     fs_group: Optional[int]
-        Allow to add an additional group to the all users running on allof the containers in the workflow.
+        Allow an additional group to the all users running on all of the containers in the workflow.
     run_as_non_root: Optional[bool]
-        Validates that all the tasks container does not run as root, i.e UID does not equal 0.
+        Validates that all the tasks' container does not run as root, i.e UID does not equal 0.
     """
 
     fs_group: Optional[int] = None
@@ -43,14 +43,13 @@ class WorkflowSecurityContext(BaseSecurityContext):
 
 
 class TaskSecurityContext(BaseSecurityContext):
-    """Defines task level sercurity attributes and settings,
-    overrides the WorkflowSecurityContext settings.
+    """Defines task level security attributes and settings overrides the WorkflowSecurityContext settings.
 
     Attributes
     ----------
-    run_as_user: Optinal[int]
+    run_as_user: Optional[int]
         Sets the user id of the user running in the task's container.
-    run_as_group: Optinal[int]
+    run_as_group: Optional[int]
         Sets the group id of the user running in the task's container.
     run_as_non_root: Optional[bool]
         Validates that the tasks container does not run as root, i.e UID does not equal 0.
