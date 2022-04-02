@@ -37,6 +37,7 @@ argo-workflows = {version = "6.3.0rc4", allow-prereleases = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
+pytest-cov = "*"
 black = "*"
 pyproject-flake8 = "*"
 mypy = "*"
