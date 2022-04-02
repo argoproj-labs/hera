@@ -32,7 +32,8 @@ jobs:
 
       - name: install base dependencies
         run: |
-          python -m pip install --upgrade "tox<4.0" tox-wheel twine poetry
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade "tox<4.0" tox-gh-actions poetry
 
       - name: lint
         env:
