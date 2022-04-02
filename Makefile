@@ -1,3 +1,8 @@
+SRC_FOLDER=src
+TEST_FOLDER=tests
+EXAMPLES_FOLDER=examples
+CONFTEST=conftest.py
+
 # we mark all commands as `phony` to avoid any potential conflict with files in the CICD environment
 .PHONY: lint format isort typecheck typecheck verify build
 
