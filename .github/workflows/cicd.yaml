@@ -98,7 +98,7 @@ jobs:
           path: .tox/htmlcov
 
   publish:
-    needs: [ coverage, test, build-py3-none-any ]
+    needs: [ coverage, test ]
     if: success() && ( github.ref == 'refs/heads/main' )
     runs-on: ubuntu-latest
 
