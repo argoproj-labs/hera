@@ -47,9 +47,6 @@ jobs:
           tox
 
       - name: tests
-        env:
-          ENABLE_BDIST_EXT_MODULE: 'yes'
-          TOXENV: python${{ matrix.python-version }}
         run: |
           tox
 
