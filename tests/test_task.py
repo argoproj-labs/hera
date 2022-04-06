@@ -426,6 +426,13 @@ def test_task_template_has_correct_labels(op):
     assert tt.metadata.labels == expected_labels
 
 
+def test_task_template_has_correct_annotations(op):
+    t = Task('t', op, [{'a': 1}], resources=Resources(), annotations={'foo': 'bar'})
+    tt = t.get_task_template()
+    expected_annotations = {'foo': 'bar'}
+    assert tt.metadata.annotations == expected_annotations
+
+
 def test_task_with_config_map_env_variable(no_op):
     t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
     tt = t.get_task_template()

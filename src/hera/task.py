@@ -211,6 +211,8 @@ class Task:
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Task Template object metadata.
+    annotations: Optional[Dict[str, str]] = None
+        A Dict of annotations to attach to the Task Template object metadata.
     variables: Optional[List[VariableAsEnv]] = None
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
@@ -248,6 +250,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
+        annotations: Optional[Dict[str, str]] = None,
         variables: Optional[List[VariableAsEnv]] = None,
         security_context: Optional[TaskSecurityContext] = None,
         continue_on_fail: bool = False,
@@ -272,6 +275,7 @@ class Task:
         self.tolerations = tolerations
         self.node_selector = node_selectors
         self.labels = labels or {}
+        self.annotations = annotations or {}
         self.variables = variables or []
 
         self.env = self.get_env(env_specs)
@@ -829,7 +833,7 @@ class Task:
             inputs=self.inputs,
             outputs=self.outputs,
             tolerations=self.get_tolerations(),
-            metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels),
+            metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels, annotations=self.annotations),
         )
         if self.node_selector:
             setattr(template, 'node_selector', self.node_selector)

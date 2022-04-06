@@ -43,6 +43,8 @@ class Workflow:
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
+    annotations: Optional[Dict[str, str]] = None
+        A Dict of annotations to attach to the Workflow object metadata
     namespace: Optional[str] = 'default'
         The namespace to use for creating the Workflow.  Defaults to "default"
     security_context:  Optional[WorkflowSecurityContext] = None
@@ -64,6 +66,7 @@ class Workflow:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
+        annotations: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
@@ -76,6 +79,7 @@ class Workflow:
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
+        self.annotations = annotations
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
 
@@ -115,6 +119,8 @@ class Workflow:
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
+        if self.annotations:
+            setattr(self.metadata, 'annotations', self.annotations)
 
         self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 

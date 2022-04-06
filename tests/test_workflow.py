@@ -199,6 +199,13 @@ def test_wf_contains_specified_labels(ws):
     assert w.metadata.labels == expected_labels
 
 
+def test_wf_contains_specified_annotations(ws):
+    w = Workflow('w', service=ws, annotations={'foo': 'bar'})
+
+    expected_annotations = {'foo': 'bar'}
+    assert w.metadata.annotations == expected_annotations
+
+
 def test_wf_submit_with_default(ws):
     w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test")
     w.service = Mock()
