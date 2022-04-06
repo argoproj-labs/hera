@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 2.7.0 - DATE (04/06/2022)
+
+### Added
+
+- add support for specifying annotations on Workflows, CronWorkflows and Tasks
+
 # 2.6.0 - DATE (29/03/2022)
 
 ### Added

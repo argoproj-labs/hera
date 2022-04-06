@@ -135,7 +135,6 @@ class CronWorkflow:
         if self.annotations:
             setattr(self.metadata, 'annotations', self.annotations)
 
-
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,
             spec=self.cron_spec,
