@@ -1,9 +1,10 @@
 import json
 
+from argo_workflows.model.object_field_selector import ObjectFieldSelector
 from argo_workflows.models import ConfigMapKeySelector, EnvVarSource, SecretKeySelector
 from pydantic import BaseModel
 
-from hera.env import ConfigMapEnvSpec, EnvSpec, SecretEnvSpec
+from hera.env import ConfigMapEnvSpec, EnvSpec, FieldEnvSpec, SecretEnvSpec
 
 
 class MockModel(BaseModel):
@@ -66,3 +67,15 @@ def test_config_map_env_spec_contains_expected_fields():
     assert isinstance(spec.value_from.config_map_key_ref, ConfigMapKeySelector)
     assert spec.value_from.config_map_key_ref.name == 'a'
     assert spec.value_from.config_map_key_ref.key == 'b'
+
+
+def test_field_env_spec_contains_expected_fields():
+    env = FieldEnvSpec(name='s', field_path='a', api_version="b")
+    spec = env.argo_spec
+
+    assert not hasattr(spec, 'value')
+    assert spec.name == 's'
+    assert isinstance(spec.value_from, EnvVarSource)
+    assert isinstance(spec.value_from.field_ref, ObjectFieldSelector)
+    assert spec.value_from.field_ref.field_path == 'a'
+    assert spec.value_from.field_ref.api_version == 'b'
