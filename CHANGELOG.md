@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 2.8.0 - DATE (04/07/2022)
+
+### Added
+
+- add support for exposing field reference via env vars in Tasks
+
 # 2.7.0 - DATE (04/06/2022)
 
 ### Added
