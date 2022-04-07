@@ -4,7 +4,7 @@ from argo_workflows.model.object_field_selector import ObjectFieldSelector
 from argo_workflows.models import ConfigMapKeySelector, EnvVarSource, SecretKeySelector
 from pydantic import BaseModel
 
-from hera.env import ConfigMapEnvSpec, EnvSpec, SecretEnvSpec, FieldEnvSpec
+from hera.env import ConfigMapEnvSpec, EnvSpec, FieldEnvSpec, SecretEnvSpec
 
 
 class MockModel(BaseModel):
