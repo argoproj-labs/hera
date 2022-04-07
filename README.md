@@ -88,11 +88,7 @@ If you plan to submit contributions to Hera you can install Hera in a virtual en
 poetry install
 ```
 
-In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, e.g.:
-
-```shell
-make test
-```
+In you activated `poetry shell`, you can utilize the tasks found in `tox.ini`, e.g.:
 
 To run tests on all supported python versions with coverage run [tox](https://tox.wiki/en/latest/):
 
@@ -109,10 +105,10 @@ tox -a
 To run selected tox envs, e.g. for a specific python version with coverage run:
 
 ```shell
-tox -e python3.7,coverage
+tox -e py37,coverage
 ```
 
-As `coverage` *dependes* on `python3.7`, it will run *after* `python3.7`
+As `coverage` *depends* on `py37`, it will run *after* `py37`
 
 See project `tox.ini` for more details
 

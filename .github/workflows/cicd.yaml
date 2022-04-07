@@ -98,9 +98,9 @@ jobs:
           name: coverage-data
           path: .tox
 
-      # - name: list coverage files
-      #   run: |
-      #     find .tox -name ".coverage.*"
+      - name: list coverage files
+        run: |
+          find .tox -name ".coverage.*"
 
       - name: install tox
         run: |
