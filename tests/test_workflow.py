@@ -1,4 +1,5 @@
 from unittest.mock import Mock
+from hera.ttl_strategy import TTLStrategy
 
 import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
@@ -221,11 +222,7 @@ def test_wf_adds_image_pull_secrets(ws):
 
 
 def test_wf_adds_ttl_strategy(ws):
-    w = Workflow('w', service=ws, ttl_strategy={
-       'seconds_after_completion': 5,
-       'seconds_after_failure': 10,
-       'seconds_after_success': 15,
-    })
+    w = Workflow('w', service=ws, ttl_strategy=TTLStrategy(seconds_after_completion=5, seconds_after_failure=10, seconds_after_success=15))
 
     expected_ttl_strategy = {
        'seconds_after_completion': 5,
@@ -233,4 +230,4 @@ def test_wf_adds_ttl_strategy(ws):
        'seconds_after_success': 15,
     }
 
-    assert w.ttl_strategy._data_store == expected_ttl_strategy
+    assert w.spec.ttl_strategy._data_store == expected_ttl_strategy

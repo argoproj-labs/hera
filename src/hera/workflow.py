@@ -6,7 +6,6 @@ from uuid import uuid4
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
-    IoArgoprojWorkflowV1alpha1TTLStrategy,
     IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
@@ -16,6 +15,7 @@ from argo_workflows.models import (
 
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.ttl_strategy import TTLStrategy
 from hera.volumes import Volume
 from hera.workflow_service import WorkflowService
 
@@ -72,7 +72,7 @@ class Workflow:
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
-        ttl_strategy: Optional[Dict[str, int]] = None,
+        ttl_strategy: Optional[TTLStrategy] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -84,16 +84,6 @@ class Workflow:
         self.annotations = annotations
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
-
-        if ttl_strategy:
-            self.ttl_strategy = IoArgoprojWorkflowV1alpha1TTLStrategy(
-                seconds_after_completion=ttl_strategy['seconds_after_completion'],
-                seconds_after_failure=ttl_strategy['seconds_after_failure'],
-                seconds_after_success=ttl_strategy['seconds_after_success']
-            )
-        else:
-            self.ttl_strategy = IoArgoprojWorkflowV1alpha1TTLStrategy()
-
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.template = IoArgoprojWorkflowV1alpha1Template(
@@ -110,7 +100,6 @@ class Workflow:
                 entrypoint=self.workflow_template_ref,
                 volumes=[],
                 volume_claim_templates=[],
-                ttl_strategy=self.ttl_strategy,
             )
         else:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
@@ -118,8 +107,10 @@ class Workflow:
                 entrypoint=self.name,
                 volumes=[],
                 volume_claim_templates=[],
-                ttl_strategy=self.ttl_strategy,
             )
+
+        if ttl_strategy:
+            setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if self.security_context:
             security_context = self.security_context.get_security_context()
