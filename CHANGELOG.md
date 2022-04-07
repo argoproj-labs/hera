@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 2.9.0 - DATE (04/08/2022)
+
+### Fixed
+
+- fix wrong dependencies when calling on_success(), on_failure(), on_error() functions of Sask
+
 # 2.8.0 - DATE (04/07/2022)
 
 ### Added
