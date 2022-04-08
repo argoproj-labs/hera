@@ -15,6 +15,7 @@ and its crew were specially protected by the goddess Hera.
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
 [![Versions](https://img.shields.io/pypi/pyversions/hera-workflows.svg)](https://github.com/argoproj-labs/hera-workflows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/argoproj-labs/hera-workflows/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera-workflows)
 
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo
 Workflows more accessible by abstracting away some setup that is typically necessary for constructing workflows.
