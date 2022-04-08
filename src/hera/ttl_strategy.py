@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1TTLStrategy
 )
