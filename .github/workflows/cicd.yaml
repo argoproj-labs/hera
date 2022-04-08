@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request: { }
+  pull_request:
 
 jobs:
   test:
@@ -13,11 +13,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
-    env:
-      PYVER: ${{ matrix.python-version }}
-      OS: ${{ matrix.os }}
+        include:
+          - os: ubuntu-latest
+            python-version: '3.7'
+            toxenv: 'py37'
+          - os: ubuntu-latest
+            python-version: '3.8'
+            toxenv: 'py38'
+          - os: ubuntu-latest
+            python-version: '3.9'
+            toxenv: 'py39'
+          - os: ubuntu-latest
+            python-version: '3.10'
+            toxenv: 'py310'
+          - os: macos-latest
+            python-version: '3.7'
+            toxenv: 'py37'
+          - os: macos-latest
+            python-version: '3.8'
+            toxenv: 'py38'
+          - os: macos-latest
+            python-version: '3.9'
+            toxenv: 'py39'
+          - os: macos-latest
+            python-version: '3.10'
+            toxenv: 'py310'
 
     runs-on: ${{ matrix.os }}
 
@@ -32,7 +52,8 @@ jobs:
 
       - name: install base dependencies
         run: |
-          python -m pip install --upgrade "tox<4.0" tox-wheel twine
+          python -m pip install --upgrade pip
+          python -m pip install "tox<4.0" poetry
 
       - name: lint
         env:
@@ -48,65 +69,15 @@ jobs:
 
       - name: tests
         env:
-          ENABLE_BDIST_EXT_MODULE: 'yes'
-          TOXENV: python${{ matrix.python-version }}
+          TOXENV: ${{ matrix.toxenv }}
         run: |
           tox
-
-      - name: twine check
-        run: |
-          twine check .tox/dist/*
-
-# TODO: wheels for linux_x86_64 cannot be uploaded. Rather, this needs manylinux distributions, which can be built
-# TODO: using `cibuildwheel` in a separate step / job, and not as part of tox test task
-#      - name: upload build artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: pypi-build-arts
-#          path: .tox/dist
 
       - name: upload coverage files
         uses: actions/upload-artifact@v2
         with:
           name: coverage-data
           path: ".tox/.coverage.*"
-
-  build-py3-none-any:
-    name: build py3-none-any on linux
-    timeout-minutes: 10
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: setup python3.7
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.7
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install base dependencies
-        run: |
-          python -m pip install --upgrade build twine
-
-      - name: build sdist and wheel ( no test )
-        run: |
-          python -m build --sdist --wheel --outdir dist
-
-      - name: list artifacts
-        run: |
-          ls -l dist
-
-      - name: twine check
-        run: |
-          twine check dist/*
-
-      - name: upload build artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: pypi-build-arts
-          path: dist
 
   coverage:
     needs: [ test ]
@@ -133,7 +104,8 @@ jobs:
 
       - name: install tox
         run: |
-          python -m pip install --upgrade tox
+          python -m pip install --upgrade pip
+          python -m pip install tox poetry
 
       - name: create coverage report
         env:
@@ -148,7 +120,7 @@ jobs:
           path: .tox/htmlcov
 
   publish:
-    needs: [ coverage, test, build-py3-none-any ]
+    needs: [ coverage, test ]
     if: success() && ( github.ref == 'refs/heads/main' )
     runs-on: ubuntu-latest
 
@@ -160,28 +132,14 @@ jobs:
         with:
           python-version: '3.7'
 
-      - name: get distribution wheels
-        uses: actions/download-artifact@v2
-        with:
-          name: pypi-build-arts
-          path: dist
-
-      - name: list all pypi build arts
+      - name: Install base dependencies
         run: |
-          ls -la dist/
+          python -m pip install --upgrade pip
+          python -m pip install poetry twine
 
-      - name: install check dependencies
+      - name: Build and publish
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          python -m pip install --upgrade twine
-
-      - name: check pypi artifacts
-        run: |
-          twine check dist/*
-
-      - name: publish package to pypi
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          verbose: true
-          skip_existing: true
+          poetry publish --build --username $TWINE_USERNAME --password $TWINE_PASSWORD

@@ -1,12 +1,65 @@
+[tool.poetry]
+name = "hera"
+version = "2.8.1"
+description="Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo Workflows more accessible by abstracting away some setup that is typically necessary for constructing Argo workflows."
+authors = ["Flaviu Vadan <flaviu.vadan@dynotx.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/argoproj-labs/hera-workflows"
+repository = "https://github.com/argoproj-labs/hera-workflows"
+documentation = "https://github.com/argoproj-labs/hera-workflows/README.md"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+packages = [
+    { include = "hera", from = "src" }
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/argoproj-labs/hera-workflows/issues"
+
+[tool.poetry.dependencies]
+python = ">=3.7, <3.11"
+pydantic = "^1.9.0"
+python-dateutil = "^2.8.2"
+urllib3 = "^1.26.8"
+certifi = "^2021.10.8"
+pytz = "^2021.3"
+argo-workflows = {version = "6.3.0rc6", allow-prereleases = true}
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+pyproject-flake8 = "*"
+mypy = "*"
+build = "*"
+isort = "*"
+tox = "<4.0"
+
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["poetry"]
+build-backend = "poetry.masonry.api"
 
 [tool.black]
 line-length = 119
 skip-string-normalization = true
 target-version = ['py37']
 include = '\.pyi?$'
+
+[tool.flake8]
+# do not look here for things to lint
+exclude = [".git", "__init__.py"]
+docstring-convention = "numpy"
+max-line-length = 119
 
 [tool.pytest.ini_options]
 addopts = "-ra -q"
@@ -15,3 +68,21 @@ addopts = "-ra -q"
 profile = "black"
 skip_gitignore = true
 skip_glob = [".venv/*", ".mypy_cache/*", ".pytest_cache/*", ".github/*", ".git/*"]
+
+[tool.mypy]
+mypy_path = "src"
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = false
+
+[[tool.mypy.overrides]]
+module = "mypy-argo.workflows.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mypy-urllib3.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module ="mypy-pytz.*"
+ignore_missing_imports = true
