@@ -122,6 +122,7 @@ jobs:
       - name: upload coverage to CodeCov
         uses: codecov/codecov-action@v2
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: .tox/
           fail_ci_if_error: true
         if: ${{ always() }}
