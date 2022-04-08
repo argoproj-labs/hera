@@ -28,6 +28,11 @@ The general format is:
 - C from D
 
 ```
+# 2.9.0 - DATE (04/08/2022)
+
+### Added
+
+- Add support for TTLStrategy([link](https://argoproj.github.io/argo-workflows/fields/#ttlstrategy))
 
 # 2.8.1 - DATE (04/08/2022)
 

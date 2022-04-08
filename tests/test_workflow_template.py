@@ -7,6 +7,7 @@ from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.workflow_template import WorkflowTemplate
+from hera.ttl_strategy import TTLStrategy
 
 
 def test_wft_contains_specified_service_account(ws):
@@ -86,3 +87,19 @@ def test_wft_submit_with_default(ws):
     w.service = Mock()
     w.create()
     w.service.create.assert_called_with(w.workflow_template, w.namespace)
+
+
+def test_wft_adds_ttl_strategy(ws):
+    w = WorkflowTemplate(
+        'w',
+        service=ws,
+        ttl_strategy=TTLStrategy(seconds_after_completion=5, seconds_after_failure=10, seconds_after_success=15),
+    )
+
+    expected_ttl_strategy = {
+        'seconds_after_completion': 5,
+        'seconds_after_failure': 10,
+        'seconds_after_success': 15,
+    }
+
+    assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
