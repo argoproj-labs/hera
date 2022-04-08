@@ -29,6 +29,24 @@ The general format is:
 
 ```
 
+# 2.8.1 - DATE (04/08/2022)
+
+### Fixed
+
+- fix wrong dependencies when calling on_success(), on_failure(), on_error() functions of Sask
+
+# 2.8.0 - DATE (04/07/2022)
+
+### Added
+
+- add support for exposing field reference via env vars in Tasks
+
+# 2.7.0 - DATE (04/06/2022)
+
+### Added
+
+- add support for specifying annotations on Workflows, CronWorkflows and Tasks
+
 # 2.6.0 - DATE (29/03/2022)
 
 ### Added

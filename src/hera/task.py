@@ -211,6 +211,8 @@ class Task:
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Task Template object metadata.
+    annotations: Optional[Dict[str, str]] = None
+        A Dict of annotations to attach to the Task Template object metadata.
     variables: Optional[List[VariableAsEnv]] = None
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
@@ -248,6 +250,7 @@ class Task:
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
+        annotations: Optional[Dict[str, str]] = None,
         variables: Optional[List[VariableAsEnv]] = None,
         security_context: Optional[TaskSecurityContext] = None,
         continue_on_fail: bool = False,
@@ -272,6 +275,7 @@ class Task:
         self.tolerations = tolerations
         self.node_selector = node_selectors
         self.labels = labels or {}
+        self.annotations = annotations or {}
         self.variables = variables or []
 
         self.env = self.get_env(env_specs)
@@ -367,8 +371,8 @@ class Task:
 
     def on_success(self, other: 'Task') -> 'Task':
         """Execute `other` when this task succeeds"""
-        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Succeeded'
-        return other.next(self)
+        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Succeeded'
+        return self.next(other)
 
     def on_failure(self, other: 'Task') -> 'Task':
         """Execute `other` when this task fails. This forces `continue_on_fail` to be True"""
@@ -380,8 +384,8 @@ class Task:
         else:
             setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
 
-        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Failed'
-        return other.next(self)
+        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Failed'
+        return self.next(other)
 
     def on_error(self, other: 'Task') -> 'Task':
         """Execute `other` when this task errors. This forces `continue_on_error` to be True"""
@@ -393,8 +397,8 @@ class Task:
         else:
             setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
 
-        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Error'
-        return other.next(self)
+        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
+        return self.next(other)
 
     def validate(self):
         """
@@ -829,7 +833,7 @@ class Task:
             inputs=self.inputs,
             outputs=self.outputs,
             tolerations=self.get_tolerations(),
-            metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels),
+            metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels, annotations=self.annotations),
         )
         if self.node_selector:
             setattr(template, 'node_selector', self.node_selector)

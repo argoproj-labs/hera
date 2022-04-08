@@ -168,6 +168,13 @@ def test_cwf_contains_specified_labels(ws):
     assert w.metadata.labels == expected_labels
 
 
+def test_cwf_contains_specified_annotations(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, annotations={'foo': 'bar'})
+
+    expected_annotations = {'foo': 'bar'}
+    assert w.metadata.annotations == expected_annotations
+
+
 def test_cwf_contains_specified_namespace(ws):
     w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
 

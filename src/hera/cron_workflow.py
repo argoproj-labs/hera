@@ -45,6 +45,8 @@ class CronWorkflow:
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the CronWorkflow object metadata.
+    annotations: Optional[Dict[str, str]] = None
+        A Dict of annotations to attach to the CronWorkflow object metadata.
     namespace: Optional[str] = 'default'
         The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
     security_context:  Optional[WorkflowSecurityContext] = None
@@ -68,6 +70,7 @@ class CronWorkflow:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
+        annotations: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = "default",
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
@@ -83,6 +86,7 @@ class CronWorkflow:
         self.parallelism = parallelism
         self.service_account_name = service_account_name
         self.labels = labels
+        self.annotations = annotations
         self.namespace = namespace
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
@@ -128,6 +132,8 @@ class CronWorkflow:
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
+        if self.annotations:
+            setattr(self.metadata, 'annotations', self.annotations)
 
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,

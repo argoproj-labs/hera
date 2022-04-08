@@ -426,6 +426,13 @@ def test_task_template_has_correct_labels(op):
     assert tt.metadata.labels == expected_labels
 
 
+def test_task_template_has_correct_annotations(op):
+    t = Task('t', op, [{'a': 1}], resources=Resources(), annotations={'foo': 'bar'})
+    tt = t.get_task_template()
+    expected_annotations = {'foo': 'bar'}
+    assert tt.metadata.annotations == expected_annotations
+
+
 def test_task_with_config_map_env_variable(no_op):
     t = Task('t', no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
     tt = t.get_task_template()
@@ -513,7 +520,7 @@ def test_task_adds_other_task_on_success():
     o = Task('o')
 
     t.on_success(o)
-    assert t.argo_task.when == '{{tasks.o.status}} == Succeeded'
+    assert o.argo_task.when == '{{tasks.t.status}} == Succeeded'
 
 
 def test_task_adds_other_task_on_failure():
@@ -521,7 +528,7 @@ def test_task_adds_other_task_on_failure():
     o = Task('o')
 
     t.on_failure(o)
-    assert t.argo_task.when == '{{tasks.o.status}} == Failed'
+    assert o.argo_task.when == '{{tasks.t.status}} == Failed'
     assert t.argo_task.continue_on.failed
 
 
@@ -530,7 +537,7 @@ def test_task_adds_other_task_on_error():
     o = Task('o')
 
     t.on_error(o)
-    assert t.argo_task.when == '{{tasks.o.status}} == Error'
+    assert o.argo_task.when == '{{tasks.t.status}} == Error'
     assert t.argo_task.continue_on.error
 
 
