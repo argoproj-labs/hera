@@ -123,7 +123,6 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           directory: .tox/
-          files: .tox/coverage.xml
           fail_ci_if_error: true
         if: ${{ always() }}
 
