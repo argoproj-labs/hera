@@ -43,6 +43,7 @@ pyproject-flake8 = "*"
 mypy = "*"
 build = "*"
 isort = "*"
+tox = "<4.0"
 
 [build-system]
 requires = ["poetry"]
