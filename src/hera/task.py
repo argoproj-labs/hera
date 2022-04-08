@@ -371,8 +371,8 @@ class Task:
 
     def on_success(self, other: 'Task') -> 'Task':
         """Execute `other` when this task succeeds"""
-        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Succeeded'
-        return other.next(self)
+        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Succeeded'
+        return self.next(other)
 
     def on_failure(self, other: 'Task') -> 'Task':
         """Execute `other` when this task fails. This forces `continue_on_fail` to be True"""
@@ -384,8 +384,8 @@ class Task:
         else:
             setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
 
-        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Failed'
-        return other.next(self)
+        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Failed'
+        return self.next(other)
 
     def on_error(self, other: 'Task') -> 'Task':
         """Execute `other` when this task errors. This forces `continue_on_error` to be True"""
@@ -397,8 +397,8 @@ class Task:
         else:
             setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
 
-        self.argo_task.when = f'{{{{tasks.{other.name}.status}}}} {Operator.equals.value} Error'
-        return other.next(self)
+        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
+        return self.next(other)
 
     def validate(self):
         """
