@@ -23,9 +23,9 @@ class TTLStrategy(BaseModel):
 
     """
 
-    seconds_after_completion: int
-    seconds_after_failure: int
-    seconds_after_success: int
+    seconds_after_completion: Optional[int]
+    seconds_after_failure: Optional[int]
+    seconds_after_success: Optional[int]
 
     @property
     def argo_ttl_strategy(self) -> IoArgoprojWorkflowV1alpha1TTLStrategy:
