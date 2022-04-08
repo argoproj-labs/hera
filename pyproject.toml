@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "hera"
+name = "hera-workflows"
 version = "2.8.1"
 description="Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo Workflows more accessible by abstracting away some setup that is typically necessary for constructing Argo workflows."
 authors = ["Flaviu Vadan <flaviu.vadan@dynotx.com>"]

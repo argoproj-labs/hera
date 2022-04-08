@@ -139,7 +139,8 @@ jobs:
 
       - name: Build and publish
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          PYPI_USERNAME: __token__
+          PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          poetry publish --build --username $TWINE_USERNAME --password $TWINE_PASSWORD
+          poetry build
+          twine upload -u __token__ -p $PYPI_PASSWORD --skip-existing dist/* 
