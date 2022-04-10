@@ -5,6 +5,7 @@ from argo_workflows.apis import CronWorkflowServiceApi
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1CronWorkflow,
+    IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1WorkflowResumeRequest,
     IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest,
 )
@@ -69,6 +70,33 @@ class CronWorkflowService:
         return self.service.create_cron_workflow(
             namespace,
             IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
+            _check_return_type=False,
+        )
+
+    def update(
+        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = 'default'
+    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Updates given cron workflow in the argo server.
+
+        Parameters
+        ----------
+        cron_workflow: V1alpha1CronWorkflow
+            The cron workflow to update.
+        namespace: str = 'default'
+            The K8S namespace of the Argo server to update the cron workflow in.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1CronWorkflow
+            The updated cron workflow.
+
+        Raises
+        ------
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        """
+        return self.service.update_cron_workflow(
+            namespace,
+            IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
         )
 

@@ -2,7 +2,6 @@
 from datetime import datetime
 from datetime import timezone as tz
 from typing import Dict, List, Optional, Tuple
-from uuid import uuid4
 
 import pytz
 from argo_workflows.models import (
@@ -49,7 +48,7 @@ class CronWorkflow:
     annotations: Optional[Dict[str, str]] = None
         A Dict of annotations to attach to the CronWorkflow object metadata.
     namespace: Optional[str] = 'default'
-        The namespace to use by default when calling create/suspend/resume.  Defaults to 'default'.
+        The namespace to use by default when calling create/update/suspend/resume.  Defaults to 'default'.
     security_context:  Optional[WorkflowSecurityContext] = None
         Define security settings for all containers in the workflow.
     image_pull_secrets: Optional[List[str]] = None
@@ -81,7 +80,7 @@ class CronWorkflow:
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
 
-        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
+        self.name = name.replace("_", "-")
         self.schedule = schedule
         self.timezone = timezone
         self.service = service
@@ -225,6 +224,12 @@ class CronWorkflow:
         if namespace is None:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
+
+    def update(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Updates the cron workflow in the server"""
+        if namespace is None:
+            namespace = self.namespace
+        return self.service.update(self.workflow, namespace)
 
     def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""

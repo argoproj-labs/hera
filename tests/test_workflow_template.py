@@ -6,8 +6,8 @@ from argo_workflows.model.pod_security_context import PodSecurityContext
 from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
-from hera.workflow_template import WorkflowTemplate
 from hera.ttl_strategy import TTLStrategy
+from hera.workflow_template import WorkflowTemplate
 
 
 def test_wft_contains_specified_service_account(ws):
