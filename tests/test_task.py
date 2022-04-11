@@ -98,17 +98,17 @@ def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_param_script_portion()
-    assert script == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n'
+    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
 
 
 def test_script_getter_returns_expected_string(op, typed_op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
+    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
 
     t = Task('t', typed_op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
 
 
 def test_script_getter_parses_multi_line_function(long_op):
@@ -127,11 +127,11 @@ def test_script_getter_parses_multi_line_function(long_op):
     )
 
     expected_script = """import json
-very_long_parameter_name = json.loads('{{inputs.parameters.very_long_parameter_name}}')
-very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_long_parameter_name}}')
-very_very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_very_long_parameter_name}}')
-very_very_very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_very_very_long_parameter_name}}')
-very_very_very_very_very_long_parameter_name = json.loads('{{inputs.parameters.very_very_very_very_very_long_parameter_name}}')
+very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
+very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
+very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
 
 print(42)
 """
@@ -274,7 +274,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
-    assert tt.script.source == 'import json\na = json.loads(\'{{inputs.parameters.a}}\')\n\nprint(a)\n'
+    assert tt.script.source == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
