@@ -15,6 +15,7 @@ from argo_workflows.models import (
 
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.ttl_strategy import TTLStrategy
 from hera.volumes import Volume
 from hera.workflow_service import WorkflowService
 
@@ -71,6 +72,7 @@ class Workflow:
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
+        ttl_strategy: Optional[TTLStrategy] = None,
     ):
         self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -101,8 +103,14 @@ class Workflow:
             )
         else:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
+                templates=[self.template],
+                entrypoint=self.name,
+                volumes=[],
+                volume_claim_templates=[],
             )
+
+        if ttl_strategy:
+            setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if self.security_context:
             security_context = self.security_context.get_security_context()

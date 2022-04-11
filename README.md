@@ -8,13 +8,19 @@ and its crew were specially protected by the goddess Hera.
 (https://en.wikipedia.org/wiki/Argo)
 
 [![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/cicd.yaml)
+
+[![codecov](https://codecov.io/gh/argoproj-labs/hera-workflows/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera-workflows)
+
 [![Pypi](https://img.shields.io/pypi/v/hera-workflows.svg)](https://pypi.python.org/pypi/hera-workflows)
 [![CondaForge](https://anaconda.org/conda-forge/hera-workflows/badges/version.svg)](https://anaconda.org/conda-forge/hera-workflows)
+[![Versions](https://img.shields.io/pypi/pyversions/hera-workflows.svg)](https://github.com/argoproj-labs/hera-workflows)
+
 [![Downloads](https://pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
 [![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
-[![Versions](https://img.shields.io/pypi/pyversions/hera-workflows.svg)](https://github.com/argoproj-labs/hera-workflows)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo
 Workflows more accessible by abstracting away some setup that is typically necessary for constructing workflows.
@@ -82,18 +88,13 @@ There are multiple ways to install Hera:
 
 # Contributing
 
-If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `pipenv`:
+If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry`:
 
 ```shell
-pipenv shell
-pipenv sync --dev --pre
+poetry install
 ```
 
-In you activated `pipenv` shell, you can utilize the tasks found in `Makefile`, e.g.:
-
-```shell
-make test
-```
+In you activated `poetry shell`, you can utilize the tasks found in `tox.ini`, e.g.:
 
 To run tests on all supported python versions with coverage run [tox](https://tox.wiki/en/latest/):
 
@@ -110,10 +111,10 @@ tox -a
 To run selected tox envs, e.g. for a specific python version with coverage run:
 
 ```shell
-tox -e python3.7,coverage
+tox -e py37,coverage
 ```
 
-As `coverage` *dependes* on `python3.7`, it will run *after* `python3.7`
+As `coverage` *depends* on `py37`, it will run *after* `py37`
 
 See project `tox.ini` for more details
 

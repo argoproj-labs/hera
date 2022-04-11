@@ -5,6 +5,7 @@ import pytest
 from hera.cron_workflow import CronWorkflow
 from hera.resources import Resources
 from hera.task import Task
+from hera.ttl_strategy import TTLStrategy
 from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
 
 
@@ -207,3 +208,20 @@ def test_cwf_adds_image_pull_secrets(ws):
     secrets = [{'name': secret.name} for secret in w.spec.get('image_pull_secrets')]
     assert secrets[0] == {'name': 'secret0'}
     assert secrets[1] == {'name': 'secret1'}
+
+
+def test_wf_adds_ttl_strategy(ws):
+    w = CronWorkflow(
+        'w',
+        schedule="* * * * *",
+        service=ws,
+        ttl_strategy=TTLStrategy(seconds_after_completion=5, seconds_after_failure=10, seconds_after_success=15),
+    )
+
+    expected_ttl_strategy = {
+        'seconds_after_completion': 5,
+        'seconds_after_failure': 10,
+        'seconds_after_success': 15,
+    }
+
+    assert w.spec.ttl_strategy._data_store == expected_ttl_strategy

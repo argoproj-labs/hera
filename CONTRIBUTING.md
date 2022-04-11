@@ -5,14 +5,14 @@ appreciates your willingness to dedicate some time to Hera for the benefit of ev
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
 
-1. Use `make format` to format the repository code. `make format` maps to a usage of
+1. Use `tox -e format` to format the repository code. `tox -e format` maps to a usage of
    [black](https://github.com/psf/black), and the repository adheres to whatever `black` uses as its strict pep8 format.
    No questions asked
-1. Use `make verify` to lint, run tests, and typecheck on the project
+1. Use `tox` to lint, run tests, and typecheck on the project
 1. Add unit tests for any new code you write
 1. Add an example, or extend an existing example, with any new features you may add
 1. Increment the version of Hera. Hera adheres to [semantic versioning](https://semver.org/). This increment can be
-   performed in the [VERSION](https://github.com/argoproj-labs/hera-workflows/blob/main/VERSION) file. A
+   performed in the [pyproject.toml](https://github.com/argoproj-labs/hera-workflows/blob/main/pyproject.toml) file. A
    [CHANGELOG](https://github.com/argoproj-labs/hera-workflows/blob/main/CHANGELOG.md) entry is expected along with
    version increases!
 

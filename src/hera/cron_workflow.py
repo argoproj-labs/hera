@@ -20,6 +20,7 @@ from argo_workflows.models import (
 from hera.cron_workflow_service import CronWorkflowService
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.ttl_strategy import TTLStrategy
 from hera.volumes import Volume
 
 
@@ -75,6 +76,7 @@ class CronWorkflow:
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
+        ttl_strategy: Optional[TTLStrategy] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -112,6 +114,9 @@ class CronWorkflow:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
                 templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
             )
+
+        if ttl_strategy:
+            setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)

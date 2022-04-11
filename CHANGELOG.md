@@ -28,6 +28,23 @@ The general format is:
 - C from D
 
 ```
+# 2.9.0 - DATE (04/08/2022)
+
+### Added
+
+- Add support for TTLStrategy([link](https://argoproj.github.io/argo-workflows/fields/#ttlstrategy))
+
+# 2.8.1 - DATE (04/08/2022)
+
+### Fixed
+
+- fix wrong dependencies when calling on_success(), on_failure(), on_error() functions of Sask
+
+# 2.8.0 - DATE (04/07/2022)
+
+### Added
+
+- add support for exposing field reference via env vars in Tasks
 
 # 2.7.0 - DATE (04/06/2022)
 
