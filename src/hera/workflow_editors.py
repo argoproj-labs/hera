@@ -24,16 +24,18 @@ def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], *ts: Tas
         return
 
     for t in ts:
-        if t.template_ref is None:
+        if t.template_ref is None and t.argo_template not in w.spec.templates:
             w.spec.templates.append(t.argo_template)
 
         if t.resources.volumes:
             for vol in t.resources.volumes:
                 if isinstance(vol, Volume):
                     # dynamically provisioned volumes need associated claims on the workflow spec
-                    w.spec.volume_claim_templates.append(vol.get_claim_spec())
+                    if vol.get_claim_spec() not in w.spec.volume_claim_templates:
+                        w.spec.volume_claim_templates.append(vol.get_claim_spec())
                 else:
-                    w.spec.volumes.append(vol.get_volume())
+                    if vol.get_volume() not in w.spec.volumes:
+                        w.spec.volumes.append(vol.get_volume())
 
         w.dag_template.tasks.append(t.argo_task)
 
