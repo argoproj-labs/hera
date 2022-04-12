@@ -28,11 +28,20 @@ class TaskTemplate(Task):
         task.name = name.replace("_", "-")  # RFC1123
         task.argo_template = self.argo_template
 
-        task.variables = [
-            VariableAsEnv(name=key, value=json.dumps(value))
-            for param in func_params
-            for key, value in param.items()
-        ]
+        func_params = func_params or []
+        if len(func_params) > 1:
+            uniq_keys = {key for param in func_params for key in param.keys()}
+            task.variables = [
+                VariableAsEnv(name=key, value=f"{{{{item.{key}}}}}")
+                for key in uniq_keys
+            ]
+        else:
+            task.variables = [
+                VariableAsEnv(name=key, value=json.dumps(value))
+                for param in func_params[:1]
+                for key, value in param.items()
+            ]
+
         task.parameters = task.get_parameters()
         task.argo_input_artifacts = task.get_argo_input_artifacts()
 
