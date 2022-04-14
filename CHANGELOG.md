@@ -28,6 +28,7 @@ The general format is:
 - C from D
 
 ```
+
 # 3.0.0 - DATE (04/10/2022)
 
 ### Added
@@ -37,6 +38,12 @@ The general format is:
 ### Removed
 
 - Removed name suffix from CronWorkflow
+
+# 2.9.1 - DATE (04/11/2022)
+
+### Fixed
+
+- prevent json.loads error when task has input from other tasks(with the json dumped string contains single quote)
 
 # 2.9.0 - DATE (04/08/2022)
 

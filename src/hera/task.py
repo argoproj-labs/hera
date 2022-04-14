@@ -644,7 +644,7 @@ class Task:
         """
         extract = "import json\n"
         for param in self.parameters:
-            extract += f"""{param.name} = json.loads('{{{{inputs.parameters.{param.name}}}}}')\n"""
+            extract += f"""{param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
         return textwrap.dedent(extract)
 
     def get_script(self) -> str:
