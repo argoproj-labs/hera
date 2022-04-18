@@ -16,7 +16,7 @@ def use_secret():
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
-w = Workflow('volume-provision', ws)
+w = Workflow('secret-volume', ws)
 d = Task(
     'use_secret',
     use_secret,

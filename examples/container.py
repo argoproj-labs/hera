@@ -5,7 +5,7 @@ from hera.workflow_service import WorkflowService
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('fv-testing', ws)
+w = Workflow('container', ws)
 
 t = Task('cowsay', image='docker/whalesay', command=['cowsay', 'foo'])
 w.add_task(t)

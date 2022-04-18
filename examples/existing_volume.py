@@ -16,7 +16,7 @@ def download(path: str):
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('download-to-volume', ws)
+w = Workflow('existing-volume', ws)
 d = Task(
     'download',
     download,

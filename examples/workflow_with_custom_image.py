@@ -12,7 +12,7 @@ w = Workflow('pipeline-image-testing', ws, namespace="argo")
 # Image_pull_policy is set to Never because on localhost when you test
 # you don't need to pull the image
 t = Task(
-    'pipeline-image-test',
+    'workflow-with-custom-image',
     image='my-custom-image-name:latest',
     image_pull_policy=ImagePullPolicy.Never,
     command=["python", "-m", "src.pipeline_example"],
