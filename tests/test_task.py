@@ -108,7 +108,10 @@ def test_script_getter_returns_expected_string(op, typed_op):
 
     t = Task('t', typed_op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+    assert (
+        script
+        == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+    )
 
 
 def test_script_getter_parses_multi_line_function(long_op):

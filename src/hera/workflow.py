@@ -1,6 +1,6 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 import warnings
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
@@ -203,20 +203,14 @@ class Workflow:
         free_tasks = set(task_name_to_task.keys()).difference(dependencies)
         t.argo_task.dependencies = list(free_tasks)
 
-    def submit(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
-        """Submits the workflow.
-
-        Notes
-        -----
-        This method is deprecated in favor of `workflow.create(...)`.
-        """
-        warnings.warn("`submit` is deprecated in favor of `create`", DeprecationWarning, stacklevel=2)
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.submit(self.workflow, namespace)
-
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the workflow"""
         if namespace is None:
             namespace = self.namespace
-        return self.service.submit(self.workflow, namespace)
+        return self.service.create(self.workflow, namespace)
+
+    def delete(self, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+        """Deletes the workflow"""
+        if namespace is None:
+            namespace = self.name
+        return self.service.delete(self.name)
