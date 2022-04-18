@@ -18,10 +18,6 @@ from hera.ttl_strategy import TTLStrategy
 from hera.volumes import Volume
 from hera.workflow_service import WorkflowService
 
-# by default, `DeprecationWarning`s are silenced, this removes the warning from the filter so it
-# can be issued to users
-warnings.simplefilter('always', DeprecationWarning)
-
 
 class Workflow:
     """A workflow representation.
