@@ -33,11 +33,14 @@ The general format is:
 
 ### Added
 
-- Add update method to CronWorkflowService
+- update method to CronWorkflowService
+- ability to track workflow status
+- shared implementation of `add_head`, `add_tail`, `add_task`, `add_tasks`
+- task workflow template reference
 
 ### Removed
 
-- Removed name suffix from CronWorkflow
+- UUID suffixes
 
 # 2.9.1 - DATE (04/11/2022)
 
