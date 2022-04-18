@@ -16,7 +16,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
-from hera._workflow_editors import add_task, add_tasks, add_tail, add_head
+from hera._workflow_editors import add_head, add_tail, add_task, add_tasks
 from hera.cron_workflow_service import CronWorkflowService
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task

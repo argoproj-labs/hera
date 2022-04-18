@@ -211,7 +211,7 @@ def test_wf_submit_with_default(ws):
     w = Workflow('w', service=ws, labels={'foo': 'bar'}, namespace="test")
     w.service = Mock()
     w.create()
-    w.service.submit.assert_called_with(w.workflow, w.namespace)
+    w.service.create.assert_called_with(w.workflow, w.namespace)
 
 
 def test_wf_adds_image_pull_secrets(ws):

@@ -44,9 +44,9 @@ from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
+from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import VariableAsEnv
-from hera.template_ref import TemplateRef
 
 
 class _Item(ModelSimple):

@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1TemplateRef
+from pydantic import BaseModel
 
 
 class TemplateRef(BaseModel):
@@ -13,6 +12,7 @@ class TemplateRef(BaseModel):
     template: str
         The name of the independent task template to reference in the workflow template.
     """
+
     name: str
     template: str
 
