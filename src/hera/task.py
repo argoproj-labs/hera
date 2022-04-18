@@ -916,7 +916,7 @@ class Task:
         )
 
         if self.template_ref:
-            setattr(task, 'template_ref', self.template_ref.get_argo_spec())
+            setattr(task, 'template_ref', self.template_ref.argo_spec)
         else:
             setattr(task, 'template', self.argo_template.name)
 

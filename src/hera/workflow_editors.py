@@ -1,17 +1,24 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hera.workflow import Workflow
+    from hera.cron_workflow import CronWorkflow
+    from hera.workflow_template import WorkflowTemplate
+
 from typing import Union
 
 from hera.task import Task
 from hera.volumes import Volume
 
 
-def add_task(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task) -> None:
+def add_task(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task) -> None:
     """Adds a single task to the workflow"""
     add_tasks(w, t)
 
 
-def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], *ts: Task) -> None:
+def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], *ts: Task) -> None:
     """Adds multiple tasks to the workflow"""
     if not all(ts):
         return
@@ -30,9 +37,7 @@ def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow
         w.dag_template.tasks.append(t.argo_task)
 
 
-def add_head(
-    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task, append: bool = True
-) -> None:
+def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True) -> None:
     """Adds a task at the head of the workflow so the workflow start with the given task.
 
     This sets the given task as a dependency of the starting tasks of the workflow.
@@ -55,9 +60,7 @@ def add_head(
                 setattr(template_task, 'dependencies', [t.name])
 
 
-def add_tail(
-    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task, append: bool = True
-) -> None:
+def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True) -> None:
     """Adds a task as the tail of the workflow so the workflow ends with the given task.
 
     This sets the given task's dependencies to all the tasks that are not listed as dependencies in the workflow.

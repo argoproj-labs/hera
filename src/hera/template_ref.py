@@ -16,5 +16,6 @@ class TemplateRef(BaseModel):
     name: str
     template: str
 
-    def get_argo_spec(self) -> IoArgoprojWorkflowV1alpha1TemplateRef:
+    @property
+    def argo_spec(self) -> IoArgoprojWorkflowV1alpha1TemplateRef:
         return IoArgoprojWorkflowV1alpha1TemplateRef(name=self.name, template=self.template)
