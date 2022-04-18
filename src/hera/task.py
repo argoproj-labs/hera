@@ -46,6 +46,7 @@ from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.toleration import Toleration
 from hera.variable import VariableAsEnv
+from hera.template_ref import TemplateRef
 
 
 class _Item(ModelSimple):
@@ -221,6 +222,9 @@ class Task:
         Whether to continue task chain execution when this task fails.
     continue_on_error: bool = False
         Whether to continue task chain execution this task errors.
+    template_ref: Optional[str] = None
+        A template name reference to use with this task. Note that this is prioritized over a new template creation
+        for each task definition.
 
     Notes
     ------
@@ -255,6 +259,7 @@ class Task:
         security_context: Optional[TaskSecurityContext] = None,
         continue_on_fail: bool = False,
         continue_on_error: bool = False,
+        template_ref: Optional[TemplateRef] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -283,6 +288,7 @@ class Task:
         self.security_context = security_context
         self.continue_on_fail = continue_on_fail
         self.continue_on_error = continue_on_error
+        self.template_ref = template_ref
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -902,30 +908,21 @@ class Task:
             The graph task representation.
         """
         continue_on = IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error, failed=self.continue_on_fail)
-        if self.input_from:
-            return IoArgoprojWorkflowV1alpha1DAGTask(
-                name=self.name,
-                template=self.argo_template.name,
-                arguments=self.arguments,
-                with_param=f'{{{{tasks.{self.input_from.name}.outputs.result}}}}',
-                continue_on=continue_on,
-                _check_type=False,
-            )
-        elif self.func_params and len(self.func_params) > 1:
-            items = self.get_parallel_items()
-            return IoArgoprojWorkflowV1alpha1DAGTask(
-                name=self.name,
-                template=self.argo_template.name,
-                dependencies=[],
-                arguments=self.arguments,
-                with_items=items,
-                continue_on=continue_on,
-                _check_type=False,
-            )
-        return IoArgoprojWorkflowV1alpha1DAGTask(
+        task = IoArgoprojWorkflowV1alpha1DAGTask(
             name=self.name,
-            template=self.argo_template.name,
-            arguments=self.arguments,
             continue_on=continue_on,
+            arguments=self.arguments,
             _check_type=False,
         )
+
+        if self.template_ref:
+            setattr(task, 'template_ref', self.template_ref.get_argo_spec())
+        else:
+            setattr(task, 'template', self.argo_template.name)
+
+        if self.input_from:
+            setattr(task, 'with_param', f'{{{{tasks.{self.input_from.name}.outputs.result}}}}')
+        elif self.func_params and len(self.func_params) > 1:
+            items = self.get_parallel_items()
+            setattr(task, 'with_items', items)
+        return task
