@@ -2,7 +2,6 @@
 from datetime import datetime
 from datetime import timezone as tz
 from typing import Dict, List, Optional, Tuple
-from uuid import uuid4
 
 import pytz
 from argo_workflows.models import (
@@ -81,7 +80,7 @@ class CronWorkflow:
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
 
-        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'
+        self.name = f'{name.replace("_", "-")}'
         self.schedule = schedule
         self.timezone = timezone
         self.service = service
