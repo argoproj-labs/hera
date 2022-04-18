@@ -24,7 +24,7 @@ def tails():
 
 # TODO: replace the domain and token with your own
 wts = WorkflowTemplateService(host='', verify_ssl=False, token="", namespace="argo")
-w = WorkflowTemplate("coin-flip-template", wts, namespace="argo")
+w = WorkflowTemplate("workflow-template", wts, namespace="argo")
 r = Task("r", random_code)
 h = Task("h", heads)
 t = Task("t", tails)

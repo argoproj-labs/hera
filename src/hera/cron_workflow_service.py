@@ -5,12 +5,14 @@ from argo_workflows.apis import CronWorkflowServiceApi
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1CronWorkflow,
+    IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1WorkflowResumeRequest,
     IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest,
 )
 
 from hera.client import Client
 from hera.config import Config
+from hera.workflow_status import WorkflowStatus
 
 
 class CronWorkflowService:
@@ -69,6 +71,33 @@ class CronWorkflowService:
         return self.service.create_cron_workflow(
             namespace,
             IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
+            _check_return_type=False,
+        )
+
+    def update(
+        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = 'default'
+    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Updates given cron workflow in the argo server.
+
+        Parameters
+        ----------
+        cron_workflow: V1alpha1CronWorkflow
+            The cron workflow to update.
+        namespace: str = 'default'
+            The K8S namespace of the Argo server to update the cron workflow in.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1CronWorkflow
+            The updated cron workflow.
+
+        Raises
+        ------
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        """
+        return self.service.update_cron_workflow(
+            namespace,
+            IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
         )
 
@@ -158,3 +187,36 @@ class CronWorkflowService:
             The cron workflow link.
         """
         return f'{self._host}/cron-workflows/{namespace}/{name}'
+
+    def get_workflow(self, name: str, namespace: str = 'default') -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Fetches a workflow by the specified name and namespace combination.
+
+        Parameters
+        ----------
+        name: str
+            Name of the workflow.
+        namespace: str = 'default'
+            The namespace the workflow is running in.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1Workflow
+        """
+        return self.service.get_cron_workflow(namespace, name, _check_return_type=False)
+
+    def get_workflow_status(self, name: str, namespace: str = 'default') -> WorkflowStatus:
+        """Returns the workflow status of the workflow identified by the specified name.
+
+        Parameters
+        ----------
+        name: str
+            Name of the workflow to fetch the status of.
+        namespace: str = 'default'
+            Namespace where the workflow is running/ran.
+
+        Returns
+        -------
+        WorkflowStatus
+        """
+        argo_status = self.get_workflow(name, namespace=namespace).status.get('phase')
+        return WorkflowStatus.from_argo_status(argo_status)

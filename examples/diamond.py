@@ -25,4 +25,4 @@ b.next(d)  # b >> d
 c.next(d)  # c >> d
 
 w.add_tasks(a, b, c, d)
-w.submit()
+w.create()

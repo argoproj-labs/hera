@@ -22,7 +22,7 @@ def consumer():
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('artifact-passing', ws)
+w = Workflow('artifact', ws)
 w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
 c_t = Task(
     'consumer',
@@ -32,4 +32,4 @@ c_t = Task(
 
 w_t >> c_t
 w.add_tasks(w_t, c_t)
-w.submit()
+w.create()

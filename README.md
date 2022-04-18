@@ -201,7 +201,7 @@ a.next(b).next(d)  # a >> b >> d
 a.next(c).next(d)  # a >> c >> d
 
 w.add_tasks(a, b, c, d)
-w.submit()
+w.create()
 ```
 
 </p></td>

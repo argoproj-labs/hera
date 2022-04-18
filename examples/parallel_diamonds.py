@@ -10,7 +10,7 @@ def say(message: str):
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
-w = Workflow('paralell-diamonds', ws)
+w = Workflow('parallel-diamonds', ws)
 a = Task(
     'A', say, [{'message': 'This is task A.1!'}, {'message': 'This is task A.2!'}, {'message': 'This is task A.3!'}]
 )
@@ -30,4 +30,4 @@ b >> d  # b.next(d)
 c >> d  # c.next(d)
 
 w.add_tasks(a, b, c, d)
-w.submit()
+w.create()

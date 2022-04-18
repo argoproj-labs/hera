@@ -25,7 +25,7 @@ def do():
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
-w = Workflow('volume-provision', ws)
+w = Workflow('volume', ws)
 d = Task(
     'do',
     do,
@@ -33,4 +33,4 @@ d = Task(
 )
 
 w.add_task(d)
-w.submit()
+w.create()

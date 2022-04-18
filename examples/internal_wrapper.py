@@ -79,4 +79,4 @@ def example():
     w = MyWorkflow('my-workflow')
     t = MyTask('t', lambda: print(42))
     w.add_task(t)
-    w.submit()
+    w.create()
