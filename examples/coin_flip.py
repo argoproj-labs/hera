@@ -31,4 +31,4 @@ h.when(r, Operator.equals, "heads")
 t.when(r, Operator.equals, "tails")
 
 w.add_tasks(r, h, t)
-w.submit()
+w.create()

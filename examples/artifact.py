@@ -32,4 +32,4 @@ c_t = Task(
 
 w_t >> c_t
 w.add_tasks(w_t, c_t)
-w.submit()
+w.create()

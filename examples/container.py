@@ -9,4 +9,4 @@ w = Workflow('fv-testing', ws)
 
 t = Task('cowsay', image='docker/whalesay', command=['cowsay', 'foo'])
 w.add_task(t)
-w.submit()
+w.create()

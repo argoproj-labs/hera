@@ -31,4 +31,4 @@ consume_task = Task('consume', consume, input_from=InputFrom(name='generate', pa
 generate_task.next(consume_task)
 
 w.add_tasks(generate_task, consume_task)
-w.submit()
+w.create()

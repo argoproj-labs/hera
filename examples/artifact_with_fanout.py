@@ -39,4 +39,4 @@ f_t = Task(
 c_t = Task('consumer', consumer, input_from=InputFrom(name='fanout', parameters=['i']))
 w_t >> f_t >> c_t
 w.add_tasks(w_t, f_t, c_t)
-w.submit()
+w.create()

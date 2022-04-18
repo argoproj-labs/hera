@@ -24,4 +24,4 @@ d = Task(
 )
 
 w.add_task(d)
-w.submit()
+w.create()

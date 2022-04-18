@@ -31,4 +31,4 @@ t4 = Task('t4', task_4)
 t1 >> t2 >> t3 >> t4  # t1.next(t2).next(t3).next(t4)
 
 w.add_tasks(t1, t2, t3, t4)
-w.submit()
+w.create()
