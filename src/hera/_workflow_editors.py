@@ -30,7 +30,9 @@ def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow
         w.dag_template.tasks.append(t.argo_task)
 
 
-def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task, append: bool = True) -> None:
+def add_head(
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task, append: bool = True
+) -> None:
     """Adds a task at the head of the workflow so the workflow start with the given task.
 
     This sets the given task as a dependency of the starting tasks of the workflow.
@@ -53,7 +55,9 @@ def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'
                 setattr(template_task, 'dependencies', [t.name])
 
 
-def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task, append: bool = True) -> None:
+def add_tail(
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow', 'Workflow'], t: Task, append: bool = True
+) -> None:
     """Adds a task as the tail of the workflow so the workflow ends with the given task.
 
     This sets the given task's dependencies to all the tasks that are not listed as dependencies in the workflow.
