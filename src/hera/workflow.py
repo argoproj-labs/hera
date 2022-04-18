@@ -1,7 +1,6 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 import warnings
 from typing import Dict, List, Optional
-from uuid import uuid4
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
@@ -74,7 +73,7 @@ class Workflow:
         workflow_template_ref: Optional[str] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
     ):
-        self.name = f'{name.replace("_", "-")}-{str(uuid4()).split("-")[0]}'  # RFC1123
+        self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
         self.service = service
         self.parallelism = parallelism
