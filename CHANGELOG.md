@@ -28,6 +28,17 @@ The general format is:
 - C from D
 
 ```
+
+# 3.0.0 - DATE (04/10/2022)
+
+### Added
+
+- Add update method to CronWorkflowService
+
+### Removed
+
+- Removed name suffix from CronWorkflow
+
 # 2.9.1 - DATE (04/11/2022)
 
 ### Fixed
