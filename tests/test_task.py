@@ -14,6 +14,7 @@ from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.task import Task
+from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.variable import VariableAsEnv
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
@@ -554,3 +555,10 @@ def test_task_has_expected_retry_limit():
     t = Task('t', retry=Retry(limit=5))
     tt = t.get_task_template()
     assert tt.retry_strategy.limit == '5'
+
+
+def test_task_uses_expected_template_ref():
+    t = Task('t', template_ref=TemplateRef(name='workflow-template', template='template')).argo_task
+    assert hasattr(t, 'template_ref')
+    assert t.template_ref.name == 'workflow-template'
+    assert t.template_ref.template == 'template'

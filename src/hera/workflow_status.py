@@ -20,4 +20,8 @@ class WorkflowStatus(str, Enum):
             'Error': WorkflowStatus.Error,
             'Terminated': WorkflowStatus.Terminated,
         }
-        return switch.get(s)
+
+        ss = switch.get(s)
+        if not ss:
+            raise KeyError(f"Unrecognized status {s}. " f"Available Argo statuses are: {list(switch.keys())}")
+        return ss

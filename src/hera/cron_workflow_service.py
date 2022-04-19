@@ -12,7 +12,6 @@ from argo_workflows.models import (
 
 from hera.client import Client
 from hera.config import Config
-from hera.workflow_status import WorkflowStatus
 
 
 class CronWorkflowService:
@@ -203,20 +202,3 @@ class CronWorkflowService:
         IoArgoprojWorkflowV1alpha1Workflow
         """
         return self.service.get_cron_workflow(namespace, name, _check_return_type=False)
-
-    def get_workflow_status(self, name: str, namespace: str = 'default') -> WorkflowStatus:
-        """Returns the workflow status of the workflow identified by the specified name.
-
-        Parameters
-        ----------
-        name: str
-            Name of the workflow to fetch the status of.
-        namespace: str = 'default'
-            Namespace where the workflow is running/ran.
-
-        Returns
-        -------
-        WorkflowStatus
-        """
-        argo_status = self.get_workflow(name, namespace=namespace).status.get('phase')
-        return WorkflowStatus.from_argo_status(argo_status)
