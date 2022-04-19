@@ -561,4 +561,4 @@ def test_task_uses_expected_template_ref():
     t = Task('t', template_ref=TemplateRef(name='workflow-template', template='template')).argo_task
     assert hasattr(t, 'template_ref')
     assert t.template_ref.name == 'workflow-template'
-    assert t.template_ref.template == 'my-template'
+    assert t.template_ref.template == 'template'
