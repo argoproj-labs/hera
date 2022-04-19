@@ -5,7 +5,6 @@ from argo_workflows.apis import CronWorkflowServiceApi
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1CronWorkflow,
-    IoArgoprojWorkflowV1alpha1CronWorkflowStatus,
     IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1WorkflowResumeRequest,
     IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest,
@@ -13,7 +12,6 @@ from argo_workflows.models import (
 
 from hera.client import Client
 from hera.config import Config
-from hera.workflow_status import WorkflowStatus
 
 
 class CronWorkflowService:
