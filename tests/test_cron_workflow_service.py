@@ -68,10 +68,11 @@ def test_ws_calls_update_as_expected():
             schedule='* * * * *', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
         ),
     )
-    ws.update(w)
+    ws.update(w, 'my-wf')
 
     mock_service.update_cron_workflow.assert_called_with(
         'default',
+        'my-wf',
         IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=w, _check_type=False),
         _check_return_type=False,
     )

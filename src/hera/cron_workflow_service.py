@@ -74,7 +74,10 @@ class CronWorkflowService:
         )
 
     def update(
-        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = 'default'
+        self,
+        cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
+        name: str,
+        namespace: str = 'default',
     ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates given cron workflow in the argo server.
 
@@ -96,6 +99,7 @@ class CronWorkflowService:
         """
         return self.service.update_cron_workflow(
             namespace,
+            name,
             IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
         )

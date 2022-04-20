@@ -165,11 +165,15 @@ class CronWorkflow:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
 
-    def update(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+    def update(
+        self, name: Optional[str] = None, namespace: Optional[str] = None
+    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates the cron workflow in the server"""
         if namespace is None:
             namespace = self.namespace
-        return self.service.update(self.workflow, namespace)
+        if name is None:
+            name = self.name
+        return self.service.update(self.workflow, name, namespace)
 
     def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""
