@@ -196,6 +196,13 @@ def test_cwf_update_with_defaults(ws):
     w.service.update.assert_called_with(w.workflow, w.name, w.namespace)
 
 
+def test_cwf_update_with_specified_name_and_namespace(ws):
+    w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
+    w.service = Mock()
+    w.update(name='cwf', namespace='cwf')
+    w.service.update.assert_called_with(w.workflow, 'cwf', 'cwf')
+
+
 def test_cwf_resume_with_defaults(ws):
     w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
     w.service = Mock()
