@@ -874,6 +874,8 @@ class Task:
                 )
             if self.retry.limit is not None:
                 setattr(strategy, 'limit', str(self.retry.limit))
+            if self.retry.retry_policy is not None:
+                setattr(strategy, 'retry_policy', str(self.retry.retry_policy.value))
 
             return strategy
         return None

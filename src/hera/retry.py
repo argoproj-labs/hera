@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, root_validator
 
+from hera.retry_policy import RetryPolicy
+
 
 class Retry(BaseModel):
     """Retry holds the duration values for retrying tasks.
@@ -17,8 +19,9 @@ class Retry(BaseModel):
     """
 
     duration: Optional[int]
-    max_duration: Optional[int]
     limit: Optional[int]
+    max_duration: Optional[int]
+    retry_policy: Optional[RetryPolicy]
 
     @root_validator()
     def check_durations(cls, values):
