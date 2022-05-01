@@ -16,6 +16,10 @@ class Retry(BaseModel):
         Max duration (seconds) is the maximum amount of time allowed for the backoff strategy. This value is
         expected to be higher than the specified duration. Not specifying this value leads to theoretically infinite
         retries.
+    limit: int
+        The number of retries to attempt
+    retry_policy: RetryPolicy
+        The strategy for performing retries, for example OnError vs OnFailure vs Always
     """
 
     duration: Optional[int]
