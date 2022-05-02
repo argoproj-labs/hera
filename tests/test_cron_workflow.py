@@ -1,6 +1,16 @@
 from unittest.mock import Mock
 
 import pytest
+from argo_workflows.model.io_argoproj_workflow_v1alpha1_cron_workflow import (
+    IoArgoprojWorkflowV1alpha1CronWorkflow,
+)
+from argo_workflows.model.io_argoproj_workflow_v1alpha1_cron_workflow_spec import (
+    IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
+)
+from argo_workflows.model.io_argoproj_workflow_v1alpha1_workflow_spec import (
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
+)
+from argo_workflows.model.object_meta import ObjectMeta
 
 from hera.cron_workflow import CronWorkflow
 from hera.resources import Resources
@@ -191,16 +201,46 @@ def test_cwf_create_with_defaults(ws):
 
 def test_cwf_update_with_defaults(ws):
     w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
-    w.service = Mock()
+    w.service.get_workflow = Mock(  # type: ignore
+        return_value=IoArgoprojWorkflowV1alpha1CronWorkflow(
+            metadata=ObjectMeta(
+                resourceVersion='rv',
+                uid='uid',
+            ),
+            spec=IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
+                schedule='', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
+            ),
+        )
+    )
+    w.service.update = Mock()  # type: ignore
     w.update()
+
+    w.service.get_workflow.assert_called_with(w.name, w.namespace)
     w.service.update.assert_called_with(w.workflow, w.name, w.namespace)
+    assert w.workflow.metadata['resourceVersion'] == 'rv'
+    assert w.workflow.metadata['uid'] == 'uid'
 
 
 def test_cwf_update_with_specified_name_and_namespace(ws):
     w = CronWorkflow('w', schedule="* * * * *", service=ws, labels={'foo': 'bar'}, namespace="test")
-    w.service = Mock()
+    w.service.get_workflow = Mock(  # type: ignore
+        return_value=IoArgoprojWorkflowV1alpha1CronWorkflow(
+            metadata=ObjectMeta(
+                resourceVersion='rv',
+                uid='uid',
+            ),
+            spec=IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
+                schedule='', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
+            ),
+        )
+    )
+    w.service.update = Mock()  # type: ignore
     w.update(name='cwf', namespace='cwf')
+
+    w.service.get_workflow.assert_called_with('cwf', 'cwf')
     w.service.update.assert_called_with(w.workflow, 'cwf', 'cwf')
+    assert w.workflow.metadata['resourceVersion'] == 'rv'
+    assert w.workflow.metadata['uid'] == 'uid'
 
 
 def test_cwf_resume_with_defaults(ws):

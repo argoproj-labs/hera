@@ -173,6 +173,12 @@ class CronWorkflow:
             namespace = self.namespace
         if name is None:
             name = self.name
+
+        # When update cron_workflow, metadata.resourceVersion and metadata.uid should be same as the previous value.
+        old_workflow = self.service.get_workflow(name, namespace)
+        self.workflow.metadata['resourceVersion'] = old_workflow.metadata['resourceVersion']
+        self.workflow.metadata['uid'] = old_workflow.metadata['uid']
+
         return self.service.update(self.workflow, name, namespace)
 
     def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
