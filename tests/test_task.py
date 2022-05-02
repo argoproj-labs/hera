@@ -12,6 +12,7 @@ from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
+from hera.retry_policy import RetryPolicy
 from hera.security_context import TaskSecurityContext
 from hera.task import Task
 from hera.template_ref import TemplateRef
@@ -555,6 +556,12 @@ def test_task_has_expected_retry_limit():
     t = Task('t', retry=Retry(limit=5))
     tt = t.get_task_template()
     assert tt.retry_strategy.limit == '5'
+
+
+def test_task_has_expected_retry_policy():
+    t = Task('t', retry=Retry(retry_policy=RetryPolicy.Always))
+    tt = t.get_task_template()
+    assert tt.retry_strategy.retry_policy == 'Always'
 
 
 def test_task_uses_expected_template_ref():
