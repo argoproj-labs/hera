@@ -222,7 +222,7 @@ class Task:
         Whether to continue task chain execution when this task fails.
     continue_on_error: bool = False
         Whether to continue task chain execution this task errors.
-    template_ref: Optional[str] = None
+    template_ref: Optional[TemplateRef] = None
         A template name reference to use with this task. Note that this is prioritized over a new template creation
         for each task definition.
 
