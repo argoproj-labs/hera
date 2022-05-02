@@ -29,6 +29,17 @@ The general format is:
 
 ```
 
+# 3.1.0 - DATE (28/04/2022)
+
+### Added
+
+- retry policy support
+
+### Changed
+
+- implementation of the cron workflow update command so that it includes the version and the assigned cron workflow UUID
+  during the update operation
+
 # 3.0.0 - DATE (04/10/2022)
 
 ### Added

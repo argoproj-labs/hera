@@ -222,7 +222,7 @@ class Task:
         Whether to continue task chain execution when this task fails.
     continue_on_error: bool = False
         Whether to continue task chain execution this task errors.
-    template_ref: Optional[str] = None
+    template_ref: Optional[TemplateRef] = None
         A template name reference to use with this task. Note that this is prioritized over a new template creation
         for each task definition.
 
@@ -874,6 +874,8 @@ class Task:
                 )
             if self.retry.limit is not None:
                 setattr(strategy, 'limit', str(self.retry.limit))
+            if self.retry.retry_policy is not None:
+                setattr(strategy, 'retry_policy', str(self.retry.retry_policy.value))
 
             return strategy
         return None

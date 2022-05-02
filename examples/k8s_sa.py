@@ -46,8 +46,8 @@ namespace = "argo"
 token = get_sa_token("argo-server", namespace=namespace)
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token', namespace=namespace)
+ws = WorkflowService(host='https://my-argo-server.com', token=token, namespace=namespace)
 w = Workflow("k8s-sa", ws)
 t = Task("t", hello)
 w.add_task(t)
-ws.submit(w.workflow, namespace=namespace)
+w.create(namespace=namespace)

@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, root_validator
 
+from hera.retry_policy import RetryPolicy
+
 
 class Retry(BaseModel):
     """Retry holds the duration values for retrying tasks.
@@ -14,11 +16,16 @@ class Retry(BaseModel):
         Max duration (seconds) is the maximum amount of time allowed for the backoff strategy. This value is
         expected to be higher than the specified duration. Not specifying this value leads to theoretically infinite
         retries.
+    limit: int
+        The number of retries to attempt
+    retry_policy: RetryPolicy
+        The strategy for performing retries, for example OnError vs OnFailure vs Always
     """
 
     duration: Optional[int]
-    max_duration: Optional[int]
     limit: Optional[int]
+    max_duration: Optional[int]
+    retry_policy: Optional[RetryPolicy]
 
     @root_validator()
     def check_durations(cls, values):

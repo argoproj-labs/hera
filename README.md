@@ -146,11 +146,11 @@ def say(message: str):
     print(message)
 
 
-ws = WorkflowService('my-argo-domain.com', 'my-argo-server-token')
+ws = WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')
 w = Workflow('my-workflow', ws)
 t = Task('say', say, [{'message': 'Hello, world!'}])
 w.add_task(t)
-w.submit()
+w.create()
 ```
 
 See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
@@ -190,7 +190,7 @@ def say(message: str):
     print(message)
 
 
-ws = WorkflowService('my-argo-server.com', 'my-auth-token')
+ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
 w = Workflow('diamond', ws)
 a = Task('A', say, [{'message': 'This is task A!'}])
 b = Task('B', say, [{'message': 'This is task B!'}])
