@@ -46,4 +46,4 @@ t = Task('consumer', consumer, variables=[server_ip_variable])
 d >> t
 
 w.add_tasks(d, t)
-w.submit(namespace=namespace)
+w.create(namespace=namespace)

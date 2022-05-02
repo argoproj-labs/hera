@@ -21,7 +21,7 @@ d = Task(
     'download',
     download,
     [{'path': '/whatever/path'}],
-    resources=Resources(existing_volume=ExistingVolume(name='my-vol-claim', mount_path='/vol')),
+    resources=Resources(volumes=[ExistingVolume(name='my-vol-claim', mount_path='/vol')]),
 )
 
 w.add_task(d)
