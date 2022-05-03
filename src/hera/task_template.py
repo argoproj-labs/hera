@@ -12,19 +12,29 @@ from hera.variable import VariableAsEnv
 class TaskTemplate(Task):
     def task(
         self,
-        name: str,
+        name: str = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
         input_artifacts: Optional[List[Artifact]] = None,
     ) -> Task:
         task = Task(
             name=self.name,
-            func_params=func_params,
-            input_from=input_from,
-            input_artifacts=input_artifacts,
+            func=self.func,
+            func_params=func_params or self.func_params,
+            resources=self.resources,
+            template_ref=self.template_ref,
+            retry=self.retry,
+            continue_on_fail=self.continue_on_fail,
+            continue_on_error=self.continue_on_error,
+            input_from=input_from or self.input_from,
+            input_artifacts=input_artifacts or self.input_artifacts,
+            variables=self.variables,
         )
+        name = name or self.name
         task.name = name.replace("_", "-")  # RFC1123
         task.argo_template = self.argo_template
+
+        task.func = self.func
 
         func_params = func_params or []
         if len(func_params) > 1:

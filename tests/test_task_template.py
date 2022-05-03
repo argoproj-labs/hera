@@ -3,6 +3,17 @@ from test_task import task_security_context_kwargs  # noqa
 import inspect
 import test_task
 
+
+def create_task_from_templated_task(*args, **kwargs):
+    args_str = ', '.join(map(str,args))
+    kwargs_str = ','.join('{}={}'.format(k,v) for k,v in kwargs.items())
+    print(f"{args_str=}")
+    print(f"{kwargs_str=}")
+    # task = TaskTemplate(*args, **kwargs).task(name="asd")
+    task = TaskTemplate(*args, **kwargs).task()
+    return task
+
+
 # Get all imports from test_task.py and import here.
 with open("tests/test_task.py", "r") as file:
     imports = [
@@ -24,19 +35,40 @@ for test_name in _test_func_names:
     modified_lines = lines.replace("Task(", "TaskTemplate(")
     exec(modified_lines)
 
+# ############################# #
+# comment out for testing start #
+# ############################# #
 # Modify all tests to use TaskTemplate(...).task
 for test_name in _test_func_names:
     f = test_task.__getattribute__(test_name)
     lines = inspect.getsource(f)
-
-    def_line = next((line for line in lines.splitlines() if line.startswith("def")))
-    def_line = def_line.replace("test_", "test_templated_task_")
-    # print(def_line)
     lines = lines.splitlines()
-    lines[0] = def_line
-    print(lines)
-    # print(lines)
-    break
 
-    # modified_lines = lines.replace("Task(", "TaskTemplate(")
-    # exec(modified_lines)
+    for index, line in enumerate(lines):
+        # either first or second line because of @pytest decorators
+        if line.startswith("def"):
+            def_line = line.replace("test_", "test_templated_")
+            lines[index] = def_line
+            print(def_line)
+
+    lines = "\n".join(lines)
+    lines = lines.replace("Task(", "create_task_from_templated_task(")
+    if test_name == "test_param_getter_parses_single_param_val_on_json_payload":
+        print(lines)
+    try:
+        exec(lines)
+    except Exception:
+        print(lines)
+        break
+    # break
+# ########################### #
+# comment out for testing end #
+# ########################### #
+
+
+# def test_templated_param_getter_parses_single_param_val_on_json_payload(op):
+#     t = create_task_from_templated_task('t', op, [{'a': 1}])
+#     print(t.get_parameters())
+#     param = t.get_parameters()[0]
+#     assert param.name == 'a'
+#     assert param.value == '1'  # from json.dumps
