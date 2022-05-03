@@ -1,4 +1,4 @@
-from hera.task_template import TaskTemplate  # noqa
+from hera.task_template import TaskTemplate
 from test_task import task_security_context_kwargs  # noqa
 import inspect
 import test_task
@@ -29,14 +29,14 @@ for test_name in _test_func_names:
     modified_lines = lines.replace("Task(", "TaskTemplate(")
     exec(modified_lines)
 
-# Modify all tests to use TaskTemplate(...).task
+# Modify all tests to use TaskTemplate(...).task.
 for test_name in _test_func_names:
     f = test_task.__getattribute__(test_name)
     lines = inspect.getsource(f)
     lines = lines.splitlines()
 
     for index, line in enumerate(lines):
-        # either first or second line because of @pytest decorators
+        # Not always first line because of @pytest decorators.
         if line.startswith("def"):
             def_line = line.replace("test_", "test_templated_")
             lines[index] = def_line
