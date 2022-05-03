@@ -45,3 +45,6 @@ for test_name in _test_func_names:
     lines = "\n".join(lines)
     lines = lines.replace("Task(", "create_task_from_templated_task(")
     exec(lines)
+
+
+# TODO: test task with all possible tasks: python func, bash func, container, daemon, else...?
