@@ -1,12 +1,9 @@
-import json
 from typing import Dict, List, Optional, Union
-
 from pydantic import BaseModel
 
 from hera.artifact import Artifact
 from hera.input import InputFrom
 from hera.task import Task
-from hera.variable import VariableAsEnv
 
 
 class TaskTemplate(Task):
@@ -21,35 +18,36 @@ class TaskTemplate(Task):
             name=self.name,
             func=self.func,
             func_params=func_params or self.func_params,
-            resources=self.resources,
-            template_ref=self.template_ref,
-            retry=self.retry,
-            continue_on_fail=self.continue_on_fail,
-            continue_on_error=self.continue_on_error,
             input_from=input_from or self.input_from,
             input_artifacts=input_artifacts or self.input_artifacts,
+            output_artifacts=self.output_artifacts,
+            image=self.image,
+            image_pull_policy=self.image_pull_policy,
+            daemon=self.daemon,
+            command=self.command,
+            args=self.args,
+            # Envs provided by assignigning to Task object.
+            resources=self.resources,
+            working_dir=self.working_dir,
+            retry=self.retry,
+            tolerations=self.tolerations,
+            node_selectors=self.node_selector,
+            labels=self.labels,
+            annotations=self.annotations,
             variables=self.variables,
+            security_context=self.security_context,
+            continue_on_fail=self.continue_on_fail,
+            continue_on_error=self.continue_on_error,
+            template_ref=self.template_ref,
         )
         name = name or self.name
         task.name = name.replace("_", "-")  # RFC1123
         task.argo_template = self.argo_template
 
-        task.func = self.func
+        # Needed for Task.get_task_template which is already defined for self.
+        task.env_from = self.env_from
+        task.env = self.env
 
-        func_params = func_params or []
-        if len(func_params) > 1:
-            uniq_keys = {key for param in func_params for key in param.keys()}
-            task.variables = [VariableAsEnv(name=key, value=f"{{{{item.{key}}}}}") for key in uniq_keys]
-        else:
-            task.variables = [
-                VariableAsEnv(name=key, value=json.dumps(value))
-                for param in func_params[:1]
-                for key, value in param.items()
-            ]
-
-        task.parameters = task.get_parameters()
-        task.argo_input_artifacts = task.get_argo_input_artifacts()
-
-        task.arguments = task.get_arguments()
+        # Reload task spec with reused template.
         task.argo_task = task.get_task_spec()
         return task

@@ -5,13 +5,7 @@ import test_task
 
 
 def create_task_from_templated_task(*args, **kwargs):
-    args_str = ', '.join(map(str,args))
-    kwargs_str = ','.join('{}={}'.format(k,v) for k,v in kwargs.items())
-    print(f"{args_str=}")
-    print(f"{kwargs_str=}")
-    # task = TaskTemplate(*args, **kwargs).task(name="asd")
-    task = TaskTemplate(*args, **kwargs).task()
-    return task
+    return TaskTemplate(*args, **kwargs).task()
 
 
 # Get all imports from test_task.py and import here.
@@ -35,9 +29,6 @@ for test_name in _test_func_names:
     modified_lines = lines.replace("Task(", "TaskTemplate(")
     exec(modified_lines)
 
-# ############################# #
-# comment out for testing start #
-# ############################# #
 # Modify all tests to use TaskTemplate(...).task
 for test_name in _test_func_names:
     f = test_task.__getattribute__(test_name)
@@ -53,22 +44,4 @@ for test_name in _test_func_names:
 
     lines = "\n".join(lines)
     lines = lines.replace("Task(", "create_task_from_templated_task(")
-    if test_name == "test_param_getter_parses_single_param_val_on_json_payload":
-        print(lines)
-    try:
-        exec(lines)
-    except Exception:
-        print(lines)
-        break
-    # break
-# ########################### #
-# comment out for testing end #
-# ########################### #
-
-
-# def test_templated_param_getter_parses_single_param_val_on_json_payload(op):
-#     t = create_task_from_templated_task('t', op, [{'a': 1}])
-#     print(t.get_parameters())
-#     param = t.get_parameters()[0]
-#     assert param.name == 'a'
-#     assert param.value == '1'  # from json.dumps
+    exec(lines)
