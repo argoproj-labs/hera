@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -13,9 +13,7 @@ class TaskTemplate(Task):
     def task(
         self,
         name: str,
-        func_params: Optional[
-            List[Dict[str, Union[int, str, float, dict, BaseModel]]]
-        ] = None,
+        func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
         input_artifacts: Optional[List[Artifact]] = None,
     ) -> Task:
@@ -31,10 +29,7 @@ class TaskTemplate(Task):
         func_params = func_params or []
         if len(func_params) > 1:
             uniq_keys = {key for param in func_params for key in param.keys()}
-            task.variables = [
-                VariableAsEnv(name=key, value=f"{{{{item.{key}}}}}")
-                for key in uniq_keys
-            ]
+            task.variables = [VariableAsEnv(name=key, value=f"{{{{item.{key}}}}}") for key in uniq_keys]
         else:
             task.variables = [
                 VariableAsEnv(name=key, value=json.dumps(value))
