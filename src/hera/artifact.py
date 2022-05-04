@@ -1,6 +1,7 @@
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1GCSArtifact,
+    IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
 )
 from pydantic import BaseModel
@@ -118,3 +119,16 @@ class GCSArtifact(BucketArtifact):
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact inputs representation"""
         return self.get_spec()
+
+
+class GitArtifact(Artifact):
+    """Location of an git artifact"""
+    repo: str
+    revision: str
+
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return IoArgoprojWorkflowV1alpha1Artifact(
+            name=self.name,
+            path=self.path,
+            git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo, revision=self.revision),
+        )
