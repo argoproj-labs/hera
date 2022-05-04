@@ -1,3 +1,5 @@
+from typing import Optional
+
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1GCSArtifact,
@@ -123,8 +125,9 @@ class GCSArtifact(BucketArtifact):
 
 class GitArtifact(Artifact):
     """Location of an git artifact"""
+
     repo: str
-    revision: str
+    revision: Optional[str]
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         return IoArgoprojWorkflowV1alpha1Artifact(
