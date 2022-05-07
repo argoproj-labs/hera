@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional, Union
+
 from pydantic import BaseModel
 
 from hera.artifact import Artifact

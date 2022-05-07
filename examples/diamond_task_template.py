@@ -55,13 +55,7 @@ b = task_template.task('B-task', [{'message': 'This is task B!'}])
 c = task_template.task('C-task', [{'other_message': 'This is task C!'}])
 d = task_template.task(
     'D-task',
-    [
-        {
-            'message': {
-                "dicted": "message with non-alpanumeric characters: !@#$%^&*()_-+=;|<.>/?"
-            }
-        }
-    ],
+    [{'message': {"dicted": "message with non-alpanumeric characters: !@#$%^&*()_-+=;|<.>/?"}}],
 )
 
 a.next(b)  # a >> b

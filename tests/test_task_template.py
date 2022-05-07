@@ -1,10 +1,10 @@
-from hera.task_template import TaskTemplate
-from test_task import task_security_context_kwargs  # noqa
 import inspect
-import test_task
-
 from pathlib import Path
 
+import test_task
+from test_task import task_security_context_kwargs  # noqa
+
+from hera.task_template import TaskTemplate
 
 # Get test_task.py path into Path.
 test_task_file = Path(__file__).parent.joinpath("test_task.py")
@@ -23,11 +23,7 @@ def create_task_from_templated_task(*args, **kwargs):
 
 # Get all imports from test_task.py and import here.
 with open(test_task_file, "r") as file:
-    imports = [
-        line
-        for line in file.readlines()
-        if line.startswith("from ") or line.startswith("import ")
-    ]
+    imports = [line for line in file.readlines() if line.startswith("from ") or line.startswith("import ")]
     for i in imports:
         exec(i)
 
@@ -56,7 +52,5 @@ for test_name in _test_func_names:
             lines[index] = def_line
 
     modified_source = "\n".join(lines)
-    modified_source = modified_source.replace(
-        "Task(", f"{create_task_from_templated_task.__name__}("
-    )
+    modified_source = modified_source.replace("Task(", f"{create_task_from_templated_task.__name__}(")
     exec(modified_source)
