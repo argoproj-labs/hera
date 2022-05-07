@@ -126,6 +126,7 @@ Currently, Hera is centered around two core concepts. These concepts are also us
 consistent with:
 
 - `Task` - the object that holds the Python function for remote execution/the atomic unit of execution;
+- `TaskTemplate` - allows specifying task once and reusing with different arguments;
 - `Workflow` - the higher level representation of a collection of tasks.
 
 # Examples
