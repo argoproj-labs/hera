@@ -29,8 +29,7 @@ with open(test_task_file, "r") as file:
 
 
 # Modify all tests to use TaskTemplate. Execution of Task(...) and
-# TaskTemplate(...) should be the same since TaskTemplate inherits from Task and
-# adds another function.
+# TaskTemplate(...) should be the same since TaskTemplate inherits from Task.
 for test_name in _test_func_names:
     _test_func = test_task.__getattribute__(test_name)
     source = inspect.getsource(_test_func)
