@@ -36,8 +36,8 @@ with open(test_task_file, "r") as file:
 # TaskTemplate(...) should be the same since TaskTemplate inherits from Task and
 # adds another function.
 for test_name in _test_func_names:
-    test_func = test_task.__getattribute__(test_name)
-    source = inspect.getsource(test_func)
+    _test_func = test_task.__getattribute__(test_name)
+    source = inspect.getsource(_test_func)
     modified_source = source.replace("Task(", "TaskTemplate(")
     exec(modified_source)
 
@@ -45,8 +45,8 @@ for test_name in _test_func_names:
 # Modify all tests to use TaskTemplate(...).task. And change test names to avoid
 # duplicates.
 for test_name in _test_func_names:
-    test_func = test_task.__getattribute__(test_name)
-    source = inspect.getsource(test_func)
+    _test_func = test_task.__getattribute__(test_name)
+    source = inspect.getsource(_test_func)
     lines = source.splitlines()
 
     for index, line in enumerate(lines):

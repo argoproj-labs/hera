@@ -42,11 +42,9 @@ class TaskTemplate(Task):
         )
         name = name or self.name
         task.name = name.replace("_", "-")  # RFC1123
-        task.argo_template = self.argo_template
-
-        # Needed for Task.get_task_template which is already defined for self.
         task.env_from = self.env_from
         task.env = self.env
+        task.argo_template = self.argo_template
 
         # Reload task spec with reused template.
         task.argo_task = task.get_task_spec()
