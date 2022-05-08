@@ -1,4 +1,5 @@
 import inspect
+from os import TMP_MAX
 from pathlib import Path
 
 import test_task
@@ -53,3 +54,58 @@ for test_name in _test_func_names:
     modified_source = "\n".join(lines)
     modified_source = modified_source.replace("Task(", f"{create_task_from_templated_task.__name__}(")
     exec(modified_source)
+
+
+def test_one_template_two_tasks(op):
+    tmpl = TaskTemplate("tmpl", op, [{"a": 1}])
+
+    t1 = tmpl.task("t1")
+    t2 = tmpl.task("t2", [{"a": 3}])
+
+    assert tmpl.name == "tmpl", "TaskTemplate name mismatch"
+    assert t1.name == "t1", "t1 name mismatch"
+    assert t2.name == "t2", "t2 name mismatch"
+
+    for p_tmpl in tmpl.get_parameters():
+        assert p_tmpl.name == "a", "TaskTemplate param name mismatch"
+        assert p_tmpl.value == "1", "TaskTemplate default param value mismatch"
+
+    for t1_p in t1.get_parameters():
+        assert t1_p.name == "a", "t1 param name mismatch"
+        assert t1_p.value == "1", "t1 default param value mismatch"
+
+    for t2_p in t2.get_parameters():
+        assert t2_p.name == "a", "t2 param name mismatch"
+        assert t2_p.value == "3", "t2 param value mismatch"
+
+
+def test_two_templates_one_task():
+    ...
+
+
+def test_many_templates_many_tasks():
+    ...
+
+
+def test_template_with_multiple_args(op):
+    tmpl = TaskTemplate("tmpl", op, [{"a": 1}, {"a": 2}])
+
+    t1 = tmpl.task("t1")
+    t2 = tmpl.task("t2", [{"a": 3}, {"a": 4}])
+
+    for t1_p in t1.get_parameters():
+        assert t1_p.name == "a"
+        assert t1_p.value == "{{item.a}}"
+
+    for t2_p in t2.get_parameters():
+        assert t2_p.name == "a"
+        assert t2_p.value == "{{item.a}}"
+
+    t1_items = t1.get_task_spec().with_items
+    t2_items = t2.get_task_spec().with_items
+
+    assert t1_items[0].value["a"] == "1"
+    assert t1_items[1].value["a"] == "2"
+
+    assert t2_items[0].value["a"] == "3"
+    assert t2_items[1].value["a"] == "4"
