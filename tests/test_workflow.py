@@ -8,6 +8,7 @@ from hera.host_alias import HostAlias
 from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.template_ref import TemplateRef
 from hera.ttl_strategy import TTLStrategy
 from hera.volumes import (
     ConfigMapVolume,
@@ -239,6 +240,7 @@ def test_wf_adds_ttl_strategy(ws):
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
 
 
+
 def test_wf_adds_host_aliases(ws):
     w = Workflow(
         'w',
@@ -251,3 +253,13 @@ def test_wf_adds_host_aliases(ws):
 
     assert w.spec.host_aliases[0] == ArgoHostAlias(hostnames=["host1", "host2"], ip="0.0.0.0")
     assert w.spec.host_aliases[1] == ArgoHostAlias(hostnames=["host3"], ip="1.1.1.1")
+
+def test_wf_add_task_with_template_ref(w):
+    t = Task("t", template_ref=TemplateRef(name="name", template="template"))
+    w.add_task(t)
+
+    assert w.dag_template.tasks[0] == t.argo_task
+
+    # Not add a Task with TemplateRef to w.spec.templates
+    # Note: w.spec.templates[0] is a template of dag
+    assert len(w.spec.templates) == 1

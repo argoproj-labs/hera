@@ -1,6 +1,9 @@
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1Artifact
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Artifact,
+    IoArgoprojWorkflowV1alpha1GitArtifact,
+)
 
-from hera.artifact import InputArtifact, OutputArtifact
+from hera.artifact import GitArtifact, InputArtifact, OutputArtifact
 
 
 def test_output_artifact_contains_expected_fields():
@@ -24,3 +27,17 @@ def test_input_artifact_contains_expected_fields():
     assert actual.name == expected.name
     assert actual.path == expected.path
     assert actual._from == expected._from
+
+
+def test_git_artifact():
+    name = "git-artifact"
+    path = "/src"
+    repo = "https://github.com/awesome/awesome-repo.git"
+    revision = "main"
+
+    expected = IoArgoprojWorkflowV1alpha1Artifact(
+        name=name, path=path, git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=repo, revision=revision)
+    )
+    actual = GitArtifact(name=name, path=path, repo=repo, revision=revision).get_spec()
+
+    assert actual == expected
