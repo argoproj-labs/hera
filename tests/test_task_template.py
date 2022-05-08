@@ -60,31 +60,58 @@ def test_one_template_two_tasks(op):
     tmpl = TaskTemplate("tmpl", op, [{"a": 1}])
 
     t1 = tmpl.task("t1")
-    t2 = tmpl.task("t2", [{"a": 3}])
+    t2 = tmpl.task("t2", [{"a": 2}])
 
-    assert tmpl.name == "tmpl", "TaskTemplate name mismatch"
-    assert t1.name == "t1", "t1 name mismatch"
-    assert t2.name == "t2", "t2 name mismatch"
+    assert tmpl.name == "tmpl"
+    assert t1.name == "t1"
+    assert t2.name == "t2"
 
     for p_tmpl in tmpl.get_parameters():
-        assert p_tmpl.name == "a", "TaskTemplate param name mismatch"
-        assert p_tmpl.value == "1", "TaskTemplate default param value mismatch"
+        assert p_tmpl.name == "a"
+        assert p_tmpl.value == "1"
 
     for t1_p in t1.get_parameters():
-        assert t1_p.name == "a", "t1 param name mismatch"
-        assert t1_p.value == "1", "t1 default param value mismatch"
+        assert t1_p.name == "a"
+        assert t1_p.value == "1"
 
     for t2_p in t2.get_parameters():
-        assert t2_p.name == "a", "t2 param name mismatch"
-        assert t2_p.value == "3", "t2 param value mismatch"
+        assert t2_p.name == "a"
+        assert t2_p.value == "2"
 
 
-def test_two_templates_one_task():
-    ...
+def test_two_templates_one_task(no_op):
+    tmpl1 = TaskTemplate("tmpl1", no_op)
+    tmpl2 = TaskTemplate("tmpl2", no_op)
+
+    t = tmpl1.task("t1")
+    assert t.name == "t1"
+    assert t.argo_template.name == "tmpl1"
+
+    t = tmpl2.task("t2")
+    assert t.name == "t2"
+    assert t.argo_template.name == "tmpl2"
 
 
-def test_many_templates_many_tasks():
-    ...
+def test_many_templates_many_tasks(op):
+    tmpl1 = TaskTemplate("tmpl1", op, [{"a": 123}])
+    tmpl2 = TaskTemplate("tmpl2", op, [{"a": 456}])
+
+    t1_1, t1_2, t1_3 = tmpl1.task("t1_1"), tmpl1.task("t1_2"), tmpl1.task("t1_3")
+    t2_1, t2_2, t2_3 = tmpl2.task("t2_1"), tmpl2.task("t2_2"), tmpl2.task("t2_3")
+
+    for t1 in [t1_1, t1_2, t1_3]:
+        assert t1.argo_template.name == "tmpl1"
+
+        for p in t1.get_parameters():
+            assert p.name == "a"
+            assert p.value == "123"
+
+    for t2 in [t2_1, t2_2, t2_3]:
+        assert t2.argo_template.name == "tmpl2"
+
+        for p in t2.get_parameters():
+            assert p.name == "a"
+            assert p.value == "456"
 
 
 def test_template_with_multiple_args(op):
