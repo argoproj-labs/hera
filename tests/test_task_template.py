@@ -5,7 +5,10 @@ from pathlib import Path
 import test_task
 from test_task import task_security_context_kwargs  # noqa
 
+from hera.resources import Resources
 from hera.task_template import TaskTemplate
+from hera.volumes import Volume
+from hera.workflow import Workflow
 
 # Get test_task.py path into Path.
 test_task_file = Path(__file__).parent.joinpath("test_task.py")
@@ -136,3 +139,18 @@ def test_template_with_multiple_args(op):
 
     assert t2_items[0].value["a"] == "3"
     assert t2_items[1].value["a"] == "4"
+
+
+def test_add_multiple_tasks_from_one_task_template_to_workflow(w: Workflow, no_op):
+    tmpl = TaskTemplate(
+        "tmpl",
+        no_op,
+        resources=Resources(volumes=[Volume(name="test-volume", mount_path="/mnt/test", size="1Mi")]),
+    )
+    t1, t2, t3 = tmpl.task("t1"), tmpl.task("t2"), tmpl.task("t3")
+    w.add_tasks(t1, t2, t3)
+
+    assert len(w.spec.templates[0].to_dict()["dag"]["tasks"]) == 3
+    assert (
+        len(w.spec.templates) == 2
+    ), "Workflow should have 2 templates: one for task template, other for dag template"
