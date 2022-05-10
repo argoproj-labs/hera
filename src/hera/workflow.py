@@ -55,7 +55,7 @@ class Workflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
-    volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = VolumeClaimGCStrategy.OnWorkflowCompletion
+    volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
         Mappings between IP and hostnames.
@@ -74,7 +74,7 @@ class Workflow:
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
-        volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = VolumeClaimGCStrategy.OnWorkflowCompletion,
+        volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
         host_aliases: Optional[List[HostAlias]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
