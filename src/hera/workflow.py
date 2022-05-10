@@ -11,6 +11,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -52,6 +53,8 @@ class Workflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    host_aliases: Optional[List[HostAlias]] = None
+        Mappings between IP and hostnames.
     """
 
     def __init__(
@@ -67,6 +70,7 @@ class Workflow:
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        host_aliases: Optional[List[HostAlias]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -105,6 +109,9 @@ class Workflow:
 
         if ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
+
+        if host_aliases:
+            setattr(self.spec, 'host_aliases', [h.argo_host_alias for h in host_aliases])
 
         if self.security_context:
             security_context = self.security_context.get_security_context()
