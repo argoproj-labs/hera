@@ -17,6 +17,7 @@ from argo_workflows.models import (
 )
 
 from hera.cron_workflow_service import CronWorkflowService
+from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -59,6 +60,8 @@ class CronWorkflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    host_aliases: Optional[List[HostAlias]] = None
+        Mappings between IP and hostnames.
     """
 
     def __init__(
@@ -76,6 +79,7 @@ class CronWorkflow:
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        host_aliases: Optional[List[HostAlias]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -116,6 +120,9 @@ class CronWorkflow:
 
         if ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
+
+        if host_aliases:
+            setattr(self.spec, 'host_aliases', [h.argo_host_alias for h in host_aliases])
 
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)

@@ -12,6 +12,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -56,6 +57,8 @@ class Workflow:
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
     volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = VolumeClaimGCStrategy.OnWorkflowCompletion
         Define how to delete volumes from completed Workflows.
+    host_aliases: Optional[List[HostAlias]] = None
+        Mappings between IP and hostnames.
     """
 
     def __init__(
@@ -72,6 +75,7 @@ class Workflow:
         workflow_template_ref: Optional[str] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
         volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = VolumeClaimGCStrategy.OnWorkflowCompletion,
+        host_aliases: Optional[List[HostAlias]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -117,6 +121,9 @@ class Workflow:
                 'volume_claim_gc',
                 IoArgoprojWorkflowV1alpha1VolumeClaimGC(strategy=volume_claim_gc_strategy.value),
             )
+
+        if host_aliases:
+            setattr(self.spec, 'host_aliases', [h.argo_host_alias for h in host_aliases])
 
         if self.security_context:
             security_context = self.security_context.get_security_context()

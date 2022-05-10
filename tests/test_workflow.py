@@ -2,7 +2,9 @@ from unittest.mock import Mock
 
 import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
+from argo_workflows.models import HostAlias as ArgoHostAlias
 
+from hera.host_alias import HostAlias
 from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
@@ -253,6 +255,20 @@ def test_wf_adds_volume_claim_gc_strategy_on_workflow_success(ws):
     expected_volume_claim_gc = {"strategy": "OnWorkflowSuccess"}
 
     assert w.spec.volume_claim_gc._data_store == expected_volume_claim_gc
+
+
+def test_wf_adds_host_aliases(ws):
+    w = Workflow(
+        'w',
+        service=ws,
+        host_aliases=[
+            HostAlias(hostnames=["host1", "host2"], ip="0.0.0.0"),
+            HostAlias(hostnames=["host3"], ip="1.1.1.1"),
+        ],
+    )
+
+    assert w.spec.host_aliases[0] == ArgoHostAlias(hostnames=["host1", "host2"], ip="0.0.0.0")
+    assert w.spec.host_aliases[1] == ArgoHostAlias(hostnames=["host3"], ip="1.1.1.1")
 
 
 def test_wf_add_task_with_template_ref(w):
