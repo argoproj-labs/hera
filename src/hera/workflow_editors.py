@@ -24,7 +24,8 @@ def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], *ts: Tas
         return
 
     for t in ts:
-        w.spec.templates.append(t.argo_template)
+        if t.template_ref is None:
+            w.spec.templates.append(t.argo_template)
 
         if t.resources.volumes:
             for vol in t.resources.volumes:
