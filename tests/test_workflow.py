@@ -8,7 +8,7 @@ from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.template_ref import TemplateRef
 from hera.ttl_strategy import TTLStrategy
-from hera.volume_claim_gc import VolumeClaimGC, VolumeClaimGCStrategy
+from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import (
     ConfigMapVolume,
     EmptyDirVolume,
@@ -239,10 +239,18 @@ def test_wf_adds_ttl_strategy(ws):
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
 
 
-def test_wf_adds_volume_claim_gc(ws):
-    w = Workflow('w', service=ws, volume_claim_gc=VolumeClaimGC(strategy=VolumeClaimGCStrategy.OnWorkflowCompletion))
+def test_wf_adds_volume_claim_gc_strategy_on_workflow_completion(ws):
+    w = Workflow('w', service=ws, volume_claim_gc_strategy=VolumeClaimGCStrategy.OnWorkflowCompletion)
 
     expected_volume_claim_gc = {"strategy": "OnWorkflowCompletion"}
+
+    assert w.spec.volume_claim_gc._data_store == expected_volume_claim_gc
+
+
+def test_wf_adds_volume_claim_gc_strategy_on_workflow_success(ws):
+    w = Workflow('w', service=ws, volume_claim_gc_strategy=VolumeClaimGCStrategy.OnWorkflowSuccess)
+
+    expected_volume_claim_gc = {"strategy": "OnWorkflowSuccess"}
 
     assert w.spec.volume_claim_gc._data_store == expected_volume_claim_gc
 
