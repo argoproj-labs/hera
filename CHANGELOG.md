@@ -34,6 +34,8 @@ The general format is:
 ### Added
 
 - support `cluster_scope` in template reference
+- add implementation for `TaskTemplates` - this enables specifying task details with a template once and creating task
+  based on that template instead of redefining every time
 
 # 3.1.0 - DATE (28/04/2022)
 
