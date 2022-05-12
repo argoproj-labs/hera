@@ -1,5 +1,4 @@
 import inspect
-from os import TMP_MAX
 from pathlib import Path
 
 import test_task
