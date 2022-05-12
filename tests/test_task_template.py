@@ -144,7 +144,6 @@ def test_add_multiple_tasks_from_one_task_template_to_workflow(w: Workflow, no_o
     tmpl = TaskTemplate(
         "tmpl",
         no_op,
-        resources=Resources(volumes=[Volume(name="test-volume", mount_path="/mnt/test", size="1Mi")]),
     )
     t1, t2, t3 = tmpl.task("t1"), tmpl.task("t2"), tmpl.task("t3")
     w.add_tasks(t1, t2, t3)
@@ -153,3 +152,15 @@ def test_add_multiple_tasks_from_one_task_template_to_workflow(w: Workflow, no_o
     assert (
         len(w.spec.templates) == 2
     ), "Workflow should have 2 templates: one for task template, other for dag template"
+
+
+def test_task_template_with_volume(w: Workflow, no_op):
+    tmpl = TaskTemplate(
+        "tmpl",
+        no_op,
+        resources=Resources(volumes=[Volume(name="test-volume", mount_path="/mnt/test", size="1Mi")]),
+    )
+    t1, t2, t3 = tmpl.task("t1"), tmpl.task("t2"), tmpl.task("t3")
+    w.add_tasks(t1, t2, t3)
+
+    assert id(t1.resources.volumes) == id(t2.resources.volumes) == id(t3.resources.volumes)
