@@ -6,7 +6,6 @@ import json
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
-from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.model_utils import (
     ApiTypeError,
     ModelSimple,
@@ -30,9 +29,10 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
+    Toleration as ArgoToleration,
+    SecurityContext,
+    VolumeMount,
 )
-from argo_workflows.models import Toleration as ArgoToleration
-from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
@@ -46,7 +46,7 @@ from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
-from hera.variable import VariableAsEnv
+from hera.variable import Variable, VariableAsEnv
 
 
 class _Item(ModelSimple):
@@ -214,7 +214,7 @@ class Task:
         A Dict of labels to attach to the Task Template object metadata.
     annotations: Optional[Dict[str, str]] = None
         A Dict of annotations to attach to the Task Template object metadata.
-    variables: Optional[List[VariableAsEnv]] = None
+    variables: Optional[List[Variable]] = None
         A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
@@ -255,7 +255,7 @@ class Task:
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
         annotations: Optional[Dict[str, str]] = None,
-        variables: Optional[List[VariableAsEnv]] = None,
+        variables: Optional[List[Variable]] = None,
         security_context: Optional[TaskSecurityContext] = None,
         continue_on_fail: bool = False,
         continue_on_error: bool = False,

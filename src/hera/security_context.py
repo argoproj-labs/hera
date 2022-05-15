@@ -1,8 +1,6 @@
 from typing import List, Optional
 
-from argo_workflows.model.capabilities import Capabilities
-from argo_workflows.model.pod_security_context import PodSecurityContext
-from argo_workflows.model.security_context import SecurityContext
+from argo_workflows.models import Capabilities, PodSecurityContext, SecurityContext
 from pydantic import BaseModel
 
 
