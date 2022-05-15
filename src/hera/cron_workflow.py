@@ -9,6 +9,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
     IoArgoprojWorkflowV1alpha1CronWorkflowStatus,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
+    IoArgoprojWorkflowV1alpha1VolumeClaimGC,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
@@ -18,6 +19,7 @@ from argo_workflows.models import (
 
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
+from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -60,6 +62,8 @@ class CronWorkflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
+        Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
         Mappings between IP and hostnames.
     """
@@ -79,6 +83,7 @@ class CronWorkflow:
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
         host_aliases: Optional[List[HostAlias]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
@@ -120,6 +125,13 @@ class CronWorkflow:
 
         if ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
+
+        if volume_claim_gc_strategy:
+            setattr(
+                self.spec,
+                'volume_claim_gc',
+                IoArgoprojWorkflowV1alpha1VolumeClaimGC(strategy=volume_claim_gc_strategy.value),
+            )
 
         if host_aliases:
             setattr(self.spec, 'host_aliases', [h.argo_host_alias for h in host_aliases])
