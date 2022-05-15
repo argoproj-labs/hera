@@ -1,8 +1,8 @@
 import json
 from typing import Any, Optional
 
-from argo_workflows.model.object_field_selector import ObjectFieldSelector
 from argo_workflows.models import (
+    ObjectFieldSelector,
     ConfigMapKeySelector,
     EnvVar,
     EnvVarSource,
