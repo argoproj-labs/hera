@@ -664,9 +664,8 @@ class Task:
         str
             Final formatted script.
         """
-        script_extra = self.get_param_script_portion()
-
         script = ''
+        script_extra = self.get_param_script_portion() if self.func_params else None
         if script_extra:
             script = copy.deepcopy(script_extra)
             script += '\n'
@@ -848,7 +847,8 @@ class Task:
         if retry_strategy:
             setattr(template, 'retry_strategy', retry_strategy)
 
-        if self.get_script_def():
+        script_def = self.get_script_def()
+        if script_def:
             setattr(template, 'script', self.get_script_def())
         else:
             setattr(template, 'container', self.get_container())

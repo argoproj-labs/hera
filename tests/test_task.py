@@ -569,3 +569,10 @@ def test_task_uses_expected_template_ref():
     assert hasattr(t, 'template_ref')
     assert t.template_ref.name == 'workflow-template'
     assert t.template_ref.template == 'template'
+
+
+def test_task_does_not_include_imports_when_no_params_are_specifies(no_op):
+    t = Task('t', no_op)
+    t_script = t.get_script()
+    assert 'import' not in t_script
+    assert 'pass\n' == t_script
