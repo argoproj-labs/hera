@@ -29,7 +29,7 @@ The general format is:
 
 ```
 
-# 3.2.0 - DATE (03/05/2022)
+# 3.2.0 - DATE (15/05/2022)
 
 ### Added
 
@@ -42,7 +42,6 @@ The general format is:
 
 - structure of the environment variables. Now contributors can implement the generic `Variable` rather than augment or
   duplicate `VariableAsEnv`
-
 
 # 3.1.0 - DATE (28/04/2022)
 
