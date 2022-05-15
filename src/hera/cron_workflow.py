@@ -9,8 +9,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
     IoArgoprojWorkflowV1alpha1CronWorkflowStatus,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
-    IoArgoprojWorkflowV1alpha1VolumeClaimGC,
     IoArgoprojWorkflowV1alpha1Template,
+    IoArgoprojWorkflowV1alpha1VolumeClaimGC,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
     LocalObjectReference,
@@ -19,10 +19,10 @@ from argo_workflows.models import (
 
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
-from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
+from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks
 
 
