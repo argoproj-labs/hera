@@ -33,7 +33,16 @@ The general format is:
 
 ### Added
 
-- support `cluster_scope` in template reference
+- cluster scope in template reference
+- host alias support
+- volume claim garbage collection setting on workflows
+- git artifact
+
+### Changed
+
+- structure of the environment variables. Now contributors can implement the generic `Variable` rather than augment or
+  duplicate `VariableAsEnv`
+
 
 # 3.1.0 - DATE (28/04/2022)
 
