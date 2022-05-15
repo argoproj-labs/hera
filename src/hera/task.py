@@ -29,10 +29,10 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
-    Toleration as ArgoToleration,
     SecurityContext,
-    VolumeMount,
 )
+from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
