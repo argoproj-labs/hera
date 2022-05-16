@@ -3,7 +3,6 @@ from unittest.mock import Mock
 import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
 
-from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -103,3 +102,37 @@ def test_wft_adds_ttl_strategy(ws):
     }
 
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
+
+def test_workflow_template_visualize_generated_graph_structure(wt, no_op):
+    t1 = Task('t1', no_op)
+    t2 = Task('t2', no_op)
+    t1 >> t2
+    wt.add_tasks(t1, t2)
+
+    h2 = Task('head2', no_op)
+    wt.add_head(h2)
+
+    # call visualize()
+    graph_obj = wt.visualize(is_test=True)
+    assert graph_obj.comment == 'w'
+
+    # generate list of numbers with len of dot body elements
+    # len(2) is a node (Task) and len(4) is an edge (dependency)
+    element_len_list = [len(item.split(' ')) for item in graph_obj.body]
+    # check number of nodes (Tasks)
+    assert 3 == element_len_list.count(2)
+    # check number of edge (dependency)
+    assert 3 == element_len_list.count(4)
+
+    h1 = Task('head1', no_op)
+    wt.add_head(h1)
+
+    # call visualize again after new node (Task)
+    # that is also a new head (new dependency)
+    updated_graph_obj = wt.visualize(is_test=True)
+    element_len_list_new = [len(item.split(' ')) for item in updated_graph_obj.body]
+
+    # check number of nodes (Tasks)
+    assert 4 == element_len_list_new.count(2)
+    # check number of edge (dependency)
+    assert 6 == element_len_list_new.count(4)

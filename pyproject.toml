@@ -34,6 +34,7 @@ urllib3 = "^1.26.8"
 certifi = "^2021.10.8"
 pytz = "^2021.3"
 argo-workflows = {version = "6.3.0rc6", allow-prereleases = true}
+graphviz = "^0.20"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
