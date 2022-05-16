@@ -12,8 +12,10 @@ from argo_workflows.models import (
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks
+from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_template_service import WorkflowTemplateService
+from hera.operator import Operator
+from hera.workflow_status import WorkflowStatus
 
 
 class WorkflowTemplate:
@@ -101,6 +103,9 @@ class WorkflowTemplate:
 
     def add_tail(self, t: Task, append: bool = True) -> None:
         add_tail(self, t, append=append)
+
+    def on_exit(self, w: 'WorkflowTemplate', op: Operator, status: WorkflowStatus) -> None:
+        return on_exit(self, w, op, status)
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""

@@ -9,8 +9,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
     IoArgoprojWorkflowV1alpha1CronWorkflowStatus,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
-    IoArgoprojWorkflowV1alpha1VolumeClaimGC,
     IoArgoprojWorkflowV1alpha1Template,
+    IoArgoprojWorkflowV1alpha1VolumeClaimGC,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
     LocalObjectReference,
@@ -19,11 +19,13 @@ from argo_workflows.models import (
 
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
-from hera.volume_claim_gc import VolumeClaimGCStrategy
+from hera.operator import Operator
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks
+from hera.volume_claim_gc import VolumeClaimGCStrategy
+from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
+from hera.workflow_status import WorkflowStatus
 
 
 class CronWorkflow:
@@ -177,6 +179,9 @@ class CronWorkflow:
 
     def add_tail(self, t: Task, append: bool = True) -> None:
         add_tail(self, t, append=append)
+
+    def on_exit(self, w: 'CronWorkflow', op: Operator, status: WorkflowStatus) -> None:
+        return on_exit(self, w, op, status)
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow in the server"""

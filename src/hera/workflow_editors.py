@@ -9,8 +9,10 @@ if TYPE_CHECKING:
 
 from typing import Union
 
+from hera.operator import Operator
 from hera.task import Task
 from hera.volumes import Volume
+from hera.workflow_status import WorkflowStatus
 
 
 def add_task(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task) -> None:
@@ -61,7 +63,7 @@ def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
                 setattr(template_task, 'dependencies', [t.name])
 
 
-def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True) -> None:
+def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True) -> Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']:
     """Adds a task as the tail of the workflow so the workflow ends with the given task.
 
     This sets the given task's dependencies to all the tasks that are not listed as dependencies in the workflow.
@@ -88,3 +90,16 @@ def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
     # e.g if A -> B -> C then B.deps = [A] and C.deps = [B] but nothing lists C so C is "free"
     free_tasks = set(task_name_to_task.keys()).difference(dependencies)
     t.argo_task.dependencies = list(free_tasks)
+
+
+def on_exit(
+    base_workflow: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
+    on_exit_workflow: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
+    op: Operator,
+    status: WorkflowStatus,
+):
+    base_workflow.spec.templates.extend(on_exit_workflow.spec.templates)
+    for t in on_exit_workflow.dag_template.tasks:
+        condition = f"{{{{workflow.status}}}} {op.value} {status.value}"
+        setattr(t, 'when', condition)
+    setattr(base_workflow.spec, "on_exit", on_exit_workflow.name)
