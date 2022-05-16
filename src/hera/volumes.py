@@ -11,9 +11,9 @@ from argo_workflows.models import (
     PersistentVolumeClaimVolumeSource,
     ResourceRequirements,
     SecretVolumeSource,
-    Volume as ArgoVolume,
-    VolumeMount,
 )
+from argo_workflows.models import Volume as ArgoVolume
+from argo_workflows.models import VolumeMount
 from pydantic import BaseModel, validator
 
 from hera.validators import validate_storage_units
