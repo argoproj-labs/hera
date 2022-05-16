@@ -31,6 +31,7 @@ def cws():
 def wts():
     yield WorkflowTemplateService(host='https://abc.com', token='abc')
 
+
 @pytest.fixture(scope='function')
 def wt(wts):
     yield WorkflowTemplate('w', service=wts)

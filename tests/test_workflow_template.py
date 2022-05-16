@@ -103,6 +103,7 @@ def test_wft_adds_ttl_strategy(ws):
 
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
 
+
 def test_workflow_template_visualize_generated_graph_structure(wt, no_op):
     t1 = Task('t1', no_op)
     t2 = Task('t2', no_op)

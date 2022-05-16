@@ -1,5 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
@@ -151,11 +151,7 @@ class Workflow:
         return self.service.delete(self.name)
 
     # extra function
-    def visualize(
-        self,
-        format: str = "pdf",
-        is_test: bool = False
-    ) -> Optional[Any]:
+    def visualize(self, format: str = "pdf", is_test: bool = False) -> Optional[Any]:
         """
         Creates graphviz object for representing the current Workflow. This graphviz
         will be rendered in a new window. If a `filename` is provided, the object
@@ -207,3 +203,4 @@ class Workflow:
             return dot
         else:
             dot.render(f'workflows-graph-output/{self.name}', view=True, format=format, cleanup=True)
+            return dot

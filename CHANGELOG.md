@@ -29,6 +29,13 @@ The general format is:
 
 ```
 
+# 3.3.0 - DATE (16/04/2022)
+
+### Added
+
+- Workflow and WorkflowTemplate visualisation. Generates an image with the visual
+  representation of the specific Workflow or WorkflowTemplate.
+
 # 3.1.0 - DATE (28/04/2022)
 
 ### Added

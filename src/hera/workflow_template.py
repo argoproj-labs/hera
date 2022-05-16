@@ -1,5 +1,5 @@
 """The implementation of a Hera workflowTemplate for Argo-based workflowTemplates"""
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
@@ -109,11 +109,7 @@ class WorkflowTemplate:
         return self.service.create(self.workflow_template, namespace)
 
     # extra function
-    def visualize(
-        self,
-        format: str = "pdf",
-        is_test: bool = False
-    ) -> Optional[Any]:
+    def visualize(self, format: str = "pdf", is_test: bool = False) -> Optional[Any]:
         """
         Creates graphviz object for representing the current Workflow. This graphviz
         will be rendered in a new window. If a `filename` is provided, the object
@@ -165,3 +161,4 @@ class WorkflowTemplate:
             return dot
         else:
             dot.render(f'workflows-graph-output/{self.name}', view=True, format=format, cleanup=True)
+            return dot
