@@ -1,11 +1,11 @@
 import json
 from typing import Any, Optional
 
-from argo_workflows.model.object_field_selector import ObjectFieldSelector
 from argo_workflows.models import (
     ConfigMapKeySelector,
     EnvVar,
     EnvVarSource,
+    ObjectFieldSelector,
     SecretKeySelector,
 )
 from pydantic import BaseModel, validator

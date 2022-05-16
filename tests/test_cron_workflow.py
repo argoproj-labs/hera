@@ -11,8 +11,10 @@ from argo_workflows.model.io_argoproj_workflow_v1alpha1_workflow_spec import (
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
 )
 from argo_workflows.model.object_meta import ObjectMeta
+from argo_workflows.models import HostAlias as ArgoHostAlias
 
 from hera.cron_workflow import CronWorkflow
+from hera.host_alias import HostAlias
 from hera.resources import Resources
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -279,3 +281,18 @@ def test_wf_adds_ttl_strategy(ws):
     }
 
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
+
+
+def test_wf_adds_host_aliases(ws):
+    w = CronWorkflow(
+        'w',
+        schedule="* * * * *",
+        service=ws,
+        host_aliases=[
+            HostAlias(hostnames=["host1", "host2"], ip="0.0.0.0"),
+            HostAlias(hostnames=["host3"], ip="1.1.1.1"),
+        ],
+    )
+
+    assert w.spec.host_aliases[0] == ArgoHostAlias(hostnames=["host1", "host2"], ip="0.0.0.0")
+    assert w.spec.host_aliases[1] == ArgoHostAlias(hostnames=["host3"], ip="1.1.1.1")

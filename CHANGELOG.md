@@ -36,6 +36,20 @@ The general format is:
 - Workflow and WorkflowTemplate visualisation. Generates an image with the visual
   representation of the specific Workflow or WorkflowTemplate.
 
+# 3.2.0 - DATE (15/05/2022)
+
+### Added
+
+- cluster scope in template reference
+- host alias support
+- volume claim garbage collection setting on workflows
+- git artifact
+
+### Changed
+
+- structure of the environment variables. Now contributors can implement the generic `Variable` rather than augment or
+  duplicate `VariableAsEnv`
+
 # 3.1.0 - DATE (28/04/2022)
 
 ### Added
