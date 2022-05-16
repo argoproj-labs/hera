@@ -63,7 +63,9 @@ def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
                 setattr(template_task, 'dependencies', [t.name])
 
 
-def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True) -> Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']:
+def add_tail(
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True
+) -> Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']:
     """Adds a task as the tail of the workflow so the workflow ends with the given task.
 
     This sets the given task's dependencies to all the tasks that are not listed as dependencies in the workflow.
