@@ -19,6 +19,8 @@ from hera.volumes import (
     Volume,
 )
 from hera.workflow import Workflow
+from hera.workflow_status import WorkflowStatus
+from hera.operator import Operator
 
 
 def test_wf_contains_specified_service_account(ws):
@@ -280,3 +282,36 @@ def test_wf_add_task_with_template_ref(w):
     # Not add a Task with TemplateRef to w.spec.templates
     # Note: w.spec.templates[0] is a template of dag
     assert len(w.spec.templates) == 1
+
+
+def test_wf_adds_exit_tasks(w, no_op):
+    t1 = Task('t1', no_op)
+    w.add_task(t1)
+
+    t2 = Task('t2', no_op).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+    w.on_exit(t2)
+
+    t3 = Task('t3', no_op).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+    w.on_exit(t3)
+
+    assert len(w.exit_template.dag.tasks) == 2
+    assert len(w.spec.templates) == 5
+
+
+def test_wf_catches_tasks_without_exit_status_conditions(w, no_op):
+    t1 = Task('t1', no_op)
+    w.add_task(t1)
+
+    t2 = Task('t2', no_op)
+    with pytest.raises(AssertionError) as e:
+        w.on_exit(t2)
+    assert str(e.value) == \
+           'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+
+
+def test_wf_catches_exit_tasks_without_parent_workflow_tasks(w, no_op):
+    t1 = Task('t1', no_op)
+    with pytest.raises(AssertionError) as e:
+        w.on_exit(t1)
+    assert str(e.value) == \
+           'Cannot add an exit condition to empty workflows'

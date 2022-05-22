@@ -106,6 +106,7 @@ def on_exit(
     *t: Task
         Collection of tasks to append as exit tasks to w.
     """
+    assert len(w.dag_template.tasks) >= 1, 'Cannot add an exit condition to empty workflows'
 
     for t in ts:
         assert hasattr(t.argo_task, 'when') and 'workflow.status' in getattr(
@@ -128,4 +129,3 @@ def on_exit(
     if not hasattr(w.spec, 'on_exit'):
         w.spec.templates.append(w.exit_template)
         setattr(w.spec, "on_exit", w.exit_template.name)
-    return w
