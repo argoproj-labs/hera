@@ -91,6 +91,13 @@ class Workflow:
         self.workflow_template_ref = workflow_template_ref
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.exit_template = IoArgoprojWorkflowV1alpha1Template(
+            name='exit-template',
+            steps=[],
+            dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
+            parallelism=self.parallelism,
+        )
+
         self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
@@ -165,8 +172,8 @@ class Workflow:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
 
-    def on_exit(self, w: 'Workflow', op: Operator, status: WorkflowStatus):
-        return on_exit(self, w, op, status)
+    def on_exit(self, *t: Task):
+        return on_exit(self, *t)
 
     def delete(self, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Deletes the workflow"""

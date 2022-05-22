@@ -47,6 +47,7 @@ from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import Variable, VariableAsEnv
+from hera.workflow_status import WorkflowStatus
 
 
 class _Item(ModelSimple):
@@ -374,6 +375,11 @@ class Task:
         """
         self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
         return other.next(self)
+
+    def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> 'Task':
+        """Execute this task conditionally on a workflow status."""
+        self.argo_task.when = f'{{{{workflow.status}}}} {op.value} {status.value}'
+        return self
 
     def on_success(self, other: 'Task') -> 'Task':
         """Execute `other` when this task succeeds"""

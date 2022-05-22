@@ -9,10 +9,8 @@ if TYPE_CHECKING:
 
 from typing import Union
 
-from hera.operator import Operator
 from hera.task import Task
 from hera.volumes import Volume
-from hera.workflow_status import WorkflowStatus
 
 
 def add_task(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task) -> None:
@@ -47,6 +45,8 @@ def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
 
     Parameters
     ----------
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']
+        Workflow to add head to.
     t: Task
         The task to add to the head of the workflow.
     append: bool = True
@@ -63,15 +63,15 @@ def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
                 setattr(template_task, 'dependencies', [t.name])
 
 
-def add_tail(
-    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True
-) -> None:
+def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, append: bool = True) -> None:
     """Adds a task as the tail of the workflow so the workflow ends with the given task.
 
     This sets the given task's dependencies to all the tasks that are not listed as dependencies in the workflow.
 
     Parameters
     ----------
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']
+        Workflow to add tail to.
     t: Task
         The task to add to the tail of the workflow.
     append: bool = True
@@ -95,13 +95,37 @@ def add_tail(
 
 
 def on_exit(
-    base_workflow: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
-    on_exit_workflow: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
-    op: Operator,
-    status: WorkflowStatus,
-):
-    base_workflow.spec.templates.extend(on_exit_workflow.spec.templates)
-    for t in on_exit_workflow.dag_template.tasks:
-        condition = f"{{{{workflow.status}}}} {op.value} {status.value}"
-        setattr(t, 'when', condition)
-    setattr(base_workflow.spec, "on_exit", on_exit_workflow.name)
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
+    *ts: Task,
+) -> Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']:
+    """Appends the given exit tasks to the
+
+    Parameters
+    ----------
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']
+    *t: Task
+        Collection of tasks to append as exit tasks to w.
+    """
+
+    for t in ts:
+        assert hasattr(t.argo_task, 'when') and 'workflow.status' in getattr(
+            t.argo_task, 'when'
+        ), 'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+
+        if t.template_ref is None:
+            w.spec.templates.append(t.argo_template)
+
+        if t.resources.volumes:
+            for vol in t.resources.volumes:
+                if isinstance(vol, Volume):
+                    # dynamically provisioned volumes need associated claims on the workflow spec
+                    w.spec.volume_claim_templates.append(vol.get_claim_spec())
+                else:
+                    w.spec.volumes.append(vol.get_volume())
+
+        w.exit_template.dag.tasks.append(t.argo_task)
+
+    if not hasattr(w.spec, 'on_exit'):
+        w.spec.templates.append(w.exit_template)
+        setattr(w.spec, "on_exit", w.exit_template.name)
+    return w
