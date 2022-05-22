@@ -64,6 +64,13 @@ class WorkflowTemplate:
         self.labels = labels
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.exit_template = IoArgoprojWorkflowV1alpha1Template(
+            name='exit-template',
+            steps=[],
+            dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
+            parallelism=self.parallelism,
+        )
+
         self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
@@ -104,8 +111,8 @@ class WorkflowTemplate:
     def add_tail(self, t: Task, append: bool = True) -> None:
         add_tail(self, t, append=append)
 
-    def on_exit(self, w: 'WorkflowTemplate', op: Operator, status: WorkflowStatus) -> None:
-        return on_exit(self, w, op, status)
+    def on_exit(self, *t: Task) -> None:
+        on_exit(self, *t)
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""

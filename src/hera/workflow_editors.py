@@ -97,7 +97,7 @@ def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
 def on_exit(
     w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
     *ts: Task,
-) -> Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']:
+) -> None:
     """Appends the given exit tasks to the
 
     Parameters

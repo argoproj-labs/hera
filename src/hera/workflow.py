@@ -172,8 +172,8 @@ class Workflow:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
 
-    def on_exit(self, *t: Task):
-        return on_exit(self, *t)
+    def on_exit(self, *t: Task) -> None:
+        on_exit(self, *t)
 
     def delete(self, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
