@@ -443,6 +443,8 @@ class Task:
             other.argo_task.dependencies = None
         setattr(other.argo_task, 'depends', depends)
 
+        return self
+
     def when_all_failed(self, other: 'Task') -> 'Task':
         """Sets the other task to execute when all the tasks of this task group have failed"""
         assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
