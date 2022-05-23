@@ -655,6 +655,13 @@ def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
         str(e.value) == 'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
         'with multiple `func_params or setting `input_from`'
     )
+    with pytest.raises(AssertionError) as e:
+        t1.when_any_succeeded(t2)
+    assert (
+        str(e.value) == 'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
+        'with multiple `func_params or setting `input_from`'
+    )
+
 
     t1 = Task(
         't1',

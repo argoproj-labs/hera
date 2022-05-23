@@ -417,9 +417,31 @@ class Task:
         return self.next(other)
 
     def when_any_succeeded(self, other: 'Task') -> 'Task':
-        """Sets the other task to execute when any of the tasks of this task group have succeeded"""
+        """Sets the other task to execute when any of the tasks of this task group have succeeded.
+
+        Parameters
+        ----------
+        other: Task
+            The other task to execute when any of the tasks of this task group have succeeded.
+
+        Returns
+        -------
+        Task
+            The current task.
+
+        Raises
+        ------
+        AssertionError
+            When the task does not contain multiple `func_params` to process.
+            When the task does not use `input_from`.
+            When the task uses `continue_on_fail` or `continue_on_error`.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
+        """
         assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
-            'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
+            'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
             'with multiple `func_params or setting `input_from`'
         )
         assert (
@@ -446,7 +468,29 @@ class Task:
         return self
 
     def when_all_failed(self, other: 'Task') -> 'Task':
-        """Sets the other task to execute when all the tasks of this task group have failed"""
+        """Sets the other task to execute when all the tasks of this task group have failed
+
+        Parameters
+        ----------
+        other: Task
+            The other task to execute when all of the tasks of this task group have failed.
+
+        Returns
+        -------
+        Task
+            The current task.
+
+        Raises
+        ------
+        AssertionError
+            When the task does not contain multiple `func_params` to process.
+            When the task does not use `input_from`.
+            When the task uses `continue_on_fail` or `continue_on_error`.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
+        """
         assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
             'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
             'with multiple `func_params or setting `input_from`'
