@@ -5,7 +5,7 @@ from argo_workflows.apis import WorkflowTemplateServiceApi
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec,
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
     ObjectMeta,
 )
 
@@ -29,7 +29,7 @@ def test_ws_calls_create_as_expected():
     ws = WorkflowTemplateService(host='https://abc.com', token='abc')
     ws.service = mock_service
     t = IoArgoprojWorkflowV1alpha1WorkflowTemplate(
-        metadata=ObjectMeta(), spec=IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec()
+        metadata=ObjectMeta(), spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
     )
     ws.create(t)
 

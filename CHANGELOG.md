@@ -29,6 +29,21 @@ The general format is:
 
 ```
 
+# 3.3.0 - DATE (23/05/2022)
+
+### Added
+
+- `AnySucceeded`/`AllFailed` support on tasks
+- `OnExit` condition on workflows with tasks conditioned on `WorkflowStatus`
+- plain string support when using `InputFrom`
+- `argo-workflows==6.3.5` dependency
+
+### Removed
+
+- JSON import from tasks that do not need it
+- references to `IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec` and instead
+  use `IoArgoprojWorkflowV1alpha1WorkflowSpec`
+
 # 3.2.0 - DATE (15/05/2022)
 
 ### Added
