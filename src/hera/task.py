@@ -650,7 +650,15 @@ class Task:
         """
         extract = "import json\n"
         for param in self.parameters:
-            extract += f"""{param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            if self.input_from:
+                # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
+                # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
+                # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
+                # payload of the script is not necessary when regular input is set on the task via `func_params`
+                extract += f"""try: {param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+                extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
+            else:
+                extract += f"""{param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
         return textwrap.dedent(extract)
 
     def get_script(self) -> str:
@@ -665,7 +673,7 @@ class Task:
             Final formatted script.
         """
         script = ''
-        script_extra = self.get_param_script_portion() if self.func_params else None
+        script_extra = self.get_param_script_portion() if inspect.getfullargspec(self.func).args else None
         if script_extra:
             script = copy.deepcopy(script_extra)
             script += '\n'
