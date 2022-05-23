@@ -101,19 +101,22 @@ def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_param_script_portion()
-    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+    assert script == 'import json\n' \
+                     'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
 
 
 def test_script_getter_returns_expected_string(op, typed_op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert script == 'import json\n' \
+                     'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
 
     t = Task('t', typed_op, [{'a': 1}])
     script = t.get_script()
     assert (
         script
-        == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+        == 'import json\n'
+           'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
     )
 
 
@@ -280,7 +283,8 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
-    assert tt.script.source == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert tt.script.source == 'import json\n' \
+                               'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
@@ -346,6 +350,14 @@ def test_task_validation_fails_on_input_from_plus_input_artifact(op, in_artifact
     with pytest.raises(AssertionError) as e:
         Task('t', op, input_from=InputFrom(name='test', parameters=['a']), input_artifacts=[in_artifact])
     assert str(e.value) == 'cannot supply both InputFrom and Artifacts'
+
+
+def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
+    t = Task('t', op, input_from=InputFrom(name='some-other-task', parameters=['a']))
+    script = t.get_param_script_portion()
+    assert script == 'import json\n' \
+                     'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n' \
+                     'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
 
 
 def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
