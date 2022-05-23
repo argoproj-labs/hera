@@ -14,7 +14,7 @@ from hera.resources import Resources
 from hera.retry import Retry
 from hera.retry_policy import RetryPolicy
 from hera.security_context import TaskSecurityContext
-from hera.task import Task
+from hera.task import Task, _dependencies_to_depends
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.variable import VariableAsEnv
@@ -595,3 +595,115 @@ def test_task_adds_exit_condition(no_op):
     t = Task('t', no_op)
     t.on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
     assert t.argo_task.when == '{{workflow.status}} == Succeeded'
+
+
+def test_all_failed_adds_dependency(no_op, multi_op, mock_model):
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t1.when_all_failed(t2)
+    assert t2.argo_task.depends == 't1.AllFailed'
+
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t3 = Task('t3', no_op)
+    t2 >> t3
+    t1.when_all_failed(t3)
+    assert t3.argo_task.depends == 't2 && t1.AllFailed'
+    # calling again hits the block that checks it's already added
+    t2 >> t3
+    t1.when_all_failed(t3)
+    assert t3.argo_task.depends == 't2 && t1.AllFailed'
+
+
+def test_any_succeeded_adds_dependency(no_op, multi_op, mock_model):
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t1.when_any_succeeded(t2)
+    assert t2.argo_task.depends == 't1.AnySucceeded'
+
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t3 = Task('t3', no_op)
+    t2 >> t3
+    t1.when_any_succeeded(t3)
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
+    # calling again hits the block that checks it's already added
+    t2 >> t3
+    t1.when_any_succeeded(t3)
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
+
+
+def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
+    t1 = Task('t1', no_op)
+    t2 = Task('t2', no_op)
+
+    with pytest.raises(AssertionError) as e:
+        t1.when_all_failed(t2)
+    assert (
+        str(e.value) == 'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
+                        'with multiple `func_params or setting `input_from`'
+    )
+    with pytest.raises(AssertionError) as e:
+        t1.when_any_succeeded(t2)
+    assert (
+        str(e.value) == 'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
+                        'with multiple `func_params or setting `input_from`'
+    )
+
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op, continue_on_error=True)
+    with pytest.raises(AssertionError) as e:
+        t1.when_all_failed(t2)
+    assert str(e.value) == 'The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`'
+
+    with pytest.raises(AssertionError) as e:
+        t1.when_any_succeeded(t2)
+    assert str(e.value) == 'The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`'
+
+
+def test_dependencies_to_depends():
+    depends = _dependencies_to_depends(['a', 'b', 'c'])
+    assert depends == 'a && b && c'
+
+    assert not _dependencies_to_depends([])
+    assert not _dependencies_to_depends(None)
