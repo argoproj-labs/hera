@@ -324,9 +324,12 @@ class Task:
         t1.next(t2).next(t3)
         """
         assert issubclass(other.__class__, Task)
-        assert not hasattr(
-            other.argo_task, 'depends'
-        ), 'Cannot set `dependencies` when a `depends` field is set via `when_any_succeeded` or `when_all_failed`'
+
+        if hasattr(other.argo_task, 'depends'):
+            if self.argo_task.name in other.argo_task.depends:
+                return other
+            other.argo_task.depends += f' && {self.argo_task.name}'
+            return other
 
         if not hasattr(other.argo_task, 'dependencies'):
             setattr(other.argo_task, 'dependencies', [self.argo_task.name])
@@ -450,10 +453,12 @@ class Task:
 
         if hasattr(other.argo_task, 'dependencies'):
             depends = _dependencies_to_depends(other.argo_task.dependencies)
+        elif hasattr(other.argo_task, 'depends'):
+            depends = other.argo_task.depends
         else:
             depends = ''
 
-        if f'{self.name}.AllFailed' in depends:
+        if f'{self.name}.AnySucceeded' in depends:
             return self
 
         if depends:
@@ -462,7 +467,9 @@ class Task:
             depends = f'{self.name}.AnySucceeded'
 
         if hasattr(other.argo_task, 'dependencies'):
-            other.argo_task.dependencies = None
+            # calling delattr(other.argo_task, 'dependencies') results in AttributeError
+            # so recreate the argo task field
+            self.argo_task = self.get_task_spec()
         setattr(other.argo_task, 'depends', depends)
 
         return self
@@ -501,6 +508,8 @@ class Task:
 
         if hasattr(other.argo_task, 'dependencies'):
             depends = _dependencies_to_depends(other.argo_task.dependencies)
+        elif hasattr(other.argo_task, 'depends'):
+            depends = other.argo_task.depends
         else:
             depends = ''
 
@@ -513,7 +522,9 @@ class Task:
             depends = f'{self.name}.AllFailed'
 
         if hasattr(other.argo_task, 'dependencies'):
-            other.argo_task.dependencies = None
+            # calling delattr(other.argo_task, 'dependencies') results in AttributeError
+            # so recreate the argo task field
+            self.argo_task = self.get_task_spec()
         setattr(other.argo_task, 'depends', depends)
 
         return self

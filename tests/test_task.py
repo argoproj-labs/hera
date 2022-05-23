@@ -613,6 +613,10 @@ def test_all_failed_adds_dependency(no_op, multi_op, mock_model):
     t2 >> t3
     t1.when_all_failed(t3)
     assert t3.argo_task.depends == 't2 && t1.AllFailed'
+    # calling again hits the block that checks it's already added
+    t2 >> t3
+    t1.when_all_failed(t3)
+    assert t3.argo_task.depends == 't2 && t1.AllFailed'
 
 
 def test_any_succeeded_adds_dependency(no_op, multi_op, mock_model):
@@ -643,6 +647,10 @@ def test_any_succeeded_adds_dependency(no_op, multi_op, mock_model):
     t2 >> t3
     t1.when_any_succeeded(t3)
     assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
+    # calling again hits the block that checks it's already added
+    t2 >> t3
+    t1.when_any_succeeded(t3)
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
 
 
 def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
@@ -653,15 +661,14 @@ def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
         t1.when_all_failed(t2)
     assert (
         str(e.value) == 'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
-        'with multiple `func_params or setting `input_from`'
+                        'with multiple `func_params or setting `input_from`'
     )
     with pytest.raises(AssertionError) as e:
         t1.when_any_succeeded(t2)
     assert (
         str(e.value) == 'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
-        'with multiple `func_params or setting `input_from`'
+                        'with multiple `func_params or setting `input_from`'
     )
-
 
     t1 = Task(
         't1',
@@ -680,21 +687,6 @@ def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
     with pytest.raises(AssertionError) as e:
         t1.when_any_succeeded(t2)
     assert str(e.value) == 'The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`'
-
-
-def test_any_successful_adds_dependency(no_op, multi_op, mock_model):
-    t1 = Task(
-        't1',
-        multi_op,
-        func_params=[
-            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
-            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
-            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
-        ],
-    )
-    t2 = Task('t2', no_op)
-    t1.when_any_succeeded(t2)
-    assert t2.argo_task.depends == 't1.AnySucceeded'
 
 
 def test_dependencies_to_depends():
