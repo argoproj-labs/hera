@@ -30,9 +30,9 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Template,
     ResourceRequirements,
     SecurityContext,
+    Toleration as ArgoToleration,
+    VolumeMount,
 )
-from argo_workflows.models import Toleration as ArgoToleration
-from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
 from hera.artifact import Artifact, OutputArtifact
@@ -401,7 +401,7 @@ class Task:
             setattr(continue_on, 'failed', True)
             setattr(self.argo_task, 'continue_on', continue_on)
         else:
-            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
+            setattr(self.argo_task, 'continue_on', self.get_continue_on())
 
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Failed'
         return self.next(other)
@@ -414,7 +414,7 @@ class Task:
             setattr(continue_on, 'error', True)
             setattr(self.argo_task, 'continue_on', continue_on)
         else:
-            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
+            setattr(self.argo_task, 'continue_on', self.get_continue_on())
 
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
         return self.next(other)
@@ -451,10 +451,10 @@ class Task:
             not other.continue_on_fail and not other.continue_on_error
         ), 'The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`'
 
-        if hasattr(other.argo_task, 'dependencies'):
-            depends = _dependencies_to_depends(other.argo_task.dependencies)
-        elif hasattr(other.argo_task, 'depends'):
+        if hasattr(other.argo_task, 'depends'):
             depends = other.argo_task.depends
+        elif hasattr(other.argo_task, 'dependencies'):
+            depends = _dependencies_to_depends(other.argo_task.dependencies)
         else:
             depends = ''
 
@@ -506,10 +506,10 @@ class Task:
             not other.continue_on_fail and not other.continue_on_error
         ), 'The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`'
 
-        if hasattr(other.argo_task, 'dependencies'):
-            depends = _dependencies_to_depends(other.argo_task.dependencies)
-        elif hasattr(other.argo_task, 'depends'):
+        if hasattr(other.argo_task, 'depends'):
             depends = other.argo_task.depends
+        elif hasattr(other.argo_task, 'dependencies'):
+            depends = _dependencies_to_depends(other.argo_task.dependencies)
         else:
             depends = ''
 
@@ -1032,6 +1032,16 @@ class Task:
             ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
         return ts if ts else []
 
+    def get_continue_on(self) -> Optional[IoArgoprojWorkflowV1alpha1ContinueOn]:
+        """Assembles and returns the `continue_on` task setting"""
+        if self.continue_on_error and self.continue_on_fail:
+            return IoArgoprojWorkflowV1alpha1ContinueOn(error=True, failed=True)
+        elif self.continue_on_error:
+            return IoArgoprojWorkflowV1alpha1ContinueOn(error=True)
+        elif self.continue_on_fail:
+            return IoArgoprojWorkflowV1alpha1ContinueOn(failed=True)
+        return None
+
     def get_task_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
 
@@ -1046,10 +1056,7 @@ class Task:
             _check_type=False,
         )
         if self.continue_on_error or self.continue_on_fail:
-            continue_on_error = False if self.continue_on_error is None else self.continue_on_error
-            continue_on_fail = False if self.continue_on_fail is None else self.continue_on_fail
-            cont = IoArgoprojWorkflowV1alpha1ContinueOn(error=continue_on_error, failed=continue_on_fail)
-            setattr(task, 'continue_on', cont)
+            setattr(task, 'continue_on', self.get_continue_on())
 
         if self.template_ref:
             setattr(task, 'template_ref', self.template_ref.argo_spec)

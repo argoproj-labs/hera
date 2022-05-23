@@ -549,9 +549,26 @@ def test_task_adds_other_task_on_failure():
     assert o.argo_task.when == '{{tasks.t.status}} == Failed'
     assert t.argo_task.continue_on.failed
 
+    # this sets the `continue_on` field, which forces the fail after set via `on_failure`
+    t = Task('t', continue_on_error=True)
+    o = Task('o')
+
+    t.on_failure(o)
+    assert o.argo_task.when == '{{tasks.t.status}} == Failed'
+    assert t.argo_task.continue_on.failed
+    assert t.argo_task.continue_on.error
+
 
 def test_task_adds_other_task_on_error():
     t = Task('t')
+    o = Task('o')
+
+    t.on_error(o)
+    assert o.argo_task.when == '{{tasks.t.status}} == Error'
+    assert t.argo_task.continue_on.error
+
+    # this sets the `continue_on` field, which forces the fail after set via `on_failure`
+    t = Task('t', continue_on_error=True)
     o = Task('o')
 
     t.on_error(o)
@@ -563,6 +580,14 @@ def test_task_sets_continue_behavior():
     t = Task('t', continue_on_fail=True, continue_on_error=True)
     assert t.argo_task.continue_on.error
     assert t.argo_task.continue_on.failed
+
+    cont = t.get_continue_on()
+    assert cont.error
+    assert cont.failed
+
+    t = Task('t')
+    cont = t.get_continue_on()
+    assert not cont
 
 
 def test_task_has_expected_retry_limit():
@@ -630,6 +655,11 @@ def test_all_failed_adds_dependency(no_op, multi_op, mock_model):
     t1.when_all_failed(t3)
     assert t3.argo_task.depends == 't2 && t1.AllFailed'
 
+    # now set a new dependency to ensure that the `depends` field is used
+    t4 = Task('t4', no_op)
+    t4 >> t3
+    assert t3.argo_task.depends == 't2 && t1.AllFailed && t4'
+
 
 def test_any_succeeded_adds_dependency(no_op, multi_op, mock_model):
     t1 = Task(
@@ -663,6 +693,11 @@ def test_any_succeeded_adds_dependency(no_op, multi_op, mock_model):
     t2 >> t3
     t1.when_any_succeeded(t3)
     assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
+
+    # now set a new dependency to ensure that the `depends` field is used
+    t4 = Task('t4', no_op)
+    t4 >> t3
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded && t4'
 
 
 def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
