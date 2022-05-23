@@ -8,6 +8,8 @@ from hera.cron_workflow import CronWorkflow
 from hera.cron_workflow_service import CronWorkflowService
 from hera.workflow import Workflow
 from hera.workflow_service import WorkflowService
+from hera.workflow_template import WorkflowTemplate
+from hera.workflow_template_service import WorkflowTemplateService
 
 
 @pytest.fixture(scope='session')
@@ -18,6 +20,16 @@ def ws():
 @pytest.fixture(scope='function')
 def w(ws):
     yield Workflow('w', service=ws)
+
+
+@pytest.fixture(scope='session')
+def wts():
+    yield WorkflowTemplateService(host='https://abc.com', token='abc')
+
+
+@pytest.fixture(scope='function')
+def wt(wts):
+    yield WorkflowTemplate('wt', service=wts)
 
 
 @pytest.fixture(scope='function')

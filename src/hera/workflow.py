@@ -17,7 +17,7 @@ from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks
+from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_service import WorkflowService
 
 
@@ -89,6 +89,13 @@ class Workflow:
         self.workflow_template_ref = workflow_template_ref
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.exit_template = IoArgoprojWorkflowV1alpha1Template(
+            name='exit-template',
+            steps=[],
+            dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
+            parallelism=self.parallelism,
+        )
+
         self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
@@ -162,6 +169,9 @@ class Workflow:
         if namespace is None:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
+
+    def on_exit(self, *t: Task) -> None:
+        on_exit(self, *t)
 
     def delete(self, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
         """Deletes the workflow"""

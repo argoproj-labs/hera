@@ -19,6 +19,7 @@ from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.variable import VariableAsEnv
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
+from hera.workflow_status import WorkflowStatus
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -576,3 +577,9 @@ def test_task_does_not_include_imports_when_no_params_are_specifies(no_op):
     t_script = t.get_script()
     assert 'import' not in t_script
     assert 'pass\n' == t_script
+
+
+def test_task_adds_exit_condition(no_op):
+    t = Task('t', no_op)
+    t.on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+    assert t.argo_task.when == '{{workflow.status}} == Succeeded'
