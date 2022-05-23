@@ -41,6 +41,8 @@ The general format is:
 ### Removed
 
 - JSON import from tasks that do not need it
+- references to `IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec` and instead
+  use `IoArgoprojWorkflowV1alpha1WorkflowSpec`
 
 # 3.2.0 - DATE (15/05/2022)
 

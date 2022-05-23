@@ -5,7 +5,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec,
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
     ObjectMeta,
 )
 
@@ -76,7 +76,7 @@ class WorkflowTemplate:
             parallelism=self.parallelism,
         )
 
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec(
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
         )
 
