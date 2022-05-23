@@ -13,14 +13,12 @@ from argo_workflows.models import (
 )
 
 from hera.host_alias import HostAlias
-from hera.operator import Operator
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_service import WorkflowService
-from hera.workflow_status import WorkflowStatus
 
 
 class Workflow:
