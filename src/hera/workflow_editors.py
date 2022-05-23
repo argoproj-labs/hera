@@ -45,6 +45,8 @@ def add_head(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
 
     Parameters
     ----------
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']
+        Workflow to add head to.
     t: Task
         The task to add to the head of the workflow.
     append: bool = True
@@ -68,6 +70,8 @@ def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
 
     Parameters
     ----------
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']
+        Workflow to add tail to.
     t: Task
         The task to add to the tail of the workflow.
     append: bool = True
@@ -88,3 +92,40 @@ def add_tail(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task, 
     # e.g if A -> B -> C then B.deps = [A] and C.deps = [B] but nothing lists C so C is "free"
     free_tasks = set(task_name_to_task.keys()).difference(dependencies)
     t.argo_task.dependencies = list(free_tasks)
+
+
+def on_exit(
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
+    *ts: Task,
+) -> None:
+    """Appends the given exit tasks to the
+
+    Parameters
+    ----------
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow']
+    *t: Task
+        Collection of tasks to append as exit tasks to w.
+    """
+    assert len(w.dag_template.tasks) >= 1, 'Cannot add an exit condition to empty workflows'
+
+    for t in ts:
+        assert hasattr(t.argo_task, 'when') and 'workflow.status' in getattr(
+            t.argo_task, 'when'
+        ), 'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+
+        if t.template_ref is None:
+            w.spec.templates.append(t.argo_template)
+
+        if t.resources.volumes:
+            for vol in t.resources.volumes:
+                if isinstance(vol, Volume):
+                    # dynamically provisioned volumes need associated claims on the workflow spec
+                    w.spec.volume_claim_templates.append(vol.get_claim_spec())
+                else:
+                    w.spec.volumes.append(vol.get_volume())
+
+        w.exit_template.dag.tasks.append(t.argo_task)
+
+    if not hasattr(w.spec, 'on_exit'):
+        w.spec.templates.append(w.exit_template)
+        setattr(w.spec, "on_exit", w.exit_template.name)

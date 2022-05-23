@@ -22,6 +22,16 @@ def w(ws):
     yield Workflow('w', service=ws)
 
 
+@pytest.fixture(scope='session')
+def wts():
+    yield WorkflowTemplateService(host='https://abc.com', token='abc')
+
+
+@pytest.fixture(scope='function')
+def wt(wts):
+    yield WorkflowTemplate('wt', service=wts)
+
+
 @pytest.fixture(scope='function')
 def cws():
     yield CronWorkflowService(host='https://abc.com', token='abc')

@@ -23,7 +23,7 @@ from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks
+from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 
 
 class CronWorkflow:
@@ -103,6 +103,13 @@ class CronWorkflow:
         self.workflow_template_ref = workflow_template_ref
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.exit_template = IoArgoprojWorkflowV1alpha1Template(
+            name='exit-template',
+            steps=[],
+            dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
+            parallelism=self.parallelism,
+        )
+
         self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
@@ -177,6 +184,9 @@ class CronWorkflow:
 
     def add_tail(self, t: Task, append: bool = True) -> None:
         add_tail(self, t, append=append)
+
+    def on_exit(self, *t: Task) -> None:
+        on_exit(self, *t)
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow in the server"""

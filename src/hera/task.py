@@ -47,6 +47,7 @@ from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import Variable, VariableAsEnv
+from hera.workflow_status import WorkflowStatus
 
 
 class _Item(ModelSimple):
@@ -257,8 +258,8 @@ class Task:
         annotations: Optional[Dict[str, str]] = None,
         variables: Optional[List[Variable]] = None,
         security_context: Optional[TaskSecurityContext] = None,
-        continue_on_fail: bool = False,
-        continue_on_error: bool = False,
+        continue_on_fail: Optional[bool] = None,
+        continue_on_error: Optional[bool] = None,
         template_ref: Optional[TemplateRef] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
@@ -323,6 +324,13 @@ class Task:
         t1.next(t2).next(t3)
         """
         assert issubclass(other.__class__, Task)
+
+        if hasattr(other.argo_task, 'depends'):
+            if self.argo_task.name in other.argo_task.depends:
+                return other
+            other.argo_task.depends += f' && {self.argo_task.name}'
+            return other
+
         if not hasattr(other.argo_task, 'dependencies'):
             setattr(other.argo_task, 'dependencies', [self.argo_task.name])
         else:
@@ -375,6 +383,11 @@ class Task:
         self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
         return other.next(self)
 
+    def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> 'Task':
+        """Execute this task conditionally on a workflow status."""
+        self.argo_task.when = f'{{{{workflow.status}}}} {op.value} {status.value}'
+        return self
+
     def on_success(self, other: 'Task') -> 'Task':
         """Execute `other` when this task succeeds"""
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Succeeded'
@@ -388,7 +401,7 @@ class Task:
             setattr(continue_on, 'failed', True)
             setattr(self.argo_task, 'continue_on', continue_on)
         else:
-            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(failed=self.continue_on_fail))
+            setattr(self.argo_task, 'continue_on', self.get_continue_on())
 
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Failed'
         return self.next(other)
@@ -401,10 +414,120 @@ class Task:
             setattr(continue_on, 'error', True)
             setattr(self.argo_task, 'continue_on', continue_on)
         else:
-            setattr(self.argo_task, 'continue_on', IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error))
+            setattr(self.argo_task, 'continue_on', self.get_continue_on())
 
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
         return self.next(other)
+
+    def when_any_succeeded(self, other: 'Task') -> 'Task':
+        """Sets the other task to execute when any of the tasks of this task group have succeeded.
+
+        Parameters
+        ----------
+        other: Task
+            The other task to execute when any of the tasks of this task group have succeeded.
+
+        Returns
+        -------
+        Task
+            The current task.
+
+        Raises
+        ------
+        AssertionError
+            When the task does not contain multiple `func_params` to process.
+            When the task does not use `input_from`.
+            When the task uses `continue_on_fail` or `continue_on_error`.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
+        """
+        assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
+            'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
+            'with multiple `func_params or setting `input_from`'
+        )
+        assert (
+            not other.continue_on_fail and not other.continue_on_error
+        ), 'The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`'
+
+        if hasattr(other.argo_task, 'depends'):
+            depends = other.argo_task.depends
+        elif hasattr(other.argo_task, 'dependencies'):
+            depends = _dependencies_to_depends(other.argo_task.dependencies)
+        else:
+            depends = ''
+
+        if f'{self.name}.AnySucceeded' in depends:
+            return self
+
+        if depends:
+            depends += f' && {self.name}.AnySucceeded'
+        else:
+            depends = f'{self.name}.AnySucceeded'
+
+        if hasattr(other.argo_task, 'dependencies'):
+            # calling delattr(other.argo_task, 'dependencies') results in AttributeError
+            # so recreate the argo task field
+            self.argo_task = self.get_task_spec()
+        setattr(other.argo_task, 'depends', depends)
+
+        return self
+
+    def when_all_failed(self, other: 'Task') -> 'Task':
+        """Sets the other task to execute when all the tasks of this task group have failed
+
+        Parameters
+        ----------
+        other: Task
+            The other task to execute when all of the tasks of this task group have failed.
+
+        Returns
+        -------
+        Task
+            The current task.
+
+        Raises
+        ------
+        AssertionError
+            When the task does not contain multiple `func_params` to process.
+            When the task does not use `input_from`.
+            When the task uses `continue_on_fail` or `continue_on_error`.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
+        """
+        assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
+            'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
+            'with multiple `func_params or setting `input_from`'
+        )
+        assert (
+            not other.continue_on_fail and not other.continue_on_error
+        ), 'The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`'
+
+        if hasattr(other.argo_task, 'depends'):
+            depends = other.argo_task.depends
+        elif hasattr(other.argo_task, 'dependencies'):
+            depends = _dependencies_to_depends(other.argo_task.dependencies)
+        else:
+            depends = ''
+
+        if f'{self.name}.AllFailed' in depends:
+            return self
+
+        if depends:
+            depends += f' && {self.name}.AllFailed'
+        else:
+            depends = f'{self.name}.AllFailed'
+
+        if hasattr(other.argo_task, 'dependencies'):
+            # calling delattr(other.argo_task, 'dependencies') results in AttributeError
+            # so recreate the argo task field
+            self.argo_task = self.get_task_spec()
+        setattr(other.argo_task, 'depends', depends)
+
+        return self
 
     def validate(self):
         """
@@ -620,7 +743,7 @@ class Task:
                 # at this point the init passed validation, so this condition is always false when self.input_from
                 # is specified
 
-                # if there's more than 1 input, it's a parallel task so we map the param names of the
+                # if there's more than 1 input, it's a parallel task, so we map the param names of the
                 # first series of params to item.param_name since the keys are all the same for the func_params
                 for param_name in self.func_params[0].keys():
                     parameters.append(
@@ -650,7 +773,15 @@ class Task:
         """
         extract = "import json\n"
         for param in self.parameters:
-            extract += f"""{param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            if self.input_from:
+                # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
+                # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
+                # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
+                # payload of the script is not necessary when regular input is set on the task via `func_params`
+                extract += f"""try: {param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+                extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
+            else:
+                extract += f"""{param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
         return textwrap.dedent(extract)
 
     def get_script(self) -> str:
@@ -664,9 +795,8 @@ class Task:
         str
             Final formatted script.
         """
-        script_extra = self.get_param_script_portion()
-
         script = ''
+        script_extra = self.get_param_script_portion() if inspect.getfullargspec(self.func).args else None
         if script_extra:
             script = copy.deepcopy(script_extra)
             script += '\n'
@@ -848,7 +978,8 @@ class Task:
         if retry_strategy:
             setattr(template, 'retry_strategy', retry_strategy)
 
-        if self.get_script_def():
+        script_def = self.get_script_def()
+        if script_def:
             setattr(template, 'script', self.get_script_def())
         else:
             setattr(template, 'container', self.get_container())
@@ -901,6 +1032,16 @@ class Task:
             ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
         return ts if ts else []
 
+    def get_continue_on(self) -> Optional[IoArgoprojWorkflowV1alpha1ContinueOn]:
+        """Assembles and returns the `continue_on` task setting"""
+        if self.continue_on_error and self.continue_on_fail:
+            return IoArgoprojWorkflowV1alpha1ContinueOn(error=True, failed=True)
+        elif self.continue_on_error:
+            return IoArgoprojWorkflowV1alpha1ContinueOn(error=True)
+        elif self.continue_on_fail:
+            return IoArgoprojWorkflowV1alpha1ContinueOn(failed=True)
+        return None
+
     def get_task_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
 
@@ -909,13 +1050,13 @@ class Task:
         V1alpha1DAGTask
             The graph task representation.
         """
-        continue_on = IoArgoprojWorkflowV1alpha1ContinueOn(error=self.continue_on_error, failed=self.continue_on_fail)
         task = IoArgoprojWorkflowV1alpha1DAGTask(
             name=self.name,
-            continue_on=continue_on,
             arguments=self.arguments,
             _check_type=False,
         )
+        if self.continue_on_error or self.continue_on_fail:
+            setattr(task, 'continue_on', self.get_continue_on())
 
         if self.template_ref:
             setattr(task, 'template_ref', self.template_ref.argo_spec)
@@ -928,3 +1069,12 @@ class Task:
             items = self.get_parallel_items()
             setattr(task, 'with_items', items)
         return task
+
+
+def _dependencies_to_depends(dependencies: List[str]) -> str:
+    if not dependencies or len(dependencies) == 0:
+        return ''
+    depends = f'{dependencies[0]}'
+    for dep in dependencies[1:]:
+        depends += f' && {dep}'
+    return depends

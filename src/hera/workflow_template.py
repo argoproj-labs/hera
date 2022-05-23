@@ -4,15 +4,15 @@ from typing import Any, Dict, Optional
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec,
     ObjectMeta,
 )
 
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks
+from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_template_service import WorkflowTemplateService
 
 
@@ -62,6 +62,13 @@ class WorkflowTemplate:
         self.labels = labels
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
+        self.exit_template = IoArgoprojWorkflowV1alpha1Template(
+            name='exit-template',
+            steps=[],
+            dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
+            parallelism=self.parallelism,
+        )
+
         self.template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             steps=[],
@@ -69,7 +76,7 @@ class WorkflowTemplate:
             parallelism=self.parallelism,
         )
 
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec(
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
             templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
         )
 
@@ -101,6 +108,9 @@ class WorkflowTemplate:
 
     def add_tail(self, t: Task, append: bool = True) -> None:
         add_tail(self, t, append=append)
+
+    def on_exit(self, *t: Task) -> None:
+        on_exit(self, *t)
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""

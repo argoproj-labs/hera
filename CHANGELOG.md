@@ -29,12 +29,28 @@ The general format is:
 
 ```
 
-# 3.3.0 - DATE (16/04/2022)
+# 3.4.0 - DATE (23/05/2022)
 
 ### Added
 
 - Workflow and WorkflowTemplate visualisation. Generates an image with the visual
   representation of the specific Workflow or WorkflowTemplate.
+
+# 3.3.0 - DATE (23/05/2022)
+
+### Added
+
+- `AnySucceeded`/`AllFailed` support on tasks
+- `OnExit` condition on workflows with tasks conditioned on `WorkflowStatus`
+- plain string support when using `InputFrom`
+- `argo-workflows==6.3.5` dependency
+
+### Removed
+
+- JSON import from tasks that do not need it
+- references to `IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec` and instead
+  use `IoArgoprojWorkflowV1alpha1WorkflowSpec`
+>>>>>>> main
 
 # 3.2.0 - DATE (15/05/2022)
 

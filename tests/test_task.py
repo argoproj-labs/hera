@@ -14,11 +14,12 @@ from hera.resources import Resources
 from hera.retry import Retry
 from hera.retry_policy import RetryPolicy
 from hera.security_context import TaskSecurityContext
-from hera.task import Task
+from hera.task import Task, _dependencies_to_depends
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.variable import VariableAsEnv
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
+from hera.workflow_status import WorkflowStatus
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -100,19 +101,19 @@ def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_param_script_portion()
-    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+    assert script == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
 
 
 def test_script_getter_returns_expected_string(op, typed_op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert script == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
 
     t = Task('t', typed_op, [{'a': 1}])
     script = t.get_script()
     assert (
-        script
-        == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+        script == 'import json\n'
+        'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
     )
 
 
@@ -279,7 +280,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
-    assert tt.script.source == 'import json\na = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert tt.script.source == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
@@ -345,6 +346,16 @@ def test_task_validation_fails_on_input_from_plus_input_artifact(op, in_artifact
     with pytest.raises(AssertionError) as e:
         Task('t', op, input_from=InputFrom(name='test', parameters=['a']), input_artifacts=[in_artifact])
     assert str(e.value) == 'cannot supply both InputFrom and Artifacts'
+
+
+def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
+    t = Task('t', op, input_from=InputFrom(name='some-other-task', parameters=['a']))
+    script = t.get_param_script_portion()
+    assert (
+        script == 'import json\n'
+        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+    )
 
 
 def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
@@ -536,9 +547,26 @@ def test_task_adds_other_task_on_failure():
     assert o.argo_task.when == '{{tasks.t.status}} == Failed'
     assert t.argo_task.continue_on.failed
 
+    # this sets the `continue_on` field, which forces the fail after set via `on_failure`
+    t = Task('t', continue_on_error=True)
+    o = Task('o')
+
+    t.on_failure(o)
+    assert o.argo_task.when == '{{tasks.t.status}} == Failed'
+    assert t.argo_task.continue_on.failed
+    assert t.argo_task.continue_on.error
+
 
 def test_task_adds_other_task_on_error():
     t = Task('t')
+    o = Task('o')
+
+    t.on_error(o)
+    assert o.argo_task.when == '{{tasks.t.status}} == Error'
+    assert t.argo_task.continue_on.error
+
+    # this sets the `continue_on` field, which forces the fail after set via `on_failure`
+    t = Task('t', continue_on_error=True)
     o = Task('o')
 
     t.on_error(o)
@@ -550,6 +578,14 @@ def test_task_sets_continue_behavior():
     t = Task('t', continue_on_fail=True, continue_on_error=True)
     assert t.argo_task.continue_on.error
     assert t.argo_task.continue_on.failed
+
+    cont = t.get_continue_on()
+    assert cont.error
+    assert cont.failed
+
+    t = Task('t')
+    cont = t.get_continue_on()
+    assert not cont
 
 
 def test_task_has_expected_retry_limit():
@@ -569,3 +605,138 @@ def test_task_uses_expected_template_ref():
     assert hasattr(t, 'template_ref')
     assert t.template_ref.name == 'workflow-template'
     assert t.template_ref.template == 'template'
+
+
+def test_task_does_not_include_imports_when_no_params_are_specifies(no_op):
+    t = Task('t', no_op)
+    t_script = t.get_script()
+    assert 'import' not in t_script
+    assert 'pass\n' == t_script
+
+
+def test_task_adds_exit_condition(no_op):
+    t = Task('t', no_op)
+    t.on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+    assert t.argo_task.when == '{{workflow.status}} == Succeeded'
+
+
+def test_all_failed_adds_dependency(no_op, multi_op, mock_model):
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t1.when_all_failed(t2)
+    assert t2.argo_task.depends == 't1.AllFailed'
+
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t3 = Task('t3', no_op)
+    t2 >> t3
+    t1.when_all_failed(t3)
+    assert t3.argo_task.depends == 't2 && t1.AllFailed'
+    # calling again hits the block that checks it's already added
+    t2 >> t3
+    t1.when_all_failed(t3)
+    assert t3.argo_task.depends == 't2 && t1.AllFailed'
+
+    # now set a new dependency to ensure that the `depends` field is used
+    t4 = Task('t4', no_op)
+    t4 >> t3
+    assert t3.argo_task.depends == 't2 && t1.AllFailed && t4'
+
+
+def test_any_succeeded_adds_dependency(no_op, multi_op, mock_model):
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t1.when_any_succeeded(t2)
+    assert t2.argo_task.depends == 't1.AnySucceeded'
+
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op)
+    t3 = Task('t3', no_op)
+    t2 >> t3
+    t1.when_any_succeeded(t3)
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
+    # calling again hits the block that checks it's already added
+    t2 >> t3
+    t1.when_any_succeeded(t3)
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded'
+
+    # now set a new dependency to ensure that the `depends` field is used
+    t4 = Task('t4', no_op)
+    t4 >> t3
+    assert t3.argo_task.depends == 't2 && t1.AnySucceeded && t4'
+
+
+def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
+    t1 = Task('t1', no_op)
+    t2 = Task('t2', no_op)
+
+    with pytest.raises(AssertionError) as e:
+        t1.when_all_failed(t2)
+    assert (
+        str(e.value) == 'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
+        'with multiple `func_params or setting `input_from`'
+    )
+    with pytest.raises(AssertionError) as e:
+        t1.when_any_succeeded(t2)
+    assert (
+        str(e.value) == 'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
+        'with multiple `func_params or setting `input_from`'
+    )
+
+    t1 = Task(
+        't1',
+        multi_op,
+        func_params=[
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+            {'a': 1, 'b': {'d': 2, 'e': 3}, 'c': mock_model()},
+        ],
+    )
+    t2 = Task('t2', no_op, continue_on_error=True)
+    with pytest.raises(AssertionError) as e:
+        t1.when_all_failed(t2)
+    assert str(e.value) == 'The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`'
+
+    with pytest.raises(AssertionError) as e:
+        t1.when_any_succeeded(t2)
+    assert str(e.value) == 'The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`'
+
+
+def test_dependencies_to_depends():
+    depends = _dependencies_to_depends(['a', 'b', 'c'])
+    assert depends == 'a && b && c'
+
+    assert not _dependencies_to_depends([])
+    assert not _dependencies_to_depends(None)

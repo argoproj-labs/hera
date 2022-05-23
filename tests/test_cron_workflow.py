@@ -15,10 +15,12 @@ from argo_workflows.models import HostAlias as ArgoHostAlias
 
 from hera.cron_workflow import CronWorkflow
 from hera.host_alias import HostAlias
+from hera.operator import Operator
 from hera.resources import Resources
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
+from hera.workflow_status import WorkflowStatus
 
 
 def test_wf_contains_specified_service_account(cws, schedule):
@@ -296,3 +298,49 @@ def test_wf_adds_host_aliases(ws):
 
     assert w.spec.host_aliases[0] == ArgoHostAlias(hostnames=["host1", "host2"], ip="0.0.0.0")
     assert w.spec.host_aliases[1] == ArgoHostAlias(hostnames=["host3"], ip="1.1.1.1")
+
+
+def test_wf_adds_exit_tasks(cw, no_op):
+    t1 = Task('t1', no_op)
+    cw.add_task(t1)
+
+    t2 = Task(
+        't2',
+        no_op,
+        resources=Resources(volumes=[SecretVolume(name='my-vol', mount_path='/mnt/my-vol', secret_name='my-secret')]),
+    ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+    cw.on_exit(t2)
+
+    t3 = Task(
+        't3', no_op, resources=Resources(volumes=[Volume(name='my-vol', mount_path='/mnt/my-vol', size='5Gi')])
+    ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+    cw.on_exit(t3)
+
+    assert len(cw.exit_template.dag.tasks) == 2
+    assert len(cw.spec.templates) == 5
+
+
+def test_wf_catches_tasks_without_exit_status_conditions(cw, no_op):
+    t1 = Task('t1', no_op)
+    cw.add_task(t1)
+
+    t2 = Task('t2', no_op)
+    with pytest.raises(AssertionError) as e:
+        cw.on_exit(t2)
+    assert (
+        str(e.value)
+        == 'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+    )
+
+
+def test_wf_catches_exit_tasks_without_parent_workflow_tasks(cw, no_op):
+    t1 = Task('t1', no_op)
+    with pytest.raises(AssertionError) as e:
+        cw.on_exit(t1)
+    assert str(e.value) == 'Cannot add an exit condition to empty workflows'
+
+
+def test_wf_contains_expected_default_exit_template(cw):
+    assert cw.exit_template
+    assert cw.exit_template.name == 'exit-template'
+    assert cw.exit_template.dag.tasks == []
