@@ -304,10 +304,16 @@ def test_wf_adds_exit_tasks(cw, no_op):
     t1 = Task('t1', no_op)
     cw.add_task(t1)
 
-    t2 = Task('t2', no_op).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+    t2 = Task(
+        't2',
+        no_op,
+        resources=Resources(volumes=[SecretVolume(name='my-vol', mount_path='/mnt/my-vol', secret_name='my-secret')]),
+    ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
     cw.on_exit(t2)
 
-    t3 = Task('t3', no_op).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+    t3 = Task(
+        't3', no_op, resources=Resources(volumes=[Volume(name='my-vol', mount_path='/mnt/my-vol', size='5Gi')])
+    ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
     cw.on_exit(t3)
 
     assert len(cw.exit_template.dag.tasks) == 2
@@ -321,13 +327,20 @@ def test_wf_catches_tasks_without_exit_status_conditions(cw, no_op):
     t2 = Task('t2', no_op)
     with pytest.raises(AssertionError) as e:
         cw.on_exit(t2)
-    assert str(e.value) == \
-           'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+    assert (
+        str(e.value)
+        == 'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+    )
 
 
 def test_wf_catches_exit_tasks_without_parent_workflow_tasks(cw, no_op):
     t1 = Task('t1', no_op)
     with pytest.raises(AssertionError) as e:
         cw.on_exit(t1)
-    assert str(e.value) == \
-           'Cannot add an exit condition to empty workflows'
+    assert str(e.value) == 'Cannot add an exit condition to empty workflows'
+
+
+def test_wf_contains_expected_default_exit_template(cw):
+    assert cw.exit_template
+    assert cw.exit_template.name == 'exit-template'
+    assert cw.exit_template.dag.tasks == []

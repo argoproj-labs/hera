@@ -4,9 +4,11 @@ import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
 
 from hera.operator import Operator
+from hera.resources import Resources
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
+from hera.volumes import SecretVolume, Volume
 from hera.workflow_status import WorkflowStatus
 from hera.workflow_template import WorkflowTemplate
 
@@ -108,10 +110,16 @@ def test_wf_adds_exit_tasks(wt, no_op):
     t1 = Task('t1', no_op)
     wt.add_task(t1)
 
-    t2 = Task('t2', no_op).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+    t2 = Task(
+        't2',
+        no_op,
+        resources=Resources(volumes=[SecretVolume(name='my-vol', mount_path='/mnt/my-vol', secret_name='my-secret')]),
+    ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
     wt.on_exit(t2)
 
-    t3 = Task('t3', no_op).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+    t3 = Task(
+        't3', no_op, resources=Resources(volumes=[Volume(name='my-vol', mount_path='/mnt/my-vol', size='5Gi')])
+    ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
     wt.on_exit(t3)
 
     assert len(wt.exit_template.dag.tasks) == 2
@@ -125,13 +133,20 @@ def test_wf_catches_tasks_without_exit_status_conditions(wt, no_op):
     t2 = Task('t2', no_op)
     with pytest.raises(AssertionError) as e:
         wt.on_exit(t2)
-    assert str(e.value) == \
-           'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+    assert (
+        str(e.value)
+        == 'Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it'
+    )
 
 
 def test_wf_catches_exit_tasks_without_parent_workflow_tasks(wt, no_op):
     t1 = Task('t1', no_op)
     with pytest.raises(AssertionError) as e:
         wt.on_exit(t1)
-    assert str(e.value) == \
-           'Cannot add an exit condition to empty workflows'
+    assert str(e.value) == 'Cannot add an exit condition to empty workflows'
+
+
+def test_wf_contains_expected_default_exit_template(wt):
+    assert wt.exit_template
+    assert wt.exit_template.name == 'exit-template'
+    assert wt.exit_template.dag.tasks == []

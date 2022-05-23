@@ -7,9 +7,9 @@ from hera.artifact import InputArtifact, OutputArtifact
 from hera.cron_workflow import CronWorkflow
 from hera.cron_workflow_service import CronWorkflowService
 from hera.workflow import Workflow
+from hera.workflow_service import WorkflowService
 from hera.workflow_template import WorkflowTemplate
 from hera.workflow_template_service import WorkflowTemplateService
-from hera.workflow_service import WorkflowService
 
 
 @pytest.fixture(scope='session')
