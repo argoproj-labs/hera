@@ -23,7 +23,7 @@ def failure():
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow("conditional", ws)
+w = Workflow("visualize-conditional", ws)
 
 r = Task('random', random)
 s = Task('success', success)
