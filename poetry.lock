@@ -525,7 +525,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <3.11"
-content-hash = "54d2b61dfd5651319437a2f571f89186603897093c69b6aecaf8c702ff1467d6"
+content-hash = "2562abc54ccfd43563303db795352170aea9b079570e95058e0e60242a2e7e8d"
 
 [metadata.files]
 argo-workflows = [
