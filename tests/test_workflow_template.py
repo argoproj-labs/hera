@@ -212,21 +212,3 @@ def test_workflow_template_visualize_connection_style(wt, no_op):
     # check the style for dependency
     assert element_len_list[-2][-1][7:13] == "dotted"
     assert element_len_list[-1][-1][7:13] == "dotted"
-
-
-def test_workflow_template_viz_render_is_not_test(wt, no_op):
-    "workflows-graph-output/{self.name}"
-    t1 = Task('t1', no_op)
-    t2 = Task('t2', no_op)
-    t1 >> t2
-    wt.add_tasks(t1, t2)
-
-    h2 = Task('head2', no_op)
-    wt.add_head(h2)
-
-    # call visualize()
-    wt.visualize()
-
-    assert os.path.isdir("workflows-graph-output/") == True
-
-    shutil.rmtree("workflows-graph-output")
