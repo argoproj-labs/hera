@@ -1,7 +1,5 @@
-import os
-import shutil
-import tempfile
 from unittest.mock import Mock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
@@ -411,11 +409,16 @@ def test_visualize_not_in_test_mode(w, no_op):
     # add tasks
     w.add_tasks(r, s, f)
 
-    # call visualize()
-    graph_obj = w.visualize()
-    element_len_list = [item.split(' ') for item in graph_obj.body]
+    # call visualize() and get error
+    import graphviz as gviz
 
-    # check the style for dependency
-    assert element_len_list[-2][-1][7:13] == "dotted"
-    assert element_len_list[-1][-1][7:13] == "dotted"
-    shutil.rmtree(f"workflows-graph-output")
+    err = gviz.backend.ExecutableNotFound
+    graphviz = MagicMock(
+        Digraph=lambda: MagicMock(
+            render=MagicMock(side_effect=err("Can't find dot!"))
+        )
+    )
+    graphviz.backend.ExecutableNotFound = err
+    with patch.dict("sys.modules", graphviz=graphviz):
+        with pytest.raises(err):
+            w.visualize()

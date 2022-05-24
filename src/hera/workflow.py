@@ -181,7 +181,7 @@ class Workflow:
         return self.service.delete(self.name)
 
     # extra function
-    def visualize(self, format: str = "pdf", is_test: bool = False) -> Optional[Any]:
+    def visualize(self, format: str = "pdf", view: bool = False, is_test: bool = False) -> Optional[Any]:
         """
         Creates graphviz object for representing the current Workflow. This graphviz
         will be rendered in a new window. If a `filename` is provided, the object
@@ -189,6 +189,7 @@ class Workflow:
         Args:
             - format (str, optional): A format specifying the output file type; defaults to 'pdf'.
               Refer to http://www.graphviz.org/doc/info/output.html for valid formats
+            - view (bool): Attribute to trigger new window to pop up. Defaults to False.
             - is_test (bool): Used for testing without actually rendering a pdf.
 
         Raises:
@@ -225,5 +226,5 @@ class Workflow:
         if is_test:
             return dot
         else:
-            dot.render(f'workflows-graph-output/{self.name}', view=True, format=format, cleanup=True)
+            dot.render(f'workflows-graph-output/{self.name}', view=view, format=format, cleanup=True)
             return dot
