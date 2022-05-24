@@ -227,9 +227,11 @@ def test_workflow_template_viz_not_in_test_mode(wt, no_op):
     # add tasks
     wt.add_tasks(r, s, f)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        with open(os.path.join(tmpdir, "viz"), "wb"):
-            graph = wt.visualize()
-        assert os.path.exists(f"workflows-graph-output/{wt.name}.pdf")
-        shutil.rmtree(f"workflows-graph-output")
-        assert not os.path.exists(f"workflows-graph-output/{wt.name}.pdf")
+    # call visualize()
+    graph_obj = wt.visualize()
+    element_len_list = [item.split(' ') for item in graph_obj.body]
+
+    # check the style for dependency
+    assert element_len_list[-2][-1][7:13] == "dotted"
+    assert element_len_list[-1][-1][7:13] == "dotted"
+    shutil.rmtree(f"workflows-graph-output")

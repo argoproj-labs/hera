@@ -396,6 +396,10 @@ def test_workflow_visualize_connection_style(w, no_op):
 
 
 def test_visualize_not_in_test_mode(w, no_op):
+    """
+    Test for checking if the style (filled, dotted...)
+    applied according to dependency.
+    """
     r = Task('Random', no_op)
     s = Task('Success', no_op)
     f = Task('Failure', no_op)
@@ -407,9 +411,11 @@ def test_visualize_not_in_test_mode(w, no_op):
     # add tasks
     w.add_tasks(r, s, f)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        with open(os.path.join(tmpdir, "viz"), "wb"):
-            graph = w.visualize()
-        assert os.path.exists(f"workflows-graph-output/{w.name}.pdf")
-        shutil.rmtree(f"workflows-graph-output")
-        assert not os.path.exists(f"workflows-graph-output/{w.name}.pdf")
+    # call visualize()
+    graph_obj = w.visualize()
+    element_len_list = [item.split(' ') for item in graph_obj.body]
+
+    # check the style for dependency
+    assert element_len_list[-2][-1][7:13] == "dotted"
+    assert element_len_list[-1][-1][7:13] == "dotted"
+    shutil.rmtree(f"workflows-graph-output")
