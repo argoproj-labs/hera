@@ -211,30 +211,3 @@ def test_workflow_template_visualize_connection_style(wt, no_op):
     # check the style for dependency
     assert element_len_list[-2][-1][7:13] == "dotted"
     assert element_len_list[-1][-1][7:13] == "dotted"
-
-
-def test_workflow_template_viz_not_in_test_mode(wt, no_op):
-    r = Task('Random', no_op)
-    s = Task('Success', no_op)
-    f = Task('Failure', no_op)
-
-    # define dependency
-    r.on_success(s)
-    r.on_failure(f)
-
-    # add tasks
-    wt.add_tasks(r, s, f)
-
-    # call visualize() and get error
-    import graphviz as gviz
-
-    err = gviz.backend.ExecutableNotFound
-    graphviz = MagicMock(
-        Digraph=lambda: MagicMock(
-            render=MagicMock(side_effect=err("Can't find dot!"))
-        )
-    )
-    graphviz.backend.ExecutableNotFound = err
-    with patch.dict("sys.modules", graphviz=graphviz):
-        with pytest.raises(err):
-            wt.visualize()
