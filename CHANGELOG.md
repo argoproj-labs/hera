@@ -29,7 +29,7 @@ The general format is:
 
 ```
 
-# 3.4.0 - DATE (23/05/2022)
+# 3.4.0 - DATE (24/05/2022)
 
 ### Added
 

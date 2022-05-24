@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 from unittest.mock import Mock
 
 import pytest
@@ -392,3 +393,23 @@ def test_workflow_visualize_connection_style(w, no_op):
     # check the style for dependency
     assert element_len_list[-2][-1][7:13] == "dotted"
     assert element_len_list[-1][-1][7:13] == "dotted"
+
+
+def test_visualize_not_in_test_mode(w, no_op):
+    r = Task('Random', no_op)
+    s = Task('Success', no_op)
+    f = Task('Failure', no_op)
+
+    # define dependency
+    r.on_success(s)
+    r.on_failure(f)
+
+    # add tasks
+    w.add_tasks(r, s, f)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with open(os.path.join(tmpdir, "viz"), "wb"):
+            graph = w.visualize()
+        assert os.path.exists(f"workflows-graph-output/{w.name}.pdf")
+        shutil.rmtree(f"workflows-graph-output")
+        assert not os.path.exists(f"workflows-graph-output/{w.name}.pdf")
