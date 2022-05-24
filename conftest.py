@@ -38,16 +38,6 @@ def cws():
 
 
 @pytest.fixture(scope='session')
-def wts():
-    yield WorkflowTemplateService(host='https://abc.com', token='abc')
-
-
-@pytest.fixture(scope='function')
-def wt(wts):
-    yield WorkflowTemplate('w', service=wts)
-
-
-@pytest.fixture(scope='session')
 def schedule():
     yield "* * * * *"
 

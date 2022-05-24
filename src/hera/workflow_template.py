@@ -1,11 +1,12 @@
 """The implementation of a Hera workflowTemplate for Argo-based workflowTemplates"""
 from typing import Any, Dict, Optional
 
+import graphviz
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
-    IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec,
     ObjectMeta,
 )
 
@@ -76,7 +77,7 @@ class WorkflowTemplate:
             parallelism=self.parallelism,
         )
 
-        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec(
             templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
         )
 
@@ -135,13 +136,6 @@ class WorkflowTemplate:
         Returns:
             - Optional[Any]: If called in test mode return the graph object
         """
-
-        try:
-            import graphviz
-        except ImportError as exc:
-            msg = "This feature requires graphviz.\n"
-            raise ImportError(msg) from exc
-
         # set name
         dot = graphviz.Digraph(comment=self.name)
 

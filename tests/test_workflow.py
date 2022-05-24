@@ -1,3 +1,5 @@
+import os
+import shutil
 from unittest.mock import Mock
 
 import pytest
@@ -365,3 +367,46 @@ def test_workflow_visualize_generated_graph_structure(w, no_op):
     assert 4 == element_len_list_new.count(2)
     # check number of edge (dependency)
     assert 6 == element_len_list_new.count(4)
+
+
+def test_workflow_visualize_connection_style(w, no_op):
+    """
+    Test for checking if the style (filled, dotted...)
+    applied according to dependency.
+    """
+    r = Task('Random', no_op)
+    s = Task('Success', no_op)
+    f = Task('Failure', no_op)
+
+    # define dependency
+    r.on_success(s)
+    r.on_failure(f)
+
+    # add tasks
+    w.add_tasks(r, s, f)
+
+    # call visualize()
+    graph_obj = w.visualize(is_test=True)
+    element_len_list = [item.split(' ') for item in graph_obj.body]
+
+    # check the style for dependency
+    assert element_len_list[-2][-1][7:13] == "dotted"
+    assert element_len_list[-1][-1][7:13] == "dotted"
+
+
+def test_workflow_viz_render_is_not_test(w, no_op):
+    "workflows-graph-output/{self.name}"
+    t1 = Task('t1', no_op)
+    t2 = Task('t2', no_op)
+    t1 >> t2
+    w.add_tasks(t1, t2)
+
+    h2 = Task('head2', no_op)
+    w.add_head(h2)
+
+    # call visualize()
+    w.visualize()
+
+    assert os.path.isdir("workflows-graph-output/") == True
+
+    shutil.rmtree("workflows-graph-output")

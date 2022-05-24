@@ -1,6 +1,7 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 from typing import Any, Dict, List, Optional, Tuple
 
+import graphviz
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
@@ -196,13 +197,6 @@ class Workflow:
         Returns:
             - Optional[Any]: If called in test mode return the graph object
         """
-
-        try:
-            import graphviz
-        except ImportError as exc:
-            msg = "This feature requires graphviz.\n"
-            raise ImportError(msg) from exc
-
         # set name
         dot = graphviz.Digraph(comment=self.name)
 
