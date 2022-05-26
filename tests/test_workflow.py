@@ -1,5 +1,4 @@
-from unittest.mock import Mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
@@ -368,7 +367,7 @@ def test_workflow_visualize_generated_graph_structure(w, no_op):
     assert 6 == element_len_list_new.count(4)
 
 
-def test_workflow_visualize_connection_style(w, no_op):
+def test_wf_visualize_connection_style(w, no_op):
     """
     Test for checking if the style (filled, dotted...)
     applied according to dependency.
@@ -391,3 +390,26 @@ def test_workflow_visualize_connection_style(w, no_op):
     # check the style for dependency
     assert element_len_list[-2][-1][7:13] == "dotted"
     assert element_len_list[-1][-1][7:13] == "dotted"
+
+
+def test_wf_viz_not_in_test_mode(w, no_op):
+    r = Task('Random', no_op)
+    s = Task('Success', no_op)
+    f = Task('Failure', no_op)
+
+    # define dependency
+    r.on_success(s)
+    r.on_failure(f)
+
+    # add tasks
+    w.add_tasks(r, s, f)
+
+    # call visualize() and get error
+    import graphviz as gviz
+
+    err = gviz.backend.ExecutableNotFound
+    graphviz = MagicMock(Digraph=lambda: MagicMock(render=MagicMock(side_effect=err("Can't find dot!"))))
+    graphviz.backend.ExecutableNotFound = err
+    with patch.dict("sys.modules", graphviz=graphviz):
+        with pytest.raises(err):
+            w.visualize()

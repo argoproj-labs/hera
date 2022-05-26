@@ -179,11 +179,13 @@ class Workflow:
         return self.service.delete(self.name)
 
     # extra function
-    def visualize(self, format: str = "pdf", view: bool = False, is_test: bool = False) -> Optional[Any]:
+    def visualize(self, format: str = "pdf", view: bool = True, is_test: bool = False) -> Optional[Any]:
         """
         Creates graphviz object for representing the current Workflow. This graphviz
         will be rendered in a new window. If a `filename` is provided, the object
         will not be rendered and instead saved to the location specified.
+        For this feature Graphviz needs to be installed on your system.
+        See the package here: https://pypi.org/project/graphviz/ .
         Args:
             - format (str, optional): A format specifying the output file type; defaults to 'pdf'.
               Refer to http://www.graphviz.org/doc/info/output.html for valid formats
