@@ -2,7 +2,7 @@
 This example showcases how Hera supports mounting existing volumes. These volumes are expected to already be
 provisioned and available as a persistent volume claim in the K8S cluster where Argo runs.
 """
-from hera.existing_volume import ExistingVolume
+from hera.volumes import ExistingVolume
 from hera.resources import Resources
 from hera.task import Task
 from hera.workflow import Workflow
