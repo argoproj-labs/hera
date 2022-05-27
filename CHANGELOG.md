@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 3.3.1 - DATE (26/05/2022)
+
+### Fixed
+
+- Fix Task raise error with input_from without func
+
 # 3.3.0 - DATE (23/05/2022)
 
 ### Added

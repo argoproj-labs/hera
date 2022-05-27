@@ -695,12 +695,18 @@ class Task:
         parameters = []
 
         if self.input_from:
-            # this represents input from another step, which only requires parameter name specifications
-            # the intersection between arg specifications and input_from parameters represents the arguments
-            # that come in from other tasks
-            args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
-            for arg in args:
-                parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+            if self.func is not None:
+                # this represents input from another step, which only requires parameter name specifications
+                # the intersection between arg specifications and input_from parameters represents the arguments
+                # that come in from other tasks
+                args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
+                for arg in args:
+                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+            else:
+                for parameter in self.input_from.parameters:
+                    parameters.append(
+                        IoArgoprojWorkflowV1alpha1Parameter(name=parameter, value=f'{{{{item.{parameter}}}}}')
+                    )
         if self.variables:
             parameters += [variable.get_argument_parameter() for variable in self.variables]
         if self.func:
