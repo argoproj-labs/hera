@@ -358,6 +358,14 @@ def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
     )
 
 
+def test_task_adds_input_from_without_func():
+    t = Task('t', input_from=InputFrom(name='test', parameters=['a']))
+    parameters = t.get_parameters()
+    assert len(parameters) == 1
+    assert parameters[0].name == 'a'
+    assert parameters[0].value == '{{item.a}}'
+
+
 def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 

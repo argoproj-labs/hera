@@ -29,12 +29,18 @@ The general format is:
 
 ```
 
-# 3.4.0 - DATE (24/05/2022)
+# 3.4.0 - DATE (29/05/2022)
 
 ### Added
 
 - Workflow and WorkflowTemplate visualisation. Generates an image with the visual
   representation of the specific Workflow or WorkflowTemplate.
+
+# 3.3.1 - DATE (26/05/2022)
+
+### Fixed
+
+- Fix Task raise error with input_from without func
 
 # 3.3.0 - DATE (23/05/2022)
 
@@ -50,7 +56,6 @@ The general format is:
 - JSON import from tasks that do not need it
 - references to `IoArgoprojWorkflowV1alpha1WorkflowTemplateSpec` and instead
   use `IoArgoprojWorkflowV1alpha1WorkflowSpec`
->>>>>>> main
 
 # 3.2.0 - DATE (15/05/2022)
 
