@@ -4,8 +4,8 @@ from typing import Dict, Optional
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     ObjectMeta,
 )
 
@@ -77,7 +77,11 @@ class WorkflowTemplate:
         )
 
         self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-            templates=[self.template], entrypoint=self.name, volumes=[], volume_claim_templates=[]
+            templates=[self.template],
+            entrypoint=self.name,
+            volumes=[],
+            volume_claim_templates=[],
+            parallelism=self.parallelism,
         )
 
         if ttl_strategy:
