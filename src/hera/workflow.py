@@ -110,6 +110,7 @@ class Workflow:
                 entrypoint=self.workflow_template_ref,
                 volumes=[],
                 volume_claim_templates=[],
+                parallelism=self.parallelism,
             )
         else:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
@@ -117,6 +118,7 @@ class Workflow:
                 entrypoint=self.name,
                 volumes=[],
                 volume_claim_templates=[],
+                parallelism=self.parallelism,
             )
 
         if ttl_strategy:

@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 3.3.2 - DATE (30/05/2020)
+
+### Fixed
+
+- parallelism specification on spec templates
+
 # 3.3.1 - DATE (26/05/2022)
 
 ### Fixed

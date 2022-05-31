@@ -3,9 +3,9 @@ from unittest.mock import Mock
 from argo_workflows.api_client import ApiClient
 from argo_workflows.apis import WorkflowTemplateServiceApi
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest,
-    IoArgoprojWorkflowV1alpha1WorkflowSpec,
     ObjectMeta,
 )
 
