@@ -150,3 +150,10 @@ def test_wf_contains_expected_default_exit_template(wt):
     assert wt.exit_template
     assert wt.exit_template.name == 'exit-template'
     assert wt.exit_template.dag.tasks == []
+
+
+def test_wf_contains_expected_node_selectors(wts):
+    w = WorkflowTemplate('w', wts, node_selectors={'foo': 'bar'})
+    assert w.template.node_selector == {'foo': 'bar'}
+    assert w.exit_template.node_selector == {'foo': 'bar'}
+    assert w.dag_template.node_selector == {'foo': 'bar'}
