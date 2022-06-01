@@ -40,6 +40,11 @@ class WorkflowTemplate:
         A Dict of labels to attach to the Workflow object metadata
     namespace: Optional[str] = 'default'
         The namespace to use for creating the WorkflowTemplate.  Defaults to "default"
+        node_selectors: Optional[Dict[str, str]] = None
+        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
+        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
+        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
+        they submit the workflow to.
     """
 
     def __init__(
@@ -52,6 +57,7 @@ class WorkflowTemplate:
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        node_selectors: Optional[Dict[str, str]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -60,6 +66,7 @@ class WorkflowTemplate:
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
+        self.node_selector = node_selectors
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -98,6 +105,11 @@ class WorkflowTemplate:
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
+
+        if self.node_selector:
+            setattr(self.dag_template, 'node_selector', self.node_selector)
+            setattr(self.template, 'node_selector', self.node_selector)
+            setattr(self.exit_template, 'node_selector', self.node_selector)
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 

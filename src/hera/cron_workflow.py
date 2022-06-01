@@ -66,6 +66,11 @@ class CronWorkflow:
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
         Mappings between IP and hostnames.
+    node_selectors: Optional[Dict[str, str]] = None
+        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
+        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
+        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
+        they submit the workflow to.
     """
 
     def __init__(
@@ -85,6 +90,7 @@ class CronWorkflow:
         ttl_strategy: Optional[TTLStrategy] = None,
         volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
         host_aliases: Optional[List[HostAlias]] = None,
+        node_selectors: Optional[Dict[str, str]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -101,6 +107,7 @@ class CronWorkflow:
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
+        self.node_selector = node_selectors
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -169,6 +176,11 @@ class CronWorkflow:
             setattr(self.metadata, 'labels', self.labels)
         if self.annotations:
             setattr(self.metadata, 'annotations', self.annotations)
+
+        if self.node_selector:
+            setattr(self.dag_template, 'node_selector', self.node_selector)
+            setattr(self.template, 'node_selector', self.node_selector)
+            setattr(self.exit_template, 'node_selector', self.node_selector)
 
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,
