@@ -1,7 +1,10 @@
 """Holds client configurations for communicating with Argo APIs"""
+from typing import Optional
+
 from argo_workflows.api_client import ApiClient as ArgoApiClient
 
 from hera.config import Config
+from hera.host_config import get_global_token
 
 
 class Client:
@@ -24,7 +27,11 @@ class Client:
     This is typically used to initialize a WorkflowServiceApi.
     """
 
-    def __init__(self, config: Config, token: str):
+    def __init__(self, config: Config, token: Optional[str] = None):
+        if not token:
+            token = get_global_token()
+            assert token, "No token was provided and no global token was found."
+
         self._client = ArgoApiClient(
             configuration=config.config,
             header_name='Authorization',

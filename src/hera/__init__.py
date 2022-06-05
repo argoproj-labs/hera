@@ -34,3 +34,4 @@ from hera.workflow_service import WorkflowService
 from hera.workflow_status import WorkflowStatus
 from hera.workflow_template import WorkflowTemplate
 from hera.workflow_template_service import WorkflowTemplateService
+from hera.host_config import set_global_host, set_global_token

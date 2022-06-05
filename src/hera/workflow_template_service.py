@@ -24,7 +24,8 @@ class WorkflowTemplateService:
         workflowTemplate from an HTTPS server.
     token: Optional[str] = None
         The token to use for authentication purposes. Note that this assumes the Argo deployment is fronted with a
-        deployment/service that can intercept a request and check the Bearer token.
+        deployment/service that can intercept a request and check the Bearer token. An attempt is performed to get the
+        token from the global context (`hera.set_global_token`).
     namespace: str = 'default'
         The K8S namespace the workflowTemplate service creates workflowTemplate in.
         This defaults to the `default` namespace.
