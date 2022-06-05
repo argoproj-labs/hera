@@ -143,6 +143,10 @@ def test_label_selector():
     assert spec.match_labels is not None
     assert spec.match_labels == {'a': 'b'}
 
+    label_selector = LabelSelector()
+    spec = label_selector.get_spec()
+    assert spec is None
+
 
 def test_pod_affinity_term():
     label_selector = LabelSelector(
@@ -264,6 +268,10 @@ def test_pod_affinity():
         ),
     ]
 
+    pod_affinity = PodAffinity()
+    spec = pod_affinity.get_spec()
+    assert spec is None
+
 
 def test_pod_anti_affinity():
     pod_affinity = PodAntiAffinity(
@@ -323,6 +331,10 @@ def test_pod_anti_affinity():
             namespaces=['a'],
         ),
     ]
+
+    pod_affinity = PodAntiAffinity()
+    spec = pod_affinity.get_spec()
+    assert spec is None
 
 
 def test_node_affinity():
@@ -483,3 +495,13 @@ def test_affinity():
 
     affinity = Affinity()
     assert affinity.get_spec() is None
+
+
+def test_node_selector_returns_none_on_empty_spec():
+    node_selector = NodeSelector()
+    assert node_selector.get_spec() is None
+
+
+def test_node_affinity_returns_none_on_empty_spec():
+    node_affinity = NodeAffinity()
+    assert node_affinity.get_spec() is None
