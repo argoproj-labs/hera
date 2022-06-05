@@ -1,3 +1,4 @@
+from hera.affinity import Affinity
 from hera.artifact import Artifact
 from hera.client import Client
 from hera.config import Config
@@ -8,6 +9,7 @@ from hera.env_from import ConfigMapEnvFromSpec, SecretEnvFromSpec
 from hera.host_alias import HostAlias
 from hera.image import ImagePullPolicy
 from hera.input import InputFrom
+from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
