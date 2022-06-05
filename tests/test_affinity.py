@@ -1,7 +1,3 @@
-from enum import Enum
-from typing import Dict, List, Optional
-
-from argo_workflows.models import Affinity as ArgoAffinity
 from argo_workflows.models import LabelSelector as ArgoLabelSelector
 from argo_workflows.models import (
     LabelSelectorRequirement as ArgoLabelSelectorRequirement,

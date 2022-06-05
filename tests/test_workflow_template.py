@@ -157,3 +157,10 @@ def test_wf_contains_expected_node_selectors(wts):
     assert w.template.node_selector == {'foo': 'bar'}
     assert w.exit_template.node_selector == {'foo': 'bar'}
     assert w.dag_template.node_selector == {'foo': 'bar'}
+
+
+def test_wf_adds_affinity(wts, affinity):
+    w = WorkflowTemplate('w', wts, affinity=affinity)
+    assert w.affinity == affinity
+    assert hasattr(w.template, 'affinity')
+    assert hasattr(w.exit_template, 'affinity')

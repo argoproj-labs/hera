@@ -995,8 +995,8 @@ class Task:
         else:
             setattr(template, 'container', self.get_container())
 
-        affinity = self.affinity.get_spec()
-        if affinity:
+        affinity = self.affinity.get_spec() if self.affinity else None
+        if affinity is not None:
             setattr(template, 'affinity', affinity)
 
         return template

@@ -113,7 +113,7 @@ def test_script_getter_returns_expected_string(op, typed_op):
     script = t.get_script()
     assert (
         script == 'import json\n'
-        'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+                  'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
     )
 
 
@@ -259,7 +259,7 @@ def test_task_template_does_not_contain_gpu_references(op):
     assert not hasattr(tt, 'node_selector')
 
 
-def test_task_template_contains_expected_field_values_and_types(op):
+def test_task_template_contains_expected_field_values_and_types(op, affinity):
     t = Task(
         't',
         op,
@@ -269,6 +269,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
         node_selectors={'abc': '123-gpu'},
         retry=Retry(duration=1, max_duration=2),
         daemon=True,
+        affinity=affinity,
     )
     tt = t.get_task_template()
 
@@ -293,6 +294,15 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.daemon
     assert hasattr(tt, 'node_selector')
     assert not hasattr(tt, 'container')
+    assert hasattr(tt, 'affinity')
+    assert tt.affinity is not None
+
+
+def test_task_template_does_not_add_affinity_when_none(no_op):
+    t = Task('t', no_op)
+    tt = t.get_task_template()
+
+    assert not hasattr(tt, 'affinity')
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
@@ -353,8 +363,8 @@ def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
     script = t.get_param_script_portion()
     assert (
         script == 'import json\n'
-        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
-        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+                  'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+                  'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
     )
 
 
@@ -714,13 +724,13 @@ def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
         t1.when_all_failed(t2)
     assert (
         str(e.value) == 'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
-        'with multiple `func_params or setting `input_from`'
+                        'with multiple `func_params or setting `input_from`'
     )
     with pytest.raises(AssertionError) as e:
         t1.when_any_succeeded(t2)
     assert (
         str(e.value) == 'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
-        'with multiple `func_params or setting `input_from`'
+                        'with multiple `func_params or setting `input_from`'
     )
 
     t1 = Task(
