@@ -43,6 +43,7 @@ from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
+from hera.memoize import Memoize
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
@@ -229,6 +230,8 @@ class Task:
         for each task definition.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the task.
+    memoize: Optional[Memoize] = None
+        The memoize configuration for the task.
 
     Notes
     ------
@@ -265,6 +268,7 @@ class Task:
         continue_on_error: Optional[bool] = None,
         template_ref: Optional[TemplateRef] = None,
         affinity: Optional[Affinity] = None,
+        memoize: Optional[Memoize] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -272,6 +276,7 @@ class Task:
         self.input_from = input_from
         self.input_artifacts = input_artifacts
         self.output_artifacts = output_artifacts
+        self.memoize = memoize
         self.validate()
 
         self.image = image
@@ -582,6 +587,9 @@ class Task:
                 else:
                     # otherwise, it must be the case that the client passes func_params
                     assert self.func_params, 'no parameters passed for function'
+
+            if self.memoize:
+                assert self.memoize.key in args, 'memoize key must be a parameter of the function'
         if self.func_params:
             for params in self.func_params:
                 assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
@@ -998,6 +1006,9 @@ class Task:
         affinity = self.affinity.get_spec() if self.affinity else None
         if affinity is not None:
             setattr(template, 'affinity', affinity)
+
+        if self.memoize:
+            setattr(template, 'memoize', self.memoize.get_spec())
 
         return template
 

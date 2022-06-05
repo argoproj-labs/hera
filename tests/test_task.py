@@ -18,6 +18,7 @@ from hera.task import Task, _dependencies_to_depends
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.variable import VariableAsEnv
+from hera.memoize import Memoize
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
 from hera.workflow_status import WorkflowStatus
 
@@ -270,6 +271,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
         retry=Retry(duration=1, max_duration=2),
         daemon=True,
         affinity=affinity,
+        memoize=Memoize('a', 'b', '1h'),
     )
     tt = t.get_task_template()
 
@@ -296,6 +298,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
     assert not hasattr(tt, 'container')
     assert hasattr(tt, 'affinity')
     assert tt.affinity is not None
+    assert hasattr(tt, 'memoize')
 
 
 def test_task_template_does_not_add_affinity_when_none(no_op):
@@ -758,3 +761,9 @@ def test_dependencies_to_depends():
 
     assert not _dependencies_to_depends([])
     assert not _dependencies_to_depends(None)
+
+
+def test_task_fails_to_validate_with_incorrect_memoize(op):
+    with pytest.raises(AssertionError) as e:
+        Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a'))
+    assert str(e.value) == 'memoize key must be a parameter of the function'
