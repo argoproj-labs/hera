@@ -1,6 +1,6 @@
+from enum import Enum
 from typing import Dict, List, Optional
 
-from enum import Enum
 from argo_workflows.models import Affinity as ArgoAffinity
 from argo_workflows.models import LabelSelector as ArgoLabelSelector
 from argo_workflows.models import (
@@ -18,7 +18,8 @@ from argo_workflows.models import WeightedPodAffinityTerm as ArgoWeightedPodAffi
 
 
 class NodeSelectorRequirement:
-    values: Optional[List[str]] = None
+    def __init__(self, values: Optional[List[str]]) -> None:
+        self.values = values
 
     def get_spec(self) -> ArgoNodeSelectorRequirement:
         return ArgoNodeSelectorRequirement(values=self.values)
@@ -29,8 +30,9 @@ Field = NodeSelectorRequirement
 
 
 class NodeSelectorTerm:
-    expressions: List[Expression] = []
-    fields: List[Field] = []
+    def __init__(self, expressions: Optional[List[Expression]], fields: Optional[List[Field]] = None) -> None:
+        self.expressions = expressions
+        self.fields = fields
 
     def get_spec(self) -> ArgoNodeSelectorTerm:
         return ArgoNodeSelectorTerm(
@@ -40,8 +42,9 @@ class NodeSelectorTerm:
 
 
 class PreferredSchedulingTerm:
-    node_selector_terms: List[NodeSelectorTerm] = []
-    weight = 0
+    def __init__(self, node_selector_terms: List[NodeSelectorTerm], weight: int) -> None:
+        self.node_selector_terms = node_selector_terms
+        self.weight = weight
 
     def get_spec(self) -> ArgoPreferredSchedulingTerm:
         return ArgoPreferredSchedulingTerm(
@@ -58,9 +61,10 @@ class LabelOperator(Enum):
 
 
 class LabelSelectorRequirement:
-    key: str
-    operator: LabelOperator
-    values: Optional[List[str]] = None
+    def __init__(self, key: str, operator: LabelOperator, values: Optional[List[str]] = None) -> None:
+        self.key = key
+        self.operator = operator
+        self.values = values
 
     def get_spec(self) -> ArgoLabelSelectorRequirement:
         return ArgoLabelSelectorRequirement(
@@ -74,18 +78,35 @@ class LabelSelector:
     match_expressions: List[LabelSelectorRequirement] = []
     match_labels: Dict[str, str] = {}
 
+    def __init__(
+        self,
+        match_expressions: Optional[List[LabelSelectorRequirement]] = None,
+        match_labels: Optional[Dict[str, str]] = None,
+    ) -> None:
+        self.match_expressions = match_expressions
+        self.match_labels = match_labels
+
     def get_spec(self) -> ArgoLabelSelector:
         return ArgoLabelSelector(
-            match_expressions=[expression.get_spec() for expression in self.match_expressions],
-            match_labels=self.match_labels,
+            match_expressions=[expression.get_spec() for expression in self.match_expressions]
+            if self.match_expressions
+            else None,
+            match_labels=self.match_labels if self.match_labels else None,
         )
 
 
 class PodAffinityTerm:
-    topology_key: str
-    label_selector: Optional[LabelSelector] = None
-    namespace_selector: Optional[LabelSelector] = None
-    namespaces: Optional[List[str]] = None
+    def __init__(
+        self,
+        topology_key: str,
+        label_selector: Optional[LabelSelector] = None,
+        namespace_selector: Optional[LabelSelector] = None,
+        namespaces: Optional[List[str]] = None,
+    ) -> None:
+        self.topology_key = topology_key
+        self.label_selector = label_selector
+        self.namespace_selector = namespace_selector
+        self.namespaces = namespaces
 
     def get_spec(self) -> ArgoPodAffinityTerm:
         return ArgoPodAffinityTerm(
@@ -97,8 +118,13 @@ class PodAffinityTerm:
 
 
 class WeightedPodAffinityTerm:
-    pod_affinity_term: PodAffinityTerm
-    weight: int
+    def __init__(
+        self,
+        pod_affinity_term: PodAffinityTerm,
+        weight: int,
+    ):
+        self.pod_affinity_term = pod_affinity_term
+        self.weight = weight
 
     def get_spec(self) -> ArgoWeightedPodAffinityTerm:
         return ArgoWeightedPodAffinityTerm(
@@ -108,8 +134,15 @@ class WeightedPodAffinityTerm:
 
 
 class PodAffinity:
-    preferred_during_scheduling_ignored_during_execution: Optional[List[WeightedPodAffinityTerm]] = None
-    required_during_scheduling_ignored_during_execution: Optional[List[PodAffinityTerm]] = None
+    def __init__(
+        self,
+        preferred_during_scheduling_ignored_during_execution: Optional[List[WeightedPodAffinityTerm]] = None,
+        required_during_scheduling_ignored_during_execution: Optional[List[PodAffinityTerm]] = None,
+    ) -> None:
+        self.preferred_during_scheduling_ignored_during_execution = (
+            preferred_during_scheduling_ignored_during_execution
+        )
+        self.required_during_scheduling_ignored_during_execution = required_during_scheduling_ignored_during_execution
 
     def get_spec(self) -> ArgoPodAffinity:
         return ArgoPodAffinity(
@@ -127,8 +160,15 @@ class PodAffinity:
 
 
 class PodAntiAffinity:
-    preferred_during_scheduling_ignored_during_execution: Optional[List[WeightedPodAffinityTerm]] = None
-    required_during_scheduling_ignored_during_execution: Optional[List[PodAffinityTerm]] = None
+    def __init__(
+        self,
+        preferred_during_scheduling_ignored_during_execution: Optional[List[WeightedPodAffinityTerm]] = None,
+        required_during_scheduling_ignored_during_execution: Optional[List[PodAffinityTerm]] = None,
+    ) -> None:
+        self.preferred_during_scheduling_ignored_during_execution = (
+            preferred_during_scheduling_ignored_during_execution
+        )
+        self.required_during_scheduling_ignored_during_execution = required_during_scheduling_ignored_during_execution
 
     def get_spec(self) -> ArgoPodAntiAffinity:
         return ArgoPodAntiAffinity(
@@ -146,8 +186,15 @@ class PodAntiAffinity:
 
 
 class NodeAffinity:
-    preferred_during_scheduling_ignored_during_execution: Optional[List[PreferredSchedulingTerm]] = []
-    required_during_scheduling_ignored_during_execution: Optional[NodeSelectorTerm] = None
+    def __init__(
+        self,
+        preferred_during_scheduling_ignored_during_execution: Optional[List[PreferredSchedulingTerm]] = [],
+        required_during_scheduling_ignored_during_execution: Optional[NodeSelectorTerm] = None,
+    ) -> None:
+        self.preferred_during_scheduling_ignored_during_execution = (
+            preferred_during_scheduling_ignored_during_execution
+        )
+        self.required_during_scheduling_ignored_during_execution = required_during_scheduling_ignored_during_execution
 
     def get_spec(self) -> ArgoNodeAffinity:
         return ArgoNodeAffinity(
@@ -161,9 +208,15 @@ class NodeAffinity:
 
 
 class Affinity:
-    pod_affinity: Optional[PodAffinity] = None
-    pod_anti_affinity: Optional[PodAntiAffinity] = None
-    node_affinity: Optional[NodeAffinity] = None
+    def __init__(
+        self,
+        pod_affinity: Optional[PodAffinity] = None,
+        pod_anti_affinity: Optional[PodAntiAffinity] = None,
+        node_affinity: Optional[NodeAffinity] = None,
+    ) -> None:
+        self.pod_affinity = pod_affinity
+        self.pod_anti_affinity = pod_anti_affinity
+        self.node_affinity = node_affinity
 
     def get_spec(self) -> ArgoAffinity:
         return ArgoAffinity(
