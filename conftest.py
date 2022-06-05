@@ -144,6 +144,7 @@ def long_op():
 
     yield _long_op
 
+
 @pytest.fixture(scope='session')
 def affinity():
     yield Affinity(
