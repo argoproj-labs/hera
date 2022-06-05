@@ -377,3 +377,113 @@ def test_node_affinity():
             ),
         ]
     )
+
+
+def test_affinity():
+    affinity = Affinity(
+        pod_affinity=PodAffinity(
+            pod_affinity_terms=[
+                PodAffinityTerm(
+                    topology_key='a',
+                    label_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespace_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespaces=['a'],
+                )
+            ],
+            weighted_pod_affinities=[
+                WeightedPodAffinityTerm(
+                    weight=1,
+                    pod_affinity_term=PodAffinityTerm(
+                        topology_key='a',
+                        label_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespace_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespaces=['a'],
+                    ),
+                )
+            ],
+        ),
+        pod_anti_affinity=PodAntiAffinity(
+            pod_affinity_terms=[
+                PodAffinityTerm(
+                    topology_key='a',
+                    label_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespace_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespaces=['a'],
+                )
+            ],
+            weighted_pod_affinities=[
+                WeightedPodAffinityTerm(
+                    weight=1,
+                    pod_affinity_term=PodAffinityTerm(
+                        topology_key='a',
+                        label_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespace_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespaces=['a'],
+                    ),
+                )
+            ],
+        ),
+        node_affinity=NodeAffinity(
+            preferred_scheduling_terms=[
+                PreferredSchedulingTerm(
+                    NodeSelectorTerm(
+                        expressions=[Expression('a', LabelOperator.In, ['value'])],
+                        fields=[Field('a', LabelOperator.In, ['value'])],
+                    ),
+                    1,
+                )
+            ],
+            node_selector=NodeSelector(
+                terms=[
+                    NodeSelectorTerm(
+                        expressions=[Expression('a', LabelOperator.In, ['value'])],
+                        fields=[Field('a', LabelOperator.In, ['value'])],
+                    )
+                ]
+            ),
+        ),
+    )
+    assert affinity.get_spec() is not None
+
+    affinity = Affinity()
+    assert affinity.get_spec() is None

@@ -53,13 +53,20 @@ class NodeSelectorTerm:
         self.fields = fields
 
     def get_spec(self) -> Optional[ArgoNodeSelectorTerm]:
-        if self.expressions is not None or self.fields is not None:
+        term = ArgoNodeSelectorTerm()
+
+        if self.expressions:
             match_expressions = [expression.get_spec() for expression in self.expressions]
+            if any(match_expressions):
+                setattr(term, 'match_expressions', match_expressions)
+
+        if self.fields:
             match_fields = [field.get_spec() for field in self.fields]
-            return ArgoNodeSelectorTerm(
-                match_expressions=match_expressions if any(match_expressions) else None,
-                match_fields=match_fields if any(match_fields) else None,
-            )
+            if any(match_fields):
+                setattr(term, 'match_fields', match_fields)
+
+        if hasattr(term, 'match_expressions') or hasattr(term, 'match_fields'):
+            return term
         return None
 
 
@@ -110,12 +117,18 @@ class LabelSelector:
         self.match_labels = match_labels
 
     def get_spec(self) -> Optional[ArgoLabelSelector]:
-        match_expressions = [expression.get_spec() for expression in self.label_selector_requirements]
-        if any(self.label_selector_requirements) is not None or self.match_labels is not None:
-            return ArgoLabelSelector(
-                match_expressions=match_expressions if any(match_expressions) else None,
-                match_labels=self.match_labels if self.match_labels else None,
-            )
+        selector = ArgoLabelSelector()
+
+        if self.label_selector_requirements:
+            match_expressions = [expression.get_spec() for expression in self.label_selector_requirements]
+            if any(match_expressions):
+                setattr(selector, 'match_expressions', match_expressions)
+
+        if self.match_labels:
+            setattr(selector, 'match_labels', self.match_labels)
+
+        if hasattr(selector, 'match_expressions') or hasattr(selector, 'match_labels'):
+            return selector
         return None
 
 
@@ -134,12 +147,16 @@ class PodAffinityTerm:
 
     def get_spec(self) -> Optional[ArgoPodAffinityTerm]:
         term = ArgoPodAffinityTerm(topology_key=self.topology_key)
+
         if self.label_selector is not None:
             setattr(term, 'label_selector', self.label_selector.get_spec())
+
         if self.namespace_selector is not None:
             setattr(term, 'namespace_selector', self.namespace_selector.get_spec())
+
         if self.namespaces is not None:
             setattr(term, 'namespaces', self.namespaces)
+
         if hasattr(term, 'label_selector') or hasattr(term, 'namespace_selector') or hasattr(term, 'namespaces'):
             return term
         return None
@@ -172,22 +189,25 @@ class PodAffinity:
 
     def get_spec(self) -> Optional[ArgoPodAffinity]:
         affinity = ArgoPodAffinity()
+
         preferred_during_scheduling_ignored_during_execution = [
             term.get_spec() for term in self.weighted_pod_affinities
         ]
-        required_during_scheduling_ignored_during_execution = [term.get_spec() for term in self.pod_affinity_terms]
         if any(preferred_during_scheduling_ignored_during_execution):
             setattr(
                 affinity,
                 'preferred_during_scheduling_ignored_during_execution',
                 preferred_during_scheduling_ignored_during_execution,
             )
+
+        required_during_scheduling_ignored_during_execution = [term.get_spec() for term in self.pod_affinity_terms]
         if any(required_during_scheduling_ignored_during_execution):
             setattr(
                 affinity,
                 'required_during_scheduling_ignored_during_execution',
                 required_during_scheduling_ignored_during_execution,
             )
+
         if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(
             affinity, 'required_during_scheduling_ignored_during_execution'
         ):
@@ -206,22 +226,25 @@ class PodAntiAffinity:
 
     def get_spec(self) -> Optional[ArgoPodAntiAffinity]:
         affinity = ArgoPodAntiAffinity()
+
         preferred_during_scheduling_ignored_during_execution = [
             term.get_spec() for term in self.weighted_pod_affinities
         ]
-        required_during_scheduling_ignored_during_execution = [term.get_spec() for term in self.pod_affinity_terms]
         if any(preferred_during_scheduling_ignored_during_execution):
             setattr(
                 affinity,
                 'preferred_during_scheduling_ignored_during_execution',
                 preferred_during_scheduling_ignored_during_execution,
             )
+
+        required_during_scheduling_ignored_during_execution = [term.get_spec() for term in self.pod_affinity_terms]
         if any(required_during_scheduling_ignored_during_execution):
             setattr(
                 affinity,
                 'required_during_scheduling_ignored_during_execution',
                 required_during_scheduling_ignored_during_execution,
             )
+
         if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(
             affinity, 'required_during_scheduling_ignored_during_execution'
         ):
@@ -254,19 +277,21 @@ class NodeAffinity:
         preferred_during_scheduling_ignored_during_execution = [
             term.get_spec() for term in self.preferred_scheduling_terms
         ]
-        required_during_scheduling_ignored_during_execution = self.node_selector.get_spec()
         if any(preferred_during_scheduling_ignored_during_execution):
             setattr(
                 affinity,
                 'preferred_during_scheduling_ignored_during_execution',
                 preferred_during_scheduling_ignored_during_execution,
             )
+
+        required_during_scheduling_ignored_during_execution = self.node_selector.get_spec()
         if required_during_scheduling_ignored_during_execution:
             setattr(
                 affinity,
                 'required_during_scheduling_ignored_during_execution',
                 required_during_scheduling_ignored_during_execution,
             )
+
         if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(
             affinity, 'required_during_scheduling_ignored_during_execution'
         ):
@@ -286,10 +311,24 @@ class Affinity:
         self.node_affinity = node_affinity
 
     def get_spec(self) -> Optional[ArgoAffinity]:
-        if self.pod_affinity is not None or self.pod_anti_affinity is not None or self.node_affinity is not None:
-            return ArgoAffinity(
-                pod_affinity=self.pod_affinity.get_spec() if self.pod_affinity else None,
-                pod_anti_affinity=self.pod_anti_affinity.get_spec() if self.pod_anti_affinity else None,
-                node_affinity=self.node_affinity.get_spec() if self.node_affinity else None,
-            )
+        affinity = ArgoAffinity()
+
+        if self.pod_affinity is not None:
+            pod_affinity = self.pod_affinity.get_spec()
+            setattr(affinity, 'pod_affinity', pod_affinity)
+
+        if self.pod_anti_affinity is not None:
+            pod_anti_affinity = self.pod_anti_affinity.get_spec()
+            setattr(affinity, 'pod_anti_affinity', pod_anti_affinity)
+
+        if self.node_affinity is not None:
+            node_affinity = self.node_affinity.get_spec()
+            setattr(affinity, 'node_affinity', node_affinity)
+
+        if (
+            hasattr(affinity, 'pod_affinity')
+            or hasattr(affinity, 'pod_anti_affinity')
+            or hasattr(affinity, 'node_affinity')
+        ):
+            return affinity
         return None
