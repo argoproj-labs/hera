@@ -56,6 +56,8 @@ class Workflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    ttl_strategy: Optional[TTLStrategy] = None
+        The time to live strategy of the workflow.
     volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None

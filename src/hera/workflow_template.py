@@ -9,6 +9,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.affinity import Affinity
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -34,12 +35,16 @@ class WorkflowTemplate:
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
-    security_context:  Optional[WorkflowSecurityContext] = None
-        Define security settings for all containers in the workflow.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
     namespace: Optional[str] = 'default'
         The namespace to use for creating the WorkflowTemplate.  Defaults to "default"
+    security_context:  Optional[WorkflowSecurityContext] = None
+        Define security settings for all containers in the workflow.
+    ttl_strategy: Optional[TTLStrategy] = None
+        The time to live strategy of the workflow.
+    affinity: Optional[Affinity] = None
+        The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     """
 
     def __init__(
@@ -52,6 +57,7 @@ class WorkflowTemplate:
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        affinity: Optional[Affinity] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -60,6 +66,8 @@ class WorkflowTemplate:
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
+        self.ttl_strategy = ttl_strategy
+        self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -84,7 +92,7 @@ class WorkflowTemplate:
             parallelism=self.parallelism,
         )
 
-        if ttl_strategy:
+        if self.ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if self.security_context:
@@ -94,6 +102,10 @@ class WorkflowTemplate:
         if self.service_account_name:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
+
+        if self.affinity:
+            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
+            setattr(self.template, 'affinity', self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:

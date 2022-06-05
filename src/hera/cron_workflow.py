@@ -17,6 +17,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.affinity import Affinity
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
@@ -24,7 +25,6 @@ from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
-from hera.affinity import Affinity
 
 
 class CronWorkflow:
@@ -63,6 +63,8 @@ class CronWorkflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    ttl_strategy: Optional[TTLStrategy] = None
+        The time to live strategy of the workflow.
     volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
@@ -88,6 +90,7 @@ class CronWorkflow:
         ttl_strategy: Optional[TTLStrategy] = None,
         volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
         host_aliases: Optional[List[HostAlias]] = None,
+        affinity: Optional[Affinity] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -104,6 +107,7 @@ class CronWorkflow:
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
+        self.ttl_strategy = ttl_strategy
         self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -139,7 +143,7 @@ class CronWorkflow:
                 parallelism=self.parallelism,
             )
 
-        if ttl_strategy:
+        if self.ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if volume_claim_gc_strategy:
