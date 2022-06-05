@@ -43,7 +43,7 @@ from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
-from hera.memoization import Memoize
+from hera.memoize import Memoize
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
@@ -276,6 +276,7 @@ class Task:
         self.input_from = input_from
         self.input_artifacts = input_artifacts
         self.output_artifacts = output_artifacts
+        self.memoize = memoize
         self.validate()
 
         self.image = image
@@ -299,7 +300,6 @@ class Task:
         self.continue_on_error = continue_on_error
         self.template_ref = template_ref
         self.affinity = affinity
-        self.memoize = memoize
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -587,6 +587,9 @@ class Task:
                 else:
                     # otherwise, it must be the case that the client passes func_params
                     assert self.func_params, 'no parameters passed for function'
+
+            if self.memoize:
+                assert self.memoize.key in args, 'memoize key must be a parameter of the function'
         if self.func_params:
             for params in self.func_params:
                 assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
