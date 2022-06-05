@@ -28,7 +28,7 @@ class WorkflowTemplate:
     ----------
     name: str
         The workflowTemplate name. Note that the workflowTemplate initiation will replace underscores with dashes.
-    service: WorkflowService
+    service: Optional[WorkflowService] = None
         A workflowTemplate service to use for submissions.
         See `hera.v1.workflow_template_service.WorkflowTemplateService`.
     parallelism: int = 50
@@ -55,7 +55,7 @@ class WorkflowTemplate:
     def __init__(
         self,
         name: str,
-        service: WorkflowTemplateService,
+        service: Optional[WorkflowTemplateService] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
@@ -67,7 +67,7 @@ class WorkflowTemplate:
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
-        self.service = service
+        self.service = service or WorkflowTemplateService()
         self.parallelism = parallelism
         self.security_context = security_context
         self.service_account_name = service_account_name

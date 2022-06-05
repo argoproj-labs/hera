@@ -34,7 +34,7 @@ class Workflow:
     ----------
     name: str
         The workflow name. Note that the workflow initiation will replace underscores with dashes.
-    service: WorkflowService
+    service: Optional[WorkflowService] = None
         A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
@@ -74,7 +74,7 @@ class Workflow:
     def __init__(
         self,
         name: str,
-        service: WorkflowService,
+        service: Optional[WorkflowService] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
@@ -91,7 +91,7 @@ class Workflow:
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
-        self.service = service
+        self.service = service or WorkflowService()
         self.parallelism = parallelism
         self.security_context = security_context
         self.service_account_name = service_account_name

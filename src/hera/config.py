@@ -9,6 +9,8 @@ from argo_workflows.api_client import Configuration as ArgoConfig
 # explicitly asked for it to disable SSL, it's safe to ignore the warning.
 urllib3.disable_warnings()
 
+from hera.host_config import get_global_host
+
 
 class Config:
     """A representation for a collection of settings used to control the submission behaviour of Argo workflows.
@@ -33,6 +35,11 @@ class Config:
     def _assemble_host(self) -> str:
         """Assembles a host from the default K8S cluster env variables with Argo's address.
 
+        Note that there are multiple possibilities for the host. This method will try to assemble a host from the
+        following sources (in order):
+            - global host
+            - environment host set by K8S via the `ARGO_SERVER_PORT_2746_TCP_ADDR` environment variable
+
         Notes
         -----
         The pod containers should have an environment variable with the address of the Argo server, and this is
@@ -43,6 +50,10 @@ class Config:
         str
             Assembled host.
         """
+        host = get_global_host()
+        if host is not None:
+            return host
+
         tcp_addr = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR', None)
         assert tcp_addr is not None, 'A configuration/service host is required for submitting workflows'
 

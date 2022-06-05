@@ -20,14 +20,15 @@ class CronWorkflowService:
     Parameters
     ----------
     host: Optional[str] = None
-        The host of the Argo server to submit workflows to. An attempt to assemble a host from Argo K8S cluster
+        The host of the Argo server to submit workflowTemplate to. An attempt to assemble a host from Argo K8S cluster
         environment variables is pursued if this is not specified.
     verify_ssl: bool = True
         Whether to perform SSL/TLS verification. Set this to false to skip verifying SSL certificate when submitting
-        workflows from an HTTPS server.
+        workflowTemplate from an HTTPS server.
     token: Optional[str] = None
         The token to use for authentication purposes. Note that this assumes the Argo deployment is fronted with a
-        deployment/service that can intercept a request and check the Bearer token.
+        deployment/service that can intercept a request and check the Bearer token. An attempt is performed to get the
+        token from the global context (`hera.set_global_token`).
     namespace: str = 'default'
         The K8S namespace the cron workflow service creates cron workflows in.
         This defaults to the `default` namespace.
