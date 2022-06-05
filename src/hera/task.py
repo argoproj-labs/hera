@@ -983,6 +983,7 @@ class Task:
             The template representation of the task.
         """
         template = IoArgoprojWorkflowV1alpha1Template(
+            affinity=self.affinity.get_spec(),
             name=self.name,
             daemon=self.daemon,
             inputs=self.inputs,
