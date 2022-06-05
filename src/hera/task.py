@@ -35,6 +35,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
+from hera.affinity import Affinity
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
@@ -226,6 +227,8 @@ class Task:
     template_ref: Optional[TemplateRef] = None
         A template name reference to use with this task. Note that this is prioritized over a new template creation
         for each task definition.
+    affinity: Optional[Affinity] = None
+        The task affinity. This dictates the scheduling protocol of the pods running the task.
 
     Notes
     ------
@@ -261,6 +264,7 @@ class Task:
         continue_on_fail: Optional[bool] = None,
         continue_on_error: Optional[bool] = None,
         template_ref: Optional[TemplateRef] = None,
+        affinity: Optional[Affinity] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -290,6 +294,7 @@ class Task:
         self.continue_on_fail = continue_on_fail
         self.continue_on_error = continue_on_error
         self.template_ref = template_ref
+        self.affinity = affinity
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -989,6 +994,11 @@ class Task:
             setattr(template, 'script', self.get_script_def())
         else:
             setattr(template, 'container', self.get_container())
+
+        affinity = self.affinity.get_spec() if self.affinity else None
+        if affinity is not None:
+            setattr(template, 'affinity', affinity)
+
         return template
 
     def get_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:

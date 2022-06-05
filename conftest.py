@@ -3,6 +3,22 @@ from typing import Dict, List, Tuple
 import pytest
 from pydantic import BaseModel
 
+from hera.affinity import (
+    Affinity,
+    Expression,
+    Field,
+    LabelOperator,
+    LabelSelector,
+    LabelSelectorRequirement,
+    NodeAffinity,
+    NodeSelector,
+    NodeSelectorTerm,
+    PodAffinity,
+    PodAffinityTerm,
+    PodAntiAffinity,
+    PreferredSchedulingTerm,
+    WeightedPodAffinityTerm,
+)
 from hera.artifact import InputArtifact, OutputArtifact
 from hera.cron_workflow import CronWorkflow
 from hera.cron_workflow_service import CronWorkflowService
@@ -127,3 +143,110 @@ def long_op():
         print(42)
 
     yield _long_op
+
+
+@pytest.fixture(scope='session')
+def affinity():
+    yield Affinity(
+        pod_affinity=PodAffinity(
+            pod_affinity_terms=[
+                PodAffinityTerm(
+                    topology_key='a',
+                    label_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespace_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespaces=['a'],
+                )
+            ],
+            weighted_pod_affinities=[
+                WeightedPodAffinityTerm(
+                    weight=1,
+                    pod_affinity_term=PodAffinityTerm(
+                        topology_key='a',
+                        label_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespace_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespaces=['a'],
+                    ),
+                )
+            ],
+        ),
+        pod_anti_affinity=PodAntiAffinity(
+            pod_affinity_terms=[
+                PodAffinityTerm(
+                    topology_key='a',
+                    label_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespace_selector=LabelSelector(
+                        label_selector_requirements=[
+                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                        ],
+                        match_labels={'a': 'b'},
+                    ),
+                    namespaces=['a'],
+                )
+            ],
+            weighted_pod_affinities=[
+                WeightedPodAffinityTerm(
+                    weight=1,
+                    pod_affinity_term=PodAffinityTerm(
+                        topology_key='a',
+                        label_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespace_selector=LabelSelector(
+                            label_selector_requirements=[
+                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            ],
+                            match_labels={'a': 'b'},
+                        ),
+                        namespaces=['a'],
+                    ),
+                )
+            ],
+        ),
+        node_affinity=NodeAffinity(
+            preferred_scheduling_terms=[
+                PreferredSchedulingTerm(
+                    NodeSelectorTerm(
+                        expressions=[Expression('a', LabelOperator.In, ['value'])],
+                        fields=[Field('a', LabelOperator.In, ['value'])],
+                    ),
+                    1,
+                )
+            ],
+            node_selector=NodeSelector(
+                terms=[
+                    NodeSelectorTerm(
+                        expressions=[Expression('a', LabelOperator.In, ['value'])],
+                        fields=[Field('a', LabelOperator.In, ['value'])],
+                    )
+                ]
+            ),
+        ),
+    )

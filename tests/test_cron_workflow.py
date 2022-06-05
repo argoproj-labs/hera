@@ -351,3 +351,10 @@ def test_wf_contains_expected_node_selectors(cws, schedule):
     assert w.template.node_selector == {'foo': 'bar'}
     assert w.exit_template.node_selector == {'foo': 'bar'}
     assert w.dag_template.node_selector == {'foo': 'bar'}
+
+
+def test_wf_adds_affinity(cws, schedule, affinity):
+    w = CronWorkflow('w', schedule, cws, affinity=affinity)
+    assert w.affinity == affinity
+    assert hasattr(w.template, 'affinity')
+    assert hasattr(w.exit_template, 'affinity')

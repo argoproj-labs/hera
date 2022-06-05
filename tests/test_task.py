@@ -259,7 +259,7 @@ def test_task_template_does_not_contain_gpu_references(op):
     assert not hasattr(tt, 'node_selector')
 
 
-def test_task_template_contains_expected_field_values_and_types(op):
+def test_task_template_contains_expected_field_values_and_types(op, affinity):
     t = Task(
         't',
         op,
@@ -269,6 +269,7 @@ def test_task_template_contains_expected_field_values_and_types(op):
         node_selectors={'abc': '123-gpu'},
         retry=Retry(duration=1, max_duration=2),
         daemon=True,
+        affinity=affinity,
     )
     tt = t.get_task_template()
 
@@ -293,6 +294,15 @@ def test_task_template_contains_expected_field_values_and_types(op):
     assert tt.daemon
     assert hasattr(tt, 'node_selector')
     assert not hasattr(tt, 'container')
+    assert hasattr(tt, 'affinity')
+    assert tt.affinity is not None
+
+
+def test_task_template_does_not_add_affinity_when_none(no_op):
+    t = Task('t', no_op)
+    tt = t.get_task_template()
+
+    assert not hasattr(tt, 'affinity')
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):

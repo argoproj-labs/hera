@@ -12,6 +12,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.affinity import Affinity
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
@@ -55,6 +56,8 @@ class Workflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    ttl_strategy: Optional[TTLStrategy] = None
+        The time to live strategy of the workflow.
     volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
@@ -64,6 +67,8 @@ class Workflow:
         requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
+    affinity: Optional[Affinity] = None
+        The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     """
 
     def __init__(
@@ -82,6 +87,7 @@ class Workflow:
         volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
         host_aliases: Optional[List[HostAlias]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
+        affinity: Optional[Affinity] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
@@ -94,6 +100,8 @@ class Workflow:
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
         self.node_selector = node_selectors
+        self.ttl_strategy = ttl_strategy
+        self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -152,6 +160,10 @@ class Workflow:
         if self.image_pull_secrets:
             secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
             setattr(self.spec, 'image_pull_secrets', secret_refs)
+
+        if self.affinity:
+            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
+            setattr(self.template, 'affinity', self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
