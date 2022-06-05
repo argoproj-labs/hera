@@ -975,7 +975,6 @@ class Task:
             The template representation of the task.
         """
         template = IoArgoprojWorkflowV1alpha1Template(
-            affinity=self.affinity.get_spec(),
             name=self.name,
             daemon=self.daemon,
             inputs=self.inputs,
@@ -995,6 +994,11 @@ class Task:
             setattr(template, 'script', self.get_script_def())
         else:
             setattr(template, 'container', self.get_container())
+
+        affinity = self.affinity.get_spec()
+        if affinity:
+            setattr(template, 'affinity', affinity)
+
         return template
 
     def get_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:
