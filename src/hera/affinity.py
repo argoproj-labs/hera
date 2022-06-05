@@ -17,14 +17,30 @@ from argo_workflows.models import PreferredSchedulingTerm as ArgoPreferredSchedu
 from argo_workflows.models import WeightedPodAffinityTerm as ArgoWeightedPodAffinityTerm
 
 
+class LabelOperator(Enum):
+    In = 'In'
+    NotIn = 'NotIn'
+    Exists = 'Exists'
+    DoesNotExist = 'DoesNotExist'
+
+
 class NodeSelectorRequirement:
-    def __init__(self, values: Optional[List[str]]) -> None:
+    def __init__(self, key: str, operator: LabelOperator, values: Optional[List[str]] = None) -> None:
+        self.key = key
+        self.operator = operator
         self.values = values
 
     def get_spec(self) -> Optional[ArgoNodeSelectorRequirement]:
-        if self.values is not None:
-            return ArgoNodeSelectorRequirement(values=self.values)
-        return None
+        if self.values:
+            return ArgoNodeSelectorRequirement(
+                key=self.key,
+                operator=self.operator.value,
+                values=self.values,
+            )
+        return ArgoNodeSelectorRequirement(
+            key=self.key,
+            operator=self.operator.value,
+        )
 
 
 Expression = NodeSelectorRequirement
@@ -32,36 +48,34 @@ Field = NodeSelectorRequirement
 
 
 class NodeSelectorTerm:
-    def __init__(self, expressions: Optional[List[Expression]], fields: Optional[List[Field]] = None) -> None:
+    def __init__(self, expressions: Optional[List[Expression]] = None, fields: Optional[List[Field]] = None) -> None:
         self.expressions = expressions
         self.fields = fields
 
     def get_spec(self) -> Optional[ArgoNodeSelectorTerm]:
         if self.expressions is not None or self.fields is not None:
+            match_expressions = [expression.get_spec() for expression in self.expressions]
+            match_fields = [field.get_spec() for field in self.fields]
             return ArgoNodeSelectorTerm(
-                match_expressions=[expression.get_spec() for expression in self.expressions],
-                match_fields=[field.get_spec() for field in self.fields],
+                match_expressions=match_expressions if any(match_expressions) else None,
+                match_fields=match_fields if any(match_fields) else None,
             )
         return None
 
 
 class PreferredSchedulingTerm:
-    def __init__(self, node_selector_terms: List[NodeSelectorTerm], weight: int) -> None:
-        self.node_selector_terms = node_selector_terms
+    def __init__(self, node_selector_term: NodeSelectorTerm, weight: int) -> None:
+        self.node_selector_term = node_selector_term
         self.weight = weight
 
-    def get_spec(self) -> ArgoPreferredSchedulingTerm:
-        return ArgoPreferredSchedulingTerm(
-            preference=ArgoNodeSelector(node_selector_terms=[term.get_spec() for term in self.node_selector_terms]),
-            weight=self.weight,
-        )
-
-
-class LabelOperator(Enum):
-    In = 'In'
-    NotIn = 'NotIn'
-    Exists = 'Exists'
-    DoesNotExist = 'DoesNotExist'
+    def get_spec(self) -> Optional[ArgoPreferredSchedulingTerm]:
+        node_selector_term = self.node_selector_term.get_spec()
+        if node_selector_term is not None:
+            return ArgoPreferredSchedulingTerm(
+                preference=node_selector_term,
+                weight=self.weight,
+            )
+        return None
 
 
 class LabelSelectorRequirement:
@@ -71,10 +85,15 @@ class LabelSelectorRequirement:
         self.values = values
 
     def get_spec(self) -> ArgoLabelSelectorRequirement:
+        if self.values is not None:
+            return ArgoLabelSelectorRequirement(
+                key=self.key,
+                operator=self.operator.value,
+                values=self.values,
+            )
         return ArgoLabelSelectorRequirement(
             key=self.key,
             operator=self.operator.value,
-            values=self.values,
         )
 
 
@@ -91,9 +110,11 @@ class LabelSelector:
         self.match_labels = match_labels
 
     def get_spec(self) -> Optional[ArgoLabelSelector]:
-        if self.match_expressions is not None or self.match_labels is not None:
+        match_expressions = [expression.get_spec() for expression in self.match_expressions]
+        if any(self.match_expressions) is not None or self.match_labels is not None:
             return ArgoLabelSelector(
-                match_expressions=[expression.get_spec() for expression in self.match_expressions],
+                match_expressions=match_expressions if any(match_expressions) else None,
+                match_labels=self.match_labels if self.match_labels else None,
             )
         return None
 
@@ -111,13 +132,17 @@ class PodAffinityTerm:
         self.namespace_selector = namespace_selector
         self.namespaces = namespaces
 
-    def get_spec(self) -> ArgoPodAffinityTerm:
-        return ArgoPodAffinityTerm(
-            topology_key=self.topology_key,
-            label_selector=self.label_selector.get_spec() if self.label_selector is not None else None,
-            namespace_selector=self.namespace_selector.get_spec() if self.namespace_selector is not None else None,
-            namespaces=self.namespaces if self.namespaces is not None else None,
-        )
+    def get_spec(self) -> Optional[ArgoPodAffinityTerm]:
+        term = ArgoPodAffinityTerm(topology_key=self.topology_key)
+        if self.label_selector is not None:
+            setattr(term, 'label_selector', self.label_selector.get_spec())
+        if self.namespace_selector is not None:
+            setattr(term, 'namespace_selector', self.namespace_selector.get_spec())
+        if self.namespaces is not None:
+            setattr(term, 'namespaces', self.namespaces)
+        if hasattr(term, 'label_selector') or hasattr(term, 'namespace_selector') or hasattr(term, 'namespaces'):
+            return term
+        return None
 
 
 class WeightedPodAffinityTerm:
@@ -152,19 +177,23 @@ class PodAffinity:
             self.preferred_during_scheduling_ignored_during_execution is not None
             or self.required_during_scheduling_ignored_during_execution is not None
         ):
-            return ArgoPodAffinity(
-                preferred_during_scheduling_ignored_during_execution=[
-                    term.get_spec() for term in self.preferred_during_scheduling_ignored_during_execution
-                ]
-                if self.preferred_during_scheduling_ignored_during_execution is not None
-                else None,
-                required_during_scheduling_ignored_during_execution=[
-                    term.get_spec() for term in self.required_during_scheduling_ignored_during_execution
-                ]
-                if self.required_during_scheduling_ignored_during_execution is not None
-                else None,
-            )
-        return None
+            affinity = ArgoPodAffinity()
+            preferred_during_scheduling_ignored_during_execution = [
+                term.get_spec() for term in self.preferred_during_scheduling_ignored_during_execution
+            ]
+            required_during_scheduling_ignored_during_execution = [
+                term.get_spec() for term in self.required_during_scheduling_ignored_during_execution
+            ]
+            if any(preferred_during_scheduling_ignored_during_execution):
+                setattr(affinity, 'preferred_during_scheduling_ignored_during_execution',
+                        preferred_during_scheduling_ignored_during_execution)
+            if any(required_during_scheduling_ignored_during_execution):
+                setattr(affinity, 'required_during_scheduling_ignored_during_execution',
+                        required_during_scheduling_ignored_during_execution)
+            if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(affinity,
+                                                                                                    'required_during_scheduling_ignored_during_execution'):
+                return affinity
+            return None
 
 
 class PodAntiAffinity:
