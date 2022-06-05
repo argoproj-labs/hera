@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 
+from enum import Enum
 from argo_workflows.models import Affinity as ArgoAffinity
 from argo_workflows.models import LabelSelector as ArgoLabelSelector
 from argo_workflows.models import (
@@ -49,15 +50,22 @@ class PreferredSchedulingTerm:
         )
 
 
+class LabelOperator(Enum):
+    In = 'In'
+    NotIn = 'NotIn'
+    Exists = 'Exists'
+    DoesNotExist = 'DoesNotExist'
+
+
 class LabelSelectorRequirement:
     key: str
-    operator: str
+    operator: LabelOperator
     values: Optional[List[str]] = None
 
     def get_spec(self) -> ArgoLabelSelectorRequirement:
         return ArgoLabelSelectorRequirement(
             key=self.key,
-            operator=self.operator,
+            operator=self.operator.value,
             values=self.values,
         )
 
