@@ -37,6 +37,10 @@ from hera.affinity import (
 
 def test_node_selector_requirement_returns_expected_spec():
     node_selector_requirement = NodeSelectorRequirement('a', LabelOperator.In, values=['value'])
+    assert node_selector_requirement.key == 'a'
+    assert node_selector_requirement.operator == LabelOperator.In
+    assert node_selector_requirement.values == ['value']
+
     spec = node_selector_requirement.get_spec()
     assert isinstance(spec, ArgoNodeSelectorRequirement)
     assert spec.key == 'a'
@@ -53,8 +57,10 @@ def test_node_selector_requirement_returns_expected_spec():
 def test_node_selector_term_returns_expected_spec():
     expressions = [Expression('a', LabelOperator.In, ['value'])]
     fields = [Field('a', LabelOperator.In, ['value'])]
-
     node_selector_term = NodeSelectorTerm(expressions=expressions, fields=fields)
+    assert node_selector_term.expressions == expressions
+    assert node_selector_term.fields == fields
+
     spec = node_selector_term.get_spec()
     assert isinstance(spec, ArgoNodeSelectorTerm)
     assert spec.match_expressions == [
@@ -77,7 +83,13 @@ def test_preferred_scheduling_term_returns_expected_spec():
     expressions = [Expression('a', LabelOperator.In, ['value'])]
     fields = [Field('a', LabelOperator.In, ['value'])]
     node_selector_term = NodeSelectorTerm(expressions=expressions, fields=fields)
+    assert node_selector_term.expressions == expressions
+    assert node_selector_term.fields == fields
+
     term = PreferredSchedulingTerm(node_selector_term, 1)
+    assert term.node_selector_term == node_selector_term
+    assert term.weight == 1
+
     spec = term.get_spec()
     assert isinstance(spec, ArgoPreferredSchedulingTerm)
     assert spec.preference is not None
@@ -92,6 +104,10 @@ def test_preferred_scheduling_term_returns_expected_spec():
 
 def test_label_selector_requirement():
     label_selector_requirement = LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+    assert label_selector_requirement.key == 'a'
+    assert label_selector_requirement.operator == LabelOperator.In
+    assert label_selector_requirement.values == ['value']
+
     spec = label_selector_requirement.get_spec()
     assert isinstance(spec, ArgoLabelSelectorRequirement)
     assert spec.key == 'a'
@@ -110,6 +126,7 @@ def test_label_selector():
         label_selector_requirements=[LabelSelectorRequirement('a', LabelOperator.In, values=['value'])],
         match_labels={'a': 'b'},
     )
+
     spec = label_selector.get_spec()
     assert isinstance(spec, ArgoLabelSelector)
     assert spec.match_expressions == [
@@ -121,6 +138,7 @@ def test_label_selector():
     label_selector = LabelSelector(
         label_selector_requirements=[LabelSelectorRequirement('a', LabelOperator.In)], match_labels={'a': 'b'}
     )
+
     spec = label_selector.get_spec()
     assert isinstance(spec, ArgoLabelSelector)
     assert spec.match_expressions == [
@@ -135,6 +153,7 @@ def test_pod_affinity_term():
         label_selector_requirements=[LabelSelectorRequirement('a', LabelOperator.In, values=['value'])],
         match_labels={'a': 'b'},
     )
+
     pod_affinity_term = PodAffinityTerm(
         topology_key='a',
         label_selector=label_selector,
@@ -166,6 +185,7 @@ def test_weighted_pod_affinity_term():
         label_selector_requirements=[LabelSelectorRequirement('a', LabelOperator.In, values=['value'])],
         match_labels={'a': 'b'},
     )
+
     weighted_pod_affinity_term = WeightedPodAffinityTerm(
         weight=1,
         pod_affinity_term=PodAffinityTerm(
@@ -175,6 +195,7 @@ def test_weighted_pod_affinity_term():
             namespaces=['a'],
         ),
     )
+
     spec = weighted_pod_affinity_term.get_spec()
     assert isinstance(spec, ArgoWeightedPodAffinityTerm)
     assert spec.weight == 1
@@ -225,6 +246,7 @@ def test_pod_affinity():
             )
         ],
     )
+
     spec = pod_affinity.get_spec()
     assert isinstance(spec, ArgoPodAffinity)
     assert spec.required_during_scheduling_ignored_during_execution == [
@@ -308,7 +330,7 @@ def test_pod_anti_affinity():
 
 
 def test_node_affinity():
-    pod_affinity = NodeAffinity(
+    node_affinity = NodeAffinity(
         preferred_scheduling_terms=[
             PreferredSchedulingTerm(
                 NodeSelectorTerm(
@@ -327,7 +349,8 @@ def test_node_affinity():
             ]
         ),
     )
-    spec = pod_affinity.get_spec()
+
+    spec = node_affinity.get_spec()
     assert isinstance(spec, ArgoNodeAffinity)
     assert spec.preferred_during_scheduling_ignored_during_execution == [
         ArgoPreferredSchedulingTerm(
