@@ -43,6 +43,7 @@ from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.operator import Operator
 from hera.resources import Resources
+from hera.memoization import Memoize
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
@@ -229,6 +230,8 @@ class Task:
         for each task definition.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the task.
+    memoize: Optional[Memoize] = None
+        The memoize configuration for the task.
 
     Notes
     ------
@@ -265,6 +268,7 @@ class Task:
         continue_on_error: Optional[bool] = None,
         template_ref: Optional[TemplateRef] = None,
         affinity: Optional[Affinity] = None,
+        memoize: Optional[Memoize] = None,
     ):
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
@@ -295,6 +299,7 @@ class Task:
         self.continue_on_error = continue_on_error
         self.template_ref = template_ref
         self.affinity = affinity
+        self.memoize = memoize
 
         self.parameters = self.get_parameters()
         self.argo_input_artifacts = self.get_argo_input_artifacts()
@@ -998,6 +1003,9 @@ class Task:
         affinity = self.affinity.get_spec() if self.affinity else None
         if affinity is not None:
             setattr(template, 'affinity', affinity)
+
+        if self.memoize:
+            setattr(template, 'memoize', self.memoize.get_spec())
 
         return template
 
