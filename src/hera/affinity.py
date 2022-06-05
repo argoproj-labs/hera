@@ -25,6 +25,13 @@ class LabelOperator(Enum):
 
 
 class NodeSelectorRequirement:
+    """Builds the K8S node selector requirement.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(self, key: str, operator: LabelOperator, values: Optional[List[str]] = None) -> None:
         self.key = key
         self.operator = operator
@@ -48,6 +55,13 @@ Field = NodeSelectorRequirement
 
 
 class NodeSelectorTerm:
+    """Builds the K8S node selector term.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(self, expressions: Optional[List[Expression]] = None, fields: Optional[List[Field]] = None) -> None:
         self.expressions = expressions
         self.fields = fields
@@ -71,6 +85,13 @@ class NodeSelectorTerm:
 
 
 class PreferredSchedulingTerm:
+    """Builds the K8S preferred scheduling term.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(self, node_selector_term: NodeSelectorTerm, weight: int) -> None:
         self.node_selector_term = node_selector_term
         self.weight = weight
@@ -86,6 +107,13 @@ class PreferredSchedulingTerm:
 
 
 class LabelSelectorRequirement:
+    """Builds the K8S label selector requirement.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(self, key: str, operator: LabelOperator, values: Optional[List[str]] = None) -> None:
         self.key = key
         self.operator = operator
@@ -105,8 +133,12 @@ class LabelSelectorRequirement:
 
 
 class LabelSelector:
-    label_selector_requirements: List[LabelSelectorRequirement] = []
-    match_labels: Dict[str, str] = {}
+    """Builds the K8S label selector.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
 
     def __init__(
         self,
@@ -133,6 +165,13 @@ class LabelSelector:
 
 
 class PodAffinityTerm:
+    """Builds the K8S pod affinity term.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(
         self,
         topology_key: str,
@@ -163,6 +202,13 @@ class PodAffinityTerm:
 
 
 class WeightedPodAffinityTerm:
+    """Builds the K8S weighted pod affinity term.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(
         self,
         pod_affinity_term: PodAffinityTerm,
@@ -179,6 +225,13 @@ class WeightedPodAffinityTerm:
 
 
 class PodAffinity:
+    """Builds the K8S pod affinity.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(
         self,
         weighted_pod_affinities: Optional[List[WeightedPodAffinityTerm]] = None,
@@ -216,6 +269,13 @@ class PodAffinity:
 
 
 class PodAntiAffinity:
+    """Builds the K8S pod anti-affinity.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(
         self,
         weighted_pod_affinities: Optional[List[WeightedPodAffinityTerm]] = None,
@@ -253,6 +313,13 @@ class PodAntiAffinity:
 
 
 class NodeSelector:
+    """Builds the K8S node selector.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(self, terms: Optional[List[NodeSelectorTerm]] = None):
         self.terms = terms
 
@@ -264,6 +331,13 @@ class NodeSelector:
 
 
 class NodeAffinity:
+    """Builds the K8S node affinity.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(
         self,
         preferred_scheduling_terms: Optional[List[PreferredSchedulingTerm]] = None,
@@ -300,6 +374,13 @@ class NodeAffinity:
 
 
 class Affinity:
+    """Builds the K8S affinity.
+
+    See also
+    --------
+        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    """
+
     def __init__(
         self,
         pod_affinity: Optional[PodAffinity] = None,
