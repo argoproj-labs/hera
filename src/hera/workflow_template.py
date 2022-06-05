@@ -43,6 +43,11 @@ class WorkflowTemplate:
         Define security settings for all containers in the workflow.
     ttl_strategy: Optional[TTLStrategy] = None
         The time to live strategy of the workflow.
+    node_selectors: Optional[Dict[str, str]] = None
+        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
+        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
+        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
+        they submit the workflow to.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     """
@@ -57,6 +62,7 @@ class WorkflowTemplate:
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
@@ -67,6 +73,7 @@ class WorkflowTemplate:
         self.service_account_name = service_account_name
         self.labels = labels
         self.ttl_strategy = ttl_strategy
+        self.node_selector = node_selectors
         self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -110,6 +117,11 @@ class WorkflowTemplate:
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
+
+        if self.node_selector:
+            setattr(self.dag_template, 'node_selector', self.node_selector)
+            setattr(self.template, 'node_selector', self.node_selector)
+            setattr(self.exit_template, 'node_selector', self.node_selector)
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 
