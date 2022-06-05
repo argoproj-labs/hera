@@ -24,6 +24,7 @@ from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
+from hera.affinity import Affinity
 
 
 class CronWorkflow:
@@ -66,6 +67,8 @@ class CronWorkflow:
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
         Mappings between IP and hostnames.
+    affinity: Optional[Affinity] = None
+        The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     """
 
     def __init__(
@@ -101,6 +104,7 @@ class CronWorkflow:
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
+        self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -163,6 +167,10 @@ class CronWorkflow:
         self.cron_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
         if self.timezone:
             setattr(self.cron_spec, 'timezone', self.timezone)
+
+        if self.affinity:
+            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
+            setattr(self.template, 'affinity', self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
