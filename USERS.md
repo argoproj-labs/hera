@@ -8,3 +8,4 @@ Please open a PR with your organization or project name in the following section
 ## Organizations/projects using Hera
 
 1. [Dyno Therapeutics](https://www.dynotx.com)
+2. [Pipekit](https://www.pipekit.io)
