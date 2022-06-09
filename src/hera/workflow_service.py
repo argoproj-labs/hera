@@ -67,13 +67,11 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException
         """
-        s = self.service.create_workflow(
+        return self.service.create_workflow(
             namespace,
             IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
-        print(42)
-        return s
 
     def delete(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow from the given namespace based on the specified name.
