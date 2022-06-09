@@ -1005,7 +1005,7 @@ class Task:
 
         affinity = self.affinity.get_spec() if self.affinity else None
         if affinity is not None:
-            setattr(template, 'affinity', affinity.get_spec())
+            setattr(template, 'affinity', affinity)
 
         if self.memoize:
             setattr(template, 'memoize', self.memoize.get_spec())
