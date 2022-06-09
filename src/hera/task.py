@@ -41,9 +41,9 @@ from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
 from hera.input import InputFrom
+from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.resources import Resources
-from hera.memoize import Memoize
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef

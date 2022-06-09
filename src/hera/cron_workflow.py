@@ -37,7 +37,7 @@ class CronWorkflow:
     ----------
     name: str
         The cron workflow name. Note that the cron workflow initiation will replace underscores with dashes.
-    service: CronWorkflowService
+    service: Optional[CronWorkflowService] = None
         A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
     timezone: str
         Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles.
@@ -82,7 +82,7 @@ class CronWorkflow:
         self,
         name: str,
         schedule: str,
-        service: CronWorkflowService,
+        service: Optional[CronWorkflowService] = None,
         timezone: Optional[str] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
@@ -104,7 +104,7 @@ class CronWorkflow:
         self.name = name.replace("_", "-")
         self.schedule = schedule
         self.timezone = timezone
-        self.service = service
+        self.service = service or CronWorkflowService()
         self.parallelism = parallelism
         self.service_account_name = service_account_name
         self.labels = labels

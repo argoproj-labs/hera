@@ -7,6 +7,7 @@ from hera.cron_workflow_service import CronWorkflowService
 from hera.env import ConfigMapEnvSpec, EnvSpec, FieldEnvSpec, SecretEnvSpec
 from hera.env_from import ConfigMapEnvFromSpec, SecretEnvFromSpec
 from hera.host_alias import HostAlias
+from hera.host_config import set_global_host, set_global_token
 from hera.image import ImagePullPolicy
 from hera.input import InputFrom
 from hera.memoize import Memoize

@@ -9,6 +9,7 @@ from hera.artifact import GCSArtifact, S3Artifact
 from hera.env import ConfigMapEnvSpec
 from hera.env_from import ConfigMapEnvFromSpec
 from hera.input import InputFrom
+from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.retry import Retry
@@ -18,7 +19,6 @@ from hera.task import Task, _dependencies_to_depends
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.variable import VariableAsEnv
-from hera.memoize import Memoize
 from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
 from hera.workflow_status import WorkflowStatus
 
