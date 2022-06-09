@@ -1,6 +1,6 @@
 import pytest
 
-from hera import set_global_host, set_global_token, Client, Config
+from hera import Client, Config, set_global_host, set_global_token
 
 
 def test_config_assembles_host_from_global_host():

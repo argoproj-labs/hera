@@ -1,7 +1,7 @@
 from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Memoize,
-    IoArgoprojWorkflowV1alpha1Cache,
     ConfigMapKeySelector,
+    IoArgoprojWorkflowV1alpha1Cache,
+    IoArgoprojWorkflowV1alpha1Memoize,
 )
 
 
