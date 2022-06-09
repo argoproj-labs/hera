@@ -42,7 +42,7 @@ class WorkflowTemplateService:
         self._host = host
         self._verify_ssl = verify_ssl
         self._namespace = namespace
-        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token).api_client
+        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
         self.service = WorkflowTemplateServiceApi(api_client=api_client)
 
     def create(

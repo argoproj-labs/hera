@@ -28,7 +28,7 @@ class Client:
     """
 
     def __init__(self, config: Config, token: Optional[str] = None):
-        if not token:
+        if token is None:
             token = get_global_token()
             assert token, "No token was provided and no global token was found."
 
