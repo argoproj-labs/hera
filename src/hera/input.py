@@ -93,6 +93,5 @@ class GlobalInputParameter(Input):
 
     def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
         return IoArgoprojWorkflowV1alpha1Parameter(
-            name=self.name,
-            value=f'{{{{workflow.parameters.{self.parameter_name}}}}}'
+            name=self.name, value=f'{{{{workflow.parameters.{self.parameter_name}}}}}'
         )
