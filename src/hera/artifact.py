@@ -105,6 +105,9 @@ class S3Artifact(BucketArtifact):
             s3=IoArgoprojWorkflowV1alpha1S3Artifact(key=self.key),
         )
 
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return self.get_spec()
+
 
 class GCSArtifact(BucketArtifact):
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -113,6 +116,9 @@ class GCSArtifact(BucketArtifact):
             path=self.path,
             gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(key=self.key),
         )
+
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return self.get_spec()
 
 
 class GitArtifact(Artifact):
@@ -125,3 +131,6 @@ class GitArtifact(Artifact):
             path=self.path,
             git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo, revision=self.revision),
         )
+
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return self.get_spec()
