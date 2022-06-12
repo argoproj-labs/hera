@@ -36,10 +36,6 @@ class Artifact(BaseModel):
         """Constructs the corresponding Argo artifact representation"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
-    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
-        """Constructs the corresponding Argo artifact inputs representation"""
-        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
-
 
 class OutputArtifact(Artifact):
     """An output artifact representation"""
@@ -70,8 +66,8 @@ class InputArtifact(Artifact):
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
-        _from = f"{{{{tasks.{self.from_task}.outputs.artifacts.{self.artifact_name}}}}}"
-        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=_from)
+        from_ = f"{{{{tasks.{self.from_task}.outputs.artifacts.{self.artifact_name}}}}}"
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=from_)
 
 
 class BucketArtifact(Artifact):
@@ -105,10 +101,6 @@ class S3Artifact(BucketArtifact):
             s3=IoArgoprojWorkflowV1alpha1S3Artifact(key=self.key),
         )
 
-    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
-        """Constructs the corresponding Argo artifact inputs representation"""
-        return self.get_spec()
-
 
 class GCSArtifact(BucketArtifact):
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -118,14 +110,8 @@ class GCSArtifact(BucketArtifact):
             gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(key=self.key),
         )
 
-    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
-        """Constructs the corresponding Argo artifact inputs representation"""
-        return self.get_spec()
-
 
 class GitArtifact(Artifact):
-    """Location of an git artifact"""
-
     repo: str
     revision: Optional[str]
 

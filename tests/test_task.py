@@ -232,7 +232,7 @@ def test_task_spec_returns_with_parallel_items(op):
 
     assert s.name == 't'
     assert s.template == 't'
-    assert len(s.arguments.parameters) == 1
+    assert len(s.arguments.argo_parameters) == 1
     assert len(s.with_items) == 3
     assert [i.value for i in s.with_items] == items
 
@@ -243,9 +243,9 @@ def test_task_spec_returns_with_single_values(op):
 
     assert s.name == 't'
     assert s.template == 't'
-    assert len(s.arguments.parameters) == 1
-    assert s.arguments.parameters[0].name == 'a'
-    assert s.arguments.parameters[0].value == '1'
+    assert len(s.arguments.argo_parameters) == 1
+    assert s.arguments.argo_parameters[0].name == 'a'
+    assert s.arguments.argo_parameters[0].value == '1'
 
 
 def test_task_template_does_not_contain_gpu_references(op):
@@ -333,20 +333,20 @@ def test_task_get_retry_returns_expected_none(no_op):
 
 def test_task_sets_user_kwarg_override(kwarg_op):
     t = Task('t', kwarg_op, [{'a': 43}])
-    assert t.parameters[0].name == 'a'
-    assert t.parameters[0].value == '43'
+    assert t.argo_parameters[0].name == 'a'
+    assert t.argo_parameters[0].value == '43'
 
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task('t', kwarg_op)
-    assert t.parameters[0].name == 'a'
-    assert t.parameters[0].value == '42'
+    assert t.argo_parameters[0].name == 'a'
+    assert t.argo_parameters[0].value == '42'
 
     t = Task('t', kwarg_multi_op, [{'a': 50}])
-    assert t.parameters[0].name == 'a'
-    assert t.parameters[0].value == '50'
-    assert t.parameters[1].name == 'b'
-    assert t.parameters[1].value == '43'
+    assert t.argo_parameters[0].name == 'a'
+    assert t.argo_parameters[0].value == '50'
+    assert t.argo_parameters[1].name == 'b'
+    assert t.argo_parameters[1].value == '43'
 
 
 def test_task_fails_artifact_validation(no_op, in_artifact):
@@ -382,7 +382,7 @@ def test_task_adds_input_from_without_func():
 def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
-    artifact = t.inputs.artifacts[0]
+    artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
 
@@ -390,7 +390,7 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
 def test_task_adds_s3_input_artifact():
     t = Task('t', input_artifacts=[S3Artifact(name="n", path="/p", key="key")])
 
-    artifact = t.inputs.artifacts[0]
+    artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
     assert artifact.s3.key == "key"
 
@@ -398,7 +398,7 @@ def test_task_adds_s3_input_artifact():
 def test_task_adds_gcs_input_artifact():
     t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", key="key")])
 
-    artifact = t.inputs.artifacts[0]
+    artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
     assert artifact.gcs.key == "key"
 
@@ -406,7 +406,7 @@ def test_task_adds_gcs_input_artifact():
 def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     t = Task('t', no_op, output_artifacts=[out_artifact])
 
-    artifact = t.outputs.artifacts[0]
+    artifact = t.argo_outputs.artifacts[0]
     assert artifact.name == out_artifact.name
     assert artifact.path == out_artifact.path
 
@@ -548,8 +548,8 @@ def test_task_adds_variable_as_env_var():
     assert t1.env[0].name == "IP"
     assert t1.env[0].value == "{{inputs.parameters.IP}}"
 
-    assert t1.arguments.parameters[0].name == "IP"
-    assert t1.arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
+    assert t1.argo_arguments.argo_parameters[0].name == "IP"
+    assert t1.argo_arguments.argo_parameters[0].value == "\"{{tasks.t.ip}}\""
 
 
 def test_task_adds_other_task_on_success():

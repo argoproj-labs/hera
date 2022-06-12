@@ -40,7 +40,7 @@ from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
-from hera.input import InputFrom
+from hera.input import InputFrom, Input
 from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.resources import Resources
@@ -50,6 +50,7 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import Variable, VariableAsEnv
 from hera.workflow_status import WorkflowStatus
+from hera.output import Output
 
 
 class _Item(ModelSimple):
@@ -176,13 +177,19 @@ class Task:
         An InputFrom object that denotes the task this will receive input from. The other task results are read in via
         parameters. The parameter specifications follow the ones specified by InputFrom i.e the names of the parameters
         that are set.
+    inputs: Optional[List[Input]] = None
+        `Input` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
+        parameter it cannot be used in conjunction with other types of inputs because of the dynamic aspect of the task
+        creation process when provided with an `InputFrom`.
+    outputs: Optional[List[Output]] = None
+        `Output` objects that dictate the outputs of the task.
     image: str = 'python:3.7'
         The image to use in the execution of the function.
     image_pull_policy: ImagePullPolicy = 'Always'
         The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image or not.
         In case of local development/testing this can be set to 'Never'.
     daemon: Optional[bool] = None
-        Wether to run the the task as daemon.
+        Whether to run the task as a daemon.
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
         the specified function is parsed, stored as a string, and ultimately placed in a separate file inside the task
@@ -246,6 +253,8 @@ class Task:
         func: Optional[Callable] = None,
         func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
         input_from: Optional[InputFrom] = None,
+        inputs: Optional[List[Input]] = None,
+        outputs: Optional[List[Output]] = None,
         input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
         image: str = 'python:3.7',
@@ -274,8 +283,8 @@ class Task:
         self.func = func
         self.func_params = func_params
         self.input_from = input_from
-        self.input_artifacts = input_artifacts
-        self.output_artifacts = output_artifacts
+        self.input_artifacts = input_artifacts or []
+        self.output_artifacts = output_artifacts or []
         self.memoize = memoize
         self.validate()
 
@@ -292,6 +301,8 @@ class Task:
         self.labels = labels or {}
         self.annotations = annotations or {}
         self.variables = variables or []
+        self.inputs = inputs or []
+        self.outputs = outputs or []
 
         self.env = self.get_env(env_specs)
         self.env_from = self.get_env_from_source(env_from_specs)
@@ -301,12 +312,10 @@ class Task:
         self.template_ref = template_ref
         self.affinity = affinity
 
-        self.parameters = self.get_parameters()
-        self.argo_input_artifacts = self.get_argo_input_artifacts()
-        self.argo_output_artifacts = self.get_argo_output_artifacts()
-        self.arguments = self.get_arguments()
-        self.inputs = self.get_inputs()
-        self.outputs = self.get_outputs()
+        self.argo_parameters = self.get_parameters()
+        self.argo_arguments = self.get_arguments()
+        self.argo_inputs = self.get_inputs()
+        self.argo_outputs = self.get_outputs()
         self.argo_resources = self.get_resources()
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_task_spec()
@@ -594,23 +603,13 @@ class Task:
             for params in self.func_params:
                 assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
 
-    def get_argo_input_artifacts(self) -> List[IoArgoprojWorkflowV1alpha1Artifact]:
-        """Assembles and returns a list of artifacts assembled from the Hera internal input artifact representation"""
-        if not self.input_artifacts:
-            return []
-        input_artifacts = [i.get_spec() for i in self.input_artifacts]
-        return input_artifacts if input_artifacts else []
-
-    def get_argo_output_artifacts(self) -> List[IoArgoprojWorkflowV1alpha1Artifact]:
-        """Assembles and returns a list of artifacts assembled from the Hera internal output artifact representation"""
-        if not self.output_artifacts:
-            return []
-        output_artifacts = [o.get_spec() for o in self.output_artifacts]
-        return output_artifacts if output_artifacts else []
-
     def get_arguments(self) -> IoArgoprojWorkflowV1alpha1Arguments:
         """Assembles and returns the task arguments"""
-        return IoArgoprojWorkflowV1alpha1Arguments(parameters=self.parameters, artifacts=self.argo_input_artifacts)
+        artifacts = [i.get_spec() for i in self.input_artifacts]
+        return IoArgoprojWorkflowV1alpha1Arguments(
+            parameters=self.argo_parameters,
+            artifacts=artifacts,
+        )
 
     def get_inputs(self) -> IoArgoprojWorkflowV1alpha1Inputs:
         """Assembles the inputs of the task.
@@ -622,14 +621,14 @@ class Task:
         -----
         Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
         """
-        artifacts = []
-        if self.argo_input_artifacts:
-            artifacts = [i.get_input_spec() for i in self.input_artifacts]
-        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.parameters, artifacts=artifacts)
+        artifacts = [i.get_spec() for i in self.input_artifacts]
+        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.argo_parameters, artifacts=artifacts)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
         """Assembles and returns the task outputs"""
-        return IoArgoprojWorkflowV1alpha1Outputs(artifacts=self.argo_output_artifacts)
+        artifacts = [o.get_spec() for o in self.output_artifacts]
+        parameters = [o.get_spec() for o in self.outputs]
+        return IoArgoprojWorkflowV1alpha1Outputs(artifacts=artifacts)
 
     def get_command(self) -> Optional[List[str]]:
         """
@@ -716,12 +715,14 @@ class Task:
                 for arg in args:
                     parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
             else:
-                for parameter in self.input_from.parameters:
-                    parameters.append(
-                        IoArgoprojWorkflowV1alpha1Parameter(name=parameter, value=f'{{{{item.{parameter}}}}}')
-                    )
+                parameters.extend(self.input_from.get_spec())
+        if self.inputs:
+            for input_ in self.inputs:
+                if isinstance(input_, InputFrom) and len(self.inputs) > 1:
+                    raise ValueError('cannot use `InputFrom` along with other input types. Use `input_from` instead')
+                parameters.append(input_.get_spec())
         if self.variables:
-            parameters += [variable.get_argument_parameter() for variable in self.variables]
+            parameters.extend([variable.get_argument_parameter() for variable in self.variables])
         if self.func:
             parameters += self.get_func_parameters()
 
@@ -791,7 +792,7 @@ class Task:
             The string representation of the script to load.
         """
         extract = "import json\n"
-        for param in self.parameters:
+        for param in self.argo_parameters:
             if self.input_from:
                 # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
                 # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
@@ -985,8 +986,8 @@ class Task:
         template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
             daemon=self.daemon,
-            inputs=self.inputs,
-            outputs=self.outputs,
+            inputs=self.argo_inputs,
+            outputs=self.argo_outputs,
             tolerations=self.get_tolerations(),
             metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels, annotations=self.annotations),
         )
@@ -1079,7 +1080,7 @@ class Task:
         """
         task = IoArgoprojWorkflowV1alpha1DAGTask(
             name=self.name,
-            arguments=self.arguments,
+            arguments=self.argo_arguments,
             _check_type=False,
         )
         if self.continue_on_error or self.continue_on_fail:
