@@ -36,6 +36,10 @@ class Artifact(BaseModel):
         """Constructs the corresponding Argo artifact representation"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Artifact representation for setting task inputs"""
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
+
 
 class OutputArtifact(Artifact):
     """An output artifact representation"""

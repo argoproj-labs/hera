@@ -521,7 +521,7 @@ class Task:
         -----
         Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
         """
-        artifacts = [i.get_spec() for i in self.input_artifacts]
+        artifacts = [i.get_input_spec() for i in self.input_artifacts]
         return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.argo_parameters, artifacts=artifacts)
 
     def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
