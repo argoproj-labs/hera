@@ -92,21 +92,21 @@ def test_param_getter_parses_on_multi_params(op):
     params = t.get_parameters()
     for p in params:
         assert p.name == 'a'
-        assert p.value == '{{item.a}}'
+        assert p.default == '{{item.a}}'
 
 
 def test_param_getter_parses_single_param_val_on_json_payload(op):
     t = Task('t', op, [{'a': 1}])
     param = t.get_parameters()[0]
     assert param.name == 'a'
-    assert param.value == '1'  # from json.dumps
+    assert param.default == '1'  # from json.dumps
 
 
 def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, op):
     t = Task('t', op, [{'a': mock_model()}])
     param = t.get_parameters()[0]
     assert param.name == 'a'
-    assert param.value == '{"field1": 1, "field2": 2}'
+    assert param.default == '{"field1": 1, "field2": 2}'
 
 
 def test_param_script_portion_adds_formatted_json_calls(op):
@@ -274,7 +274,7 @@ def test_task_spec_returns_with_single_values(op):
     assert s.template == 't'
     assert len(s.arguments.parameters) == 1
     assert s.arguments.parameters[0].name == 'a'
-    assert s.arguments.parameters[0].value == '1'
+    assert s.arguments.parameters[0].default == '1'
 
 
 def test_task_template_does_not_contain_gpu_references(op):
@@ -369,19 +369,19 @@ def test_task_get_retry_returns_expected_none(no_op):
 def test_task_sets_user_kwarg_override(kwarg_op):
     t = Task('t', kwarg_op, [{'a': 43}])
     assert t.argo_parameters[0].name == 'a'
-    assert t.argo_parameters[0].value == '43'
+    assert t.argo_parameters[0].default == '43'
 
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task('t', kwarg_op)
     assert t.argo_parameters[0].name == 'a'
-    assert t.argo_parameters[0].value == '42'
+    assert t.argo_parameters[0].default == '42'
 
     t = Task('t', kwarg_multi_op, [{'a': 50}])
     assert t.argo_parameters[0].name == 'a'
-    assert t.argo_parameters[0].value == '50'
+    assert t.argo_parameters[0].default == '50'
     assert t.argo_parameters[1].name == 'b'
-    assert t.argo_parameters[1].value == '43'
+    assert t.argo_parameters[1].default == '43'
 
 
 def test_task_fails_artifact_validation(no_op, in_artifact):

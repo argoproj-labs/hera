@@ -613,7 +613,7 @@ class Task:
                 # that come in from other tasks
                 args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
                 for arg in args:
-                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, default=f'{{{{item.{arg}}}}}'))
             else:
                 parameters.extend(self.input_from.get_spec())
 
@@ -660,7 +660,7 @@ class Task:
                         value = param_value.json()
                     else:
                         value = json.dumps(param_value)
-                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=value))
+                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, default=value))
                     param_name_cache.add(param_name)
             elif len(self.func_params) > 1:
                 # at this point the init passed validation, so this condition is always false when self.input_from
@@ -670,7 +670,7 @@ class Task:
                 # first series of params to item.param_name since the keys are all the same for the func_params
                 for param_name in self.func_params[0].keys():
                     parameters.append(
-                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}')
+                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, default=f'{{{{item.{param_name}}}}}')
                     )
                     param_name_cache.add(param_name)
         for name, value in keywords:
@@ -680,7 +680,7 @@ class Task:
                 value = json.dumps(value)
             if name in param_name_cache:
                 continue  # user override of a kwarg
-            parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, value=value))
+            parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, default=value))
         return parameters
 
     def get_param_script_portion(self) -> str:
