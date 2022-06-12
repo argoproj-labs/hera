@@ -1,4 +1,4 @@
-from hera import Input, InputFrom, InputParameter, GlobalInputParameter
+from hera import GlobalInputParameter, Input, InputFrom, InputParameter
 
 
 def test_input_returns_default_expected_spec():
