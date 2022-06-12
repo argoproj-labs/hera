@@ -5,22 +5,32 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
-from hera.artifact import GCSArtifact, S3Artifact
-from hera.env import ConfigMapEnvSpec
-from hera.env_from import ConfigMapEnvFromSpec
-from hera.input import InputFrom
-from hera.memoize import Memoize
-from hera.operator import Operator
-from hera.resources import Resources
-from hera.retry import Retry
-from hera.retry_policy import RetryPolicy
-from hera.security_context import TaskSecurityContext
-from hera.task import Task, _dependencies_to_depends
-from hera.template_ref import TemplateRef
-from hera.toleration import GPUToleration, Toleration
-from hera.variable import VariableAsEnv
-from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
-from hera.workflow_status import WorkflowStatus
+from hera import (
+    ConfigMapEnvFromSpec,
+    ConfigMapEnvSpec,
+    ConfigMapVolume,
+    EmptyDirVolume,
+    ExistingVolume,
+    GCSArtifact,
+    GPUToleration,
+    InputFrom,
+    InputParameter,
+    Memoize,
+    Operator,
+    OutputPathParameter,
+    Resources,
+    Retry,
+    RetryPolicy,
+    S3Artifact,
+    Task,
+    TaskSecurityContext,
+    TemplateRef,
+    Toleration,
+    VariableAsEnv,
+    Volume,
+    WorkflowStatus,
+)
+from hera.task import _dependencies_to_depends
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -102,19 +112,33 @@ def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_param_script_portion()
-    assert script == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+    assert (
+        script == 'import json\n'
+        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+    )
 
 
 def test_script_getter_returns_expected_string(op, typed_op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert (
+        script == 'import json\n'
+        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+        '\n'
+        'print(a)\n'
+    )
 
     t = Task('t', typed_op, [{'a': 1}])
     script = t.get_script()
     assert (
         script == 'import json\n'
-        'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+        '\n'
+        'print(a)\n'
+        'return [{\'a\': (a, a)}]\n'
     )
 
 
@@ -134,11 +158,16 @@ def test_script_getter_parses_multi_line_function(long_op):
     )
 
     expected_script = """import json
-very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
-very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
-very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
-very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
-very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+try: very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
+except: very_long_parameter_name = '''{{inputs.parameters.very_long_parameter_name}}'''
+try: very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
+except: very_very_long_parameter_name = '''{{inputs.parameters.very_very_long_parameter_name}}'''
+try: very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+except: very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_long_parameter_name}}'''
+try: very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+except: very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
+try: very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+except: very_very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
 
 print(42)
 """
@@ -227,7 +256,7 @@ def test_task_command_parses(mock_model, op):
 
 def test_task_spec_returns_with_parallel_items(op):
     t = Task('t', op, [{'a': 1}, {'a': 1}, {'a': 1}])
-    s = t.get_task_spec()
+    s = t.get_spec()
     items = [{'a': '1'}, {'a': '1'}, {'a': '1'}]
 
     assert s.name == 't'
@@ -239,7 +268,7 @@ def test_task_spec_returns_with_parallel_items(op):
 
 def test_task_spec_returns_with_single_values(op):
     t = Task('t', op, [{'a': 1}])
-    s = t.get_task_spec()
+    s = t.get_spec()
 
     assert s.name == 't'
     assert s.template == 't'
@@ -283,7 +312,13 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
-    assert tt.script.source == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert (
+        tt.script.source == 'import json\n'
+        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+        '\n'
+        'print(a)\n'
+    )
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
@@ -333,20 +368,20 @@ def test_task_get_retry_returns_expected_none(no_op):
 
 def test_task_sets_user_kwarg_override(kwarg_op):
     t = Task('t', kwarg_op, [{'a': 43}])
-    assert t.parameters[0].name == 'a'
-    assert t.parameters[0].value == '43'
+    assert t.argo_parameters[0].name == 'a'
+    assert t.argo_parameters[0].value == '43'
 
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task('t', kwarg_op)
-    assert t.parameters[0].name == 'a'
-    assert t.parameters[0].value == '42'
+    assert t.argo_parameters[0].name == 'a'
+    assert t.argo_parameters[0].value == '42'
 
     t = Task('t', kwarg_multi_op, [{'a': 50}])
-    assert t.parameters[0].name == 'a'
-    assert t.parameters[0].value == '50'
-    assert t.parameters[1].name == 'b'
-    assert t.parameters[1].value == '43'
+    assert t.argo_parameters[0].name == 'a'
+    assert t.argo_parameters[0].value == '50'
+    assert t.argo_parameters[1].name == 'b'
+    assert t.argo_parameters[1].value == '43'
 
 
 def test_task_fails_artifact_validation(no_op, in_artifact):
@@ -382,7 +417,7 @@ def test_task_adds_input_from_without_func():
 def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
     t = Task('t', no_op, input_artifacts=[in_artifact])
 
-    artifact = t.inputs.artifacts[0]
+    artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == in_artifact.name
     assert artifact.path == in_artifact.path
 
@@ -390,7 +425,7 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
 def test_task_adds_s3_input_artifact():
     t = Task('t', input_artifacts=[S3Artifact(name="n", path="/p", key="key")])
 
-    artifact = t.inputs.artifacts[0]
+    artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
     assert artifact.s3.key == "key"
 
@@ -398,7 +433,7 @@ def test_task_adds_s3_input_artifact():
 def test_task_adds_gcs_input_artifact():
     t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", key="key")])
 
-    artifact = t.inputs.artifacts[0]
+    artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
     assert artifact.gcs.key == "key"
 
@@ -406,7 +441,7 @@ def test_task_adds_gcs_input_artifact():
 def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
     t = Task('t', no_op, output_artifacts=[out_artifact])
 
-    artifact = t.outputs.artifacts[0]
+    artifact = t.argo_outputs.artifacts[0]
     assert artifact.name == out_artifact.name
     assert artifact.path == out_artifact.path
 
@@ -548,8 +583,8 @@ def test_task_adds_variable_as_env_var():
     assert t1.env[0].name == "IP"
     assert t1.env[0].value == "{{inputs.parameters.IP}}"
 
-    assert t1.arguments.parameters[0].name == "IP"
-    assert t1.arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
+    assert t1.argo_arguments.parameters[0].name == "IP"
+    assert t1.argo_arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
 
 
 def test_task_adds_other_task_on_success():
@@ -767,3 +802,27 @@ def test_task_fails_to_validate_with_incorrect_memoize(op):
     with pytest.raises(AssertionError) as e:
         Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a'))
     assert str(e.value) == 'memoize key must be a parameter of the function'
+
+
+def test_task_adds_io_params():
+    inputs = [InputParameter('i', 't', 'p')]
+    outputs = [OutputPathParameter('o', '/test.txt', default='d')]
+    t = Task(
+        't',
+        inputs=inputs,
+        outputs=outputs,
+    )
+    assert t.name == 't'
+    assert t.inputs == inputs
+    assert t.outputs == outputs
+
+    p = t.get_parameters()
+    assert len(p) == 1
+    assert p[0].name == 'i'
+    assert p[0].value == '{{tasks.t.outputs.parameters.p}}'
+
+
+def test_task_raises_on_mixed_input_types():
+    with pytest.raises(ValueError) as e:
+        t = Task('t', inputs=[InputParameter('i1', 't', 'p'), InputFrom('i2', parameters=['t'])])
+    assert str(e.value) == 'cannot use `InputFrom` along with other input types. Use `input_from` instead'

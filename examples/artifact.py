@@ -4,10 +4,7 @@ The first task, t1, creates a file located at `/file` containing a message. The 
 task, t2, takes this artifact, places it at its own `/file` path, and print out the content.
 """
 
-from hera.artifact import InputArtifact, OutputArtifact
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import InputArtifact, OutputArtifact, Task, Workflow, WorkflowService
 
 
 def writer():

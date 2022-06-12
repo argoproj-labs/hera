@@ -1,8 +1,5 @@
 """This example showcases how to run a container, rather than a Python, function, as the payload of a task in Hera"""
-from hera.image import ImagePullPolicy
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import ImagePullPolicy, Task, Workflow, WorkflowService
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='', verify_ssl=False, token='')
