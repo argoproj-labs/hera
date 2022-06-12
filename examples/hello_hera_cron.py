@@ -1,7 +1,6 @@
 """This example showcases the cron hello world example of Hera"""
-from hera.cron_workflow import CronWorkflow
-from hera.cron_workflow_service import CronWorkflowService
-from hera.task import Task
+
+from hera import CronWorkflow, CronWorkflowService, Task
 
 
 def hello():

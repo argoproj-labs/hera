@@ -9,6 +9,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.affinity import Affinity
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
@@ -27,39 +28,53 @@ class WorkflowTemplate:
     ----------
     name: str
         The workflowTemplate name. Note that the workflowTemplate initiation will replace underscores with dashes.
-    service: WorkflowService
+    service: Optional[WorkflowService] = None
         A workflowTemplate service to use for submissions.
         See `hera.v1.workflow_template_service.WorkflowTemplateService`.
     parallelism: int = 50
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
     service_account_name: Optional[str] = None
         The name of the service account to use in all workflow tasks.
-    security_context:  Optional[WorkflowSecurityContext] = None
-        Define security settings for all containers in the workflow.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
     namespace: Optional[str] = 'default'
         The namespace to use for creating the WorkflowTemplate.  Defaults to "default"
+    security_context:  Optional[WorkflowSecurityContext] = None
+        Define security settings for all containers in the workflow.
+    ttl_strategy: Optional[TTLStrategy] = None
+        The time to live strategy of the workflow.
+    node_selectors: Optional[Dict[str, str]] = None
+        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
+        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
+        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
+        they submit the workflow to.
+    affinity: Optional[Affinity] = None
+        The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     """
 
     def __init__(
         self,
         name: str,
-        service: WorkflowTemplateService,
+        service: Optional[WorkflowTemplateService] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
+        node_selectors: Optional[Dict[str, str]] = None,
+        affinity: Optional[Affinity] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
-        self.service = service
+        self.service = service or WorkflowTemplateService()
         self.parallelism = parallelism
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.labels = labels
+        self.ttl_strategy = ttl_strategy
+        self.node_selector = node_selectors
+        self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -84,7 +99,7 @@ class WorkflowTemplate:
             parallelism=self.parallelism,
         )
 
-        if ttl_strategy:
+        if self.ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if self.security_context:
@@ -95,9 +110,18 @@ class WorkflowTemplate:
             setattr(self.template, 'service_account_name', self.service_account_name)
             setattr(self.spec, 'service_account_name', self.service_account_name)
 
+        if self.affinity:
+            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
+            setattr(self.template, 'affinity', self.affinity.get_spec())
+
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
+
+        if self.node_selector:
+            setattr(self.dag_template, 'node_selector', self.node_selector)
+            setattr(self.template, 'node_selector', self.node_selector)
+            setattr(self.exit_template, 'node_selector', self.node_selector)
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 

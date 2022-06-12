@@ -330,3 +330,17 @@ def test_wf_contains_expected_default_exit_template(w):
     assert w.exit_template
     assert w.exit_template.name == 'exit-template'
     assert w.exit_template.dag.tasks == []
+
+
+def test_wf_contains_expected_node_selectors(ws):
+    w = Workflow('w', ws, node_selectors={'foo': 'bar'})
+    assert w.template.node_selector == {'foo': 'bar'}
+    assert w.exit_template.node_selector == {'foo': 'bar'}
+    assert w.dag_template.node_selector == {'foo': 'bar'}
+
+
+def test_wf_contains_expected_affinity(ws, affinity):
+    w = Workflow('w', ws, affinity=affinity)
+    assert w.affinity == affinity
+    assert hasattr(w.template, 'affinity')
+    assert hasattr(w.exit_template, 'affinity')

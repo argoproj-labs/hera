@@ -1,8 +1,5 @@
 """This example showcases the classic conditional workflow coin-flip."""
-from hera.operator import Operator
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import Operator, Task, Workflow, WorkflowService
 
 
 def random_code():

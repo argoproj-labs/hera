@@ -29,7 +29,18 @@ The general format is:
 
 ```
 
-# 3.3.2 - DATE (30/05/2020)
+# 3.4.0 - DATE (12/06/2022)
+
+### Added
+
+- node selectors on all workflow types
+- memoization
+- global parameter access on tasks
+- input/output parameters in addition to artifacts
+- affinity, anti-affinity, node affinity
+- client host/token global injection
+
+# 3.3.2 - DATE (30/05/2022)
 
 ### Fixed
 

@@ -17,6 +17,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+from hera.affinity import Affinity
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
@@ -36,7 +37,7 @@ class CronWorkflow:
     ----------
     name: str
         The cron workflow name. Note that the cron workflow initiation will replace underscores with dashes.
-    service: CronWorkflowService
+    service: Optional[CronWorkflowService] = None
         A cron workflow service to use for creations. See `hera.v1.cron_workflow_service.CronWorkflowService`.
     timezone: str
         Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles.
@@ -62,17 +63,26 @@ class CronWorkflow:
         If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
         you can reference it again and again when you create a new Workflow without specifying the same tasks and
         dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
+    ttl_strategy: Optional[TTLStrategy] = None
+        The time to live strategy of the workflow.
     volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
         Define how to delete volumes from completed Workflows.
     host_aliases: Optional[List[HostAlias]] = None
         Mappings between IP and hostnames.
+    node_selectors: Optional[Dict[str, str]] = None
+        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
+        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
+        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
+        they submit the workflow to.
+        affinity: Optional[Affinity] = None
+        The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     """
 
     def __init__(
         self,
         name: str,
         schedule: str,
-        service: CronWorkflowService,
+        service: Optional[CronWorkflowService] = None,
         timezone: Optional[str] = None,
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
@@ -85,6 +95,8 @@ class CronWorkflow:
         ttl_strategy: Optional[TTLStrategy] = None,
         volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
         host_aliases: Optional[List[HostAlias]] = None,
+        node_selectors: Optional[Dict[str, str]] = None,
+        affinity: Optional[Affinity] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f'{timezone} is not a valid timezone')
@@ -92,7 +104,7 @@ class CronWorkflow:
         self.name = name.replace("_", "-")
         self.schedule = schedule
         self.timezone = timezone
-        self.service = service
+        self.service = service or CronWorkflowService()
         self.parallelism = parallelism
         self.service_account_name = service_account_name
         self.labels = labels
@@ -101,6 +113,9 @@ class CronWorkflow:
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
+        self.node_selector = node_selectors
+        self.ttl_strategy = ttl_strategy
+        self.affinity = affinity
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -135,7 +150,7 @@ class CronWorkflow:
                 parallelism=self.parallelism,
             )
 
-        if ttl_strategy:
+        if self.ttl_strategy:
             setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
 
         if volume_claim_gc_strategy:
@@ -164,11 +179,20 @@ class CronWorkflow:
         if self.timezone:
             setattr(self.cron_spec, 'timezone', self.timezone)
 
+        if self.affinity:
+            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
+            setattr(self.template, 'affinity', self.affinity.get_spec())
+
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, 'labels', self.labels)
         if self.annotations:
             setattr(self.metadata, 'annotations', self.annotations)
+
+        if self.node_selector:
+            setattr(self.dag_template, 'node_selector', self.node_selector)
+            setattr(self.template, 'node_selector', self.node_selector)
+            setattr(self.exit_template, 'node_selector', self.node_selector)
 
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,
