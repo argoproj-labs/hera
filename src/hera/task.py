@@ -178,6 +178,8 @@ class Task:
         self.input_artifacts = input_artifacts or []
         self.output_artifacts = output_artifacts or []
         self.memoize = memoize
+        self.inputs = inputs or []
+        self.outputs = outputs or []
         self.validate()
 
         self.image = image
@@ -193,8 +195,6 @@ class Task:
         self.labels = labels or {}
         self.annotations = annotations or {}
         self.variables = variables or []
-        self.inputs = inputs or []
-        self.outputs = outputs or []
 
         self.env = self.get_env(env_specs)
         self.env_from = self.get_env_from_source(env_from_specs)
@@ -454,6 +454,10 @@ class Task:
             assert len(set([i.name for i in self.output_artifacts])) == len(
                 self.output_artifacts
             ), 'output artifact names must be unique'
+        if self.inputs:
+            assert len(set([i.name for i in self.inputs])) == len(self.inputs), 'input parameters must be unique'
+        if self.outputs:
+            assert len(set([o.name for o in self.outputs])) == len(self.outputs), 'output parameters must be unique'
 
         if self.func:
             self._validate_func()
@@ -472,6 +476,9 @@ class Task:
                         len(self.func_params) == 1
                     ), 'only single function parameters are allowed when specified together with input_from'
                 pass
+            elif self.inputs:
+                assert args.issuperset(set([i.name for i in self.inputs])), \
+                    'function parameters must intersect with at least one `Input` when `inputs` is specified'
             else:
                 signature = inspect.signature(self.func)
                 keywords = []
@@ -615,9 +622,6 @@ class Task:
                     raise ValueError('cannot use `InputFrom` along with other input types. Use `input_from` instead')
                 parameters.append(input_.get_spec())
 
-        if self.outputs:
-            parameters.extend([o.get_spec() for o in self.outputs])
-
         if self.variables:
             parameters.extend([variable.get_argument_parameter() for variable in self.variables])
 
@@ -691,15 +695,12 @@ class Task:
         """
         extract = "import json\n"
         for param in self.argo_parameters:
-            if self.input_from:
-                # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
-                # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
-                # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
-                # payload of the script is not necessary when regular input is set on the task via `func_params`
-                extract += f"""try: {param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
-                extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
-            else:
-                extract += f"""{param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
+            # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
+            # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
+            # payload of the script is not necessary when regular input is set on the task via `func_params`
+            extract += f"""try: {param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
         return textwrap.dedent(extract)
 
     def get_script(self) -> str:

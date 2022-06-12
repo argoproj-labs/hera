@@ -53,10 +53,17 @@ class OutputPathParameter(Output):
         self.path = path
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Parameter:
+        if self.default is not None:
+            return IoArgoprojWorkflowV1alpha1Parameter(
+                name=self.name,
+                value_from=IoArgoprojWorkflowV1alpha1ValueFrom(
+                    default=self.default,
+                    path=self.path,
+                ),
+            )
         return IoArgoprojWorkflowV1alpha1Parameter(
             name=self.name,
             value_from=IoArgoprojWorkflowV1alpha1ValueFrom(
-                default=self.default,
                 path=self.path,
             ),
         )

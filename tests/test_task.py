@@ -112,19 +112,33 @@ def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_param_script_portion()
-    assert script == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+    assert (
+        script == 'import json\n'
+                  'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+                  'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+    )
 
 
 def test_script_getter_returns_expected_string(op, typed_op):
     t = Task('t', op, [{'a': 1}])
     script = t.get_script()
-    assert script == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert (
+        script == 'import json\n'
+                  'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+                  'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+                  '\n'
+                  'print(a)\n'
+    )
 
     t = Task('t', typed_op, [{'a': 1}])
     script = t.get_script()
     assert (
         script == 'import json\n'
-        'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\nreturn [{\'a\': (a, a)}]\n'
+                  'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+                  'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+                  '\n'
+                  'print(a)\n'
+                  'return [{\'a\': (a, a)}]\n'
     )
 
 
@@ -144,11 +158,16 @@ def test_script_getter_parses_multi_line_function(long_op):
     )
 
     expected_script = """import json
-very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
-very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
-very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
-very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
-very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+try: very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
+except: very_long_parameter_name = '''{{inputs.parameters.very_long_parameter_name}}'''
+try: very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
+except: very_very_long_parameter_name = '''{{inputs.parameters.very_very_long_parameter_name}}'''
+try: very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+except: very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_long_parameter_name}}'''
+try: very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+except: very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
+try: very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+except: very_very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
 
 print(42)
 """
@@ -293,7 +312,13 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
     assert isinstance(tt.daemon, bool)
     assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
     assert tt.name == 't'
-    assert tt.script.source == 'import json\n' 'a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n\nprint(a)\n'
+    assert (
+        tt.script.source == 'import json\n'
+                  'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+                  'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+                  '\n'
+                  'print(a)\n'
+    )
     assert tt.inputs.parameters[0].name == 'a'
     assert len(tt.tolerations) == 1
     assert tt.tolerations[0].key == 'nvidia.com/gpu'
@@ -376,8 +401,8 @@ def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
     script = t.get_param_script_portion()
     assert (
         script == 'import json\n'
-        'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
-        'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
+                  'try: a = json.loads(\'\'\'{{inputs.parameters.a}}\'\'\')\n'
+                  'except: a = \'\'\'{{inputs.parameters.a}}\'\'\'\n'
     )
 
 
@@ -737,13 +762,13 @@ def test_all_failed_raises_assertions(no_op, multi_op, mock_model):
         t1.when_all_failed(t2)
     assert (
         str(e.value) == 'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
-        'with multiple `func_params or setting `input_from`'
+                        'with multiple `func_params or setting `input_from`'
     )
     with pytest.raises(AssertionError) as e:
         t1.when_any_succeeded(t2)
     assert (
         str(e.value) == 'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
-        'with multiple `func_params or setting `input_from`'
+                        'with multiple `func_params or setting `input_from`'
     )
 
     t1 = Task(
@@ -792,12 +817,9 @@ def test_task_adds_io_params():
     assert t.outputs == outputs
 
     p = t.get_parameters()
-    assert len(p) == 2
+    assert len(p) == 1
     assert p[0].name == 'i'
     assert p[0].value == '{{tasks.t.outputs.parameters.p}}'
-    assert p[1].name == 'o'
-    assert p[1].value_from.default == 'd'
-    assert p[1].value_from.path == '/test.txt'
 
 
 def test_task_raises_on_mixed_input_types():
