@@ -1,5 +1,12 @@
 from hera.affinity import Affinity
-from hera.artifact import Artifact
+from hera.artifact import (
+    Artifact,
+    GCSArtifact,
+    GitArtifact,
+    InputArtifact,
+    OutputArtifact,
+    S3Artifact,
+)
 from hera.client import Client
 from hera.config import Config
 from hera.cron_workflow import CronWorkflow
@@ -9,9 +16,10 @@ from hera.env_from import ConfigMapEnvFromSpec, SecretEnvFromSpec
 from hera.host_alias import HostAlias
 from hera.host_config import set_global_host, set_global_token
 from hera.image import ImagePullPolicy
-from hera.input import InputFrom
+from hera.input import Input, InputFrom, InputParameter
 from hera.memoize import Memoize
 from hera.operator import Operator
+from hera.output import Output, OutputPathParameter
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.retry_policy import RetryPolicy

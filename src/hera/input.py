@@ -18,7 +18,7 @@ class Input:
         self.name = name
 
     def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
-        raise NotImplementedError('Implement')
+        return IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
 
 
 class InputParameter(Input):
@@ -64,8 +64,6 @@ class InputFrom(Input):
     parameters: List[str]
         The list of parameter names to provide as input to the existing task.
     """
-
-    parameters: List[str]
 
     def __init__(self, name: str, parameters: List[str]) -> None:
         super().__init__(name)

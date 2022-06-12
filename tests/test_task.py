@@ -5,22 +5,32 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
-from hera.artifact import GCSArtifact, S3Artifact
-from hera.env import ConfigMapEnvSpec
-from hera.env_from import ConfigMapEnvFromSpec
-from hera.input import InputFrom
-from hera.memoize import Memoize
-from hera.operator import Operator
-from hera.resources import Resources
-from hera.retry import Retry
-from hera.retry_policy import RetryPolicy
-from hera.security_context import TaskSecurityContext
-from hera.task import Task, _dependencies_to_depends
-from hera.template_ref import TemplateRef
-from hera.toleration import GPUToleration, Toleration
-from hera.variable import VariableAsEnv
-from hera.volumes import ConfigMapVolume, EmptyDirVolume, ExistingVolume, Volume
-from hera.workflow_status import WorkflowStatus
+from hera import (
+    ConfigMapEnvFromSpec,
+    ConfigMapEnvSpec,
+    ConfigMapVolume,
+    EmptyDirVolume,
+    ExistingVolume,
+    GCSArtifact,
+    GPUToleration,
+    InputFrom,
+    InputParameter,
+    Memoize,
+    Operator,
+    OutputPathParameter,
+    Resources,
+    Retry,
+    RetryPolicy,
+    S3Artifact,
+    Task,
+    TaskSecurityContext,
+    TemplateRef,
+    Toleration,
+    VariableAsEnv,
+    Volume,
+    WorkflowStatus,
+)
+from hera.task import _dependencies_to_depends
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -227,25 +237,25 @@ def test_task_command_parses(mock_model, op):
 
 def test_task_spec_returns_with_parallel_items(op):
     t = Task('t', op, [{'a': 1}, {'a': 1}, {'a': 1}])
-    s = t.get_task_spec()
+    s = t.get_spec()
     items = [{'a': '1'}, {'a': '1'}, {'a': '1'}]
 
     assert s.name == 't'
     assert s.template == 't'
-    assert len(s.arguments.argo_parameters) == 1
+    assert len(s.arguments.parameters) == 1
     assert len(s.with_items) == 3
     assert [i.value for i in s.with_items] == items
 
 
 def test_task_spec_returns_with_single_values(op):
     t = Task('t', op, [{'a': 1}])
-    s = t.get_task_spec()
+    s = t.get_spec()
 
     assert s.name == 't'
     assert s.template == 't'
-    assert len(s.arguments.argo_parameters) == 1
-    assert s.arguments.argo_parameters[0].name == 'a'
-    assert s.arguments.argo_parameters[0].value == '1'
+    assert len(s.arguments.parameters) == 1
+    assert s.arguments.parameters[0].name == 'a'
+    assert s.arguments.parameters[0].value == '1'
 
 
 def test_task_template_does_not_contain_gpu_references(op):
@@ -548,8 +558,8 @@ def test_task_adds_variable_as_env_var():
     assert t1.env[0].name == "IP"
     assert t1.env[0].value == "{{inputs.parameters.IP}}"
 
-    assert t1.argo_arguments.argo_parameters[0].name == "IP"
-    assert t1.argo_arguments.argo_parameters[0].value == "\"{{tasks.t.ip}}\""
+    assert t1.argo_arguments.parameters[0].name == "IP"
+    assert t1.argo_arguments.parameters[0].value == "\"{{tasks.t.ip}}\""
 
 
 def test_task_adds_other_task_on_success():
@@ -767,3 +777,30 @@ def test_task_fails_to_validate_with_incorrect_memoize(op):
     with pytest.raises(AssertionError) as e:
         Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a'))
     assert str(e.value) == 'memoize key must be a parameter of the function'
+
+
+def test_task_adds_io_params():
+    inputs = [InputParameter('i', 't', 'p')]
+    outputs = [OutputPathParameter('o', '/test.txt', default='d')]
+    t = Task(
+        't',
+        inputs=inputs,
+        outputs=outputs,
+    )
+    assert t.name == 't'
+    assert t.inputs == inputs
+    assert t.outputs == outputs
+
+    p = t.get_parameters()
+    assert len(p) == 2
+    assert p[0].name == 'i'
+    assert p[0].value == '{{tasks.t.outputs.parameters.p}}'
+    assert p[1].name == 'o'
+    assert p[1].value_from.default == 'd'
+    assert p[1].value_from.path == '/test.txt'
+
+
+def test_task_raises_on_mixed_input_types():
+    with pytest.raises(ValueError) as e:
+        t = Task('t', inputs=[InputParameter('i1', 't', 'p'), InputFrom('i2', parameters=['t'])])
+    assert str(e.value) == 'cannot use `InputFrom` along with other input types. Use `input_from` instead'

@@ -3,10 +3,7 @@ This example showcases how clients can use Hera to dynamically generate tasks th
 parallel. This is useful for batch jobs and instances where clients do not know ahead of time how many tasks/entities
 they may need to process.
 """
-from hera.input import InputFrom
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import InputFrom, Task, Workflow, WorkflowService
 
 
 def generate():

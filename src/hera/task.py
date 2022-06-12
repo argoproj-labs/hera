@@ -4,20 +4,13 @@ import copy
 import inspect
 import json
 import textwrap
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Callable, Dict, List, Optional, Union
 
-from argo_workflows.model_utils import (
-    ApiTypeError,
-    ModelSimple,
-    cached_property,
-    convert_js_args_to_python_args,
-)
 from argo_workflows.models import (
     Container,
     EnvFromSource,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
-    IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1Backoff,
     IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
@@ -35,14 +28,16 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
+from hera._task_input import _Item
 from hera.affinity import Affinity
 from hera.artifact import Artifact, OutputArtifact
 from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
-from hera.input import InputFrom, Input
+from hera.input import Input, InputFrom
 from hera.memoize import Memoize
 from hera.operator import Operator
+from hera.output import Output
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
@@ -50,109 +45,6 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import Variable, VariableAsEnv
 from hera.workflow_status import WorkflowStatus
-from hera.output import Output
-
-
-class _Item(ModelSimple):
-    """
-    When we use a DAG task's `with_items` field, we typically pass in a list of dictionaries as (str, str). The problem
-    with the auto-generated `argo_workflows` SDK, however, is that it will attempt to interpret each element in this
-    list of `with_items` as a non-primitive type, ultimately attempting to convert it to an internal representation,
-    which, clearly, does not exist. This happens during the call to `argo_workflows.model_utils.model_to_dict()`, which
-    recursively calls `model_to_dict` on the elements present in `with_items`. Since each element is a primitive `dict`
-    that does not have the methods necessary for `model_to_dict`, we get SDK exceptions during workflow/task
-    submission. To overcome this by not modifying the SDK, we can implement our own wrapper around a primitive type
-    by using `ModelSimple`. The `ParallelSteps` construct, of the SDK, is a wrapper around a primitive `list`/`array`,
-    and it uses a similar structure. This implementation is very similar to `ParallelSteps` but uses `dict` rather
-    than internal `str` and `list`.
-    """
-
-    allowed_values: Dict[Any, Any] = {}
-
-    validations: Dict[Any, Any] = {}
-
-    @cached_property
-    def openapi_types():  # type: ignore
-        """
-        This must be a method because a model may have properties that are of type self, this must run
-        after the class is loaded.
-        """
-        return {
-            'value': (dict,),
-        }
-
-    @cached_property
-    def discriminator():  # type: ignore
-        """
-        Typically returns an internal SDK class that can be used to discriminate between inheriting
-        classes, not necessary in this case.
-        """
-        return None
-
-    attribute_map: Dict[Any, Any] = {}
-    read_only_vars: Set[Any] = set()
-    _composed_schemas = None
-    required_properties = set(
-        [
-            '_data_store',
-            '_check_type',
-            '_spec_property_naming',
-            '_path_to_item',
-            '_configuration',
-            '_visited_composed_classes',
-        ]
-    )
-
-    @convert_js_args_to_python_args
-    def __init__(self, *args, **kwargs):
-        # required up here when default value is not given
-        _path_to_item = kwargs.pop('_path_to_item', ())
-
-        if 'value' in kwargs:
-            value = kwargs.pop('value')
-        elif args:
-            args = list(args)  # type: ignore
-            value = args.pop(0)  # type: ignore
-        else:
-            raise ApiTypeError(
-                "value is required, but not passed in args or kwargs and doesn't have default",
-                path_to_item=_path_to_item,
-                valid_classes=(self.__class__,),
-            )
-
-        _check_type = kwargs.pop('_check_type', True)
-        _spec_property_naming = kwargs.pop('_spec_property_naming', False)
-        _configuration = kwargs.pop('_configuration', None)
-        _visited_composed_classes = kwargs.pop('_visited_composed_classes', ())
-
-        if args:
-            raise ApiTypeError(
-                "Invalid positional arguments=%s passed to %s. Remove those invalid positional arguments."
-                % (
-                    args,
-                    self.__class__.__name__,
-                ),
-                path_to_item=_path_to_item,
-                valid_classes=(self.__class__,),
-            )
-
-        self._data_store = {}
-        self._check_type = _check_type
-        self._spec_property_naming = _spec_property_naming
-        self._path_to_item = _path_to_item
-        self._configuration = _configuration
-        self._visited_composed_classes = _visited_composed_classes + (self.__class__,)
-        self.value = value
-        if kwargs:
-            raise ApiTypeError(
-                "Invalid named arguments=%s passed to %s. Remove those invalid named arguments."
-                % (
-                    kwargs,
-                    self.__class__.__name__,
-                ),
-                path_to_item=_path_to_item,
-                valid_classes=(self.__class__,),
-            )
 
 
 class Task:
@@ -318,7 +210,7 @@ class Task:
         self.argo_outputs = self.get_outputs()
         self.argo_resources = self.get_resources()
         self.argo_template = self.get_task_template()
-        self.argo_task = self.get_task_spec()
+        self.argo_task = self.get_spec()
 
     @property
     def ip(self):
@@ -488,7 +380,7 @@ class Task:
         if hasattr(other.argo_task, 'dependencies'):
             # calling delattr(other.argo_task, 'dependencies') results in AttributeError
             # so recreate the argo task field
-            self.argo_task = self.get_task_spec()
+            self.argo_task = self.get_spec()
         setattr(other.argo_task, 'depends', depends)
 
         return self
@@ -543,7 +435,7 @@ class Task:
         if hasattr(other.argo_task, 'dependencies'):
             # calling delattr(other.argo_task, 'dependencies') results in AttributeError
             # so recreate the argo task field
-            self.argo_task = self.get_task_spec()
+            self.argo_task = self.get_spec()
         setattr(other.argo_task, 'depends', depends)
 
         return self
@@ -570,7 +462,7 @@ class Task:
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
-                assert self.input_artifacts is None, 'cannot supply both InputFrom and Artifacts'
+                assert self.input_artifacts == [], 'cannot supply both InputFrom and Artifacts'
 
                 # input_from denotes the task will receive input from another step. This leaves it up to the
                 # client to set up the proper output in a previous task
@@ -628,7 +520,7 @@ class Task:
         """Assembles and returns the task outputs"""
         artifacts = [o.get_spec() for o in self.output_artifacts]
         parameters = [o.get_spec() for o in self.outputs]
-        return IoArgoprojWorkflowV1alpha1Outputs(artifacts=artifacts)
+        return IoArgoprojWorkflowV1alpha1Outputs(artifacts=artifacts, parameters=parameters)
 
     def get_command(self) -> Optional[List[str]]:
         """
@@ -716,13 +608,19 @@ class Task:
                     parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
             else:
                 parameters.extend(self.input_from.get_spec())
+
         if self.inputs:
             for input_ in self.inputs:
                 if isinstance(input_, InputFrom) and len(self.inputs) > 1:
                     raise ValueError('cannot use `InputFrom` along with other input types. Use `input_from` instead')
                 parameters.append(input_.get_spec())
+
+        if self.outputs:
+            parameters.extend([o.get_spec() for o in self.outputs])
+
         if self.variables:
             parameters.extend([variable.get_argument_parameter() for variable in self.variables])
+
         if self.func:
             parameters += self.get_func_parameters()
 
@@ -1070,7 +968,7 @@ class Task:
             return IoArgoprojWorkflowV1alpha1ContinueOn(failed=True)
         return None
 
-    def get_task_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
 
         Returns
