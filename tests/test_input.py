@@ -1,4 +1,4 @@
-from hera import Input, InputFrom, InputParameter
+from hera import GlobalInputParameter, Input, InputFrom, InputParameter
 
 
 def test_input_returns_default_expected_spec():
@@ -31,3 +31,13 @@ def test_input_from_returns_expected_spec():
     for i, v in enumerate(['a', 'b', 'c']):
         assert s[i].name == v
         assert s[i].value == f'{{{{item.{v}}}}}'
+
+
+def test_global_parameter_returns_expected_spec():
+    i = GlobalInputParameter('p', 'g')
+    assert i.name == 'p'
+    assert i.parameter_name == 'g'
+
+    s = i.get_spec()
+    assert s.name == 'p'
+    assert s.value == '{{workflow.parameters.g}}'

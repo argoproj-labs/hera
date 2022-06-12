@@ -12,6 +12,7 @@ from hera import (
     EmptyDirVolume,
     ExistingVolume,
     GCSArtifact,
+    GlobalInputParameter,
     GPUToleration,
     InputFrom,
     InputParameter,
@@ -92,21 +93,21 @@ def test_param_getter_parses_on_multi_params(op):
     params = t.get_parameters()
     for p in params:
         assert p.name == 'a'
-        assert p.value == '{{item.a}}'
+        assert p.default == '{{item.a}}'
 
 
 def test_param_getter_parses_single_param_val_on_json_payload(op):
     t = Task('t', op, [{'a': 1}])
     param = t.get_parameters()[0]
     assert param.name == 'a'
-    assert param.value == '1'  # from json.dumps
+    assert param.default == '1'  # from json.dumps
 
 
 def test_param_getter_parses_single_param_val_on_base_model_payload(mock_model, op):
     t = Task('t', op, [{'a': mock_model()}])
     param = t.get_parameters()[0]
     assert param.name == 'a'
-    assert param.value == '{"field1": 1, "field2": 2}'
+    assert param.default == '{"field1": 1, "field2": 2}'
 
 
 def test_param_script_portion_adds_formatted_json_calls(op):
@@ -274,7 +275,7 @@ def test_task_spec_returns_with_single_values(op):
     assert s.template == 't'
     assert len(s.arguments.parameters) == 1
     assert s.arguments.parameters[0].name == 'a'
-    assert s.arguments.parameters[0].value == '1'
+    assert s.arguments.parameters[0].default == '1'
 
 
 def test_task_template_does_not_contain_gpu_references(op):
@@ -369,19 +370,19 @@ def test_task_get_retry_returns_expected_none(no_op):
 def test_task_sets_user_kwarg_override(kwarg_op):
     t = Task('t', kwarg_op, [{'a': 43}])
     assert t.argo_parameters[0].name == 'a'
-    assert t.argo_parameters[0].value == '43'
+    assert t.argo_parameters[0].default == '43'
 
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task('t', kwarg_op)
     assert t.argo_parameters[0].name == 'a'
-    assert t.argo_parameters[0].value == '42'
+    assert t.argo_parameters[0].default == '42'
 
     t = Task('t', kwarg_multi_op, [{'a': 50}])
     assert t.argo_parameters[0].name == 'a'
-    assert t.argo_parameters[0].value == '50'
+    assert t.argo_parameters[0].default == '50'
     assert t.argo_parameters[1].name == 'b'
-    assert t.argo_parameters[1].value == '43'
+    assert t.argo_parameters[1].default == '43'
 
 
 def test_task_fails_artifact_validation(no_op, in_artifact):
@@ -805,7 +806,7 @@ def test_task_fails_to_validate_with_incorrect_memoize(op):
 
 
 def test_task_adds_io_params():
-    inputs = [InputParameter('i', 't', 'p')]
+    inputs = [InputParameter('i1', 't', 'p'), GlobalInputParameter('i2', 'g')]
     outputs = [OutputPathParameter('o', '/test.txt', default='d')]
     t = Task(
         't',
@@ -817,12 +818,14 @@ def test_task_adds_io_params():
     assert t.outputs == outputs
 
     p = t.get_parameters()
-    assert len(p) == 1
-    assert p[0].name == 'i'
+    assert len(p) == 2
+    assert p[0].name == 'i1'
     assert p[0].value == '{{tasks.t.outputs.parameters.p}}'
+    assert p[1].name == 'i2'
+    assert p[1].value == '{{workflow.parameters.g}}'
 
 
 def test_task_raises_on_mixed_input_types():
     with pytest.raises(ValueError) as e:
-        t = Task('t', inputs=[InputParameter('i1', 't', 'p'), InputFrom('i2', parameters=['t'])])
+        Task('t', inputs=[InputParameter('i1', 't', 'p'), InputFrom('i2', parameters=['t'])])
     assert str(e.value) == 'cannot use `InputFrom` along with other input types. Use `input_from` instead'

@@ -74,3 +74,24 @@ class InputFrom(Input):
         for parameter in self.parameters:
             result.append(IoArgoprojWorkflowV1alpha1Parameter(name=parameter, value=f'{{{{item.{parameter}}}}}'))
         return result
+
+
+class GlobalInputParameter(Input):
+    """A representation of a global workflow input.
+
+    Parameters
+    ----------
+    name: str
+        The name of the parameter.
+    parameter_name: str
+        The name of the global parameter to expose to the task.
+    """
+
+    def __init__(self, name: str, parameter_name: str) -> None:
+        super().__init__(name)
+        self.parameter_name = parameter_name
+
+    def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
+        return IoArgoprojWorkflowV1alpha1Parameter(
+            name=self.name, value=f'{{{{workflow.parameters.{self.parameter_name}}}}}'
+        )
