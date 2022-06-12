@@ -660,7 +660,7 @@ class Task:
                         value = param_value.json()
                     else:
                         value = json.dumps(param_value)
-                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, default=value))
+                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=value))
                     param_name_cache.add(param_name)
             elif len(self.func_params) > 1:
                 # at this point the init passed validation, so this condition is always false when self.input_from
