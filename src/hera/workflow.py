@@ -88,7 +88,6 @@ class Workflow:
         host_aliases: Optional[List[HostAlias]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
-        # parameters: Optional[List[]]
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or 'default'
