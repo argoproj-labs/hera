@@ -1,6 +1,5 @@
 """This example showcases how to run a workflow with a previously generated WorkflowTemplate with Hera"""
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import Workflow, WorkflowService
 
 # TODO: replace the domain and token with your own
 ws = WorkflowService(host='', verify_ssl=False, token='')

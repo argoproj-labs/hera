@@ -1,8 +1,11 @@
-from hera.artifact import InputArtifact, OutputArtifact
-from hera.input import InputFrom
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import (
+    InputArtifact,
+    InputFrom,
+    OutputArtifact,
+    Task,
+    Workflow,
+    WorkflowService,
+)
 
 
 def writer():

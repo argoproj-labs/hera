@@ -477,8 +477,9 @@ class Task:
                     ), 'only single function parameters are allowed when specified together with input_from'
                 pass
             elif self.inputs:
-                assert args.issuperset(set([i.name for i in self.inputs])), \
-                    'function parameters must intersect with at least one `Input` when `inputs` is specified'
+                assert args.issuperset(
+                    set([i.name for i in self.inputs])
+                ), 'function parameters must intersect with at least one `Input` when `inputs` is specified'
             else:
                 signature = inspect.signature(self.func)
                 keywords = []

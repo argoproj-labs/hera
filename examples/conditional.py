@@ -1,7 +1,6 @@
 """This example showcases conditional execution on success, failure, and error"""
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+
+from hera import Task, Workflow, WorkflowService
 
 
 def random():

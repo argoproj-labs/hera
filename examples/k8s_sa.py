@@ -6,9 +6,7 @@ from typing import Optional
 
 from kubernetes import client, config
 
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import Task, Workflow, WorkflowService
 
 
 def get_sa_token(service_account: str, namespace: str = "default", config_file: Optional[str] = None):

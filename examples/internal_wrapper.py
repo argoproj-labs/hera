@@ -7,15 +7,17 @@ from typing import Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel
 
-from hera.env import EnvSpec
-from hera.input import InputFrom
-from hera.resources import Resources
-from hera.retry import Retry
-from hera.task import Task
-from hera.toleration import Toleration
-from hera.volumes import ExistingVolume
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import (
+    EnvSpec,
+    ExistingVolume,
+    InputFrom,
+    Resources,
+    Retry,
+    Task,
+    Toleration,
+    Workflow,
+    WorkflowService,
+)
 
 
 def generate_token() -> str:

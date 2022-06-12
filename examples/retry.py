@@ -2,10 +2,7 @@
 This example showcases how to set a retry on a task. The retry will make the task back off for 5 seconds
 post-failure and allow the retries to occur over a duration of 60 seconds.
 """
-from hera.retry import Retry
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
+from hera import Retry, Task, Workflow, WorkflowService
 
 
 def random_fail():
