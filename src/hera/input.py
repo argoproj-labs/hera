@@ -95,3 +95,33 @@ class GlobalInputParameter(Input):
         return IoArgoprojWorkflowV1alpha1Parameter(
             name=self.name, value=f'{{{{workflow.parameters.{self.parameter_name}}}}}'
         )
+
+
+class MultiInput(Input):
+    """A representation of an input from another task's aggregated output.
+
+    Parameters
+    ----------
+    name: str
+        The name of the parameter.
+    from_task: str
+        Name of the task whose output parameter this input represents.
+
+    Notes
+    -----
+    Fan-in: Combining the outputs
+    When reading the elements, Argo reads the output of the previous step from "output-number" as JSON objects fo
+    all output parameters. The input to this step will then be a JSON-compliant array of objects like so:
+        [{"number":"1"},{"number":"2"},{"number":"3"}]
+
+    The ints were converted into strings since Argo considers all inputs and outputs to be strings by default.
+    """
+
+    def __init__(self, name: str, from_task: str) -> None:
+        super().__init__(name)
+        self.from_task = from_task
+
+    def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
+        return IoArgoprojWorkflowV1alpha1Parameter(
+            name=self.name, value=f'{{{{tasks.{self.from_task}.outputs.parameters}}}}'
+        )
