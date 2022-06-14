@@ -29,6 +29,16 @@ The general format is:
 
 ```
 
+# 3.5.0 - DATE (14/06/2022)
+
+### Added
+
+- support for multiple inputs from a fanned out task via `MultiInput`
+
+### Changed
+
+- `set_global_token` to take in a union of a string token or a callable
+
 # 3.4.0 - DATE (12/06/2022)
 
 ### Added

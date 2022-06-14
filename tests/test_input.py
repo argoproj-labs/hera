@@ -1,4 +1,4 @@
-from hera import GlobalInputParameter, Input, InputFrom, InputParameter
+from hera import GlobalInputParameter, Input, InputFrom, InputParameter, MultiInput
 
 
 def test_input_returns_default_expected_spec():
@@ -41,3 +41,13 @@ def test_global_parameter_returns_expected_spec():
     s = i.get_spec()
     assert s.name == 'p'
     assert s.value == '{{workflow.parameters.g}}'
+
+
+def test_multi_input_returns_expected_spec():
+    mi = MultiInput('i', 't')
+    assert mi.name == 'i'
+    assert mi.from_task == 't'
+
+    s = mi.get_spec()
+    assert s.name == 'i'
+    assert s.value == '{{tasks.t.outputs.parameters}}'
