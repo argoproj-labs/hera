@@ -21,7 +21,13 @@ from hera.host_config import (
     set_global_token,
 )
 from hera.image import ImagePullPolicy
-from hera.input import GlobalInputParameter, Input, InputFrom, InputParameter
+from hera.input import (
+    GlobalInputParameter,
+    Input,
+    InputFrom,
+    InputParameter,
+    MultiInput,
+)
 from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.output import Output, OutputPathParameter
