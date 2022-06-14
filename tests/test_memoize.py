@@ -1,4 +1,4 @@
-from hera.memoize import Memoize
+from hera import Memoize
 
 
 def test_memoize_contains_expected_spec():

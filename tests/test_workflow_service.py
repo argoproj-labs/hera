@@ -10,8 +10,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
-from hera.workflow_service import WorkflowService
-from hera.workflow_status import WorkflowStatus
+from hera import WorkflowService, WorkflowStatus
 
 
 def test_ws_has_expected_fields_upon_init():

@@ -3,14 +3,17 @@ from unittest.mock import Mock
 import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
 
-from hera.operator import Operator
-from hera.resources import Resources
-from hera.security_context import WorkflowSecurityContext
-from hera.task import Task
-from hera.ttl_strategy import TTLStrategy
-from hera.volumes import SecretVolume, Volume
-from hera.workflow_status import WorkflowStatus
-from hera.workflow_template import WorkflowTemplate
+from hera import (
+    Operator,
+    Resources,
+    SecretVolume,
+    Task,
+    TTLStrategy,
+    Volume,
+    WorkflowSecurityContext,
+    WorkflowStatus,
+    WorkflowTemplate,
+)
 
 
 def test_wft_contains_specified_service_account(wts):

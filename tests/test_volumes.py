@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from hera.volumes import AccessMode, Volume
+from hera import AccessMode, Volume
 
 
 def test_volume_created_with_defaults():

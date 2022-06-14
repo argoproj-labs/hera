@@ -4,23 +4,23 @@ import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
 from argo_workflows.models import HostAlias as ArgoHostAlias
 
-from hera.host_alias import HostAlias
-from hera.operator import Operator
-from hera.resources import Resources
-from hera.security_context import WorkflowSecurityContext
-from hera.task import Task
-from hera.template_ref import TemplateRef
-from hera.ttl_strategy import TTLStrategy
-from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.volumes import (
+from hera import (
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
+    HostAlias,
+    Operator,
+    Resources,
     SecretVolume,
+    Task,
+    TemplateRef,
+    TTLStrategy,
     Volume,
+    VolumeClaimGCStrategy,
+    Workflow,
+    WorkflowSecurityContext,
+    WorkflowStatus,
 )
-from hera.workflow import Workflow
-from hera.workflow_status import WorkflowStatus
 
 
 def test_wf_contains_specified_service_account(ws):

@@ -5,7 +5,7 @@ from argo_workflows.model.capabilities import Capabilities
 from argo_workflows.model.pod_security_context import PodSecurityContext
 from argo_workflows.model.security_context import SecurityContext
 
-from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
+from hera import TaskSecurityContext, WorkflowSecurityContext
 
 
 @pytest.fixture

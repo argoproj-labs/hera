@@ -1,7 +1,6 @@
 from argo_workflows.api_client import ApiClient as ArgoApiClient
 
-from hera.client import Client
-from hera.config import Config
+from hera import Client, Config
 
 
 def test_client_has_expected_fields():

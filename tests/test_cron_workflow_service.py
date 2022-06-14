@@ -11,7 +11,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
-from hera.cron_workflow_service import CronWorkflowService
+from hera import CronWorkflowService
 
 
 def test_ws_has_expected_fields_upon_init():

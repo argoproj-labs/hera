@@ -133,10 +133,7 @@ consistent with:
 A very primitive example of submitting a task within a workflow through Hera is:
 
 ```python
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
-
+from hera import Task, Workflow, WorkflowService
 
 def say(message: str):
     """
@@ -148,7 +145,7 @@ def say(message: str):
 
 ws = WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')
 w = Workflow('my-workflow', ws)
-t = Task('say', say, [{'message': 'Hello, world!'}])
+t = Task('say', say, func_params=[{'message': 'Hello, world!'}])
 w.add_task(t)
 w.create()
 ```
@@ -181,10 +178,7 @@ executable payloads rather than workflow setup. Here's a side by side comparison
 <td valign="top"><p>
 
 ```python
-from hera.task import Task
-from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
-
+from hera import Task, Workflow, WorkflowService
 
 def say(message: str):
     print(message)
@@ -192,13 +186,13 @@ def say(message: str):
 
 ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
 w = Workflow('diamond', ws)
-a = Task('A', say, [{'message': 'This is task A!'}])
-b = Task('B', say, [{'message': 'This is task B!'}])
-c = Task('C', say, [{'message': 'This is task C!'}])
-d = Task('D', say, [{'message': 'This is task D!'}])
+a = Task('A', say, func_params=[{'message': 'This is task A!'}])
+b = Task('B', say, func_params=[{'message': 'This is task B!'}])
+c = Task('C', say, func_params=[{'message': 'This is task C!'}])
+d = Task('D', say, func_params=[{'message': 'This is task D!'}])
 
-a.next(b).next(d)  # a >> b >> d
-a.next(c).next(d)  # a >> c >> d
+a >> b >> d
+a >> c >> d
 
 w.add_tasks(a, b, c, d)
 w.create()

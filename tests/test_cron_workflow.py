@@ -13,14 +13,19 @@ from argo_workflows.model.io_argoproj_workflow_v1alpha1_workflow_spec import (
 from argo_workflows.model.object_meta import ObjectMeta
 from argo_workflows.models import HostAlias as ArgoHostAlias
 
-from hera.cron_workflow import CronWorkflow
-from hera.host_alias import HostAlias
-from hera.operator import Operator
-from hera.resources import Resources
-from hera.task import Task
-from hera.ttl_strategy import TTLStrategy
-from hera.volumes import EmptyDirVolume, ExistingVolume, SecretVolume, Volume
-from hera.workflow_status import WorkflowStatus
+from hera import (
+    CronWorkflow,
+    EmptyDirVolume,
+    ExistingVolume,
+    HostAlias,
+    Operator,
+    Resources,
+    SecretVolume,
+    Task,
+    TTLStrategy,
+    Volume,
+    WorkflowStatus,
+)
 
 
 def test_wf_contains_specified_service_account(cws, schedule):
