@@ -3,7 +3,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GitArtifact,
 )
 
-from hera.artifact import GitArtifact, InputArtifact, OutputArtifact
+from hera import GitArtifact, InputArtifact, OutputArtifact
 
 
 def test_output_artifact_contains_expected_fields():

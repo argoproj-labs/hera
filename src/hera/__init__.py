@@ -1,4 +1,20 @@
-from hera.affinity import Affinity
+from hera.affinity import (
+    Affinity,
+    Expression,
+    Field,
+    LabelOperator,
+    LabelSelector,
+    LabelSelectorRequirement,
+    NodeAffinity,
+    NodeSelector,
+    NodeSelectorRequirement,
+    NodeSelectorTerm,
+    PodAffinity,
+    PodAffinityTerm,
+    PodAntiAffinity,
+    PreferredSchedulingTerm,
+    WeightedPodAffinityTerm,
+)
 from hera.artifact import (
     Artifact,
     GCSArtifact,
