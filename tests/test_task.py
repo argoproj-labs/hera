@@ -21,6 +21,7 @@ from hera import (
     Operator,
     OutputPathParameter,
     Resources,
+    ResourceTemplate,
     Retry,
     RetryPolicy,
     S3Artifact,
@@ -359,6 +360,14 @@ def test_task_template_contains_expected_retry_strategy(no_op):
 
     assert int(template_backoff.duration) == int(retry_backoff.duration)
     assert int(template_backoff.max_duration) == int(retry_backoff.max_duration)
+
+
+def test_task_template_contains_resource_template():
+    resource_template = ResourceTemplate(action='create')
+    t = Task(name='t', resource_template=resource_template)
+    tt = t.get_task_template()
+    resource = resource_template.get_resource_template()
+    assert tt.resource == resource
 
 
 def test_task_get_retry_returns_expected_none(no_op):
