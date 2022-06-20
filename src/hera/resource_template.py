@@ -5,6 +5,30 @@ from pydantic import BaseModel
 
 
 class ResourceTemplate(BaseModel):
+    """ResourceTemplate manipulates kubernetes resources.
+
+    Attributes
+    ----------
+    action: str
+        Action to perform to the resource, must be a kubectl action.
+    failure_condition: Optional[str]
+        An expression which describes the conditions of considered
+        failed k8s resource step.
+    flags: Optional[List[str]]
+        Flags is a set of additional options passed to kubectl before
+        submitting a resource.
+    manifest: Optional[str]
+        Kubernetes manifest.
+    merge_strategy: Optional[str]
+        The strategy used to merge a patch.
+    set_owner_reference: Optional[bool]
+        When set to True, sets the reference to the workflow on the
+        OwnerReference of generated resource. Used for garbage collection
+        when workflow is deleted child with owner reference is also deleted.
+    success_condition: Optional[str]
+        An expression which describes the conditions of the k8s resource
+        in which it is acceptable to proceed to the following step.
+    """
 
     action: str
     failure_condition: Optional[str] = None

@@ -103,7 +103,8 @@ class Task:
     resources: Resources = Resources()
         A task resources configuration. See `hera.v1.resources.Resources`.
     resource_template: Optional[ResourceTemplate]
-        TODO add resource_template documentation
+        Resource template for managing Kubernetes resources. Resource template allows you to create, delete or update
+        any type of Kubernetes resource, it accepts any kubectl action and valid k8s manifest.
     working_dir: Optional[str] = None
         The working directory to be set inside the executing container context.
     retry: Optional[Retry] = None
