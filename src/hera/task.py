@@ -38,6 +38,7 @@ from hera.input import Input, InputFrom
 from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.output import Output
+from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
@@ -101,6 +102,8 @@ class Task:
         The environment specifications to load from ConfigMap or Secret.
     resources: Resources = Resources()
         A task resources configuration. See `hera.v1.resources.Resources`.
+    resource_template: Optional[ResourceTemplate]
+        TODO add resource_template documentation
     working_dir: Optional[str] = None
         The working directory to be set inside the executing container context.
     retry: Optional[Retry] = None
@@ -156,6 +159,7 @@ class Task:
         args: Optional[List[str]] = None,
         env_specs: Optional[List[EnvSpec]] = None,
         env_from_specs: Optional[List[BaseEnvFromSpec]] = None,
+        resource_template: Optional[ResourceTemplate] = None,
         resources: Resources = Resources(),
         working_dir: Optional[str] = None,
         retry: Optional[Retry] = None,
@@ -187,6 +191,7 @@ class Task:
         self.daemon = daemon
         self.command = command
         self.args = args
+        self.resource_template = resource_template
         self.resources = resources
         self.working_dir = working_dir
         self.retry = retry
@@ -901,6 +906,8 @@ class Task:
         script_def = self.get_script_def()
         if script_def:
             setattr(template, 'script', self.get_script_def())
+        elif self.resource_template:
+            setattr(template, 'resource', self.resource_template.get_resource_template())
         else:
             setattr(template, 'container', self.get_container())
 

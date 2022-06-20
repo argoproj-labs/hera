@@ -47,6 +47,7 @@ from hera.input import (
 from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.output import Output, OutputPathParameter
+from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.retry_policy import RetryPolicy
