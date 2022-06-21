@@ -1,7 +1,6 @@
 import pytest
 from argo_workflows.exceptions import ApiAttributeError
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1ResourceTemplate
-from black import assert_equivalent
 
 from hera import ResourceTemplate
 
