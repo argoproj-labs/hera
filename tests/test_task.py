@@ -1,7 +1,10 @@
 import pytest
 from argo_workflows.model.capabilities import Capabilities
 from argo_workflows.model.security_context import SecurityContext
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1LifecycleHook,
+)
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
 
@@ -278,6 +281,25 @@ def test_task_spec_returns_with_single_values(op):
     assert len(s.arguments.parameters) == 1
     assert s.arguments.parameters[0].name == 'a'
     assert s.arguments.parameters[0].value == '1'
+
+
+def test_task_spec_returns_with_exit_hook():
+    exit_hook = Task('exit-handler')
+    t = Task('t', exit_hook=exit_hook)
+    s = t.get_spec()
+
+    assert 'exit' in s.hooks
+    assert 'exit-handler' == s.hooks['exit'].template
+
+
+def test_task_get_argo_exit_hook():
+    exit_hook = Task('exit-handler')
+    t = Task('t', exit_hook=exit_hook)
+    argo_exit_hook = t.get_argo_exit_hook()
+
+    assert isinstance(argo_exit_hook, dict)
+    assert 'exit' in argo_exit_hook
+    assert isinstance(argo_exit_hook['exit'], IoArgoprojWorkflowV1alpha1LifecycleHook)
 
 
 def test_task_template_does_not_contain_gpu_references(op):

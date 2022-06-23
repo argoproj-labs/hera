@@ -15,6 +15,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1LifecycleHook,
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
@@ -128,6 +129,8 @@ class Task:
         Whether to continue task chain execution when this task fails.
     continue_on_error: bool = False
         Whether to continue task chain execution this task errors.
+    exit_hook: Optional['Task'] = None
+        On the completion (exit) of this Task the given Task is executed.
     template_ref: Optional[TemplateRef] = None
         A template name reference to use with this task. Note that this is prioritized over a new template creation
         for each task definition.
@@ -172,6 +175,7 @@ class Task:
         security_context: Optional[TaskSecurityContext] = None,
         continue_on_fail: Optional[bool] = None,
         continue_on_error: Optional[bool] = None,
+        exit_hook: Optional['Task'] = None,
         template_ref: Optional[TemplateRef] = None,
         affinity: Optional[Affinity] = None,
         memoize: Optional[Memoize] = None,
@@ -201,6 +205,7 @@ class Task:
         self.labels = labels or {}
         self.annotations = annotations or {}
         self.variables = variables or []
+        self.exit_hook = exit_hook
 
         self.env = self.get_env(env_specs)
         self.env_from = self.get_env_from_source(env_from_specs)
@@ -978,6 +983,15 @@ class Task:
             return IoArgoprojWorkflowV1alpha1ContinueOn(failed=True)
         return None
 
+    def get_argo_exit_hook(self) -> Dict[str, IoArgoprojWorkflowV1alpha1LifecycleHook]:
+        """Assembles and returns a hook for the task. This is dictated by the task `exit_hook`.
+
+        Returns
+        -------
+        Dict[str, IoArgoprojWorkflowV1alpha1LifecycleHook]
+        """
+        return {'exit': IoArgoprojWorkflowV1alpha1LifecycleHook(template=self.exit_hook.argo_template.name)}
+
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
 
@@ -1004,6 +1018,10 @@ class Task:
         elif self.func_params and len(self.func_params) > 1:
             items = self.get_parallel_items()
             setattr(task, 'with_items', items)
+
+        if self.exit_hook:
+            setattr(task, 'hooks', self.get_argo_exit_hook())
+
         return task
 
 

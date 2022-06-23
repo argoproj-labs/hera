@@ -35,6 +35,9 @@ def add_tasks(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], *ts: Tas
                 else:
                     w.spec.volumes.append(vol.get_volume())
 
+        if t.exit_hook:
+            w.spec.templates.append(t.exit_hook.argo_template)
+
         w.dag_template.tasks.append(t.argo_task)
 
 
