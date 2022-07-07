@@ -14,6 +14,7 @@ from hera import (
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
+    ExitTask,
     GCSArtifact,
     GitArtifact,
     GlobalInputParameter,
@@ -284,22 +285,13 @@ def test_task_spec_returns_with_single_values(op):
 
 
 def test_task_spec_returns_with_exit_hook():
-    exit_hook = Task('exit-handler')
-    t = Task('t', exit_hook=exit_hook)
-    s = t.get_spec()
+    exit_hook = ExitTask('exit-handler')
+    t = Task('t')
+    t.on_exit(exit_hook)
+    s = t.argo_task
 
     assert 'exit' in s.hooks
     assert 'exit-handler' == s.hooks['exit'].template
-
-
-def test_task_get_argo_exit_hook():
-    exit_hook = Task('exit-handler')
-    t = Task('t', exit_hook=exit_hook)
-    argo_exit_hook = t.get_argo_exit_hook()
-
-    assert isinstance(argo_exit_hook, dict)
-    assert 'exit' in argo_exit_hook
-    assert isinstance(argo_exit_hook['exit'], IoArgoprojWorkflowV1alpha1LifecycleHook)
 
 
 def test_task_template_does_not_contain_gpu_references(op):
