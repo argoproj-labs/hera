@@ -4,6 +4,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
+    IoArgoprojWorkflowV1alpha1HTTPArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
 )
 from pydantic import BaseModel
@@ -130,6 +131,20 @@ class GitArtifact(Artifact):
             name=self.name,
             path=self.path,
             git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo, revision=self.revision),
+        )
+
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return self.get_spec()
+
+
+class HttpArtifact(Artifact):
+    url: str
+
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return IoArgoprojWorkflowV1alpha1Artifact(
+            name=self.name,
+            path=self.path,
+            http=IoArgoprojWorkflowV1alpha1HTTPArtifact(url=self.url),
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:

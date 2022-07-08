@@ -19,6 +19,7 @@ from hera.artifact import (
     Artifact,
     GCSArtifact,
     GitArtifact,
+    HttpArtifact,
     InputArtifact,
     OutputArtifact,
     S3Artifact,
