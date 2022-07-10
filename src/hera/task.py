@@ -334,9 +334,6 @@ class Task:
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
         return self.next(other)
 
-    def on_exit(self, other: 'Task') -> 'Task':
-        setattr(self, 'exit', other)
-
     def when_any_succeeded(self, other: 'Task') -> 'Task':
         """Sets the other task to execute when any of the tasks of this task group have succeeded.
 
