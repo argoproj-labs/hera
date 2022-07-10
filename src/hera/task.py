@@ -479,8 +479,6 @@ class Task:
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
-                assert self.input_artifacts == [], 'cannot supply both InputFrom and Artifacts'
-
                 # input_from denotes the task will receive input from another step. This leaves it up to the
                 # client to set up the proper output in a previous task
                 if self.func_params:

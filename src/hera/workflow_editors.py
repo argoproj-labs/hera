@@ -6,8 +6,8 @@ from hera.task import Task
 from hera.volumes import Volume
 
 if TYPE_CHECKING:
-    from hera.workflow import Workflow
     from hera.cron_workflow import CronWorkflow
+    from hera.workflow import Workflow
     from hera.workflow_template import WorkflowTemplate
 
 

@@ -392,12 +392,6 @@ def test_task_fails_artifact_validation(no_op, in_artifact):
     assert str(e.value) == 'input artifact names must be unique'
 
 
-def test_task_validation_fails_on_input_from_plus_input_artifact(op, in_artifact):
-    with pytest.raises(AssertionError) as e:
-        Task('t', op, input_from=InputFrom(name='test', parameters=['a']), input_artifacts=[in_artifact])
-    assert str(e.value) == 'cannot supply both InputFrom and Artifacts'
-
-
 def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
     t = Task('t', op, input_from=InputFrom(name='some-other-task', parameters=['a']))
     script = t.get_param_script_portion()
