@@ -811,7 +811,7 @@ def test_dependencies_to_depends():
 
 def test_task_fails_to_validate_with_incorrect_memoize(op):
     with pytest.raises(AssertionError) as e:
-        Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a'))
+        Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a', 'a-key'))
     assert str(e.value) == 'memoize key must be a parameter of the function'
 
 
