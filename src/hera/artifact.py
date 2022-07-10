@@ -6,7 +6,6 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
 )
-from pydantic import BaseModel
 
 
 class Artifact:
