@@ -117,6 +117,7 @@ class CronWorkflow:
         self.node_selector = node_selectors
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
+        self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
