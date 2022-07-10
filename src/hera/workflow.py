@@ -21,7 +21,14 @@ from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
+from hera.workflow_editors import (
+    add_head,
+    add_tail,
+    add_task,
+    add_tasks,
+    on_exit,
+    pre_create_cleanup,
+)
 from hera.workflow_service import WorkflowService
 
 
@@ -197,14 +204,12 @@ class Workflow:
 
     def __enter__(self) -> 'Workflow':
         self.in_context = True
-        if hera.context.workflow is not None:
-            raise ValueError(f'Hera context already defined with workflow: {hera.context.workflow}')
-        hera.context.workflow = self
+        hera.context.set(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.in_context = False
-        hera.context.workflow = None
+        hera.context.reset()
 
     def add_task(self, t: Task) -> None:
         add_task(self, t)
@@ -224,6 +229,7 @@ class Workflow:
             raise ValueError('Cannot invoke `create` when using a Hera context')
         if namespace is None:
             namespace = self.namespace
+        pre_create_cleanup(self)
         return self.service.create(self.workflow, namespace)
 
     def on_exit(self, *t: Task) -> None:

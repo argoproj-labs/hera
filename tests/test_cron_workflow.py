@@ -371,7 +371,7 @@ def test_wf_raises_on_double_context(cws, schedule):
         with pytest.raises(ValueError) as e:
             with CronWorkflow('w2', schedule, service=cws):
                 pass
-        assert 'Hera context already defined with cron workflow' in str(e.value)
+        assert 'Hera context already defined with workflow' in str(e.value)
 
 
 def test_wf_resets_context_indicator(cws, schedule):
