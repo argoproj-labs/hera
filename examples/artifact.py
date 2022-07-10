@@ -17,13 +17,12 @@ def consumer():
         print(f.readlines())  # prints `Hello, world!` to `stdout`
 
 
-# TODO: replace the domain and token with your own
 with Workflow('artifact', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')) as w:
-    w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
+    w_t = Task('writer', writer, output_artifacts=[OutputArtifact('test', '/file')])
     c_t = Task(
         'consumer',
         consumer,
-        input_artifacts=[InputArtifact(name='test', path='/file', from_task='writer', artifact_name='test')],
+        input_artifacts=[InputArtifact('test', '/file', 'writer', 'test')],
     )
 
     w_t >> c_t
