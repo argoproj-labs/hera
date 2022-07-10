@@ -35,11 +35,11 @@ with Workflow(
     'artifact-with-fanout',
     service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token'),
 ) as w:
-    w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
+    w_t = Task('writer', writer, output_artifacts=[OutputArtifact('test', '/file')])
     f_t = Task(
         'fanout',
         fanout,
-        input_artifacts=[InputArtifact(from_task='writer', artifact_name='test', name='test', path='/file')],
+        input_artifacts=[InputArtifact('test', '/file', 'writer', 'test')],
     )
     c_t = Task('consumer', consumer, input_from=InputFrom(name='fanout', parameters=['i']))
     w_t >> f_t >> c_t

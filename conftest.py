@@ -65,12 +65,12 @@ def cw(cws, schedule):
 
 @pytest.fixture(scope='session')
 def in_artifact():
-    yield InputArtifact(name='test', path='/test', from_task='test-o', artifact_name='test-o')
+    yield InputArtifact('test', '/test', 'test-o', 'test-o')
 
 
 @pytest.fixture(scope='session')
 def out_artifact():
-    yield OutputArtifact(name='test', path='/test')
+    yield OutputArtifact('test', '/test')
 
 
 @pytest.fixture(scope='session')

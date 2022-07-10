@@ -425,15 +425,16 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
 
 
 def test_task_adds_s3_input_artifact():
-    t = Task('t', input_artifacts=[S3Artifact(name="n", path="/p", key="key")])
+    t = Task('t', input_artifacts=[S3Artifact("n", "/p", 's3://my-bucket', "key")])
 
     artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
+    assert artifact.s3.bucket == 's3://my-bucket'
     assert artifact.s3.key == "key"
 
 
 def test_task_adds_gcs_input_artifact():
-    t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", bucket='gs://my-bucket', key="key")])
+    t = Task('t', input_artifacts=[GCSArtifact("n", "/p", 'gs://my-bucket', "key")])
 
     artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
@@ -444,11 +445,7 @@ def test_task_adds_gcs_input_artifact():
 def test_task_adds_git_input_artifact():
     t = Task(
         't',
-        input_artifacts=[
-            GitArtifact(
-                name='r', path='/my-repo', repo='https://github.com/argoproj/argo-workflows.git', revision='master'
-            )
-        ],
+        input_artifacts=[GitArtifact('r', '/my-repo', 'https://github.com/argoproj/argo-workflows.git', 'master')],
     )
 
     artifact = t.argo_inputs.artifacts[0]

@@ -18,7 +18,6 @@ def task_4():
     print('Performed task 4')
 
 
-# TODO: replace the domain and token with your own
 with Workflow('linear', service=WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
     (Task('t1', task_1) >> Task('t2', task_2) >> Task('t3', task_3) >> Task('t4', task_4))
 

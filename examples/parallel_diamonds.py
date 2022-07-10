@@ -6,7 +6,6 @@ def say(message: str):
     print(message)
 
 
-# TODO: replace the domain and token with your own
 with Workflow('parallel-diamonds', service=WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
     (
         Task(

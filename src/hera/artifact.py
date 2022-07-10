@@ -9,7 +9,7 @@ from argo_workflows.models import (
 from pydantic import BaseModel
 
 
-class Artifact(BaseModel):
+class Artifact:
     """An artifact represents an object that Argo creates for a specific task's output.
 
     The output of a task payload can store specific results at a path, which can then be consumed by
@@ -29,8 +29,9 @@ class Artifact(BaseModel):
     Don't use this directly. Use OutputArtifact, InputArtifact, etc.
     """
 
-    name: str
-    path: str
+    def __init__(self, name: str, path: str) -> None:
+        self.name = name
+        self.path = path
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
@@ -65,8 +66,10 @@ class InputArtifact(Artifact):
         Name of the artifact to consume from the previous task.
     """
 
-    from_task: str
-    artifact_name: str
+    def __init__(self, name: str, path: str, from_task: str, artifact_name: str) -> None:
+        self.from_task = from_task
+        self.artifact_name = artifact_name
+        super(InputArtifact, self).__init__(name, path)
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
@@ -96,8 +99,10 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact
     """
 
-    bucket: str
-    key: str
+    def __init__(self, name: str, path: str, bucket: str, key: str) -> None:
+        self.bucket = bucket
+        self.key = key
+        super(BucketArtifact, self).__init__(name, path)
 
 
 class S3Artifact(BucketArtifact):
@@ -127,6 +132,11 @@ class GCSArtifact(BucketArtifact):
 class GitArtifact(Artifact):
     repo: str
     revision: Optional[str]
+
+    def __init__(self, name: str, path: str, repo: str, revision: str) -> None:
+        self.repo = repo
+        self.revision = revision
+        super(GitArtifact, self).__init__(name, path)
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         return IoArgoprojWorkflowV1alpha1Artifact(
