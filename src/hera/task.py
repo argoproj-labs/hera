@@ -45,6 +45,7 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import Variable, VariableAsEnv
 from hera.workflow_status import WorkflowStatus
+import hera
 
 
 class Task:
@@ -212,6 +213,9 @@ class Task:
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_spec()
 
+        if hera.context.workflow is not None:
+            hera.context.workflow.add_task(self)
+
     @property
     def ip(self):
         return f"\"{{{{tasks.{self.name}.ip}}}}\""
@@ -329,6 +333,9 @@ class Task:
 
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
         return self.next(other)
+
+    def on_exit(self, other: 'Task') -> 'Task':
+        setattr(self, 'exit', other)
 
     def when_any_succeeded(self, other: 'Task') -> 'Task':
         """Sets the other task to execute when any of the tasks of this task group have succeeded.
