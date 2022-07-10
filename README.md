@@ -136,10 +136,6 @@ from hera import Task, Workflow, WorkflowService
 
 
 def say(message: str):
-    """
-    This can be anything as long as the Docker image satisfies the dependencies. You can import anything Python
-    that is in your container e.g torch, tensorflow, scipy, biopython, etc - just provide an image to the task!
-    """
     print(message)
 
 
