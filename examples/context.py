@@ -1,12 +1,6 @@
-from hera import Workflow, Task
+from hera import Workflow, Task, WorkflowService
 
-from dyno.clients.middleware.dynet_iap import generate_dynet_iap_oauth_token
-from hera import set_global_token, set_global_host
-
-set_global_token(generate_dynet_iap_oauth_token().token)
-set_global_host('https://argo.dynet.ai')
-
-with Workflow('context') as w:
+with Workflow('context', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')) as w:
     Task('cowsay', image='docker/whalesay', command=['cowsay', 'foo'])
 
 w.create()
