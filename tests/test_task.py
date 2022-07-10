@@ -3,7 +3,6 @@ from argo_workflows.model.capabilities import Capabilities
 from argo_workflows.model.security_context import SecurityContext
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Inputs,
-    IoArgoprojWorkflowV1alpha1LifecycleHook,
 )
 from argo_workflows.models import Toleration as _ArgoToleration
 from pydantic import ValidationError
@@ -292,6 +291,13 @@ def test_task_spec_returns_with_exit_hook():
 
     assert 'exit' in s.hooks
     assert 'exit-handler' == s.hooks['exit'].template
+
+
+def test_on_exit_raises_exception_when_not_given_exit_task():
+    exit_hook = Task('exit-handler')
+    t = Task('t')
+    with pytest.raises(TypeError) as e:
+        t.on_exit(exit_hook)
 
 
 def test_task_template_does_not_contain_gpu_references(op):

@@ -337,8 +337,10 @@ class Task:
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
         return self.next(other)
 
-    def on_exit(self, other: 'Task') -> None:
+    def on_exit(self, other: 'ExitTask') -> None:
         """Execute `other` on completion (exit) of this Task."""
+        if not isinstance(other, ExitTask):
+            raise TypeError('ExitTask must be given to an on exit function.')
         exit_hook = {'exit': IoArgoprojWorkflowV1alpha1LifecycleHook(template=other.argo_template.name)}
         setattr(self.argo_task, 'hooks', exit_hook)
 
