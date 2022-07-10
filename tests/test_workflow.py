@@ -19,6 +19,7 @@ from hera import (
     VolumeClaimGCStrategy,
     Workflow,
     WorkflowSecurityContext,
+    Variable,
     WorkflowStatus,
 )
 
@@ -363,3 +364,12 @@ def test_wf_raises_on_create_in_context(ws):
         with pytest.raises(ValueError) as e:
             w.create()
         assert str(e.value) == 'Cannot invoke `create` when using a Hera context'
+
+
+def test_wf_sets_variables_as_global_args(ws):
+    with Workflow('w', service=ws, variables=[Variable('a', '42')]) as w:
+        assert len(w.variables) == 1
+        assert w.variables[0].name == 'a'
+        assert w.variables[0].value == '42'
+        assert hasattr(w.spec, 'arguments')
+        assert len(getattr(w.spec, 'arguments').parameters) == 1
