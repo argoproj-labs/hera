@@ -15,11 +15,11 @@ from hera import CronWorkflowService
 
 
 def test_ws_has_expected_fields_upon_init():
-    ws = CronWorkflowService(host='https://abc.com', token='abc', verify_ssl=True, namespace='argo')
+    ws = CronWorkflowService(host="https://abc.com", token="abc", verify_ssl=True, namespace="argo")
 
-    assert ws._host == 'https://abc.com'
+    assert ws._host == "https://abc.com"
     assert ws._verify_ssl
-    assert ws._namespace == 'argo'
+    assert ws._namespace == "argo"
     assert isinstance(ws.service, CronWorkflowServiceApi)
     assert isinstance(ws.service.api_client, ApiClient)
 
@@ -28,18 +28,18 @@ def test_ws_calls_create_as_expected():
     mock_service = Mock()
     mock_service.create_cron_workflow = Mock()
 
-    ws = CronWorkflowService(host='https://abc.com', token='abc')
+    ws = CronWorkflowService(host="https://abc.com", token="abc")
     ws.service = mock_service
     w = IoArgoprojWorkflowV1alpha1CronWorkflow(
         metadata=ObjectMeta(),
         spec=IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
-            schedule='* * * * *', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
+            schedule="* * * * *", workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
         ),
     )
     ws.create(w)
 
     mock_service.create_cron_workflow.assert_called_with(
-        'default',
+        "default",
         IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=w, _check_type=False),
         _check_return_type=False,
     )
@@ -49,30 +49,30 @@ def test_ws_calls_delete_as_expected():
     mock_service = Mock()
     mock_service.delete_cron_workflow = Mock()
 
-    ws = CronWorkflowService(host='https://abc.com', token='abc')
+    ws = CronWorkflowService(host="https://abc.com", token="abc")
     ws.service = mock_service
-    ws.delete('my-wf')
+    ws.delete("my-wf")
 
-    mock_service.delete_cron_workflow.assert_called_with('default', 'my-wf')
+    mock_service.delete_cron_workflow.assert_called_with("default", "my-wf")
 
 
 def test_ws_calls_update_as_expected():
     mock_service = Mock()
     mock_service.update_cron_workflow = Mock()
 
-    ws = CronWorkflowService(host='https://abc.com', token='abc')
+    ws = CronWorkflowService(host="https://abc.com", token="abc")
     ws.service = mock_service
     w = IoArgoprojWorkflowV1alpha1CronWorkflow(
         metadata=ObjectMeta(),
         spec=IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
-            schedule='* * * * *', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
+            schedule="* * * * *", workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
         ),
     )
-    ws.update(w, 'my-wf')
+    ws.update(w, "my-wf")
 
     mock_service.update_cron_workflow.assert_called_with(
-        'default',
-        'my-wf',
+        "default",
+        "my-wf",
         IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=w, _check_type=False),
         _check_return_type=False,
     )
@@ -80,32 +80,32 @@ def test_ws_calls_update_as_expected():
 
 def test_ws_get_workflow_link_returns_expected_link():
     mock_service = Mock()
-    ws = CronWorkflowService(host='https://abc.com', token='abc')
+    ws = CronWorkflowService(host="https://abc.com", token="abc")
     ws.service = mock_service
 
-    link = ws.get_cron_workflow_link('my-wf')
-    assert link == 'https://abc.com/cron-workflows/default/my-wf'
+    link = ws.get_cron_workflow_link("my-wf")
+    assert link == "https://abc.com/cron-workflows/default/my-wf"
 
 
 def test_ws_get_workflow_returns_expected_workflow():
     mock_service = Mock()
     mock_service.get_cron_workflow = Mock()
     mock_service.get_cron_workflow.return_value = IoArgoprojWorkflowV1alpha1CronWorkflow(
-        metadata=ObjectMeta(name='abc'),
+        metadata=ObjectMeta(name="abc"),
         spec=IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
-            schedule='* * * * *', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
+            schedule="* * * * *", workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
         ),
     )
 
-    ws = CronWorkflowService(host='https://abc.com', token='abc')
+    ws = CronWorkflowService(host="https://abc.com", token="abc")
     ws.service = mock_service
 
     expected = IoArgoprojWorkflowV1alpha1CronWorkflow(
-        metadata=ObjectMeta(name='abc'),
+        metadata=ObjectMeta(name="abc"),
         spec=IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
-            schedule='* * * * *', workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
+            schedule="* * * * *", workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
         ),
     )
-    actual = ws.get_workflow('abc')
-    mock_service.get_cron_workflow.assert_called_with('default', 'abc', _check_return_type=False)
+    actual = ws.get_workflow("abc")
+    mock_service.get_cron_workflow.assert_called_with("default", "abc", _check_return_type=False)
     assert expected == actual

@@ -29,8 +29,8 @@ class Retry(BaseModel):
 
     @root_validator()
     def check_durations(cls, values):
-        duration: int = values.get('duration')
-        max_duration: int = values.get('max_duration')
+        duration: int = values.get("duration")
+        max_duration: int = values.get("max_duration")
         if max_duration is not None:
-            assert duration <= max_duration, 'duration cannot be greater than the max duration'
+            assert duration <= max_duration, "duration cannot be greater than the max duration"
         return values

@@ -18,10 +18,10 @@ from argo_workflows.models import WeightedPodAffinityTerm as ArgoWeightedPodAffi
 
 
 class LabelOperator(Enum):
-    In = 'In'
-    NotIn = 'NotIn'
-    Exists = 'Exists'
-    DoesNotExist = 'DoesNotExist'
+    In = "In"
+    NotIn = "NotIn"
+    Exists = "Exists"
+    DoesNotExist = "DoesNotExist"
 
 
 class NodeSelectorRequirement:
@@ -72,14 +72,14 @@ class NodeSelectorTerm:
         if self.expressions is not None:
             match_expressions = [expression.get_spec() for expression in self.expressions]
             if any(match_expressions):
-                setattr(term, 'match_expressions', match_expressions)
+                setattr(term, "match_expressions", match_expressions)
 
         if self.fields is not None:
             match_fields = [field.get_spec() for field in self.fields]
             if any(match_fields):
-                setattr(term, 'match_fields', match_fields)
+                setattr(term, "match_fields", match_fields)
 
-        if hasattr(term, 'match_expressions') or hasattr(term, 'match_fields'):
+        if hasattr(term, "match_expressions") or hasattr(term, "match_fields"):
             return term
         return None
 
@@ -154,12 +154,12 @@ class LabelSelector:
         if self.label_selector_requirements is not None:
             match_expressions = [expression.get_spec() for expression in self.label_selector_requirements]
             if any(match_expressions):
-                setattr(selector, 'match_expressions', match_expressions)
+                setattr(selector, "match_expressions", match_expressions)
 
         if self.match_labels is not None:
-            setattr(selector, 'match_labels', self.match_labels)
+            setattr(selector, "match_labels", self.match_labels)
 
-        if hasattr(selector, 'match_expressions') or hasattr(selector, 'match_labels'):
+        if hasattr(selector, "match_expressions") or hasattr(selector, "match_labels"):
             return selector
         return None
 
@@ -188,15 +188,15 @@ class PodAffinityTerm:
         term = ArgoPodAffinityTerm(topology_key=self.topology_key)
 
         if self.label_selector is not None:
-            setattr(term, 'label_selector', self.label_selector.get_spec())
+            setattr(term, "label_selector", self.label_selector.get_spec())
 
         if self.namespace_selector is not None:
-            setattr(term, 'namespace_selector', self.namespace_selector.get_spec())
+            setattr(term, "namespace_selector", self.namespace_selector.get_spec())
 
         if self.namespaces is not None:
-            setattr(term, 'namespaces', self.namespaces)
+            setattr(term, "namespaces", self.namespaces)
 
-        if hasattr(term, 'label_selector') or hasattr(term, 'namespace_selector') or hasattr(term, 'namespaces'):
+        if hasattr(term, "label_selector") or hasattr(term, "namespace_selector") or hasattr(term, "namespaces"):
             return term
         return None
 
@@ -250,7 +250,7 @@ class PodAffinity:
             if any(preferred_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
-                    'preferred_during_scheduling_ignored_during_execution',
+                    "preferred_during_scheduling_ignored_during_execution",
                     preferred_during_scheduling_ignored_during_execution,
                 )
 
@@ -259,12 +259,12 @@ class PodAffinity:
             if any(required_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
-                    'required_during_scheduling_ignored_during_execution',
+                    "required_during_scheduling_ignored_during_execution",
                     required_during_scheduling_ignored_during_execution,
                 )
 
-        if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(
-            affinity, 'required_during_scheduling_ignored_during_execution'
+        if hasattr(affinity, "preferred_during_scheduling_ignored_during_execution") or hasattr(
+            affinity, "required_during_scheduling_ignored_during_execution"
         ):
             return affinity
         return None
@@ -296,7 +296,7 @@ class PodAntiAffinity:
             if any(preferred_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
-                    'preferred_during_scheduling_ignored_during_execution',
+                    "preferred_during_scheduling_ignored_during_execution",
                     preferred_during_scheduling_ignored_during_execution,
                 )
 
@@ -305,12 +305,12 @@ class PodAntiAffinity:
             if any(required_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
-                    'required_during_scheduling_ignored_during_execution',
+                    "required_during_scheduling_ignored_during_execution",
                     required_during_scheduling_ignored_during_execution,
                 )
 
-        if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(
-            affinity, 'required_during_scheduling_ignored_during_execution'
+        if hasattr(affinity, "preferred_during_scheduling_ignored_during_execution") or hasattr(
+            affinity, "required_during_scheduling_ignored_during_execution"
         ):
             return affinity
         return None
@@ -361,7 +361,7 @@ class NodeAffinity:
             if any(preferred_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
-                    'preferred_during_scheduling_ignored_during_execution',
+                    "preferred_during_scheduling_ignored_during_execution",
                     preferred_during_scheduling_ignored_during_execution,
                 )
 
@@ -370,12 +370,12 @@ class NodeAffinity:
             if required_during_scheduling_ignored_during_execution:
                 setattr(
                     affinity,
-                    'required_during_scheduling_ignored_during_execution',
+                    "required_during_scheduling_ignored_during_execution",
                     required_during_scheduling_ignored_during_execution,
                 )
 
-        if hasattr(affinity, 'preferred_during_scheduling_ignored_during_execution') or hasattr(
-            affinity, 'required_during_scheduling_ignored_during_execution'
+        if hasattr(affinity, "preferred_during_scheduling_ignored_during_execution") or hasattr(
+            affinity, "required_during_scheduling_ignored_during_execution"
         ):
             return affinity
         return None
@@ -404,20 +404,20 @@ class Affinity:
 
         if self.pod_affinity is not None:
             pod_affinity = self.pod_affinity.get_spec()
-            setattr(affinity, 'pod_affinity', pod_affinity)
+            setattr(affinity, "pod_affinity", pod_affinity)
 
         if self.pod_anti_affinity is not None:
             pod_anti_affinity = self.pod_anti_affinity.get_spec()
-            setattr(affinity, 'pod_anti_affinity', pod_anti_affinity)
+            setattr(affinity, "pod_anti_affinity", pod_anti_affinity)
 
         if self.node_affinity is not None:
             node_affinity = self.node_affinity.get_spec()
-            setattr(affinity, 'node_affinity', node_affinity)
+            setattr(affinity, "node_affinity", node_affinity)
 
         if (
-            hasattr(affinity, 'pod_affinity')
-            or hasattr(affinity, 'pod_anti_affinity')
-            or hasattr(affinity, 'node_affinity')
+            hasattr(affinity, "pod_affinity")
+            or hasattr(affinity, "pod_anti_affinity")
+            or hasattr(affinity, "node_affinity")
         ):
             return affinity
         return None

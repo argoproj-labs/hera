@@ -13,11 +13,11 @@ from hera import WorkflowTemplateService
 
 
 def test_ws_has_expected_fields_upon_init():
-    ws = WorkflowTemplateService(host='https://abc.com', token='abc', verify_ssl=True, namespace='argo')
+    ws = WorkflowTemplateService(host="https://abc.com", token="abc", verify_ssl=True, namespace="argo")
 
-    assert ws._host == 'https://abc.com'
+    assert ws._host == "https://abc.com"
     assert ws._verify_ssl
-    assert ws._namespace == 'argo'
+    assert ws._namespace == "argo"
     assert isinstance(ws.service, WorkflowTemplateServiceApi)
     assert isinstance(ws.service.api_client, ApiClient)
 
@@ -26,7 +26,7 @@ def test_ws_calls_create_as_expected():
     mock_service = Mock()
     mock_service.create_workflow_template = Mock()
 
-    ws = WorkflowTemplateService(host='https://abc.com', token='abc')
+    ws = WorkflowTemplateService(host="https://abc.com", token="abc")
     ws.service = mock_service
     t = IoArgoprojWorkflowV1alpha1WorkflowTemplate(
         metadata=ObjectMeta(), spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
@@ -34,7 +34,7 @@ def test_ws_calls_create_as_expected():
     ws.create(t)
 
     mock_service.create_workflow_template.assert_called_with(
-        'default',
+        "default",
         IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest(template=t, _check_type=False),
         _check_return_type=False,
     )
@@ -44,8 +44,8 @@ def test_ws_calls_delete_as_expected():
     mock_service = Mock()
     mock_service.delete_workflow_template = Mock()
 
-    ws = WorkflowTemplateService(host='https://abc.com', token='abc')
+    ws = WorkflowTemplateService(host="https://abc.com", token="abc")
     ws.service = mock_service
-    ws.delete('my-wf')
+    ws.delete("my-wf")
 
-    mock_service.delete_workflow_template.assert_called_with('default', 'my-wf')
+    mock_service.delete_workflow_template.assert_called_with("default", "my-wf")

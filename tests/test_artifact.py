@@ -8,8 +8,8 @@ from hera import GitArtifact, HttpArtifact, InputArtifact, OutputArtifact
 
 
 def test_output_artifact_contains_expected_fields():
-    name = 'output'
-    path = '/output/path'
+    name = "output"
+    path = "/output/path"
     expected = IoArgoprojWorkflowV1alpha1Artifact(name=name, path=path)
     actual = OutputArtifact(name, path).get_spec()
     actual_input = OutputArtifact(name, path).get_input_spec()
@@ -21,10 +21,10 @@ def test_output_artifact_contains_expected_fields():
 
 
 def test_input_artifact_contains_expected_fields():
-    name = 'input'
-    path = '/input/path'
-    from_task = 'test'
-    artifact_name = 'test-artifact'
+    name = "input"
+    path = "/input/path"
+    from_task = "test"
+    artifact_name = "test-artifact"
     expected = IoArgoprojWorkflowV1alpha1Artifact(
         name=name, path=path, _from=f"{{{{tasks.{from_task}.outputs.artifacts.{artifact_name}}}}}"
     )
@@ -55,9 +55,9 @@ def test_git_artifact():
 
 
 def test_http_artifact():
-    name = 'http-artifact'
-    path = '/src'
-    url = 'whatever.com/my-file.txt'
+    name = "http-artifact"
+    path = "/src"
+    url = "whatever.com/my-file.txt"
 
     expected = IoArgoprojWorkflowV1alpha1Artifact(
         name=name, path=path, http=IoArgoprojWorkflowV1alpha1HTTPArtifact(url=url)

@@ -8,17 +8,17 @@ from hera import ExistingVolume, Resources, Task, Workflow, WorkflowService
 
 def download(path: str):
     # we can run this task asynchronously for downloading some big file to an existing volume!
-    print(f'Would have downloaded from {path} to /vol')
+    print(f"Would have downloaded from {path} to /vol")
 
 
 with Workflow(
-    'existing-volume', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
+    "existing-volume", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
 ) as w:
     Task(
-        'download',
+        "download",
         download,
-        [{'path': '/whatever/path'}],
-        resources=Resources(volumes=[ExistingVolume(name='my-vol-claim', mount_path='/vol')]),
+        [{"path": "/whatever/path"}],
+        resources=Resources(volumes=[ExistingVolume(name="my-vol-claim", mount_path="/vol")]),
     )
 
 w.create()

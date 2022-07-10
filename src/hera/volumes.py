@@ -61,7 +61,7 @@ class BaseVolume(BaseModel):
     mount_path: str
     sub_path: Optional[str] = ""
 
-    @validator('name', always=True)
+    @validator("name", always=True)
     def check_name(cls, value):
         """Validates that a name is specified. If not, it sets it"""
         if not value:
@@ -92,9 +92,9 @@ class EmptyDirVolume(BaseVolume):
     """
 
     # default to empty size spec to allow for unlimited memory consumption
-    size: str = ''
+    size: str = ""
     # default to /dev/shm since it represents the shared memory concept in Unix systems
-    mount_path: str = '/dev/shm'
+    mount_path: str = "/dev/shm"
 
     def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
@@ -105,7 +105,7 @@ class EmptyDirVolume(BaseVolume):
             The volume representation that can be mounted in workflow steps/tasks.
         """
         size_limit = self.size if self.size else ""
-        empty_dir = EmptyDirVolumeSource(medium='Memory', size_limit=size_limit)
+        empty_dir = EmptyDirVolumeSource(medium="Memory", size_limit=size_limit)
         return ArgoVolume(name=self.name, empty_dir=empty_dir)
 
     def get_mount(self) -> VolumeMount:
@@ -116,10 +116,10 @@ class EmptyDirVolume(BaseVolume):
 class ExistingVolume(BaseVolume):
     """A representation of an existing volume. This can be used to mount existing volumes to workflow tasks"""
 
-    @validator('name', always=True)
+    @validator("name", always=True)
     def check_name(cls, value):
         """Verifies that the specified name does not contain underscores, which are not RFC1123 compliant"""
-        assert '_' not in value, 'existing volume name cannot contain underscores, see RFC1123'
+        assert "_" not in value, "existing volume name cannot contain underscores, see RFC1123"
         return value
 
     def get_volume(self) -> ArgoVolume:
@@ -208,14 +208,14 @@ class Volume(BaseVolume):
     """
 
     size: str
-    storage_class_name: str = 'standard'
+    storage_class_name: str = "standard"
     # note that different cloud providers support different types of access modes
     access_modes: List[AccessMode] = [AccessMode.ReadWriteOnce]
 
     class Config:
         use_enum_values = True
 
-    @validator('size')
+    @validator("size")
     def valid_units(cls, value):
         """Validates the storage units of the volume size"""
         validate_storage_units(value)
@@ -239,7 +239,7 @@ class Volume(BaseVolume):
             access_modes=[am.value if isinstance(am, AccessMode) else am for am in self.access_modes],
             resources=ResourceRequirements(
                 requests={
-                    'storage': self.size,
+                    "storage": self.size,
                 }
             ),
             storage_class_name=self.storage_class_name,

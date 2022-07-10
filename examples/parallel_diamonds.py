@@ -6,27 +6,27 @@ def say(message: str):
     print(message)
 
 
-with Workflow('parallel-diamonds', service=WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
+with Workflow("parallel-diamonds", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
     (
         Task(
-            'A',
+            "A",
             say,
-            [{'message': 'This is task A.1!'}, {'message': 'This is task A.2!'}, {'message': 'This is task A.3!'}],
+            [{"message": "This is task A.1!"}, {"message": "This is task A.2!"}, {"message": "This is task A.3!"}],
         )
         >> Task(
-            'B',
+            "B",
             say,
-            [{'message': 'This is task B.1!'}, {'message': 'This is task B.2!'}, {'message': 'This is task B.3!'}],
+            [{"message": "This is task B.1!"}, {"message": "This is task B.2!"}, {"message": "This is task B.3!"}],
         )
         >> Task(
-            'C',
+            "C",
             say,
-            [{'message': 'This is task C.1!'}, {'message': 'This is task C.2!'}, {'message': 'This is task C.3!'}],
+            [{"message": "This is task C.1!"}, {"message": "This is task C.2!"}, {"message": "This is task C.3!"}],
         )
         >> Task(
-            'D',
+            "D",
             say,
-            [{'message': 'This is task D.1!'}, {'message': 'This is task D.2!'}, {'message': 'This is task D.3!'}],
+            [{"message": "This is task D.1!"}, {"message": "This is task D.2!"}, {"message": "This is task D.3!"}],
         )
     )
 

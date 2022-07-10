@@ -14,7 +14,7 @@ class _Context(threading.local):
 
     def set(self, w: Union[Workflow, CronWorkflow, WorkflowTemplate]) -> None:
         if self._workflow is not None:
-            raise ValueError(f'Hera context already defined with workflow: {self._workflow}')
+            raise ValueError(f"Hera context already defined with workflow: {self._workflow}")
         self._workflow = w
 
     def reset(self) -> None:

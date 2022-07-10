@@ -11,11 +11,11 @@ def use_secret():
         print(f"Secret: {secret_file.readline()}")
 
 
-with Workflow('secret-volume', service=WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
+with Workflow("secret-volume", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
     Task(
-        'use_secret',
+        "use_secret",
         use_secret,
-        resources=Resources(volumes=[SecretVolume(secret_name='secret-file', mount_path='/secret/')]),
+        resources=Resources(volumes=[SecretVolume(secret_name="secret-file", mount_path="/secret/")]),
     )
 
 w.create()

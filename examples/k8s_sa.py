@@ -44,7 +44,7 @@ namespace = "argo"
 token = get_sa_token("argo-server", namespace=namespace)
 
 with Workflow(
-    "k8s-sa", service=WorkflowService(host='https://my-argo-server.com', token=token, namespace=namespace)
+    "k8s-sa", service=WorkflowService(host="https://my-argo-server.com", token=token, namespace=namespace)
 ) as w:
     Task("t", hello)
 

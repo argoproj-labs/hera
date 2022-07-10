@@ -39,7 +39,7 @@ class CronWorkflowService:
         host: Optional[str] = None,
         verify_ssl: bool = True,
         token: Optional[str] = None,
-        namespace: str = 'default',
+        namespace: str = "default",
     ):
         self._host = host
         self._verify_ssl = verify_ssl
@@ -48,7 +48,7 @@ class CronWorkflowService:
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
     def create(
-        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = 'default'
+        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = "default"
     ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates given cron workflow in the argo server.
 
@@ -78,7 +78,7 @@ class CronWorkflowService:
         self,
         cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
         name: str,
-        namespace: str = 'default',
+        namespace: str = "default",
     ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates given cron workflow in the argo server.
 
@@ -105,7 +105,7 @@ class CronWorkflowService:
             _check_return_type=False,
         )
 
-    def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
+    def delete(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
         """Deletes a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -125,7 +125,7 @@ class CronWorkflowService:
         """
         return self.service.delete_cron_workflow(namespace, name)
 
-    def suspend(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
+    def suspend(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -150,7 +150,7 @@ class CronWorkflowService:
             _check_return_type=False,
         )
 
-    def resume(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
+    def resume(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
         """Resumes execution of a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -175,7 +175,7 @@ class CronWorkflowService:
             _check_return_type=False,
         )
 
-    def get_cron_workflow_link(self, name: str, namespace: str = 'default') -> str:
+    def get_cron_workflow_link(self, name: str, namespace: str = "default") -> str:
         """Assembles a cron workflow link for the given cron workflow name. Note that the returned path works only for Argo.
 
         Parameters
@@ -190,9 +190,9 @@ class CronWorkflowService:
         str
             The cron workflow link.
         """
-        return f'{self._host}/cron-workflows/{namespace}/{name}'
+        return f"{self._host}/cron-workflows/{namespace}/{name}"
 
-    def get_workflow(self, name: str, namespace: str = 'default') -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+    def get_workflow(self, name: str, namespace: str = "default") -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Fetches a workflow by the specified name and namespace combination.
 
         Parameters

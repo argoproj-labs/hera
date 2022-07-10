@@ -28,52 +28,52 @@ from hera.workflow_template import WorkflowTemplate
 from hera.workflow_template_service import WorkflowTemplateService
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def ws():
-    yield WorkflowService(host='https://abc.com', token='abc')
+    yield WorkflowService(host="https://abc.com", token="abc")
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def w(ws):
-    yield Workflow('w', service=ws)
+    yield Workflow("w", service=ws)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def wts():
-    yield WorkflowTemplateService(host='https://abc.com', token='abc')
+    yield WorkflowTemplateService(host="https://abc.com", token="abc")
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def wt(wts):
-    yield WorkflowTemplate('wt', service=wts)
+    yield WorkflowTemplate("wt", service=wts)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cws():
-    yield CronWorkflowService(host='https://abc.com', token='abc')
+    yield CronWorkflowService(host="https://abc.com", token="abc")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def schedule():
     yield "* * * * *"
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cw(cws, schedule):
-    yield CronWorkflow('cw', schedule, service=cws)
+    yield CronWorkflow("cw", schedule, service=cws)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def in_artifact():
-    yield InputArtifact('test', '/test', 'test-o', 'test-o')
+    yield InputArtifact("test", "/test", "test-o", "test-o")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def out_artifact():
-    yield OutputArtifact('test', '/test')
+    yield OutputArtifact("test", "/test")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def mock_model():
     class MockModel(BaseModel):
         field1: int = 1
@@ -82,7 +82,7 @@ def mock_model():
     yield MockModel
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def no_op():
     def _no_op():
         pass
@@ -90,7 +90,7 @@ def no_op():
     yield _no_op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def op():
     def _op(a):
         print(a)
@@ -98,7 +98,7 @@ def op():
     yield _op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def kwarg_op():
     def _kwarg_op(a: int = 42):
         print(a)
@@ -106,7 +106,7 @@ def kwarg_op():
     yield _kwarg_op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def kwarg_multi_op():
     def _kwarg_multi_op(a: int = 42, b: int = 43):
         print(a, b)
@@ -114,7 +114,7 @@ def kwarg_multi_op():
     yield _kwarg_multi_op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def multi_op():
     def _multi_op(a, b, c):
         print(a, b, c)
@@ -122,16 +122,16 @@ def multi_op():
     yield _multi_op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def typed_op():
     def _typed_op(a) -> List[Dict[str, Tuple[int, int]]]:
         print(a)
-        return [{'a': (a, a)}]
+        return [{"a": (a, a)}]
 
     yield _typed_op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def long_op():
     def _long_op(
         very_long_parameter_name,
@@ -145,46 +145,46 @@ def long_op():
     yield _long_op
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def affinity():
     yield Affinity(
         pod_affinity=PodAffinity(
             pod_affinity_terms=[
                 PodAffinityTerm(
-                    topology_key='a',
+                    topology_key="a",
                     label_selector=LabelSelector(
                         label_selector_requirements=[
-                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                         ],
-                        match_labels={'a': 'b'},
+                        match_labels={"a": "b"},
                     ),
                     namespace_selector=LabelSelector(
                         label_selector_requirements=[
-                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                         ],
-                        match_labels={'a': 'b'},
+                        match_labels={"a": "b"},
                     ),
-                    namespaces=['a'],
+                    namespaces=["a"],
                 )
             ],
             weighted_pod_affinities=[
                 WeightedPodAffinityTerm(
                     weight=1,
                     pod_affinity_term=PodAffinityTerm(
-                        topology_key='a',
+                        topology_key="a",
                         label_selector=LabelSelector(
                             label_selector_requirements=[
-                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                                LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                             ],
-                            match_labels={'a': 'b'},
+                            match_labels={"a": "b"},
                         ),
                         namespace_selector=LabelSelector(
                             label_selector_requirements=[
-                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                                LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                             ],
-                            match_labels={'a': 'b'},
+                            match_labels={"a": "b"},
                         ),
-                        namespaces=['a'],
+                        namespaces=["a"],
                     ),
                 )
             ],
@@ -192,40 +192,40 @@ def affinity():
         pod_anti_affinity=PodAntiAffinity(
             pod_affinity_terms=[
                 PodAffinityTerm(
-                    topology_key='a',
+                    topology_key="a",
                     label_selector=LabelSelector(
                         label_selector_requirements=[
-                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                         ],
-                        match_labels={'a': 'b'},
+                        match_labels={"a": "b"},
                     ),
                     namespace_selector=LabelSelector(
                         label_selector_requirements=[
-                            LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                            LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                         ],
-                        match_labels={'a': 'b'},
+                        match_labels={"a": "b"},
                     ),
-                    namespaces=['a'],
+                    namespaces=["a"],
                 )
             ],
             weighted_pod_affinities=[
                 WeightedPodAffinityTerm(
                     weight=1,
                     pod_affinity_term=PodAffinityTerm(
-                        topology_key='a',
+                        topology_key="a",
                         label_selector=LabelSelector(
                             label_selector_requirements=[
-                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                                LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                             ],
-                            match_labels={'a': 'b'},
+                            match_labels={"a": "b"},
                         ),
                         namespace_selector=LabelSelector(
                             label_selector_requirements=[
-                                LabelSelectorRequirement('a', LabelOperator.In, values=['value'])
+                                LabelSelectorRequirement("a", LabelOperator.In, values=["value"])
                             ],
-                            match_labels={'a': 'b'},
+                            match_labels={"a": "b"},
                         ),
-                        namespaces=['a'],
+                        namespaces=["a"],
                     ),
                 )
             ],
@@ -234,8 +234,8 @@ def affinity():
             preferred_scheduling_terms=[
                 PreferredSchedulingTerm(
                     NodeSelectorTerm(
-                        expressions=[Expression('a', LabelOperator.In, ['value'])],
-                        fields=[Field('a', LabelOperator.In, ['value'])],
+                        expressions=[Expression("a", LabelOperator.In, ["value"])],
+                        fields=[Field("a", LabelOperator.In, ["value"])],
                     ),
                     1,
                 )
@@ -243,8 +243,8 @@ def affinity():
             node_selector=NodeSelector(
                 terms=[
                     NodeSelectorTerm(
-                        expressions=[Expression('a', LabelOperator.In, ['value'])],
-                        fields=[Field('a', LabelOperator.In, ['value'])],
+                        expressions=[Expression("a", LabelOperator.In, ["value"])],
+                        fields=[Field("a", LabelOperator.In, ["value"])],
                     )
                 ]
             ),

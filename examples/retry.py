@@ -10,11 +10,11 @@ def random_fail():
 
     p = random.random()
     if p < 0.5:
-        raise Exception('p < .5 = FAIL')
-    print('p >= .5 = SUCCESS')
+        raise Exception("p < .5 = FAIL")
+    print("p >= .5 = SUCCESS")
 
 
-with Workflow('retry', service=WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
-    Task('fail', random_fail, retry=Retry(duration=5, max_duration=60))
+with Workflow("retry", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
+    Task("fail", random_fail, retry=Retry(duration=5, max_duration=60))
 
 w.create()

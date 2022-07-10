@@ -22,7 +22,7 @@ class Memoize:
         `1d` is 1 day.
     """
 
-    def __init__(self, key: str, config_map_name: str, config_map_key: str, max_age: str = '1h'):
+    def __init__(self, key: str, config_map_name: str, config_map_key: str, max_age: str = "1h"):
         self.key = key
         self.config_map_name = config_map_name
         self.config_map_key = config_map_key
@@ -33,6 +33,6 @@ class Memoize:
             cache=IoArgoprojWorkflowV1alpha1Cache(
                 config_map=ConfigMapKeySelector(name=self.config_map_name, key=self.config_map_key),
             ),
-            key=f'{{{{inputs.parameters.{self.key}}}}}',
+            key=f"{{{{inputs.parameters.{self.key}}}}}",
             max_age=self.max_age,
         )
