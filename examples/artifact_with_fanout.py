@@ -31,15 +31,17 @@ def consumer(i: int):
     print(i)
 
 
-ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('artifact-with-fanout', ws)
-w_t = Task('writer', writer, output_artifacts=[OutputArtifact(name='test', path='/file')])
-f_t = Task(
-    'fanout',
-    fanout,
-    input_artifacts=[InputArtifact(from_task='writer', artifact_name='test', name='test', path='/file')],
-)
-c_t = Task('consumer', consumer, input_from=InputFrom(name='fanout', parameters=['i']))
-w_t >> f_t >> c_t
-w.add_tasks(w_t, f_t, c_t)
+with Workflow(
+    'artifact-with-fanout',
+    service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token'),
+) as w:
+    w_t = Task('writer', writer, output_artifacts=[OutputArtifact('test', '/file')])
+    f_t = Task(
+        'fanout',
+        fanout,
+        input_artifacts=[InputArtifact('test', '/file', 'writer', 'test')],
+    )
+    c_t = Task('consumer', consumer, input_from=InputFrom(name='fanout', parameters=['i']))
+    w_t >> f_t >> c_t
+
 w.create()

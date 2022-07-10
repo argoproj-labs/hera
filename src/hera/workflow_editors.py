@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from hera.workflow import Workflow
-    from hera.cron_workflow import CronWorkflow
-    from hera.workflow_template import WorkflowTemplate
-
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 from hera.task import Task
 from hera.volumes import Volume
+
+if TYPE_CHECKING:
+    from hera.cron_workflow import CronWorkflow
+    from hera.workflow import Workflow
+    from hera.workflow_template import WorkflowTemplate
 
 
 def add_task(w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'], t: Task) -> None:
@@ -129,3 +127,17 @@ def on_exit(
     if not hasattr(w.spec, 'on_exit'):
         w.spec.templates.append(w.exit_template)
         setattr(w.spec, "on_exit", w.exit_template.name)
+
+
+def pre_create_cleanup(
+    w: Union['WorkflowTemplate', 'CronWorkflow', 'Workflow'],
+) -> None:
+    exit_tasks = set()
+    for t in w.dag_template.tasks:
+        if hasattr(t, 'hooks'):
+            exit_hook = getattr(t, 'hooks').get('exit')
+            exit_tasks.add(exit_hook.template)
+    if len(exit_tasks) == 0:
+        return
+
+    w.dag_template.tasks = list(filter(lambda x: getattr(x, 'name') not in exit_tasks, w.dag_template.tasks))

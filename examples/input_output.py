@@ -10,11 +10,10 @@ def consume(msg: str):
     print(f'Message was: {msg}')
 
 
-p = Task('p', produce, outputs=[OutputPathParameter('msg', '/test.txt')])
-c = Task('c', consume, inputs=[InputParameter('msg', p.name, 'msg')])
-p >> c
+with Workflow('io', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')) as w:
+    (
+        Task('p', produce, outputs=[OutputPathParameter('msg', '/test.txt')])
+        >> Task('c', consume, inputs=[InputParameter('msg', p.name, 'msg')])
+    )
 
-ws = WorkflowService(host='https://my-argo-server.com', token='token')
-w = Workflow('io')
-w.add_tasks(p, c)
 w.create()

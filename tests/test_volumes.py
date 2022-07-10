@@ -29,3 +29,12 @@ def test_volume_created_with_multiple_access_modes():
 def test_volume_fails_creation_with_string_access_modes():
     with pytest.raises(ValidationError) as e:
         Volume(name='v', size='1Gi', mount_path='/test', access_modes=['ReadWriteTwice'])
+
+
+def test_volume_mount():
+    v = Volume(name="v", size="1Gi", mount_path="/test", sub_path="test.txt")
+    mount = v.get_mount()
+
+    assert mount["mount_path"] == "/test"
+    assert mount["name"] == "v"
+    assert mount["sub_path"] == "test.txt"

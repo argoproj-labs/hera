@@ -15,6 +15,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1LifecycleHook,
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
@@ -28,6 +29,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
+import hera
 from hera._task_input import _Item
 from hera.affinity import Affinity
 from hera.artifact import Artifact, OutputArtifact
@@ -203,6 +205,7 @@ class Task:
         self.continue_on_error = continue_on_error
         self.template_ref = template_ref
         self.affinity = affinity
+        self.exit_task: Optional[Task] = None
 
         self.argo_parameters = self.get_parameters()
         self.argo_arguments = self.get_arguments()
@@ -211,6 +214,9 @@ class Task:
         self.argo_resources = self.get_resources()
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_spec()
+
+        if hera.context.is_set():
+            hera.context.add_task(self)
 
     @property
     def ip(self):
@@ -329,6 +335,13 @@ class Task:
 
         other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
         return self.next(other)
+
+    def on_exit(self, other: 'Task') -> 'Task':
+        """Execute `other` on completion (exit) of this Task."""
+        self.exit_task = other
+        exit_hook = {'exit': IoArgoprojWorkflowV1alpha1LifecycleHook(template=other.argo_template.name)}
+        setattr(self.argo_task, 'hooks', exit_hook)
+        return self
 
     def when_any_succeeded(self, other: 'Task') -> 'Task':
         """Sets the other task to execute when any of the tasks of this task group have succeeded.
@@ -466,8 +479,6 @@ class Task:
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
-                assert self.input_artifacts == [], 'cannot supply both InputFrom and Artifacts'
-
                 # input_from denotes the task will receive input from another step. This leaves it up to the
                 # client to set up the proper output in a previous task
                 if self.func_params:

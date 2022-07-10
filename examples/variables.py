@@ -32,15 +32,9 @@ def consumer():
     print(response.read())
 
 
-namespace = "argo"
-# TODO: replace the domain and token with your own
-ws = WorkflowService(host='my-argo-server.com', token="token", namespace=namespace)
-w = Workflow('variables', ws)
-d = Task('daemon', server, daemon=True)
-server_ip_variable = VariableAsEnv(name='SERVER_IP', value=d.ip)
-t = Task('consumer', consumer, variables=[server_ip_variable])
+with Workflow('variables', service=WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
+    d = Task('daemon', server, daemon=True)
+    t = Task('consumer', consumer, variables=[VariableAsEnv(name='SERVER_IP', value=d.ip)])
+    d >> t
 
-d >> t
-
-w.add_tasks(d, t)
-w.create(namespace=namespace)
+w.create()

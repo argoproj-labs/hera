@@ -167,3 +167,24 @@ def test_wf_adds_affinity(wts, affinity):
     assert w.affinity == affinity
     assert hasattr(w.template, 'affinity')
     assert hasattr(w.exit_template, 'affinity')
+
+
+def test_wf_raises_on_double_context(wts):
+    with WorkflowTemplate('w', service=wts):
+        with pytest.raises(ValueError) as e:
+            with WorkflowTemplate('w2', service=wts):
+                pass
+        assert 'Hera context already defined with workflow' in str(e.value)
+
+
+def test_wf_resets_context_indicator(wts):
+    with WorkflowTemplate('w', service=wts) as w:
+        assert w.in_context
+    assert not w.in_context
+
+
+def test_wf_raises_on_create_in_context(wts):
+    with WorkflowTemplate('w', service=wts) as w:
+        with pytest.raises(ValueError) as e:
+            w.create()
+        assert str(e.value) == 'Cannot invoke `create` when using a Hera context'

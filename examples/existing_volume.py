@@ -11,15 +11,14 @@ def download(path: str):
     print(f'Would have downloaded from {path} to /vol')
 
 
-# TODO: replace the domain and token with your own
-ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('existing-volume', ws)
-d = Task(
-    'download',
-    download,
-    [{'path': '/whatever/path'}],
-    resources=Resources(volumes=[ExistingVolume(name='my-vol-claim', mount_path='/vol')]),
-)
+with Workflow(
+    'existing-volume', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
+) as w:
+    Task(
+        'download',
+        download,
+        [{'path': '/whatever/path'}],
+        resources=Resources(volumes=[ExistingVolume(name='my-vol-claim', mount_path='/vol')]),
+    )
 
-w.add_task(d)
 w.create()

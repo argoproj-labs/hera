@@ -53,10 +53,13 @@ class BaseVolume(BaseModel):
         name to avoid any potential naming conflicts with existing empty dir volumes.
     mount_path: str
         The mounting point in the task e.g /mnt/my_path.
+    sub_path: str
+        Path within the volume from which the container's volume should be mounted.
     """
 
     name: Optional[str]
     mount_path: str
+    sub_path: Optional[str] = ""
 
     @validator('name', always=True)
     def check_name(cls, value):
@@ -107,7 +110,7 @@ class EmptyDirVolume(BaseVolume):
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(mount_path=self.mount_path, name=self.name)
+        return VolumeMount(mount_path=self.mount_path, name=self.name, sub_path=self.sub_path)
 
 
 class ExistingVolume(BaseVolume):
@@ -126,7 +129,7 @@ class ExistingVolume(BaseVolume):
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(name=self.name, mount_path=self.mount_path)
+        return VolumeMount(name=self.name, mount_path=self.mount_path, sub_path=self.sub_path)
 
 
 class SecretVolume(BaseVolume):
@@ -147,7 +150,7 @@ class SecretVolume(BaseVolume):
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(name=self.name, mount_path=self.mount_path)
+        return VolumeMount(name=self.name, mount_path=self.mount_path, sub_path=self.sub_path)
 
 
 class ConfigMapVolume(BaseVolume):
@@ -168,7 +171,7 @@ class ConfigMapVolume(BaseVolume):
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(name=self.name, mount_path=self.mount_path)
+        return VolumeMount(name=self.name, mount_path=self.mount_path, sub_path=self.sub_path)
 
 
 class Volume(BaseVolume):
@@ -220,7 +223,7 @@ class Volume(BaseVolume):
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(mount_path=self.mount_path, name=self.name)
+        return VolumeMount(mount_path=self.mount_path, name=self.name, sub_path=self.sub_path)
 
     def get_claim_spec(self) -> PersistentVolumeClaim:
         """Constructs and returns an Argo volume claim representation for tasks. This is typically used by workflows

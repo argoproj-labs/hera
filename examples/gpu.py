@@ -36,18 +36,15 @@ def do():
     print(f'This is a task that uses GPUs! CUDA info:\n{os.popen("nvidia-smi").read()}')
 
 
-# TODO: replace the domain and token with your own
-ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('gpu', ws)
-gke_k80_gpu = {'cloud.google.com/gke-accelerator': 'nvidia-tesla-k80'}
-d = Task(
-    'do',
-    do,
-    image='horovod/horovod:0.22.1',
-    resources=Resources(gpus=1),
-    tolerations=[GPUToleration],
-    node_selectors=gke_k80_gpu,
-)
+with Workflow('gpu', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')) as w:
+    gke_k80_gpu = {'cloud.google.com/gke-accelerator': 'nvidia-tesla-k80'}
+    d = Task(
+        'do',
+        do,
+        image='horovod/horovod:0.22.1',
+        resources=Resources(gpus=1),
+        tolerations=[GPUToleration],
+        node_selectors=gke_k80_gpu,
+    )
 
-w.add_task(d)
 w.create()

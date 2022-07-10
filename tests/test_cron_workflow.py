@@ -23,6 +23,7 @@ from hera import (
     SecretVolume,
     Task,
     TTLStrategy,
+    Variable,
     Volume,
     WorkflowStatus,
 )
@@ -363,3 +364,33 @@ def test_wf_adds_affinity(cws, schedule, affinity):
     assert w.affinity == affinity
     assert hasattr(w.template, 'affinity')
     assert hasattr(w.exit_template, 'affinity')
+
+
+def test_wf_raises_on_double_context(cws, schedule):
+    with CronWorkflow('w', schedule, service=cws):
+        with pytest.raises(ValueError) as e:
+            with CronWorkflow('w2', schedule, service=cws):
+                pass
+        assert 'Hera context already defined with workflow' in str(e.value)
+
+
+def test_wf_resets_context_indicator(cws, schedule):
+    with CronWorkflow('w', schedule, service=cws) as w:
+        assert w.in_context
+    assert not w.in_context
+
+
+def test_wf_raises_on_create_in_context(cws, schedule):
+    with CronWorkflow('w', schedule, service=cws) as w:
+        with pytest.raises(ValueError) as e:
+            w.create()
+        assert str(e.value) == 'Cannot invoke `create` when using a Hera context'
+
+
+def test_wf_sets_variables_as_global_args(cws, schedule):
+    with CronWorkflow('w', schedule, service=cws, variables=[Variable('a', '42')]) as w:
+        assert len(w.variables) == 1
+        assert w.variables[0].name == 'a'
+        assert w.variables[0].value == '42'
+        assert hasattr(w.spec, 'arguments')
+        assert len(getattr(w.spec, 'arguments').parameters) == 1

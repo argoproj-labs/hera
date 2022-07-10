@@ -392,12 +392,6 @@ def test_task_fails_artifact_validation(no_op, in_artifact):
     assert str(e.value) == 'input artifact names must be unique'
 
 
-def test_task_validation_fails_on_input_from_plus_input_artifact(op, in_artifact):
-    with pytest.raises(AssertionError) as e:
-        Task('t', op, input_from=InputFrom(name='test', parameters=['a']), input_artifacts=[in_artifact])
-    assert str(e.value) == 'cannot supply both InputFrom and Artifacts'
-
-
 def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
     t = Task('t', op, input_from=InputFrom(name='some-other-task', parameters=['a']))
     script = t.get_param_script_portion()
@@ -425,29 +419,27 @@ def test_task_input_artifact_returns_expected_list(no_op, in_artifact):
 
 
 def test_task_adds_s3_input_artifact():
-    t = Task('t', input_artifacts=[S3Artifact(name="n", path="/p", key="key")])
+    t = Task('t', input_artifacts=[S3Artifact("n", "/p", 's3://my-bucket', "key")])
 
     artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
+    assert artifact.s3.bucket == 's3://my-bucket'
     assert artifact.s3.key == "key"
 
 
 def test_task_adds_gcs_input_artifact():
-    t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", key="key")])
+    t = Task('t', input_artifacts=[GCSArtifact("n", "/p", 'gs://my-bucket', "key")])
 
     artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
+    assert artifact.gcs.bucket == "gs://my-bucket"
     assert artifact.gcs.key == "key"
 
 
 def test_task_adds_git_input_artifact():
     t = Task(
         't',
-        input_artifacts=[
-            GitArtifact(
-                name='r', path='/my-repo', repo='https://github.com/argoproj/argo-workflows.git', revision='master'
-            )
-        ],
+        input_artifacts=[GitArtifact('r', '/my-repo', 'https://github.com/argoproj/argo-workflows.git', 'master')],
     )
 
     artifact = t.argo_inputs.artifacts[0]
@@ -819,7 +811,7 @@ def test_dependencies_to_depends():
 
 def test_task_fails_to_validate_with_incorrect_memoize(op):
     with pytest.raises(AssertionError) as e:
-        Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a'))
+        Task('t', op, func_params=[{'a': 42}], memoize=Memoize('b', 'a', 'a-key'))
     assert str(e.value) == 'memoize key must be a parameter of the function'
 
 
@@ -847,3 +839,11 @@ def test_task_raises_on_mixed_input_types():
     with pytest.raises(ValueError) as e:
         Task('t', inputs=[InputParameter('i1', 't', 'p'), InputFrom('i2', parameters=['t'])])
     assert str(e.value) == 'cannot use `InputFrom` along with other input types. Use `input_from` instead'
+
+
+def test_task_adds_exit_hook():
+    e = Task('e')
+    t = Task('t').on_exit(e)
+    assert t.exit_task == e
+    assert hasattr(t.argo_task, 'hooks')
+    assert getattr(t.argo_task, 'hooks').get('exit').template == 'e'
