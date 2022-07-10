@@ -7,8 +7,7 @@ def hello():
 
 
 # TODO: replace the domain and token with your own
-ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('hello-hera', ws)
-t = Task('t', hello)
-w.add_task(t)
+with Workflow('hello-hera', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')) as w:
+    Task('t', hello)
+
 w.create()

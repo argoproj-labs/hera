@@ -28,6 +28,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
+import hera
 from hera._task_input import _Item
 from hera.affinity import Affinity
 from hera.artifact import Artifact, OutputArtifact
@@ -45,7 +46,6 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.variable import Variable, VariableAsEnv
 from hera.workflow_status import WorkflowStatus
-import hera
 
 
 class Task:

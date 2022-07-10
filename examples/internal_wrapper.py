@@ -78,7 +78,7 @@ class MyTask(Task):
 
 def example():
     """Example usage of wrapper to demonstrate how it can slightly simplify submission"""
-    w = MyWorkflow('my-workflow')
-    t = MyTask('t', lambda: print(42))
-    w.add_task(t)
+    with MyWorkflow('my-workflow') as w:
+        MyTask('t', lambda: print(42))
+
     w.create()
