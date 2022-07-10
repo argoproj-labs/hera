@@ -17,7 +17,7 @@ def tails():
     print("it was tails")
 
 
-with Workflow("coin-flip", service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')) as w:
+with Workflow("coin-flip", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")) as w:
     r = Task("r", random_code)
     h = Task("h", heads)
     t = Task("t", tails)

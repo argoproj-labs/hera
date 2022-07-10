@@ -19,7 +19,7 @@ def tails():
 
 
 with WorkflowTemplate(
-    "workflow-template", service=WorkflowTemplateService(host='my-argo-server.com', token='my-argo-token')
+    "workflow-template", service=WorkflowTemplateService(host="my-argo-server.com", token="my-argo-token")
 ) as w:
     r = Task("r", random_code)
     Task("h", heads).when(r, Operator.equals, "heads")

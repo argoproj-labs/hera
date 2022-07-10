@@ -2,8 +2,8 @@
 from hera import Workflow, WorkflowService
 
 w = Workflow(
-    'workflow-with-template-ref',
-    service=WorkflowService(host='my-argo-server.com', token='my-auth-token'),
+    "workflow-with-template-ref",
+    service=WorkflowService(host="my-argo-server.com", token="my-auth-token"),
     workflow_template_ref="coin-flip-template",
 )
 w.create()

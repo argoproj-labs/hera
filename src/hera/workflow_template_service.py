@@ -37,7 +37,7 @@ class WorkflowTemplateService:
         host: Optional[str] = None,
         verify_ssl: bool = True,
         token: Optional[str] = None,
-        namespace: str = 'default',
+        namespace: str = "default",
     ):
         self._host = host
         self._verify_ssl = verify_ssl
@@ -46,7 +46,7 @@ class WorkflowTemplateService:
         self.service = WorkflowTemplateServiceApi(api_client=api_client)
 
     def create(
-        self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate, namespace: str = 'default'
+        self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate, namespace: str = "default"
     ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates given workflowTemplate in the argo server.
 
@@ -72,7 +72,7 @@ class WorkflowTemplateService:
             _check_return_type=False,
         )
 
-    def delete(self, name: str, namespace: str = 'default') -> Tuple[object, int, dict]:
+    def delete(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
         """Deletes a workflow template from the given namespace based on the specified name.
 
         Parameters

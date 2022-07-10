@@ -14,30 +14,30 @@ def generate():
 
     # this can be anything! e.g fetch from some API, then in parallel process all entities; chunk database records
     # and process them in parallel, etc.
-    json.dump([{'value': i} for i in range(10)], sys.stdout)
+    json.dump([{"value": i} for i in range(10)], sys.stdout)
 
 
 def fanout(value: int):
-    print(f'Received value: {value}!')
-    with open('/tmp/number', 'w') as f:
+    print(f"Received value: {value}!")
+    with open("/tmp/number", "w") as f:
         f.write(str(value))
 
 
 def fanin(values: list):
-    print(f'Received values: {values}!')
+    print(f"Received values: {values}!")
 
 
 with Workflow(
-    'dynamic-fanout-fanin', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
+    "dynamic-fanout-fanin", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
 ) as w:
-    generate_task = Task('generate', generate)
+    generate_task = Task("generate", generate)
     fanout_task = Task(
-        'fanout',
+        "fanout",
         fanout,
-        input_from=InputFrom('generate', ['value']),
-        outputs=[OutputPathParameter('fanout', '/tmp/number')],
+        input_from=InputFrom("generate", ["value"]),
+        outputs=[OutputPathParameter("fanout", "/tmp/number")],
     )
-    fanin_task = Task('fanin', fanin, inputs=[MultiInput('values', fanout_task.name)])
+    fanin_task = Task("fanin", fanin, inputs=[MultiInput("values", fanout_task.name)])
 
     generate_task >> fanout_task >> fanin_task
 
