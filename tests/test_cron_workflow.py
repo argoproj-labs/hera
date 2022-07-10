@@ -15,7 +15,6 @@ from argo_workflows.models import HostAlias as ArgoHostAlias
 
 from hera import (
     CronWorkflow,
-    Variable,
     EmptyDirVolume,
     ExistingVolume,
     HostAlias,
@@ -24,6 +23,7 @@ from hera import (
     SecretVolume,
     Task,
     TTLStrategy,
+    Variable,
     Volume,
     WorkflowStatus,
 )

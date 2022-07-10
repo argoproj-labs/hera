@@ -1,24 +1,15 @@
-from dyno.clients.middleware.client_factory import generate_dynet_iap_oauth_token
-
-from hera import (
-    GlobalInputParameter,
-    Task,
-    Variable,
-    Workflow,
-    WorkflowService,
-    set_global_host,
-    set_global_token,
-)
-
-set_global_token(generate_dynet_iap_oauth_token().token)
-set_global_host('https://argo.dynet.ai')
+from hera import GlobalInputParameter, Task, Variable, Workflow, WorkflowService
 
 
 def foo(v):
     print(v)
 
 
-with Workflow('global-parameters', variables=[Variable('v', '42')]) as w:
+with Workflow(
+    'global-parameters',
+    service=WorkflowService(host='my-argo-server.com', token='my-token'),
+    variables=[Variable('v', '42')],
+) as w:
     Task('t', foo, inputs=[GlobalInputParameter('v', 'v')])
 
 w.create()

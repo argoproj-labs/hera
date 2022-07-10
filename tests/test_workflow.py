@@ -15,11 +15,11 @@ from hera import (
     Task,
     TemplateRef,
     TTLStrategy,
+    Variable,
     Volume,
     VolumeClaimGCStrategy,
     Workflow,
     WorkflowSecurityContext,
-    Variable,
     WorkflowStatus,
 )
 
