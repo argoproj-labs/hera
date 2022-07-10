@@ -27,19 +27,18 @@ def fanin(values: list):
     print(f'Received values: {values}!')
 
 
-# TODO: replace the domain and token with your own
-ws = WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-w = Workflow('dynamic-fanout', ws)
-generate_task = Task('generate', generate)
-fanout_task = Task(
-    'fanout',
-    fanout,
-    input_from=InputFrom('generate', ['value']),
-    outputs=[OutputPathParameter('fanout', '/tmp/number')],
-)
-fanin_task = Task('fanin', fanin, inputs=[MultiInput('values', fanout_task.name)])
+with Workflow(
+    'dynamic-fanout-fanin', service=WorkflowService(host='https://my-argo-server.com', token='my-auth-token')
+) as w:
+    generate_task = Task('generate', generate)
+    fanout_task = Task(
+        'fanout',
+        fanout,
+        input_from=InputFrom('generate', ['value']),
+        outputs=[OutputPathParameter('fanout', '/tmp/number')],
+    )
+    fanin_task = Task('fanin', fanin, inputs=[MultiInput('values', fanout_task.name)])
 
-generate_task >> fanout_task >> fanin_task
+    generate_task >> fanout_task >> fanin_task
 
-w.add_tasks(generate_task, fanout_task, fanin_task)
 w.create()

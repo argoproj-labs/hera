@@ -32,9 +32,8 @@ def test_wf_contains_specified_service_account(ws):
 
 
 def test_wf_does_not_contain_sa_if_one_is_not_specified(ws):
-    w = Workflow('w', service=ws)
-
-    assert not hasattr(w.spec, 'service_account_name')
+    with Workflow('w', service=ws) as w:
+        assert not hasattr(w.spec, 'service_account_name')
 
 
 @pytest.fixture
@@ -50,10 +49,9 @@ def workflow_security_context_kwargs():
 
 def test_wf_contains_specified_security_context(ws, workflow_security_context_kwargs):
     wsc = WorkflowSecurityContext(**workflow_security_context_kwargs)
-    w = Workflow('w', service=ws, security_context=wsc)
-
-    expected_security_context = PodSecurityContext(**workflow_security_context_kwargs)
-    assert w.spec.security_context == expected_security_context
+    with Workflow('w', service=ws, security_context=wsc) as w:
+        expected_security_context = PodSecurityContext(**workflow_security_context_kwargs)
+        assert w.spec.security_context == expected_security_context
 
 
 @pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "fs_group", "run_as_non_root"])
@@ -344,3 +342,24 @@ def test_wf_contains_expected_affinity(ws, affinity):
     assert w.affinity == affinity
     assert hasattr(w.template, 'affinity')
     assert hasattr(w.exit_template, 'affinity')
+
+
+def test_wf_raises_on_double_context(ws):
+    with Workflow('w', service=ws):
+        with pytest.raises(ValueError) as e:
+            with Workflow('w2', service=ws):
+                pass
+        assert 'Hera context already defined with workflow' in str(e.value)
+
+
+def test_wf_resets_context_indicator(ws):
+    with Workflow('w', service=ws) as w:
+        assert w.in_context
+    assert not w.in_context
+
+
+def test_wf_raises_on_create_in_context(ws):
+    with Workflow('w', service=ws) as w:
+        with pytest.raises(ValueError) as e:
+            w.create()
+        assert str(e.value) == 'Cannot invoke `create` when using a Hera context'

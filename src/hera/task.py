@@ -28,6 +28,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
+import hera
 from hera._task_input import _Item
 from hera.affinity import Affinity
 from hera.artifact import Artifact, OutputArtifact
@@ -211,6 +212,9 @@ class Task:
         self.argo_resources = self.get_resources()
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_spec()
+
+        if hera.context.workflow is not None:
+            hera.context.workflow.add_task(self)
 
     @property
     def ip(self):

@@ -9,6 +9,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+import hera
 from hera.affinity import Affinity
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
@@ -75,6 +76,7 @@ class WorkflowTemplate:
         self.ttl_strategy = ttl_strategy
         self.node_selector = node_selectors
         self.affinity = affinity
+        self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -125,6 +127,17 @@ class WorkflowTemplate:
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 
+    def __enter__(self) -> 'WorkflowTemplate':
+        self.in_context = True
+        if hera.context.workflow is not None:
+            raise ValueError(f'Hera context already defined with workflow: {hera.context.workflow}')
+        hera.context.workflow = self
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.in_context = False
+        hera.context.workflow = None
+
     def add_task(self, t: Task) -> None:
         add_task(self, t)
 
@@ -142,6 +155,8 @@ class WorkflowTemplate:
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""
+        if self.in_context:
+            raise ValueError('Cannot invoke `create` when using a Hera context')
         if namespace is None:
             namespace = self.namespace
         return self.service.create(self.workflow_template, namespace)
