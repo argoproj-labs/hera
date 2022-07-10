@@ -143,10 +143,9 @@ def say(message: str):
     print(message)
 
 
-ws = WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')
-w = Workflow('my-workflow', ws)
-t = Task('say', say, func_params=[{'message': 'Hello, world!'}])
-w.add_task(t)
+with Workflow('my-workflow', service=WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')) as w:
+    Task('say', say, func_params=[{'message': 'Hello, world!'}])
+
 w.create()
 ```
 
