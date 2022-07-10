@@ -86,6 +86,8 @@ class BucketArtifact(Artifact):
     path: str
         The path where to store the input artifact. Note that this path is isolated from the output artifact path
         of the previous task artifact.
+    bucket: str
+        The name of the bucket to fetch the artifact from.
     key: str
         Key of the artifact in the bucket.
 
@@ -94,6 +96,7 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact
     """
 
+    bucket: str
     key: str
 
 
@@ -102,7 +105,7 @@ class S3Artifact(BucketArtifact):
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            s3=IoArgoprojWorkflowV1alpha1S3Artifact(key=self.key),
+            s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket, key=self.key),
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -114,7 +117,7 @@ class GCSArtifact(BucketArtifact):
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(key=self.key),
+            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(bucket=self.bucket, key=self.key),
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:

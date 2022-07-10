@@ -433,10 +433,11 @@ def test_task_adds_s3_input_artifact():
 
 
 def test_task_adds_gcs_input_artifact():
-    t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", key="key")])
+    t = Task('t', input_artifacts=[GCSArtifact(name="n", path="/p", bucket='gs://my-bucket', key="key")])
 
     artifact = t.argo_inputs.artifacts[0]
     assert artifact.name == "n"
+    assert artifact.gcs.bucket == "gs://my-bucket"
     assert artifact.gcs.key == "key"
 
 
