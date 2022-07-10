@@ -221,14 +221,12 @@ class CronWorkflow:
 
     def __enter__(self) -> 'CronWorkflow':
         self.in_context = True
-        if hera.context.workflow is not None:
-            raise ValueError(f'Hera context already defined with cron workflow: {hera.context.workflow}')
-        hera.context.workflow = self
+        hera.context.set(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.in_context = False
-        hera.context.workflow = None
+        hera.context.reset()
 
     def add_task(self, t: Task) -> None:
         add_task(self, t)

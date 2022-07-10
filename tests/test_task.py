@@ -845,3 +845,11 @@ def test_task_raises_on_mixed_input_types():
     with pytest.raises(ValueError) as e:
         Task('t', inputs=[InputParameter('i1', 't', 'p'), InputFrom('i2', parameters=['t'])])
     assert str(e.value) == 'cannot use `InputFrom` along with other input types. Use `input_from` instead'
+
+
+def test_task_adds_exit_hook():
+    e = Task('e')
+    t = Task('t').on_exit(e)
+    assert t.exit_task == e
+    assert hasattr(t.argo_task, 'hooks')
+    assert getattr(t.argo_task, 'hooks').get('exit').template == 'e'
