@@ -183,7 +183,7 @@ class Workflow:
     def __enter__(self) -> 'Workflow':
         self.in_context = True
         if hera.context.workflow is not None:
-            raise ValueError(f'Hera context already defined with workflow: {hera.context.workflow.workflow}')
+            raise ValueError(f'Hera context already defined with workflow: {hera.context.workflow}')
         hera.context.workflow = self
         return self
 

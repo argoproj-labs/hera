@@ -17,6 +17,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+import hera
 from hera.affinity import Affinity
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
@@ -202,6 +203,17 @@ class CronWorkflow:
             ),
         )
 
+    def __enter__(self) -> 'CronWorkflow':
+        self.in_context = True
+        if hera.context.workflow is not None:
+            raise ValueError(f'Hera context already defined with cron workflow: {hera.context.workflow}')
+        hera.context.workflow = self
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.in_context = False
+        hera.context.workflow = None
+
     def add_task(self, t: Task) -> None:
         add_task(self, t)
 
@@ -219,6 +231,8 @@ class CronWorkflow:
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow in the server"""
+        if self.in_context:
+            raise ValueError('Cannot invoke `create` when using a Hera context')
         if namespace is None:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
