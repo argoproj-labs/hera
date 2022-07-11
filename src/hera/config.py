@@ -54,11 +54,11 @@ class Config:
         if host is not None:
             return host
 
-        tcp_addr = os.getenv('ARGO_SERVER_PORT_2746_TCP_ADDR', None)
-        assert tcp_addr is not None, 'A configuration/service host is required for submitting workflows'
+        tcp_addr = os.getenv("ARGO_SERVER_PORT_2746_TCP_ADDR", None)
+        assert tcp_addr is not None, "A configuration/service host is required for submitting workflows"
 
-        tcp_port = os.getenv('ARGO_SERVER_PORT_2746_TCP_PORT', None)
-        return f'https://{tcp_addr}:{tcp_port}' if tcp_port else f'https://{tcp_addr}'
+        tcp_port = os.getenv("ARGO_SERVER_PORT_2746_TCP_PORT", None)
+        return f"https://{tcp_addr}:{tcp_port}" if tcp_port else f"https://{tcp_addr}"
 
     def __get_config(self) -> ArgoConfig:
         """Assembles the Argo configuration.

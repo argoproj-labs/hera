@@ -11,14 +11,11 @@ def use_secret():
         print(f"Secret: {secret_file.readline()}")
 
 
-# TODO: replace the domain and token with your own
-ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
-w = Workflow('secret-volume', ws)
-d = Task(
-    'use_secret',
-    use_secret,
-    resources=Resources(volumes=[SecretVolume(secret_name='secret-file', mount_path='/secret/')]),
-)
+with Workflow("secret-volume", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
+    Task(
+        "use_secret",
+        use_secret,
+        resources=Resources(volumes=[SecretVolume(secret_name="secret-file", mount_path="/secret/")]),
+    )
 
-w.add_task(d)
 w.create()

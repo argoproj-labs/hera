@@ -38,7 +38,7 @@ class WorkflowService:
         host: Optional[str] = None,
         verify_ssl: bool = True,
         token: Optional[str] = None,
-        namespace: str = 'default',
+        namespace: str = "default",
     ):
         self._host = host
         self._verify_ssl = verify_ssl
@@ -47,7 +47,7 @@ class WorkflowService:
         self.service = WorkflowServiceApi(api_client=api_client)
 
     def create(
-        self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = 'default'
+        self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = "default"
     ) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the given workflow to the given namespace.
 
@@ -104,9 +104,9 @@ class WorkflowService:
         str
             The workflow link.
         """
-        return f'{self._host}/workflows/{self._namespace}/{name}?tab=workflow'
+        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
 
-    def get_workflow(self, name: str, namespace: str = 'default') -> IoArgoprojWorkflowV1alpha1Workflow:
+    def get_workflow(self, name: str, namespace: str = "default") -> IoArgoprojWorkflowV1alpha1Workflow:
         """Fetches a workflow by the specified name and namespace combination.
 
         Parameters
@@ -122,7 +122,7 @@ class WorkflowService:
         """
         return self.service.get_workflow(namespace, name, _check_return_type=False)
 
-    def get_workflow_status(self, name: str, namespace: str = 'default') -> WorkflowStatus:
+    def get_workflow_status(self, name: str, namespace: str = "default") -> WorkflowStatus:
         """Returns the workflow status of the workflow identified by the specified name.
 
         Parameters
@@ -136,5 +136,5 @@ class WorkflowService:
         -------
         WorkflowStatus
         """
-        argo_status = self.get_workflow(name, namespace=namespace).status.get('phase')
+        argo_status = self.get_workflow(name, namespace=namespace).status.get("phase")
         return WorkflowStatus.from_argo_status(argo_status)

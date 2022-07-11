@@ -4,12 +4,15 @@ from hera import CronWorkflow, CronWorkflowService, Task
 
 
 def hello():
-    print('Hello, Hera!')
+    print("Hello, Hera!")
 
 
-# TODO: replace the domain and token with your own
-cws = CronWorkflowService(host='https://my-argo-server.com', token='my-auth-token')
-cw = CronWorkflow('hello-hera-cron', "5 4 * * *", cws, timezone="UTC")
-t = Task('t', hello)
-cw.add_task(t)
+with CronWorkflow(
+    "hello-hera-cron",
+    "5 4 * * *",
+    service=CronWorkflowService(host="https://my-argo-server.com", token="my-auth-token"),
+    timezone="UTC",
+) as cw:
+    Task("t", hello)
+
 cw.create()

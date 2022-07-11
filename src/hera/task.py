@@ -15,6 +15,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1LifecycleHook,
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1Outputs,
     IoArgoprojWorkflowV1alpha1Parameter,
@@ -28,6 +29,7 @@ from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
 from pydantic import BaseModel
 
+import hera
 from hera._task_input import _Item
 from hera.affinity import Affinity
 from hera.artifact import Artifact, OutputArtifact
@@ -149,7 +151,7 @@ class Task:
         outputs: Optional[List[Output]] = None,
         input_artifacts: Optional[List[Artifact]] = None,
         output_artifacts: Optional[List[OutputArtifact]] = None,
-        image: str = 'python:3.7',
+        image: str = "python:3.7",
         image_pull_policy: Optional[ImagePullPolicy] = ImagePullPolicy.Always,
         daemon: bool = False,
         command: Optional[List[str]] = None,
@@ -203,6 +205,7 @@ class Task:
         self.continue_on_error = continue_on_error
         self.template_ref = template_ref
         self.affinity = affinity
+        self.exit_task: Optional[Task] = None
 
         self.argo_parameters = self.get_parameters()
         self.argo_arguments = self.get_arguments()
@@ -212,11 +215,14 @@ class Task:
         self.argo_template = self.get_task_template()
         self.argo_task = self.get_spec()
 
+        if hera.context.is_set():
+            hera.context.add_task(self)
+
     @property
     def ip(self):
-        return f"\"{{{{tasks.{self.name}.ip}}}}\""
+        return f'"{{{{tasks.{self.name}.ip}}}}"'
 
-    def next(self, other: 'Task') -> 'Task':
+    def next(self, other: "Task") -> "Task":
         """Sets this task as a dependency of the other passed task.
 
         Parameters
@@ -236,14 +242,14 @@ class Task:
         """
         assert issubclass(other.__class__, Task)
 
-        if hasattr(other.argo_task, 'depends'):
+        if hasattr(other.argo_task, "depends"):
             if self.argo_task.name in other.argo_task.depends:
                 return other
-            other.argo_task.depends += f' && {self.argo_task.name}'
+            other.argo_task.depends += f" && {self.argo_task.name}"
             return other
 
-        if not hasattr(other.argo_task, 'dependencies'):
-            setattr(other.argo_task, 'dependencies', [self.argo_task.name])
+        if not hasattr(other.argo_task, "dependencies"):
+            setattr(other.argo_task, "dependencies", [self.argo_task.name])
         else:
             if self.argo_task.name in other.argo_task.dependencies:
                 # already a dependency
@@ -251,7 +257,7 @@ class Task:
             other.argo_task.dependencies.append(self.argo_task.name)
         return other
 
-    def __rshift__(self, other: 'Task') -> 'Task':
+    def __rshift__(self, other: "Task") -> "Task":
         """Sets this task as a dependency of the other passed task.
 
         Parameters
@@ -272,7 +278,7 @@ class Task:
         """
         return self.next(other)
 
-    def when(self, other: 'Task', operator: Operator, value: str) -> 'Task':
+    def when(self, other: "Task", operator: Operator, value: str) -> "Task":
         """Sets this task as a dependency of the other passed task if the condition match.
 
         Parameters
@@ -291,46 +297,53 @@ class Task:
         t2.when(t1, Operator.equals, "t2")
         t3.when(t1, Operator.equals, "t3")
         """
-        self.argo_task.when = f'{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}'
+        self.argo_task.when = f"{{{{tasks.{other.name}.outputs.result}}}} {operator.value} {value}"
         return other.next(self)
 
-    def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> 'Task':
+    def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> "Task":
         """Execute this task conditionally on a workflow status."""
-        self.argo_task.when = f'{{{{workflow.status}}}} {op.value} {status.value}'
+        self.argo_task.when = f"{{{{workflow.status}}}} {op.value} {status.value}"
         return self
 
-    def on_success(self, other: 'Task') -> 'Task':
+    def on_success(self, other: "Task") -> "Task":
         """Execute `other` when this task succeeds"""
-        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Succeeded'
+        other.argo_task.when = f"{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Succeeded"
         return self.next(other)
 
-    def on_failure(self, other: 'Task') -> 'Task':
+    def on_failure(self, other: "Task") -> "Task":
         """Execute `other` when this task fails. This forces `continue_on_fail` to be True"""
         self.continue_on_fail = True
-        if hasattr(self.argo_task, 'continue_on'):
-            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
-            setattr(continue_on, 'failed', True)
-            setattr(self.argo_task, 'continue_on', continue_on)
+        if hasattr(self.argo_task, "continue_on"):
+            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, "continue_on")
+            setattr(continue_on, "failed", True)
+            setattr(self.argo_task, "continue_on", continue_on)
         else:
-            setattr(self.argo_task, 'continue_on', self.get_continue_on())
+            setattr(self.argo_task, "continue_on", self.get_continue_on())
 
-        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Failed'
+        other.argo_task.when = f"{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Failed"
         return self.next(other)
 
-    def on_error(self, other: 'Task') -> 'Task':
+    def on_error(self, other: "Task") -> "Task":
         """Execute `other` when this task errors. This forces `continue_on_error` to be True"""
         self.continue_on_error = True
-        if hasattr(self.argo_task, 'continue_on'):
-            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, 'continue_on')
-            setattr(continue_on, 'error', True)
-            setattr(self.argo_task, 'continue_on', continue_on)
+        if hasattr(self.argo_task, "continue_on"):
+            continue_on: IoArgoprojWorkflowV1alpha1ContinueOn = getattr(self.argo_task, "continue_on")
+            setattr(continue_on, "error", True)
+            setattr(self.argo_task, "continue_on", continue_on)
         else:
-            setattr(self.argo_task, 'continue_on', self.get_continue_on())
+            setattr(self.argo_task, "continue_on", self.get_continue_on())
 
-        other.argo_task.when = f'{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error'
+        other.argo_task.when = f"{{{{tasks.{self.name}.status}}}} {Operator.equals.value} Error"
         return self.next(other)
 
-    def when_any_succeeded(self, other: 'Task') -> 'Task':
+    def on_exit(self, other: "Task") -> "Task":
+        """Execute `other` on completion (exit) of this Task."""
+        self.exit_task = other
+        exit_hook = {"exit": IoArgoprojWorkflowV1alpha1LifecycleHook(template=other.argo_template.name)}
+        setattr(self.argo_task, "hooks", exit_hook)
+        return self
+
+    def when_any_succeeded(self, other: "Task") -> "Task":
         """Sets the other task to execute when any of the tasks of this task group have succeeded.
 
         Parameters
@@ -354,38 +367,38 @@ class Task:
         --------
         https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
-        assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
-            'Can only use `when_any_succeeded` for tasks with more than 1 item, which happens '
-            'with multiple `func_params or setting `input_from`'
+        assert hasattr(self.argo_task, "with_items") or self.input_from is not None, (
+            "Can only use `when_any_succeeded` for tasks with more than 1 item, which happens "
+            "with multiple `func_params or setting `input_from`"
         )
         assert (
             not other.continue_on_fail and not other.continue_on_error
-        ), 'The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`'
+        ), "The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`"
 
-        if hasattr(other.argo_task, 'depends'):
+        if hasattr(other.argo_task, "depends"):
             depends = other.argo_task.depends
-        elif hasattr(other.argo_task, 'dependencies'):
+        elif hasattr(other.argo_task, "dependencies"):
             depends = _dependencies_to_depends(other.argo_task.dependencies)
         else:
-            depends = ''
+            depends = ""
 
-        if f'{self.name}.AnySucceeded' in depends:
+        if f"{self.name}.AnySucceeded" in depends:
             return self
 
         if depends:
-            depends += f' && {self.name}.AnySucceeded'
+            depends += f" && {self.name}.AnySucceeded"
         else:
-            depends = f'{self.name}.AnySucceeded'
+            depends = f"{self.name}.AnySucceeded"
 
-        if hasattr(other.argo_task, 'dependencies'):
+        if hasattr(other.argo_task, "dependencies"):
             # calling delattr(other.argo_task, 'dependencies') results in AttributeError
             # so recreate the argo task field
             self.argo_task = self.get_spec()
-        setattr(other.argo_task, 'depends', depends)
+        setattr(other.argo_task, "depends", depends)
 
         return self
 
-    def when_all_failed(self, other: 'Task') -> 'Task':
+    def when_all_failed(self, other: "Task") -> "Task":
         """Sets the other task to execute when all the tasks of this task group have failed
 
         Parameters
@@ -409,34 +422,34 @@ class Task:
         --------
         https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
-        assert hasattr(self.argo_task, 'with_items') or self.input_from is not None, (
-            'Can only use `when_all_failed` for tasks with more than 1 item, which happens '
-            'with multiple `func_params or setting `input_from`'
+        assert hasattr(self.argo_task, "with_items") or self.input_from is not None, (
+            "Can only use `when_all_failed` for tasks with more than 1 item, which happens "
+            "with multiple `func_params or setting `input_from`"
         )
         assert (
             not other.continue_on_fail and not other.continue_on_error
-        ), 'The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`'
+        ), "The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`"
 
-        if hasattr(other.argo_task, 'depends'):
+        if hasattr(other.argo_task, "depends"):
             depends = other.argo_task.depends
-        elif hasattr(other.argo_task, 'dependencies'):
+        elif hasattr(other.argo_task, "dependencies"):
             depends = _dependencies_to_depends(other.argo_task.dependencies)
         else:
-            depends = ''
+            depends = ""
 
-        if f'{self.name}.AllFailed' in depends:
+        if f"{self.name}.AllFailed" in depends:
             return self
 
         if depends:
-            depends += f' && {self.name}.AllFailed'
+            depends += f" && {self.name}.AllFailed"
         else:
-            depends = f'{self.name}.AllFailed'
+            depends = f"{self.name}.AllFailed"
 
-        if hasattr(other.argo_task, 'dependencies'):
+        if hasattr(other.argo_task, "dependencies"):
             # calling delattr(other.argo_task, 'dependencies') results in AttributeError
             # so recreate the argo task field
             self.argo_task = self.get_spec()
-        setattr(other.argo_task, 'depends', depends)
+        setattr(other.argo_task, "depends", depends)
 
         return self
 
@@ -449,15 +462,15 @@ class Task:
         if self.input_artifacts:
             assert len(set([i.name for i in self.input_artifacts])) == len(
                 self.input_artifacts
-            ), 'input artifact names must be unique'
+            ), "input artifact names must be unique"
         if self.output_artifacts:
             assert len(set([i.name for i in self.output_artifacts])) == len(
                 self.output_artifacts
-            ), 'output artifact names must be unique'
+            ), "output artifact names must be unique"
         if self.inputs:
-            assert len(set([i.name for i in self.inputs])) == len(self.inputs), 'input parameters must be unique'
+            assert len(set([i.name for i in self.inputs])) == len(self.inputs), "input parameters must be unique"
         if self.outputs:
-            assert len(set([o.name for o in self.outputs])) == len(self.outputs), 'output parameters must be unique'
+            assert len(set([o.name for o in self.outputs])) == len(self.outputs), "output parameters must be unique"
 
         if self.func:
             self._validate_func()
@@ -466,20 +479,18 @@ class Task:
         args = set(inspect.getfullargspec(self.func).args)
         if args:
             if self.input_from:
-                assert self.input_artifacts == [], 'cannot supply both InputFrom and Artifacts'
-
                 # input_from denotes the task will receive input from another step. This leaves it up to the
                 # client to set up the proper output in a previous task
                 if self.func_params:
                     # only single func params are allowed if they are specified along with input_from
                     assert (
                         len(self.func_params) == 1
-                    ), 'only single function parameters are allowed when specified together with input_from'
+                    ), "only single function parameters are allowed when specified together with input_from"
                 pass
             elif self.inputs:
                 assert args.issuperset(
                     set([i.name for i in self.inputs])
-                ), 'function parameters must intersect with at least one `Input` when `inputs` is specified'
+                ), "function parameters must intersect with at least one `Input` when `inputs` is specified"
             else:
                 signature = inspect.signature(self.func)
                 keywords = []
@@ -495,13 +506,13 @@ class Task:
                     pass  # these are all kwargs, safe to skip
                 else:
                     # otherwise, it must be the case that the client passes func_params
-                    assert self.func_params, 'no parameters passed for function'
+                    assert self.func_params, "no parameters passed for function"
 
             if self.memoize:
-                assert self.memoize.key in args, 'memoize key must be a parameter of the function'
+                assert self.memoize.key in args, "memoize key must be a parameter of the function"
         if self.func_params:
             for params in self.func_params:
-                assert args.issuperset(set(params.keys())), 'mismatched function arguments and passed parameters'
+                assert args.issuperset(set(params.keys())), "mismatched function arguments and passed parameters"
 
     def get_arguments(self) -> IoArgoprojWorkflowV1alpha1Arguments:
         """Assembles and returns the task arguments"""
@@ -613,14 +624,14 @@ class Task:
                 # that come in from other tasks
                 args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
                 for arg in args:
-                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f'{{{{item.{arg}}}}}'))
+                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f"{{{{item.{arg}}}}}"))
             else:
                 parameters.extend(self.input_from.get_spec())
 
         if self.inputs:
             for input_ in self.inputs:
                 if isinstance(input_, InputFrom) and len(self.inputs) > 1:
-                    raise ValueError('cannot use `InputFrom` along with other input types. Use `input_from` instead')
+                    raise ValueError("cannot use `InputFrom` along with other input types. Use `input_from` instead")
                 parameters.append(input_.get_spec())
 
         if self.variables:
@@ -670,7 +681,7 @@ class Task:
                 # first series of params to item.param_name since the keys are all the same for the func_params
                 for param_name in self.func_params[0].keys():
                     parameters.append(
-                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f'{{{{item.{param_name}}}}}')
+                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f"{{{{item.{param_name}}}}}")
                     )
                     param_name_cache.add(param_name)
         for name, value in keywords:
@@ -715,16 +726,16 @@ class Task:
         str
             Final formatted script.
         """
-        script = ''
+        script = ""
         script_extra = self.get_param_script_portion() if inspect.getfullargspec(self.func).args else None
         if script_extra:
             script = copy.deepcopy(script_extra)
-            script += '\n'
+            script += "\n"
 
         # content represents the function components, separated by new lines
         # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
         content = inspect.getsourcelines(self.func)[0]
-        token_index, start_token = 1, ':\n'
+        token_index, start_token = 1, ":\n"
         for curr_index, curr_token in enumerate(content):
             if start_token in curr_token:
                 # when we find the curr token we find the end of the function header. The next index is the
@@ -750,12 +761,12 @@ class Task:
 
         resource = ResourceRequirements(
             requests={
-                'cpu': str(self.resources.min_cpu),
-                'memory': self.resources.min_mem,
+                "cpu": str(self.resources.min_cpu),
+                "memory": self.resources.min_mem,
             },
             limits={
-                'cpu': str(self.resources.max_cpu) if max_cpu else str(self.resources.min_cpu),
-                'memory': self.resources.max_mem if max_mem else self.resources.min_mem,
+                "cpu": str(self.resources.max_cpu) if max_cpu else str(self.resources.min_cpu),
+                "memory": self.resources.max_mem if max_mem else self.resources.min_mem,
             },
         )
 
@@ -768,8 +779,8 @@ class Task:
             resource.limits.update(**self.resources.min_custom_resources)
 
         if self.resources.gpus:
-            resource.requests['nvidia.com/gpu'] = str(self.resources.gpus)
-            resource.limits['nvidia.com/gpu'] = str(self.resources.gpus)
+            resource.requests["nvidia.com/gpu"] = str(self.resources.gpus)
+            resource.limits["nvidia.com/gpu"] = str(self.resources.gpus)
         return resource
 
     def get_parallel_items(self) -> List[_Item]:
@@ -892,24 +903,24 @@ class Task:
             metadata=IoArgoprojWorkflowV1alpha1Metadata(labels=self.labels, annotations=self.annotations),
         )
         if self.node_selector:
-            setattr(template, 'node_selector', self.node_selector)
+            setattr(template, "node_selector", self.node_selector)
 
         retry_strategy = self.get_retry_strategy()
         if retry_strategy:
-            setattr(template, 'retry_strategy', retry_strategy)
+            setattr(template, "retry_strategy", retry_strategy)
 
         script_def = self.get_script_def()
         if script_def:
-            setattr(template, 'script', self.get_script_def())
+            setattr(template, "script", self.get_script_def())
         else:
-            setattr(template, 'container', self.get_container())
+            setattr(template, "container", self.get_container())
 
         affinity = self.affinity.get_spec() if self.affinity else None
         if affinity is not None:
-            setattr(template, 'affinity', affinity)
+            setattr(template, "affinity", affinity)
 
         if self.memoize:
-            setattr(template, 'memoize', self.memoize.get_spec())
+            setattr(template, "memoize", self.memoize.get_spec())
 
         return template
 
@@ -926,15 +937,15 @@ class Task:
             if self.retry.duration is not None and self.retry.max_duration is not None:
                 setattr(
                     strategy,
-                    'backoff',
+                    "backoff",
                     IoArgoprojWorkflowV1alpha1Backoff(
                         duration=str(self.retry.duration), max_duration=str(self.retry.max_duration)
                     ),
                 )
             if self.retry.limit is not None:
-                setattr(strategy, 'limit', str(self.retry.limit))
+                setattr(strategy, "limit", str(self.retry.limit))
             if self.retry.retry_policy is not None:
-                setattr(strategy, 'retry_policy', str(self.retry.retry_policy.value))
+                setattr(strategy, "retry_policy", str(self.retry.retry_policy.value))
 
             return strategy
         return None
@@ -984,25 +995,25 @@ class Task:
             _check_type=False,
         )
         if self.continue_on_error or self.continue_on_fail:
-            setattr(task, 'continue_on', self.get_continue_on())
+            setattr(task, "continue_on", self.get_continue_on())
 
         if self.template_ref:
-            setattr(task, 'template_ref', self.template_ref.argo_spec)
+            setattr(task, "template_ref", self.template_ref.argo_spec)
         else:
-            setattr(task, 'template', self.argo_template.name)
+            setattr(task, "template", self.argo_template.name)
 
         if self.input_from:
-            setattr(task, 'with_param', f'{{{{tasks.{self.input_from.name}.outputs.result}}}}')
+            setattr(task, "with_param", f"{{{{tasks.{self.input_from.name}.outputs.result}}}}")
         elif self.func_params and len(self.func_params) > 1:
             items = self.get_parallel_items()
-            setattr(task, 'with_items', items)
+            setattr(task, "with_items", items)
         return task
 
 
 def _dependencies_to_depends(dependencies: List[str]) -> str:
     if not dependencies or len(dependencies) == 0:
-        return ''
-    depends = f'{dependencies[0]}'
+        return ""
+    depends = f"{dependencies[0]}"
     for dep in dependencies[1:]:
-        depends += f' && {dep}'
+        depends += f" && {dep}"
     return depends

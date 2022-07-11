@@ -34,8 +34,8 @@ class Client:
 
         self._client = ArgoApiClient(
             configuration=config.config,
-            header_name='Authorization',
-            header_value=f'Bearer {token}',
+            header_name="Authorization",
+            header_value=f"Bearer {token}",
         )
 
     @property

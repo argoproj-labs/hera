@@ -43,7 +43,7 @@ class Resources(BaseModel):
     """
 
     min_cpu: Union[int, float] = 1
-    min_mem: str = '4Gi'
+    min_mem: str = "4Gi"
     min_custom_resources: Optional[Dict[str, str]] = None
 
     max_cpu: Optional[Union[int, float]] = None
@@ -56,13 +56,13 @@ class Resources(BaseModel):
 
     overwrite_maxs: bool = True
 
-    @validator('min_mem', 'max_mem')
+    @validator("min_mem", "max_mem")
     def valid_units(cls, value):
         """Validates that memory specifications have correct units"""
         validate_storage_units(value)
         return value
 
-    @validator('volumes')
+    @validator("volumes")
     def valid_volume_frequencies(cls, value):
         """Validates that a single EmptyDir volume is specified (K8S limitation)"""
         freqs: Dict[str, int] = {}
@@ -81,14 +81,14 @@ class Resources(BaseModel):
     @root_validator
     def valid_values(cls, values):
         """Validates that cpu values are valid"""
-        assert values['min_cpu'] >= 0, 'cannot specify a negative value for the min CPU field'
+        assert values["min_cpu"] >= 0, "cannot specify a negative value for the min CPU field"
 
-        if values.get('max_cpu') is None and values['overwrite_maxs']:
-            values['max_cpu'] = values.get('min_cpu')
+        if values.get("max_cpu") is None and values["overwrite_maxs"]:
+            values["max_cpu"] = values.get("min_cpu")
 
-        if 'max_cpu' in values and values.get('max_cpu'):
-            assert values['min_cpu'] <= values['max_cpu'], 'cannot specify a min CPU value smaller than max CPU'
+        if "max_cpu" in values and values.get("max_cpu"):
+            assert values["min_cpu"] <= values["max_cpu"], "cannot specify a min CPU value smaller than max CPU"
 
-        if values.get('max_mem') is None and values['overwrite_maxs']:
-            values['max_mem'] = values.get('min_mem')
+        if values.get("max_mem") is None and values["overwrite_maxs"]:
+            values["max_mem"] = values.get("min_mem")
         return values

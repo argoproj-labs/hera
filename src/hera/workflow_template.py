@@ -9,6 +9,7 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+import hera
 from hera.affinity import Affinity
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
@@ -66,7 +67,7 @@ class WorkflowTemplate:
         affinity: Optional[Affinity] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
-        self.namespace = namespace or 'default'
+        self.namespace = namespace or "default"
         self.service = service or WorkflowTemplateService()
         self.parallelism = parallelism
         self.security_context = security_context
@@ -75,10 +76,11 @@ class WorkflowTemplate:
         self.ttl_strategy = ttl_strategy
         self.node_selector = node_selectors
         self.affinity = affinity
+        self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
-            name='exit-template',
+            name="exit-template",
             steps=[],
             dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
             parallelism=self.parallelism,
@@ -100,30 +102,39 @@ class WorkflowTemplate:
         )
 
         if self.ttl_strategy:
-            setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
+            setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)
 
         if self.security_context:
             security_context = self.security_context.get_security_context()
-            setattr(self.spec, 'security_context', security_context)
+            setattr(self.spec, "security_context", security_context)
 
         if self.service_account_name:
-            setattr(self.template, 'service_account_name', self.service_account_name)
-            setattr(self.spec, 'service_account_name', self.service_account_name)
+            setattr(self.template, "service_account_name", self.service_account_name)
+            setattr(self.spec, "service_account_name", self.service_account_name)
 
         if self.affinity:
-            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
-            setattr(self.template, 'affinity', self.affinity.get_spec())
+            setattr(self.exit_template, "affinity", self.affinity.get_spec())
+            setattr(self.template, "affinity", self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
-            setattr(self.metadata, 'labels', self.labels)
+            setattr(self.metadata, "labels", self.labels)
 
         if self.node_selector:
-            setattr(self.dag_template, 'node_selector', self.node_selector)
-            setattr(self.template, 'node_selector', self.node_selector)
-            setattr(self.exit_template, 'node_selector', self.node_selector)
+            setattr(self.dag_template, "node_selector", self.node_selector)
+            setattr(self.template, "node_selector", self.node_selector)
+            setattr(self.exit_template, "node_selector", self.node_selector)
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
+
+    def __enter__(self) -> "WorkflowTemplate":
+        self.in_context = True
+        hera.context.set(self)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.in_context = False
+        hera.context.reset()
 
     def add_task(self, t: Task) -> None:
         add_task(self, t)
@@ -142,6 +153,8 @@ class WorkflowTemplate:
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""
+        if self.in_context:
+            raise ValueError("Cannot invoke `create` when using a Hera context")
         if namespace is None:
             namespace = self.namespace
         return self.service.create(self.workflow_template, namespace)

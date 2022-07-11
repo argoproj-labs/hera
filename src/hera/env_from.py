@@ -11,7 +11,7 @@ class BaseEnvFromSpec(BaseModel):
         An optional identifier to prepend to each key in the specified resources.
     """
 
-    prefix: str = ''
+    prefix: str = ""
 
     @property
     def argo_spec(self) -> EnvFromSource:
