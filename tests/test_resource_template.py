@@ -7,17 +7,17 @@ from hera import ResourceTemplate
 
 @pytest.fixture
 def action():
-    yield 'create'
+    yield "create"
 
 
 @pytest.fixture
 def failure_condition():
-    yield 'status,phase in (Failed, Error)'
+    yield "status,phase in (Failed, Error)"
 
 
 @pytest.fixture
 def success_condition():
-    yield 'status.phase == Succeeded'
+    yield "status.phase == Succeeded"
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def manifest():
 
 @pytest.fixture
 def merge_strategy():
-    yield 'strategic'
+    yield "strategic"
 
 
 @pytest.fixture

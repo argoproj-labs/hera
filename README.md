@@ -21,7 +21,6 @@ and its crew were specially protected by the goddess Hera.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo
 Workflows more accessible by abstracting away some setup that is typically necessary for constructing workflows.
 
@@ -135,18 +134,14 @@ A very primitive example of submitting a task within a workflow through Hera is:
 ```python
 from hera import Task, Workflow, WorkflowService
 
+
 def say(message: str):
-    """
-    This can be anything as long as the Docker image satisfies the dependencies. You can import anything Python
-    that is in your container e.g torch, tensorflow, scipy, biopython, etc - just provide an image to the task!
-    """
     print(message)
 
 
-ws = WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')
-w = Workflow('my-workflow', ws)
-t = Task('say', say, func_params=[{'message': 'Hello, world!'}])
-w.add_task(t)
+with Workflow('my-workflow', service=WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')) as w:
+    Task('say', say, func_params=[{'message': 'Hello, world!'}])
+
 w.create()
 ```
 
@@ -180,21 +175,19 @@ executable payloads rather than workflow setup. Here's a side by side comparison
 ```python
 from hera import Task, Workflow, WorkflowService
 
+
 def say(message: str):
     print(message)
 
 
-ws = WorkflowService(host='my-argo-server.com', token='my-auth-token')
-w = Workflow('diamond', ws)
-a = Task('A', say, func_params=[{'message': 'This is task A!'}])
-b = Task('B', say, func_params=[{'message': 'This is task B!'}])
-c = Task('C', say, func_params=[{'message': 'This is task C!'}])
-d = Task('D', say, func_params=[{'message': 'This is task D!'}])
+with Workflow('diamond', WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
+    a = Task('A', say, func_params=[{'message': 'This is task A!'}])
+    b = Task('B', say, func_params=[{'message': 'This is task B!'}])
+    c = Task('C', say, func_params=[{'message': 'This is task C!'}])
+    d = Task('D', say, func_params=[{'message': 'This is task D!'}])
+    a >> b >> d
+    a >> c >> d
 
-a >> b >> d
-a >> c >> d
-
-w.add_tasks(a, b, c, d)
 w.create()
 ```
 

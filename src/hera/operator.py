@@ -11,9 +11,9 @@ class Operator(Enum):
     The task that outputs its result needs to do so using stdout. See `examples` for a sample workflow.
     """
 
-    equals = '=='
-    greater = '>'
-    less = '<'
-    greater_equal = '>='
-    less_equal = '<='
-    not_equal = '!='
+    equals = "=="
+    greater = ">"
+    less = "<"
+    greater_equal = ">="
+    less_equal = "<="
+    not_equal = "!="

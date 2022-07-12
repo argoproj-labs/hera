@@ -4,12 +4,12 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
+    IoArgoprojWorkflowV1alpha1HTTPArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
 )
-from pydantic import BaseModel
 
 
-class Artifact(BaseModel):
+class Artifact:
     """An artifact represents an object that Argo creates for a specific task's output.
 
     The output of a task payload can store specific results at a path, which can then be consumed by
@@ -29,8 +29,9 @@ class Artifact(BaseModel):
     Don't use this directly. Use OutputArtifact, InputArtifact, etc.
     """
 
-    name: str
-    path: str
+    def __init__(self, name: str, path: str) -> None:
+        self.name = name
+        self.path = path
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
@@ -65,13 +66,18 @@ class InputArtifact(Artifact):
         Name of the artifact to consume from the previous task.
     """
 
-    from_task: str
-    artifact_name: str
+    def __init__(self, name: str, path: str, from_task: str, artifact_name: str) -> None:
+        self.from_task = from_task
+        self.artifact_name = artifact_name
+        super(InputArtifact, self).__init__(name, path)
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
         from_ = f"{{{{tasks.{self.from_task}.outputs.artifacts.{self.artifact_name}}}}}"
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=from_)
+
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return self.get_spec()
 
 
 class BucketArtifact(Artifact):
@@ -86,6 +92,8 @@ class BucketArtifact(Artifact):
     path: str
         The path where to store the input artifact. Note that this path is isolated from the output artifact path
         of the previous task artifact.
+    bucket: str
+        The name of the bucket to fetch the artifact from.
     key: str
         Key of the artifact in the bucket.
 
@@ -94,7 +102,10 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact
     """
 
-    key: str
+    def __init__(self, name: str, path: str, bucket: str, key: str) -> None:
+        self.bucket = bucket
+        self.key = key
+        super(BucketArtifact, self).__init__(name, path)
 
 
 class S3Artifact(BucketArtifact):
@@ -102,7 +113,7 @@ class S3Artifact(BucketArtifact):
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            s3=IoArgoprojWorkflowV1alpha1S3Artifact(key=self.key),
+            s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket, key=self.key),
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -114,7 +125,7 @@ class GCSArtifact(BucketArtifact):
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(key=self.key),
+            gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(bucket=self.bucket, key=self.key),
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -125,11 +136,34 @@ class GitArtifact(Artifact):
     repo: str
     revision: Optional[str]
 
+    def __init__(self, name: str, path: str, repo: str, revision: str) -> None:
+        self.repo = repo
+        self.revision = revision
+        super(GitArtifact, self).__init__(name, path)
+
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
             git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo, revision=self.revision),
+        )
+
+    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return self.get_spec()
+
+
+class HttpArtifact(Artifact):
+    url: str
+
+    def __init__(self, name: str, path: str, url: str) -> None:
+        self.url = url
+        super(HttpArtifact, self).__init__(name, path)
+
+    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        return IoArgoprojWorkflowV1alpha1Artifact(
+            name=self.name,
+            path=self.path,
+            http=IoArgoprojWorkflowV1alpha1HTTPArtifact(url=self.url),
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:

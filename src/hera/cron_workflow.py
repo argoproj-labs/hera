@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 
 import pytz
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1CronWorkflow,
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
     IoArgoprojWorkflowV1alpha1CronWorkflowStatus,
@@ -17,12 +18,14 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+import hera
 from hera.affinity import Affinity
 from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
+from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 
@@ -74,8 +77,10 @@ class CronWorkflow:
         requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
-        affinity: Optional[Affinity] = None
+    affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
+    variables: Optional[List[Variable]] = None
+        A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
     """
 
     def __init__(
@@ -97,9 +102,10 @@ class CronWorkflow:
         host_aliases: Optional[List[HostAlias]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
+        variables: Optional[List[Variable]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
-            raise ValueError(f'{timezone} is not a valid timezone')
+            raise ValueError(f"{timezone} is not a valid timezone")
 
         self.name = name.replace("_", "-")
         self.schedule = schedule
@@ -116,10 +122,12 @@ class CronWorkflow:
         self.node_selector = node_selectors
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
+        self.variables = variables
+        self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
-            name='exit-template',
+            name="exit-template",
             steps=[],
             dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
             parallelism=self.parallelism,
@@ -151,48 +159,57 @@ class CronWorkflow:
             )
 
         if self.ttl_strategy:
-            setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
+            setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)
 
         if volume_claim_gc_strategy:
             setattr(
                 self.spec,
-                'volume_claim_gc',
+                "volume_claim_gc",
                 IoArgoprojWorkflowV1alpha1VolumeClaimGC(strategy=volume_claim_gc_strategy.value),
             )
 
         if host_aliases:
-            setattr(self.spec, 'host_aliases', [h.argo_host_alias for h in host_aliases])
+            setattr(self.spec, "host_aliases", [h.argo_host_alias for h in host_aliases])
 
         if self.service_account_name:
-            setattr(self.template, 'service_account_name', self.service_account_name)
-            setattr(self.spec, 'service_account_name', self.service_account_name)
+            setattr(self.template, "service_account_name", self.service_account_name)
+            setattr(self.spec, "service_account_name", self.service_account_name)
 
         if self.security_context:
             security_context = self.security_context.get_security_context()
-            setattr(self.spec, 'security_context', security_context)
+            setattr(self.spec, "security_context", security_context)
 
         if self.image_pull_secrets:
             secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
-            setattr(self.spec, 'image_pull_secrets', secret_refs)
+            setattr(self.spec, "image_pull_secrets", secret_refs)
 
         self.cron_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(schedule=self.schedule, workflow_spec=self.spec)
         if self.timezone:
-            setattr(self.cron_spec, 'timezone', self.timezone)
+            setattr(self.cron_spec, "timezone", self.timezone)
 
         if self.affinity:
-            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
-            setattr(self.template, 'affinity', self.affinity.get_spec())
+            setattr(self.exit_template, "affinity", self.affinity.get_spec())
+            setattr(self.template, "affinity", self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
-            setattr(self.metadata, 'labels', self.labels)
+            setattr(self.metadata, "labels", self.labels)
         if self.annotations:
-            setattr(self.metadata, 'annotations', self.annotations)
+            setattr(self.metadata, "annotations", self.annotations)
 
         if self.node_selector:
-            setattr(self.dag_template, 'node_selector', self.node_selector)
-            setattr(self.template, 'node_selector', self.node_selector)
-            setattr(self.exit_template, 'node_selector', self.node_selector)
+            setattr(self.dag_template, "node_selector", self.node_selector)
+            setattr(self.template, "node_selector", self.node_selector)
+            setattr(self.exit_template, "node_selector", self.node_selector)
+
+        if self.variables:
+            setattr(
+                self.spec,
+                "arguments",
+                IoArgoprojWorkflowV1alpha1Arguments(
+                    parameters=[variable.get_argument_parameter() for variable in self.variables],
+                ),
+            )
 
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,
@@ -201,6 +218,15 @@ class CronWorkflow:
                 active=[], conditions=[], last_scheduled_time=datetime.now(tz.utc)
             ),
         )
+
+    def __enter__(self) -> "CronWorkflow":
+        self.in_context = True
+        hera.context.set(self)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.in_context = False
+        hera.context.reset()
 
     def add_task(self, t: Task) -> None:
         add_task(self, t)
@@ -219,6 +245,8 @@ class CronWorkflow:
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow in the server"""
+        if self.in_context:
+            raise ValueError("Cannot invoke `create` when using a Hera context")
         if namespace is None:
             namespace = self.namespace
         return self.service.create(self.workflow, namespace)
@@ -234,8 +262,8 @@ class CronWorkflow:
 
         # When update cron_workflow, metadata.resourceVersion and metadata.uid should be same as the previous value.
         old_workflow = self.service.get_workflow(name, namespace)
-        self.workflow.metadata['resourceVersion'] = old_workflow.metadata['resourceVersion']
-        self.workflow.metadata['uid'] = old_workflow.metadata['uid']
+        self.workflow.metadata["resourceVersion"] = old_workflow.metadata["resourceVersion"]
+        self.workflow.metadata["uid"] = old_workflow.metadata["uid"]
 
         return self.service.update(self.workflow, name, namespace)
 

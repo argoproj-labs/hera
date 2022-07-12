@@ -35,10 +35,10 @@ class EnvSpec(BaseModel):
     name: str
     value: Optional[Any] = None
 
-    @validator('value')
+    @validator("value")
     def check_value_json_serializable(cls, value):
         """Verifies that the specific environment value"""
-        assert json_serializable(value), 'specified value is not JSON serializable'
+        assert json_serializable(value), "specified value is not JSON serializable"
         return value
 
     @property
@@ -113,7 +113,7 @@ class FieldEnvSpec(EnvSpec):
     """
 
     field_path: str
-    api_version: Optional[str] = 'v1'
+    api_version: Optional[str] = "v1"
 
     @property
     def argo_spec(self) -> EnvVar:

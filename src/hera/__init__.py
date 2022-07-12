@@ -1,3 +1,4 @@
+from hera._context import context
 from hera.affinity import (
     Affinity,
     Expression,
@@ -19,6 +20,7 @@ from hera.artifact import (
     Artifact,
     GCSArtifact,
     GitArtifact,
+    HttpArtifact,
     InputArtifact,
     OutputArtifact,
     S3Artifact,

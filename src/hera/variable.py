@@ -2,12 +2,11 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Inputs,
     IoArgoprojWorkflowV1alpha1Parameter,
 )
-from pydantic import BaseModel
 
 from hera.env import EnvSpec
 
 
-class Variable(BaseModel):
+class Variable:
     """This allows passing variable into a Task.
 
     Parameters
@@ -18,8 +17,9 @@ class Variable(BaseModel):
         The value to be set for the variable.
     """
 
-    name: str
-    value: str
+    def __init__(self, name: str, value: str) -> None:
+        self.name = name
+        self.value = value
 
     def get_argument_parameter(self):
         return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value=self.value)

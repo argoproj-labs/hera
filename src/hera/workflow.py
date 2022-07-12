@@ -2,6 +2,7 @@
 from typing import Dict, List, Optional, Tuple
 
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1VolumeClaimGC,
@@ -12,13 +13,22 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
+import hera
 from hera.affinity import Affinity
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
+from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
+from hera.workflow_editors import (
+    add_head,
+    add_tail,
+    add_task,
+    add_tasks,
+    on_exit,
+    pre_create_cleanup,
+)
 from hera.workflow_service import WorkflowService
 
 
@@ -69,6 +79,8 @@ class Workflow:
         they submit the workflow to.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
+    variables: Optional[List[Variable]] = None
+        A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
     """
 
     def __init__(
@@ -88,9 +100,10 @@ class Workflow:
         host_aliases: Optional[List[HostAlias]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
+        variables: Optional[List[Variable]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
-        self.namespace = namespace or 'default'
+        self.namespace = namespace or "default"
         self.service = service or WorkflowService()
         self.parallelism = parallelism
         self.security_context = security_context
@@ -102,10 +115,12 @@ class Workflow:
         self.node_selector = node_selectors
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
+        self.variables = variables
+        self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
-            name='exit-template',
+            name="exit-template",
             steps=[],
             dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[]),
             parallelism=self.parallelism,
@@ -137,46 +152,64 @@ class Workflow:
             )
 
         if ttl_strategy:
-            setattr(self.spec, 'ttl_strategy', ttl_strategy.argo_ttl_strategy)
+            setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)
 
         if volume_claim_gc_strategy:
             setattr(
                 self.spec,
-                'volume_claim_gc',
+                "volume_claim_gc",
                 IoArgoprojWorkflowV1alpha1VolumeClaimGC(strategy=volume_claim_gc_strategy.value),
             )
 
         if host_aliases:
-            setattr(self.spec, 'host_aliases', [h.argo_host_alias for h in host_aliases])
+            setattr(self.spec, "host_aliases", [h.argo_host_alias for h in host_aliases])
 
         if self.security_context:
             security_context = self.security_context.get_security_context()
-            setattr(self.spec, 'security_context', security_context)
+            setattr(self.spec, "security_context", security_context)
 
         if self.service_account_name:
-            setattr(self.template, 'service_account_name', self.service_account_name)
-            setattr(self.spec, 'service_account_name', self.service_account_name)
+            setattr(self.template, "service_account_name", self.service_account_name)
+            setattr(self.spec, "service_account_name", self.service_account_name)
 
         if self.image_pull_secrets:
             secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
-            setattr(self.spec, 'image_pull_secrets', secret_refs)
+            setattr(self.spec, "image_pull_secrets", secret_refs)
 
         if self.affinity:
-            setattr(self.exit_template, 'affinity', self.affinity.get_spec())
-            setattr(self.template, 'affinity', self.affinity.get_spec())
+            setattr(self.exit_template, "affinity", self.affinity.get_spec())
+            setattr(self.template, "affinity", self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
-            setattr(self.metadata, 'labels', self.labels)
+            setattr(self.metadata, "labels", self.labels)
         if self.annotations:
-            setattr(self.metadata, 'annotations', self.annotations)
+            setattr(self.metadata, "annotations", self.annotations)
 
         if self.node_selector:
-            setattr(self.dag_template, 'node_selector', self.node_selector)
-            setattr(self.template, 'node_selector', self.node_selector)
-            setattr(self.exit_template, 'node_selector', self.node_selector)
+            setattr(self.dag_template, "node_selector", self.node_selector)
+            setattr(self.template, "node_selector", self.node_selector)
+            setattr(self.exit_template, "node_selector", self.node_selector)
+
+        if self.variables:
+            setattr(
+                self.spec,
+                "arguments",
+                IoArgoprojWorkflowV1alpha1Arguments(
+                    parameters=[variable.get_argument_parameter() for variable in self.variables],
+                ),
+            )
 
         self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
+
+    def __enter__(self) -> "Workflow":
+        self.in_context = True
+        hera.context.set(self)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.in_context = False
+        hera.context.reset()
 
     def add_task(self, t: Task) -> None:
         add_task(self, t)
@@ -192,8 +225,11 @@ class Workflow:
 
     def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the workflow"""
+        if self.in_context:
+            raise ValueError("Cannot invoke `create` when using a Hera context")
         if namespace is None:
             namespace = self.namespace
+        pre_create_cleanup(self)
         return self.service.create(self.workflow, namespace)
 
     def on_exit(self, *t: Task) -> None:

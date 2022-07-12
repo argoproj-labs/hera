@@ -29,6 +29,22 @@ The general format is:
 
 ```
 
+# 3.6.0 - DATE (10/07/2022)
+
+### Added
+
+- support for `subPath` in volume mounts
+- context management to workflow types. This supports the `with` clause and adds all tasks to a workflow automatically
+- task exit hook
+- HTTP artifact
+- global workflow parameters
+- input parameter caching through memoization
+- bucket field to GCS/S3 artifact, which was missing
+
+### Removed
+
+- assertion that `input_from` cannot be used with artifacts, which supports artifact input on fanned out tasks now
+
 # 3.5.0 - DATE (14/06/2022)
 
 ### Added

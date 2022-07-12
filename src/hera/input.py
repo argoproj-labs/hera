@@ -72,7 +72,7 @@ class InputFrom(Input):
     def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
         result = []
         for parameter in self.parameters:
-            result.append(IoArgoprojWorkflowV1alpha1Parameter(name=parameter, value=f'{{{{item.{parameter}}}}}'))
+            result.append(IoArgoprojWorkflowV1alpha1Parameter(name=parameter, value=f"{{{{item.{parameter}}}}}"))
         return result
 
 
@@ -93,7 +93,7 @@ class GlobalInputParameter(Input):
 
     def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
         return IoArgoprojWorkflowV1alpha1Parameter(
-            name=self.name, value=f'{{{{workflow.parameters.{self.parameter_name}}}}}'
+            name=self.name, value=f"{{{{workflow.parameters.{self.parameter_name}}}}}"
         )
 
 
@@ -123,5 +123,5 @@ class MultiInput(Input):
 
     def get_spec(self) -> Union[IoArgoprojWorkflowV1alpha1Parameter, List[IoArgoprojWorkflowV1alpha1Parameter]]:
         return IoArgoprojWorkflowV1alpha1Parameter(
-            name=self.name, value=f'{{{{tasks.{self.from_task}.outputs.parameters}}}}'
+            name=self.name, value=f"{{{{tasks.{self.from_task}.outputs.parameters}}}}"
         )

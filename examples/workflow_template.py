@@ -18,15 +18,11 @@ def tails():
     print("it was tails")
 
 
-# TODO: replace the domain and token with your own
-wts = WorkflowTemplateService(host='', verify_ssl=False, token="", namespace="argo")
-w = WorkflowTemplate("workflow-template", wts, namespace="argo")
-r = Task("r", random_code)
-h = Task("h", heads)
-t = Task("t", tails)
+with WorkflowTemplate(
+    "workflow-template", service=WorkflowTemplateService(host="my-argo-server.com", token="my-argo-token")
+) as w:
+    r = Task("r", random_code)
+    Task("h", heads).when(r, Operator.equals, "heads")
+    Task("t", tails).when(r, Operator.equals, "tails")
 
-h.when(r, Operator.equals, "heads")
-t.when(r, Operator.equals, "tails")
-
-w.add_tasks(r, h, t)
-w.create(namespace="argo")
+w.create()

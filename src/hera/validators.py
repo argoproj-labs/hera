@@ -24,15 +24,15 @@ def validate_storage_units(value: str) -> None:
     AssertionError
         When the identified unit is not a supported one. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'].
     """
-    supported_units = ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']
+    supported_units = ["Ki", "Mi", "Gi", "Ti", "Pi", "Ei"]
 
-    pattern = r'[A-Za-z]+'
+    pattern = r"[A-Za-z]+"
     unit_search = re.search(pattern, value)
     if not unit_search:
-        raise ValueError('could not extract units out of the passed in value')
+        raise ValueError("could not extract units out of the passed in value")
     else:
         unit = unit_search.group(0)
-        assert unit in supported_units, f'unsupported unit for parsed value {value}'
+        assert unit in supported_units, f"unsupported unit for parsed value {value}"
 
 
 def json_serializable(value: Union[BaseModel, Any]) -> True:  # type: ignore

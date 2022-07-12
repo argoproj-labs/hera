@@ -28,5 +28,5 @@ class Toleration(BaseModel):
     value: Optional[str] = ""
 
 
-GPUToleration = Toleration(key='nvidia.com/gpu', effect='NoSchedule', operator='Equal', value='present')
+GPUToleration = Toleration(key="nvidia.com/gpu", effect="NoSchedule", operator="Equal", value="present")
 """GPUToleration denotes a GPU toleration. This works on GKE and Azure but not necessarily on platforms like AWS"""
