@@ -35,9 +35,9 @@ You can watch the introductory Hera presentation at the "Argo Workflows and Even
 
 - [Assumptions](#assumptions)
 - [Installation](#installation)
+- [Examples](#examples)
 - [Contributing](#contributing)
 - [Concepts](#concepts)
-- [Examples](#examples)
 - [Comparison](#comparison)
 
 # Assumptions
@@ -85,6 +85,27 @@ There are multiple ways to install Hera:
    pip install .
    ```
 
+# Examples
+
+A very primitive example of submitting a task within a workflow through Hera is:
+
+```python
+from hera import Task, Workflow, WorkflowService
+
+
+def say(m: str):
+    print(m)
+
+
+with Workflow('my-workflow', service=WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')) as w:
+    Task('say', say, func_params=[{'m': 'Hello, world!'}]) >> Task('say', say, func_params=[{'m': 'Goodbye, world!'}])
+
+w.create()
+```
+
+See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
+Argo workflow construction and submission via Hera!
+
 # Contributing
 
 If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry`:
@@ -126,27 +147,6 @@ consistent with:
 
 - `Task` - the object that holds the Python function for remote execution/the atomic unit of execution;
 - `Workflow` - the higher level representation of a collection of tasks.
-
-# Examples
-
-A very primitive example of submitting a task within a workflow through Hera is:
-
-```python
-from hera import Task, Workflow, WorkflowService
-
-
-def say(message: str):
-    print(message)
-
-
-with Workflow('my-workflow', service=WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')) as w:
-    Task('say', say, func_params=[{'message': 'Hello, world!'}])
-
-w.create()
-```
-
-See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
-Argo workflow construction and submission via Hera!
 
 # Comparison
 
