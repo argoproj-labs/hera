@@ -141,7 +141,7 @@ def test_script_getter_returns_expected_string(op, typed_op):
         "except: a = '''{{inputs.parameters.a}}'''\n"
         "\n"
         "print(a)\n"
-        'return [{"a": (a, a)}]\n'
+        "return [{\"a\": (a, a)}]\n"
     )
 
 
