@@ -19,7 +19,7 @@ def test_ws_has_expected_fields_upon_init():
 
     assert ws._host == "https://abc.com"
     assert ws._verify_ssl
-    assert ws._namespace == "argo"
+    assert ws.namespace == "argo"
     assert isinstance(ws.service, CronWorkflowServiceApi)
     assert isinstance(ws.service.api_client, ApiClient)
 
@@ -68,7 +68,7 @@ def test_ws_calls_update_as_expected():
             schedule="* * * * *", workflow_spec=IoArgoprojWorkflowV1alpha1WorkflowSpec()
         ),
     )
-    ws.update(w, "my-wf")
+    ws.update("my-wf", w)
 
     mock_service.update_cron_workflow.assert_called_with(
         "default",

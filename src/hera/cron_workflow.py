@@ -54,8 +54,6 @@ class CronWorkflow:
         A Dict of labels to attach to the CronWorkflow object metadata.
     annotations: Optional[Dict[str, str]] = None
         A Dict of annotations to attach to the CronWorkflow object metadata.
-    namespace: Optional[str] = 'default'
-        The namespace to use by default when calling create/update/suspend/resume.  Defaults to 'default'.
     security_context:  Optional[WorkflowSecurityContext] = None
         Define security settings for all containers in the workflow.
     image_pull_secrets: Optional[List[str]] = None
@@ -93,7 +91,6 @@ class CronWorkflow:
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         annotations: Optional[Dict[str, str]] = None,
-        namespace: Optional[str] = "default",
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
@@ -115,7 +112,6 @@ class CronWorkflow:
         self.service_account_name = service_account_name
         self.labels = labels
         self.annotations = annotations
-        self.namespace = namespace
         self.security_context = security_context
         self.image_pull_secrets = image_pull_secrets
         self.workflow_template_ref = workflow_template_ref
@@ -243,42 +239,35 @@ class CronWorkflow:
     def on_exit(self, *t: Task) -> None:
         on_exit(self, *t)
 
-    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+    def create(self) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow in the server"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.create(self.workflow, namespace)
+        return self.service.create(self.workflow)
 
     def update(
-        self, name: Optional[str] = None, namespace: Optional[str] = None
+        self,
+        name: Optional[str] = None,
     ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates the cron workflow in the server"""
-        if namespace is None:
-            namespace = self.namespace
         if name is None:
             name = self.name
 
         # When update cron_workflow, metadata.resourceVersion and metadata.uid should be same as the previous value.
-        old_workflow = self.service.get_workflow(name, namespace)
+        old_workflow = self.service.get_workflow(name)
         self.workflow.metadata["resourceVersion"] = old_workflow.metadata["resourceVersion"]
         self.workflow.metadata["uid"] = old_workflow.metadata["uid"]
 
-        return self.service.update(self.workflow, name, namespace)
+        return self.service.update(name, self.workflow)
 
-    def suspend(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+    def suspend(self, name: Optional[str] = None) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""
         if name is None:
             name = self.name
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.suspend(name, namespace)
+        return self.service.suspend(name)
 
-    def resume(self, name: Optional[str] = None, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+    def resume(self, name: Optional[str] = None) -> Tuple[object, int, dict]:
         """Resumes execution of the cron workflow"""
         if name is None:
             name = self.name
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.resume(name, namespace)
+        return self.service.resume(name)

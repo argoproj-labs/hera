@@ -17,7 +17,7 @@ def test_ws_has_expected_fields_upon_init():
 
     assert ws._host == "https://abc.com"
     assert ws._verify_ssl
-    assert ws._namespace == "argo"
+    assert ws.namespace == "argo"
     assert isinstance(ws.service, WorkflowTemplateServiceApi)
     assert isinstance(ws.service.api_client, ApiClient)
 

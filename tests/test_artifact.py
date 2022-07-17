@@ -35,7 +35,7 @@ def test_input_artifact_contains_expected_fields():
     assert actual._from == expected._from
     assert actual_input.name == expected.name
     assert actual_input.path == expected.path
-    assert not hasattr(actual_input, '_from')
+    assert not hasattr(actual_input, "_from")
 
 
 def test_git_artifact():

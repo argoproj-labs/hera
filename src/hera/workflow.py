@@ -54,8 +54,6 @@ class Workflow:
         A Dict of labels to attach to the Workflow object metadata
     annotations: Optional[Dict[str, str]] = None
         A Dict of annotations to attach to the Workflow object metadata
-    namespace: Optional[str] = 'default'
-        The namespace to use for creating the Workflow.  Defaults to "default"
     security_context:  Optional[WorkflowSecurityContext] = None
         Define security settings for all containers in the workflow.
     image_pull_secrets: Optional[List[str]] = None
@@ -91,7 +89,6 @@ class Workflow:
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
         annotations: Optional[Dict[str, str]] = None,
-        namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         image_pull_secrets: Optional[List[str]] = None,
         workflow_template_ref: Optional[str] = None,
@@ -103,7 +100,6 @@ class Workflow:
         variables: Optional[List[Variable]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
-        self.namespace = namespace or "default"
         self.service = service or WorkflowService()
         self.parallelism = parallelism
         self.security_context = security_context
@@ -223,20 +219,16 @@ class Workflow:
     def add_tail(self, t: Task, append: bool = True) -> None:
         add_tail(self, t, append=append)
 
-    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1Workflow:
+    def create(self) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
-        if namespace is None:
-            namespace = self.namespace
         pre_create_cleanup(self)
-        return self.service.create(self.workflow, namespace)
+        return self.service.create(self.workflow)
 
     def on_exit(self, *t: Task) -> None:
         on_exit(self, *t)
 
-    def delete(self, namespace: Optional[str] = None) -> Tuple[object, int, dict]:
+    def delete(self) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
-        if namespace is None:
-            namespace = self.name
         return self.service.delete(self.name)

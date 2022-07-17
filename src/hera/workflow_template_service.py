@@ -41,12 +41,13 @@ class WorkflowTemplateService:
     ):
         self._host = host
         self._verify_ssl = verify_ssl
-        self._namespace = namespace
+        self.namespace = namespace
         api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
         self.service = WorkflowTemplateServiceApi(api_client=api_client)
 
     def create(
-        self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate, namespace: str = "default"
+        self,
+        workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates given workflowTemplate in the argo server.
 
@@ -54,8 +55,6 @@ class WorkflowTemplateService:
         ----------
         workflow_template: V1alpha1WorkflowTemplate
             The workflowTemplate to create.
-        namespace: str = 'default'
-            The K8S namespace of the Argo server to create the workflowTemplate in.
 
         Returns
         -------
@@ -67,20 +66,18 @@ class WorkflowTemplateService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.create_workflow_template(
-            namespace,
+            self.namespace,
             IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest(template=workflow_template, _check_type=False),
             _check_return_type=False,
         )
 
-    def delete(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
+    def delete(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow template from the given namespace based on the specified name.
 
         Parameters
         ----------
         name: str
             The name of the workflow template to delete.
-        namespace: str = 'default'
-            The K8S namespace of the Argo server to delete the workflow template from.
 
         Returns
         -------
@@ -90,4 +87,4 @@ class WorkflowTemplateService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return self.service.delete_workflow_template(namespace, name)
+        return self.service.delete_workflow_template(self.namespace, name)

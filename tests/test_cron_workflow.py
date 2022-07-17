@@ -196,21 +196,15 @@ def test_cwf_contains_specified_annotations(ws):
     assert w.metadata.annotations == expected_annotations
 
 
-def test_cwf_contains_specified_namespace(ws):
-    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"}, namespace="test")
-
-    assert w.namespace == "test"
-
-
 def test_cwf_create_with_defaults(ws):
-    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"}, namespace="test")
+    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"})
     w.service = Mock()
     w.create()
-    w.service.create.assert_called_with(w.workflow, w.namespace)
+    w.service.create.assert_called_with(w.workflow)
 
 
 def test_cwf_update_with_defaults(ws):
-    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"}, namespace="test")
+    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"})
     w.service.get_workflow = Mock(  # type: ignore
         return_value=IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=ObjectMeta(
@@ -225,14 +219,14 @@ def test_cwf_update_with_defaults(ws):
     w.service.update = Mock()  # type: ignore
     w.update()
 
-    w.service.get_workflow.assert_called_with(w.name, w.namespace)
-    w.service.update.assert_called_with(w.workflow, w.name, w.namespace)
+    w.service.get_workflow.assert_called_with(w.name)
+    w.service.update.assert_called_with(w.name, w.workflow)
     assert w.workflow.metadata["resourceVersion"] == "rv"
     assert w.workflow.metadata["uid"] == "uid"
 
 
 def test_cwf_update_with_specified_name_and_namespace(ws):
-    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"}, namespace="test")
+    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"})
     w.service.get_workflow = Mock(  # type: ignore
         return_value=IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=ObjectMeta(
@@ -245,26 +239,26 @@ def test_cwf_update_with_specified_name_and_namespace(ws):
         )
     )
     w.service.update = Mock()  # type: ignore
-    w.update(name="cwf", namespace="cwf")
+    w.update(name="cwf")
 
-    w.service.get_workflow.assert_called_with("cwf", "cwf")
-    w.service.update.assert_called_with(w.workflow, "cwf", "cwf")
+    w.service.get_workflow.assert_called_with("cwf")
+    w.service.update.assert_called_with("cwf", w.workflow)
     assert w.workflow.metadata["resourceVersion"] == "rv"
     assert w.workflow.metadata["uid"] == "uid"
 
 
 def test_cwf_resume_with_defaults(ws):
-    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"}, namespace="test")
+    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"})
     w.service = Mock()
     w.resume()
-    w.service.resume.assert_called_with(w.name, w.namespace)
+    w.service.resume.assert_called_with(w.name)
 
 
 def test_cwf_suspend_with_defaults(ws):
-    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"}, namespace="test")
+    w = CronWorkflow("w", schedule="* * * * *", service=ws, labels={"foo": "bar"})
     w.service = Mock()
     w.suspend()
-    w.service.suspend.assert_called_with(w.name, w.namespace)
+    w.service.suspend.assert_called_with(w.name)
 
 
 def test_cwf_adds_image_pull_secrets(ws):

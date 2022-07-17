@@ -43,13 +43,11 @@ class CronWorkflowService:
     ):
         self._host = host
         self._verify_ssl = verify_ssl
-        self._namespace = namespace
+        self.namespace = namespace
         api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
-    def create(
-        self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow, namespace: str = "default"
-    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+    def create(self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates given cron workflow in the argo server.
 
         Parameters
@@ -69,25 +67,24 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.create_cron_workflow(
-            namespace,
+            self.namespace,
             IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
         )
 
     def update(
         self,
-        cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
         name: str,
-        namespace: str = "default",
+        cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
     ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates given cron workflow in the argo server.
 
         Parameters
         ----------
-        cron_workflow: V1alpha1CronWorkflow
-            The cron workflow to update.
-        namespace: str = 'default'
-            The K8S namespace of the Argo server to update the cron workflow in.
+        name: str
+            The name of the cron workflow to update.
+        cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow
+            The new workflow to associate with the given cron workflow name.
 
         Returns
         -------
@@ -99,21 +96,19 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.update_cron_workflow(
-            namespace,
+            self.namespace,
             name,
             IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
         )
 
-    def delete(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
+    def delete(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a cron workflow from the given namespace based on the specified name.
 
         Parameters
         ----------
         name: str
             The name of the cron workflow to delete.
-        namespace: str = 'default'
-            The K8S namespace of the Argo server to delete the cron workflow from.
 
         Returns
         -------
@@ -123,9 +118,9 @@ class CronWorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return self.service.delete_cron_workflow(namespace, name)
+        return self.service.delete_cron_workflow(self.namespace, name)
 
-    def suspend(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
+    def suspend(self, name: str) -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -144,13 +139,13 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.suspend_cron_workflow(
-            namespace,
+            self.namespace,
             name,
-            body=IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest(name=name, namespace=namespace),
+            body=IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest(name=name, namespace=self.namespace),
             _check_return_type=False,
         )
 
-    def resume(self, name: str, namespace: str = "default") -> Tuple[object, int, dict]:
+    def resume(self, name: str) -> Tuple[object, int, dict]:
         """Resumes execution of a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -169,41 +164,37 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.resume_cron_workflow(
-            namespace,
+            self.namespace,
             name,
-            body=IoArgoprojWorkflowV1alpha1WorkflowResumeRequest(name=name, namespace=namespace),
+            body=IoArgoprojWorkflowV1alpha1WorkflowResumeRequest(name=name, namespace=self.namespace),
             _check_return_type=False,
         )
 
-    def get_cron_workflow_link(self, name: str, namespace: str = "default") -> str:
+    def get_cron_workflow_link(self, name: str) -> str:
         """Assembles a cron workflow link for the given cron workflow name. Note that the returned path works only for Argo.
 
         Parameters
         ----------
         name: optional str
             The name of the cron workflow to assemble a link for.
-        namespace: str = 'default'
-            The K8S namespace of the Argo server to get the cron workflow link from.
 
         Returns
         -------
         str
             The cron workflow link.
         """
-        return f"{self._host}/cron-workflows/{namespace}/{name}"
+        return f"{self._host}/cron-workflows/{self.namespace}/{name}"
 
-    def get_workflow(self, name: str, namespace: str = "default") -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+    def get_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Fetches a workflow by the specified name and namespace combination.
 
         Parameters
         ----------
         name: str
             Name of the workflow.
-        namespace: str = 'default'
-            The namespace the workflow is running in.
 
         Returns
         -------
         IoArgoprojWorkflowV1alpha1Workflow
         """
-        return self.service.get_cron_workflow(namespace, name, _check_return_type=False)
+        return self.service.get_cron_workflow(self.namespace, name, _check_return_type=False)

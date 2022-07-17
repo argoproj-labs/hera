@@ -87,10 +87,10 @@ def test_wft_contains_specified_labels(wts):
 
 
 def test_wft_submit_with_default(wts):
-    w = WorkflowTemplate("w", service=wts, labels={"foo": "bar"}, namespace="test")
+    w = WorkflowTemplate("w", service=wts, labels={"foo": "bar"})
     w.service = Mock()
     w.create()
-    w.service.create.assert_called_with(w.workflow_template, w.namespace)
+    w.service.create.assert_called_with(w.workflow_template)
 
 
 def test_wft_adds_ttl_strategy(wts):
