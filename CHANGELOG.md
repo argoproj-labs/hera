@@ -29,6 +29,13 @@ The general format is:
 
 ```
 
+# 3.6.1 - DATE (17/07/2022)
+
+### Removed
+
+- `get_input_spec` from `InputArtifact` so that it relies on the inherited one that does not add the `from` field that
+  is not allowed in the Argo submission for input artifacts
+
 # 3.6.0 - DATE (10/07/2022)
 
 ### Added
