@@ -38,8 +38,6 @@ class WorkflowTemplate:
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
         A Dict of labels to attach to the Workflow object metadata
-    namespace: Optional[str] = 'default'
-        The namespace to use for creating the WorkflowTemplate.  Defaults to "default"
     security_context:  Optional[WorkflowSecurityContext] = None
         Define security settings for all containers in the workflow.
     ttl_strategy: Optional[TTLStrategy] = None
@@ -60,14 +58,12 @@ class WorkflowTemplate:
         parallelism: int = 50,
         service_account_name: Optional[str] = None,
         labels: Optional[Dict[str, str]] = None,
-        namespace: Optional[str] = None,
         security_context: Optional[WorkflowSecurityContext] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
-        self.namespace = namespace or "default"
         self.service = service or WorkflowTemplateService()
         self.parallelism = parallelism
         self.security_context = security_context
@@ -151,10 +147,8 @@ class WorkflowTemplate:
     def on_exit(self, *t: Task) -> None:
         on_exit(self, *t)
 
-    def create(self, namespace: Optional[str] = None) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
+    def create(self) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
         """Creates the workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
-        if namespace is None:
-            namespace = self.namespace
-        return self.service.create(self.workflow_template, namespace)
+        return self.service.create(self.workflow_template)

@@ -42,12 +42,13 @@ class WorkflowService:
     ):
         self._host = host
         self._verify_ssl = verify_ssl
-        self._namespace = namespace
+        self.namespace = namespace
         api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
     def create(
-        self, workflow: IoArgoprojWorkflowV1alpha1Workflow, namespace: str = "default"
+        self,
+        workflow: IoArgoprojWorkflowV1alpha1Workflow,
     ) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the given workflow to the given namespace.
 
@@ -55,8 +56,6 @@ class WorkflowService:
         ----------
         workflow: V1alpha1Workflow
             The workflow to submit.
-        namespace: str
-            The K8S namespace of the Argo server to submit the workflow to.
 
         Returns
         -------
@@ -68,7 +67,7 @@ class WorkflowService:
         argo.workflows.client.ApiException
         """
         return self.service.create_workflow(
-            namespace,
+            self.namespace,
             IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
@@ -89,7 +88,7 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException
         """
-        return self.service.delete_workflow(self._namespace, name)
+        return self.service.delete_workflow(self.namespace, name)
 
     def get_workflow_link(self, name: str) -> str:
         """Assembles a workflow link for the given workflow name. Note that the returned path works only for Argo.
@@ -104,37 +103,33 @@ class WorkflowService:
         str
             The workflow link.
         """
-        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
+        return f"{self._host}/workflows/{self.namespace}/{name}?tab=workflow"
 
-    def get_workflow(self, name: str, namespace: str = "default") -> IoArgoprojWorkflowV1alpha1Workflow:
+    def get_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Fetches a workflow by the specified name and namespace combination.
 
         Parameters
         ----------
         name: str
             Name of the workflow.
-        namespace: str = 'default'
-            The namespace the workflow is running in.
 
         Returns
         -------
         IoArgoprojWorkflowV1alpha1Workflow
         """
-        return self.service.get_workflow(namespace, name, _check_return_type=False)
+        return self.service.get_workflow(self.namespace, name, _check_return_type=False)
 
-    def get_workflow_status(self, name: str, namespace: str = "default") -> WorkflowStatus:
+    def get_workflow_status(self, name: str) -> WorkflowStatus:
         """Returns the workflow status of the workflow identified by the specified name.
 
         Parameters
         ----------
         name: str
             Name of the workflow to fetch the status of.
-        namespace: str = 'default'
-            Namespace where the workflow is running/ran.
 
         Returns
         -------
         WorkflowStatus
         """
-        argo_status = self.get_workflow(name, namespace=namespace).status.get("phase")
+        argo_status = self.get_workflow(name).status.get("phase")
         return WorkflowStatus.from_argo_status(argo_status)
