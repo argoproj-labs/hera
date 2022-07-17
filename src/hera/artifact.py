@@ -76,9 +76,6 @@ class InputArtifact(Artifact):
         from_ = f"{{{{tasks.{self.from_task}.outputs.artifacts.{self.artifact_name}}}}}"
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path, _from=from_)
 
-    def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
-        return self.get_spec()
-
 
 class BucketArtifact(Artifact):
     """An input artifact representation.
