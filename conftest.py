@@ -1,7 +1,6 @@
 from typing import Dict, List, Tuple
 
 import pytest
-from pydantic import BaseModel
 
 from hera.affinity import (
     Affinity,
@@ -19,7 +18,9 @@ from hera.affinity import (
     PreferredSchedulingTerm,
     WeightedPodAffinityTerm,
 )
-from hera.artifact import InputArtifact, OutputArtifact
+from hera.artifact import Artifact
+
+# from hera.artifact import InputArtifact, OutputArtifact
 from hera.cron_workflow import CronWorkflow
 from hera.cron_workflow_service import CronWorkflowService
 from hera.workflow import Workflow
@@ -64,22 +65,8 @@ def cw(cws, schedule):
 
 
 @pytest.fixture(scope="session")
-def in_artifact():
-    yield InputArtifact("test", "/test", "test-o", "test-o")
-
-
-@pytest.fixture(scope="session")
-def out_artifact():
-    yield OutputArtifact("test", "/test")
-
-
-@pytest.fixture(scope="session")
-def mock_model():
-    class MockModel(BaseModel):
-        field1: int = 1
-        field2: int = 2
-
-    yield MockModel
+def artifact():
+    yield Artifact("test", "/test")
 
 
 @pytest.fixture(scope="session")

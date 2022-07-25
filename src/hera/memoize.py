@@ -28,7 +28,7 @@ class Memoize:
         self.config_map_key = config_map_key
         self.max_age = max_age
 
-    def get_spec(self) -> IoArgoprojWorkflowV1alpha1Memoize:
+    def build(self) -> IoArgoprojWorkflowV1alpha1Memoize:
         return IoArgoprojWorkflowV1alpha1Memoize(
             cache=IoArgoprojWorkflowV1alpha1Cache(
                 config_map=ConfigMapKeySelector(name=self.config_map_name, key=self.config_map_key),

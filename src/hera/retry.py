@@ -1,11 +1,11 @@
+from dataclasses import dataclass
 from typing import Optional
-
-from pydantic import BaseModel, root_validator
 
 from hera.retry_policy import RetryPolicy
 
 
-class Retry(BaseModel):
+@dataclass
+class Retry:
     """Retry holds the duration values for retrying tasks.
 
     Attributes
@@ -22,15 +22,14 @@ class Retry(BaseModel):
         The strategy for performing retries, for example OnError vs OnFailure vs Always
     """
 
-    duration: Optional[int]
-    limit: Optional[int]
-    max_duration: Optional[int]
-    retry_policy: Optional[RetryPolicy]
+    duration: Optional[int] = None
+    limit: Optional[int] = None
+    max_duration: Optional[int] = None
+    retry_policy: Optional[RetryPolicy] = RetryPolicy.Always
 
-    @root_validator()
-    def check_durations(cls, values):
-        duration: int = values.get("duration")
-        max_duration: int = values.get("max_duration")
-        if max_duration is not None:
-            assert duration <= max_duration, "duration cannot be greater than the max duration"
-        return values
+    def __post_init__(self):
+        self.validate_durations()
+
+    def validate_durations(self):
+        if self.max_duration and self.duration:
+            assert self.duration <= self.max_duration, "duration cannot be greater than the max duration"

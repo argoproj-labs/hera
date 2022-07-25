@@ -1,6 +1,6 @@
 """This example showcases how clients can schedule tasks that provision independent volumes"""
 
-from hera import Resources, Task, Volume, Workflow, WorkflowService
+from hera import Task, Volume, Workflow, WorkflowService
 
 
 def do():
@@ -21,6 +21,6 @@ def do():
 
 
 with Workflow("volume", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
-    Task("do", do, resources=Resources(volumes=[Volume(size="50Gi", mount_path="/vol")]))
+    Task("do", do, volumes=[Volume(size="50Gi", mount_path="/vol")])
 
 w.create()

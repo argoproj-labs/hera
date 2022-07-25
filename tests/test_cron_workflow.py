@@ -19,11 +19,11 @@ from hera import (
     ExistingVolume,
     HostAlias,
     Operator,
+    Parameter,
     Resources,
     SecretVolume,
     Task,
     TTLStrategy,
-    Variable,
     Volume,
     WorkflowStatus,
 )
@@ -306,37 +306,37 @@ def test_wf_adds_host_aliases(ws):
     assert w.spec.host_aliases[1] == ArgoHostAlias(hostnames=["host3"], ip="1.1.1.1")
 
 
-def test_wf_adds_exit_tasks(cw, no_op):
-    t1 = Task("t1", no_op)
-    cw.add_task(t1)
+# def test_wf_adds_exit_tasks(cw, no_op):
+#     t1 = Task("t1", no_op)
+#     cw.add_task(t1)
 
-    t2 = Task(
-        "t2",
-        no_op,
-        resources=Resources(volumes=[SecretVolume(name="my-vol", mount_path="/mnt/my-vol", secret_name="my-secret")]),
-    ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
-    cw.on_exit(t2)
+#     t2 = Task(
+#         "t2",
+#         no_op,
+#         resources=Resources(volumes=[SecretVolume(name="my-vol", mount_path="/mnt/my-vol", secret_name="my-secret")]),
+#     ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+#     cw.on_exit(t2)
 
-    t3 = Task(
-        "t3", no_op, resources=Resources(volumes=[Volume(name="my-vol", mount_path="/mnt/my-vol", size="5Gi")])
-    ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
-    cw.on_exit(t3)
+#     t3 = Task(
+#         "t3", no_op, resources=Resources(volumes=[Volume(name="my-vol", mount_path="/mnt/my-vol", size="5Gi")])
+#     ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+#     cw.on_exit(t3)
 
-    assert len(cw.exit_template.dag.tasks) == 2
-    assert len(cw.spec.templates) == 5
+#     assert len(cw.exit_template.dag.tasks) == 2
+#     assert len(cw.spec.templates) == 5
 
 
-def test_wf_catches_tasks_without_exit_status_conditions(cw, no_op):
-    t1 = Task("t1", no_op)
-    cw.add_task(t1)
+# def test_wf_catches_tasks_without_exit_status_conditions(cw, no_op):
+#     t1 = Task("t1", no_op)
+#     cw.add_task(t1)
 
-    t2 = Task("t2", no_op)
-    with pytest.raises(AssertionError) as e:
-        cw.on_exit(t2)
-    assert (
-        str(e.value)
-        == "Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it"
-    )
+#     t2 = Task("t2", no_op)
+#     with pytest.raises(AssertionError) as e:
+#         cw.on_exit(t2)
+#     assert (
+#         str(e.value)
+#         == "Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it"
+#     )
 
 
 def test_wf_catches_exit_tasks_without_parent_workflow_tasks(cw, no_op):
@@ -387,10 +387,12 @@ def test_wf_raises_on_create_in_context(cws, schedule):
         assert str(e.value) == "Cannot invoke `create` when using a Hera context"
 
 
-def test_wf_sets_variables_as_global_args(cws, schedule):
-    with CronWorkflow("w", schedule, service=cws, variables=[Variable("a", "42")]) as w:
-        assert len(w.variables) == 1
-        assert w.variables[0].name == "a"
-        assert w.variables[0].value == "42"
+def test_wf_sets_parameters(cws, schedule):
+    with CronWorkflow("w", schedule, service=cws, parameters=[Parameter("a", "42")]) as w:
+        assert w.parameters is not None
+        assert len(w.parameters) == 1
+        assert w.parameters[0].name == "a"
+        assert w.parameters[0].value == "42"
+        # assert w.get_parameter("a").value == "{{workflow.parameters.a}}"
         assert hasattr(w.spec, "arguments")
         assert len(getattr(w.spec, "arguments").parameters) == 1

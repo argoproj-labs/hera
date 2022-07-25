@@ -25,7 +25,7 @@ def fs_group():
 
 @pytest.fixture
 def run_as_non_root():
-    yield random.randint(0, 1)
+    yield random.random() > 0.5
 
 
 @pytest.fixture
@@ -77,7 +77,7 @@ def test_task_get_security_context(run_as_user, run_as_group, run_as_non_root, a
         run_as_non_root=run_as_non_root,
         additional_capabilities=additional_capabilities,
     )
-    sc = tsc.get_security_context()
+    sc = tsc.build_security_context()
     capabilities = Capabilities(add=additional_capabilities)
     assert isinstance(sc, SecurityContext)
     assert sc.run_as_user == run_as_user

@@ -5,8 +5,6 @@ top of Hera to support consistency in submission across users, teams, etc.
 
 from typing import Callable, Dict, List, Optional, Union
 
-from pydantic import BaseModel
-
 from hera import (
     EnvSpec,
     ExistingVolume,

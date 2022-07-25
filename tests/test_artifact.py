@@ -4,38 +4,38 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
 )
 
-from hera import GitArtifact, HttpArtifact, InputArtifact, OutputArtifact
+from hera import Artifact, GitArtifact, HttpArtifact, Task
 
 
 def test_output_artifact_contains_expected_fields():
-    name = "output"
-    path = "/output/path"
-    expected = IoArgoprojWorkflowV1alpha1Artifact(name=name, path=path)
-    actual = OutputArtifact(name, path).as_argument()
-    actual_input = OutputArtifact(name, path).as_input()
-
-    assert actual.name == expected.name
-    assert actual.path == expected.path
-    assert actual_input.name == expected.name
-    assert actual_input.path == expected.path
-
-
-def test_input_artifact_contains_expected_fields():
-    name = "input"
+    name = "test-artifact"
     path = "/input/path"
-    from_task = "test"
-    artifact_name = "test-artifact"
-    expected = IoArgoprojWorkflowV1alpha1Artifact(
-        name=name, path=path, _from=f"{{{{tasks.{from_task}.outputs.artifacts.{artifact_name}}}}}"
-    )
-    actual = InputArtifact(name, path, from_task, artifact_name).as_argument()
-    actual_input = InputArtifact(name, path, from_task, artifact_name).as_input()
+    from_task = "produce-artifact"
+
+    expected = Artifact(name=name, path=path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
+    t1 = Task("produce-artifact", outputs=[Artifact(name, path)])
+    actual = t1.get_output(name)
+
+    assert isinstance(actual, Artifact)
+    assert actual.from_task == expected.from_task
     assert actual.name == expected.name
     assert actual.path == expected.path
-    assert actual._from == expected._from
-    assert actual_input.name == expected.name
-    assert actual_input.path == expected.path
-    assert not hasattr(actual_input, '_from')
+
+    new_path = "/input/alternative_path"
+    expected = Artifact(name=name, path=new_path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
+    actual = t1.get_output(name, new_path)
+    assert isinstance(actual, Artifact)
+    assert actual.from_task == expected.from_task
+    assert actual.name == expected.name
+    assert actual.path == expected.path
+
+    new_name = "test-artifact2"
+    expected = Artifact(name=new_name, path=new_path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
+    actual = t1.get_output(name, new_path, as_name=new_name)
+    assert isinstance(actual, Artifact)
+    assert actual.from_task == expected.from_task
+    assert actual.name == expected.name
+    assert actual.path == expected.path
 
 
 def test_git_artifact():

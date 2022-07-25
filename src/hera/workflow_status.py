@@ -10,6 +10,9 @@ class WorkflowStatus(str, Enum):
     Error = "Error"
     Terminated = "Terminated"
 
+    def __str__(self):
+        return str(self.value)
+
     @classmethod
     def from_argo_status(cls, s: str) -> "WorkflowStatus":
         """Turns an Argo status into a Dyno workflows representation"""

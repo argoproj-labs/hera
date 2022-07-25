@@ -8,7 +8,7 @@ def test_memoize_contains_expected_spec():
     assert m.config_map_key == "b-key"
     assert m.max_age == "1h"
 
-    spec = m.get_spec()
+    spec = m.build()
     assert spec.key == "{{inputs.parameters.a}}"
     assert spec.cache.config_map.name == "b"
     assert spec.cache.config_map.key == "b-key"

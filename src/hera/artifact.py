@@ -37,18 +37,14 @@ class Artifact:
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         artifact = IoArgoprojWorkflowV1alpha1Artifact(name=self.name)
         if self.from_task is not None:
-            setattr(artifact, "from", self.from_task)
+            setattr(artifact, "_from", self.from_task)
         return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
-        artifact = IoArgoprojWorkflowV1alpha1Artifact(
-            name=self.name,
-            path=self.path,
-        )
-        return artifact
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Artifact:
-        return self.as_input()
+        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
 
 class BucketArtifact(Artifact):
