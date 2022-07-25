@@ -16,10 +16,10 @@ from argo_workflows.models import (
 import hera
 from hera.affinity import Affinity
 from hera.host_alias import HostAlias
+from hera.parameter import Parameter
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
-from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_editors import (
     add_head,
@@ -100,7 +100,7 @@ class Workflow:
         host_aliases: Optional[List[HostAlias]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
-        variables: Optional[List[Variable]] = None,
+        parameters: Optional[List[Parameter]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -115,7 +115,7 @@ class Workflow:
         self.node_selector = node_selectors
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
-        self.variables = variables
+        self.parameters = parameters
         self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -191,13 +191,11 @@ class Workflow:
             setattr(self.template, "node_selector", self.node_selector)
             setattr(self.exit_template, "node_selector", self.node_selector)
 
-        if self.variables:
+        if self.parameters:
             setattr(
                 self.spec,
                 "arguments",
-                IoArgoprojWorkflowV1alpha1Arguments(
-                    parameters=[variable.get_argument_parameter() for variable in self.variables],
-                ),
+                IoArgoprojWorkflowV1alpha1Arguments(parameters=[p.as_argument() for p in self.parameters]),
             )
 
         self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
@@ -240,3 +238,8 @@ class Workflow:
         if namespace is None:
             namespace = self.name
         return self.service.delete(self.name)
+
+    def get_parameter(self, name: str):
+        if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
+            raise KeyError("`{name}` not in workflow parameters")
+        return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")

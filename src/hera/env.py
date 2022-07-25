@@ -25,6 +25,8 @@ class EnvSpec(BaseModel):
         corresponding `.json()` method will be used for serialization. It is up to the client to deserialize the value
         in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
         performed.
+    value_from_input: Optional[str] = None
+        A reference to an input parameter which will resolve to the value.
 
     Raises
     ------
@@ -34,6 +36,7 @@ class EnvSpec(BaseModel):
 
     name: str
     value: Optional[Any] = None
+    value_from_input: Optional[str] = None
 
     @validator("value")
     def check_value_json_serializable(cls, value):
@@ -44,7 +47,9 @@ class EnvSpec(BaseModel):
     @property
     def argo_spec(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
-        if isinstance(self.value, BaseModel):
+        if self.value_from_input:
+            value = f"{{{{inputs.parameters.{self.name}}}}}"
+        elif isinstance(self.value, BaseModel):
             value = self.value.json()
         elif isinstance(self.value, str):
             value = self.value

@@ -11,6 +11,7 @@ from argo_workflows.models import (
     EnvFromSource,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
+    IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1Backoff,
     IoArgoprojWorkflowV1alpha1ContinueOn,
     IoArgoprojWorkflowV1alpha1DAGTask,
@@ -27,25 +28,21 @@ from argo_workflows.models import (
 )
 from argo_workflows.models import Toleration as ArgoToleration
 from argo_workflows.models import VolumeMount
-from pydantic import BaseModel
 
 import hera
-from hera._task_input import _Item
 from hera.affinity import Affinity
-from hera.artifact import Artifact, OutputArtifact
+from hera.artifact import Artifact
 from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
-from hera.input import Input, InputFrom
 from hera.memoize import Memoize
 from hera.operator import Operator
-from hera.output import Output
+from hera.parameter import Parameter
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
-from hera.variable import Variable, VariableAsEnv
 from hera.workflow_status import WorkflowStatus
 
 
@@ -118,8 +115,6 @@ class Task:
         A Dict of labels to attach to the Task Template object metadata.
     annotations: Optional[Dict[str, str]] = None
         A Dict of annotations to attach to the Task Template object metadata.
-    variables: Optional[List[Variable]] = None
-        A list of variable for a Task. Allows passing information about other Tasks into this Task.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
     continue_on_fail: bool = False
@@ -145,19 +140,15 @@ class Task:
         self,
         name: str,
         func: Optional[Callable] = None,
-        func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
-        input_from: Optional[InputFrom] = None,
-        inputs: Optional[List[Input]] = None,
-        outputs: Optional[List[Output]] = None,
-        input_artifacts: Optional[List[Artifact]] = None,
-        output_artifacts: Optional[List[OutputArtifact]] = None,
+        with_param: Optional[Union[List[Dict[str, Union[int, str, float, dict]]], List[str], str]] = None,
+        inputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         image: str = "python:3.7",
         image_pull_policy: Optional[ImagePullPolicy] = ImagePullPolicy.Always,
         daemon: bool = False,
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
-        env_specs: Optional[List[EnvSpec]] = None,
-        env_from_specs: Optional[List[BaseEnvFromSpec]] = None,
+        env: Optional[List[Union[EnvSpec, BaseEnvFromSpec]]] = None,
         resources: Resources = Resources(),
         working_dir: Optional[str] = None,
         retry: Optional[Retry] = None,
@@ -165,7 +156,6 @@ class Task:
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
         annotations: Optional[Dict[str, str]] = None,
-        variables: Optional[List[Variable]] = None,
         security_context: Optional[TaskSecurityContext] = None,
         continue_on_fail: Optional[bool] = None,
         continue_on_error: Optional[bool] = None,
@@ -173,15 +163,15 @@ class Task:
         affinity: Optional[Affinity] = None,
         memoize: Optional[Memoize] = None,
     ):
+        # Some of these methods have side-effects*
         self.name = name.replace("_", "-")  # RFC1123
         self.func = func
-        self.func_params = func_params
-        self.input_from = input_from
-        self.input_artifacts = input_artifacts or []
-        self.output_artifacts = output_artifacts or []
         self.memoize = memoize
         self.inputs = inputs or []
+        self.with_param = self.deduce_inputs(with_param)  # self.inputs*
         self.outputs = outputs or []
+        self.env = self.get_env(env)  # self.inputs*
+        self.env_from = self.get_env_from_source(env)
         self.validate()
 
         self.image = image
@@ -196,10 +186,7 @@ class Task:
         self.node_selector = node_selectors
         self.labels = labels or {}
         self.annotations = annotations or {}
-        self.variables = variables or []
 
-        self.env = self.get_env(env_specs)
-        self.env_from = self.get_env_from_source(env_from_specs)
         self.security_context = security_context
         self.continue_on_fail = continue_on_fail
         self.continue_on_error = continue_on_error
@@ -208,11 +195,11 @@ class Task:
         self.exit_task: Optional[Task] = None
 
         self.argo_parameters = self.get_parameters()
-        self.argo_arguments = self.get_arguments()
-        self.argo_inputs = self.get_inputs()
-        self.argo_outputs = self.get_outputs()
-        self.argo_resources = self.get_resources()
-        self.argo_template = self.get_task_template()
+        self.argo_arguments = self.assemble_arguments()
+        self.argo_inputs = self.assemble_inputs()
+        self.argo_outputs = self.assemble_outputs()
+        self.argo_resources = self.assemble_resources()
+        self.argo_template = self.assemble_task_template()
         self.argo_task = self.get_spec()
 
         if hera.context.is_set():
@@ -367,10 +354,10 @@ class Task:
         --------
         https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
-        assert hasattr(self.argo_task, "with_items") or self.input_from is not None, (
-            "Can only use `when_any_succeeded` for tasks with more than 1 item, which happens "
-            "with multiple `func_params or setting `input_from`"
-        )
+        # assert hasattr(self.argo_task, "with_items") or self.input_from is not None, (
+        #     "Can only use `when_any_succeeded` for tasks with more than 1 item, which happens "
+        #     "with multiple `func_params or setting `input_from`"
+        # )
         assert (
             not other.continue_on_fail and not other.continue_on_error
         ), "The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`"
@@ -422,10 +409,10 @@ class Task:
         --------
         https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
-        assert hasattr(self.argo_task, "with_items") or self.input_from is not None, (
-            "Can only use `when_all_failed` for tasks with more than 1 item, which happens "
-            "with multiple `func_params or setting `input_from`"
-        )
+        # assert hasattr(self.argo_task, "with_items") or self.input_from is not None, (
+        #     "Can only use `when_all_failed` for tasks with more than 1 item, which happens "
+        #     "with multiple `func_params or setting `input_from`"
+        # )
         assert (
             not other.continue_on_fail and not other.continue_on_error
         ), "The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`"
@@ -459,14 +446,14 @@ class Task:
         conditions are not satisfied.
         """
         # verify artifacts are uniquely names
-        if self.input_artifacts:
-            assert len(set([i.name for i in self.input_artifacts])) == len(
-                self.input_artifacts
-            ), "input artifact names must be unique"
-        if self.output_artifacts:
-            assert len(set([i.name for i in self.output_artifacts])) == len(
-                self.output_artifacts
-            ), "output artifact names must be unique"
+        # if self.input_artifacts:
+        #     assert len(set([i.name for i in self.input_artifacts])) == len(
+        #         self.input_artifacts
+        #     ), "input artifact names must be unique"
+        # if self.output_artifacts:
+        #     assert len(set([i.name for i in self.output_artifacts])) == len(
+        #         self.output_artifacts
+        #     ), "output artifact names must be unique"
         if self.inputs:
             assert len(set([i.name for i in self.inputs])) == len(self.inputs), "input parameters must be unique"
         if self.outputs:
@@ -477,69 +464,82 @@ class Task:
 
     def _validate_func(self):
         args = set(inspect.getfullargspec(self.func).args)
-        if args:
-            if self.input_from:
-                # input_from denotes the task will receive input from another step. This leaves it up to the
-                # client to set up the proper output in a previous task
-                if self.func_params:
-                    # only single func params are allowed if they are specified along with input_from
-                    assert (
-                        len(self.func_params) == 1
-                    ), "only single function parameters are allowed when specified together with input_from"
-                pass
-            elif self.inputs:
-                assert args.issuperset(
-                    set([i.name for i in self.inputs])
-                ), "function parameters must intersect with at least one `Input` when `inputs` is specified"
-            else:
-                signature = inspect.signature(self.func)
-                keywords = []
+        # if args:
+        #     if self.inputs:
+        #         assert args.issuperset(
+        #             set([i.name for i in self.inputs])
+        #         ), "function parameters must intersect with at least one `Input` when `inputs` is specified"
+        #     else:
+        #         signature = inspect.signature(self.func)
+        #         keywords = []
 
-                if list(signature.parameters.values()):
-                    for param in list(signature.parameters.values()):
-                        if (
-                            param.default != inspect.Parameter.empty
-                            and param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
-                        ):
-                            keywords.append(param.name)
-                if len(keywords) == len(args):
-                    pass  # these are all kwargs, safe to skip
-                else:
-                    # otherwise, it must be the case that the client passes func_params
-                    assert self.func_params, "no parameters passed for function"
+        #         if list(signature.parameters.values()):
+        #             for param in list(signature.parameters.values()):
+        #                 if (
+        #                     param.default != inspect.Parameter.empty
+        #                     and param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+        #                 ):
+        #                     keywords.append(param.name)
+        #         if len(keywords) == len(args):
+        #             pass  # these are all kwargs, safe to skip
+        #         else:
+        #             # otherwise, it must be the case that the client passes func_params
+        #             assert self.with_param, "no parameters passed for function"
 
-            if self.memoize:
-                assert self.memoize.key in args, "memoize key must be a parameter of the function"
-        if self.func_params:
-            for params in self.func_params:
-                assert args.issuperset(set(params.keys())), "mismatched function arguments and passed parameters"
+        if self.memoize:
+            assert self.memoize.key in args, "memoize key must be a parameter of the function"
 
-    def get_arguments(self) -> IoArgoprojWorkflowV1alpha1Arguments:
+    # if self.func_params:
+    #     for params in self.func_params:
+    #         if isinstance(params, BaseModel):
+    #             params = params.dict()
+    #         assert args.issuperset(set(params.keys())), "mismatched function arguments and passed parameters"
+
+    def assemble_arguments(self) -> IoArgoprojWorkflowV1alpha1Arguments:
         """Assembles and returns the task arguments"""
-        artifacts = [i.get_spec() for i in self.input_artifacts]
         return IoArgoprojWorkflowV1alpha1Arguments(
-            parameters=self.argo_parameters,
-            artifacts=artifacts,
+            parameters=[obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)],
+            artifacts=[obj.as_argument() for obj in self.inputs if isinstance(obj, Artifact)],
         )
 
-    def get_inputs(self) -> IoArgoprojWorkflowV1alpha1Inputs:
-        """Assembles the inputs of the task.
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1Inputs
+    def assemble_inputs(self) -> IoArgoprojWorkflowV1alpha1Inputs:
+        """Assembles the inputs of the task."""
+        return IoArgoprojWorkflowV1alpha1Inputs(
+            parameters=[obj.as_input() for obj in self.inputs if isinstance(obj, Parameter)],
+            artifacts=[obj.as_input() for obj in self.inputs if isinstance(obj, Artifact)],
+        )
 
-        Notes
-        -----
-        Note that this parses specified artifacts differently than `get_argo_input_artifacts`.
-        """
-        artifacts = [i.get_input_spec() for i in self.input_artifacts]
-        return IoArgoprojWorkflowV1alpha1Inputs(parameters=self.argo_parameters, artifacts=artifacts)
-
-    def get_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
+    def assemble_outputs(self) -> IoArgoprojWorkflowV1alpha1Outputs:
         """Assembles and returns the task outputs"""
-        artifacts = [o.get_spec() for o in self.output_artifacts]
-        parameters = [o.get_spec() for o in self.outputs]
-        return IoArgoprojWorkflowV1alpha1Outputs(artifacts=artifacts, parameters=parameters)
+        return IoArgoprojWorkflowV1alpha1Outputs(
+            parameters=[obj.as_output() for obj in self.outputs if isinstance(obj, Parameter)],
+            artifacts=[obj.as_output() for obj in self.outputs if isinstance(obj, Artifact)],
+        )
+
+    def get_outputs_as(self, name):
+        """Gets all the output parameters from this task"""
+        return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
+
+    def get_output(
+        self, name: str, path: Optional[str] = None, as_name: Optional[str] = None
+    ) -> Union[Artifact, Parameter]:
+        if as_name is None:
+            as_name = name
+        obj = next(output for output in self.outputs if output.name == name)
+        if isinstance(obj, Parameter):
+            return Parameter(as_name, value=f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}")
+        elif isinstance(obj, Artifact):
+            if path is None:
+                raise ValueError(f"Output with name `{name}` is of type `Artifact` which requires a `path` argument")
+            return Artifact(as_name, path=path, from_task=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
+        else:
+            raise NotImplementedError()
+
+    def get_result(self) -> str:
+        return f"{{{{tasks.{self.name}.outputs.result}}}}"
+
+    def get_result_as(self, name: str) -> Parameter:
+        return Parameter(name, value=f"{{{{tasks.{self.name}.outputs.result}}}}")
 
     def get_command(self) -> Optional[List[str]]:
         """
@@ -557,7 +557,7 @@ class Task:
             return None
         return [str(arg) for arg in self.args]
 
-    def get_env(self, specs: Optional[List[EnvSpec]]) -> Optional[List[EnvVar]]:
+    def get_env(self, specs: Optional[List[Union[EnvSpec, BaseEnvFromSpec]]]) -> List[EnvVar]:
         """Returns a list of Argo workflow environment variables based on the specified Hera environment specifications.
 
         Parameters
@@ -567,22 +567,18 @@ class Task:
 
         Returns
         -------
-        Optional[List[EnvVar]]
+        List[EnvVar]
             A list of Argo environment specifications, if any specs are provided.
         """
-        r = []
+        env_vars: List[EnvVar] = []
+        env_specs: List[EnvSpec] = [s for s in specs or [] if isinstance(s, EnvSpec)]
+        for spec in env_specs:
+            if spec.value_from_input:
+                self.inputs.append(Parameter(name=spec.name, value=spec.value_from_input))
+            env_vars.append(spec.argo_spec)
+        return env_vars
 
-        if specs:
-            for spec in specs:
-                r.append(spec.argo_spec)
-
-        if self.variables:
-            for variable in self.variables:
-                if self.variables and isinstance(variable, VariableAsEnv):
-                    r.append(variable.get_env_spec().argo_spec)
-        return r
-
-    def get_env_from_source(self, specs: Optional[List[BaseEnvFromSpec]]) -> Optional[List[EnvFromSource]]:
+    def get_env_from_source(self, specs: Optional[List[Union[EnvSpec, BaseEnvFromSpec]]]) -> List[EnvFromSource]:
         """Returns a list of Argo environment variables based on the Hera environment from source specifications.
 
         Parameters
@@ -592,107 +588,122 @@ class Task:
 
         Returns
         -------
-        Optional[List[EnvFromSource]]
+        List[EnvFromSource]
             A list of env variables from specified sources.
         """
-        r = []
+        base_env_specs: List[BaseEnvFromSpec] = [s for s in specs or [] if isinstance(s, BaseEnvFromSpec)]
+        return [s.argo_spec for s in base_env_specs]
 
-        if specs:
-            for spec in specs:
-                r.append(spec.argo_spec)
-        return r
-
-    def get_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:
-        """Returns a list of Argo workflow task parameters based on the specified task function parameters.
+    def get_parameters(self) -> List[Union[IoArgoprojWorkflowV1alpha1Parameter, IoArgoprojWorkflowV1alpha1Artifact]]:
+        """Returns a list of Argo workflow task parameters based on the inputs.
 
         Returns
         -------
         List[IoArgoprojWorkflowV1alpha1Parameter]
             The list of constructed Argo parameters.
 
-        Notes
-        -----
-        If users specify keyword parameters in the func_params payload those will override the kwarg specified in the
-        task function parameters.
         """
-        parameters = []
+        return [i.as_argument() for i in self.inputs]
 
-        if self.input_from:
-            if self.func is not None:
-                # this represents input from another step, which only requires parameter name specifications
-                # the intersection between arg specifications and input_from parameters represents the arguments
-                # that come in from other tasks
-                args = set(inspect.getfullargspec(self.func).args).intersection(set(self.input_from.parameters))
-                for arg in args:
-                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=arg, value=f"{{{{item.{arg}}}}}"))
-            else:
-                parameters.extend(self.input_from.get_spec())
+    def deduce_inputs(self, with_param) -> Optional[str]:
+        """Returns a list of Argo workflow parameters based on the function signature and the function parameters
 
-        if self.inputs:
-            for input_ in self.inputs:
-                if isinstance(input_, InputFrom) and len(self.inputs) > 1:
-                    raise ValueError("cannot use `InputFrom` along with other input types. Use `input_from` instead")
-                parameters.append(input_.get_spec())
-
-        if self.variables:
-            parameters.extend([variable.get_argument_parameter() for variable in self.variables])
-
+        Returns
+        -------
+        List[Parameter]
+            The list of constructed Argo parameters.
+        """
+        parameters: List[Parameter] = []
         if self.func:
-            parameters += self.get_func_parameters()
-
-        return parameters
-
-    def get_func_parameters(self) -> List[IoArgoprojWorkflowV1alpha1Parameter]:
-        """Returns a list of Argo workflow parameters that are for the function passed to the task
-
-        Returns
-        -------
-        List[IoArgoprojWorkflowV1alpha1Parameter]
-            The list of constructed Argo parameters.
-        """
-        parameters = []
-        param_name_cache = set()
-        # if there are any keyword arguments associated with the function signature, we set them as default values
-        # so Argo passes them in
-        signature = inspect.signature(self.func)
-        keywords = []
-
-        if list(signature.parameters.values()):
-            for param in list(signature.parameters.values()):
-                if param.default != inspect.Parameter.empty and param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-                    keywords.append([param.name, param.default])
-
-        if self.func_params:
-            if len(self.func_params) == 1:
-                # if there's a single func_param dict, then we need to map each input key and value pair to a valid
-                # JSON parameter entry
-                for param_name, param_value in self.func_params[0].items():
-                    if isinstance(param_value, BaseModel):
-                        value = param_value.json()
+            signature = inspect.signature(self.func)
+            arg_defaults = {}
+            # if there are any keyword arguments associated with the function signature, we set them as default values
+            # so Argo passes them in
+            if list(signature.parameters.values()):
+                for param in list(signature.parameters.values()):
+                    if (
+                        param.default != inspect.Parameter.empty
+                        and param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+                    ):
+                        arg_defaults[param.name] = param.default
                     else:
-                        value = json.dumps(param_value)
-                    parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=value))
-                    param_name_cache.add(param_name)
-            elif len(self.func_params) > 1:
-                # at this point the init passed validation, so this condition is always false when self.input_from
-                # is specified
+                        arg_defaults[param.name] = None
 
-                # if there's more than 1 input, it's a parallel task, so we map the param names of the
-                # first series of params to item.param_name since the keys are all the same for the func_params
-                for param_name in self.func_params[0].keys():
-                    parameters.append(
-                        IoArgoprojWorkflowV1alpha1Parameter(name=param_name, value=f"{{{{item.{param_name}}}}}")
+            non_default_args = [k for k, v in arg_defaults.items() if v is None]
+
+            if with_param is None:
+                if len(non_default_args) == 0:
+                    parameters += [Parameter(name=k, value=v) for k, v in arg_defaults.items()]
+                else:
+                    missing_args = set(non_default_args) - set(
+                        [p.name for p in self.inputs if isinstance(p, Parameter)]
                     )
-                    param_name_cache.add(param_name)
-        for name, value in keywords:
-            if isinstance(value, BaseModel):
-                value = value.json()
+                    if missing_args:
+                        raise ValueError(
+                            f"`with_params` is empty and there exists non-default arguments which aren't covered by `inputs`: {missing_args}"
+                        )
+            elif isinstance(with_param, str):
+                # Pure string or string-reference from another task.
+                # We assume that each object contains all arguments for function:
+                unique_param_names = list(arg_defaults.keys())
+                if len(unique_param_names) == 1:
+                    parameters.append(Parameter(name=unique_param_names[0], value="{{item}}"))
+                else:
+                    for name in unique_param_names:
+                        parameters.append(Parameter(name=name, value=f"{{{{item.{name}}}}}"))
             else:
-                value = json.dumps(value)
-            if name in param_name_cache:
-                continue  # user override of a kwarg
-            parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, default=value))
-        return parameters
+                unique_input_names = set()
+                # with_param assumed to be a dictionary
+                assert with_param is not None
+
+                first_type = type(with_param[0])
+                if not all((type(x) is first_type) for x in with_param):
+                    raise ValueError("Non-homogeneous types in `with_param`")
+
+                # with_params should all be of the same type at this point
+                with_param_is_dicts = isinstance(with_param[0], dict)
+                if with_param_is_dicts:
+                    for param in with_param:
+                        unique_input_names.update(param.keys())
+                else:
+                    if len(non_default_args) > 1:
+                        raise ValueError(
+                            f"function signature has multiple non-default arguments ({non_default_args})"
+                            " which requires a dict-mapping in `with_param`"
+                        )
+                    else:
+                        # Add the exclusive non-default argument
+                        unique_input_names.add(non_default_args[0])
+
+                # We need to make sure these args are provided in `with_param`
+                missing_args = set(non_default_args) - set(unique_input_names)
+                if missing_args:
+                    raise ValueError(
+                        f"Incomplete argument mapping between function and `with_params`: {missing_args}`"
+                    )
+
+                if with_param_is_dicts:
+                    for param_name in unique_input_names:
+                        parameters.append(Parameter(name=param_name, value=f"{{{{item.{param_name}}}}}"))
+                else:
+                    # Function has only one mandatory argument
+                    main_param_name = list(unique_input_names)[0]
+                    parameters.append(Parameter(name=main_param_name, value="{{item}}"))
+
+                # Add default arguments
+                for param_name in arg_defaults.keys() - unique_input_names:
+                    parameters.append(Parameter(name=param_name, value=arg_defaults.get(param_name)))
+
+        # Add all accumulated parameters to inputs
+        for p in parameters:
+            self.inputs.append(p)
+
+        # self.with_param should always be Optional[str]
+        # if len(parameters) > 0 and with_param is not None and not isinstance(with_param, str):
+        if with_param and not isinstance(with_param, str):
+            with_param = json.dumps(with_param)
+
+        return with_param
 
     def get_param_script_portion(self) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
@@ -747,7 +758,7 @@ class Task:
         script += textwrap.dedent(s)
         return textwrap.dedent(script)
 
-    def get_resources(self) -> ResourceRequirements:
+    def assemble_resources(self) -> ResourceRequirements:
         """Assembles an Argo resource requirements object with the given resource configuration.
 
         Returns
@@ -783,29 +794,6 @@ class Task:
             resource.limits["nvidia.com/gpu"] = str(self.resources.gpus)
         return resource
 
-    def get_parallel_items(self) -> List[_Item]:
-        """Constructs a list of items to be used in a parallel task. This is typically consumed in order to be passed
-        to the with_items field of an Argo DAG task.
-
-        Returns
-        -------
-        List[_Item]
-            A list of dictionaries keyed by the argument name to the argument value.
-        """
-        items: List[_Item] = []
-        if not self.func_params:
-            return items
-
-        for func_param in self.func_params:
-            item = {}
-            for k, v in func_param.items():
-                if isinstance(v, BaseModel):
-                    item[k] = v.json()
-                else:
-                    item[k] = json.dumps(v)  # type: ignore
-            items.append(_Item(value=item))
-        return items
-
     def get_volume_mounts(self) -> List[VolumeMount]:
         """Assembles the list of volumes to be mounted by the task.
 
@@ -838,7 +826,7 @@ class Task:
             "command": self.get_command(),
             "args": self.get_args(),
             "source": self.get_script(),
-            "resources": self.argo_resources,
+            # "resources": self.argo_resources,
             "env": self.env,
             "env_from": self.env_from,
             "working_dir": self.working_dir,
@@ -885,7 +873,7 @@ class Task:
         container = Container(**container_args)
         return container
 
-    def get_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
+    def assemble_task_template(self) -> IoArgoprojWorkflowV1alpha1Template:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
         configuration required for the task be executed.
 
@@ -1002,11 +990,8 @@ class Task:
         else:
             setattr(task, "template", self.argo_template.name)
 
-        if self.input_from:
-            setattr(task, "with_param", f"{{{{tasks.{self.input_from.name}.outputs.result}}}}")
-        elif self.func_params and len(self.func_params) > 1:
-            items = self.get_parallel_items()
-            setattr(task, "with_items", items)
+        if self.with_param:
+            setattr(task, "with_param", self.with_param)
         return task
 
 

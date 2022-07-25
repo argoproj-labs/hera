@@ -13,10 +13,7 @@ from hera import (
     ExistingVolume,
     GCSArtifact,
     GitArtifact,
-    GlobalInputParameter,
     GPUToleration,
-    InputFrom,
-    InputParameter,
     Memoize,
     Operator,
     OutputPathParameter,
@@ -140,7 +137,7 @@ def test_script_getter_returns_expected_string(op, typed_op):
         "except: a = '''{{inputs.parameters.a}}'''\n"
         "\n"
         "print(a)\n"
-        "return [{\"a\": (a, a)}]\n"
+        'return [{"a": (a, a)}]\n'
     )
 
 
@@ -180,7 +177,7 @@ print(42)
 def test_resources_returned_with_appropriate_limits(op):
     r = Resources()
     t = Task("t", op, [{"a": 1}], resources=r)
-    resources = t.get_resources()
+    resources = t.assemble_resources()
 
     assert resources.limits["cpu"] == "1"
     assert resources.limits["memory"] == "4Gi"
@@ -189,7 +186,7 @@ def test_resources_returned_with_appropriate_limits(op):
 def test_resources_returned_with_gpus(op):
     r = Resources(gpus=2)
     t = Task("t", op, [{"a": 1}], resources=r)
-    resources = t.get_resources()
+    resources = t.assemble_resources()
 
     assert resources.requests["nvidia.com/gpu"] == "2"
     assert resources.limits["nvidia.com/gpu"] == "2"
@@ -281,7 +278,7 @@ def test_task_spec_returns_with_single_values(op):
 
 def test_task_template_does_not_contain_gpu_references(op):
     t = Task("t", op, [{"a": 1}], resources=Resources())
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
 
     assert tt.tolerations == []
     assert not hasattr(tt, "retry_strategy")
@@ -304,7 +301,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
         affinity=affinity,
         memoize=Memoize("a", "b", "1h"),
     )
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
@@ -340,7 +337,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
 
 def test_task_template_does_not_add_affinity_when_none(no_op):
     t = Task("t", no_op)
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
 
     assert not hasattr(tt, "affinity")
 
@@ -351,7 +348,7 @@ def test_task_template_contains_expected_retry_strategy(no_op):
     assert t.retry.duration == 3
     assert t.retry.max_duration == 9
 
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     tr = t.get_retry_strategy()
 
     template_backoff = tt.retry_strategy.backoff
@@ -504,35 +501,35 @@ def test_task_does_not_contain_specified_security_context(no_op):
 
 def test_task_template_has_correct_labels(op):
     t = Task("t", op, [{"a": 1}], resources=Resources(), labels={"foo": "bar"})
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     expected_labels = {"foo": "bar"}
     assert tt.metadata.labels == expected_labels
 
 
 def test_task_template_has_correct_annotations(op):
     t = Task("t", op, [{"a": 1}], resources=Resources(), annotations={"foo": "bar"})
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     expected_annotations = {"foo": "bar"}
     assert tt.metadata.annotations == expected_annotations
 
 
 def test_task_with_config_map_env_variable(no_op):
     t = Task("t", no_op, env_specs=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
 
 
 def test_task_with_config_map_env_from(no_op):
     t = Task("t", no_op, env_from_specs=[ConfigMapEnvFromSpec(prefix="p", config_map_name="cn")])
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     assert tt.script.env_from[0].prefix == "p"
     assert tt.script.env_from[0].config_map_ref.name == "cn"
 
 
 def test_task_should_create_task_with_container_template():
     t = Task("t", command=["cowsay"])
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
 
     assert tt.container.image == "python:3.7"
     assert tt.container.command[0] == "cowsay"
@@ -574,7 +571,7 @@ def test_task_adds_custom_resources(no_op):
             }
         ),
     )
-    r = t.get_resources()
+    r = t.assemble_resources()
 
     assert r.requests["cpu"] == "1"
     assert r.requests["memory"] == "4Gi"
@@ -657,13 +654,13 @@ def test_task_sets_continue_behavior():
 
 def test_task_has_expected_retry_limit():
     t = Task("t", retry=Retry(limit=5))
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     assert tt.retry_strategy.limit == "5"
 
 
 def test_task_has_expected_retry_policy():
     t = Task("t", retry=Retry(retry_policy=RetryPolicy.Always))
-    tt = t.get_task_template()
+    tt = t.assemble_task_template()
     assert tt.retry_strategy.retry_policy == "Always"
 
 
