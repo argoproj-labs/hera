@@ -11,9 +11,8 @@ def consume(msg: str):
 
 
 with Workflow("io", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")) as w:
-    (
-        Task("p", produce, outputs=[OutputPathParameter("msg", "/test.txt")])
-        >> Task("c", consume, inputs=[InputParameter("msg", p.name, "msg")])
-    )
+    p = Task("p", produce, outputs=[OutputPathParameter("msg", "/test.txt")])
+    c = Task("c", consume, inputs=[InputParameter("msg", p.name, "msg")])
+    p >> c
 
 w.create()
