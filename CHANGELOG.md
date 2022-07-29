@@ -29,6 +29,13 @@ The general format is:
 
 ```
 
+# 3.6.2 - DATE (29/07/2022)
+
+### Changed
+
+- `Config.host` and `Config.verify_ssl` are now public; `WorkflowService.get_workflow_link` now references `Config.host`
+  to properly pull the host when using `set_global_host`.
+
 # 3.6.1 - DATE (17/07/2022)
 
 ### Removed

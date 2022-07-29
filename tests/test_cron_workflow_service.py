@@ -17,8 +17,8 @@ from hera import CronWorkflowService
 def test_ws_has_expected_fields_upon_init():
     ws = CronWorkflowService(host="https://abc.com", token="abc", verify_ssl=True, namespace="argo")
 
-    assert ws._host == "https://abc.com"
-    assert ws._verify_ssl
+    assert ws._config.host == "https://abc.com"
+    assert ws._config.verify_ssl
     assert ws._namespace == "argo"
     assert isinstance(ws.service, CronWorkflowServiceApi)
     assert isinstance(ws.service.api_client, ApiClient)

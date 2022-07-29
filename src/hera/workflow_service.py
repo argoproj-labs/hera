@@ -40,10 +40,9 @@ class WorkflowService:
         token: Optional[str] = None,
         namespace: str = "default",
     ):
-        self._host = host
-        self._verify_ssl = verify_ssl
         self._namespace = namespace
-        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
+        self._config = Config(host=host, verify_ssl=verify_ssl)
+        api_client = Client(self._config, token=token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
     def create(
@@ -104,7 +103,7 @@ class WorkflowService:
         str
             The workflow link.
         """
-        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
+        return f"{self._config.host}/workflows/{self._namespace}/{name}?tab=workflow"
 
     def get_workflow(self, name: str, namespace: str = "default") -> IoArgoprojWorkflowV1alpha1Workflow:
         """Fetches a workflow by the specified name and namespace combination.
