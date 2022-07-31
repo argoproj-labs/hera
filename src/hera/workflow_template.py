@@ -1,7 +1,8 @@
 """The implementation of a Hera workflowTemplate for Argo-based workflowTemplates"""
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
@@ -14,6 +15,7 @@ from hera.affinity import Affinity
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
+from hera.variable import Variable
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_template_service import WorkflowTemplateService
 
@@ -51,6 +53,8 @@ class WorkflowTemplate:
         they submit the workflow to.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
+    variables: Optional[List[Variable]] = None
+        A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
     """
 
     def __init__(
@@ -65,6 +69,7 @@ class WorkflowTemplate:
         ttl_strategy: Optional[TTLStrategy] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
+        variables: Optional[List[Variable]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -77,6 +82,7 @@ class WorkflowTemplate:
         self.node_selector = node_selectors
         self.affinity = affinity
         self.in_context = False
+        self.variables = variables
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -124,6 +130,15 @@ class WorkflowTemplate:
             setattr(self.dag_template, "node_selector", self.node_selector)
             setattr(self.template, "node_selector", self.node_selector)
             setattr(self.exit_template, "node_selector", self.node_selector)
+
+        if self.variables:
+            setattr(
+                self.spec,
+                "arguments",
+                IoArgoprojWorkflowV1alpha1Arguments(
+                    parameters=[variable.get_argument_parameter() for variable in self.variables],
+                ),
+            )
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 
