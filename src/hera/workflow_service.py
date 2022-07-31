@@ -40,10 +40,9 @@ class WorkflowService:
         token: Optional[str] = None,
         namespace: str = "default",
     ):
-        self._host = host
-        self._verify_ssl = verify_ssl
-        self.namespace = namespace
-        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
+        self._namespace = namespace
+        self._config = Config(host=host, verify_ssl=verify_ssl)
+        api_client = Client(self._config, token=token).api_client
         self.service = WorkflowServiceApi(api_client=api_client)
 
     def create(
@@ -67,7 +66,7 @@ class WorkflowService:
         argo.workflows.client.ApiException
         """
         return self.service.create_workflow(
-            self.namespace,
+            self._namespace,
             IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
@@ -88,7 +87,7 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException
         """
-        return self.service.delete_workflow(self.namespace, name)
+        return self.service.delete_workflow(self._namespace, name)
 
     def get_workflow_link(self, name: str) -> str:
         """Assembles a workflow link for the given workflow name. Note that the returned path works only for Argo.
@@ -103,7 +102,7 @@ class WorkflowService:
         str
             The workflow link.
         """
-        return f"{self._host}/workflows/{self.namespace}/{name}?tab=workflow"
+        return f"{self._config.host}/workflows/{self._namespace}/{name}?tab=workflow"
 
     def get_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Fetches a workflow by the specified name and namespace combination.
@@ -117,7 +116,7 @@ class WorkflowService:
         -------
         IoArgoprojWorkflowV1alpha1Workflow
         """
-        return self.service.get_workflow(self.namespace, name, _check_return_type=False)
+        return self.service.get_workflow(self._namespace, name, _check_return_type=False)
 
     def get_workflow_status(self, name: str) -> WorkflowStatus:
         """Returns the workflow status of the workflow identified by the specified name.

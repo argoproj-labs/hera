@@ -28,8 +28,8 @@ class Config:
     """
 
     def __init__(self, host: Optional[str] = None, verify_ssl: bool = True):
-        self._host = host or self._assemble_host()
-        self._verify_ssl = verify_ssl
+        self.host = host or self._assemble_host()
+        self.verify_ssl = verify_ssl
         self._config = self.__get_config()
 
     def _assemble_host(self) -> str:
@@ -80,8 +80,8 @@ class Config:
 
         Use this together with Client to instantiate a WorkflowService/CronWorkflowService.
         """
-        config = ArgoConfig(host=self._host)
-        config.verify_ssl = self._verify_ssl
+        config = ArgoConfig(host=self.host)
+        config.verify_ssl = self.verify_ssl
         return config
 
     @property

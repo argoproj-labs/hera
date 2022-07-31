@@ -41,10 +41,9 @@ class CronWorkflowService:
         token: Optional[str] = None,
         namespace: str = "default",
     ):
-        self._host = host
-        self._verify_ssl = verify_ssl
-        self.namespace = namespace
-        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
+        self._namespace = namespace
+        self._config = Config(host=host, verify_ssl=verify_ssl)
+        api_client = Client(self._config, token=token).api_client
         self.service = CronWorkflowServiceApi(api_client=api_client)
 
     def create(self, cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
@@ -67,7 +66,7 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.create_cron_workflow(
-            self.namespace,
+            self._namespace,
             IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
         )
@@ -96,7 +95,7 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.update_cron_workflow(
-            self.namespace,
+            self._namespace,
             name,
             IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
@@ -118,7 +117,7 @@ class CronWorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return self.service.delete_cron_workflow(self.namespace, name)
+        return self.service.delete_cron_workflow(self._namespace, name)
 
     def suspend(self, name: str) -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
@@ -139,7 +138,7 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.suspend_cron_workflow(
-            self.namespace,
+            self._namespace,
             name,
             body=IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest(name=name, namespace=self.namespace),
             _check_return_type=False,
@@ -164,7 +163,7 @@ class CronWorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.resume_cron_workflow(
-            self.namespace,
+            self._namespace,
             name,
             body=IoArgoprojWorkflowV1alpha1WorkflowResumeRequest(name=name, namespace=self.namespace),
             _check_return_type=False,
@@ -183,7 +182,7 @@ class CronWorkflowService:
         str
             The cron workflow link.
         """
-        return f"{self._host}/cron-workflows/{self.namespace}/{name}"
+        return f"{self._config.host}/cron-workflows/{self._namespace}/{name}"
 
     def get_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Fetches a workflow by the specified name and namespace combination.
@@ -197,4 +196,4 @@ class CronWorkflowService:
         -------
         IoArgoprojWorkflowV1alpha1Workflow
         """
-        return self.service.get_cron_workflow(self.namespace, name, _check_return_type=False)
+        return self.service.get_cron_workflow(self._namespace, name, _check_return_type=False)

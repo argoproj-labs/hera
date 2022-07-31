@@ -39,10 +39,9 @@ class WorkflowTemplateService:
         token: Optional[str] = None,
         namespace: str = "default",
     ):
-        self._host = host
-        self._verify_ssl = verify_ssl
-        self.namespace = namespace
-        api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
+        self._namespace = namespace
+        self._config = Config(host=host, verify_ssl=verify_ssl)
+        api_client = Client(self._config, token=token).api_client
         self.service = WorkflowTemplateServiceApi(api_client=api_client)
 
     def create(
@@ -66,7 +65,7 @@ class WorkflowTemplateService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return self.service.create_workflow_template(
-            self.namespace,
+            self._namespace,
             IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest(template=workflow_template, _check_type=False),
             _check_return_type=False,
         )
@@ -87,4 +86,4 @@ class WorkflowTemplateService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return self.service.delete_workflow_template(self.namespace, name)
+        return self.service.delete_workflow_template(self._namespace, name)
