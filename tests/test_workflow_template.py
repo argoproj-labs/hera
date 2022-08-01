@@ -34,6 +34,7 @@ def test_wft_does_not_contain_sa_if_one_is_not_specified(ws):
 @pytest.fixture
 def workflow_security_context_kwargs():
     sc_kwargs = {
+        "privileged": True,
         "run_as_user": 1000,
         "run_as_group": 1001,
         "fs_group": 1002,
@@ -50,7 +51,7 @@ def test_wft_contains_specified_security_context(wts, workflow_security_context_
     assert w.spec.security_context == expected_security_context
 
 
-@pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "fs_group", "run_as_non_root"])
+@pytest.mark.parametrize("set_only", ["privileged", "run_as_user", "run_as_group", "fs_group", "run_as_non_root"])
 def test_wft_specified_partial_security_context(ws, set_only, workflow_security_context_kwargs):
     one_param_kwargs = {set_only: workflow_security_context_kwargs[set_only]}
     wsc = WorkflowSecurityContext(**one_param_kwargs)
