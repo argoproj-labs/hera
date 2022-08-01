@@ -29,6 +29,17 @@ The general format is:
 
 ```
 
+# 3.6.3 - DATE (01/08/2022)
+
+### Changed
+
+- `pytz` version from `^2021.3` to `>=2021.3`
+
+### Added
+
+- workflow template parameters
+- privileged option to the security context
+
 # 3.6.2 - DATE (29/07/2022)
 
 ### Changed
