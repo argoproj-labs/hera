@@ -140,7 +140,7 @@ class CronWorkflowService:
         return self.service.suspend_cron_workflow(
             self._namespace,
             name,
-            body=IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest(name=name, namespace=self.namespace),
+            body=IoArgoprojWorkflowV1alpha1WorkflowSuspendRequest(name=name, namespace=self._namespace),
             _check_return_type=False,
         )
 
@@ -165,7 +165,7 @@ class CronWorkflowService:
         return self.service.resume_cron_workflow(
             self._namespace,
             name,
-            body=IoArgoprojWorkflowV1alpha1WorkflowResumeRequest(name=name, namespace=self.namespace),
+            body=IoArgoprojWorkflowV1alpha1WorkflowResumeRequest(name=name, namespace=self._namespace),
             _check_return_type=False,
         )
 
