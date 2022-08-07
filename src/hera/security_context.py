@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class BaseSecurityContext(BaseModel):
     """Abstract class to accommodate the shared functionality of task and workflow context."""
 
+    privileged: Optional[bool] = None
     run_as_user: Optional[int] = None
     run_as_group: Optional[int] = None
     run_as_non_root: Optional[bool] = None
@@ -22,6 +23,8 @@ class WorkflowSecurityContext(BaseSecurityContext):
 
     Attributes
     ----------
+    privileged: Optional[bool] = None
+        Allow all the task's container to run as privileged
     run_as_user: Optional[int]
         Sets the user id of the user running in all the containers in the workflow.
     run_as_group: Optional[int]
@@ -45,6 +48,8 @@ class TaskSecurityContext(BaseSecurityContext):
 
     Attributes
     ----------
+    privileged: Optional[bool] = None
+        Allow all the task's container to run as privileged
     run_as_user: Optional[int]
         Sets the user id of the user running in the task's container.
     run_as_group: Optional[int]

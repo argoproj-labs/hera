@@ -460,6 +460,7 @@ def test_task_output_artifact_returns_expected_list(no_op, out_artifact):
 @pytest.fixture
 def task_security_context_kwargs():
     sc_kwargs = {
+        "privileged": True,
         "run_as_user": 1000,
         "run_as_group": 1001,
         "run_as_non_root": False,
@@ -481,7 +482,7 @@ def test_task_contains_specified_security_context(no_op, task_security_context_k
     assert t.argo_template.script.security_context == expected_security_context
 
 
-@pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "run_as_non_root", "additional_capabilities"])
+@pytest.mark.parametrize("set_only", ["privileged", "run_as_user", "run_as_group", "run_as_non_root", "additional_capabilities"])
 def test_task_specified_partial_security_context(no_op, set_only, task_security_context_kwargs):
     one_param_kwargs = {set_only: task_security_context_kwargs[set_only]}
     tsc = TaskSecurityContext(**one_param_kwargs)
