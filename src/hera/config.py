@@ -2,14 +2,18 @@
 import os
 from typing import Optional
 
-import urllib3
 from argo_workflows.api_client import Configuration as ArgoConfig
 
 from hera.host_config import get_global_host
 
-# __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
-# explicitly asked for it to disable SSL, it's safe to ignore the warning.
-urllib3.disable_warnings()
+try:
+    import urllib3
+
+    # __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
+    # explicitly asked for it to disable SSL, it's safe to ignore the warning.
+    urllib3.disable_warnings()
+except ImportError:
+    pass
 
 
 class Config:
