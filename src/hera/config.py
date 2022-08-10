@@ -12,7 +12,7 @@ try:
     # __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
     # explicitly asked for it to disable SSL, it's safe to ignore the warning.
     urllib3.disable_warnings()
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 
