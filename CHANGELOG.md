@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 3.6.4 - DATE (11/08/2022)
+
+### Removed
+
+- Remove python <3.11 constraint and unpin transitive dependencies
+
 # 3.6.3 - DATE (01/08/2022)
 
 ### Changed
