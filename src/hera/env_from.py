@@ -16,7 +16,7 @@ class BaseEnvFromSpec(BaseModel):
     @property
     def argo_spec(self) -> EnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class SecretEnvFromSpec(BaseEnvFromSpec):
