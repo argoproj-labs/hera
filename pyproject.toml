@@ -51,13 +51,6 @@ line-length = 119
 target-version = ['py37']
 include = '\.pyi?$'
 
-[tool.coverage.report]
-exclude_lines = [
-    "if TYPE_CHECKING:",
-    "pragma: no cover",
-    "raise NotImplementedError",
-]
-
 [tool.flake8]
 # do not look here for things to lint
 exclude = [".git", "__init__.py"]
