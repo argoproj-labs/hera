@@ -70,11 +70,11 @@ class BaseVolume(BaseModel):
 
     def get_volume(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task"""
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class EmptyDirVolume(BaseVolume):
