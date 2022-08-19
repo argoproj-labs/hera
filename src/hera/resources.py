@@ -12,7 +12,7 @@ class Resources(BaseModel):
 
     Attributes
     ----------
-    min_cpu: Union[int, float] = 1
+    min_cpu: Union[float, int] = 1
         The minimum amount of CPU to request.
     min_mem: str = '4Gi'
         The minimum amount of memory to request.
@@ -20,7 +20,7 @@ class Resources(BaseModel):
         A custom definition of resources, mapped from key to resource specification. Some users have access to custom
         cloud resources, such as "habana.ai/gaudi", which are outside of the knowledge of vanilla K8S, but are provided
         by the K8S engine of the cloud provider. This allows users to take advantage of those.
-    max_cpu: Optional[Union[int, float]] = None
+    max_cpu: Optional[Union[float, int]] = None
         The maximum amount of CPU to request. If this is not specified it's automatically set to min_cpu when
         `overwrite_maxs` is True.
     max_mem: Optional[str]
@@ -42,11 +42,11 @@ class Resources(BaseModel):
         `overwrite_maxs` is False.
     """
 
-    min_cpu: Union[int, float] = 1
+    min_cpu: Union[float, int] = 1
     min_mem: str = "4Gi"
     min_custom_resources: Optional[Dict[str, str]] = None
 
-    max_cpu: Optional[Union[int, float]] = None
+    max_cpu: Optional[Union[float, int]] = None
     max_mem: Optional[str] = None
     max_custom_resources: Optional[Dict[str, str]] = None
 
