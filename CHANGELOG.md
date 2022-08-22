@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 3.6.5 - DATE (22/08/2022)
+
+### Changed
+
+- Fix float type handling for max_cpu and min_cpu properties in Resources class. 
+
 # 3.6.4 - DATE (11/08/2022)
 
 ### Removed
