@@ -966,10 +966,8 @@ class Task:
         if self.tolerations is None:
             return []
 
-        ts = []
-        for t in self.tolerations:
-            ts.append(ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value))
-        return ts if ts else []
+        ts = [t.to_argo_toleration() for t in self.tolerations]
+        return ts
 
     def get_continue_on(self) -> Optional[IoArgoprojWorkflowV1alpha1ContinueOn]:
         """Assembles and returns the `continue_on` task setting"""

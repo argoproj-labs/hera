@@ -1,5 +1,6 @@
 from typing import Optional
 
+from argo_workflows.models import Toleration as ArgoToleration
 from pydantic import BaseModel
 
 
@@ -26,6 +27,9 @@ class Toleration(BaseModel):
     effect: str
     operator: str
     value: Optional[str] = ""
+
+    def to_argo_toleration(self):
+        return ArgoToleration(key=self.key, effect=self.effect, operator=self.operator, value=self.value)
 
 
 GPUToleration = Toleration(key="nvidia.com/gpu", effect="NoSchedule", operator="Equal", value="present")

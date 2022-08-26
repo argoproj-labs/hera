@@ -18,6 +18,7 @@ from hera.affinity import Affinity
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
@@ -81,6 +82,8 @@ class Workflow:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    tolerations: Optional[List[Toleration]] = None
+        List of tolerations for the pod executing the task. This is used for scheduling purposes.
     """
 
     def __init__(
@@ -101,6 +104,7 @@ class Workflow:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        tolerations: Optional[List[Toleration]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -116,6 +120,7 @@ class Workflow:
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
         self.variables = variables
+        self.tolerations = tolerations
         self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -199,6 +204,11 @@ class Workflow:
                     parameters=[variable.get_argument_parameter() for variable in self.variables],
                 ),
             )
+
+        if self.tolerations:
+            ts = [t.to_argo_toleration() for t in self.tolerations]
+            setattr(self.template, "tolerations", ts)
+            setattr(self.exit_template, "tolerations", ts)
 
         self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 
