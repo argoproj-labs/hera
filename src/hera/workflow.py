@@ -240,15 +240,4 @@ class Workflow:
     def get_parameter(self, name: str):
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
             raise KeyError("`{name}` not in workflow parameters")
-        # return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
-        return f"{{{{workflow.parameters.{name}}}}}"
-
-    # Reserved for CronWorkflow
-    # def update(self):
-    #     raise NotImplementedError()
-
-    # def resume(self):
-    #     raise NotImplementedError()
-
-    # def suspend(self):
-    #     raise NotImplementedError()
+        return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")

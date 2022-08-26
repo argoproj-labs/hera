@@ -8,7 +8,6 @@ from typing import Callable, Dict, List, Optional, Union
 from hera import (
     EnvSpec,
     ExistingVolume,
-    InputFrom,
     Resources,
     Retry,
     Task,

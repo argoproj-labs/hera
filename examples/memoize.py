@@ -1,11 +1,4 @@
-from hera import (
-    InputParameter,
-    Memoize,
-    OutputPathParameter,
-    Task,
-    Workflow,
-    WorkflowService,
-)
+from hera import Memoize, Parameter, Task, Workflow, WorkflowService
 
 
 def generate():
@@ -18,8 +11,8 @@ def consume(value):
 
 
 with Workflow("memoize", service=WorkflowService(host="my-argo-server.com", token="my-token")) as w:
-    g = Task("g", generate, outputs=[OutputPathParameter("out", "/out")])
-    c = Task("c", consume, inputs=[InputParameter("value", g.name, "out")], memoize=Memoize("value", "memoize", "c"))
+    g = Task("g", generate, outputs=[Parameter("out", value_from=dict(path="/out"))])
+    c = Task("c", consume, inputs=[g.get_output("out")], memoize=Memoize("value", "memoize", "c"))
     g >> c
 
 w.create()
