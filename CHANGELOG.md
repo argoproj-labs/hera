@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 3.7.0 - DATE (26/08/2022)
+
+### Added
+
+- tolerations can now be set via workflow
+
 # 3.6.4 - DATE (11/08/2022)
 
 ### Removed

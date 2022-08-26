@@ -14,6 +14,7 @@ from hera import (
     SecretVolume,
     Task,
     TemplateRef,
+    Toleration,
     TTLStrategy,
     Variable,
     Volume,
@@ -374,3 +375,18 @@ def test_wf_sets_variables_as_global_args(ws):
         assert w.variables[0].value == "42"
         assert hasattr(w.spec, "arguments")
         assert len(getattr(w.spec, "arguments").parameters) == 1
+
+
+def test_wf_sets_tolerations(ws):
+    with Workflow(
+        "w", service=ws, tolerations=[Toleration(key="a", effect="NoSchedule", operator="Exists", value="")]
+    ) as w:
+        assert len(w.tolerations) == 1
+        assert w.tolerations[0].key == "a"
+        assert w.tolerations[0].effect == "NoSchedule"
+        assert w.tolerations[0].operator == "Exists"
+        assert w.tolerations[0].value == ""
+        assert hasattr(w.template, "tolerations")
+        assert len(getattr(w.template, "tolerations")) == 1
+        assert hasattr(w.exit_template, "tolerations")
+        assert len(getattr(w.exit_template, "tolerations")) == 1
