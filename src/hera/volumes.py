@@ -92,7 +92,7 @@ class EmptyDirVolume(BaseVolume):
     """
 
     # default to empty size spec to allow for unlimited memory consumption
-    size: str = ""
+    size: Optional[str] = None
     # default to /dev/shm since it represents the shared memory concept in Unix systems
     mount_path: str = "/dev/shm"
 
@@ -104,9 +104,10 @@ class EmptyDirVolume(BaseVolume):
         Volume
             The volume representation that can be mounted in workflow steps/tasks.
         """
-        size_limit = self.size if self.size else ""
-        empty_dir = EmptyDirVolumeSource(medium="Memory", size_limit=size_limit)
-        return ArgoVolume(name=self.name, empty_dir=empty_dir)
+        if self.size is not None:
+            return ArgoVolume(name=self.name, empty_dir=EmptyDirVolumeSource(medium="Memory", size_limit=self.size))
+        else:
+            return ArgoVolume(name=self.name, empty_dir=EmptyDirVolumeSource(medium="Memory"))
 
     def get_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""

@@ -16,6 +16,7 @@ from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
+from hera.volumes import BaseVolume, Volume
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_template_service import WorkflowTemplateService
 
@@ -55,6 +56,8 @@ class WorkflowTemplate:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    volumes: Optional[List[BaseVolume]] = None
+        List of volumes to mount to all the tasks of the workflow.
     """
 
     def __init__(
@@ -70,6 +73,7 @@ class WorkflowTemplate:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        volumes: Optional[List[BaseVolume]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -83,6 +87,7 @@ class WorkflowTemplate:
         self.affinity = affinity
         self.in_context = False
         self.variables = variables
+        self.volumes = volumes
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -106,6 +111,12 @@ class WorkflowTemplate:
             volume_claim_templates=[],
             parallelism=self.parallelism,
         )
+        if self.volumes is not None:
+            for volume in self.volumes:
+                if isinstance(volume, Volume):
+                    self.spec.volume_claim_templates.append(volume.get_claim_spec())
+                else:
+                    self.spec.volumes.append(volume.get_volume())
 
         if self.ttl_strategy:
             setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)

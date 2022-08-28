@@ -1,4 +1,5 @@
 from hera._context import context
+from hera._version import version
 from hera.affinity import (
     Affinity,
     Expression,
@@ -72,3 +73,6 @@ from hera.workflow_service import WorkflowService
 from hera.workflow_status import WorkflowStatus
 from hera.workflow_template import WorkflowTemplate
 from hera.workflow_template_service import WorkflowTemplateService
+
+__version__ = version
+__version_info__ = version.split(".")

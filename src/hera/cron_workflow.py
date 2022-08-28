@@ -27,6 +27,7 @@ from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
+from hera.volumes import BaseVolume, Volume
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 
 
@@ -81,6 +82,8 @@ class CronWorkflow:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    volumes: Optional[List[BaseVolume]] = None
+        List of volumes to mount to all the tasks of the workflow.
     """
 
     def __init__(
@@ -103,6 +106,7 @@ class CronWorkflow:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        volumes: Optional[List[BaseVolume]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f"{timezone} is not a valid timezone")
@@ -123,6 +127,7 @@ class CronWorkflow:
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
         self.variables = variables
+        self.volumes = volumes
         self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -157,6 +162,12 @@ class CronWorkflow:
                 volume_claim_templates=[],
                 parallelism=self.parallelism,
             )
+        if self.volumes is not None:
+            for volume in self.volumes:
+                if isinstance(volume, Volume):
+                    self.spec.volume_claim_templates.append(volume.get_claim_spec())
+                else:
+                    self.spec.volumes.append(volume.get_volume())
 
         if self.ttl_strategy:
             setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)

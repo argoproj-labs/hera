@@ -18,9 +18,11 @@ from hera.affinity import Affinity
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
+from hera.volumes import BaseVolume, Volume
 from hera.workflow_editors import (
     add_head,
     add_tail,
@@ -81,6 +83,10 @@ class Workflow:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    tolerations: Optional[List[Toleration]] = None
+        List of tolerations for the pod executing the task. This is used for scheduling purposes.
+    volumes: Optional[List[BaseVolume]] = None
+        List of volumes to mount to all the tasks of the workflow.
     """
 
     def __init__(
@@ -101,6 +107,8 @@ class Workflow:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        tolerations: Optional[List[Toleration]] = None,
+        volumes: Optional[List[BaseVolume]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -116,6 +124,8 @@ class Workflow:
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
         self.variables = variables
+        self.tolerations = tolerations
+        self.volumes = volumes
         self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -150,6 +160,12 @@ class Workflow:
                 volume_claim_templates=[],
                 parallelism=self.parallelism,
             )
+        if self.volumes is not None:
+            for volume in self.volumes:
+                if isinstance(volume, Volume):
+                    self.spec.volume_claim_templates.append(volume.get_claim_spec())
+                else:
+                    self.spec.volumes.append(volume.get_volume())
 
         if ttl_strategy:
             setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)
@@ -199,6 +215,11 @@ class Workflow:
                     parameters=[variable.get_argument_parameter() for variable in self.variables],
                 ),
             )
+
+        if self.tolerations:
+            ts = [t.to_argo_toleration() for t in self.tolerations]
+            setattr(self.template, "tolerations", ts)
+            setattr(self.exit_template, "tolerations", ts)
 
         self.workflow = IoArgoprojWorkflowV1alpha1Workflow(metadata=self.metadata, spec=self.spec)
 

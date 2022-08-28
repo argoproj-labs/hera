@@ -14,6 +14,7 @@ from hera import (
     SecretVolume,
     Task,
     TemplateRef,
+    Toleration,
     TTLStrategy,
     Variable,
     Volume,
@@ -148,7 +149,7 @@ def test_wf_adds_task_empty_dir_volume(w, no_op):
 
     vol = w.spec.volumes[0]
     assert vol.name == "v"
-    assert not vol.empty_dir.size_limit
+    assert not hasattr(vol.empty_dir, "size_limit")
     assert vol.empty_dir.medium == "Memory"
 
 
@@ -374,3 +375,29 @@ def test_wf_sets_variables_as_global_args(ws):
         assert w.variables[0].value == "42"
         assert hasattr(w.spec, "arguments")
         assert len(getattr(w.spec, "arguments").parameters) == 1
+
+
+def test_wf_sets_tolerations(ws):
+    with Workflow(
+        "w", service=ws, tolerations=[Toleration(key="a", effect="NoSchedule", operator="Exists", value="")]
+    ) as w:
+        assert len(w.tolerations) == 1
+        assert w.tolerations[0].key == "a"
+        assert w.tolerations[0].effect == "NoSchedule"
+        assert w.tolerations[0].operator == "Exists"
+        assert w.tolerations[0].value == ""
+        assert hasattr(w.template, "tolerations")
+        assert len(getattr(w.template, "tolerations")) == 1
+        assert hasattr(w.exit_template, "tolerations")
+        assert len(getattr(w.exit_template, "tolerations")) == 1
+
+
+def test_wf_adds_volumes(ws):
+    with Workflow("w", service=ws, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")]) as w:
+        assert len(w.spec.volumes) == 1
+        assert len(w.spec.volume_claim_templates) == 1
+    with Workflow(
+        "w", service=ws, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")], workflow_template_ref="abc"
+    ) as w:
+        assert len(w.spec.volumes) == 1
+        assert len(w.spec.volume_claim_templates) == 1

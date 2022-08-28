@@ -29,6 +29,20 @@ The general format is:
 
 ```
 
+# 3.7.0 - DATE (26/08/2022)
+
+### Added
+
+- support for Git artifact authentication credentials
+- tolerations can now be set via workflow
+- version via `hera.__version__`
+- volume specifications on workflows
+
+### Changed
+
+- float type handling for `max_cpu` and `min_cpu` properties in `Resources` class
+- kwarg value setting as a parameter
+
 # 3.6.4 - DATE (11/08/2022)
 
 ### Removed
