@@ -35,6 +35,7 @@ The general format is:
 
 - support for Git artifact authentication credentials
 - tolerations can now be set via workflow
+- version via `hera.__version__`
 
 ### Changed
 
