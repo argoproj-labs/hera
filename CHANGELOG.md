@@ -38,6 +38,7 @@ The general format is:
 ### Changed
 
 - float type handling for `max_cpu` and `min_cpu` properties in `Resources` class
+- kwarg value setting as a parameter
 
 # 3.6.4 - DATE (11/08/2022)
 
