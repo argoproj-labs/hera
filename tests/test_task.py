@@ -378,12 +378,14 @@ def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task("t", kwarg_op)
     assert t.argo_parameters[0].name == "a"
     assert t.argo_parameters[0].default == "42"
+    assert t.argo_parameters[0].value == "42"
 
     t = Task("t", kwarg_multi_op, [{"a": 50}])
     assert t.argo_parameters[0].name == "a"
     assert t.argo_parameters[0].value == "50"
     assert t.argo_parameters[1].name == "b"
     assert t.argo_parameters[1].default == "43"
+    assert t.argo_parameters[1].value == "43"
 
 
 def test_task_fails_artifact_validation(no_op, in_artifact):

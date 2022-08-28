@@ -691,7 +691,7 @@ class Task:
                 value = json.dumps(value)
             if name in param_name_cache:
                 continue  # user override of a kwarg
-            parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, default=value))
+            parameters.append(IoArgoprojWorkflowV1alpha1Parameter(name=name, default=value, value=value))
         return parameters
 
     def get_param_script_portion(self) -> str:
