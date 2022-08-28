@@ -391,12 +391,13 @@ def test_wf_sets_tolerations(ws):
         assert hasattr(w.exit_template, "tolerations")
         assert len(getattr(w.exit_template, "tolerations")) == 1
 
+
 def test_wf_adds_volumes(ws):
-    with Workflow('w', service=ws,
-                      volumes=[EmptyDirVolume(), Volume(mount_path='/mnt', size='1Gi')]) as w:
+    with Workflow("w", service=ws, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")]) as w:
         assert len(w.spec.volumes) == 1
         assert len(w.spec.volume_claim_templates) == 1
-    with Workflow('w', service=ws, volumes=[EmptyDirVolume(), Volume(mount_path='/mnt', size='1Gi')],
-                      workflow_template_ref='abc') as w:
+    with Workflow(
+        "w", service=ws, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")], workflow_template_ref="abc"
+    ) as w:
         assert len(w.spec.volumes) == 1
         assert len(w.spec.volume_claim_templates) == 1

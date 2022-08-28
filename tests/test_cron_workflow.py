@@ -397,11 +397,17 @@ def test_wf_sets_variables_as_global_args(cws, schedule):
 
 
 def test_wf_adds_volumes(cws, schedule):
-    with CronWorkflow('w', schedule, service=cws,
-                      volumes=[EmptyDirVolume(), Volume(mount_path='/mnt', size='1Gi')]) as w:
+    with CronWorkflow(
+        "w", schedule, service=cws, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")]
+    ) as w:
         assert len(w.spec.volumes) == 1
         assert len(w.spec.volume_claim_templates) == 1
-    with CronWorkflow('w', schedule, service=cws, volumes=[EmptyDirVolume(), Volume(mount_path='/mnt', size='1Gi')],
-                      workflow_template_ref='abc') as w:
+    with CronWorkflow(
+        "w",
+        schedule,
+        service=cws,
+        volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")],
+        workflow_template_ref="abc",
+    ) as w:
         assert len(w.spec.volumes) == 1
         assert len(w.spec.volume_claim_templates) == 1
