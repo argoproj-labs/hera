@@ -441,7 +441,9 @@ def test_task_adds_gcs_input_artifact():
 def test_task_adds_git_input_artifact():
     t = Task(
         "t",
-        input_artifacts=[GitArtifact("r", "/my-repo", "https://github.com/argoproj/argo-workflows.git", "master")],
+        input_artifacts=[
+            GitArtifact("r", "/my-repo", "https://github.com/argoproj/argo-workflows.git", revision="master")
+        ],
     )
 
     artifact = t.argo_inputs.artifacts[0]

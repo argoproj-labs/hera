@@ -33,6 +33,7 @@ The general format is:
 
 ### Added
 
+- support for Git artifact authentication credentials
 - tolerations can now be set via workflow
 
 ### Changed

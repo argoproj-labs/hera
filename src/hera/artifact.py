@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Artifact,
@@ -6,6 +6,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
+    SecretKeySelector,
 )
 
 
@@ -32,6 +33,11 @@ class Artifact:
     def __init__(self, name: str, path: str) -> None:
         self.name = name
         self.path = path
+
+    def _get_settable_attributes_as_kwargs(self):
+        attributes = vars(self)
+        settable_attributes = {k: v for k, v in attributes.items() if v is not None}
+        return settable_attributes
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
@@ -130,19 +136,73 @@ class GCSArtifact(BucketArtifact):
 
 
 class GitArtifact(Artifact):
+    """ """
+
     repo: str
     revision: Optional[str]
 
-    def __init__(self, name: str, path: str, repo: str, revision: str) -> None:
+    def __init__(
+        self,
+        name: str,
+        path: str,
+        repo: str,
+        revision: Optional[str] = None,
+        depth: Optional[int] = None,
+        disable_submodules: Optional[bool] = None,
+        fetch: Optional[List[str]] = None,
+        insecure_ignore_host_key: Optional[bool] = None,
+        username_secret_key: Optional[str] = None,
+        username_secret_name: Optional[str] = None,
+        password_secret_key: Optional[str] = None,
+        password_secret_name: Optional[str] = None,
+        ssh_private_key_secret_key: Optional[str] = None,
+        ssh_private_key_secret_name: Optional[str] = None,
+    ) -> None:
         self.repo = repo
+        self.depth = depth
+        self.disable_submodules = disable_submodules
+        self.fetch = fetch
+        self.insecure_ignore_host_key = insecure_ignore_host_key
+        self.username_secret_key = username_secret_key
+        self.username_secret_name = username_secret_name
+        self.password_secret_key = password_secret_key
+        self.password_secret_name = password_secret_name
         self.revision = revision
+        self.ssh_private_key_secret_key = ssh_private_key_secret_key
+        self.ssh_private_key_secret_name = ssh_private_key_secret_name
         super(GitArtifact, self).__init__(name, path)
 
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        git = IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo)
+        if self.depth is not None:
+            setattr(git, "depth", self.depth)
+        if self.disable_submodules is not None:
+            setattr(git, "disable_submodules", self.disable_submodules)
+        if self.fetch is not None:
+            setattr(git, "fetch", self.fetch)
+        if self.insecure_ignore_host_key is not None:
+            setattr(git, "insecure_ignore_host_key", self.insecure_ignore_host_key)
+        if self.password_secret_key is not None:
+            password_secret = SecretKeySelector(key=self.password_secret_key)
+            if self.password_secret_name is not None:
+                setattr(password_secret, "name", self.password_secret_name)
+            setattr(git, "password_secret", password_secret)
+        if self.revision:
+            setattr(git, "revision", self.revision)
+        if self.ssh_private_key_secret_name is not None:
+            ssh_private_key_secret = SecretKeySelector(key=self.ssh_private_key_secret_key)
+            if self.password_secret_name is not None:
+                setattr(ssh_private_key_secret, "name", self.ssh_private_key_secret_name)
+            setattr(git, "ssh_private_key_secret", ssh_private_key_secret)
+        if self.username_secret_key is not None:
+            username_secret = SecretKeySelector(key=self.username_secret_key)
+            if self.username_secret_name is not None:
+                setattr(username_secret, "name", self.username_secret_name)
+            setattr(git, "username_secret", username_secret)
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
-            git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo, revision=self.revision),
+            git=git,
         )
 
     def get_input_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
