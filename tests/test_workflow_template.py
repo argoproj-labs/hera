@@ -6,6 +6,7 @@ from argo_workflows.model.pod_security_context import PodSecurityContext
 from hera import (
     Operator,
     Resources,
+EmptyDirVolume,
     SecretVolume,
     Task,
     TTLStrategy,
@@ -199,3 +200,9 @@ def test_wf_sets_variables_as_global_args(wts):
         assert w.variables[0].value == "42"
         assert hasattr(w.spec, "arguments")
         assert len(getattr(w.spec, "arguments").parameters) == 1
+
+def test_wf_adds_volumes(wts):
+    with WorkflowTemplate('w', service=wts,
+                      volumes=[EmptyDirVolume(), Volume(mount_path='/mnt', size='1Gi')]) as w:
+        assert len(w.spec.volumes) == 1
+        assert len(w.spec.volume_claim_templates) == 1

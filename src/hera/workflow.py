@@ -22,7 +22,7 @@ from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.volumes import Volume
+from hera.volumes import BaseVolume, Volume
 from hera.workflow_editors import (
     add_head,
     add_tail,
@@ -85,7 +85,7 @@ class Workflow:
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
-    volumes: Optional[List[Volume]] = None
+    volumes: Optional[List[BaseVolume]] = None
         List of volumes to mount to all the tasks of the workflow.
     """
 
@@ -108,7 +108,7 @@ class Workflow:
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
         tolerations: Optional[List[Toleration]] = None,
-        volumes: Optional[List[Volume]] = None,
+        volumes: Optional[List[BaseVolume]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -148,18 +148,24 @@ class Workflow:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
                 workflow_template_ref=self.workflow_template,
                 entrypoint=self.workflow_template_ref,
-                volumes=[vol.get_volume() for vol in self.volumes],
-                volume_claim_templates=[vol.get_claim_spec() for vol in self.volumes],
+                volumes=[],
+                volume_claim_templates=[],
                 parallelism=self.parallelism,
             )
         else:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
                 templates=[self.template],
                 entrypoint=self.name,
-                volumes=[vol.get_volume() for vol in self.volumes],
-                volume_claim_templates=[vol.get_claim_spec() for vol in self.volumes],
+                volumes=[],
+                volume_claim_templates=[],
                 parallelism=self.parallelism,
             )
+        if self.volumes is not None:
+            for volume in self.volumes:
+                if isinstance(volume, Volume):
+                    self.spec.volume_claim_templates.append(volume.get_claim_spec())
+                else:
+                    self.spec.volumes.append(volume.get_volume())
 
         if ttl_strategy:
             setattr(self.spec, "ttl_strategy", ttl_strategy.argo_ttl_strategy)
