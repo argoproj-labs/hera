@@ -16,6 +16,7 @@ from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
+from hera.volumes import Volume
 from hera.workflow_editors import add_head, add_tail, add_task, add_tasks, on_exit
 from hera.workflow_template_service import WorkflowTemplateService
 
@@ -55,6 +56,8 @@ class WorkflowTemplate:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    volumes: Optional[List[Volume]] = None
+        List of volumes to mount to all the tasks of the workflow.
     """
 
     def __init__(
@@ -70,6 +73,7 @@ class WorkflowTemplate:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        volumes: Optional[List[Volume]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -83,6 +87,7 @@ class WorkflowTemplate:
         self.affinity = affinity
         self.in_context = False
         self.variables = variables
+        self.volumes = volumes
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
         self.exit_template = IoArgoprojWorkflowV1alpha1Template(
@@ -102,8 +107,8 @@ class WorkflowTemplate:
         self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
             templates=[self.template],
             entrypoint=self.name,
-            volumes=[],
-            volume_claim_templates=[],
+            volumes=[vol.get_volume() for vol in self.volumes],
+            volume_claim_templates=[vol.get_claim_spec() for vol in self.volumes],
             parallelism=self.parallelism,
         )
 

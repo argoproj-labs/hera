@@ -22,6 +22,7 @@ from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
+from hera.volumes import Volume
 from hera.workflow_editors import (
     add_head,
     add_tail,
@@ -84,6 +85,8 @@ class Workflow:
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
+    volumes: Optional[List[Volume]] = None
+        List of volumes to mount to all the tasks of the workflow.
     """
 
     def __init__(
@@ -105,6 +108,7 @@ class Workflow:
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
         tolerations: Optional[List[Toleration]] = None,
+        volumes: Optional[List[Volume]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
         self.namespace = namespace or "default"
@@ -121,6 +125,7 @@ class Workflow:
         self.affinity = affinity
         self.variables = variables
         self.tolerations = tolerations
+        self.volumes = volumes
         self.in_context = False
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -143,16 +148,16 @@ class Workflow:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
                 workflow_template_ref=self.workflow_template,
                 entrypoint=self.workflow_template_ref,
-                volumes=[],
-                volume_claim_templates=[],
+                volumes=[vol.get_volume() for vol in self.volumes],
+                volume_claim_templates=[vol.get_claim_spec() for vol in self.volumes],
                 parallelism=self.parallelism,
             )
         else:
             self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
                 templates=[self.template],
                 entrypoint=self.name,
-                volumes=[],
-                volume_claim_templates=[],
+                volumes=[vol.get_volume() for vol in self.volumes],
+                volume_claim_templates=[vol.get_claim_spec() for vol in self.volumes],
                 parallelism=self.parallelism,
             )
 
