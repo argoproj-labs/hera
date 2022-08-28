@@ -112,7 +112,7 @@ def test_cwf_adds_task_empty_dir_volume(cw, no_op):
 
     vol = cw.spec.volumes[0]
     assert vol.name == "v"
-    assert not vol.empty_dir.size_limit
+    assert not hasattr(vol.empty_dir, 'size_limit')
     assert vol.empty_dir.medium == "Memory"
 
 

@@ -30,13 +30,13 @@ class Client:
     def __init__(self, config: Config, token: Optional[str] = None):
         if token is None:
             token = get_global_token()
+            assert token, "No token was provided and no global token was found."
 
-        if token:
-            kwargs = {"header_name": "Authorization", "header_value": f"Bearer {token}"}
-        else:
-            kwargs = {}
-
-        self._client = ArgoApiClient(configuration=config.config, **kwargs)
+        self._client = ArgoApiClient(
+            configuration=config.config,
+            header_name="Authorization",
+            header_value=f"Bearer {token}",
+        )
 
     @property
     def api_client(self) -> ArgoApiClient:

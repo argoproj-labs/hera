@@ -1,7 +1,21 @@
 import pytest
 from pydantic import ValidationError
 
-from hera import AccessMode, Volume
+from hera import AccessMode, Volume, EmptyDirVolume
+
+
+def test_empty_dir_volume_created_without_size():
+    edv = EmptyDirVolume().get_volume()
+    assert edv.name is not None
+    assert edv.empty_dir.medium == 'Memory'
+    assert not hasattr(edv.empty_dir, 'size_limit')
+
+
+def test_empty_dir_volume_created_with_size():
+    edv = EmptyDirVolume(size='5Gi').get_volume()
+    assert edv.name is not None
+    assert edv.empty_dir.medium == 'Memory'
+    assert edv.empty_dir.size_limit == '5Gi'
 
 
 def test_volume_created_with_defaults():
