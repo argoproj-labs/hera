@@ -226,10 +226,6 @@ class Volume(BaseVolume):
         """Constructs and returns an Argo volume mount representation for tasks"""
         return VolumeMount(mount_path=self.mount_path, name=self.name, sub_path=self.sub_path)
 
-    def get_volume(self) -> ArgoVolume:
-        """Constructs an Argo volume representation for mounting existing volumes to a step/task"""
-        return ArgoVolume(name=self.name)
-
     def get_claim_spec(self) -> PersistentVolumeClaim:
         """Constructs and returns an Argo volume claim representation for tasks. This is typically used by workflows
         to dynamically provision volumes and discard them upon completion.

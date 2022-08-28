@@ -34,11 +34,6 @@ class Artifact:
         self.name = name
         self.path = path
 
-    def _get_settable_attributes_as_kwargs(self):
-        attributes = vars(self)
-        settable_attributes = {k: v for k, v in attributes.items() if v is not None}
-        return settable_attributes
-
     def get_spec(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Constructs the corresponding Argo artifact representation"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
