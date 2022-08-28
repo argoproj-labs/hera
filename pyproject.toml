@@ -82,3 +82,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module ="mypy-pytz.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module ="mypy-pkg_resources.*"
+ignore_missing_imports = true
