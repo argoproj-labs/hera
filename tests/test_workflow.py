@@ -335,6 +335,7 @@ def test_wf_contains_expected_default_exit_template(w):
 
 def test_wf_contains_expected_node_selectors(ws):
     w = Workflow("w", ws, node_selectors={"foo": "bar"})
+    assert w.spec.node_selector == {"foo": "bar"}
     assert w.template.node_selector == {"foo": "bar"}
     assert w.exit_template.node_selector == {"foo": "bar"}
     assert w.dag_template.node_selector == {"foo": "bar"}
@@ -343,6 +344,7 @@ def test_wf_contains_expected_node_selectors(ws):
 def test_wf_contains_expected_affinity(ws, affinity):
     w = Workflow("w", ws, affinity=affinity)
     assert w.affinity == affinity
+    assert hasattr(w.spec, "affinity")
     assert hasattr(w.template, "affinity")
     assert hasattr(w.exit_template, "affinity")
 
@@ -386,6 +388,8 @@ def test_wf_sets_tolerations(ws):
         assert w.tolerations[0].effect == "NoSchedule"
         assert w.tolerations[0].operator == "Exists"
         assert w.tolerations[0].value == ""
+        assert hasattr(w.spec, "tolerations")
+        assert len(getattr(w.spec, "tolerations")) == 1
         assert hasattr(w.template, "tolerations")
         assert len(getattr(w.template, "tolerations")) == 1
         assert hasattr(w.exit_template, "tolerations")

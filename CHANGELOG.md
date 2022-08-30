@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 3.7.1 - DATE (30/08/2022)
+
+### Fixed
+
+- tolerations, node selectors and affinity should be set in the internal workflow spec
+
 # 3.7.0 - DATE (26/08/2022)
 
 ### Added

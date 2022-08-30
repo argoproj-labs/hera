@@ -143,23 +143,19 @@ class Workflow:
             parallelism=self.parallelism,
         )
 
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+            templates=[self.template],
+            entrypoint=self.name,
+            volumes=[],
+            volume_claim_templates=[],
+            parallelism=self.parallelism,
+        )
+
         if self.workflow_template_ref:
             self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplateRef(name=self.workflow_template_ref)
-            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                workflow_template_ref=self.workflow_template,
-                entrypoint=self.workflow_template_ref,
-                volumes=[],
-                volume_claim_templates=[],
-                parallelism=self.parallelism,
-            )
-        else:
-            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                templates=[self.template],
-                entrypoint=self.name,
-                volumes=[],
-                volume_claim_templates=[],
-                parallelism=self.parallelism,
-            )
+            self.spec.workflow_template_ref = self.workflow_template
+            self.spec.entrypoint = self.workflow_template_ref
+
         if self.volumes is not None:
             for volume in self.volumes:
                 if isinstance(volume, Volume):
@@ -193,8 +189,9 @@ class Workflow:
             setattr(self.spec, "image_pull_secrets", secret_refs)
 
         if self.affinity:
-            setattr(self.exit_template, "affinity", self.affinity.get_spec())
+            setattr(self.spec, "affinity", self.affinity.get_spec())
             setattr(self.template, "affinity", self.affinity.get_spec())
+            setattr(self.exit_template, "affinity", self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
@@ -203,6 +200,7 @@ class Workflow:
             setattr(self.metadata, "annotations", self.annotations)
 
         if self.node_selector:
+            setattr(self.spec, "node_selector", self.node_selector)
             setattr(self.dag_template, "node_selector", self.node_selector)
             setattr(self.template, "node_selector", self.node_selector)
             setattr(self.exit_template, "node_selector", self.node_selector)
@@ -218,6 +216,7 @@ class Workflow:
 
         if self.tolerations:
             ts = [t.to_argo_toleration() for t in self.tolerations]
+            setattr(self.spec, "tolerations", ts)
             setattr(self.template, "tolerations", ts)
             setattr(self.exit_template, "tolerations", ts)
 
