@@ -31,6 +31,10 @@ The general format is:
 
 # 3.7.1 - DATE (30/08/2022)
 
+### Added
+
+- tolerations can now be set via cron workflow and workflow spec
+
 ### Fixed
 
 - tolerations, node selectors and affinity should be set in the internal workflow spec

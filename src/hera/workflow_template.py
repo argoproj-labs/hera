@@ -14,6 +14,7 @@ import hera
 from hera.affinity import Affinity
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volumes import BaseVolume, Volume
@@ -56,6 +57,8 @@ class WorkflowTemplate:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    tolerations: Optional[List[Toleration]] = None
+        List of tolerations for the pod executing the task. This is used for scheduling purposes.
     volumes: Optional[List[BaseVolume]] = None
         List of volumes to mount to all the tasks of the workflow.
     """
@@ -73,6 +76,7 @@ class WorkflowTemplate:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        tolerations: Optional[List[Toleration]] = None,
         volumes: Optional[List[BaseVolume]] = None,
     ):
         self.name = f'{name.replace("_", "-")}'  # RFC1123
@@ -87,6 +91,7 @@ class WorkflowTemplate:
         self.affinity = affinity
         self.in_context = False
         self.variables = variables
+        self.tolerations = tolerations
         self.volumes = volumes
 
         self.dag_template = IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=[])
@@ -111,6 +116,7 @@ class WorkflowTemplate:
             volume_claim_templates=[],
             parallelism=self.parallelism,
         )
+
         if self.volumes is not None:
             for volume in self.volumes:
                 if isinstance(volume, Volume):
@@ -130,14 +136,16 @@ class WorkflowTemplate:
             setattr(self.spec, "service_account_name", self.service_account_name)
 
         if self.affinity:
-            setattr(self.exit_template, "affinity", self.affinity.get_spec())
+            setattr(self.spec, "affinity", self.affinity.get_spec())
             setattr(self.template, "affinity", self.affinity.get_spec())
+            setattr(self.exit_template, "affinity", self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
             setattr(self.metadata, "labels", self.labels)
 
         if self.node_selector:
+            setattr(self.spec, "node_selector", self.node_selector)
             setattr(self.dag_template, "node_selector", self.node_selector)
             setattr(self.template, "node_selector", self.node_selector)
             setattr(self.exit_template, "node_selector", self.node_selector)
@@ -150,6 +158,12 @@ class WorkflowTemplate:
                     parameters=[variable.get_argument_parameter() for variable in self.variables],
                 ),
             )
+
+        if self.tolerations:
+            ts = [t.to_argo_toleration() for t in self.tolerations]
+            setattr(self.spec, "tolerations", ts)
+            setattr(self.template, "tolerations", ts)
+            setattr(self.exit_template, "tolerations", ts)
 
         self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.metadata, spec=self.spec)
 

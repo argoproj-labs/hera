@@ -16,6 +16,7 @@ from hera import (
     WorkflowStatus,
     WorkflowTemplate,
 )
+from hera.toleration import Toleration
 
 
 def test_wft_contains_specified_service_account(wts):
@@ -160,6 +161,7 @@ def test_wf_contains_expected_default_exit_template(wt):
 
 def test_wf_contains_expected_node_selectors(wts):
     w = WorkflowTemplate("w", wts, node_selectors={"foo": "bar"})
+    assert w.spec.node_selector == {"foo": "bar"}
     assert w.template.node_selector == {"foo": "bar"}
     assert w.exit_template.node_selector == {"foo": "bar"}
     assert w.dag_template.node_selector == {"foo": "bar"}
@@ -168,6 +170,7 @@ def test_wf_contains_expected_node_selectors(wts):
 def test_wf_adds_affinity(wts, affinity):
     w = WorkflowTemplate("w", wts, affinity=affinity)
     assert w.affinity == affinity
+    assert hasattr(w.spec, "affinity")
     assert hasattr(w.template, "affinity")
     assert hasattr(w.exit_template, "affinity")
 
@@ -200,6 +203,23 @@ def test_wf_sets_variables_as_global_args(wts):
         assert w.variables[0].value == "42"
         assert hasattr(w.spec, "arguments")
         assert len(getattr(w.spec, "arguments").parameters) == 1
+
+
+def test_wf_sets_tolerations(ws):
+    with WorkflowTemplate(
+        "w", service=ws, tolerations=[Toleration(key="a", effect="NoSchedule", operator="Exists", value="")]
+    ) as w:
+        assert len(w.tolerations) == 1
+        assert w.tolerations[0].key == "a"
+        assert w.tolerations[0].effect == "NoSchedule"
+        assert w.tolerations[0].operator == "Exists"
+        assert w.tolerations[0].value == ""
+        assert hasattr(w.spec, "tolerations")
+        assert len(getattr(w.spec, "tolerations")) == 1
+        assert hasattr(w.template, "tolerations")
+        assert len(getattr(w.template, "tolerations")) == 1
+        assert hasattr(w.exit_template, "tolerations")
+        assert len(getattr(w.exit_template, "tolerations")) == 1
 
 
 def test_wf_adds_volumes(wts):
