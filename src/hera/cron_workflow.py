@@ -24,6 +24,7 @@ from hera.cron_workflow_service import CronWorkflowService
 from hera.host_alias import HostAlias
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
+from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.variable import Variable
 from hera.volume_claim_gc import VolumeClaimGCStrategy
@@ -82,6 +83,8 @@ class CronWorkflow:
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
     variables: Optional[List[Variable]] = None
         A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
+    tolerations: Optional[List[Toleration]] = None
+        List of tolerations for the pod executing the task. This is used for scheduling purposes.
     volumes: Optional[List[BaseVolume]] = None
         List of volumes to mount to all the tasks of the workflow.
     """
@@ -106,6 +109,7 @@ class CronWorkflow:
         node_selectors: Optional[Dict[str, str]] = None,
         affinity: Optional[Affinity] = None,
         variables: Optional[List[Variable]] = None,
+        tolerations: Optional[List[Toleration]] = None,
         volumes: Optional[List[BaseVolume]] = None,
     ):
         if timezone and timezone not in pytz.all_timezones:
@@ -127,6 +131,7 @@ class CronWorkflow:
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
         self.variables = variables
+        self.tolerations = tolerations
         self.volumes = volumes
         self.in_context = False
 
@@ -145,23 +150,19 @@ class CronWorkflow:
             parallelism=self.parallelism,
         )
 
+        self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
+            templates=[self.template],
+            entrypoint=self.name,
+            volumes=[],
+            volume_claim_templates=[],
+            parallelism=self.parallelism,
+        )
+
         if self.workflow_template_ref:
             self.workflow_template = IoArgoprojWorkflowV1alpha1WorkflowTemplateRef(name=self.workflow_template_ref)
-            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                workflow_template_ref=self.workflow_template,
-                entrypoint=self.workflow_template_ref,
-                volumes=[],
-                volume_claim_templates=[],
-                parallelism=self.parallelism,
-            )
-        else:
-            self.spec = IoArgoprojWorkflowV1alpha1WorkflowSpec(
-                templates=[self.template],
-                entrypoint=self.name,
-                volumes=[],
-                volume_claim_templates=[],
-                parallelism=self.parallelism,
-            )
+            self.spec.workflow_template_ref = self.workflow_template
+            self.spec.entrypoint = self.workflow_template_ref
+
         if self.volumes is not None:
             for volume in self.volumes:
                 if isinstance(volume, Volume):
@@ -199,8 +200,9 @@ class CronWorkflow:
             setattr(self.cron_spec, "timezone", self.timezone)
 
         if self.affinity:
-            setattr(self.exit_template, "affinity", self.affinity.get_spec())
+            setattr(self.spec, "affinity", self.affinity.get_spec())
             setattr(self.template, "affinity", self.affinity.get_spec())
+            setattr(self.exit_template, "affinity", self.affinity.get_spec())
 
         self.metadata = ObjectMeta(name=self.name)
         if self.labels:
@@ -209,6 +211,7 @@ class CronWorkflow:
             setattr(self.metadata, "annotations", self.annotations)
 
         if self.node_selector:
+            setattr(self.spec, "node_selector", self.node_selector)
             setattr(self.dag_template, "node_selector", self.node_selector)
             setattr(self.template, "node_selector", self.node_selector)
             setattr(self.exit_template, "node_selector", self.node_selector)
@@ -221,6 +224,12 @@ class CronWorkflow:
                     parameters=[variable.get_argument_parameter() for variable in self.variables],
                 ),
             )
+
+        if self.tolerations:
+            ts = [t.to_argo_toleration() for t in self.tolerations]
+            setattr(self.spec, "tolerations", ts)
+            setattr(self.template, "tolerations", ts)
+            setattr(self.exit_template, "tolerations", ts)
 
         self.workflow = IoArgoprojWorkflowV1alpha1CronWorkflow(
             metadata=self.metadata,
