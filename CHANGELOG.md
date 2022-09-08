@@ -29,6 +29,54 @@ The general format is:
 
 ```
 
+# 3.7.1 - DATE (30/08/2022)
+
+### Added
+
+- tolerations can now be set via cron workflow and workflow spec
+
+### Fixed
+
+- tolerations, node selectors and affinity should be set in the internal workflow spec
+
+# 3.7.0 - DATE (26/08/2022)
+
+### Added
+
+- support for Git artifact authentication credentials
+- tolerations can now be set via workflow
+- version via `hera.__version__`
+- volume specifications on workflows
+
+### Changed
+
+- float type handling for `max_cpu` and `min_cpu` properties in `Resources` class
+- kwarg value setting as a parameter
+
+# 3.6.4 - DATE (11/08/2022)
+
+### Removed
+
+- Remove python <3.11 constraint and unpin transitive dependencies
+
+# 3.6.3 - DATE (01/08/2022)
+
+### Changed
+
+- `pytz` version from `^2021.3` to `>=2021.3`
+
+### Added
+
+- workflow template parameters
+- privileged option to the security context
+
+# 3.6.2 - DATE (29/07/2022)
+
+### Changed
+
+- `Config.host` and `Config.verify_ssl` are now public; `WorkflowService.get_workflow_link` now references `Config.host`
+  to properly pull the host when using `set_global_host`.
+
 # 3.6.1 - DATE (17/07/2022)
 
 ### Removed

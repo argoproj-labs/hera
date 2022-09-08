@@ -15,8 +15,8 @@ from hera import WorkflowTemplateService
 def test_ws_has_expected_fields_upon_init():
     ws = WorkflowTemplateService(host="https://abc.com", token="abc", verify_ssl=True, namespace="argo")
 
-    assert ws._host == "https://abc.com"
-    assert ws._verify_ssl
+    assert ws._config.host == "https://abc.com"
+    assert ws._config.verify_ssl
     assert ws._namespace == "argo"
     assert isinstance(ws.service, WorkflowTemplateServiceApi)
     assert isinstance(ws.service.api_client, ApiClient)

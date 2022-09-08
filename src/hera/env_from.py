@@ -29,7 +29,7 @@ class BaseEnvFromSpec:
 
     def build(self) -> EnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 @dataclass

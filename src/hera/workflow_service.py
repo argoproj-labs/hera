@@ -53,7 +53,7 @@ class WorkflowService:
     ):
         self._host = host
         self._verify_ssl = verify_ssl
-        self.namespace = namespace
+        self._namespace = namespace
         self._api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
 
     def create_workflow(self, workflow: IoArgoprojWorkflowV1alpha1Workflow) -> IoArgoprojWorkflowV1alpha1Workflow:
@@ -74,7 +74,7 @@ class WorkflowService:
         argo.workflows.client.ApiException
         """
         return WorkflowServiceApi(api_client=self._api_client).create_workflow(
-            self.namespace,
+            self._namespace,
             IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
@@ -99,7 +99,7 @@ class WorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return WorkflowTemplateServiceApi(api_client=self._api_client).create_workflow_template(
-            self.namespace,
+            self._namespace,
             IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest(template=workflow_template, _check_type=False),
             _check_return_type=False,
         )
@@ -124,7 +124,7 @@ class WorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return CronWorkflowServiceApi(api_client=self._api_client).create_cron_workflow(
-            self.namespace,
+            self._namespace,
             IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
@@ -151,7 +151,7 @@ class WorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return CronWorkflowServiceApi(api_client=self._api_client).update_cron_workflow(
-            self.namespace,
+            self._namespace,
             name,
             IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
             _check_return_type=False,
@@ -173,7 +173,7 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException
         """
-        return WorkflowServiceApi(api_client=self._api_client).delete_workflow(self.namespace, name)
+        return WorkflowServiceApi(api_client=self._api_client).delete_workflow(self._namespace, name)
 
     def delete_cron_workflow(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a cron workflow from the given namespace based on the specified name.
@@ -191,7 +191,7 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return CronWorkflowServiceApi(api_client=self._api_client).delete_cron_workflow(self.namespace, name)
+        return CronWorkflowServiceApi(api_client=self._api_client).delete_cron_workflow(self._namespace, name)
 
     def delete_template(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a cron workflow from the given namespace based on the specified name.
@@ -209,7 +209,7 @@ class WorkflowService:
         ------
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
-        return WorkflowTemplateServiceApi(api_client=self._api_client).delete_workflow_template(self.namespace, name)
+        return WorkflowTemplateServiceApi(api_client=self._api_client).delete_workflow_template(self._namespace, name)
 
     def get_workflow_link(self, name: str) -> str:
         """Assembles a workflow link for the given workflow name. Note that the returned path works only for Argo.
@@ -224,7 +224,7 @@ class WorkflowService:
         str
             The workflow link.
         """
-        return f"{self._host}/workflows/{self.namespace}/{name}?tab=workflow"
+        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
 
     def get_cron_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Fetches a workflow by the specified name and namespace combination.
@@ -239,7 +239,7 @@ class WorkflowService:
         IoArgoprojWorkflowV1alpha1Workflow
         """
         return CronWorkflowServiceApi(api_client=self._api_client).get_cron_workflow(
-            self.namespace, name, _check_return_type=False
+            self._namespace, name, _check_return_type=False
         )
 
     def get_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
@@ -255,7 +255,7 @@ class WorkflowService:
         IoArgoprojWorkflowV1alpha1Workflow
         """
         return WorkflowServiceApi(api_client=self._api_client).get_workflow(
-            self.namespace, name, _check_return_type=False
+            self._namespace, name, _check_return_type=False
         )
 
     def get_workflow_status(self, name: str) -> WorkflowStatus:
@@ -290,9 +290,9 @@ class WorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return CronWorkflowServiceApi(api_client=self._api_client).suspend_cron_workflow(
-            self.namespace,
+            self._namespace,
             name,
-            body=IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(name=name, namespace=self.namespace),
+            body=IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest(name=name, namespace=self._namespace),
             _check_return_type=False,
         )
 
@@ -313,9 +313,9 @@ class WorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return CronWorkflowServiceApi(api_client=self._api_client).resume_cron_workflow(
-            self.namespace,
+            self._namespace,
             name,
-            body=IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest(name=name, namespace=self.namespace),
+            body=IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest(name=name, namespace=self._namespace),
             _check_return_type=False,
         )
 
@@ -332,4 +332,4 @@ class WorkflowService:
         str
             The cron workflow link.
         """
-        return f"{self._host}/cron-workflows/{self.namespace}/{name}"
+        return f"{self._host}/cron-workflows/{self._namespace}/{name}"

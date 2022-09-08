@@ -4,16 +4,19 @@ import pytest
 from argo_workflows.model.pod_security_context import PodSecurityContext
 
 from hera import (
+    EmptyDirVolume,
     Operator,
     Resources,
     SecretVolume,
     Task,
     TTLStrategy,
+    Variable,
     Volume,
     WorkflowSecurityContext,
     WorkflowStatus,
     WorkflowTemplate,
 )
+from hera.toleration import Toleration
 
 
 def test_wft_contains_specified_service_account(wts):
@@ -33,6 +36,7 @@ def test_wft_does_not_contain_sa_if_one_is_not_specified(ws):
 @pytest.fixture
 def workflow_security_context_kwargs():
     sc_kwargs = {
+        "privileged": True,
         "run_as_user": 1000,
         "run_as_group": 1001,
         "fs_group": 1002,
@@ -49,7 +53,7 @@ def test_wft_contains_specified_security_context(wts, workflow_security_context_
     assert w.spec.security_context == expected_security_context
 
 
-@pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "fs_group", "run_as_non_root"])
+@pytest.mark.parametrize("set_only", ["privileged", "run_as_user", "run_as_group", "fs_group", "run_as_non_root"])
 def test_wft_specified_partial_security_context(ws, set_only, workflow_security_context_kwargs):
     one_param_kwargs = {set_only: workflow_security_context_kwargs[set_only]}
     wsc = WorkflowSecurityContext(**one_param_kwargs)
@@ -157,6 +161,7 @@ def test_wf_contains_expected_default_exit_template(wt):
 
 def test_wf_contains_expected_node_selectors(wts):
     w = WorkflowTemplate("w", wts, node_selectors={"foo": "bar"})
+    assert w.spec.node_selector == {"foo": "bar"}
     assert w.template.node_selector == {"foo": "bar"}
     assert w.exit_template.node_selector == {"foo": "bar"}
     assert w.dag_template.node_selector == {"foo": "bar"}
@@ -165,6 +170,7 @@ def test_wf_contains_expected_node_selectors(wts):
 def test_wf_adds_affinity(wts, affinity):
     w = WorkflowTemplate("w", wts, affinity=affinity)
     assert w.affinity == affinity
+    assert hasattr(w.spec, "affinity")
     assert hasattr(w.template, "affinity")
     assert hasattr(w.exit_template, "affinity")
 
@@ -188,3 +194,35 @@ def test_wf_raises_on_create_in_context(wts):
         with pytest.raises(ValueError) as e:
             w.create()
         assert str(e.value) == "Cannot invoke `create` when using a Hera context"
+
+
+def test_wf_sets_variables_as_global_args(wts):
+    with WorkflowTemplate("w", service=wts, variables=[Variable("a", "42")]) as w:
+        assert len(w.variables) == 1
+        assert w.variables[0].name == "a"
+        assert w.variables[0].value == "42"
+        assert hasattr(w.spec, "arguments")
+        assert len(getattr(w.spec, "arguments").parameters) == 1
+
+
+def test_wf_sets_tolerations(ws):
+    with WorkflowTemplate(
+        "w", service=ws, tolerations=[Toleration(key="a", effect="NoSchedule", operator="Exists", value="")]
+    ) as w:
+        assert len(w.tolerations) == 1
+        assert w.tolerations[0].key == "a"
+        assert w.tolerations[0].effect == "NoSchedule"
+        assert w.tolerations[0].operator == "Exists"
+        assert w.tolerations[0].value == ""
+        assert hasattr(w.spec, "tolerations")
+        assert len(getattr(w.spec, "tolerations")) == 1
+        assert hasattr(w.template, "tolerations")
+        assert len(getattr(w.template, "tolerations")) == 1
+        assert hasattr(w.exit_template, "tolerations")
+        assert len(getattr(w.exit_template, "tolerations")) == 1
+
+
+def test_wf_adds_volumes(wts):
+    with WorkflowTemplate("w", service=wts, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")]) as w:
+        assert len(w.spec.volumes) == 1
+        assert len(w.spec.volume_claim_templates) == 1

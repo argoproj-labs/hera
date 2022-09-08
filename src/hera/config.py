@@ -2,14 +2,18 @@
 import os
 from typing import Optional
 
-import urllib3
 from argo_workflows.api_client import Configuration as ArgoConfig
 
 from hera.host_config import get_global_host
 
-# __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
-# explicitly asked for it to disable SSL, it's safe to ignore the warning.
-urllib3.disable_warnings()
+try:
+    import urllib3
+
+    # __get_config() explicitly disables SSL verification, so urllib3 will throw a warning to the user. Since we have
+    # explicitly asked for it to disable SSL, it's safe to ignore the warning.
+    urllib3.disable_warnings()
+except ImportError:  # pragma: no cover
+    pass
 
 
 class Config:
@@ -28,8 +32,8 @@ class Config:
     """
 
     def __init__(self, host: Optional[str] = None, verify_ssl: bool = True):
-        self._host = host or self._assemble_host()
-        self._verify_ssl = verify_ssl
+        self.host = host or self._assemble_host()
+        self.verify_ssl = verify_ssl
         self._config = self.__get_config()
 
     def _assemble_host(self) -> str:
@@ -80,8 +84,8 @@ class Config:
 
         Use this together with Client to instantiate a WorkflowService/CronWorkflowService.
         """
-        config = ArgoConfig(host=self._host)
-        config.verify_ssl = self._verify_ssl
+        config = ArgoConfig(host=self.host)
+        config.verify_ssl = self.verify_ssl
         return config
 
     @property
