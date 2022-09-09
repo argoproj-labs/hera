@@ -30,6 +30,8 @@ from hera.host_config import (
     get_global_token,
     set_global_host,
     set_global_token,
+    set_global_namespace,
+    get_global_namespace,
 )
 from hera.image import ImagePullPolicy
 from hera.memoize import Memoize

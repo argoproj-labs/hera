@@ -21,7 +21,7 @@ from hera.validators import validate_storage_units
 
 @dataclass
 class _Sized:
-    size: str
+    size: Optional[str]
 
 
 @dataclass
@@ -93,7 +93,7 @@ class BaseVolume:
 
 
 @dataclass
-class EmptyDirVolume(BaseVolume):
+class EmptyDirVolume(BaseVolume, _Sized):
     """A representation of an in-memory empty dir volume.
 
     When mounted, this volume results in the creation of a temporary filesystem (tmpfs). The mount path will map to
@@ -102,8 +102,6 @@ class EmptyDirVolume(BaseVolume):
     if one is passed.
     """
 
-    # default to empty size spec to allow for unlimited memory consumption
-    size: Optional[str] = None
     # default to /dev/shm since it represents the shared memory concept in Unix systems
     mount_path: str = "/dev/shm"
 

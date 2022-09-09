@@ -78,12 +78,8 @@ class Workflow:
         they submit the workflow to.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
-    variables: Optional[List[Variable]] = None
-        A list of global variables for the workflow. These are accessible by all tasks via `GlobalInputParameter`.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
-    volumes: Optional[List[BaseVolume]] = None
-        List of volumes to mount to all the tasks of the workflow.
     """
 
     def __init__(
@@ -104,9 +100,7 @@ class Workflow:
         affinity: Optional[Affinity] = None,
         dag: Optional[DAG] = None,
         parameters: Optional[List[Parameter]] = None,
-        variables: Optional[List[Variable]] = None,
         tolerations: Optional[List[Toleration]] = None,
-        volumes: Optional[List[BaseVolume]] = None,
     ):
         self.name = validate_name(name)
         self.service = service or WorkflowService()
@@ -121,9 +115,7 @@ class Workflow:
         self.ttl_strategy = ttl_strategy
         self.affinity = affinity
         self.parameters = parameters
-        self.variables = variables
         self.tolerations = tolerations
-        self.volumes = volumes
         self.in_context = False
         self.volume_claim_gc_strategy = volume_claim_gc_strategy
         self.host_aliases = host_aliases
@@ -191,23 +183,13 @@ class Workflow:
             
         if self.affinity:
             setattr(spec, "affinity", self.affinity.get_spec())
-            setattr(template, "affinity", self.affinity.get_spec())
-            setattr(exit_template, "affinity", self.affinity.get_spec())
-
-        self.metadata = ObjectMeta(name=self.name)
-        if self.labels:
-            setattr(self.metadata, "labels", self.labels)
-        if self.annotations:
-            setattr(self.metadata, "annotations", self.annotations)
 
         if self.node_selector:
             setattr(spec, "node_selector", self.node_selector)
-            setattr(template, "node_selector", self.node_selector)
-            
+
         if self.tolerations:
             ts = [t.to_argo_toleration() for t in self.tolerations]
             setattr(spec, "tolerations", ts)
-            setattr(template, "tolerations", ts)
 
         vct = self.dag.build_volume_claim_templates()
         if vct:

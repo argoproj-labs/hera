@@ -21,6 +21,7 @@ from argo_workflows.models import (
 from hera.client import Client
 from hera.config import Config
 from hera.workflow_status import WorkflowStatus
+from hera.host_config import get_global_namespace
 
 
 class WorkflowService:
@@ -39,9 +40,9 @@ class WorkflowService:
         The token to use for authentication purposes. Note that this assumes the Argo deployment is fronted with a
         deployment/service that can intercept a request and check the Bearer token. An attempt is performed to get the
         token from the global context (`hera.set_global_token`).
-    namespace: str = 'default'
-        The K8S namespace the cron workflow service creates cron workflows in.
-        This defaults to the `default` namespace.
+    namespace: Optional[str] = None
+        The K8S namespace the workflow service creates workflows in. This defaults to the `default` namespace if a
+        namespace is not passed or a global namespace is not set.
     """
 
     def __init__(
@@ -49,11 +50,11 @@ class WorkflowService:
         host: Optional[str] = None,
         verify_ssl: bool = True,
         token: Optional[str] = None,
-        namespace: str = "default",
+        namespace: Optional[str] = None,
     ):
         self._host = host
         self._verify_ssl = verify_ssl
-        self._namespace = namespace
+        self._namespace = get_global_namespace() if namespace is None else namespace
         self._api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
 
     def create_workflow(self, workflow: IoArgoprojWorkflowV1alpha1Workflow) -> IoArgoprojWorkflowV1alpha1Workflow:
