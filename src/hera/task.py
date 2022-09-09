@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, Any
 
 if TYPE_CHECKING:
     from hera import DAG
@@ -160,7 +160,7 @@ class Task(IO):
         self,
         name: str,
         source: Optional[Union[Callable, str]] = None,
-        with_param: Optional[Union[List[Dict[str, Union[int, str, float, dict]]], List[str], str]] = None,
+        with_param: Optional[Any] = None,
         inputs: Optional[List[Union[Parameter, Artifact]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional["DAG"] = None,
