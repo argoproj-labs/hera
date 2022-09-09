@@ -27,10 +27,12 @@ packages = [
 "Bug Tracker" = "https://github.com/argoproj-labs/hera-workflows/issues"
 
 [tool.poetry.dependencies]
+python = ">=3.7, <3.11"
+python-dateutil = "^2.8.2"
+urllib3 = "^1.26.8"
+certifi = "^2021.10.8"
+pytz = "^2021.3"
 argo-workflows = {version = "6.3.5", allow-prereleases = true}
-pydantic = "^1.9.0"
-python = ">=3.7"
-pytz = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

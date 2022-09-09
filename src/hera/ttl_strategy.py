@@ -1,10 +1,11 @@
+from dataclasses import dataclass
 from typing import Optional
 
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1TTLStrategy
-from pydantic import BaseModel
 
 
-class TTLStrategy(BaseModel):
+@dataclass
+class TTLStrategy:
     """TTLStrategy specification for workflows.
 
     https://argoproj.github.io/argo-workflows/fields/#ttlstrategy

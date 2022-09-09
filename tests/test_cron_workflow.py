@@ -19,18 +19,17 @@ from hera import (
     ExistingVolume,
     HostAlias,
     Operator,
+    Parameter,
     Resources,
     SecretVolume,
     Task,
     TTLStrategy,
-    Variable,
     Volume,
     WorkflowStatus,
 )
-from hera.toleration import Toleration
 
 
-def test_cwf_contains_specified_service_account(cws, schedule):
+def test_wf_contains_specified_service_account(cws, schedule):
     w = CronWorkflow("w", schedule, service=cws, service_account_name="w-sa")
 
     expected_sa = "w-sa"
@@ -38,7 +37,7 @@ def test_cwf_contains_specified_service_account(cws, schedule):
     assert w.spec.templates[0].service_account_name == expected_sa
 
 
-def test_cwf_does_not_contain_sa_if_one_is_not_specified(cws, schedule):
+def test_wf_does_not_contain_sa_if_one_is_not_specified(cws, schedule):
     w = CronWorkflow("w", schedule, service=cws)
 
     assert not hasattr(w.spec.templates[0], "service_account_name")
@@ -76,7 +75,7 @@ def test_cwf_adds_task_volume(cw, no_op):
     assert claim.metadata.name == "v"
 
 
-def test_cwf_adds_task_secret_volume(cw, no_op):
+def test_wf_adds_task_secret_volume(cw, no_op):
     t = Task("t", no_op, resources=Resources(volumes=[SecretVolume(name="s", secret_name="sn", mount_path="/")]))
     cw.add_task(t)
 
@@ -113,7 +112,7 @@ def test_cwf_adds_task_empty_dir_volume(cw, no_op):
 
     vol = cw.spec.volumes[0]
     assert vol.name == "v"
-    assert not hasattr(vol.empty_dir, "size_limit")
+    assert not vol.empty_dir.size_limit
     assert vol.empty_dir.medium == "Memory"
 
 
@@ -275,7 +274,7 @@ def test_cwf_adds_image_pull_secrets(ws):
     assert secrets[1] == {"name": "secret1"}
 
 
-def test_cwf_adds_ttl_strategy(ws):
+def test_wf_adds_ttl_strategy(ws):
     w = CronWorkflow(
         "w",
         schedule="* * * * *",
@@ -292,7 +291,7 @@ def test_cwf_adds_ttl_strategy(ws):
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
 
 
-def test_cwf_adds_host_aliases(ws):
+def test_wf_adds_host_aliases(ws):
     w = CronWorkflow(
         "w",
         schedule="* * * * *",
@@ -307,69 +306,67 @@ def test_cwf_adds_host_aliases(ws):
     assert w.spec.host_aliases[1] == ArgoHostAlias(hostnames=["host3"], ip="1.1.1.1")
 
 
-def test_cwf_adds_exit_tasks(cw, no_op):
-    t1 = Task("t1", no_op)
-    cw.add_task(t1)
+# def test_wf_adds_exit_tasks(cw, no_op):
+#     t1 = Task("t1", no_op)
+#     cw.add_task(t1)
 
-    t2 = Task(
-        "t2",
-        no_op,
-        resources=Resources(volumes=[SecretVolume(name="my-vol", mount_path="/mnt/my-vol", secret_name="my-secret")]),
-    ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
-    cw.on_exit(t2)
+#     t2 = Task(
+#         "t2",
+#         no_op,
+#         resources=Resources(volumes=[SecretVolume(name="my-vol", mount_path="/mnt/my-vol", secret_name="my-secret")]),
+#     ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+#     cw.on_exit(t2)
 
-    t3 = Task(
-        "t3", no_op, resources=Resources(volumes=[Volume(name="my-vol", mount_path="/mnt/my-vol", size="5Gi")])
-    ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
-    cw.on_exit(t3)
+#     t3 = Task(
+#         "t3", no_op, resources=Resources(volumes=[Volume(name="my-vol", mount_path="/mnt/my-vol", size="5Gi")])
+#     ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+#     cw.on_exit(t3)
 
-    assert len(cw.exit_template.dag.tasks) == 2
-    assert len(cw.spec.templates) == 5
-
-
-def test_cwf_catches_tasks_without_exit_status_conditions(cw, no_op):
-    t1 = Task("t1", no_op)
-    cw.add_task(t1)
-
-    t2 = Task("t2", no_op)
-    with pytest.raises(AssertionError) as e:
-        cw.on_exit(t2)
-    assert (
-        str(e.value)
-        == "Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it"
-    )
+#     assert len(cw.exit_template.dag.tasks) == 2
+#     assert len(cw.spec.templates) == 5
 
 
-def test_cwf_catches_exit_tasks_without_parent_workflow_tasks(cw, no_op):
+# def test_wf_catches_tasks_without_exit_status_conditions(cw, no_op):
+#     t1 = Task("t1", no_op)
+#     cw.add_task(t1)
+
+#     t2 = Task("t2", no_op)
+#     with pytest.raises(AssertionError) as e:
+#         cw.on_exit(t2)
+#     assert (
+#         str(e.value)
+#         == "Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it"
+#     )
+
+
+def test_wf_catches_exit_tasks_without_parent_workflow_tasks(cw, no_op):
     t1 = Task("t1", no_op)
     with pytest.raises(AssertionError) as e:
         cw.on_exit(t1)
     assert str(e.value) == "Cannot add an exit condition to empty workflows"
 
 
-def test_cwf_contains_expected_default_exit_template(cw):
+def test_wf_contains_expected_default_exit_template(cw):
     assert cw.exit_template
     assert cw.exit_template.name == "exit-template"
     assert cw.exit_template.dag.tasks == []
 
 
-def test_cwf_contains_expected_node_selectors(cws, schedule):
+def test_wf_contains_expected_node_selectors(cws, schedule):
     w = CronWorkflow("w", schedule, cws, node_selectors={"foo": "bar"})
-    assert w.spec.node_selector == {"foo": "bar"}
     assert w.template.node_selector == {"foo": "bar"}
     assert w.exit_template.node_selector == {"foo": "bar"}
     assert w.dag_template.node_selector == {"foo": "bar"}
 
 
-def test_cwf_adds_affinity(cws, schedule, affinity):
+def test_wf_adds_affinity(cws, schedule, affinity):
     w = CronWorkflow("w", schedule, cws, affinity=affinity)
     assert w.affinity == affinity
-    assert hasattr(w.spec, "affinity")
     assert hasattr(w.template, "affinity")
     assert hasattr(w.exit_template, "affinity")
 
 
-def test_cwf_raises_on_double_context(cws, schedule):
+def test_wf_raises_on_double_context(cws, schedule):
     with CronWorkflow("w", schedule, service=cws):
         with pytest.raises(ValueError) as e:
             with CronWorkflow("w2", schedule, service=cws):
@@ -377,57 +374,25 @@ def test_cwf_raises_on_double_context(cws, schedule):
         assert "Hera context already defined with workflow" in str(e.value)
 
 
-def test_cwf_resets_context_indicator(cws, schedule):
+def test_wf_resets_context_indicator(cws, schedule):
     with CronWorkflow("w", schedule, service=cws) as w:
         assert w.in_context
     assert not w.in_context
 
 
-def test_cwf_raises_on_create_in_context(cws, schedule):
+def test_wf_raises_on_create_in_context(cws, schedule):
     with CronWorkflow("w", schedule, service=cws) as w:
         with pytest.raises(ValueError) as e:
             w.create()
         assert str(e.value) == "Cannot invoke `create` when using a Hera context"
 
 
-def test_cwf_sets_variables_as_global_args(cws, schedule):
-    with CronWorkflow("w", schedule, service=cws, variables=[Variable("a", "42")]) as w:
-        assert len(w.variables) == 1
-        assert w.variables[0].name == "a"
-        assert w.variables[0].value == "42"
+def test_wf_sets_parameters(cws, schedule):
+    with CronWorkflow("w", schedule, service=cws, parameters=[Parameter("a", "42")]) as w:
+        assert w.parameters is not None
+        assert len(w.parameters) == 1
+        assert w.parameters[0].name == "a"
+        assert w.parameters[0].value == "42"
+        # assert w.get_parameter("a").value == "{{workflow.parameters.a}}"
         assert hasattr(w.spec, "arguments")
         assert len(getattr(w.spec, "arguments").parameters) == 1
-
-
-def test_wf_sets_tolerations(cws, schedule):
-    with CronWorkflow(
-        "w", schedule, service=cws, tolerations=[Toleration(key="a", effect="NoSchedule", operator="Exists", value="")]
-    ) as w:
-        assert len(w.tolerations) == 1
-        assert w.tolerations[0].key == "a"
-        assert w.tolerations[0].effect == "NoSchedule"
-        assert w.tolerations[0].operator == "Exists"
-        assert w.tolerations[0].value == ""
-        assert hasattr(w.spec, "tolerations")
-        assert len(getattr(w.spec, "tolerations")) == 1
-        assert hasattr(w.template, "tolerations")
-        assert len(getattr(w.template, "tolerations")) == 1
-        assert hasattr(w.exit_template, "tolerations")
-        assert len(getattr(w.exit_template, "tolerations")) == 1
-
-
-def test_cwf_adds_volumes(cws, schedule):
-    with CronWorkflow(
-        "w", schedule, service=cws, volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")]
-    ) as w:
-        assert len(w.spec.volumes) == 1
-        assert len(w.spec.volume_claim_templates) == 1
-    with CronWorkflow(
-        "w",
-        schedule,
-        service=cws,
-        volumes=[EmptyDirVolume(), Volume(mount_path="/mnt", size="1Gi")],
-        workflow_template_ref="abc",
-    ) as w:
-        assert len(w.spec.volumes) == 1
-        assert len(w.spec.volume_claim_templates) == 1

@@ -1,4 +1,4 @@
-from hera import InputParameter, OutputPathParameter, Task, Workflow, WorkflowService
+from hera import Parameter, Task, Workflow, WorkflowService
 
 
 def produce():
@@ -11,8 +11,8 @@ def consume(msg: str):
 
 
 with Workflow("io", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")) as w:
-    p = Task("p", produce, outputs=[OutputPathParameter("msg", "/test.txt")])
-    c = Task("c", consume, inputs=[InputParameter("msg", p.name, "msg")])
-    p >> c
+    t1 = Task("p", produce, outputs=[Parameter("msg", value_from=dict(path="/test.txt"))])
+    t2 = Task("c", consume, inputs=[t1.get_output("msg")])
+    t1 >> t2
 
 w.create()

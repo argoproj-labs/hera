@@ -1,8 +1,22 @@
+from dataclasses import dataclass
+
 from argo_workflows.models import ConfigMapEnvSource, EnvFromSource, SecretEnvSource
-from pydantic.main import BaseModel
+
+# TODO Generalize from classes in volumes.py
 
 
-class BaseEnvFromSpec(BaseModel):
+@dataclass
+class _NamedConfigMap:
+    config_map_name: str
+
+
+@dataclass
+class _NamedSecret:
+    secret_name: str
+
+
+@dataclass
+class BaseEnvFromSpec:
     """Environment variable specification from K8S resources.
 
     Attributes
@@ -13,13 +27,13 @@ class BaseEnvFromSpec(BaseModel):
 
     prefix: str = ""
 
-    @property
-    def argo_spec(self) -> EnvFromSource:
+    def build(self) -> EnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
         raise NotImplementedError()
 
 
-class SecretEnvFromSpec(BaseEnvFromSpec):
+@dataclass
+class SecretEnvFromSpec(BaseEnvFromSpec, _NamedSecret):
     """Environment variable specification from K8S secrets.
 
     Attributes
@@ -30,18 +44,17 @@ class SecretEnvFromSpec(BaseEnvFromSpec):
         Specify whether the K8S secret must be defined
     """
 
-    secret_name: str
     optional: bool = False
 
-    @property
-    def argo_spec(self) -> EnvFromSource:
+    def build(self) -> EnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
         return EnvFromSource(
             prefix=self.prefix, secret_ref=SecretEnvSource(name=self.secret_name, optional=self.optional)
         )
 
 
-class ConfigMapEnvFromSpec(BaseEnvFromSpec):
+@dataclass
+class ConfigMapEnvFromSpec(BaseEnvFromSpec, _NamedConfigMap):
     """Environment variable specification from K8S config map.
 
     Attributes
@@ -52,11 +65,9 @@ class ConfigMapEnvFromSpec(BaseEnvFromSpec):
         Specify whether the K8S config map must be defined
     """
 
-    config_map_name: str
     optional: bool = False
 
-    @property
-    def argo_spec(self) -> EnvFromSource:
+    def build(self) -> EnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
         return EnvFromSource(
             prefix=self.prefix, config_map_ref=ConfigMapEnvSource(name=self.config_map_name, optional=self.optional)

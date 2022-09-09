@@ -70,7 +70,7 @@ def test_wft_does_not_add_empty_task(w):
     t = None
     w.add_task(t)
 
-    assert not w.dag_template.tasks
+    assert not w.tasks
 
 
 def test_wft_adds_specified_tasks(w, no_op):
@@ -78,8 +78,8 @@ def test_wft_adds_specified_tasks(w, no_op):
     ts = [Task(f"t{i}", no_op) for i in range(n)]
     w.add_tasks(*ts)
 
-    assert len(w.dag_template.tasks) == n
-    for i, t in enumerate(w.dag_template.tasks):
+    assert len(w.tasks) == n
+    for i, t in enumerate(w.tasks):
         assert ts[i].name == t.name
 
 
@@ -113,44 +113,44 @@ def test_wft_adds_ttl_strategy(wts):
     assert w.spec.ttl_strategy._data_store == expected_ttl_strategy
 
 
-def test_wf_adds_exit_tasks(wt, no_op):
-    t1 = Task("t1", no_op)
-    wt.add_task(t1)
+# def test_wf_adds_exit_tasks(wt, no_op):
+#     t1 = Task("t1", no_op)
+#     wt.add_task(t1)
 
-    t2 = Task(
-        "t2",
-        no_op,
-        resources=Resources(volumes=[SecretVolume(name="my-vol", mount_path="/mnt/my-vol", secret_name="my-secret")]),
-    ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
-    wt.on_exit(t2)
+#     t2 = Task(
+#         "t2",
+#         no_op,
+#         resources=Resources(volumes=[SecretVolume(name="my-vol", mount_path="/mnt/my-vol", secret_name="my-secret")]),
+#     ).on_workflow_status(Operator.equals, WorkflowStatus.Succeeded)
+#     wt.on_exit(t2)
 
-    t3 = Task(
-        "t3", no_op, resources=Resources(volumes=[Volume(name="my-vol", mount_path="/mnt/my-vol", size="5Gi")])
-    ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
-    wt.on_exit(t3)
+#     t3 = Task(
+#         "t3", no_op, resources=Resources(volumes=[Volume(name="my-vol", mount_path="/mnt/my-vol", size="5Gi")])
+#     ).on_workflow_status(Operator.equals, WorkflowStatus.Failed)
+#     wt.on_exit(t3)
 
-    assert len(wt.exit_template.dag.tasks) == 2
-    assert len(wt.spec.templates) == 5
-
-
-def test_wf_catches_tasks_without_exit_status_conditions(wt, no_op):
-    t1 = Task("t1", no_op)
-    wt.add_task(t1)
-
-    t2 = Task("t2", no_op)
-    with pytest.raises(AssertionError) as e:
-        wt.on_exit(t2)
-    assert (
-        str(e.value)
-        == "Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it"
-    )
+#     assert len(wt.exit_template.dag.tasks) == 2
+#     assert len(wt.spec.templates) == 5
 
 
-def test_wf_catches_exit_tasks_without_parent_workflow_tasks(wt, no_op):
-    t1 = Task("t1", no_op)
-    with pytest.raises(AssertionError) as e:
-        wt.on_exit(t1)
-    assert str(e.value) == "Cannot add an exit condition to empty workflows"
+# def test_wf_catches_tasks_without_exit_status_conditions(wt, no_op):
+#     t1 = Task("t1", no_op)
+#     wt.add_task(t1)
+
+#     t2 = Task("t2", no_op)
+#     with pytest.raises(AssertionError) as e:
+#         wt.on_exit(t2)
+#     assert (
+#         str(e.value)
+#         == "Each exit task must contain a workflow status condition. Use `task.on_workflow_status(...)` to set it"
+#     )
+
+
+# def test_wf_catches_exit_tasks_without_parent_workflow_tasks(wt, no_op):
+#     t1 = Task("t1", no_op)
+#     with pytest.raises(AssertionError) as e:
+#         wt.on_exit(t1)
+#     assert str(e.value) == "Cannot add an exit condition to empty workflows"
 
 
 def test_wf_contains_expected_default_exit_template(wt):

@@ -1,8 +1,10 @@
+from dataclasses import dataclass
+
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1TemplateRef
-from pydantic import BaseModel
 
 
-class TemplateRef(BaseModel):
+@dataclass
+class TemplateRef:
     """Reference to a workflow template containing task templates to be shared.
 
     Parameters
@@ -20,7 +22,7 @@ class TemplateRef(BaseModel):
     cluster_scope: bool = False
 
     @property
-    def argo_spec(self) -> IoArgoprojWorkflowV1alpha1TemplateRef:
+    def build_spec(self) -> IoArgoprojWorkflowV1alpha1TemplateRef:
         return IoArgoprojWorkflowV1alpha1TemplateRef(
             name=self.name, template=self.template, cluster_scope=self.cluster_scope
         )

@@ -1,9 +1,34 @@
 """Holds a collection of validators that are shared in V1"""
 import json
 import re
-from typing import Any, Union
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel
+
+def validate_name(name: str, max_length: Optional[int] = None) -> str:
+    """Validates a name according to standard argo/kubernetes limitations
+
+    Parameters
+    ----------
+    name: str
+        The name which should be validated.
+
+    Raises
+    ------
+    ValueError
+        When the name is invalid according to specifications.
+    """
+    if max_length and len(name) > max_length:
+        raise ValueError(f"Name is too long. Max length: {max_length}, now: {len(name)}")
+    if "." in name:
+        raise ValueError("Name cannot include a dot")
+    if "_" in name:
+        raise ValueError("Name cannot include underscore.")
+
+    pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    match_obj = re.match(pattern, name)
+    if not match_obj:
+        raise ValueError(f"Name is invalid: '{name}'. Regex used for validation is {pattern}")
+    return name
 
 
 def validate_storage_units(value: str) -> None:
@@ -35,13 +60,13 @@ def validate_storage_units(value: str) -> None:
         assert unit in supported_units, f"unsupported unit for parsed value {value}"
 
 
-def json_serializable(value: Union[BaseModel, Any]) -> True:  # type: ignore
+def json_serializable(value: Any) -> True:  # type: ignore
     """Check if the given value is JSON serializable.
 
     Parameters
     ----------
-    value: Union[BaseModel, Any]
-        The value to check. Note that there's a union on the pydantic BaseModel and Any.
+    value: Union[Any]
+        The value to check.
 
     Returns
     -------
@@ -51,9 +76,6 @@ def json_serializable(value: Union[BaseModel, Any]) -> True:  # type: ignore
     if not value:
         return True  # serialized as 'null'
 
-    if isinstance(value, BaseModel):
-        # BaseModels expose a .json() and .dict() on the model, which is serializable
-        return True
     try:
         json.dumps(value)
     except (TypeError, OverflowError):

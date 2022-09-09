@@ -1,11 +1,4 @@
-from hera import (
-    InputFrom,
-    MultiInput,
-    OutputPathParameter,
-    Task,
-    Workflow,
-    WorkflowService,
-)
+from hera import Parameter, Task, Workflow, WorkflowService
 
 
 def generate():
@@ -17,9 +10,11 @@ def generate():
     json.dump([{"value": i} for i in range(10)], sys.stdout)
 
 
-def fanout(value: int):
-    print(f"Received value: {value}!")
-    with open("/tmp/number", "w") as f:
+def fanout(object: dict):
+    print(f"Received object: {object}!")
+    # Output the content of the "value" key in the object
+    value = object["value"]
+    with open("/tmp/value", "w") as f:
         f.write(str(value))
 
 
@@ -27,17 +22,17 @@ def fanin(values: list):
     print(f"Received values: {values}!")
 
 
-with Workflow(
-    "dynamic-fanout-fanin", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
-) as w:
+ws = WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
+
+with Workflow("dynamic-fanout-fanin", service=ws) as w:
     generate_task = Task("generate", generate)
     fanout_task = Task(
         "fanout",
         fanout,
-        input_from=InputFrom("generate", ["value"]),
-        outputs=[OutputPathParameter("fanout", "/tmp/number")],
+        with_param=generate_task.get_result(),
+        outputs=[Parameter("value", value_from=dict(path="/tmp/value"))],
     )
-    fanin_task = Task("fanin", fanin, inputs=[MultiInput("values", fanout_task.name)])
+    fanin_task = Task("fanin", fanin, inputs=[fanout_task.get_outputs_as("values")])
 
     generate_task >> fanout_task >> fanin_task
 

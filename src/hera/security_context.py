@@ -1,10 +1,11 @@
+from dataclasses import asdict, dataclass, field
 from typing import List, Optional
 
 from argo_workflows.models import Capabilities, PodSecurityContext, SecurityContext
-from pydantic import BaseModel
 
 
-class BaseSecurityContext(BaseModel):
+@dataclass
+class BaseSecurityContext:
     """Abstract class to accommodate the shared functionality of task and workflow context."""
 
     privileged: Optional[bool] = None
@@ -13,11 +14,12 @@ class BaseSecurityContext(BaseModel):
     run_as_non_root: Optional[bool] = None
 
     def _get_settable_attributes_as_kwargs(self):
-        attributes = dict(self)
+        attributes = asdict(self)
         settable_attributes = {k: v for k, v in attributes.items() if v is not None}
         return settable_attributes
 
 
+@dataclass
 class WorkflowSecurityContext(BaseSecurityContext):
     """Defines workflow level sercurity attributes and settings.
 
@@ -43,6 +45,7 @@ class WorkflowSecurityContext(BaseSecurityContext):
         return security_context
 
 
+@dataclass
 class TaskSecurityContext(BaseSecurityContext):
     """Defines task level security attributes and settings overrides the WorkflowSecurityContext settings.
 
@@ -60,7 +63,7 @@ class TaskSecurityContext(BaseSecurityContext):
         List of POSIX capabilities to add to the task's container.
     """
 
-    additional_capabilities: List[str] = None
+    additional_capabilities: List[str] = field(default_factory=list)
 
     def _get_capabilties(self):
         if self.additional_capabilities:
@@ -72,7 +75,7 @@ class TaskSecurityContext(BaseSecurityContext):
             settable_attributes["capabilities"] = self._get_capabilties()
         return settable_attributes
 
-    def get_security_context(self) -> SecurityContext:
+    def build_security_context(self) -> SecurityContext:
         settable_attributes = self._get_settable_attributes_as_kwargs()
         security_context = SecurityContext(**settable_attributes)
         return security_context
