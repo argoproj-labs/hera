@@ -13,12 +13,14 @@ from argo_workflows.models import (
 
 @dataclass
 class ConfigMapNamedKey:
+    """Config map representation. Supports the specification of a name/key string pair to identify a value"""
     config_map_name: str
     config_map_key: str
 
 
 @dataclass
 class SecretNamedKey:
+    """Secret map representation. Supports the specification of a name/key string pair to identify a value"""
     secret_name: str
     secret_key: str
 
@@ -47,12 +49,6 @@ class EnvSpec:
     name: str
     value: Optional[Any] = None
     value_from_input: Optional[str] = None
-
-    # @validator("value")
-    # def check_value_json_serializable(cls, value):
-    #     """Verifies that the specific environment value"""
-    #     assert json_serializable(value), "specified value is not JSON serializable"
-    #     return value
 
     def build(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
@@ -109,6 +105,15 @@ class ConfigMapEnvSpec(EnvSpec, ConfigMapNamedKey):
 
 @dataclass
 class FieldPath:
+    """Field path representation.
+
+    This allows obtaining K8S values via indexing into specific fields of the K8S definition.
+
+    Attributes
+    ----------
+    field_path: str
+        Path to the field to obtain the value from.
+    """
     field_path: str
 
 
@@ -118,8 +123,16 @@ class FieldEnvSpec(EnvSpec, FieldPath):
 
     Attributes
     ----------
+    name: str
+        The name of the variable.
+    value: Optional[Any] = None
+        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the value
+        in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
+        performed.
+    value_from_input: Optional[str] = None
+        A reference to an input parameter which will resolve to the value. The input parameter will be auto-generated.
     field_path: str
-        The path of the object field to load values from.
+        Path to the field to obtain the value from.
     api_version: Optional[str] = 'v1'
         The version of the schema the FieldPath is written in terms of. Defaults to 'v1'.
     """
