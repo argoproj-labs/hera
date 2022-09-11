@@ -24,6 +24,9 @@ class LabelOperator(str, Enum):
     Exists = "Exists"
     DoesNotExist = "DoesNotExist"
 
+    def __str__(self):
+        return str(self.value)
+
 
 class NodeSelectorRequirement:
     """Builds the K8S node selector requirement.

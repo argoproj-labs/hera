@@ -34,28 +34,34 @@ class _NamedSecret:
     secret_name: str
 
 
-class AccessMode(Enum):
+class AccessMode(str, Enum):
     """A representations of the volume access modes for Kubernetes.
 
-    Notes
-    -----
-        See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
+    See Also
+    --------
+    https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
     """
 
     ReadWriteOnce = "ReadWriteOnce"
-    """the volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple
-    pods to access the volume when the pods are running on the same node."""
+    """
+    The volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple
+    pods to access the volume when the pods are running on the same node
+    """
 
     ReadOnlyMany = "ReadOnlyMany"
-    """the volume can be mounted as read-only by many nodes"""
+    """The volume can be mounted as read-only by many nodes"""
 
     ReadWriteMany = "ReadWriteMany"
-    """the volume can be mounted as read-write by many nodes"""
+    """The volume can be mounted as read-write by many nodes"""
 
     ReadWriteOncePod = "ReadWriteOncePod"
-    """the volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to
+    """
+    The volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to
     ensure that only one pod across whole cluster can read that PVC or write to it. This is only supported for CSI
-    volumes and Kubernetes version 1.22+"""
+    volumes and Kubernetes version 1.22+.
+    """
+    def __str__(self):
+        return str(self.value)
 
 
 @dataclass

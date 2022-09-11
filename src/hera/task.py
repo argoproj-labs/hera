@@ -52,7 +52,7 @@ from hera.volumes import (
 from hera.workflow_status import WorkflowStatus
 
 
-class TaskResult(Enum):
+class TaskResult(str, Enum):
     Failed = "Failed"
     Succeeded = "Succeeded"
     Errored = "Errored"

@@ -11,10 +11,27 @@ from argo_workflows.models import (
 from hera.workflow import Workflow
 
 
-class ConcurrencyPolicy(Enum):
+class ConcurrencyPolicy(str, Enum):
+    """Specifies how to treat concurrent executions of a job that is created by a cron workflow.
+
+    See Also
+    --------
+    https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/#concurrency-policy
+    """
     Allow = "Allow"
+    """Default, cron job allows concurrently running jobs"""
+
     Replace = "Replace"
+    """
+    If it is time for a new job run and the previous job run hasn't finished yet, the cron job replaces the 
+    currently running job run with a new job run
+    """
+
     Forbid = "Forbid"
+    """
+    The cron job does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't 
+    finished yet, the cron job skips the new job run.
+    """
 
     def __str__(self):
         return str(self.value)
@@ -30,11 +47,19 @@ class CronWorkflow(Workflow):
 
     Parameters
     ----------
+    name: str
+        Name of the workflow.
     schedule: str
-        Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *.
-    timezone: str
+        Schedule at which the Workflow will be run in Cron format e.g. 5 4 * * *.
+    concurrency_policy: Optional[ConcurrencyPolicy] = None
+        Concurrency policy that dictates the concurrency behavior of multiple cron jobs of the same kind.
+        See `hera.cron_workflow.ConcurrencyPolicy`
+    starting_deadline_seconds: Optional[int] = None
+        The number of seconds the workflow has as a starting deadline.
+    timezone: Optional[str] = None
         Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles.
-
+    **kwargs
+        Any kwargs to set on the workflow. See `hera.workflow.Workflow`.
     """
 
     def __init__(
@@ -55,6 +80,7 @@ class CronWorkflow(Workflow):
         self.concurrency_policy = concurrency_policy
 
     def build(self) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Builds the workflow representation"""
         workflow = super().build()
         cron_workflow_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
             schedule=self.schedule,
@@ -87,7 +113,7 @@ class CronWorkflow(Workflow):
     def update(self) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates the cron workflow in the server"""
 
-        # When update cron_workflow, metadata.resourceVersion and metadata.uid should be same as the previous value.
+        # when update cron_workflow, metadata.resourceVersion and metadata.uid should be same as the previous value
         old_workflow = self.service.get_cron_workflow(self.name)
         cron_workflow = self.build()
         cron_workflow.metadata["resourceVersion"] = old_workflow.metadata["resourceVersion"]
