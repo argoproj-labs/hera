@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from argo_workflows.models import ConfigMapEnvSource, EnvFromSource, SecretEnvSource
 
-
 # TODO Generalize from classes in volumes.py
 
 

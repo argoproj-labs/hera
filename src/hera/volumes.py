@@ -60,6 +60,7 @@ class AccessMode(str, Enum):
     ensure that only one pod across whole cluster can read that PVC or write to it. This is only supported for CSI
     volumes and Kubernetes version 1.22+.
     """
+
     def __str__(self):
         return str(self.value)
 
@@ -143,8 +144,6 @@ class ExistingVolume(BaseVolume):
         """Constructs an Argo volume representation for mounting existing volumes to a step/task"""
         claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
         return ArgoVolume(name=self.name, persistent_volume_claim=claim)
-
-
 
 
 @dataclass

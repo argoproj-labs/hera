@@ -19,6 +19,7 @@ from argo_workflows.models import WeightedPodAffinityTerm as ArgoWeightedPodAffi
 
 class LabelOperator(str, Enum):
     """Collection of valid labels for node selectors"""
+
     In = "In"
     NotIn = "NotIn"
     Exists = "Exists"
@@ -123,7 +124,7 @@ class PreferredSchedulingTerm:
 
     def __init__(self, node_selector_term: NodeSelectorTerm, weight: int) -> None:
         self.node_selector_term = node_selector_term
-        assert 1 <= weight <= 100, 'Node selector weight for scheduling term preference should be between 1 and 100'
+        assert 1 <= weight <= 100, "Node selector weight for scheduling term preference should be between 1 and 100"
         self.weight = weight
 
     def get_spec(self) -> Optional[ArgoPreferredSchedulingTerm]:
@@ -283,7 +284,7 @@ class WeightedPodAffinityTerm:
         weight: int,
     ):
         self.pod_affinity_term = pod_affinity_term
-        assert 1 <= weight <= 100, 'Pod affinity term weight should be between 1 and 100'
+        assert 1 <= weight <= 100, "Pod affinity term weight should be between 1 and 100"
         self.weight = weight
 
     def get_spec(self) -> ArgoWeightedPodAffinityTerm:

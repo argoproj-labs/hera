@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, Any, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from argo_workflows.model.env_from_source import EnvFromSource
 
@@ -14,17 +14,18 @@ if TYPE_CHECKING:
 
 from argo_workflows.models import (
     Container,
+    EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Backoff,
-    PersistentVolumeClaim,
-    Volume as ArgoVolume,
-    IoArgoprojWorkflowV1alpha1DAGTask,EnvVar,
+    IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1RetryStrategy,
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
+    PersistentVolumeClaim,
 )
 from argo_workflows.models import Toleration as ArgoToleration
+from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera

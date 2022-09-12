@@ -14,6 +14,7 @@ from argo_workflows.models import (
 @dataclass
 class ConfigMapNamedKey:
     """Config map representation. Supports the specification of a name/key string pair to identify a value"""
+
     config_map_name: str
     config_map_key: str
 
@@ -21,6 +22,7 @@ class ConfigMapNamedKey:
 @dataclass
 class SecretNamedKey:
     """Secret map representation. Supports the specification of a name/key string pair to identify a value"""
+
     secret_name: str
     secret_key: str
 
@@ -114,6 +116,7 @@ class FieldPath:
     field_path: str
         Path to the field to obtain the value from.
     """
+
     field_path: str
 
 

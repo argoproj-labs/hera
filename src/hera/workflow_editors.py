@@ -6,9 +6,9 @@ from hera.task import Task
 
 if TYPE_CHECKING:
     from hera.cron_workflow import CronWorkflow
+    from hera.dag import DAG
     from hera.workflow import Workflow
     from hera.workflow_template import WorkflowTemplate
-    from hera.dag import DAG
 
 
 def add_task(w: Union["DAG", "WorkflowTemplate", "CronWorkflow", "Workflow"], t: Task) -> None:

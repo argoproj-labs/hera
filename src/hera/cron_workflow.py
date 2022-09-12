@@ -18,6 +18,7 @@ class ConcurrencyPolicy(str, Enum):
     --------
     https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/#concurrency-policy
     """
+
     Allow = "Allow"
     """Default, cron job allows concurrently running jobs"""
 

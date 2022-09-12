@@ -178,7 +178,7 @@ class Workflow:
                 "arguments",
                 IoArgoprojWorkflowV1alpha1Arguments(parameters=[p.as_argument() for p in self.parameters]),
             )
-            
+
         if self.affinity is not None:
             setattr(spec, "affinity", self.affinity.get_spec())
 

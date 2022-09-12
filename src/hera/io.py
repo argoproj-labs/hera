@@ -21,6 +21,7 @@ class IO:
     outputs: List[Union[Parameter, Artifact]]
         List of parameters or artifacts to use as outputs.
     """
+
     inputs: List[Union[Parameter, Artifact]]
     outputs: List[Union[Parameter, Artifact]]
 
