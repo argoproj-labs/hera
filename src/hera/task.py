@@ -33,6 +33,7 @@ from hera.affinity import Affinity
 from hera.artifact import Artifact
 from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
+from hera.resource_template import ResourceTemplate
 from hera.image import ImagePullPolicy
 from hera.io import IO
 from hera.memoize import Memoize
@@ -148,6 +149,9 @@ class Task(IO):
     pod_spec_patch: Optional[str] = None
         The fields of the task to patch, and how.
         See https://github.com/argoproj/argo-workflows/blob/master/examples/pod-spec-patch.yaml for an example.
+    resource_template: Optional[ResourceTemplate]
+        Resource template for managing Kubernetes resources. Resource template allows you to create, delete or update
+        any type of Kubernetes resource, it accepts any kubectl action and valid K8S manifest.
 
     Notes
     ------
@@ -183,6 +187,7 @@ class Task(IO):
         affinity: Optional[Affinity] = None,
         memoize: Optional[Memoize] = None,
         pod_spec_patch: Optional[str] = None,
+        resource_template: Optional[ResourceTemplate] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -199,6 +204,7 @@ class Task(IO):
         self.with_param = with_param
         self.inputs += self.deduce_parameters()
         self.pod_spec_patch = pod_spec_patch
+        self.resource_template: Optional[ResourceTemplate] = resource_template
 
         self.image = image
         self.image_pull_policy = image_pull_policy
@@ -794,6 +800,9 @@ class Task(IO):
 
         if self.pod_spec_patch is not None:
             setattr(template, "podSpecPatch", self.pod_spec_patch)
+
+        if self.resource_template is not None:
+            setattr(template, "resource", self.resource_template.build())
 
         return template
 

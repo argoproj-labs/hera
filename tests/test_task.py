@@ -24,13 +24,12 @@ from hera import (
     Task,
     TaskSecurityContext,
     TemplateRef,
+    ResourceTemplate,
     Toleration,
     Volume,
     WorkflowStatus,
+EnvSpec,Parameter,TaskResult
 )
-from hera.env import EnvSpec
-from hera.parameter import Parameter
-from hera.task import TaskResult
 
 
 def test_next_and_shifting_set_correct_dependencies(no_op):
@@ -831,3 +830,10 @@ def test_task_fails_to_validate_with_incorrect_memoize(op):
 #     assert t.exit_task == e
 #     assert hasattr(t.argo_task, "hooks")
 #     assert getattr(t.argo_task, "hooks").get("exit").template == "e"
+
+def test_task_template_contains_resource_template():
+    resource_template = ResourceTemplate(action="create")
+    t = Task(name="t", resource_template=resource_template)
+    tt = t.build_template()
+    resource = resource_template.get_resource_template()
+    assert tt.resource == resource
