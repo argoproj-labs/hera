@@ -129,6 +129,11 @@ class EmptyDirVolume(BaseVolume, _Sized):
 class ExistingVolume(BaseVolume):
     """A representation of an existing volume. This can be used to mount existing volumes to workflow tasks"""
 
+    def __post_init__(self):
+        assert self.name, "ExistingVolume needs a name to use as claim name"
+        # super().__post_init__()
+        self.check_name()
+
     def check_name(self):
         """Verifies that the specified name does not contain underscores, which are not RFC1123 compliant"""
         assert self.name
@@ -139,10 +144,7 @@ class ExistingVolume(BaseVolume):
         claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
         return ArgoVolume(name=self.name, persistent_volume_claim=claim)
 
-    def __post_init__(self):
-        assert self.name, "ExistingVolume needs a name to use as claim name"
-        # super().__post_init__()
-        self.check_name()
+
 
 
 @dataclass

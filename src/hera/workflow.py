@@ -3,14 +3,9 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Arguments,
-    IoArgoprojWorkflowV1alpha1CronWorkflow,
-    IoArgoprojWorkflowV1alpha1DAGTemplate,
-    IoArgoprojWorkflowV1alpha1Template,
     IoArgoprojWorkflowV1alpha1VolumeClaimGC,
     IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplate,
-    IoArgoprojWorkflowV1alpha1WorkflowTemplateRef,
     LocalObjectReference,
     ObjectMeta,
 )
@@ -26,7 +21,6 @@ from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.volumes import Volume
 from hera.workflow_editors import add_task, add_tasks
 from hera.workflow_service import WorkflowService
 
@@ -45,17 +39,15 @@ class Workflow:
         The workflow name. Note that the workflow initiation will replace underscores with dashes.
     service: Optional[WorkflowService] = None
         A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
-    parallelism: int = 50
+    parallelism: Optional[int] = None
         The number of parallel tasks to run in case a task group is executed for multiple tasks.
-    service_account_name: Optional[str] = None
+    service_account_name: Optional[str] = None,
         The name of the service account to use in all workflow tasks.
     labels: Optional[Dict[str, str]] = None
-        A Dict of labels to attach to the Workflow object metadata
+        A dictionary of labels to attach to the Workflow object metadata.
     annotations: Optional[Dict[str, str]] = None
-        A Dict of annotations to attach to the Workflow object metadata
-    namespace: Optional[str] = 'default'
-        The namespace to use for creating the Workflow.  Defaults to "default"
-    security_context:  Optional[WorkflowSecurityContext] = None
+        A dictionary of annotations to attach to the Workflow object metadata.
+    security_context: Optional[WorkflowSecurityContext] = None
         Define security settings for all containers in the workflow.
     image_pull_secrets: Optional[List[str]] = None
         A list of image pull secrets. This is used to authenticate with the private image registry of the images
@@ -78,6 +70,10 @@ class Workflow:
         they submit the workflow to.
     affinity: Optional[Affinity] = None
         The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
+    dag: Optional[DAG] = None
+        The DAG to execute as part of the workflow.
+    parameters: Optional[List[Parameter]] = None
+        Any global parameters for the workflow.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
     """
@@ -123,7 +119,8 @@ class Workflow:
         self.exit_task = None
         self.tasks = []
 
-    def build_metadata(self, use_name=True):
+    def build_metadata(self, use_name=True) -> ObjectMeta:
+        """Assembles the metadata of the workflow"""
         metadata = ObjectMeta()
         if use_name:
             setattr(metadata, "name", self.name)
@@ -133,10 +130,11 @@ class Workflow:
             setattr(metadata, "annotations", self.annotations)
         return metadata
 
-    def build_spec(self, workflow_template: bool = False):
+    def build_spec(self, workflow_template: bool = False) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
+        """Assembles the spec of the workflow"""
         # Main difference between workflow and workflow template spec is that WT
         # (generally) doesn't have an entrypoint
-        assert self.dag
+        assert self.dag is not None
         spec = IoArgoprojWorkflowV1alpha1WorkflowSpec()
         templates = self.dag.build_templates()
 
@@ -146,48 +144,48 @@ class Workflow:
 
         setattr(spec, "templates", templates)
 
-        if self.parallelism:
+        if self.parallelism is not None:
             setattr(spec, "parallelism", self.parallelism)
 
-        if self.ttl_strategy:
+        if self.ttl_strategy is not None:
             setattr(spec, "ttl_strategy", self.ttl_strategy.argo_ttl_strategy)
 
-        if self.volume_claim_gc_strategy:
+        if self.volume_claim_gc_strategy is not None:
             setattr(
                 spec,
                 "volume_claim_gc",
                 IoArgoprojWorkflowV1alpha1VolumeClaimGC(strategy=self.volume_claim_gc_strategy.value),
             )
 
-        if self.host_aliases:
+        if self.host_aliases is not None:
             setattr(spec, "host_aliases", [h.argo_host_alias for h in self.host_aliases])
 
-        if self.security_context:
+        if self.security_context is not None:
             security_context = self.security_context.get_security_context()
             setattr(spec, "security_context", security_context)
 
-        if self.service_account_name:
+        if self.service_account_name is not None:
             # setattr(main_template, "service_account_name", self.service_account_name) #TODO Is this needed?
             setattr(spec, "service_account_name", self.service_account_name)
 
-        if self.image_pull_secrets:
+        if self.image_pull_secrets is not None:
             secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
             setattr(spec, "image_pull_secrets", secret_refs)
 
-        if self.parameters:
+        if self.parameters is not None:
             setattr(
                 spec,
                 "arguments",
                 IoArgoprojWorkflowV1alpha1Arguments(parameters=[p.as_argument() for p in self.parameters]),
             )
             
-        if self.affinity:
+        if self.affinity is not None:
             setattr(spec, "affinity", self.affinity.get_spec())
 
-        if self.node_selector:
+        if self.node_selector is not None:
             setattr(spec, "node_selector", self.node_selector)
 
-        if self.tolerations:
+        if self.tolerations is not None:
             ts = [t.to_argo_toleration() for t in self.tolerations]
             setattr(spec, "tolerations", ts)
 
@@ -199,15 +197,20 @@ class Workflow:
         if pcvs:
             setattr(spec, "volumes", pcvs)
 
-        if self.exit_task:
+        if self.exit_task is not None:
             setattr(spec, "on_exit", self.exit_task)
 
         return spec
 
     def build(self) -> IoArgoprojWorkflowV1alpha1Workflow:
+        """Builds the workflow core representation"""
         return IoArgoprojWorkflowV1alpha1Workflow(metadata=self.build_metadata(), spec=self.build_spec())
 
     def __enter__(self) -> "Workflow":
+        """Enter the context of the workflow.
+
+        Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
+        """
         self.in_context = True
         if self.dag:
             raise ValueError("DAG already set for workflow")
@@ -216,24 +219,34 @@ class Workflow:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Leave the context of the workflow.
+
+        This supports using `with Workflow(...)`.
+        """
         self.in_context = False
         hera.dag_context.exit()
 
-    def add_task(self, t: Task) -> None:
+    def add_task(self, t: Task) -> "Workflow":
+        """Add a task to the workflow"""
         add_task(self, t)
+        return self
 
-    def add_tasks(self, *ts: Task) -> None:
+    def add_tasks(self, *ts: Task) -> "Workflow":
+        """Add a collection of tasks to the workflow"""
         add_tasks(self, *ts)
+        return self
 
-    def create(self):
+    def create(self) -> "Workflow":
         """Creates the workflow"""
         assert self.dag
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
 
-        return self.service.create_workflow(self.build())
+        self.service.create_workflow(self.build())
+        return self
 
     def on_exit(self, other: Union[Task, DAG]) -> None:
+        """Add a task or a DAG to execute upon workflow exit"""
         if isinstance(other, Task):
             self.exit_task = other.name
             other.is_exit_task = True
@@ -250,7 +263,8 @@ class Workflow:
         """Deletes the workflow"""
         return self.service.delete(self.name)
 
-    def get_parameter(self, name: str):
+    def get_parameter(self, name: str) -> Parameter:
+        """Assembles the specified parameter name into a parameter specification"""
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
             raise KeyError("`{name}` not in workflow parameters")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
