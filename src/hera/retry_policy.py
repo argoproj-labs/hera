@@ -17,3 +17,6 @@ class RetryPolicy(str, Enum):
     OnFailure = "OnFailure"
     OnError = "OnError"
     OnTransientError = "OnTransientError"
+
+    def __str__(self):
+        return str(self.value)
