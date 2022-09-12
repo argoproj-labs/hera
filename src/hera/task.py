@@ -5,7 +5,10 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, Any, Tuple
+
+from argo_workflows.model.env_from_source import EnvFromSource
+from argo_workflows.model.env_var import EnvVar
 
 if TYPE_CHECKING:
     from hera import DAG
@@ -15,7 +18,9 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1Backoff,
     IoArgoprojWorkflowV1alpha1ContinueOn,
-    IoArgoprojWorkflowV1alpha1DAGTask,
+    PersistentVolumeClaim,
+    Volume as ArgoVolume,
+    IoArgoprojWorkflowV1alpha1DAGTask,EnvVar,
     IoArgoprojWorkflowV1alpha1LifecycleHook,
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1RetryStrategy,
@@ -76,30 +81,29 @@ class Task(IO):
     ----------
     name: str
         The name of the task to submit as part of a workflow.
-    func: Optional[Callable]
-        The function to execute remotely.
-    func_params: Optional[List[Dict[str, Union[int, str, float, dict]]]] = None
+    source: Optional[Union[Callable, str]] = None
+        The function to execute remotely. If a string is supplied it is submitted as a literal, otherwise the callable
+        is parsed and submitted.
+    with_param: Optional[Any] = None
         The parameters of the function to execute. Note that this works together with parallel. If the params are
         constructed using a single list of values and parallel is False, it is going to be interpreted as a single
         function call with the given parameters. Otherwise, if parallel is False and the list of params is a list of
-        lists (each list contains a series of values to pass to the function), the the task will execute as a task
+        lists (each list contains a series of values to pass to the function), the task will execute as a task
         group and schedule multiple function calls in parallel.
-    input_from: Optional[InputFrom] = None
-        An InputFrom object that denotes the task this will receive input from. The other task results are read in via
-        parameters. The parameter specifications follow the ones specified by InputFrom i.e the names of the parameters
-        that are set.
-    inputs: Optional[List[Input]] = None
-        `Input` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
+    inputs: Optional[List[Union[Parameter, Artifact]]] = None
+        `Input` or `Parameter` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
         parameter it cannot be used in conjunction with other types of inputs because of the dynamic aspect of the task
         creation process when provided with an `InputFrom`.
-    outputs: Optional[List[Output]] = None
+    outputs: Optional[List[Union[Parameter, Artifact]]] = None
         `Output` objects that dictate the outputs of the task.
-    image: str = 'python:3.7'
+    dag: Optional["DAG"] = None
+        The DAG the task should execute.
+    image: str = "python:3.7"
         The image to use in the execution of the function.
-    image_pull_policy: ImagePullPolicy = 'Always'
+    image_pull_policy: Optional[ImagePullPolicy] = None
         The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image or not.
         In case of local development/testing this can be set to 'Never'.
-    daemon: Optional[bool] = None
+    daemon: bool = False
         Whether to run the task as a daemon.
     command: Optional[List[str]] = None
         The command to use in the environment where the function runs in order to run the specific function. Note that
@@ -108,22 +112,22 @@ class Task(IO):
         will default to python. This command offers users the opportunity to start up the script in a different way
         e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows training models
         on multiple GPUs, etc.
-    args: Optionals[List[str]] = None
+    args: Optional[List[str]] = None
         Optional list of arguments to run in the container. This can be used as an alternative to command, with the
         advantage of not overriding the set entrypoint of the container. As an example, a container by default may
         enter via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`.
         See notes, for when running with emissary executor.
-    env_specs: Optional[List[EnvSpec]] = None
+    env: Optional[List[Union[EnvSpec, BaseEnvFromSpec]]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
-    env_from_specs: Optional[List[BaseEnvFromSpec]] = None
-        The environment specifications to load from ConfigMap or Secret.
-    resources: Resources = Resources()
-        A task resources configuration. See `hera.v1.resources.Resources`.
+    resources: Optional[Resources] = None
+        A task resources configuration. See `hera.resources.Resources`.
+    volumes: Optional[List[BaseVolume]] = None
+        Any volumes to mount or create for the task. See `hera.volumes`.
     working_dir: Optional[str] = None
         The working directory to be set inside the executing container context.
     retry: Optional[Retry] = None
-        A task retry configuration. See `hera.v1.retry.Retry`.
+        A task retry configuration. See `hera.retry.Retry`.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
     node_selectors: Optional[Dict[str, str]] = None
@@ -132,15 +136,11 @@ class Task(IO):
         requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
         they submit the workflow to.
     labels: Optional[Dict[str, str]] = None
-        A Dict of labels to attach to the Task Template object metadata.
+        A dictionary of labels to attach to the Task Template object metadata.
     annotations: Optional[Dict[str, str]] = None
-        A Dict of annotations to attach to the Task Template object metadata.
+        A dictionary of annotations to attach to the Task Template object metadata.
     security_context: Optional[TaskSecurityContext] = None
         Define security settings for the task container, overrides workflow security context.
-    continue_on_fail: bool = False
-        Whether to continue task chain execution when this task fails.
-    continue_on_error: bool = False
-        Whether to continue task chain execution this task errors.
     template_ref: Optional[TemplateRef] = None
         A template name reference to use with this task. Note that this is prioritized over a new template creation
         for each task definition.
@@ -148,6 +148,9 @@ class Task(IO):
         The task affinity. This dictates the scheduling protocol of the pods running the task.
     memoize: Optional[Memoize] = None
         The memoize configuration for the task.
+    pod_spec_patch: Optional[str] = None
+        The fields of the task to patch, and how.
+        See https://github.com/argoproj/argo-workflows/blob/master/examples/pod-spec-patch.yaml for an example.
 
     Notes
     ------
@@ -228,6 +231,7 @@ class Task(IO):
 
     @property
     def ip(self):
+        """Returns the specifications for the IP property of the task"""
         return f'"{{{{tasks.{self.name}.ip}}}}"'
 
     def next(self, other: "Task", operator: Operator = Operator.And, on: Optional[TaskResult] = None) -> "Task":
@@ -451,6 +455,7 @@ class Task(IO):
         return [str(cc) for cc in self.command]
 
     def get_args(self) -> Optional[List[str]]:
+        """Returns the arguments of the task"""
         if not self.args:
             return None
         return [str(arg) for arg in self.args]
@@ -500,7 +505,7 @@ class Task(IO):
                             "`with_params` is empty and there exists non-default arguments "
                             f"which aren't covered by `inputs`: {missing_args}"
                         )
-            elif isinstance(self.with_param, Union[str, Parameter]):
+            elif isinstance(self.with_param, str) or isinstance(self.with_param, Parameter):
                 # with_param is a string-list or an argo reference (str) to something that resolves into a list.
                 # We assume that each (resolved) object contains all arguments for function:
                 unique_param_names = list(arg_defaults.keys())
@@ -664,17 +669,20 @@ class Task(IO):
         """
         return [v.build_mount() for v in self.volumes]
 
-    def build_volume_claim_templates(self):
+    def build_volume_claim_templates(self) -> Optional[List[PersistentVolumeClaim]]:
+        """Assembles the list of volume claim templates to be created for the task."""
         return [v.build_claim_spec() for v in self.volumes if isinstance(v, Volume)]
 
-    def build_persistent_volume_claims(self):
+    def build_persistent_volume_claims(self) -> Optional[List[ArgoVolume]]:
+        """Assembles the list of Argo volume specifications"""
         return [
             v.build_claim_spec()
             for v in self.volumes
-            if isinstance(v, Union[ExistingVolume, SecretVolume, EmptyDirVolume])
+            if isinstance(v, ExistingVolume) or isinstance(v, SecretVolume) or isinstance(v, EmptyDirVolume)
         ]
 
-    def build_env(self):
+    def build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
+        """Assembles the environment variables for the task"""
         env = [e.build() for e in self.env if isinstance(e, EnvSpec)]
         env_from = [e.build() for e in self.env if isinstance(e, BaseEnvFromSpec)]
         return env, env_from
@@ -735,10 +743,10 @@ class Task(IO):
         IoArgoprojWorkflowV1alpha1Template
             The template representation of the task.
         """
-        if self.template_ref:
+        if self.template_ref is not None:
             # Template already exists in cluster
             return None
-        if self.dag:
+        if self.dag is not None:
             return None
         template = IoArgoprojWorkflowV1alpha1Template(
             name=self.name,
@@ -756,26 +764,26 @@ class Task(IO):
         built_outputs = self.build_outputs()
         built_tolerations = self.build_tolerations()
 
-        if built_inputs:
+        if built_inputs is not None:
             setattr(template, "inputs", built_inputs)
 
-        if built_outputs:
+        if built_outputs is not None:
             setattr(template, "outputs", built_outputs)
 
-        if built_tolerations:
+        if built_tolerations is not None:
             setattr(template, "tolerations", built_tolerations)
 
         if self.daemon:
             setattr(template, "daemon", True)
 
-        if self.node_selector:
+        if self.node_selector is not None:
             setattr(template, "node_selector", self.node_selector)
 
         retry_strategy = self.build_retry_strategy()
-        if retry_strategy:
+        if retry_strategy is not None:
             setattr(template, "retry_strategy", retry_strategy)
 
-        if self.source:
+        if self.source is not None:
             setattr(template, "script", self.build_script())
         else:
             setattr(template, "container", self.build_container())
@@ -784,10 +792,10 @@ class Task(IO):
         if affinity is not None:
             setattr(template, "affinity", affinity)
 
-        if self.memoize:
+        if self.memoize is not None:
             setattr(template, "memoize", self.memoize.build())
 
-        if self.pod_spec_patch:
+        if self.pod_spec_patch is not None:
             setattr(template, "podSpecPatch", self.pod_spec_patch)
 
         return template
