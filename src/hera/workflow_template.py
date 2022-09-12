@@ -7,31 +7,27 @@ from hera.workflow import Workflow
 
 
 class WorkflowTemplate(Workflow):
-    """A cron workflow representation.
+    """A workflow template representation.
 
-    CronWorkflow are workflows that run on a preset schedule.
-    In essence, CronWorkflow = Workflow + some specific cron options.
+    See `hera.workflow.Workflow` for parameterization.
 
-    See https://argoproj.github.io/argo-workflows/cron-workflows/
-
-    Parameters
-    ----------
-    schedule: str
-        Schedule at which the Workflow will be run in Cron format. E.g. 5 4 * * *.
-    timezone: str
-        Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles.
-
+    See Also
+    --------
+    https://argoproj.github.io/argo-workflows/workflow-templates/
     """
 
     def build(self) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
+        """Builds the workflow"""
         spec = super().build_spec(workflow_template=True)
         return IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self.build_metadata(), spec=spec)
 
-    def create(self):
+    def create(self) -> "WorkflowTemplate":
+        """Creates the workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
-        assert self.dag
-        return self.service.create_template(self.build())
+        assert self.dag is not None
+        self.service.create_template(self.build())
+        return self
 
     def delete(self) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
