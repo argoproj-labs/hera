@@ -235,7 +235,7 @@ class Task(IO):
     @property
     def ip(self) -> str:
         """Returns the specifications for the IP property of the task"""
-        return f"'{{{{dag.tasks.{self.name}.ip}}}}'"
+        return f"{{{{dag.tasks.{self.name}.ip}}}}"
 
     def next(self, other: "Task", operator: Operator = Operator.And, on: Optional[TaskResult] = None) -> "Task":
         """Sets this task as a dependency of the other passed task.
