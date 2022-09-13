@@ -1,21 +1,15 @@
-from hera import (
-    GlobalInputParameter,
-    Task,
-    Variable,
-    WorkflowTemplate,
-    WorkflowTemplateService,
-)
+from hera import Task, WorkflowTemplate, Parameter
 
 
 def foo(v):
     print(v)
 
 
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with WorkflowTemplate(
     "global-parameters",
-    service=WorkflowTemplateService(host="my-argo-server.com", token="my-token"),
-    variables=[Variable("v", "42")],
+    parameters=[Parameter("v", "42")]
 ) as w:
-    Task("t", foo, inputs=[GlobalInputParameter("v", "v")])
+    Task("t", foo, inputs=[w.get_parameter("v")])
 
 w.create()

@@ -48,4 +48,4 @@ with Workflow(
 ) as w:
     Task("t", hello)
 
-w.create(namespace=namespace)
+w.create()

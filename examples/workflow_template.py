@@ -1,6 +1,6 @@
 """This example showcases the classic conditional workflow coin-flip."""
 
-from hera import Operator, Task, WorkflowTemplate, WorkflowTemplateService
+from hera import Operator, Task, WorkflowTemplate
 
 
 def random_code():
@@ -18,11 +18,9 @@ def tails():
     print("it was tails")
 
 
-with WorkflowTemplate(
-    "workflow-template", service=WorkflowTemplateService(host="my-argo-server.com", token="my-argo-token")
-) as w:
+with WorkflowTemplate("workflow-template") as w:
     r = Task("r", random_code)
-    Task("h", heads).when(r, Operator.equals, "heads")
-    Task("t", tails).when(r, Operator.equals, "tails")
+    Task("h", heads).on_other_output(r, Operator.Equals, "heads")
+    Task("t", tails).on_other_output(r, Operator.Equals, "tails")
 
 w.create()

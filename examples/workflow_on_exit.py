@@ -1,11 +1,12 @@
-from hera import DAG, Operator, Task, Workflow, WorkflowService, WorkflowStatus
+from hera import DAG, Operator, Task, Workflow, WorkflowStatus
 
 
 def echo(s: str):
     print(s)
 
 
-with Workflow("on-exit1", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("on-exit") as w:
     Task("t1", echo, [{"s": "a"}]) >> Task("t2", echo, [{"s": "b"}])
 
     with DAG("exit-procedure") as exit_procedure:

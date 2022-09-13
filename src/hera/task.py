@@ -233,9 +233,9 @@ class Task(IO):
             hera.dag_context.add_task(self)
 
     @property
-    def ip(self):
+    def ip(self) -> str:
         """Returns the specifications for the IP property of the task"""
-        return f'"{{{{tasks.{self.name}.ip}}}}"'
+        return f"'{{{{dag.tasks.{self.name}.ip}}}}'"
 
     def next(self, other: "Task", operator: Operator = Operator.And, on: Optional[TaskResult] = None) -> "Task":
         """Sets this task as a dependency of the other passed task.
@@ -318,6 +318,16 @@ class Task(IO):
         """Execute `other` on completion (exit) of this Task."""
         self.exit_task = other.name
         other.is_exit_task = True
+        return self
+
+    def on_other_output(self, other: "Task", operator: Operator, value: str) -> "Task":
+        """Execute this task based on the `other` result"""
+        expression = f"'{other.get_result()}' {operator} {value}"
+        if self.when:
+            self.when += f" {Operator.And} {expression}"
+        else:
+            self.when = expression
+        other.next(self)
         return self
 
     def when_any_succeeded(self, other: "Task") -> "Task":
@@ -419,12 +429,16 @@ class Task(IO):
         Parameters
         ----------
         name: str
-            The name of the output
+            The name of the parameter to extract as an output.
+        path: Optional[str] = None
+            Path to the file containing the output to share.
+        as_name: Optional[str] = None
+            Name alias for the parameter. This will be used for sharing the output with the consumer.
 
         Returns
         -------
         Union[Artifact, Parameter]
-            The output object
+            Artifact or Parameter, depending on whatever shareable object has been identified on the task.
         """
         if as_name is None:
             as_name = name
@@ -441,7 +455,12 @@ class Task(IO):
         raise KeyError(f"No output named {name} found")
 
     def get_result(self) -> str:
+        """Returns the formatted field that points to the result/output of this task"""
         return f"{{{{tasks.{self.name}.outputs.result}}}}"
+
+    def get_output_condition(self, operator: Operator, value: str) -> str:
+        """Returns the output condition of the task based on the specified operator and value"""
+        return f"{self.get_result()} {operator} {value}"
 
     def get_result_as(self, name: str) -> Parameter:
         return Parameter(name, value=f"{{{{tasks.{self.name}.outputs.result}}}}")

@@ -1,4 +1,4 @@
-from hera import Artifact, Task, Workflow, WorkflowService
+from hera import Artifact, Task, Workflow
 
 
 def writer():
@@ -24,9 +24,8 @@ def consumer(i: int):
     print(i)
 
 
-ws = WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
-
-with Workflow("artifact-with-fanout", service=ws) as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("artifact-with-fanout") as w:
     w_t = Task("writer", writer, outputs=[Artifact("test", "/file")])
     f_t = Task(
         "fanout",
