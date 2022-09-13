@@ -1,10 +1,11 @@
+from dataclasses import asdict, dataclass
 from typing import List, Optional
 
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1ResourceTemplate
-from pydantic import BaseModel
 
 
-class ResourceTemplate(BaseModel):
+@dataclass
+class ResourceTemplate:
     """ResourceTemplate manipulates kubernetes resources.
 
     Attributes
@@ -39,7 +40,7 @@ class ResourceTemplate(BaseModel):
     success_condition: Optional[str] = None
 
     def _get_settable_attributes_as_kwargs(self):
-        attributes = dict(self)
+        attributes = asdict(self)
         settable_attributes = {k: v for k, v in attributes.items() if v is not None}
         return settable_attributes
 

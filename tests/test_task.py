@@ -11,24 +11,26 @@ from hera import (
     ConfigMapEnvSpec,
     ConfigMapVolume,
     EmptyDirVolume,
+    EnvSpec,
     ExistingVolume,
     GCSArtifact,
     GitArtifact,
     GPUToleration,
     Memoize,
     Operator,
+    Parameter,
     Resources,
+    ResourceTemplate,
     Retry,
     RetryPolicy,
     S3Artifact,
     Task,
+    TaskResult,
     TaskSecurityContext,
     TemplateRef,
-    ResourceTemplate,
     Toleration,
     Volume,
     WorkflowStatus,
-EnvSpec,Parameter,TaskResult
 )
 
 
@@ -830,6 +832,7 @@ def test_task_fails_to_validate_with_incorrect_memoize(op):
 #     assert t.exit_task == e
 #     assert hasattr(t.argo_task, "hooks")
 #     assert getattr(t.argo_task, "hooks").get("exit").template == "e"
+
 
 def test_task_template_contains_resource_template():
     resource_template = ResourceTemplate(action="create")

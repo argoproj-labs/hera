@@ -33,12 +33,12 @@ from hera.affinity import Affinity
 from hera.artifact import Artifact
 from hera.env import EnvSpec
 from hera.env_from import BaseEnvFromSpec
-from hera.resource_template import ResourceTemplate
 from hera.image import ImagePullPolicy
 from hera.io import IO
 from hera.memoize import Memoize
 from hera.operator import Operator
 from hera.parameter import Parameter
+from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry import Retry
 from hera.security_context import TaskSecurityContext
