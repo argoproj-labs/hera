@@ -26,10 +26,6 @@ class Artifact:
         respective volume.
     from_task: Optional[str] = None
         The name of the task that generates the artifact.
-
-    Notes
-    -----
-    Don't use this directly. Use OutputArtifact, InputArtifact, etc.
     """
 
     def __init__(self, name: str, path: Optional[str] = None, from_task: Optional[str] = None) -> None:
