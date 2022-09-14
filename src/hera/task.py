@@ -237,6 +237,17 @@ class Task(IO):
         """Returns the specifications for the IP property of the task"""
         return f"{{{{tasks.{self.name}.ip}}}}"
 
+    def _get_dependency_tasks(self) -> List[str]:
+        """Extract task names from `depends` string"""
+        if self.depends is None:
+            return []
+        # Filter out operators
+        all_operators = [o.value for o in Operator]
+        tasks = [t for t in self.depends.split() if t not in all_operators]
+        # Remove dot suffixes
+        task_names = [t.split(".")[0] for t in tasks]
+        return task_names
+
     def next(self, other: "Task", operator: Operator = Operator.And, on: Optional[TaskResult] = None) -> "Task":
         """Sets this task as a dependency of the other passed task.
 
@@ -259,13 +270,10 @@ class Task(IO):
 
         condition = f".{on}" if on else ""
 
-        if not other.depends:
+        if other.depends is None:
             # First dependency
             other.depends = self.name + condition
-            return other
-        elif self.name in other.depends:
-            # TODO This is a bad check because self.name could be a subset of another name.
-            # We can fix this with some proper string-splitting and elimination.
+        elif self.name in other._get_dependency_tasks():
             raise ValueError(f"{self.name} already in {other.name}'s depends: {other.depends}")
         else:
             # Add follow-up dependency
