@@ -8,7 +8,6 @@ from argo_workflows.models import (
 )
 from argo_workflows.models import Volume as ArgoVolume
 
-from hera._context import dag_context
 from hera.artifact import Artifact
 from hera.io import IO
 from hera.parameter import Parameter
