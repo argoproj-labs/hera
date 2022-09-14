@@ -20,7 +20,7 @@ def tails():
 
 with WorkflowTemplate("workflow-template") as w:
     r = Task("r", random_code)
-    Task("h", heads).on_other_output(r, Operator.Equals, "heads")
-    Task("t", tails).on_other_output(r, Operator.Equals, "tails")
+    Task("h", heads).on_other_result(r, Operator.Equals, "heads")
+    Task("t", tails).on_other_result(r, Operator.Equals, "tails")
 
 w.create()

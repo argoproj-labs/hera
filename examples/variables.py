@@ -35,7 +35,7 @@ def consumer():
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow("variables") as w:
     d = Task("daemon", server, daemon=True)
-    t = Task("consumer", consumer, env=[EnvSpec(name="SERVER_IP", value=d.ip)])
+    t = Task("consumer", consumer, env=[EnvSpec(name="SERVER_IP", value_from_input=d.ip)])
     d >> t
 
 w.create()

@@ -235,7 +235,7 @@ class Task(IO):
     @property
     def ip(self) -> str:
         """Returns the specifications for the IP property of the task"""
-        return f"{{{{dag.tasks.{self.name}.ip}}}}"
+        return f"{{{{tasks.{self.name}.ip}}}}"
 
     def next(self, other: "Task", operator: Operator = Operator.And, on: Optional[TaskResult] = None) -> "Task":
         """Sets this task as a dependency of the other passed task.
@@ -320,7 +320,7 @@ class Task(IO):
         other.is_exit_task = True
         return self
 
-    def on_other_output(self, other: "Task", operator: Operator, value: str) -> "Task":
+    def on_other_result(self, other: "Task", operator: Operator, value: str) -> "Task":
         """Execute this task based on the `other` result"""
         expression = f"'{other.get_result()}' {operator} {value}"
         if self.when:

@@ -23,7 +23,7 @@ with Workflow("coin-flip") as w:
     h = Task("h", heads)
     t = Task("t", tails)
 
-    h.on_other_output(r, Operator.Equals, "heads")
-    t.on_other_output(r, Operator.Equals, "tails")
+    h.on_other_result(r, Operator.Equals, "heads")
+    t.on_other_result(r, Operator.Equals, "tails")
 
 w.create()
