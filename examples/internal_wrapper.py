@@ -3,10 +3,9 @@ This example showcases how clients can simplify their workflow submission proces
 top of Hera to support consistency in submission across users, teams, etc.
 """
 
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 from hera import (
-    EnvSpec,
     ExistingVolume,
     Resources,
     Retry,
@@ -18,7 +17,11 @@ from hera import (
 
 
 def generate_token() -> str:
-    """Abstractly, generates a client Bearer token that passes auth with the Argo server for workflow submission"""
+    """
+    Abstractly, generates a client Bearer token that passes auth with the Argo server for workflow submission.
+
+    Alternatively, you can use `hera.set_global_token(callable_to_generate_token)` for setting a global token!
+    """
     return "my-bearer-token"
 
 
@@ -42,12 +45,10 @@ class MyTask(Task):
     def __init__(
         self,
         name: str,
-        func: Callable,
-        func_params: Optional[List[Dict[str, Union[int, str, float, dict, BaseModel]]]] = None,
-        input_from: Optional[InputFrom] = None,
+        source: Optional[Union[Callable, str]] = None,
+        with_param: Optional[Any] = None,
         image: str = "python:3.7",
         command: Optional[List[str]] = None,
-        env_specs: Optional[List[EnvSpec]] = None,
         resources: Resources = Resources(),
         tolerations: Optional[List[Toleration]] = None,
     ):
@@ -59,12 +60,10 @@ class MyTask(Task):
         resources.existing_volume = ExistingVolume(name="my-volume", mount_path="/my-volume")
         super(MyTask, self).__init__(
             name,
-            func,
-            func_params,
-            input_from=input_from,
+            source,
+            with_param,
             image=image,
             command=command,
-            env_specs=env_specs,
             resources=resources,
             working_dir=default_working_dir,
             retry=default_retry,

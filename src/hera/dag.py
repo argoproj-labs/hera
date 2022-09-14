@@ -108,12 +108,14 @@ class DAG(IO):
 
     def __enter__(self) -> "DAG":
         """Enter the context of the DAG. This supports the use of `with DAG(...)`"""
+        from hera._context import dag_context
         self.in_context = True
         dag_context.enter(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit the context of the DAG. This supports the use of `with DAG(...)`"""
+        from hera._context import dag_context
         self.in_context = False
         dag_context.exit()
 

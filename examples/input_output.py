@@ -1,4 +1,4 @@
-from hera import Parameter, Task, Workflow, WorkflowService
+from hera import Parameter, Task, Workflow
 
 
 def produce():
@@ -9,8 +9,8 @@ def produce():
 def consume(msg: str):
     print(f"Message was: {msg}")
 
-
-with Workflow("io", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")) as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("io") as w:
     t1 = Task("p", produce, outputs=[Parameter("msg", value_from=dict(path="/test.txt"))])
     t2 = Task("c", consume, inputs=[t1.get_output("msg")])
     t1 >> t2

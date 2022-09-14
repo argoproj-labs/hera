@@ -1,4 +1,4 @@
-from hera import Parameter, Task, Workflow, WorkflowService
+from hera import Parameter, Task, Workflow
 
 
 def generate():
@@ -22,9 +22,8 @@ def fanin(values: list):
     print(f"Received values: {values}!")
 
 
-ws = WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
-
-with Workflow("dynamic-fanout-fanin", service=ws) as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("dynamic-fanout-fanin") as w:
     generate_task = Task("generate", generate)
     fanout_task = Task(
         "fanout",

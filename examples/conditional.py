@@ -7,19 +7,19 @@ def random():
 
     p = random.random()
     if p <= 0.5:
-        raise Exception("FAILURE")
-    print("SUCCESS")
+        raise Exception("failure")
+    print("success")
 
 
 def success():
-    print("SUCCESS")
+    print("success")
 
 
 def failure():
-    print("FAILURE")
+    print("failure")
 
 
-with Workflow("conditional", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")) as w:
+with Workflow("conditional") as w:
     r = Task("random", random)
     s = Task("success", success)
     f = Task("failure", failure)

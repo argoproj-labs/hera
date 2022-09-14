@@ -4,7 +4,7 @@ The first task, t1, creates a file located at `/file` containing a message. The 
 task, t2, takes this artifact, places it at its own `/file` path, and print out the content.
 """
 
-from hera import Artifact, Task, Workflow, WorkflowService
+from hera import Artifact, Task, Workflow
 
 
 def writer():
@@ -17,9 +17,8 @@ def consumer():
         print(f.readlines())  # prints `Hello, world!` to `stdout`
 
 
-ws = WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
-
-with Workflow("artifact", service=ws) as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("artifact") as w:
     w_t = Task("writer", writer, outputs=[Artifact("test", "/file")])
     c_t = Task(
         "consumer",

@@ -1,17 +1,12 @@
-from hera import Parameter, Task, Workflow, WorkflowService
+from hera import Parameter, Task, Workflow
 
 
 def foo(v):
     print(v)
 
 
-ws = WorkflowService(host="my-argo-server.com", token="my-token")
 
-with Workflow(
-    "global-parameters",
-    service=ws,
-    parameters=[Parameter("v", "42")],
-) as w:
+with Workflow("global-parameters", parameters=[Parameter("v", "42")]) as w:
     Task("t", foo, inputs=[w.get_parameter("v")])
 
 w.create()
