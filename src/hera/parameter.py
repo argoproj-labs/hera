@@ -52,8 +52,7 @@ class Parameter:
             setattr(parameter, "value_from", IoArgoprojWorkflowV1alpha1ValueFrom(**self.value_from))
         else:
             raise ValueError(
-                f"Parameter with name `{parameter.name}` cannot be interpreted as argument as neither of the following args are set:"
-                " `value`, `value_from`, `default`"
+                f"Parameter with name `{parameter.name}` cannot be interpreted as argument as neither of the following args are set: `value`, `value_from`, `default`"  # noqa
             )
         return parameter
 
