@@ -6,7 +6,19 @@ from argo_workflows.models import Capabilities, PodSecurityContext, SecurityCont
 
 @dataclass
 class BaseSecurityContext:
-    """Abstract class to accommodate the shared functionality of task and workflow context."""
+    """Abstract class to accommodate the shared functionality of task and workflow context.
+
+    Attributes
+    ----------
+    privileged: Optional[bool] = None
+        Allow all the task's container to run as privileged
+    run_as_user: Optional[int]
+        Sets the user id of the user running in all the containers in the workflow.
+    run_as_group: Optional[int]
+        Sets the user id of the user running in all the containers in the workflow.
+    run_as_non_root: Optional[bool]
+        Validates that all the tasks' container does not run as root, i.e UID does not equal 0.
+    """
 
     privileged: Optional[bool] = None
     run_as_user: Optional[int] = None
@@ -14,6 +26,7 @@ class BaseSecurityContext:
     run_as_non_root: Optional[bool] = None
 
     def _get_settable_attributes_as_kwargs(self):
+        """Assembles non-None attribute mappings, from key to value"""
         attributes = asdict(self)
         settable_attributes = {k: v for k, v in attributes.items() if v is not None}
         return settable_attributes
@@ -40,6 +53,7 @@ class WorkflowSecurityContext(BaseSecurityContext):
     fs_group: Optional[int] = None
 
     def get_security_context(self) -> PodSecurityContext:
+        """Assembles the security context of the workflow"""
         settable_attributes = self._get_settable_attributes_as_kwargs()
         security_context = PodSecurityContext(**settable_attributes)
         return security_context
@@ -66,6 +80,7 @@ class TaskSecurityContext(BaseSecurityContext):
     additional_capabilities: List[str] = field(default_factory=list)
 
     def _get_capabilties(self):
+        """Assembles the capabilities of the task security context"""
         if self.additional_capabilities:
             return Capabilities(add=self.additional_capabilities)
 
@@ -76,6 +91,7 @@ class TaskSecurityContext(BaseSecurityContext):
         return settable_attributes
 
     def build_security_context(self) -> SecurityContext:
+        """Assembles the security context of the pod"""
         settable_attributes = self._get_settable_attributes_as_kwargs()
         security_context = SecurityContext(**settable_attributes)
         return security_context

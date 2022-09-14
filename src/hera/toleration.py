@@ -3,6 +3,7 @@ from typing import Optional
 
 from argo_workflows.models import Toleration as ArgoToleration
 
+
 @dataclass
 class Toleration:
     """Toleration is a representation of a Kubernetes toleration:

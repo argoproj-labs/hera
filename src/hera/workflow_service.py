@@ -20,8 +20,8 @@ from argo_workflows.models import (
 
 from hera.client import Client
 from hera.config import Config
-from hera.workflow_status import WorkflowStatus
 from hera.host_config import get_global_namespace
+from hera.workflow_status import WorkflowStatus
 
 
 class WorkflowService:

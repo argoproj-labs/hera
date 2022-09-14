@@ -20,14 +20,12 @@ class Artifact:
     ----------
     name: str
         The name of the artifact.
-    path: str
+    path: Optional[str] = None
         The path to the file to be assembled into an artifact. This path is relative to the task environment.
         If clients have a volume where results are stored, it's the path to the created object on the
         respective volume.
-
-    Notes
-    -----
-    Don't use this directly. Use OutputArtifact, InputArtifact, etc.
+    from_task: Optional[str] = None
+        The name of the task that generates the artifact.
     """
 
     def __init__(self, name: str, path: Optional[str] = None, from_task: Optional[str] = None) -> None:
@@ -36,22 +34,23 @@ class Artifact:
         self.from_task = from_task
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact specifications for use as an argument to a task"""
         artifact = IoArgoprojWorkflowV1alpha1Artifact(name=self.name)
         if self.from_task is not None:
             setattr(artifact, "_from", self.from_task)
         return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact specifications for use as an input to a task"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact specifications for use as an output of a task"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
 
 class BucketArtifact(Artifact):
-    """An input artifact representation.
-
-    This artifact is used to represent a bucket object
+    """This artifact is used to represent a bucket object as an artifact.
 
     Attributes
     ----------
@@ -67,7 +66,7 @@ class BucketArtifact(Artifact):
 
     Notes
     -----
-    Don't use this directly. Use S3InputArtifact or GCSInputArtifact
+    Don't use this directly. Use S3InputArtifact or GCSInputArtifact.
     """
 
     def __init__(self, name: str, path: str, bucket: str, key: str) -> None:
@@ -77,7 +76,10 @@ class BucketArtifact(Artifact):
 
 
 class S3Artifact(BucketArtifact):
+    """S3 artifact specification. See `hera.artifact.BucketArtifact`"""
+
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact representation for use as an argument to a task"""
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
@@ -85,11 +87,15 @@ class S3Artifact(BucketArtifact):
         )
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact representation for use as an input to a task"""
         return self.as_argument()
 
 
 class GCSArtifact(BucketArtifact):
+    """GCS artifact specification. See `hera.artifact.BucketArtifact`"""
+
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact representation for use as an argument to a task"""
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
@@ -97,10 +103,45 @@ class GCSArtifact(BucketArtifact):
         )
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact representation for use as an input to a task"""
         return self.as_argument()
 
 
 class GitArtifact(Artifact):
+    """Git artifact representation for fetching Git repositories/artifacts as Argo artifacts.
+
+    Parameters
+    ----------
+    name: str
+        Name of the git artifact.
+    path: str
+        Path to the artifact.
+    repo: str
+        Name of the repo origin.
+    revision: Optional[str] = None
+        The revision to fetch e.g. main.
+    depth: Optional[int] = None
+        The number of commit to fetch during the clone.
+    disable_submodules: Optional[bool] = None
+        Whether to disable git submodules.
+    fetch: Optional[List[str]] = None
+        Fetch specifies a number of refs that should be fetched before checkout
+    insecure_ignore_host_key: Optional[bool] = None
+        Whether to disable SSH strict host key checking during git clone
+    username_secret_name: Optional[str] = None,
+        The secret name to use to fetch the username.
+    username_secret_key: Optional[str] = None
+        The key within the username secret to use to fetch the username.
+    password_secret_name: Optional[str] = None,
+        The secret name to use to fetch the password.
+    password_secret_key: Optional[str] = None
+        The key within the password secret to use to fetch the password.
+    ssh_private_key_secret_name: Optional[str] = None
+        The secret name to use to fetch the SSH private key.
+    ssh_private_key_secret_key: Optional[str] = None
+        The key within the SSH secret to use to fetch the password.
+    """
+
     def __init__(
         self,
         name: str,
@@ -111,10 +152,10 @@ class GitArtifact(Artifact):
         disable_submodules: Optional[bool] = None,
         fetch: Optional[List[str]] = None,
         insecure_ignore_host_key: Optional[bool] = None,
-        username_secret_key: Optional[str] = None,
         username_secret_name: Optional[str] = None,
-        password_secret_key: Optional[str] = None,
+        username_secret_key: Optional[str] = None,
         password_secret_name: Optional[str] = None,
+        password_secret_key: Optional[str] = None,
         ssh_private_key_secret_key: Optional[str] = None,
         ssh_private_key_secret_name: Optional[str] = None,
     ) -> None:
@@ -133,6 +174,7 @@ class GitArtifact(Artifact):
         super(GitArtifact, self).__init__(name, path)
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an argument of a task"""
         git = IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo)
         if self.depth is not None:
             setattr(git, "depth", self.depth)
@@ -166,17 +208,29 @@ class GitArtifact(Artifact):
         )
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an input to a task"""
         return self.as_argument()
 
 
 class HttpArtifact(Artifact):
+    """Representation of an HTTP artifact from an arbitrary origin.
+
+    Parameters
+    ----------
+    name: str
+        Name to assign to the parameter.
+    path: str
+        Path for storing the parameter content.
     url: str
+        URL to fetch the artifact content from.
+    """
 
     def __init__(self, name: str, path: str, url: str) -> None:
         self.url = url
         super(HttpArtifact, self).__init__(name, path)
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an argument of a task"""
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
@@ -184,4 +238,5 @@ class HttpArtifact(Artifact):
         )
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an input to a task"""
         return self.as_argument()

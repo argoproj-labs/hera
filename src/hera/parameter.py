@@ -15,9 +15,13 @@ class Parameter:
     name: str
         The name of the task to take input from. The task's results are expected via stdout. Specifically, the task is
         expected to perform the script illustrated in Examples.
-    value_from: dict
-        Describes a location in which to obtain the value to a parameter
-        See https://argoproj.github.io/argo-workflows/fields/#valuefrom
+    value: Optional[str] = None
+        Value of the parameter, as an index into some field of the task.
+    default: Optional[str] = None
+        Default value of the parameter in case the `value` cannot be obtained based on the specification.
+    value_from: Optional[dict] = None
+        Describes a location in which to obtain the value to a parameter.
+        See https://argoproj.github.io/argo-workflows/fields/#valuefrom.
     """
 
     def __init__(
@@ -35,6 +39,7 @@ class Parameter:
         self.value_from = value_from
 
     def as_argument(self) -> Optional[IoArgoprojWorkflowV1alpha1Parameter]:
+        """Assembles the parameter for use as an argument of a task"""
         if self.value is None and self.value_from is None and self.default:
             # Argument not necessary as default is set for the input.
             return None
@@ -53,12 +58,14 @@ class Parameter:
         return parameter
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Parameter:
+        """Assembles the parameter for use as an input to task"""
         parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
         if self.default:
             setattr(parameter, "default", self.default)
         return parameter
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
+        """Assembles the parameter for use as an output of a task"""
         if self.value_from:
             return IoArgoprojWorkflowV1alpha1Parameter(
                 name=self.name, value_from=IoArgoprojWorkflowV1alpha1ValueFrom(**self.value_from)

@@ -12,6 +12,16 @@ from hera.parameter import Parameter
 
 @dataclass
 class IO:
+    """Input/output high-level representation.
+
+    Parameters
+    ----------
+    inputs: List[Union[Parameter, Artifact]]
+        List of parameters or artifacts to use as inputs.
+    outputs: List[Union[Parameter, Artifact]]
+        List of parameters or artifacts to use as outputs.
+    """
+
     inputs: List[Union[Parameter, Artifact]]
     outputs: List[Union[Parameter, Artifact]]
 
