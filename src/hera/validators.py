@@ -1,7 +1,7 @@
 """Holds a collection of validators that are shared in V1"""
 import json
 import re
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 
 def validate_name(name: str, max_length: Optional[int] = None) -> str:

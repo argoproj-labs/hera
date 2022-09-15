@@ -8,7 +8,6 @@ from argo_workflows.models import (
 )
 from argo_workflows.models import Volume as ArgoVolume
 
-from hera._context import dag_context
 from hera.artifact import Artifact
 from hera.io import IO
 from hera.parameter import Parameter
@@ -108,14 +107,16 @@ class DAG(IO):
 
     def __enter__(self) -> "DAG":
         """Enter the context of the DAG. This supports the use of `with DAG(...)`"""
-        from hera._context import dag_context
+        from hera import dag_context
+
         self.in_context = True
         dag_context.enter(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit the context of the DAG. This supports the use of `with DAG(...)`"""
-        from hera._context import dag_context
+        from hera import dag_context
+
         self.in_context = False
         dag_context.exit()
 
@@ -124,7 +125,10 @@ class DAG(IO):
         add_task(self, t)
 
     def add_tasks(self, *ts: Task) -> None:
-        """Add a collection of tasks to the DAG. Note that tasks are added automatically when the DAG context is used"""
+        """Add a collection of tasks to the DAG.
+
+        Note that tasks are added automatically when the DAG context is used
+        """
         add_tasks(self, *ts)
 
     def get_parameter(self, name: str):

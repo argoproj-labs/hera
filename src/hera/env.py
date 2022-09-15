@@ -36,8 +36,8 @@ class EnvSpec:
     name: str
         The name of the variable.
     value: Optional[Any] = None
-        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the value
-        in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
+        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the
+        value in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
         performed.
     value_from_input: Optional[str] = None
         A reference to an input parameter which will resolve to the value. The input parameter will be auto-generated.
@@ -129,8 +129,8 @@ class FieldEnvSpec(EnvSpec, FieldPath):
     name: str
         The name of the variable.
     value: Optional[Any] = None
-        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the value
-        in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
+        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the
+        value in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
         performed.
     value_from_input: Optional[str] = None
         A reference to an input parameter which will resolve to the value. The input parameter will be auto-generated.

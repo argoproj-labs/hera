@@ -24,13 +24,13 @@ class ConcurrencyPolicy(str, Enum):
 
     Replace = "Replace"
     """
-    If it is time for a new job run and the previous job run hasn't finished yet, the cron job replaces the 
+    If it is time for a new job run and the previous job run hasn't finished yet, the cron job replaces the
     currently running job run with a new job run
     """
 
     Forbid = "Forbid"
     """
-    The cron job does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't 
+    The cron job does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't
     finished yet, the cron job skips the new job run.
     """
 
