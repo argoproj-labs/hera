@@ -710,3 +710,10 @@ def test_task_template_contains_resource_template():
     tt = t._build_template()
     resource = resource_template.build()
     assert tt.resource == resource
+
+
+def test_task_template_with_resource_template_has_no_container():
+    resource_template = ResourceTemplate(action="create")
+    t = Task(name="t", resource_template=resource_template)
+    tt = t._build_template()
+    assert not hasattr(tt, "container")
