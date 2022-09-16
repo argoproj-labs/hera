@@ -909,8 +909,8 @@ class Task(IO):
         if self.when:
             setattr(task, "when", self.when)
 
-        if self.template_ref:
-            setattr(task, "template_ref", self.template_ref.build)
+        if self.template_ref is not None:
+            setattr(task, "template_ref", self.template_ref.build())
         else:
             name = self.name if not self.dag else self.dag.name
             setattr(task, "template", name)
