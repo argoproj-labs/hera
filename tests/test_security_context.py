@@ -10,7 +10,7 @@ from hera import TaskSecurityContext, WorkflowSecurityContext
 
 @pytest.fixture
 def privileged():
-    yield random.randint(0, 1)
+    yield random.choice([True, False])
 
 
 @pytest.fixture

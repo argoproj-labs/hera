@@ -1,15 +1,7 @@
 import pytest
+from argo_workflows import ApiTypeError
 
 from hera import Parameter
-
-# def test_output_returns_default_expected_spec():
-#     o = Parameter(name="o", default="d")
-#     assert o.name == "o"
-#     assert o.default == "d"
-
-#     s = o.as_input()
-#     assert s.name == "o"
-#     assert s.default == "d"
 
 
 def test_parameter():
@@ -51,6 +43,5 @@ def test_parameter_with_default_value():
     p = Parameter(name="i", default="default_value")
     assert p.as_argument() is None
     assert p.as_input() is not None
-    with pytest.raises(AssertionError):
+    with pytest.raises(ApiTypeError):
         p.as_output()
-    # assert str(e.value) == "Parameter cannot be interpreted as input as there is no `value` or `value_from`"

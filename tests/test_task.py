@@ -55,18 +55,6 @@ def test_next_does_not_set_dependency_multiple_times():
         t1 >> t2
 
 
-# def test_when_correct_expression_and_dependencies(no_op):
-#     t1, t2, t3 = Task("t1", no_op), Task("t2", no_op), Task("t3", no_op)
-#     t2.when = (t1.name, Operator.EQUALS, "t2")
-#     t3.when = ({t1.name} {Operator.EQUALS} "t3")
-
-#     assert t2.argo_task.dependencies == ["t1"]
-#     assert t3.argo_task.dependencies == ["t1"]
-
-#     assert t2.argo_task.when == "{{tasks.t1.outputs.result}} == t2"
-#     assert t3.argo_task.when == "{{tasks.t1.outputs.result}} == t3"
-
-
 def test_retry_limits_fail_validation():
     with pytest.raises(AssertionError):
         Retry(duration=5, max_duration=4)
@@ -184,25 +172,27 @@ print(42)
 
 
 def test_resources_returned_with_appropriate_limits(op):
-    r = Resources()
+    r = Resources(cpu_request=1, memory_request="4Gi")
     t = Task("t", op, [{"a": 1}], resources=r)
-    resources = t.build_resources()
+    resources = t.build_script().resources
 
-    assert resources.limits["cpu"] == "1"
-    assert resources.limits["memory"] == "4Gi"
+    assert resources["request"]["cpu"] == "1"
+    assert resources["request"]["memory"] == "4Gi"
 
 
 def test_resources_returned_with_gpus(op):
     r = Resources(gpus=2)
     t = Task("t", op, [{"a": 1}], resources=r)
-    resources = t.build_resources()
+    resources = t.build_script().resources
 
-    assert resources.requests["nvidia.com/gpu"] == "2"
-    assert resources.limits["nvidia.com/gpu"] == "2"
+    assert resources["request"]["nvidia.com/gpu"] == "2"
+    assert resources["limit"]["nvidia.com/gpu"] == "2"
 
 
 def test_volume_mounts_returns_expected_volumes(no_op):
-    r = Resources(
+    t = Task(
+        "t",
+        no_op,
         volumes=[
             Volume(name="v1", size="1Gi", mount_path="/v1"),
             ExistingVolume(name="v2", mount_path="/v2"),
@@ -210,7 +200,6 @@ def test_volume_mounts_returns_expected_volumes(no_op):
             ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
         ],
     )
-    t = Task("t", no_op, resources=r)
     vs = t.build_volume_mounts()
     assert vs[0].name == "v1"
     assert vs[0].mount_path == "/v1"
@@ -357,12 +346,6 @@ def test_task_get_retry_returns_expected_none(no_op):
     assert tr is None
 
 
-# def test_task_sets_user_kwarg_override(kwarg_op):
-#     t = Task("t", kwarg_op, [{"a": 43}])
-#     assert t.argo_parameters[0].name == "a"
-#     assert t.argo_parameters[0].value == "{{item.a}}"
-
-
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task("t", kwarg_op)
     generated_input = t.inputs[0]
@@ -380,34 +363,12 @@ def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     assert isinstance(generated_input, Parameter)
     assert generated_input_2.name == "b"
     assert generated_input_2.value == "43"
-    # assert t.argo_parameters[0].name == "a"
-    # assert t.argo_parameters[0].value == "50"
-    # assert t.argo_parameters[1].name == "b"
-    # assert t.argo_parameters[1].default == "43"
 
 
 def test_task_fails_artifact_validation(no_op, artifact):
     with pytest.raises(AssertionError) as e:
         Task("t", no_op, inputs=[artifact, artifact])
     assert str(e.value) == "input objects must have unique names"
-
-
-# def test_task_adds_expanded_json_deserialization_call_with_input_from(op):
-#     t = Task("t", op, input_from=InputFrom(name="some-other-task", parameters=["a"]))
-#     script = t.get_param_script_portion()
-#     assert (
-#         script == "import json\n"
-#         "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-#         "except: a = '''{{inputs.parameters.a}}'''\n"
-#     )
-
-
-# def test_task_adds_input_from_without_func():
-#     t = Task("t", input_from=InputFrom(name="test", parameters=["a"]))
-#     parameters = t.get_parameters()
-#     assert len(parameters) == 1
-#     assert parameters[0].name == "a"
-#     assert parameters[0].value == "{{item.a}}"
 
 
 def test_task_artifact_returns_expected_list(no_op, artifact):
@@ -530,12 +491,12 @@ def test_task_with_config_map_env_from(no_op):
 
 
 def test_task_should_create_task_with_container_template():
-    t = Task("t", command=["cowsay"], resources=Resources())
+    t = Task("t", command=["cowsay"], resources=Resources(memory_request="4Gi"))
     tt = t.build_template()
 
     assert tt.container.image == "python:3.7"
     assert tt.container.command[0] == "cowsay"
-    assert tt.container.resources.requests["memory"] == "4Gi"
+    assert tt.container.resources["request"]["memory"] == "4Gi"
 
 
 def test_task_allow_subclassing_when_assigned_next(no_op):
@@ -556,7 +517,7 @@ def test_supply_args():
 
 
 def test_task_script_def_volume_template(no_op):
-    t = Task("t", no_op, resources=Resources(volumes=[Volume(size="1Gi", mount_path="/tmp")]))
+    t = Task("t", no_op, volumes=[Volume(size="1Gi", mount_path="/tmp")])
 
     template = t.build_script()
     assert template
@@ -569,35 +530,30 @@ def test_task_adds_custom_resources(no_op):
         "t",
         no_op,
         resources=Resources(
-            min_custom_resources={
+            custom_resources={
                 "custom-1": "1",
                 "custom-2": "42Gi",
             }
         ),
     )
-    r = t.build_resources()
+    r = t.resources.build()
     assert r
-    assert r.requests["cpu"] == "1"
-    assert r.requests["memory"] == "4Gi"
-    assert r.requests["custom-1"] == "1"
-    assert r.requests["custom-2"] == "42Gi"
-
-    assert r.limits["cpu"] == "1"
-    assert r.limits["memory"] == "4Gi"
-    assert r.limits["custom-1"] == "1"
-    assert r.limits["custom-2"] == "42Gi"
+    assert r["custom-1"] == "1"
+    assert r["custom-2"] == "42Gi"
 
 
 def test_task_adds_variable_as_env_var():
     t = Task("t")
-    t1 = Task("t1", env=[EnvSpec(name="IP", value_from_input=t.ip)])
+    t1 = Task("t1", "print(42)", env=[EnvSpec(name="IP", value_from_input=t.ip)])
+    t1s = t1.build_script()
 
-    assert t1.env[0].name == "IP"
-    assert t1.env[0].value == "{{inputs.parameters.IP}}"
-    args = t1.build_arguments()
-    assert args
-    assert args.parameters[0].name == "IP"
-    assert args.parameters[0].value == '"{{tasks.t.ip}}"'
+    assert t1s.env[0].name == "IP"
+    assert t1s.env[0].value == "{{inputs.parameters.IP}}"
+
+    t1g = t1.build_arguments()
+    assert t1g
+    assert t1g.parameters[0].name == "IP"
+    assert t1g.parameters[0].value == "{{tasks.t.ip}}"
 
 
 def test_task_adds_other_task_on_success():
@@ -622,20 +578,6 @@ def test_task_adds_other_task_on_error():
 
     t.on_error(o)
     assert o.depends == f"t.{TaskResult.Errored}"
-
-
-# def test_task_sets_continue_behavior():
-#     t = Task("t", continue_on_fail=True, continue_on_error=True)
-#     assert t.argo_task.continue_on.error
-#     assert t.argo_task.continue_on.failed
-
-#     cont = t.get_continue_on()
-#     assert cont.error
-#     assert cont.failed
-
-#     t = Task("t")
-#     cont = t.get_continue_on()
-#     assert not cont
 
 
 def test_task_has_expected_retry_limit():
@@ -756,87 +698,15 @@ def test_any_succeeded_adds_dependency(no_op, multi_op):
     assert t3.depends == "t2 && t1.AnySucceeded && t4"
 
 
-# def test_all_failed_raises_assertions(no_op, multi_op):
-#     t1 = Task("t1", no_op)
-#     t2 = Task("t2", no_op)
-
-#     with pytest.raises(AssertionError) as e:
-#         t1.when_all_failed(t2)
-#     assert str(e.value) == "Can only use `when_all_failed` in combination with `with_param`"
-#     with pytest.raises(AssertionError) as e:
-#         t1.when_any_succeeded(t2)
-#     assert str(e.value) == "Can only use `when_all_succeeded` in combination with `with_param`"
-
-#     t1 = Task(
-#         "t1",
-#         multi_op,
-#         with_param=[
-#             {"a": 1, "b": 2, "c": 3},
-#             {"a": 1, "b": 2, "c": 3},
-#             {"a": 1, "b": 2, "c": 3},
-#         ],
-#     )
-#     t2 = Task("t2", no_op, continue_on_error=True)
-#     with pytest.raises(AssertionError) as e:
-#         t1.when_all_failed(t2)
-#     assert str(e.value) == "The use of `when_all_failed` is incompatible with setting `continue_on_error/fail`"
-
-#     with pytest.raises(AssertionError) as e:
-#         t1.when_any_succeeded(t2)
-#     assert str(e.value) == "The use of `when_any_succeeded` is incompatible with setting `continue_on_error/fail`"
-
-
-# def test_dependencies_to_depends():
-#     depends = _dependencies_to_depends(["a", "b", "c"])
-#     assert depends == "a && b && c"
-
-#     assert not _dependencies_to_depends([])
-#     assert not _dependencies_to_depends(None)
-
-
 def test_task_fails_to_validate_with_incorrect_memoize(op):
     with pytest.raises(AssertionError) as e:
         Task("t", op, with_param=[{"a": 42}], memoize=Memoize("b", "a", "a-key"))
     assert str(e.value) == "memoize key must be a parameter of the function"
 
 
-# def test_task_adds_io_params():
-#     inputs = [InputParameter("i1", "t", "p"), GlobalInputParameter("i2", "g")]
-#     outputs = [OutputPathParameter("o", "/test.txt", default="d")]
-#     t = Task(
-#         "t",
-#         inputs=inputs,
-#         outputs=outputs,
-#     )
-#     assert t.name == "t"
-#     assert t.inputs == inputs
-#     assert t.outputs == outputs
-
-#     p = t.get_parameters()
-#     assert len(p) == 2
-#     assert p[0].name == "i1"
-#     assert p[0].value == "{{tasks.t.outputs.parameters.p}}"
-#     assert p[1].name == "i2"
-#     assert p[1].value == "{{workflow.parameters.g}}"
-
-
-# def test_task_raises_on_mixed_input_types():
-#     with pytest.raises(ValueError) as e:
-#         Task("t", inputs=[InputParameter("i1", "t", "p"), InputFrom("i2", parameters=["t"])])
-#     assert str(e.value) == "cannot use `InputFrom` along with other input types. Use `input_from` instead"
-
-
-# def test_task_adds_exit_hook():
-#     e = Task("e")
-#     t = Task("t").on_exit(e)
-#     assert t.exit_task == e
-#     assert hasattr(t.argo_task, "hooks")
-#     assert getattr(t.argo_task, "hooks").get("exit").template == "e"
-
-
 def test_task_template_contains_resource_template():
     resource_template = ResourceTemplate(action="create")
     t = Task(name="t", resource_template=resource_template)
     tt = t.build_template()
-    resource = resource_template.get_resource_template()
+    resource = resource_template.build()
     assert tt.resource == resource

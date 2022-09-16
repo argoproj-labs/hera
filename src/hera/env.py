@@ -54,7 +54,7 @@ class EnvSpec:
 
     def build(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
-        if self.value_from_input:
+        if self.value_from_input is not None:
             value = f"{{{{inputs.parameters.{self.name}}}}}"
         elif isinstance(self.value, str):
             value = self.value

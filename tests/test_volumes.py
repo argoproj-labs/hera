@@ -4,14 +4,14 @@ from hera import AccessMode, EmptyDirVolume, Volume
 
 
 def test_empty_dir_volume_created_without_size():
-    edv = EmptyDirVolume().get_volume()
+    edv = EmptyDirVolume().build_claim_spec()
     assert edv.name is not None
     assert edv.empty_dir.medium == "Memory"
     assert not hasattr(edv.empty_dir, "size_limit")
 
 
 def test_empty_dir_volume_created_with_size():
-    edv = EmptyDirVolume(size="5Gi").get_volume()
+    edv = EmptyDirVolume(size="5Gi").build_claim_spec()
     assert edv.name is not None
     assert edv.empty_dir.medium == "Memory"
     assert edv.empty_dir.size_limit == "5Gi"

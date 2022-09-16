@@ -130,7 +130,7 @@ class WorkflowService:
             _check_return_type=False,
         )
 
-    def update(
+    def update_cron_workflow(
         self,
         cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
         name: str,

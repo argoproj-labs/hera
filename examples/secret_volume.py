@@ -2,7 +2,6 @@
 
 from hera import SecretVolume, Task, Workflow
 
-
 # Create a secret with kubectl
 # kubectl create secret generic secret-file --from-literal="config.json=SECRET_TOKEN"
 # (Remember to add --namespace <namespace> if not default)

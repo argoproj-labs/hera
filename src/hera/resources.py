@@ -70,15 +70,20 @@ class Resources:
             if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
                 assert self.cpu_request <= self.cpu_limit, "CPU request must be smaller or equal to limit"
 
+        if self.cpu_request is None and self.cpu_limit is not None:
+            self.cpu_request = self.cpu_limit
+        if self.memory_request is None and self.memory_limit is not None:
+            self.memory_request = self.memory_limit
+
     def build(self) -> ResourceRequirements:
         """Builds the resource requirements of the pod"""
         resources = dict()
 
         if self.cpu_limit is not None:
-            resources = merge_dicts(resources, dict(limit=dict(cpu=self.cpu_limit)))
+            resources = merge_dicts(resources, dict(limit=dict(cpus=str(self.cpu_limit))))
 
         if self.cpu_request is not None:
-            resources = merge_dicts(resources, dict(request=dict(cpu=self.cpu_request)))
+            resources = merge_dicts(resources, dict(request=dict(cpu=str(self.cpu_request))))
 
         if self.memory_limit is not None:
             resources = merge_dicts(resources, dict(limit=dict(memory=self.memory_limit)))
@@ -87,8 +92,8 @@ class Resources:
             resources = merge_dicts(resources, dict(request=dict(memory=self.memory_request)))
 
         if self.gpus is not None:
-            resources = merge_dicts(resources, dict(request={self.gpu_flag: self.gpus}))
-            resources = merge_dicts(resources, dict(limit={self.gpu_flag: self.gpus}))
+            resources = merge_dicts(resources, dict(request={self.gpu_flag: str(self.gpus)}))
+            resources = merge_dicts(resources, dict(limit={self.gpu_flag: str(self.gpus)}))
 
         if self.custom_resources:
             resources = merge_dicts(resources, self.custom_resources)

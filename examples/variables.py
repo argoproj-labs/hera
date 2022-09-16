@@ -3,7 +3,7 @@
 # The daemoned task operates as server, serving an example payload, with the second task operating as a client, making
 # http requests to the server
 
-from hera import Task, Workflow, EnvSpec, FieldEnvSpec
+from hera import EnvSpec, FieldEnvSpec, Task, Workflow
 
 
 def server():

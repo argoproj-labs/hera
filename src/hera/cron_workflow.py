@@ -120,7 +120,7 @@ class CronWorkflow(Workflow):
         cron_workflow.metadata["resourceVersion"] = old_workflow.metadata["resourceVersion"]
         cron_workflow.metadata["uid"] = old_workflow.metadata["uid"]
 
-        return self.service.update(cron_workflow, self.name)
+        return self.service.update_cron_workflow(cron_workflow, self.name)
 
     def suspend(self) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""

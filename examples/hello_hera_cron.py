@@ -6,6 +6,7 @@ from hera import CronWorkflow, Task
 def hello():
     print("Hello, Hera!")
 
+
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with CronWorkflow("hello-hera-cron", "5 4 * * *", timezone="UTC") as cw:
     Task("t", hello)

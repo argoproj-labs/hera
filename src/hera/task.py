@@ -47,6 +47,7 @@ from hera.toleration import Toleration
 from hera.validators import validate_name
 from hera.volumes import (
     BaseVolume,
+    ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
     SecretVolume,
@@ -242,7 +243,7 @@ class Task(IO):
         if self.depends is None:
             return []
         # Filter out operators
-        all_operators = [o.value for o in Operator]
+        all_operators = [o for o in Operator]
         tasks = [t for t in self.depends.split() if t not in all_operators]
         # Remove dot suffixes
         task_names = [t.split(".")[0] for t in tasks]
@@ -708,7 +709,10 @@ class Task(IO):
         return [
             v.build_claim_spec()
             for v in self.volumes
-            if isinstance(v, ExistingVolume) or isinstance(v, SecretVolume) or isinstance(v, EmptyDirVolume)
+            if isinstance(v, ExistingVolume)
+            or isinstance(v, SecretVolume)
+            or isinstance(v, EmptyDirVolume)
+            or isinstance(v, ConfigMapVolume)
         ]
 
     def build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
@@ -800,7 +804,7 @@ class Task(IO):
         if built_outputs is not None:
             setattr(template, "outputs", built_outputs)
 
-        if built_tolerations is not None:
+        if built_tolerations != []:
             setattr(template, "tolerations", built_tolerations)
 
         if self.daemon:

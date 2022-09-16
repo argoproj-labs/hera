@@ -21,7 +21,7 @@ from hera.validators import validate_storage_units
 
 @dataclass
 class _Sized:
-    size: Optional[str]
+    size: Optional[str] = None
 
 
 @dataclass
@@ -180,7 +180,7 @@ class ConfigMapVolume(BaseVolume, _NamedConfigMap):
 
 
 @dataclass
-class Volume(BaseVolume, _Sized):
+class Volume(_Sized, BaseVolume):
     """A dynamically created and mountable volume representation.
 
     This is used to specify a volume mount for a particular task to be executed. It is recommended to not pass in a
@@ -199,7 +199,6 @@ class Volume(BaseVolume, _Sized):
     name: Optional[str]
         The name of the volume. One will be generated if the name is not specified. It is recommended to not pass a
         name to avoid any potential naming conflicts with existing volumes.
-    access
 
     Raises
     ------
