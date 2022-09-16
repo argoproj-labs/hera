@@ -77,7 +77,7 @@ class Resources:
 
     def build(self) -> ResourceRequirements:
         """Builds the resource requirements of the pod"""
-        resources = dict()
+        resources: Dict = dict()
 
         if self.cpu_limit is not None:
             resources = merge_dicts(resources, dict(limit=dict(cpus=str(self.cpu_limit))))

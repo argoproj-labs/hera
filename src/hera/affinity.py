@@ -48,7 +48,7 @@ class NodeSelectorRequirement:
 
     def __init__(self, key: str, operator: Union[LabelOperator, str], values: Optional[List[str]] = None) -> None:
         self.key = key
-        self.operator: str = operator if isinstance(operator, str) else operator.value
+        self.operator: str = str(operator)
         self.values = values
 
     def get_spec(self) -> Optional[ArgoNodeSelectorRequirement]:
@@ -157,7 +157,7 @@ class LabelSelectorRequirement:
 
     def __init__(self, key: str, operator: Union[LabelOperator, str], values: Optional[List[str]] = None) -> None:
         self.key = key
-        self.operator: str = operator if isinstance(operator, str) else operator.value
+        self.operator: str = str(operator)
         self.values = values
 
     def get_spec(self) -> ArgoLabelSelectorRequirement:

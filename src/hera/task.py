@@ -406,7 +406,7 @@ class Task(IO):
                 raise ValueError("`pod_spec_patch` must be `str` to handle argo expressions properly")
 
     def _validate_source(self):
-        if isinstance(self.source, Callable):
+        if callable(self.source):
             args = set(inspect.getfullargspec(self.source).args)
             if self.memoize:
                 assert self.memoize.key in args, "memoize key must be a parameter of the function"
@@ -502,7 +502,7 @@ class Task(IO):
             A string representing the value which should be given to argos `with_params`
         """
         deduced_params: List[Parameter] = []
-        if self.source and isinstance(self.source, Callable):
+        if self.source and callable(self.source):
             # Source is a function
             signature = inspect.signature(self.source)
             arg_defaults = {}
@@ -647,7 +647,7 @@ class Task(IO):
         str
             Final formatted script.
         """
-        if isinstance(self.source, Callable):
+        if callable(self.source):
             signature = inspect.signature(self.source)
             args = inspect.getfullargspec(self.source).args
             if signature.return_annotation == str:

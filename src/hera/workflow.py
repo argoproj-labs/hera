@@ -116,8 +116,8 @@ class Workflow:
         self.volume_claim_gc_strategy = volume_claim_gc_strategy
         self.host_aliases = host_aliases
         self.dag = dag
-        self.exit_task = None
-        self.tasks = []
+        self.exit_task: Optional[str] = None
+        self.tasks: List["Task"] = []
 
     def build_metadata(self, use_name=True) -> ObjectMeta:
         """Assembles the metadata of the workflow"""
