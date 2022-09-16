@@ -1,7 +1,3 @@
-from unittest.mock import Mock
-
-from argo_workflows.models import Toleration as ArgoToleration
-
 from hera import Toleration
 
 

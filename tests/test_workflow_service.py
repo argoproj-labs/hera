@@ -1,17 +1,8 @@
-from unittest import mock
 from unittest.mock import Mock
 
-from argo_workflows.api.workflow_service_api import WorkflowServiceApi
 from argo_workflows.api_client import ApiClient
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Workflow,
-    IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
-    IoArgoprojWorkflowV1alpha1WorkflowSpec,
-    IoArgoprojWorkflowV1alpha1WorkflowStatus,
-    ObjectMeta,
-)
 
-from hera import WorkflowService, WorkflowStatus
+from hera import WorkflowService
 
 
 def test_ws_has_expected_fields_upon_init():

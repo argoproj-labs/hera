@@ -1,6 +1,6 @@
 import pytest
 
-from hera import ExistingVolume, Resources, SecretVolume, Volume
+from hera import Resources
 
 
 def test_init_raises_on_invalid_mem():

@@ -9,8 +9,6 @@ from hera import (
     EmptyDirVolume,
     ExistingVolume,
     HostAlias,
-    Operator,
-    Resources,
     SecretVolume,
     Task,
     TemplateRef,
@@ -19,9 +17,6 @@ from hera import (
     VolumeClaimGCStrategy,
     Workflow,
     WorkflowSecurityContext,
-    WorkflowStatus,
-    set_global_host,
-    set_global_token,
 )
 from hera.parameter import Parameter
 
