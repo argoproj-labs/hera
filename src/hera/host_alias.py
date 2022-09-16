@@ -1,15 +1,16 @@
+from dataclasses import dataclass
 from typing import List
 
 from argo_workflows.models import HostAlias as ArgoHostAlias
-from pydantic import BaseModel
 
 
-class HostAlias(BaseModel):
+@dataclass
+class HostAlias:
     """mapping between IP and hostnames
 
-    Notes
+    See Also
     -----
-        See https://github.com/argoproj/argo-workflows/blob/master/sdks/python/client/docs/HostAlias.md
+    https://github.com/argoproj/argo-workflows/blob/master/sdks/python/client/docs/HostAlias.md
     """
 
     hostnames: List[str]

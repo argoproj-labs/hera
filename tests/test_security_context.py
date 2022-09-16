@@ -10,7 +10,7 @@ from hera import TaskSecurityContext, WorkflowSecurityContext
 
 @pytest.fixture
 def privileged():
-    yield random.randint(0, 1)
+    yield random.choice([True, False])
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def fs_group():
 
 @pytest.fixture
 def run_as_non_root():
-    yield random.randint(0, 1)
+    yield random.random() > 0.5
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def test_task_get_security_context(privileged, run_as_user, run_as_group, run_as
         run_as_non_root=run_as_non_root,
         additional_capabilities=additional_capabilities,
     )
-    sc = tsc.get_security_context()
+    sc = tsc.build()
     capabilities = Capabilities(add=additional_capabilities)
     assert isinstance(sc, SecurityContext)
     assert sc.privileged == privileged

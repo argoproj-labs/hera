@@ -29,6 +29,28 @@ The general format is:
 
 ```
 
+# 4.0.0rc1 - DATE (15/09/2022)
+
+### Added
+
+- workflow of workflows support, and general K8S resource provisioning, via resource templates
+- nested, parallel, DAGs
+- pod patch spec
+- support for arbitrary scripts, rather than only Python functions and containers
+- K8S-aligned resource specs
+- volumes on tasks
+- `IO` between tasks
+- `Task` build on submission
+- `IO` on parameters
+
+### Removed
+
+- `func` and `func_params` from `Task` in favor of `source` and `params`
+- `Resource` volumes, moved to `Task`
+- `CronWorkflow` and `WorkflowTemplate` services
+- `CronWorkflow` and `WorkflowTemplate` independent implementations
+- `Task` build on definition
+
 # 3.7.1 - DATE (30/08/2022)
 
 ### Added

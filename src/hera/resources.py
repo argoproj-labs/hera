@@ -1,94 +1,101 @@
 """Holds the resource specification"""
-from typing import Dict, List, Optional, Union
+from dataclasses import dataclass
+from typing import Dict, Optional, Union
 
-from pydantic import BaseModel, root_validator, validator
+from argo_workflows.models import ResourceRequirements
 
 from hera.validators import validate_storage_units
-from hera.volumes import BaseVolume, EmptyDirVolume
 
 
-class Resources(BaseModel):
+# TODO: Move function?
+def merge_dicts(a: Dict, b: Dict, path=None):
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge_dicts(a[key], b[key], path + [str(key)])
+            elif a[key] == b[key]:
+                pass  # same leaf value
+            else:
+                raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
+        else:
+            a[key] = b[key]
+    return a
+
+
+@dataclass
+class Resources:
     """A representation of a collection of resources that are requested to be consumed by a task for execution.
 
-    Attributes
-    ----------
-    min_cpu: Union[float, int] = 1
-        The minimum amount of CPU to request.
-    min_mem: str = '4Gi'
-        The minimum amount of memory to request.
-    min_custom_resources: Optional[Dict[str, str]] = None
-        A custom definition of resources, mapped from key to resource specification. Some users have access to custom
-        cloud resources, such as "habana.ai/gaudi", which are outside of the knowledge of vanilla K8S, but are provided
-        by the K8S engine of the cloud provider. This allows users to take advantage of those.
-    max_cpu: Optional[Union[float, int]] = None
-        The maximum amount of CPU to request. If this is not specified it's automatically set to min_cpu when
-        `overwrite_maxs` is True.
-    max_mem: Optional[str]
-        The maximum amount of memory to request. If this is not specified it's automatically set to min_mem when
-        `overwrite_maxs` is True.
-    max_custom_resources: Optional[Dict[str, str]] = None
-        A custom definition of resources, mapped from key to resource specification. Some users have access to custom
-        cloud resources, such as "habana.ai/gaudi", which are outside of the knowledge of vanilla K8S, but are provided
-        by the K8S engine of the cloud provider. This allows users to take advantage of those.
+    This follow the K8S definition for resources.
 
-    gpus: Optional[int]
-        The number of GPUs to request as part of the workflow.
-    volumes: Optional[List[BaseVolume]] = None
-        List of available Hera volumes [ConfigMapVolume, EmptyDirVolume, ExistingVolume, SecretVolume, Volume].
-    overwrite_maxs: bool = True
-        Whether to override `max_cpu` and `max_mem` with corresponding min values when they are not specified. This
-        applies to custom resources as well - if users specify `min_custom_resources` they are interpreted as `limit`
-        and if `max_custom_resources` is not specified, the `min_custom_resources` will be set in its place, unless
-        `overwrite_maxs` is False.
+    Parameters
+    ----------
+    cpu_request: Optional[Union[float, int, str]] = None
+        The number of CPUs to request, either as a fraction (millicpu), whole number, or a string.
+    cpu_limit: Optional[Union[int, str]] = None
+        The limit of CPUs to request, either as a fraction (millicpu), whole number, or a string.
+    memory_request: Optional[str] = None
+        The amount of memory to request.
+    memory_limit: Optional[str] = None
+        The memory limit of the pod.
+    gpus: Optional[int] = None
+        The number of GPUs to request.
+    gpu_flag: Optional[str] = "nvidia.com/gpu"
+        The GPU flag to use for identifying how many GPUs to mount to a pod. This is dependent on the cloud provider.
+    custom_resources: Optional[Dict] = None
+        Any custom resources to request. This is dependent on the cloud provider.
     """
 
-    min_cpu: Union[float, int] = 1
-    min_mem: str = "4Gi"
-    min_custom_resources: Optional[Dict[str, str]] = None
-
-    max_cpu: Optional[Union[float, int]] = None
-    max_mem: Optional[str] = None
-    max_custom_resources: Optional[Dict[str, str]] = None
-
+    cpu_request: Optional[Union[float, int, str]] = None
+    cpu_limit: Optional[Union[float, int, str]] = None
+    memory_request: Optional[str] = None
+    memory_limit: Optional[str] = None
     gpus: Optional[int] = None
+    gpu_flag: Optional[str] = "nvidia.com/gpu"
+    custom_resources: Optional[Dict] = None
 
-    volumes: Optional[List[BaseVolume]] = None
+    def __post_init__(self):
+        if self.memory_request:
+            validate_storage_units(self.memory_request)
+        if self.memory_limit:
+            validate_storage_units(self.memory_limit)
+        # TODO: add validation for CPU units if str
 
-    overwrite_maxs: bool = True
+        if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
+            assert self.cpu_limit >= 0, "CPU limit must be positive"
+        if self.cpu_request is not None and isinstance(self.cpu_request, int):
+            assert self.cpu_request >= 0, "CPU request must be positive"
+            if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
+                assert self.cpu_request <= self.cpu_limit, "CPU request must be smaller or equal to limit"
 
-    @validator("min_mem", "max_mem")
-    def valid_units(cls, value):
-        """Validates that memory specifications have correct units"""
-        validate_storage_units(value)
-        return value
+        if self.cpu_request is None and self.cpu_limit is not None:
+            self.cpu_request = self.cpu_limit
+        if self.memory_request is None and self.memory_limit is not None:
+            self.memory_request = self.memory_limit
 
-    @validator("volumes")
-    def valid_volume_frequencies(cls, value):
-        """Validates that a single EmptyDir volume is specified (K8S limitation)"""
-        freqs: Dict[str, int] = {}
-        if value:
-            for volume in value:
-                if volume.__class__.__name__ in freqs:
-                    freqs[volume.__class__.__name__] += 1
-                else:
-                    freqs[volume.__class__.__name__] = 1
-                if volume.__class__ == EmptyDirVolume:
-                    assert (
-                        EmptyDirVolume.__class__.__name__ not in freqs or freqs[EmptyDirVolume.__class__.__name__] <= 1
-                    )
-        return value
+    def build(self) -> ResourceRequirements:
+        """Builds the resource requirements of the pod"""
+        resources: Dict = dict()
 
-    @root_validator
-    def valid_values(cls, values):
-        """Validates that cpu values are valid"""
-        assert values["min_cpu"] >= 0, "cannot specify a negative value for the min CPU field"
+        if self.cpu_limit is not None:
+            resources = merge_dicts(resources, dict(limit=dict(cpus=str(self.cpu_limit))))
 
-        if values.get("max_cpu") is None and values["overwrite_maxs"]:
-            values["max_cpu"] = values.get("min_cpu")
+        if self.cpu_request is not None:
+            resources = merge_dicts(resources, dict(request=dict(cpu=str(self.cpu_request))))
 
-        if "max_cpu" in values and values.get("max_cpu"):
-            assert values["min_cpu"] <= values["max_cpu"], "cannot specify a min CPU value smaller than max CPU"
+        if self.memory_limit is not None:
+            resources = merge_dicts(resources, dict(limit=dict(memory=self.memory_limit)))
 
-        if values.get("max_mem") is None and values["overwrite_maxs"]:
-            values["max_mem"] = values.get("min_mem")
-        return values
+        if self.memory_request is not None:
+            resources = merge_dicts(resources, dict(request=dict(memory=self.memory_request)))
+
+        if self.gpus is not None:
+            resources = merge_dicts(resources, dict(request={self.gpu_flag: str(self.gpus)}))
+            resources = merge_dicts(resources, dict(limit={self.gpu_flag: str(self.gpus)}))
+
+        if self.custom_resources:
+            resources = merge_dicts(resources, self.custom_resources)
+
+        return ResourceRequirements(**resources)

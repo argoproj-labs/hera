@@ -1,9 +1,10 @@
 """This example showcases how clients can mount secrets inside a task"""
 
-from hera import Resources, SecretVolume, Task, Workflow, WorkflowService
+from hera import SecretVolume, Task, Workflow
 
 # Create a secret with kubectl
 # kubectl create secret generic secret-file --from-literal="config.json=SECRET_TOKEN"
+# (Remember to add --namespace <namespace> if not default)
 
 
 def use_secret():
@@ -11,11 +12,8 @@ def use_secret():
         print(f"Secret: {secret_file.readline()}")
 
 
-with Workflow("secret-volume", service=WorkflowService(host="my-argo-server.com", token="my-auth-token")) as w:
-    Task(
-        "use_secret",
-        use_secret,
-        resources=Resources(volumes=[SecretVolume(secret_name="secret-file", mount_path="/secret/")]),
-    )
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("secret-volume") as w:
+    Task("use_secret", use_secret, volumes=[SecretVolume(secret_name="secret-file", mount_path="/secret/")])
 
 w.create()

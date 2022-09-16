@@ -10,3 +10,6 @@ class ImagePullPolicy(str, Enum):
     Always = "Always"
     Never = "Never"
     IfNotPresent = "IfNotPresent"
+
+    def __str__(self):
+        return str(self.value)

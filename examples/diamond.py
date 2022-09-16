@@ -2,18 +2,19 @@
 This example showcases the classic diamond workflow that is used as an example by Argo documentation and
 other libraries.
 """
-from hera import Task, Workflow, WorkflowService
+from hera import Task, Workflow
 
 
 def say(message: str):
     print(message)
 
 
-with Workflow("diamond", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")) as w:
-    a = Task("A", say, [{"message": "This is task A!"}])
-    b = Task("B", say, [{"message": "This is task B!"}])
-    c = Task("C", say, [{"message": "This is task C!"}])
-    d = Task("D", say, [{"message": "This is task D!"}])
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("diamond") as w:
+    a = Task("a", say, ["This is task A!"])
+    b = Task("b", say, ["This is task B!"])
+    c = Task("c", say, ["This is task C!"])
+    d = Task("d", say, ["This is task D!"])
 
     a >> b
     a >> c

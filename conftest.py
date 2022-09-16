@@ -1,8 +1,8 @@
 from typing import Dict, List, Tuple
 
 import pytest
-from pydantic import BaseModel
 
+from hera import set_global_host, set_global_token
 from hera.affinity import (
     Affinity,
     Expression,
@@ -19,38 +19,27 @@ from hera.affinity import (
     PreferredSchedulingTerm,
     WeightedPodAffinityTerm,
 )
-from hera.artifact import InputArtifact, OutputArtifact
+from hera.artifact import Artifact
 from hera.cron_workflow import CronWorkflow
-from hera.cron_workflow_service import CronWorkflowService
 from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
 from hera.workflow_template import WorkflowTemplate
-from hera.workflow_template_service import WorkflowTemplateService
 
 
-@pytest.fixture(scope="session")
-def ws():
-    yield WorkflowService(host="https://abc.com", token="abc")
+@pytest.fixture
+def setup():
+    set_global_host("https://abc.com")
+    set_global_token("abc")
 
 
 @pytest.fixture(scope="function")
-def w(ws):
-    yield Workflow("w", service=ws)
-
-
-@pytest.fixture(scope="session")
-def wts():
-    yield WorkflowTemplateService(host="https://abc.com", token="abc")
+def w(setup):
+    with Workflow("w") as w:
+        yield w
 
 
 @pytest.fixture(scope="function")
 def wt(wts):
-    yield WorkflowTemplate("wt", service=wts)
-
-
-@pytest.fixture(scope="function")
-def cws():
-    yield CronWorkflowService(host="https://abc.com", token="abc")
+    yield WorkflowTemplate("wt")
 
 
 @pytest.fixture(scope="session")
@@ -59,27 +48,14 @@ def schedule():
 
 
 @pytest.fixture(scope="function")
-def cw(cws, schedule):
-    yield CronWorkflow("cw", schedule, service=cws)
+def cw(schedule):
+    with CronWorkflow("cw", schedule) as w:
+        yield w
 
 
 @pytest.fixture(scope="session")
-def in_artifact():
-    yield InputArtifact("test", "/test", "test-o", "test-o")
-
-
-@pytest.fixture(scope="session")
-def out_artifact():
-    yield OutputArtifact("test", "/test")
-
-
-@pytest.fixture(scope="session")
-def mock_model():
-    class MockModel(BaseModel):
-        field1: int = 1
-        field2: int = 2
-
-    yield MockModel
+def artifact():
+    yield Artifact("test", "/test")
 
 
 @pytest.fixture(scope="session")

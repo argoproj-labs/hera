@@ -3,7 +3,7 @@ This example showcases how Hera supports mounting existing volumes. These volume
 provisioned and available as a persistent volume claim in the K8S cluster where Argo runs.
 """
 
-from hera import ExistingVolume, Resources, Task, Workflow, WorkflowService
+from hera import ExistingVolume, Task, Workflow
 
 
 def download(path: str):
@@ -11,14 +11,13 @@ def download(path: str):
     print(f"Would have downloaded from {path} to /vol")
 
 
-with Workflow(
-    "existing-volume", service=WorkflowService(host="https://my-argo-server.com", token="my-auth-token")
-) as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("existing-volume") as w:
     Task(
         "download",
         download,
         [{"path": "/whatever/path"}],
-        resources=Resources(volumes=[ExistingVolume(name="my-vol-claim", mount_path="/vol")]),
+        volumes=[ExistingVolume(name="my-vol-claim", mount_path="/vol")],
     )
 
 w.create()

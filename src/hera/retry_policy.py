@@ -14,6 +14,20 @@ class RetryPolicy(str, Enum):
     """
 
     Always = "Always"
+    """Retry all failed steps"""
+
     OnFailure = "OnFailure"
+    """Retry steps whose main container is marked as failed in Kubernetes"""
+
     OnError = "OnError"
+    """Retry steps that encounter Argo controller errors, or whose init or wait containers fail"""
+
     OnTransientError = "OnTransientError"
+    """Retry steps that encounter errors defined as transient, or errors matching the `TRANSIENT_ERROR_PATTERN`
+    environment variable.
+
+    Available in version 3.0 and later.
+    """
+
+    def __str__(self):
+        return str(self.value)

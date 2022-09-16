@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional
 
@@ -14,36 +15,58 @@ from argo_workflows.models import (
 )
 from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
-from pydantic import BaseModel, validator
 
 from hera.validators import validate_storage_units
 
 
-class AccessMode(Enum):
+@dataclass
+class _Sized:
+    size: Optional[str] = None
+
+
+@dataclass
+class _NamedConfigMap:
+    config_map_name: str
+
+
+@dataclass
+class _NamedSecret:
+    secret_name: str
+
+
+class AccessMode(str, Enum):
     """A representations of the volume access modes for Kubernetes.
 
-    Notes
-    -----
-        See https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
+    See Also
+    --------
+    https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
     """
 
     ReadWriteOnce = "ReadWriteOnce"
-    """the volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple
-    pods to access the volume when the pods are running on the same node."""
+    """
+    The volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple
+    pods to access the volume when the pods are running on the same node
+    """
 
     ReadOnlyMany = "ReadOnlyMany"
-    """the volume can be mounted as read-only by many nodes"""
+    """The volume can be mounted as read-only by many nodes"""
 
     ReadWriteMany = "ReadWriteMany"
-    """the volume can be mounted as read-write by many nodes"""
+    """The volume can be mounted as read-write by many nodes"""
 
     ReadWriteOncePod = "ReadWriteOncePod"
-    """the volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to
+    """
+    The volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to
     ensure that only one pod across whole cluster can read that PVC or write to it. This is only supported for CSI
-    volumes and Kubernetes version 1.22+"""
+    volumes and Kubernetes version 1.22+.
+    """
+
+    def __str__(self):
+        return str(self.value)
 
 
-class BaseVolume(BaseModel):
+@dataclass
+class BaseVolume:
     """Base representation of a volume.
 
     Attributes
@@ -57,51 +80,44 @@ class BaseVolume(BaseModel):
         Path within the volume from which the container's volume should be mounted.
     """
 
-    name: Optional[str]
     mount_path: str
-    sub_path: Optional[str] = ""
+    name: Optional[str] = None
+    sub_path: Optional[str] = None
 
-    @validator("name", always=True)
-    def check_name(cls, value):
-        """Validates that a name is specified. If not, it sets it"""
-        if not value:
-            return str(uuid.uuid4())
-        return value
+    def __post_init__(self):
+        if self.name is None:
+            self.name = str(uuid.uuid4())
 
-    def get_volume(self) -> ArgoVolume:
-        """Constructs an Argo volume representation for mounting existing volumes to a step/task"""
-        raise NotImplementedError()
+    def _build_claim_spec(self):
+        return None
 
-    def get_mount(self) -> VolumeMount:
+    def _build_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        raise NotImplementedError()
+        vm = VolumeMount(name=self.name, mount_path=self.mount_path)
+        if self.sub_path:
+            setattr(vm, "sub_path", self.sub_path)
+        return vm
 
 
-class EmptyDirVolume(BaseVolume):
+@dataclass
+class EmptyDirVolume(BaseVolume, _Sized):
     """A representation of an in-memory empty dir volume.
 
     When mounted, this volume results in the creation of a temporary filesystem (tmpfs). The mount path will map to
     the memory location where files in the path are stored. The memory footprint/availability is equivalent to half
     the size of the node a workflow mounting an empty dir volume is mounted on, or limited by the size specification
     if one is passed.
-
-    Attributes
-    ----------
-    size: str
-        The size of the volume to create and mount, typically in gigabytes e.g 20Gi, 100Gi, 1Ti.
     """
 
-    # default to empty size spec to allow for unlimited memory consumption
-    size: Optional[str] = None
     # default to /dev/shm since it represents the shared memory concept in Unix systems
     mount_path: str = "/dev/shm"
 
-    def get_volume(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
         -------
-        Volume
+        ArgoVolume
             The volume representation that can be mounted in workflow steps/tasks.
         """
         if self.size is not None:
@@ -109,31 +125,29 @@ class EmptyDirVolume(BaseVolume):
         else:
             return ArgoVolume(name=self.name, empty_dir=EmptyDirVolumeSource(medium="Memory"))
 
-    def get_mount(self) -> VolumeMount:
-        """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(mount_path=self.mount_path, name=self.name, sub_path=self.sub_path)
 
-
+@dataclass
 class ExistingVolume(BaseVolume):
     """A representation of an existing volume. This can be used to mount existing volumes to workflow tasks"""
 
-    @validator("name", always=True)
-    def check_name(cls, value):
-        """Verifies that the specified name does not contain underscores, which are not RFC1123 compliant"""
-        assert "_" not in value, "existing volume name cannot contain underscores, see RFC1123"
-        return value
+    def __post_init__(self):
+        assert self.name, "ExistingVolume needs a name to use as claim name"
+        # super().__post_init__()
+        self._check_name()
 
-    def get_volume(self) -> ArgoVolume:
+    def _check_name(self):
+        """Verifies that the specified name does not contain underscores, which are not RFC1123 compliant"""
+        assert self.name
+        assert "_" not in self.name, "existing volume name cannot contain underscores, see RFC1123"
+
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task"""
         claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
         return ArgoVolume(name=self.name, persistent_volume_claim=claim)
 
-    def get_mount(self) -> VolumeMount:
-        """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(name=self.name, mount_path=self.mount_path, sub_path=self.sub_path)
 
-
-class SecretVolume(BaseVolume):
+@dataclass
+class SecretVolume(BaseVolume, _NamedSecret):
     """A volume representing a secret. This can be used to mount secrets to paths inside a task
 
     Attributes
@@ -142,19 +156,15 @@ class SecretVolume(BaseVolume):
         The name of the secret existing in the task namespace
     """
 
-    secret_name: str
-
-    def get_volume(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for a secret in the task namespace"""
         secret = SecretVolumeSource(secret_name=self.secret_name)
+        # TODO: Do we want the name to be the same as secret_name to bundle objects?
         return ArgoVolume(name=self.name, secret=secret)
 
-    def get_mount(self) -> VolumeMount:
-        """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(name=self.name, mount_path=self.mount_path, sub_path=self.sub_path)
 
-
-class ConfigMapVolume(BaseVolume):
+@dataclass
+class ConfigMapVolume(BaseVolume, _NamedConfigMap):
     """A volume representing a config map. This can be used to mount config maps to paths inside a task
 
     Attributes
@@ -163,19 +173,14 @@ class ConfigMapVolume(BaseVolume):
         The name of the config map existing in the task namespace.
     """
 
-    config_map_name: str
-
-    def get_volume(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for a config map in the task namespace"""
         config_map = ConfigMapVolumeSource(name=self.config_map_name)
         return ArgoVolume(name=self.name, config_map=config_map)
 
-    def get_mount(self) -> VolumeMount:
-        """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(name=self.name, mount_path=self.mount_path, sub_path=self.sub_path)
 
-
-class Volume(BaseVolume):
+@dataclass
+class Volume(_Sized, BaseVolume):
     """A dynamically created and mountable volume representation.
 
     This is used to specify a volume mount for a particular task to be executed. It is recommended to not pass in a
@@ -194,7 +199,6 @@ class Volume(BaseVolume):
     name: Optional[str]
         The name of the volume. One will be generated if the name is not specified. It is recommended to not pass a
         name to avoid any potential naming conflicts with existing volumes.
-    access
 
     Raises
     ------
@@ -208,25 +212,18 @@ class Volume(BaseVolume):
     the same time.
     """
 
-    size: str
     storage_class_name: str = "standard"
     # note that different cloud providers support different types of access modes
-    access_modes: List[AccessMode] = [AccessMode.ReadWriteOnce]
+    access_modes: List[AccessMode] = field(default_factory=lambda: [AccessMode.ReadWriteOnce])
+    sub_path: Optional[str] = None
 
-    class Config:
-        use_enum_values = True
+    def __post_init__(self):
+        super().__post_init__()
+        validate_storage_units(self.size)
+        for mode in self.access_modes:
+            assert isinstance(mode, AccessMode)
 
-    @validator("size")
-    def valid_units(cls, value):
-        """Validates the storage units of the volume size"""
-        validate_storage_units(value)
-        return value
-
-    def get_mount(self) -> VolumeMount:
-        """Constructs and returns an Argo volume mount representation for tasks"""
-        return VolumeMount(mount_path=self.mount_path, name=self.name, sub_path=self.sub_path)
-
-    def get_claim_spec(self) -> PersistentVolumeClaim:
+    def _build_claim_spec(self) -> PersistentVolumeClaim:
         """Constructs and returns an Argo volume claim representation for tasks. This is typically used by workflows
         to dynamically provision volumes and discard them upon completion.
 
