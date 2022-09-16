@@ -90,7 +90,7 @@ class TaskSecurityContext(BaseSecurityContext):
             settable_attributes["capabilities"] = self._get_capabilties()
         return settable_attributes
 
-    def build_security_context(self) -> SecurityContext:
+    def build(self) -> SecurityContext:
         """Assembles the security context of the pod"""
         settable_attributes = self._get_settable_attributes_as_kwargs()
         security_context = SecurityContext(**settable_attributes)

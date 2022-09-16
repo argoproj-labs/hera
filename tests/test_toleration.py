@@ -3,7 +3,7 @@ from hera import Toleration
 
 def test_toleration_translates():
     hera_t = Toleration(key="a", effect="NoSchedule", operator="Equal", value="value123")
-    argo_t = hera_t.to_argo_toleration()
+    argo_t = hera_t.build()
     assert hasattr(argo_t, "key")
     assert hera_t.key == getattr(argo_t, "key")
     assert hasattr(argo_t, "effect")

@@ -86,7 +86,7 @@ class CronWorkflow(Workflow):
         cron_workflow_spec = IoArgoprojWorkflowV1alpha1CronWorkflowSpec(
             schedule=self.schedule,
             workflow_spec=workflow.spec,
-            workflow_metadata=super().build_metadata(use_name=False),
+            workflow_metadata=super()._build_metadata(use_name=False),
         )
         if self.concurrency_policy:
             setattr(cron_workflow_spec, "concurrencyPolicy", self.concurrency_policy.value)

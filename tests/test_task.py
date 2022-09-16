@@ -99,7 +99,7 @@ def test_param_getter_parses_single_param_val_on_json_payload(op):
 
 def test_param_script_portion_adds_formatted_json_calls(op):
     t = Task("t", op, [{"a": 1}])
-    script = t.get_param_script_portion()
+    script = t._get_param_script_portion()
     assert (
         script == "import json\n"
         "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
@@ -109,7 +109,7 @@ def test_param_script_portion_adds_formatted_json_calls(op):
 
 def test_script_getter_returns_expected_string(op, typed_op):
     t = Task("t", op, [{"a": 1}])
-    script = t.get_script()
+    script = t._get_script()
     assert (
         script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
         "import json\n"
@@ -120,7 +120,7 @@ def test_script_getter_returns_expected_string(op, typed_op):
     )
 
     t = Task("t", typed_op, [{"a": 1}])
-    script = t.get_script()
+    script = t._get_script()
     assert (
         script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
         "import json\n"
@@ -168,13 +168,13 @@ except: very_very_very_very_very_long_parameter_name = '''{{inputs.parameters.ve
 
 print(42)
 """
-    assert t.get_script() == expected_script
+    assert t._get_script() == expected_script
 
 
 def test_resources_returned_with_appropriate_limits(op):
     r = Resources(cpu_request=1, memory_request="4Gi")
     t = Task("t", op, [{"a": 1}], resources=r)
-    resources = t.build_script().resources
+    resources = t._build_script().resources
 
     assert resources["request"]["cpu"] == "1"
     assert resources["request"]["memory"] == "4Gi"
@@ -183,7 +183,7 @@ def test_resources_returned_with_appropriate_limits(op):
 def test_resources_returned_with_gpus(op):
     r = Resources(gpus=2)
     t = Task("t", op, [{"a": 1}], resources=r)
-    resources = t.build_script().resources
+    resources = t._build_script().resources
 
     assert resources["request"]["nvidia.com/gpu"] == "2"
     assert resources["limit"]["nvidia.com/gpu"] == "2"
@@ -200,7 +200,7 @@ def test_volume_mounts_returns_expected_volumes(no_op):
             ConfigMapVolume(config_map_name="cfm", mount_path="/v3"),
         ],
     )
-    vs = t.build_volume_mounts()
+    vs = t._build_volume_mounts()
     assert vs[0].name == "v1"
     assert vs[0].mount_path == "/v1"
     assert vs[1].name == "v2"
@@ -237,7 +237,7 @@ def test_task_command_parses(op):
 def test_task_spec_returns_with_param(op):
     items = [{"a": 1}, {"a": 1}, {"a": 1}]
     t = Task("t", op, with_param=items)
-    s = t.build_dag_task()
+    s = t._build_dag_task()
 
     assert s.name == "t"
     assert s.template == "t"
@@ -247,7 +247,7 @@ def test_task_spec_returns_with_param(op):
 
 def test_task_spec_returns_with_single_values(op):
     t = Task("t", op, [{"a": 1}])
-    s = t.build_dag_task()
+    s = t._build_dag_task()
 
     assert s.name == "t"
     assert s.template == "t"
@@ -258,7 +258,7 @@ def test_task_spec_returns_with_single_values(op):
 
 def test_task_template_does_not_contain_gpu_references(op):
     t = Task("t", op, [{"a": 1}], resources=Resources())
-    tt = t.build_template()
+    tt = t._build_template()
 
     assert not hasattr(tt, "tolerations")
     assert not hasattr(tt, "retry_strategy")
@@ -281,7 +281,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
         affinity=affinity,
         memoize=Memoize("a", "b", "1h"),
     )
-    tt = t.build_template()
+    tt = t._build_template()
 
     assert isinstance(tt.name, str)
     assert isinstance(tt.script.source, str)
@@ -318,7 +318,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
 
 def test_task_template_does_not_add_affinity_when_none(no_op):
     t = Task("t", no_op)
-    tt = t.build_template()
+    tt = t._build_template()
 
     assert not hasattr(tt, "affinity")
 
@@ -329,8 +329,8 @@ def test_task_template_contains_expected_retry_strategy(no_op):
     assert t.retry.duration == 3
     assert t.retry.max_duration == 9
 
-    tt = t.build_template()
-    tr = t.build_retry_strategy()
+    tt = t._build_template()
+    tr = t._build_retry_strategy()
 
     template_backoff = tt.retry_strategy.backoff
     retry_backoff = tr.backoff
@@ -342,7 +342,7 @@ def test_task_template_contains_expected_retry_strategy(no_op):
 def test_task_get_retry_returns_expected_none(no_op):
     t = Task("t", no_op)
 
-    tr = t.build_retry_strategy()
+    tr = t._build_retry_strategy()
     assert tr is None
 
 
@@ -432,7 +432,7 @@ def test_task_contains_specified_security_context(no_op, task_security_context_k
         **task_security_context_kwargs,
         capabilities=expected_capabilities,
     )
-    script_def = t.build_script()
+    script_def = t._build_script()
     assert script_def
     assert script_def.security_context == expected_security_context
 
@@ -449,7 +449,7 @@ def test_task_specified_partial_security_context(no_op, set_only, task_security_
         setattr(expected_security_context, "capabilities", expected_capabilities)
     else:
         expected_security_context = SecurityContext(**one_param_kwargs)
-    script_def = t.build_script()
+    script_def = t._build_script()
     assert script_def
     assert script_def.security_context == expected_security_context
 
@@ -457,42 +457,42 @@ def test_task_specified_partial_security_context(no_op, set_only, task_security_
 def test_task_does_not_contain_specified_security_context(no_op):
     t = Task("t", no_op)
 
-    script_def = t.build_script()
+    script_def = t._build_script()
     assert script_def
     assert "security_context" not in script_def
 
 
 def test_task_template_has_correct_labels(op):
     t = Task("t", op, [{"a": 1}], resources=Resources(), labels={"foo": "bar"})
-    tt = t.build_template()
+    tt = t._build_template()
     expected_labels = {"foo": "bar"}
     assert tt.metadata.labels == expected_labels
 
 
 def test_task_template_has_correct_annotations(op):
     t = Task("t", op, [{"a": 1}], resources=Resources(), annotations={"foo": "bar"})
-    tt = t.build_template()
+    tt = t._build_template()
     expected_annotations = {"foo": "bar"}
     assert tt.metadata.annotations == expected_annotations
 
 
 def test_task_with_config_map_env_variable(no_op):
     t = Task("t", no_op, env=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
-    tt = t.build_template()
+    tt = t._build_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
 
 
 def test_task_with_config_map_env_from(no_op):
     t = Task("t", no_op, env=[ConfigMapEnvFromSpec(prefix="p", config_map_name="cn")])
-    tt = t.build_template()
+    tt = t._build_template()
     assert tt.script.env_from[0].prefix == "p"
     assert tt.script.env_from[0].config_map_ref.name == "cn"
 
 
 def test_task_should_create_task_with_container_template():
     t = Task("t", command=["cowsay"], resources=Resources(memory_request="4Gi"))
-    tt = t.build_template()
+    tt = t._build_template()
 
     assert tt.container.image == "python:3.7"
     assert tt.container.command[0] == "cowsay"
@@ -511,7 +511,7 @@ def test_task_allow_subclassing_when_assigned_next(no_op):
 
 def test_supply_args():
     t = Task("t", args=["arg"])
-    tt = t.build_template()
+    tt = t._build_template()
     assert tt.container.args == ["arg"]
     assert "command" not in tt.container
 
@@ -519,7 +519,7 @@ def test_supply_args():
 def test_task_script_def_volume_template(no_op):
     t = Task("t", no_op, volumes=[Volume(size="1Gi", mount_path="/tmp")])
 
-    template = t.build_script()
+    template = t._build_script()
     assert template
     assert len(template.volume_mounts) == 1
     assert template.volume_mounts[0].mount_path == "/tmp"
@@ -545,7 +545,7 @@ def test_task_adds_custom_resources(no_op):
 def test_task_adds_variable_as_env_var():
     t = Task("t")
     t1 = Task("t1", "print(42)", env=[EnvSpec(name="IP", value_from_input=t.ip)])
-    t1s = t1.build_script()
+    t1s = t1._build_script()
 
     assert t1s.env[0].name == "IP"
     assert t1s.env[0].value == "{{inputs.parameters.IP}}"
@@ -582,18 +582,18 @@ def test_task_adds_other_task_on_error():
 
 def test_task_has_expected_retry_limit():
     t = Task("t", retry=Retry(limit=5))
-    tt = t.build_template()
+    tt = t._build_template()
     assert tt.retry_strategy.limit == "5"
 
 
 def test_task_has_expected_retry_policy():
     t = Task("t", retry=Retry(retry_policy=RetryPolicy.Always))
-    tt = t.build_template()
+    tt = t._build_template()
     assert tt.retry_strategy.retry_policy == "Always"
 
 
 def test_task_uses_expected_template_ref():
-    t = Task("t", template_ref=TemplateRef(name="workflow-template", template="template")).build_dag_task()
+    t = Task("t", template_ref=TemplateRef(name="workflow-template", template="template"))._build_dag_task()
     assert hasattr(t, "template_ref")
     assert t.template_ref.name == "workflow-template"
     assert t.template_ref.template == "template"
@@ -601,7 +601,7 @@ def test_task_uses_expected_template_ref():
 
 def test_task_does_not_include_imports_when_no_params_are_specified(no_op):
     t = Task("t", no_op)
-    t_script = t.get_script()
+    t_script = t._get_script()
     assert "import json" not in t_script
     assert "pass\n" in t_script
 
@@ -707,6 +707,6 @@ def test_task_fails_to_validate_with_incorrect_memoize(op):
 def test_task_template_contains_resource_template():
     resource_template = ResourceTemplate(action="create")
     t = Task(name="t", resource_template=resource_template)
-    tt = t.build_template()
+    tt = t._build_template()
     resource = resource_template.build()
     assert tt.resource == resource

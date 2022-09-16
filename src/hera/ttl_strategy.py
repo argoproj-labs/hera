@@ -28,8 +28,7 @@ class TTLStrategy:
     seconds_after_failure: Optional[int]
     seconds_after_success: Optional[int]
 
-    @property
-    def argo_ttl_strategy(self) -> IoArgoprojWorkflowV1alpha1TTLStrategy:
+    def build(self) -> IoArgoprojWorkflowV1alpha1TTLStrategy:
         """Constructs and returns the ttl strategy"""
         return IoArgoprojWorkflowV1alpha1TTLStrategy(
             seconds_after_completion=self.seconds_after_completion,

@@ -203,7 +203,7 @@ class Task(IO):
         self.outputs = outputs or []
         self.env = env or []
         self.with_param = with_param
-        self.inputs += self.deduce_parameters()
+        self.inputs += self._deduce_parameters()
         self.pod_spec_patch = pod_spec_patch
         self.resource_template: Optional[ResourceTemplate] = resource_template
 
@@ -491,7 +491,7 @@ class Task(IO):
             return None
         return [str(arg) for arg in self.args]
 
-    def deduce_parameters(
+    def _deduce_parameters(
         self,
     ) -> List[Parameter]:
         """Returns a list of Argo workflow parameters based on the function signature and the function parameters
@@ -613,7 +613,7 @@ class Task(IO):
 
         return deduced_params  # type: ignore
 
-    def get_param_script_portion(self) -> Optional[str]:
+    def _get_param_script_portion(self) -> Optional[str]:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
         parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
         script that automatically imports json and loads/adds code to interpret each independent argument into the
@@ -636,7 +636,7 @@ class Task(IO):
             extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
         return textwrap.dedent(extract)
 
-    def get_script(self) -> str:
+    def _get_script(self) -> str:
         """Assembles and returns a script representation of the given function, along with the extra script material
         prefixed to the string. The script is expected to be a callable function the client is interested in submitting
         for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
@@ -667,7 +667,7 @@ class Task(IO):
                 # We fix this by appending the cwd path to sys:
                 script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
 
-                script_extra = self.get_param_script_portion() if args else None
+                script_extra = self._get_param_script_portion() if args else None
                 if script_extra:
                     script += copy.deepcopy(script_extra)
                     script += "\n"
@@ -690,7 +690,7 @@ class Task(IO):
             assert isinstance(self.source, str)
             return self.source
 
-    def build_volume_mounts(self) -> Optional[List[VolumeMount]]:
+    def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
         """Assembles the list of volumes to be mounted by the task.
 
         Returns
@@ -698,16 +698,16 @@ class Task(IO):
         List[VolumeMount]
             The list of volume mounts to be added to the task specification.
         """
-        return [v.build_mount() for v in self.volumes]
+        return [v._build_mount() for v in self.volumes]
 
-    def build_volume_claim_templates(self) -> Optional[List[PersistentVolumeClaim]]:
+    def _build_volume_claim_templates(self) -> Optional[List[PersistentVolumeClaim]]:
         """Assembles the list of volume claim templates to be created for the task."""
-        return [v.build_claim_spec() for v in self.volumes if isinstance(v, Volume)]
+        return [v._build_claim_spec() for v in self.volumes if isinstance(v, Volume)]
 
-    def build_persistent_volume_claims(self) -> Optional[List[ArgoVolume]]:
+    def _build_persistent_volume_claims(self) -> Optional[List[ArgoVolume]]:
         """Assembles the list of Argo volume specifications"""
         return [
-            v.build_claim_spec()
+            v._build_claim_spec()
             for v in self.volumes
             if isinstance(v, ExistingVolume)
             or isinstance(v, SecretVolume)
@@ -715,7 +715,7 @@ class Task(IO):
             or isinstance(v, ConfigMapVolume)
         ]
 
-    def build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
+    def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
         """Assembles the environment variables for the task"""
         env = [e.build() for e in self.env if isinstance(e, EnvSpec)]
         env_from = [e.build() for e in self.env if isinstance(e, BaseEnvFromSpec)]
@@ -727,7 +727,7 @@ class Task(IO):
         if self.image_pull_policy:
             pull_policy = self.image_pull_policy.value
 
-        env, env_from = self.build_env()
+        env, env_from = self._build_env()
 
         kwargs = dict(
             image=self.image,
@@ -738,12 +738,12 @@ class Task(IO):
             env=env,
             env_from=env_from,
             working_dir=self.working_dir,
-            volume_mounts=self.build_volume_mounts(),
-            security_context=self.security_context.build_security_context() if self.security_context else None,
+            volume_mounts=self._build_volume_mounts(),
+            security_context=self.security_context.build() if self.security_context else None,
         )
         return {k: v for k, v in kwargs.items() if v}  # treats empty lists/None as false
 
-    def build_script(self) -> IoArgoprojWorkflowV1alpha1ScriptTemplate:
+    def _build_script(self) -> IoArgoprojWorkflowV1alpha1ScriptTemplate:
         """Assembles and returns the script template that contains the definition of the script to run in a task.
 
         Returns
@@ -752,11 +752,11 @@ class Task(IO):
             The script template representation of the task.
         """
         kwargs = self._build_container_kwargs()
-        kwargs["source"] = self.get_script()
+        kwargs["source"] = self._get_script()
         template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**kwargs)
         return template
 
-    def build_container(self) -> Container:
+    def _build_container(self) -> Container:
         """Assembles and returns the container for the task to run in.
 
         Returns
@@ -768,7 +768,7 @@ class Task(IO):
         container = Container(**container_args)
         return container
 
-    def build_template(self) -> Optional[IoArgoprojWorkflowV1alpha1Template]:
+    def _build_template(self) -> Optional[IoArgoprojWorkflowV1alpha1Template]:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
         configuration required for the task be executed.
 
@@ -794,9 +794,9 @@ class Task(IO):
                 setattr(metadata, "annotations", self.annotations)
             setattr(template, "metadata", metadata)
 
-        built_inputs = self.build_inputs()
-        built_outputs = self.build_outputs()
-        built_tolerations = self.build_tolerations()
+        built_inputs = self._build_inputs()
+        built_outputs = self._build_outputs()
+        built_tolerations = self._build_tolerations()
 
         if built_inputs is not None:
             setattr(template, "inputs", built_inputs)
@@ -813,16 +813,16 @@ class Task(IO):
         if self.node_selector is not None:
             setattr(template, "node_selector", self.node_selector)
 
-        retry_strategy = self.build_retry_strategy()
+        retry_strategy = self._build_retry_strategy()
         if retry_strategy is not None:
             setattr(template, "retry_strategy", retry_strategy)
 
         if self.source is not None:
-            setattr(template, "script", self.build_script())
+            setattr(template, "script", self._build_script())
         else:
-            setattr(template, "container", self.build_container())
+            setattr(template, "container", self._build_container())
 
-        affinity = self.affinity.get_spec() if self.affinity else None
+        affinity = self.affinity._build() if self.affinity else None
         if affinity is not None:
             setattr(template, "affinity", affinity)
 
@@ -837,7 +837,7 @@ class Task(IO):
 
         return template
 
-    def build_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:
+    def _build_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:
         """Assembles and returns a retry strategy for the task. This is dictated by the task `retry_limit`.
 
         Returns
@@ -863,7 +863,7 @@ class Task(IO):
             return strategy
         return None
 
-    def build_tolerations(self) -> List[ArgoToleration]:
+    def _build_tolerations(self) -> List[ArgoToleration]:
         """Assembles and returns the pod toleration objects required for scheduling a task.
 
         Returns
@@ -884,7 +884,7 @@ class Task(IO):
                 for t in self.tolerations
             ]
 
-    def build_dag_task(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
+    def _build_dag_task(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
         """Assembles and returns the graph task specification of the task.
 
         Returns
@@ -910,7 +910,7 @@ class Task(IO):
             setattr(task, "when", self.when)
 
         if self.template_ref:
-            setattr(task, "template_ref", self.template_ref.build_spec)
+            setattr(task, "template_ref", self.template_ref.build)
         else:
             name = self.name if not self.dag else self.dag.name
             setattr(task, "template", name)

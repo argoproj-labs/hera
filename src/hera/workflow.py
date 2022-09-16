@@ -119,7 +119,7 @@ class Workflow:
         self.exit_task: Optional[str] = None
         self.tasks: List["Task"] = []
 
-    def build_metadata(self, use_name=True) -> ObjectMeta:
+    def _build_metadata(self, use_name=True) -> ObjectMeta:
         """Assembles the metadata of the workflow"""
         metadata = ObjectMeta()
         if use_name:
@@ -130,13 +130,13 @@ class Workflow:
             setattr(metadata, "annotations", self.annotations)
         return metadata
 
-    def build_spec(self, workflow_template: bool = False) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
+    def _build_spec(self, workflow_template: bool = False) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
         """Assembles the spec of the workflow"""
         # Main difference between workflow and workflow template spec is that WT
         # (generally) doesn't have an entrypoint
         assert self.dag is not None
         spec = IoArgoprojWorkflowV1alpha1WorkflowSpec()
-        templates = self.dag.build_templates()
+        templates = self.dag._build_templates()
 
         if not workflow_template:
             templates += self.dag.build()
@@ -148,7 +148,7 @@ class Workflow:
             setattr(spec, "parallelism", self.parallelism)
 
         if self.ttl_strategy is not None:
-            setattr(spec, "ttl_strategy", self.ttl_strategy.argo_ttl_strategy)
+            setattr(spec, "ttl_strategy", self.ttl_strategy.build())
 
         if self.volume_claim_gc_strategy is not None:
             setattr(
@@ -180,20 +180,20 @@ class Workflow:
             )
 
         if self.affinity is not None:
-            setattr(spec, "affinity", self.affinity.get_spec())
+            setattr(spec, "affinity", self.affinity._build())
 
         if self.node_selector is not None:
             setattr(spec, "node_selector", self.node_selector)
 
         if self.tolerations is not None:
-            ts = [t.to_argo_toleration() for t in self.tolerations]
+            ts = [t.build() for t in self.tolerations]
             setattr(spec, "tolerations", ts)
 
-        vct = self.dag.build_volume_claim_templates()
+        vct = self.dag._build_volume_claim_templates()
         if vct:
             setattr(spec, "volume_claim_templates", vct)
 
-        pcvs = self.dag.build_persistent_volume_claims()
+        pcvs = self.dag._build_persistent_volume_claims()
         if pcvs:
             setattr(spec, "volumes", pcvs)
 
@@ -204,7 +204,7 @@ class Workflow:
 
     def build(self) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Builds the workflow core representation"""
-        return IoArgoprojWorkflowV1alpha1Workflow(metadata=self.build_metadata(), spec=self.build_spec())
+        return IoArgoprojWorkflowV1alpha1Workflow(metadata=self._build_metadata(), spec=self._build_spec())
 
     def __enter__(self) -> "Workflow":
         """Enter the context of the workflow.

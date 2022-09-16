@@ -25,7 +25,7 @@ class IO:
     inputs: List[Union[Parameter, Artifact]]
     outputs: List[Union[Parameter, Artifact]]
 
-    def build_inputs(self) -> Optional[IoArgoprojWorkflowV1alpha1Inputs]:
+    def _build_inputs(self) -> Optional[IoArgoprojWorkflowV1alpha1Inputs]:
         """Assembles the inputs of the task."""
         parameters = [obj.as_input() for obj in self.inputs if isinstance(obj, Parameter)]
         artifacts = [obj.as_input() for obj in self.inputs if isinstance(obj, Artifact)]
@@ -38,7 +38,7 @@ class IO:
             setattr(inputs, "artifacts", artifacts)
         return inputs
 
-    def build_outputs(self) -> Optional[IoArgoprojWorkflowV1alpha1Outputs]:
+    def _build_outputs(self) -> Optional[IoArgoprojWorkflowV1alpha1Outputs]:
         """Assembles and returns the task outputs"""
         parameters = [obj.as_output() for obj in self.outputs if isinstance(obj, Parameter)]
         artifacts = [obj.as_output() for obj in self.outputs if isinstance(obj, Artifact)]

@@ -45,44 +45,44 @@ class DAG(IO):
         self.outputs = outputs or []
         self.tasks: List[Task] = []
 
-    def build_templates(self):
+    def _build_templates(self):
         """Assembles the templates from sub-DAGs of the DAG"""
-        templates = [t for t in [t.build_template() for t in self.tasks] if t]
+        templates = [t for t in [t._build_template() for t in self.tasks] if t]
         # Assemble the templates from sub-dags
-        sub_templates = [t.dag.build_templates() for t in self.tasks if t.dag]
+        sub_templates = [t.dag._build_templates() for t in self.tasks if t.dag]
         sub_templates = [t for sublist in sub_templates for t in sublist]  # flatten
         return templates + sub_templates
 
-    def build_dag_tasks(self):
+    def _build_dag_tasks(self):
         """Assembles all the DAG tasks"""
-        return [t for t in [t.build_dag_task() for t in self.tasks if not t.is_exit_task] if t]
+        return [t for t in [t._build_dag_task() for t in self.tasks if not t.is_exit_task] if t]
 
-    def build_volume_claim_templates(self) -> List[PersistentVolumeClaim]:
+    def _build_volume_claim_templates(self) -> List[PersistentVolumeClaim]:
         """Assembles the volume claim templates"""
         # make sure we only have unique names
         vcs = dict()
         for t in self.tasks:
-            for v in t.build_volume_claim_templates():
+            for v in t._build_volume_claim_templates():
                 vcs[v.metadata.name] = v
 
         # sub-claims:
-        sub_volume_claims = [t.dag.build_volume_claim_templates() for t in self.tasks if t.dag]
+        sub_volume_claims = [t.dag._build_volume_claim_templates() for t in self.tasks if t.dag]
         for volume_claims in sub_volume_claims:
             for v in volume_claims:
                 vcs[v.metadata.name] = v
 
         return [v for _, v in vcs.items()]
 
-    def build_persistent_volume_claims(self) -> List[ArgoVolume]:
+    def _build_persistent_volume_claims(self) -> List[ArgoVolume]:
         """Assembles the persistent volume claim templates"""
         # Make sure we only have unique names
         pcvs = dict()
         for t in self.tasks:
-            for v in t.build_persistent_volume_claims():
+            for v in t._build_persistent_volume_claims():
                 pcvs[v.name] = v
 
         # sub-claims:
-        sub_volume_claims = [t.dag.build_persistent_volume_claims() for t in self.tasks if t.dag]
+        sub_volume_claims = [t.dag._build_persistent_volume_claims() for t in self.tasks if t.dag]
         for volume_claims in sub_volume_claims:
             for v in volume_claims:
                 pcvs[v.name] = v
@@ -92,12 +92,12 @@ class DAG(IO):
     def build(self) -> List[IoArgoprojWorkflowV1alpha1Template]:
         """Assembles the main DAG/workflow template"""
         dag = IoArgoprojWorkflowV1alpha1Template(
-            name=self.name, dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=self.build_dag_tasks())
+            name=self.name, dag=IoArgoprojWorkflowV1alpha1DAGTemplate(tasks=self._build_dag_tasks())
         )
-        inputs = self.build_inputs()
+        inputs = self._build_inputs()
         if inputs:
             setattr(dag, "inputs", inputs)
-        outputs = self.build_outputs()
+        outputs = self._build_outputs()
         if outputs:
             setattr(dag, "outputs", outputs)
         # Assemble the sub-dags if present in task templates

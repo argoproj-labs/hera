@@ -4,14 +4,14 @@ from hera import AccessMode, EmptyDirVolume, Volume
 
 
 def test_empty_dir_volume_created_without_size():
-    edv = EmptyDirVolume().build_claim_spec()
+    edv = EmptyDirVolume()._build_claim_spec()
     assert edv.name is not None
     assert edv.empty_dir.medium == "Memory"
     assert not hasattr(edv.empty_dir, "size_limit")
 
 
 def test_empty_dir_volume_created_with_size():
-    edv = EmptyDirVolume(size="5Gi").build_claim_spec()
+    edv = EmptyDirVolume(size="5Gi")._build_claim_spec()
     assert edv.name is not None
     assert edv.empty_dir.medium == "Memory"
     assert edv.empty_dir.size_limit == "5Gi"
@@ -19,7 +19,7 @@ def test_empty_dir_volume_created_with_size():
 
 def test_volume_created_with_defaults():
     v = Volume(name="v", size="1Gi", mount_path="/test")
-    spec = v.build_claim_spec().spec
+    spec = v._build_claim_spec().spec
 
     assert len(spec.access_modes) == 1
     assert spec.access_modes == ["ReadWriteOnce"]
@@ -31,7 +31,7 @@ def test_volume_created_with_multiple_access_modes():
     v = Volume(
         name="v", size="1Gi", mount_path="/test", access_modes=[AccessMode.ReadWriteOnce, AccessMode.ReadWriteOncePod]
     )
-    spec = v.build_claim_spec().spec
+    spec = v._build_claim_spec().spec
 
     assert len(spec.access_modes) == 2
     assert spec.access_modes == ["ReadWriteOnce", "ReadWriteOncePod"]
@@ -46,7 +46,7 @@ def test_volume_fails_creation_with_string_access_modes():
 
 def test_volume_mount():
     v = Volume(name="v", size="1Gi", mount_path="/test", sub_path="test.txt")
-    mount = v.build_mount()
+    mount = v._build_mount()
 
     assert mount["mount_path"] == "/test"
     assert mount["name"] == "v"

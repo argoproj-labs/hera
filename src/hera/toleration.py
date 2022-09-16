@@ -29,7 +29,7 @@ class Toleration:
     effect: str
     value: Optional[str] = ""
 
-    def to_argo_toleration(self):
+    def build(self):
         return ArgoToleration(key=self.key, effect=self.effect, operator=self.operator, value=self.value)
 
 

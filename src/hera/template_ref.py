@@ -21,8 +21,7 @@ class TemplateRef:
     template: str
     cluster_scope: bool = False
 
-    @property
-    def build_spec(self) -> IoArgoprojWorkflowV1alpha1TemplateRef:
+    def build(self) -> IoArgoprojWorkflowV1alpha1TemplateRef:
         return IoArgoprojWorkflowV1alpha1TemplateRef(
             name=self.name, template=self.template, cluster_scope=self.cluster_scope
         )

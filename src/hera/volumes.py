@@ -88,10 +88,10 @@ class BaseVolume:
         if self.name is None:
             self.name = str(uuid.uuid4())
 
-    def build_claim_spec(self):
+    def _build_claim_spec(self):
         return None
 
-    def build_mount(self) -> VolumeMount:
+    def _build_mount(self) -> VolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
         vm = VolumeMount(name=self.name, mount_path=self.mount_path)
         if self.sub_path:
@@ -112,7 +112,7 @@ class EmptyDirVolume(BaseVolume, _Sized):
     # default to /dev/shm since it represents the shared memory concept in Unix systems
     mount_path: str = "/dev/shm"
 
-    def build_claim_spec(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
 
         Returns
@@ -133,14 +133,14 @@ class ExistingVolume(BaseVolume):
     def __post_init__(self):
         assert self.name, "ExistingVolume needs a name to use as claim name"
         # super().__post_init__()
-        self.check_name()
+        self._check_name()
 
-    def check_name(self):
+    def _check_name(self):
         """Verifies that the specified name does not contain underscores, which are not RFC1123 compliant"""
         assert self.name
         assert "_" not in self.name, "existing volume name cannot contain underscores, see RFC1123"
 
-    def build_claim_spec(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task"""
         claim = PersistentVolumeClaimVolumeSource(claim_name=self.name)
         return ArgoVolume(name=self.name, persistent_volume_claim=claim)
@@ -156,7 +156,7 @@ class SecretVolume(BaseVolume, _NamedSecret):
         The name of the secret existing in the task namespace
     """
 
-    def build_claim_spec(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for a secret in the task namespace"""
         secret = SecretVolumeSource(secret_name=self.secret_name)
         # TODO: Do we want the name to be the same as secret_name to bundle objects?
@@ -173,7 +173,7 @@ class ConfigMapVolume(BaseVolume, _NamedConfigMap):
         The name of the config map existing in the task namespace.
     """
 
-    def build_claim_spec(self) -> ArgoVolume:
+    def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for a config map in the task namespace"""
         config_map = ConfigMapVolumeSource(name=self.config_map_name)
         return ArgoVolume(name=self.name, config_map=config_map)
@@ -223,7 +223,7 @@ class Volume(_Sized, BaseVolume):
         for mode in self.access_modes:
             assert isinstance(mode, AccessMode)
 
-    def build_claim_spec(self) -> PersistentVolumeClaim:
+    def _build_claim_spec(self) -> PersistentVolumeClaim:
         """Constructs and returns an Argo volume claim representation for tasks. This is typically used by workflows
         to dynamically provision volumes and discard them upon completion.
 
