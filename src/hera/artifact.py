@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1ArchiveStrategy,
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
@@ -20,7 +21,7 @@ class Artifact:
     ----------
     name: str
         The name of the artifact.
-    path: Optional[str] = None
+    path: str
         The path to the file to be assembled into an artifact. This path is relative to the task environment.
         If clients have a volume where results are stored, it's the path to the created object on the
         respective volume.
@@ -28,16 +29,30 @@ class Artifact:
         The name of the task that generates the artifact.
     """
 
-    def __init__(self, name: str, path: Optional[str] = None, from_task: Optional[str] = None) -> None:
+    def __init__(self, name: str, path: str, from_task: Optional[str] = None, sub_path: Optional[str] = None) -> None:
         self.name = name
         self.path = path
         self.from_task = from_task
+        self.sub_path = sub_path
+
+    def as_name(self, name: str):
+        """Changes the name of the artifact."""
+        self.name = name
+        return self
+
+    def to_path(self, path: str, sub_path: Optional[str] = None):
+        """Change the paths of the artifact"""
+        self.path = path
+        self.sub_path = sub_path
+        return self
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Assembles the artifact specifications for use as an argument to a task"""
         artifact = IoArgoprojWorkflowV1alpha1Artifact(name=self.name)
         if self.from_task is not None:
             setattr(artifact, "_from", self.from_task)
+        if self.sub_path:
+            setattr(artifact, "sub_path", self.sub_path)
         return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -69,9 +84,10 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact.
     """
 
-    def __init__(self, name: str, path: str, bucket: str, key: str) -> None:
+    def __init__(self, name: str, path: str, bucket: str, key: str, archive: Optional[Dict] = None) -> None:
         self.bucket = bucket
         self.key = key
+        self.archive = archive
         super(BucketArtifact, self).__init__(name, path)
 
 
@@ -80,13 +96,20 @@ class S3Artifact(BucketArtifact):
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Assembles the artifact representation for use as an argument to a task"""
-        return IoArgoprojWorkflowV1alpha1Artifact(
+        artifact = IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
             s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket, key=self.key),
         )
+        if self.archive:
+            setattr(artifact, "archive", IoArgoprojWorkflowV1alpha1ArchiveStrategy(**self.archive))
+        return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact representation for use as an input to a task"""
+        return self.as_argument()
+
+    def as_output(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Assembles the artifact representation for use as an input to a task"""
         return self.as_argument()
 
@@ -96,13 +119,20 @@ class GCSArtifact(BucketArtifact):
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Assembles the artifact representation for use as an argument to a task"""
-        return IoArgoprojWorkflowV1alpha1Artifact(
+        artifact = IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,
             gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(bucket=self.bucket, key=self.key),
         )
+        if self.archive:
+            setattr(artifact, "archive", IoArgoprojWorkflowV1alpha1ArchiveStrategy(**self.archive))
+        return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact representation for use as an input to a task"""
+        return self.as_argument()
+
+    def as_output(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Assembles the artifact representation for use as an input to a task"""
         return self.as_argument()
 
