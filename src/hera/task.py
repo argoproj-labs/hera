@@ -281,7 +281,30 @@ class Task(IO):
             other.depends += f" {operator} {self.name + condition}"
         return other
 
-    def __rshift__(self, other: Union["Task", List["Task"]]) -> "Task":
+    def __rrshift__(self, other: List["Task"]) -> "Task":
+        """Sets the `other` as a dependency of `self`.
+
+        This method piggybacks on the default fallback mechanism of Python, which invokes `__rrshift__` when
+        `__rshift__` fails. Hera uses `__rshift__` (TaskA >> TaskB) for setting task dependency chains. However, that
+        does not natively support lists of items/tasks, so this provides the reverse mechanism - the other here is the
+        list of upstream dependency of `self`.
+
+        Parameters
+        ----------
+        other: List["Task"]
+            The list of upstream dependencies of this task.
+
+        Returns
+        -------
+        Task
+            This task/`self`.
+        """
+        assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
+        for o in other:
+            o.next(self)
+        return self
+
+    def __rshift__(self, other: Union["Task", List["Task"]]) -> Union["Task", List["Task"]]:
         """Sets this task as a dependency of the other passed task.
 
         Parameters
@@ -291,9 +314,8 @@ class Task(IO):
 
         Returns
         -------
-        Task
-            The other task that was specified when a single task is used for setting the dependency or `self` when a
-            list of tasks is used to set the dependecy.
+        Union["Task", List["Task"]]
+            The other task/s that was/were specified as the dependencies.
 
         Examples
         --------
@@ -308,7 +330,8 @@ class Task(IO):
                 assert isinstance(o, Task), \
                     f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
                 self.next(o)
-        return self
+            return other
+        raise ValueError(f"Unknown type {type(other)}provided to `__rshift__`")
 
     def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> "Task":
         """Execute this task conditionally on a workflow status."""
