@@ -13,7 +13,7 @@ def consume(value):
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow("memoize") as w:
     g = Task("g", generate, outputs=[Parameter("out", value_from=dict(path="/out"))])
-    c = Task("c", consume, inputs=[g.get_output("out")], memoize=Memoize("value", "memoize", "c"))
+    c = Task("c", consume, inputs=[g.get_parameter("out")], memoize=Memoize("value", "memoize", "c"))
     g >> c
 
 w.create()

@@ -426,42 +426,53 @@ class Task(IO):
             setattr(arguments, "artifacts", artifacts)
         return arguments
 
-    def get_outputs_as(self, name):
+    def get_parameters_as(self, name):
         """Gets all the output parameters from this task"""
         return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
 
-    def get_output(
-        self, name: str, path: Optional[str] = None, as_name: Optional[str] = None
-    ) -> Union[Artifact, Parameter]:
-        """Returns an output object in the form of an artifact or parameter based on the name.
+    def get_parameter(self, name: str) -> Parameter:
+        """Returns a Parameter from this tasks' outputs based on the name.
 
         Parameters
         ----------
         name: str
             The name of the parameter to extract as an output.
-        path: Optional[str] = None
-            Path to the file containing the output to share.
-        as_name: Optional[str] = None
-            Name alias for the parameter. This will be used for sharing the output with the consumer.
-
         Returns
         -------
-        Union[Artifact, Parameter]
-            Artifact or Parameter, depending on whatever shareable object has been identified on the task.
+        Parameter
+            Parameter with the same name
+
         """
-        if as_name is None:
-            as_name = name
-        obj = next((output for output in self.outputs if output.name == name), None)
+        parameters = [p for p in self.outputs if isinstance(p, Parameter)]
+        obj = next((output for output in parameters if output.name == name), None)
         if obj:
             if isinstance(obj, Parameter):
                 value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
-                return Parameter(as_name, value, default=obj.default)
-            if isinstance(obj, Artifact):
-                if path is None:  # If a new path isn't set, we use the same as the origin
-                    path = obj.path
-                return Artifact(as_name, path=path, from_task=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
+                return Parameter(name, value, default=obj.default)
             raise NotImplementedError(type(obj))
-        raise KeyError(f"No output named {name} found")
+        raise KeyError(f"No output parameter named {name} found")
+
+    def get_artifact(self, name: str) -> Artifact:
+        """Returns an Artifact from this tasks' outputs based on the name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to extract as an output.
+
+        Returns
+        -------
+        Artifact
+            Artifact with the same name
+
+        """
+        artifacts = [p for p in self.outputs if isinstance(p, Artifact)]
+        obj = next((output for output in artifacts if output.name == name), None)
+        if obj:
+            if isinstance(obj, Artifact):
+                return Artifact(name, path=obj.path, from_task=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
+            raise NotImplementedError(type(obj))
+        raise KeyError(f"No output artifact named {name} found")
 
     def get_result(self) -> str:
         """Returns the formatted field that points to the result/output of this task"""

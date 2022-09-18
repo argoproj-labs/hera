@@ -14,7 +14,7 @@ def test_output_artifact_contains_expected_fields():
 
     expected = Artifact(name=name, path=path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
     t1 = Task("produce-artifact", outputs=[Artifact(name, path)])
-    actual = t1.get_output(name)
+    actual = t1.get_artifact(name)
 
     assert isinstance(actual, Artifact)
     assert actual.from_task == expected.from_task
@@ -23,7 +23,7 @@ def test_output_artifact_contains_expected_fields():
 
     new_path = "/input/alternative_path"
     expected = Artifact(name=name, path=new_path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
-    actual = t1.get_output(name, new_path)
+    actual = t1.get_artifact(name).to_path(new_path)
     assert isinstance(actual, Artifact)
     assert actual.from_task == expected.from_task
     assert actual.name == expected.name
@@ -31,7 +31,7 @@ def test_output_artifact_contains_expected_fields():
 
     new_name = "test-artifact2"
     expected = Artifact(name=new_name, path=new_path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
-    actual = t1.get_output(name, new_path, as_name=new_name)
+    actual = t1.get_artifact(name).to_path(new_path).as_name(new_name)
     assert isinstance(actual, Artifact)
     assert actual.from_task == expected.from_task
     assert actual.name == expected.name

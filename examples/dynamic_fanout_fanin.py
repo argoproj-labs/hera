@@ -31,7 +31,7 @@ with Workflow("dynamic-fanout-fanin") as w:
         with_param=generate_task.get_result(),
         outputs=[Parameter("value", value_from=dict(path="/tmp/value"))],
     )
-    fanin_task = Task("fanin", fanin, inputs=[fanout_task.get_outputs_as("values")])
+    fanin_task = Task("fanin", fanin, inputs=[fanout_task.get_parameters_as("values")])
 
     generate_task >> fanout_task >> fanin_task
 
