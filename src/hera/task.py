@@ -327,8 +327,9 @@ class Task(IO):
             return self.next(other)
         elif isinstance(other, list):
             for o in other:
-                assert isinstance(o, Task), \
-                    f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                assert isinstance(
+                    o, Task
+                ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
                 self.next(o)
             return other
         raise ValueError(f"Unknown type {type(other)}provided to `__rshift__`")
@@ -752,9 +753,9 @@ class Task(IO):
             v._build_claim_spec()
             for v in self.volumes
             if isinstance(v, ExistingVolume)
-               or isinstance(v, SecretVolume)
-               or isinstance(v, EmptyDirVolume)
-               or isinstance(v, ConfigMapVolume)
+            or isinstance(v, SecretVolume)
+            or isinstance(v, EmptyDirVolume)
+            or isinstance(v, ConfigMapVolume)
         ]
 
     def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
