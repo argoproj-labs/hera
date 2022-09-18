@@ -30,7 +30,7 @@ with Workflow("artifact-with-fanout") as w:
     f_t = Task(
         "fanout",
         fanout,
-        inputs=[w_t.get_output("test")],
+        inputs=[w_t.get_artifact("test")],
     )
     c_t = Task("consumer", consumer, with_param=f_t.get_result_as("i"))
     w_t >> f_t >> c_t

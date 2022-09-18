@@ -38,6 +38,11 @@ class Parameter:
         self.default = default
         self.value_from = value_from
 
+    def as_name(self, name: str):
+        """Changes the name of the parameter."""
+        self.name = name
+        return self
+
     def as_argument(self) -> Optional[IoArgoprojWorkflowV1alpha1Parameter]:
         """Assembles the parameter for use as an argument of a task"""
         if self.value is None and self.value_from is None and self.default:
