@@ -63,7 +63,3 @@ from hera.workflow_template import WorkflowTemplate
 __version__ = version
 __version_info__ = version.split(".")
 
-from dyno.clients.middleware.client_factory import generate_dynet_iap_oauth_token
-
-set_global_token(generate_dynet_iap_oauth_token().token)
-set_global_host("https://argo.dynet.ai")
