@@ -261,7 +261,7 @@ class Workflow:
 
     def delete(self) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
-        return self.service.delete(self.name)
+        return self.service.delete_workflow(self.name)
 
     def get_parameter(self, name: str) -> Parameter:
         """Assembles the specified parameter name into a parameter specification"""
