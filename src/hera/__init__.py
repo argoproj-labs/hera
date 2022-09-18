@@ -62,4 +62,3 @@ from hera.workflow_template import WorkflowTemplate
 
 __version__ = version
 __version_info__ = version.split(".")
-
