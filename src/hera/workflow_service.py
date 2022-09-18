@@ -16,6 +16,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest,
+IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
 )
 
 from hera.client import Client
@@ -80,169 +81,6 @@ class WorkflowService:
             _check_return_type=False,
         )
 
-    def create_template(
-        self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate
-    ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
-        """Creates given workflowTemplate in the argo server.
-
-        Parameters
-        ----------
-        workflow_template: V1alpha1WorkflowTemplate
-            The workflowTemplate to create.
-
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1WorkflowTemplate
-            The created workflowTemplate.
-
-        Raises
-        ------
-        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
-        """
-        return WorkflowTemplateServiceApi(api_client=self._api_client).create_workflow_template(
-            self._namespace,
-            IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest(template=workflow_template, _check_type=False),
-            _check_return_type=False,
-        )
-
-    def create_cron_workflow(
-        self, workflow: IoArgoprojWorkflowV1alpha1CronWorkflow
-    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
-        """Creates given cron workflow in the argo server.
-
-        Parameters
-        ----------
-        cron_workflow: V1alpha1CronWorkflow
-            The cron workflow to create.
-
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1CronWorkflow
-            The created cron workflow.
-
-        Raises
-        ------
-        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
-        """
-        return CronWorkflowServiceApi(api_client=self._api_client).create_cron_workflow(
-            self._namespace,
-            IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=workflow, _check_type=False),
-            _check_return_type=False,
-        )
-
-    def update_cron_workflow(
-        self,
-        cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
-        name: str,
-    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
-        """Updates given cron workflow in the argo server.
-
-        Parameters
-        ----------
-        cron_workflow: V1alpha1CronWorkflow
-            The cron workflow to update.
-
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1CronWorkflow
-            The updated cron workflow.
-
-        Raises
-        ------
-        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
-        """
-        return CronWorkflowServiceApi(api_client=self._api_client).update_cron_workflow(
-            self._namespace,
-            name,
-            IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
-            _check_return_type=False,
-        )
-
-    def delete(self, name: str) -> Tuple[object, int, dict]:
-        """Deletes a workflow from the given namespace based on the specified name.
-
-        Parameters
-        ----------
-        name: str
-            The name of the workflow to delete.
-
-        Returns
-        -------
-        Tuple(object, status_code(int), headers(HTTPHeaderDict))
-
-        Raises
-        ------
-        argo.workflows.client.ApiException
-        """
-        return WorkflowServiceApi(api_client=self._api_client).delete_workflow(self._namespace, name)
-
-    def delete_cron_workflow(self, name: str) -> Tuple[object, int, dict]:
-        """Deletes a cron workflow from the given namespace based on the specified name.
-
-        Parameters
-        ----------
-        name: str
-            The name of the cron workflow to delete.
-
-        Returns
-        -------
-            Tuple(object, status_code(int), headers(HTTPHeaderDict))
-
-        Raises
-        ------
-        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
-        """
-        return CronWorkflowServiceApi(api_client=self._api_client).delete_cron_workflow(self._namespace, name)
-
-    def delete_template(self, name: str) -> Tuple[object, int, dict]:
-        """Deletes a cron workflow from the given namespace based on the specified name.
-
-        Parameters
-        ----------
-        name: str
-            The name of the cron workflow to delete.
-
-        Returns
-        -------
-            Tuple(object, status_code(int), headers(HTTPHeaderDict))
-
-        Raises
-        ------
-        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
-        """
-        return WorkflowTemplateServiceApi(api_client=self._api_client).delete_workflow_template(self._namespace, name)
-
-    def get_workflow_link(self, name: str) -> str:
-        """Assembles a workflow link for the given workflow name. Note that the returned path works only for Argo.
-
-        Parameters
-        ----------
-        name: str
-            The name of the workflow to assemble a link for.
-
-        Returns
-        -------
-        str
-            The workflow link.
-        """
-        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
-
-    def get_cron_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
-        """Fetches a workflow by the specified name and namespace combination.
-
-        Parameters
-        ----------
-        name: str
-            Name of the workflow.
-
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1Workflow
-        """
-        return CronWorkflowServiceApi(api_client=self._api_client).get_cron_workflow(
-            self._namespace, name, _check_return_type=False
-        )
-
     def get_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Fetches a workflow by the specified name and namespace combination.
 
@@ -274,7 +112,196 @@ class WorkflowService:
         argo_status = self.get_workflow(name).status.get("phase")
         return WorkflowStatus.from_argo_status(argo_status)
 
-    def suspend(self, name: str) -> Tuple[object, int, dict]:
+    def get_workflow_link(self, name: str) -> str:
+        """Assembles a workflow link for the given workflow name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the workflow to assemble a link for.
+
+        Returns
+        -------
+        str
+            The workflow link.
+
+        Notes
+        -----
+        The returned path works only for Argo.
+        """
+        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
+
+    def delete_workflow(self, name: str) -> Tuple[object, int, dict]:
+        """Deletes a workflow from the given namespace based on the specified name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the workflow to delete.
+
+        Returns
+        -------
+        Tuple(object, status_code(int), headers(HTTPHeaderDict))
+
+        Raises
+        ------
+        argo.workflows.client.ApiException
+        """
+        return WorkflowServiceApi(api_client=self._api_client).delete_workflow(self._namespace, name)
+
+    def create_workflow_template(
+        self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate
+    ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
+        """Creates given workflowTemplate in the argo server.
+
+        Parameters
+        ----------
+        workflow_template: V1alpha1WorkflowTemplate
+            The workflowTemplate to create.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1WorkflowTemplate
+            The created workflow template.
+
+        Raises
+        ------
+        argo.workflows.client.ApiException
+            Upon any HTTP-related errors.
+        """
+        return WorkflowTemplateServiceApi(api_client=self._api_client).create_workflow_template(
+            self._namespace,
+            IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest(template=workflow_template, _check_type=False),
+            _check_return_type=False,
+        )
+
+    def update_workflow_template(self, name: str, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate) -> Tuple[object, int, dict]:
+        """Updates a workflow template based on name and new spec.
+
+        Parameters
+        ----------
+        name: str
+            The name of the workflow template to update.
+        workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate
+            The new specification of the workflow template that overwrites the existing template.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1WorkflowTemplate
+            The updated workflow template.
+        """
+        return WorkflowTemplateServiceApi(api_client=self._api_client).update_workflow_template(
+            self._namespace,
+            name,
+            IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest(template=workflow_template),
+        )
+
+    def delete_workflow_template(self, name: str) -> Tuple[object, int, dict]:
+        """Deletes a cron workflow from the given namespace based on the specified name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the cron workflow to delete.
+
+        Returns
+        -------
+            Tuple(object, status_code(int), headers(HTTPHeaderDict))
+
+        Raises
+        ------
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        """
+        return WorkflowTemplateServiceApi(api_client=self._api_client).delete_workflow_template(self._namespace, name)
+
+    def create_cron_workflow(
+        self, workflow: IoArgoprojWorkflowV1alpha1CronWorkflow
+    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Creates given cron workflow in the argo server.
+
+        Parameters
+        ----------
+        cron_workflow: V1alpha1CronWorkflow
+            The cron workflow to create.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1CronWorkflow
+            The created cron workflow.
+
+        Raises
+        ------
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        """
+        return CronWorkflowServiceApi(api_client=self._api_client).create_cron_workflow(
+            self._namespace,
+            IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest(cron_workflow=workflow, _check_type=False),
+            _check_return_type=False,
+        )
+
+    def update_cron_workflow(
+        self,
+        name: str,
+        cron_workflow: IoArgoprojWorkflowV1alpha1CronWorkflow,
+    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Updates given cron workflow in the argo server.
+
+        Parameters
+        ----------
+        cron_workflow: V1alpha1CronWorkflow
+            The cron workflow to update.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1CronWorkflow
+            The updated cron workflow.
+
+        Raises
+        ------
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        """
+        return CronWorkflowServiceApi(api_client=self._api_client).update_cron_workflow(
+            self._namespace,
+            name,
+            IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest(cron_workflow=cron_workflow, _check_type=False),
+            _check_return_type=False,
+        )
+
+    def delete_cron_workflow(self, name: str) -> Tuple[object, int, dict]:
+        """Deletes a cron workflow from the given namespace based on the specified name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the cron workflow to delete.
+
+        Returns
+        -------
+            Tuple(object, status_code(int), headers(HTTPHeaderDict))
+
+        Raises
+        ------
+        argo.workflows.client.ApiException: Raised upon any HTTP-related errors
+        """
+        return CronWorkflowServiceApi(api_client=self._api_client).delete_cron_workflow(self._namespace, name)
+
+    def get_cron_workflow(self, name: str) -> IoArgoprojWorkflowV1alpha1Workflow:
+        """Fetches a workflow by the specified name and namespace combination.
+
+        Parameters
+        ----------
+        name: str
+            Name of the workflow.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1Workflow
+        """
+        return CronWorkflowServiceApi(api_client=self._api_client).get_cron_workflow(
+            self._namespace, name, _check_return_type=False
+        )
+
+    def suspend_cron_workflow(self, name: str) -> Tuple[object, int, dict]:
         """Suspends a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -297,7 +324,7 @@ class WorkflowService:
             _check_return_type=False,
         )
 
-    def resume(self, name: str) -> Tuple[object, int, dict]:
+    def resume_cron_workflow(self, name: str) -> Tuple[object, int, dict]:
         """Resumes execution of a cron workflow from the given namespace based on the specified name.
 
         Parameters
@@ -321,7 +348,7 @@ class WorkflowService:
         )
 
     def get_cron_workflow_link(self, name: str) -> str:
-        """Assembles a cron workflow link for the given cron workflow name. Note that the returned path works only for Argo.
+        """Assembles a cron workflow link for the given cron workflow name.
 
         Parameters
         ----------
@@ -332,5 +359,9 @@ class WorkflowService:
         -------
         str
             The cron workflow link.
+
+        Notes
+        -----
+        The returned path works only for Argo.
         """
         return f"{self._host}/cron-workflows/{self._namespace}/{name}"

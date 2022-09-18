@@ -22,13 +22,18 @@ class WorkflowTemplate(Workflow):
         return IoArgoprojWorkflowV1alpha1WorkflowTemplate(metadata=self._build_metadata(), spec=spec)
 
     def create(self) -> "WorkflowTemplate":
-        """Creates the workflow"""
+        """Creates a workflow template"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
         assert self.dag is not None
-        self.service.create_template(self.build())
+        self.service.create_workflow_template(self.build())
+        return self
+
+    def update(self) -> "WorkflowTemplate":
+        """Updates an existing workflow tempalte"""
+        self.service.update_workflow_template(self.name, self.build())
         return self
 
     def delete(self) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
-        return self.service.delete_template(self.name)
+        return self.service.delete_workflow_template(self.name)

@@ -120,12 +120,12 @@ class CronWorkflow(Workflow):
         cron_workflow.metadata["resourceVersion"] = old_workflow.metadata["resourceVersion"]
         cron_workflow.metadata["uid"] = old_workflow.metadata["uid"]
 
-        return self.service.update_cron_workflow(cron_workflow, self.name)
+        return self.service.update_cron_workflow(self.name, cron_workflow)
 
     def suspend(self) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""
-        return self.service.suspend(self.name)
+        return self.service.suspend_cron_workflow(self.name)
 
     def resume(self) -> Tuple[object, int, dict]:
         """Resumes execution of the cron workflow"""
-        return self.service.resume(self.name)
+        return self.service.resume_cron_workflow(self.name)
