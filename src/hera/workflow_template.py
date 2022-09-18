@@ -30,7 +30,7 @@ class WorkflowTemplate(Workflow):
         return self
 
     def update(self) -> "WorkflowTemplate":
-        """Updates an existing workflow tempalte"""
+        """Updates an existing workflow template"""
         self.service.update_workflow_template(self.name, self.build())
         return self
 

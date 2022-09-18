@@ -16,7 +16,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest,
-IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
 )
 
 from hera.client import Client
@@ -175,7 +175,9 @@ class WorkflowService:
             _check_return_type=False,
         )
 
-    def update_workflow_template(self, name: str, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate) -> Tuple[object, int, dict]:
+    def update_workflow_template(
+        self, name: str, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate
+    ) -> Tuple[object, int, dict]:
         """Updates a workflow template based on name and new spec.
 
         Parameters
