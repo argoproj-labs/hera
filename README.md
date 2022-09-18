@@ -173,20 +173,20 @@ executable payloads rather than workflow setup. Here's a side by side comparison
 <td valign="top"><p>
 
 ```python
-from hera import Task, Workflow, WorkflowService
+from hera import Task, Workflow
 
 
 def say(message: str):
     print(message)
 
 
-with Workflow('diamond', WorkflowService(host='my-argo-server.com', token='my-auth-token')) as w:
-    a = Task('A', say, func_params=[{'message': 'This is task A!'}])
-    b = Task('B', say, func_params=[{'message': 'This is task B!'}])
-    c = Task('C', say, func_params=[{'message': 'This is task C!'}])
-    d = Task('D', say, func_params=[{'message': 'This is task D!'}])
-    a >> b >> d
-    a >> c >> d
+with Workflow("diamond") as w:
+    a = Task('a', say, ['This is task A!'])
+    b = Task('b', say, ['This is task B!'])
+    c = Task('c', say, ['This is task C!'])
+    d = Task('d', say, ['This is task D!'])
+
+    a >> [b, c] >> d
 
 w.create()
 ```
