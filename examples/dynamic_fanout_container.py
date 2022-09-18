@@ -12,12 +12,14 @@ with Workflow("dynamic-fanout-container") as w:
     # this can be anything! e.g. fetch from some API, then in parallel process all entities; chunk database records
     # and process them in parallel, etc.
     generate_task = Task(
-        "generate", image="alpine:latest", command=["echo", '[{"value": "a"}, {"value": "b"}, {"value": "c"}]'],
+        "generate",
+        image="alpine:latest",
+        command=["echo", '[{"value": "a"}, {"value": "b"}, {"value": "c"}]'],
     )
     fanout_task = Task(
         "fanout",
         with_param=generate_task.get_result(),  # this make the task fan out over the `with_param`
-        inputs=[generate_task.get_result_as('value')],  # this sets the correct input parameter so the result is used
+        inputs=[generate_task.get_result_as("value")],  # this sets the correct input parameter so the result is used
         image="alpine:latest",
         command=["echo", "{{inputs.parameters.value}}"],
     )

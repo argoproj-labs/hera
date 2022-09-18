@@ -10,7 +10,7 @@ def test_version():
     try:
         int(version_info[0])
         int(version_info[1])
-        if 'rc' in version_info[2]:
+        if "rc" in version_info[2]:
             pass
         else:
             int(version_info[2])
