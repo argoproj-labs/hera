@@ -47,10 +47,10 @@ def test_max_not_set_to_min_if_max_not_specified_with_no_overwrite():
 
 
 def test_built_resources_contain_expected_fields():
-    r = Resources(cpu_request=1, memory_request='4Gi', cpu_limit=2, memory_limit='8Gi').build()
-    assert hasattr(r, 'limit')
-    assert 'cpu' in r.limit
-    assert 'memory' in r.limit
-    assert hasattr(r, 'request')
-    assert 'cpu' in r.request
-    assert 'memory' in r.request
+    r = Resources(cpu_request=1, memory_request="4Gi", cpu_limit=2, memory_limit="8Gi").build()
+    assert hasattr(r, "limit")
+    assert "cpu" in r.limit
+    assert "memory" in r.limit
+    assert hasattr(r, "request")
+    assert "cpu" in r.request
+    assert "memory" in r.request
