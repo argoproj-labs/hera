@@ -281,18 +281,19 @@ class Task(IO):
             other.depends += f" {operator} {self.name + condition}"
         return other
 
-    def __rshift__(self, other: "Task") -> "Task":
+    def __rshift__(self, other: Union["Task", List["Task"]]) -> "Task":
         """Sets this task as a dependency of the other passed task.
 
         Parameters
         ----------
-        other: Task
+        other: Union["Task", List["Task"]]
             The other task(s) to set a dependency for. The new dependency of the task is this task.
 
         Returns
         -------
         Task
-            The other task that was specified.
+            The other task that was specified when a single task is used for setting the dependency or `self` when a
+            list of tasks is used to set the dependecy.
 
         Examples
         --------
@@ -300,7 +301,14 @@ class Task(IO):
         t2 = Task('t2')
         t1 >> t2  # this makes t2 execute AFTER t1
         """
-        return self.next(other)
+        if isinstance(other, Task):
+            return self.next(other)
+        elif isinstance(other, list):
+            for o in other:
+                assert isinstance(o, Task), \
+                    f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                self.next(o)
+        return self
 
     def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> "Task":
         """Execute this task conditionally on a workflow status."""
@@ -721,9 +729,9 @@ class Task(IO):
             v._build_claim_spec()
             for v in self.volumes
             if isinstance(v, ExistingVolume)
-            or isinstance(v, SecretVolume)
-            or isinstance(v, EmptyDirVolume)
-            or isinstance(v, ConfigMapVolume)
+               or isinstance(v, SecretVolume)
+               or isinstance(v, EmptyDirVolume)
+               or isinstance(v, ConfigMapVolume)
         ]
 
     def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
