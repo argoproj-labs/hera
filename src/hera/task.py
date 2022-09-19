@@ -862,6 +862,8 @@ class Task(IO):
 
         if self.source is not None:
             setattr(template, "script", self._build_script())
+        elif self.resource_template is not None:
+            setattr(template, "resource", self.resource_template.build())
         else:
             setattr(template, "container", self._build_container())
 
@@ -874,9 +876,6 @@ class Task(IO):
 
         if self.pod_spec_patch is not None:
             setattr(template, "podSpecPatch", self.pod_spec_patch)
-
-        if self.resource_template is not None:
-            setattr(template, "resource", self.resource_template.build())
 
         return template
 
