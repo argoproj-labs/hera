@@ -608,7 +608,7 @@ def test_task_does_not_include_imports_when_no_params_are_specified(no_op):
 
 def test_task_adds_exit_condition(no_op):
     t = Task("t", no_op)
-    t.on_workflow_status(Operator.Equals, WorkflowStatus.Succeeded)
+    t.on_workflow_status(WorkflowStatus.Succeeded)
     assert t.when == "{{workflow.status}} == Succeeded"
 
 

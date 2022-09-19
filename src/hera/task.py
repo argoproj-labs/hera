@@ -334,7 +334,7 @@ class Task(IO):
             return other
         raise ValueError(f"Unknown type {type(other)}provided to `__rshift__`")
 
-    def on_workflow_status(self, op: Operator, status: WorkflowStatus) -> "Task":
+    def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.Equals) -> "Task":
         """Execute this task conditionally on a workflow status."""
         expression = f"{{{{workflow.status}}}} {op} {status}"
         if self.when:
@@ -361,7 +361,7 @@ class Task(IO):
         other.is_exit_task = True
         return self
 
-    def on_other_result(self, other: "Task", operator: Operator, value: str) -> "Task":
+    def on_other_result(self, other: "Task", value: str, operator: Operator = Operator.Equals) -> "Task":
         """Execute this task based on the `other` result"""
         expression = f"'{other.get_result()}' {operator} {value}"
         if self.when:
