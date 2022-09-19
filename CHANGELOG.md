@@ -28,6 +28,16 @@ The general format is:
 - C from D
 
 ```
+# 4.0.0rc2 - DATE (19/09/2022)
+
+### Added
+
+- workflow template update API
+- more examples
+- Hera type returns rather than `argo_workflow` SDK return types
+- `get_parameters_as` rather than `outputs`
+- list dependencies structuring
+- reorder of args to use default `Equals` for workflow and task result comparisons
 
 # 4.0.0rc1 - DATE (15/09/2022)
 

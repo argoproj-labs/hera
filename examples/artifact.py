@@ -23,7 +23,7 @@ with Workflow("artifact") as w:
     c_t = Task(
         "consumer",
         consumer,
-        inputs=[w_t.get_output("test")],
+        inputs=[w_t.get_artifact("test")],
     )
 
     w_t >> c_t

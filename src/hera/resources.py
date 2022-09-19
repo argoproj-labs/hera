@@ -80,7 +80,7 @@ class Resources:
         resources: Dict = dict()
 
         if self.cpu_limit is not None:
-            resources = merge_dicts(resources, dict(limit=dict(cpus=str(self.cpu_limit))))
+            resources = merge_dicts(resources, dict(limit=dict(cpu=str(self.cpu_limit))))
 
         if self.cpu_request is not None:
             resources = merge_dicts(resources, dict(request=dict(cpu=str(self.cpu_request))))

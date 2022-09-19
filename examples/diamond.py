@@ -16,9 +16,6 @@ with Workflow("diamond") as w:
     c = Task("c", say, ["This is task C!"])
     d = Task("d", say, ["This is task D!"])
 
-    a >> b
-    a >> c
-    b >> d
-    c >> d
+    a >> [b, c] >> d
 
 w.create()

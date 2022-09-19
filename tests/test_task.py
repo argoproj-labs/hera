@@ -355,12 +355,12 @@ def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
 
     t = Task("t", kwarg_multi_op, [{"a": 50}])
     generated_input_1 = t.inputs[0]
-    assert isinstance(generated_input, Parameter)
+    assert isinstance(generated_input_1, Parameter)
     assert generated_input_1.name == "a"
     assert generated_input_1.value == "{{item.a}}"
 
     generated_input_2 = t.inputs[1]
-    assert isinstance(generated_input, Parameter)
+    assert isinstance(generated_input_2, Parameter)
     assert generated_input_2.name == "b"
     assert generated_input_2.value == "43"
 
@@ -368,7 +368,7 @@ def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
 def test_task_fails_artifact_validation(no_op, artifact):
     with pytest.raises(AssertionError) as e:
         Task("t", no_op, inputs=[artifact, artifact])
-    assert str(e.value) == "input objects must have unique names"
+    assert str(e.value) == "input artifacts must have unique names"
 
 
 def test_task_artifact_returns_expected_list(no_op, artifact):
@@ -608,7 +608,7 @@ def test_task_does_not_include_imports_when_no_params_are_specified(no_op):
 
 def test_task_adds_exit_condition(no_op):
     t = Task("t", no_op)
-    t.on_workflow_status(Operator.Equals, WorkflowStatus.Succeeded)
+    t.on_workflow_status(WorkflowStatus.Succeeded)
     assert t.when == "{{workflow.status}} == Succeeded"
 
 
