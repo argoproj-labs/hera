@@ -76,7 +76,7 @@ There are multiple ways to install Hera:
 3. Install it directly from this repository using:
 
    ```shell
-   python -m pip install git+https://github.com/argoproj-labs/hera-workflows  --ignore-installed
+   python -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed
    ```
 
 4. Alternatively, you can clone this repository and then run the following to install:
@@ -90,15 +90,15 @@ There are multiple ways to install Hera:
 A very primitive example of submitting a task within a workflow through Hera is:
 
 ```python
-from hera import Task, Workflow, WorkflowService
+from hera import Task, Workflow
 
 
 def say(m: str):
     print(m)
 
 
-with Workflow('my-workflow', service=WorkflowService(host='my-argo-domain.com', token='my-argo-server-token')) as w:
-    Task('say', say, func_params=[{'m': 'Hello, world!'}]) >> Task('say', say, func_params=[{'m': 'Goodbye, world!'}])
+with Workflow('my-workflow') as w:
+    Task('say', say, ['Hello, world!'])
 
 w.create()
 ```
