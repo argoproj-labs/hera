@@ -1,6 +1,22 @@
 import pytest
+from unittest import mock
+from hera.validators import validate_storage_units, validate_name, json_serializable
 
-from hera.validators import validate_storage_units
+
+def test_validate_name():
+    with pytest.raises(ValueError) as e:
+        validate_name('test', max_length=1)
+    assert str(e.value) == "Name is too long. Max length: 1, found: 4"
+    with pytest.raises(ValueError) as e:
+        validate_name("test.42")
+    assert str(e.value) == "Name cannot include a dot"
+    with pytest.raises(ValueError) as e:
+        validate_name("test_42")
+    assert str(e.value) == "Name cannot include an underscore"
+    with pytest.raises(ValueError) as e:
+        validate_name("TEST")
+    assert str(e.value) == "Name is invalid: 'TEST'. Regex used for validation is " \
+                           "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
 
 
 def test_storage_validation_passes():
@@ -21,3 +37,17 @@ def test_storage_validation_raises_assertion_error_on_unit_not_supported():
     with pytest.raises(AssertionError) as e:
         validate_storage_units(val)
     assert str(e.value) == f"unsupported unit for parsed value {val}"
+
+
+def test_json_serializable():
+    assert json_serializable(None)
+
+    with mock.patch("json.dumps") as dumps:
+        dumps.side_effect = TypeError
+        assert not json_serializable(42)
+        dumps.assert_called_with(42)
+
+    with mock.patch("json.dumps") as dumps:
+        dumps.side_effect = OverflowError
+        assert not json_serializable(42)
+        dumps.assert_called_with(42)

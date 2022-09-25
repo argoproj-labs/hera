@@ -56,14 +56,14 @@ class TestIO:
 
     def test_validate_io(self):
         with pytest.raises(AssertionError) as e:
-            IO(inputs=[Parameter("a"), Parameter("a")], outputs=[])
-            assert str(e.value) == "input parameters must have unique names"
+            IO(inputs=[Parameter("a"), Parameter("a")], outputs=[])._validate_io()
+        assert str(e.value) == "input parameters must have unique names"
         with pytest.raises(AssertionError) as e:
-            IO(inputs=[Artifact("a", "/a"), Artifact("a", "/a")], outputs=[])
-            assert str(e.value) == "input artifacts mut have unique names"
+            IO(inputs=[Artifact("a", "/a"), Artifact("a", "/a")], outputs=[])._validate_io()
+        assert str(e.value) == "input artifacts must have unique names"
         with pytest.raises(AssertionError) as e:
-            IO(inputs=[], outputs=[Parameter("a", value="42"), Parameter("a", value="42")])
-            assert str(e.value) == "output parameters must have unique names"
+            IO(inputs=[], outputs=[Parameter("a", value="42"), Parameter("a", value="42")])._validate_io()
+        assert str(e.value) == "output parameters must have unique names"
         with pytest.raises(AssertionError) as e:
-            IO(inputs=[], outputs=[Artifact("a", path="/a"), Artifact("a", path="/a")])
-            assert str(e.value) == "output artifacts must have unique names"
+            IO(inputs=[], outputs=[Artifact("a", path="/a"), Artifact("a", path="/a")])._validate_io()
+        assert str(e.value) == "output artifacts must have unique names"
