@@ -20,7 +20,7 @@ from hera.affinity import (
 from hera.artifact import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact
 from hera.client import Client
 from hera.config import Config
-from hera.cron_workflow import CronWorkflow
+from hera.cron_workflow import ConcurrencyPolicy, CronWorkflow
 from hera.dag import DAG
 from hera.env import ConfigMapEnvSpec, EnvSpec, FieldEnvSpec, SecretEnvSpec
 from hera.env_from import ConfigMapEnvFromSpec, SecretEnvFromSpec
