@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 
 import pytest
-from argo_workflows.models import HostAlias as ArgoHostAlias, ObjectMeta, PodSecurityContext
+from argo_workflows.models import HostAlias as ArgoHostAlias
+from argo_workflows.models import ObjectMeta, PodSecurityContext
 
 from hera import (
     ConfigMapVolume,
@@ -31,7 +32,6 @@ def workflow_security_context_kwargs():
 
 
 class TestWorkflow:
-
     def test_wf_contains_specified_service_account(self, setup):
         with Workflow("w", service_account_name="w-sa") as w:
             expected_sa = "w-sa"
@@ -42,7 +42,7 @@ class TestWorkflow:
         with Workflow("w") as w:
             assert not hasattr(w.build().spec, "service_account_name")
 
-    def test_wf_contains_specified_security_context(self,workflow_security_context_kwargs, setup):
+    def test_wf_contains_specified_security_context(self, workflow_security_context_kwargs, setup):
         wsc = WorkflowSecurityContext(**workflow_security_context_kwargs)
         with Workflow("w", security_context=wsc) as w:
             expected_security_context = PodSecurityContext(**workflow_security_context_kwargs)
@@ -60,12 +60,12 @@ class TestWorkflow:
         with Workflow("w") as w:
             assert "security_context" not in w.build().spec
 
-    def test_wf_does_not_add_empty_task(self,w):
+    def test_wf_does_not_add_empty_task(self, w):
         t = None
         w.add_task(t)
         assert not w.tasks
 
-    def test_wf_adds_specified_tasks(self,w, no_op):
+    def test_wf_adds_specified_tasks(self, w, no_op):
         n = 3
         ts = [Task(f"t{i}", no_op) for i in range(n)]
         w.add_tasks(*ts)
@@ -74,7 +74,7 @@ class TestWorkflow:
         for i, t in enumerate(w.tasks):
             assert ts[i].name == t.name
 
-    def test_wf_adds_task_volume(self,w, no_op):
+    def test_wf_adds_task_volume(self, w, no_op):
         t = Task("t", no_op, volumes=[Volume(name="v", size="1Gi", mount_path="/", storage_class_name="custom")])
         w.add_task(t)
 
@@ -84,7 +84,7 @@ class TestWorkflow:
         assert claim.spec.storage_class_name == "custom"
         assert claim.metadata.name == "v"
 
-    def test_wf_adds_task_secret_volume(self,w, no_op):
+    def test_wf_adds_task_secret_volume(self, w, no_op):
         t = Task("t", no_op, volumes=[SecretVolume(name="s", secret_name="sn", mount_path="/")])
         w.add_task(t)
 
@@ -99,7 +99,7 @@ class TestWorkflow:
         assert wb.spec["volumes"][0].name
         assert wb.spec["volumes"][0].config_map.name == "cmn"
 
-    def test_wf_adds_task_existing_checkpoints_staging_volume(self,w, no_op):
+    def test_wf_adds_task_existing_checkpoints_staging_volume(self, w, no_op):
         t = Task("t", no_op, volumes=[ExistingVolume(name="v", mount_path="/")])
         w.add_task(t)
 
@@ -107,7 +107,7 @@ class TestWorkflow:
         assert vol.name == "v"
         assert vol.persistent_volume_claim.claim_name == "v"
 
-    def test_wf_adds_task_existing_checkpoints_prod_volume(self,w, no_op):
+    def test_wf_adds_task_existing_checkpoints_prod_volume(self, w, no_op):
         t = Task(
             "t",
             no_op,
@@ -216,19 +216,18 @@ class TestWorkflow:
             assert len(getattr(w.build().spec, "arguments").parameters) == 1
 
     def test_build_metadata_returns_expected_object_meta(self, setup):
-        with Workflow('test', labels={'test': 'test'}, annotations={'test': 'test'}) as w:
+        with Workflow("test", labels={"test": "test"}, annotations={"test": "test"}) as w:
             meta = w._build_metadata(use_name=True)
-            assert hasattr(meta, 'name')
-            assert meta.name == 'test'
-            assert hasattr(meta, 'labels')
-            assert meta.labels == {'test': 'test'}
-            assert hasattr(meta, 'annotations')
-            assert meta.annotations == {'test': 'test'}
+            assert hasattr(meta, "name")
+            assert meta.name == "test"
+            assert hasattr(meta, "labels")
+            assert meta.labels == {"test": "test"}
+            assert hasattr(meta, "annotations")
+            assert meta.annotations == {"test": "test"}
 
             meta = w._build_metadata(use_name=False)
-            assert not hasattr(meta, 'name')
-            assert hasattr(meta, 'labels')
-            assert meta.labels == {'test': 'test'}
-            assert hasattr(meta, 'annotations')
-            assert meta.annotations == {'test': 'test'}
-
+            assert not hasattr(meta, "name")
+            assert hasattr(meta, "labels")
+            assert meta.labels == {"test": "test"}
+            assert hasattr(meta, "annotations")
+            assert meta.annotations == {"test": "test"}

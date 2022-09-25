@@ -1,11 +1,13 @@
-import pytest
 from unittest import mock
-from hera.validators import validate_storage_units, validate_name, json_serializable
+
+import pytest
+
+from hera.validators import json_serializable, validate_name, validate_storage_units
 
 
 def test_validate_name():
     with pytest.raises(ValueError) as e:
-        validate_name('test', max_length=1)
+        validate_name("test", max_length=1)
     assert str(e.value) == "Name is too long. Max length: 1, found: 4"
     with pytest.raises(ValueError) as e:
         validate_name("test.42")
@@ -15,8 +17,10 @@ def test_validate_name():
     assert str(e.value) == "Name cannot include an underscore"
     with pytest.raises(ValueError) as e:
         validate_name("TEST")
-    assert str(e.value) == "Name is invalid: 'TEST'. Regex used for validation is " \
-                           "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    assert (
+        str(e.value) == "Name is invalid: 'TEST'. Regex used for validation is "
+        "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    )
 
 
 def test_storage_validation_passes():
