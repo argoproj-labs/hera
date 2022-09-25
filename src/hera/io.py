@@ -62,5 +62,5 @@ class IO:
         o_artifacts = [obj.as_output() for obj in self.outputs if isinstance(obj, Artifact)]
         assert len(set([i.name for i in i_parameters])) == len(i_parameters), "input parameters must have unique names"
         assert len(set([i.name for i in i_artifacts])) == len(i_artifacts), "input artifacts must have unique names"
-        assert len(set([o.name for o in o_parameters])) == len(o_parameters), "input parameters must have unique names"
+        assert len(set([o.name for o in o_parameters])) == len(o_parameters), "output parameters must have unique names"
         assert len(set([o.name for o in o_artifacts])) == len(o_artifacts), "output artifacts must have unique names"
