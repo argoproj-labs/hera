@@ -28,7 +28,7 @@ class SecretNamedKey:
 
 
 @dataclass
-class EnvSpec:
+class Env:
     """Environment variable specification for tasks.
 
     Attributes
@@ -64,7 +64,7 @@ class EnvSpec:
 
 
 @dataclass
-class SecretEnvSpec(EnvSpec, SecretNamedKey):
+class SecretEnv(Env, SecretNamedKey):
     """Environment variable specification from K8S secrets.
 
     Attributes
@@ -84,7 +84,7 @@ class SecretEnvSpec(EnvSpec, SecretNamedKey):
 
 
 @dataclass
-class ConfigMapEnvSpec(EnvSpec, ConfigMapNamedKey):
+class ConfigMapEnv(Env, ConfigMapNamedKey):
     """Environment variable specification from K8S config map.
 
     Attributes
@@ -121,7 +121,7 @@ class FieldPath:
 
 
 @dataclass
-class FieldEnvSpec(EnvSpec, FieldPath):
+class FieldEnv(Env, FieldPath):
     """Environment variable specification from K8S object field.
 
     Attributes

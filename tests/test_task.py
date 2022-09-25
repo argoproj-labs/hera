@@ -8,10 +8,10 @@ from argo_workflows.models import Toleration as _ArgoToleration
 
 from hera import (
     ConfigMapEnvFromSpec,
-    ConfigMapEnvSpec,
+    ConfigMapEnv,
     ConfigMapVolume,
     EmptyDirVolume,
-    EnvSpec,
+    Env,
     ExistingVolume,
     GCSArtifact,
     GitArtifact,
@@ -487,7 +487,7 @@ def test_task_template_has_correct_annotations(op):
 
 
 def test_task_with_config_map_env_variable(no_op):
-    t = Task("t", no_op, env=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
+    t = Task("t", no_op, env=[ConfigMapEnv(name="n", config_map_name="cn", config_map_key="k")])
     tt = t._build_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
@@ -554,7 +554,7 @@ def test_task_adds_custom_resources(no_op):
 
 def test_task_adds_variable_as_env_var():
     t = Task("t")
-    t1 = Task("t1", "print(42)", env=[EnvSpec(name="IP", value_from_input=t.ip)])
+    t1 = Task("t1", "print(42)", env=[Env(name="IP", value_from_input=t.ip)])
     t1s = t1._build_script()
 
     assert t1s.env[0].name == "IP"

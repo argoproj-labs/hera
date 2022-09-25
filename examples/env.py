@@ -2,7 +2,7 @@
 This example showcases how Hera can dynamically set environmental variables
 """
 
-from hera import ConfigMapEnvFromSpec, EnvSpec, Parameter, Task, Workflow
+from hera import ConfigMapEnvFromSpec, Env, Parameter, Task, Workflow
 
 
 def inspect_envs():
@@ -17,8 +17,8 @@ with Workflow("test-env-variables", parameters=[Parameter("env-value", "wf-env-v
         "test-env",
         inspect_envs,
         env=[
-            EnvSpec(name="FIXED_ENV", value="fixed-env-value"),
-            EnvSpec(name="WF_ENV", value_from_input=wf.get_parameter("wf-env-value").value),
+            Env(name="FIXED_ENV", value="fixed-env-value"),
+            Env(name="WF_ENV", value_from_input=wf.get_parameter("wf-env-value").value),
             ConfigMapEnvFromSpec(
                 config_map_name="<your-reference>"
             ),  # Assumes the user has a config map in the k8s cluster

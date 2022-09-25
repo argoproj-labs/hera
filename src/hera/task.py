@@ -34,7 +34,7 @@ from argo_workflows.models import VolumeMount
 import hera
 from hera.affinity import Affinity
 from hera.artifact import Artifact
-from hera.env import EnvSpec
+from hera.env import Env
 from hera.env_from import BaseEnvFromSpec
 from hera.image import ImagePullPolicy
 from hera.io import IO
@@ -181,7 +181,7 @@ class Task(IO):
         daemon: bool = False,
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
-        env: Optional[List[Union[EnvSpec, BaseEnvFromSpec]]] = None,
+        env: Optional[List[Union[Env, BaseEnvFromSpec]]] = None,
         resources: Optional[Resources] = None,
         volumes: Optional[List[BaseVolume]] = None,
         working_dir: Optional[str] = None,
@@ -679,7 +679,7 @@ class Task(IO):
             deduced_params += self._deduce_input_params_from_source()
 
         for spec in self.env:
-            if isinstance(spec, EnvSpec) and spec.value_from_input:
+            if isinstance(spec, Env) and spec.value_from_input:
                 deduced_params.append(Parameter(name=spec.name, value=spec.value_from_input))
 
         return deduced_params  # type: ignore
@@ -788,7 +788,7 @@ class Task(IO):
 
     def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
         """Assembles the environment variables for the task"""
-        env = [e.build() for e in self.env if isinstance(e, EnvSpec)]
+        env = [e.build() for e in self.env if isinstance(e, Env)]
         env_from = [e.build() for e in self.env if isinstance(e, BaseEnvFromSpec)]
         return env, env_from
 
