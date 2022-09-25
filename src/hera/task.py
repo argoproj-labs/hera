@@ -8,6 +8,9 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from argo_workflows.model.env_from_source import EnvFromSource
+from argo_workflows.model.io_argoproj_workflow_v1alpha1_sequence import (
+    IoArgoprojWorkflowV1alpha1Sequence,
+)
 
 if TYPE_CHECKING:
     from hera import DAG
@@ -89,6 +92,9 @@ class Task(IO):
         function call with the given parameters. Otherwise, if parallel is False and the list of params is a list of
         lists (each list contains a series of values to pass to the function), the task will execute as a task
         group and schedule multiple function calls in parallel.
+    with_sequence: Optional[dict] = None,
+        Sequence is similar to `with_param` in that it generates a range of objects.
+        See: https://argoproj.github.io/argo-workflows/fields/#sequence
     inputs: Optional[List[Union[Parameter, Artifact]]] = None
         `Input` or `Parameter` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
         parameter it cannot be used in conjunction with other types of inputs because of the dynamic aspect of the task
@@ -166,6 +172,7 @@ class Task(IO):
         name: str,
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
+        with_sequence: Optional[dict] = None,
         inputs: Optional[List[Union[Parameter, Artifact]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional["DAG"] = None,
@@ -194,6 +201,8 @@ class Task(IO):
             raise ValueError("Cannot use both `dag` and `source`")
         if dag and template_ref:
             raise ValueError("Cannot use both `dag` and `template_ref`")
+        if with_param is not None and with_sequence is not None:
+            raise ValueError("Cannot use both `with_sequence` and `with_param`")
         self.name = validate_name(name)
         self.dag = dag
         self.source = source
@@ -203,7 +212,7 @@ class Task(IO):
         self.outputs = outputs or []
         self.env = env or []
         self.with_param = with_param
-        self.inputs += self._deduce_parameters()
+        self.with_sequence = with_sequence
         self.pod_spec_patch = pod_spec_patch
         self.resource_template: Optional[ResourceTemplate] = resource_template
 
@@ -228,7 +237,9 @@ class Task(IO):
         self.is_exit_task: bool = False
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
+
         self.validate()
+        self.inputs += self._deduce_input_params()
 
         if hera.dag_context.is_set():
             hera.dag_context.add_task(self)
@@ -395,7 +406,10 @@ class Task(IO):
         --------
         https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
-        assert self.with_param is not None, "Can only use `when_all_succeeded` in combination with `with_param`"
+        assert (self.with_param is not None) or (
+            self.with_sequence is not None
+        ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
+
         return self.next(other, on=TaskResult.AnySucceeded)
 
     def when_all_failed(self, other: "Task") -> "Task":
@@ -422,7 +436,10 @@ class Task(IO):
         --------
         https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
-        assert self.with_param is not None, "Can only use `when_all_failed` in combination with `with_param`"
+        assert (self.with_param is not None) or (
+            self.with_sequence is not None
+        ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
+
         return self.next(other, on=TaskResult.AllFailed)
 
     def validate(self):
@@ -431,6 +448,13 @@ class Task(IO):
         conditions are not satisfied.
         """
         self._validate_io()
+        if self.with_param is not None:
+            assert isinstance(self.with_param, list) or isinstance(
+                self.with_param, str
+            ), "`with_param` is of unsupported type"
+            assert len(self.with_param) != 0, "`with_param` cannot be empty"
+        if self.with_sequence is not None:
+            assert isinstance(self.with_sequence, dict)
         if self.source:
             self._validate_source()
         if self.pod_spec_patch is not None:
@@ -534,121 +558,125 @@ class Task(IO):
             return None
         return [str(arg) for arg in self.args]
 
-    def _deduce_parameters(
-        self,
-    ) -> List[Parameter]:
-        """Returns a list of Argo workflow parameters based on the function signature and the function parameters
-
-        Returns
-        -------
-        Optional[str]
-            A string representing the value which should be given to argos `with_params`
+    def _deduce_input_params_from_source(self) -> List[Parameter]:
         """
-        deduced_params: List[Parameter] = []
-        if self.source and callable(self.source):
-            # Source is a function
-            signature = inspect.signature(self.source)
-            arg_defaults = {}
-            # if there are any kwargs arguments associated with the function signature, we set these as default values
-            # for the argo defaults
-            if list(signature.parameters.values()):
-                for param in list(signature.parameters.values()):
-                    if (
-                        param.default != inspect.Parameter.empty
-                        and param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
-                    ):
-                        arg_defaults[param.name] = param.default
-                    else:
-                        arg_defaults[param.name] = None
+        Returns a list of generated Parameters based on the function signature
+        in combination with `with_params` or `with_sequence`
+        """
+        if self.source is None or isinstance(self.source, str):
+            return []
+        assert callable(self.source), "`source` is not a callable function"
 
-            non_default_args = [k for k, v in arg_defaults.items() if v is None]
-            if not self.with_param:
-                if len(non_default_args) == 0:
-                    deduced_params += [Parameter(name=k, default=str(v)) for k, v in arg_defaults.items()]
-                else:
-                    missing_args = set(non_default_args) - set(
-                        [p.name for p in self.inputs if isinstance(p, Parameter)]
-                    )
-                    deduced_params += [Parameter(name) for name in missing_args]
+        # If there are any kwargs arguments associated with the function signature,
+        # we store these as we can set them as default values for argo arguments
+        source_signature: Dict[str, Optional[str]] = {}
+        for p in inspect.signature(self.source).parameters.values():
+            if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                source_signature[p.name] = p.default
+            else:
+                source_signature[p.name] = None
 
-                    from hera.workflow_template import WorkflowTemplate
+        # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
+        input_params = [p for p in self.inputs if isinstance(p, Parameter)]
+        input_params_names = [p.name for p in input_params]
+        deduced_params: List[Parameter] = [
+            Parameter(name=n, default=v) for n, v in source_signature.items() if n not in input_params_names
+        ]
 
-                    if missing_args and not isinstance(self, WorkflowTemplate):
-                        # WorkflowTemplates do not know about arguments, so we allow this section to pass
-                        raise ValueError(
-                            "`with_params` is empty and there exists non-default arguments "
-                            f"which aren't covered by `inputs`: {missing_args}"
-                        )
-            elif isinstance(self.with_param, str) or isinstance(self.with_param, Parameter):
+        # Find owners to the deduced parameters. They could exist in either:
+        #   - with_param
+        #   - with_sequence
+
+        non_default_params = [p for p in deduced_params if p.default is None]
+
+        if self.with_sequence is not None:
+            if len(non_default_params) == 1:
+                # Non-ambigious mapping; `with_sequence` yields non-nested items.
+                non_default_params.pop().value = "{{item}}"
+
+        if self.with_param is not None:
+            if isinstance(self.with_param, str) or isinstance(self.with_param, Parameter):
                 # with_param is a string-list or an argo reference (str) to something that resolves into a list.
                 # We assume that each (resolved) object contains all arguments for function:
-                unique_param_names = list(arg_defaults.keys())
-                if len(unique_param_names) == 1:
-                    deduced_params.append(Parameter(name=unique_param_names[0], value="{{item}}"))
-                else:
-                    for name in unique_param_names:
-                        deduced_params.append(Parameter(name=name, value=f"{{{{item.{name}}}}}"))
-            elif isinstance(self.with_param, list):
-                unique_input_names = set()
-                assert self.with_param is not None
 
+                if len(non_default_params) == 1:
+                    # We assume the user wants the entire object in the non-default argument
+                    non_default_params.pop().value = "{{item}}"
+                else:
+                    # We assume that there are sub-items which have names
+                    # corresponding to the source signature
+                    while len(non_default_params) != 0:
+                        parameter = non_default_params.pop()
+                        parameter.value = f"{{{{item.{parameter.name}}}}}"
+
+            elif isinstance(self.with_param, list):
+                assert self.with_param is not None
                 first_param = self.with_param[0]
                 if not all(isinstance(x, type(first_param)) for x in self.with_param):
                     raise ValueError("Non-homogeneous types in `with_param`")
 
-                # with_param should all be of the same type at this point
-                with_param_holds_dicts = isinstance(first_param, dict)
-                if with_param_holds_dicts:
-                    for param in self.with_param:
-                        missing_args = set(non_default_args) - param.keys()  # type: ignore
+                # All elements are of same type
+                if isinstance(first_param, dict):
+                    # Validate that the dicts contain required keys
+                    first_param_keys = first_param.keys()
+                    required_keys = [p.name for p in deduced_params if not p.default]
+                    for p in self.with_param:
+                        missing_args = set(required_keys) - p.keys()  # type: ignore
+                        assert (
+                            len(first_param_keys ^ p.keys()) == 0  # type: ignore
+                        ), "`with_param` contains dicts with different set of keys"
                         if missing_args:
-                            raise ValueError(f"param in `with_params` misses non-default argument: {missing_args}")
+                            raise ValueError(f"param in `with_params` is missing non-default argument: {missing_args}")
 
-                        unique_input_names.update(param.keys())  # type: ignore
+                    # Map non-default params to nested items
+                    while len(non_default_params) != 0:
+                        parameter = non_default_params.pop()
+                        parameter.value = f"{{{{item.{parameter.name}}}}}"
 
-                else:
-                    if len(non_default_args) > 1:
-                        raise ValueError(
-                            f"source signature has multiple non-default arguments ({non_default_args})"
-                            " which requires a dict-mapping in `with_param`"
-                        )
-                    # Add the exclusive non-default argument
-                    unique_input_names.add(non_default_args[0])
+                    # Override possible defaults based observed keys
+                    for default_parameter in [p for p in deduced_params if p.default]:
+                        if default_parameter.name in first_param_keys:
+                            default_parameter.value = f"{{{{item.{default_parameter.name}}}}}"
 
-                # We need to make sure these args are provided in `with_param`
-                missing_args = set(non_default_args) - set(unique_input_names)
-                if missing_args:
-                    raise ValueError(
-                        f"Incomplete argument mapping between function and `with_params`: {missing_args}`"
-                    )
+                else:  # Assuming list of objects which can be converted to str
+                    if len(non_default_params) == 1:
+                        non_default_params.pop().value = "{{item}}"
 
-                if with_param_holds_dicts:
-                    for param_name in unique_input_names:
-                        value = f"{{{{item.{param_name}}}}}"
-                        deduced_params.append(Parameter(name=param_name, value=value))
-                else:
-                    # Function has only one mandatory argument
-                    main_param_name = list(unique_input_names)[0]
-                    deduced_params.append(Parameter(name=main_param_name, value="{{item}}"))
+        if (self.with_param is not None) or (self.with_sequence is not None):
+            # Verify that we're utilizing 'item'
+            if not any([p.contains_item for p in input_params + deduced_params]):
+                raise ValueError(
+                    "`with_param` or `with_sequence` items are not defined as a value "
+                    "in any input parameters, nor could they be deduced"
+                )
 
-                # Add default arguments
-                for param_name in arg_defaults.keys() - unique_input_names:
-                    deduced_params.append(Parameter(name=param_name, value=str(arg_defaults.get(param_name))))
-            else:
-                raise NotImplementedError(f"Type {type(self.with_param)} not supported for `with_param`")
+        return deduced_params
 
-        elif self.dag:
+    def _deduce_input_params(
+        self,
+    ) -> List[Parameter]:
+        """Deduce missing input parameters based on the contents of:
+            - `inputs`
+            - `with_param`
+            - `with_sequence`
+            - `source`
+
+        Returns
+        -------
+        List[Parameter]
+            A list representing the deduced parameters
+        """
+        deduced_params: List[Parameter] = []
+
+        if self.dag:
             if self.dag.inputs:
                 if len(self.dag.inputs) == 1:
                     deduced_params.append(Parameter(name=self.dag.inputs[0].name, value="{{item}}"))
                 else:
                     for p in self.dag.inputs:
                         deduced_params.append(Parameter(name=p.name, value=f"{{{{item.{p.name}}}}}"))
-
-        if self.with_param and not deduced_params and not self.inputs:
-            raise ValueError(
-                "`inputs` is empty, and no input parameters could be deduced from `source` and `with_params`"
-            )
+        else:
+            deduced_params += self._deduce_input_params_from_source()
 
         for spec in self.env:
             if isinstance(spec, EnvSpec) and spec.value_from_input:
@@ -964,4 +992,11 @@ class Task(IO):
             elif not isinstance(self.with_param, str):
                 with_param = json.dumps(self.with_param)
             setattr(task, "with_param", with_param)
+        if self.with_sequence:
+            # Cast all values to str
+            sequence = dict()
+            for k, v in self.with_sequence.items():
+                sequence[k] = str(v)
+            setattr(task, "with_sequence", IoArgoprojWorkflowV1alpha1Sequence(**sequence))
+
         return task

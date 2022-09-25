@@ -60,19 +60,16 @@ def test_retry_limits_fail_validation():
         Retry(duration=5, max_duration=4)
 
 
-def test_func_and_func_param_validation_raises_on_args_not_passed(op):
-    with pytest.raises(ValueError) as e:
+def test_func_and_func_param_validation_raises_on_empty_params(op):
+    with pytest.raises(AssertionError) as e:
         Task("t", op, [])
-    assert (
-        str(e.value)
-        == "`with_params` is empty and there exists non-default arguments which aren't covered by `inputs`: {'a'}"
-    )
+    assert str(e.value) == "`with_param` cannot be empty"
 
 
 def test_func_and_func_param_validation_raises_on_difference(op):
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(AssertionError) as e:
         Task("t", op, [{"a": 1}, {"b": 1}])
-    assert str(e.value) == "param in `with_params` misses non-default argument: {'a'}"
+    assert str(e.value) == "`with_param` contains dicts with different set of keys"
 
 
 def test_param_getter_returns_empty(no_op):
@@ -348,21 +345,34 @@ def test_task_get_retry_returns_expected_none(no_op):
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task("t", kwarg_op)
-    generated_input = t.inputs[0]
-    assert isinstance(generated_input, Parameter)
-    assert generated_input.name == "a"
-    assert generated_input.default == "42"
+    deduced_input = t.inputs[0]
+    assert isinstance(deduced_input, Parameter)
+    assert deduced_input.name == "a"
+    assert deduced_input.default == "42"
 
     t = Task("t", kwarg_multi_op, [{"a": 50}])
-    generated_input_1 = t.inputs[0]
-    assert isinstance(generated_input_1, Parameter)
-    assert generated_input_1.name == "a"
-    assert generated_input_1.value == "{{item.a}}"
+    deduced_input_1 = t.inputs[0]
+    assert isinstance(deduced_input_1, Parameter)
+    assert deduced_input_1.name == "a"
+    assert deduced_input_1.value == "{{item.a}}"
 
-    generated_input_2 = t.inputs[1]
-    assert isinstance(generated_input_2, Parameter)
-    assert generated_input_2.name == "b"
-    assert generated_input_2.value == "43"
+    deduced_input_2 = t.inputs[1]
+    assert isinstance(deduced_input_2, Parameter)
+    assert deduced_input_2.name == "b"
+    assert deduced_input_2.value is None
+    assert deduced_input_2.default == "43"
+
+    t = Task("t", kwarg_multi_op, [{"b": 50}])
+    deduced_input_1 = t.inputs[0]
+    assert isinstance(deduced_input_1, Parameter)
+    assert deduced_input_1.name == "a"
+    assert deduced_input_1.value is None
+    assert deduced_input_1.default == "42"
+
+    deduced_input_2 = t.inputs[1]
+    assert isinstance(deduced_input_2, Parameter)
+    assert deduced_input_2.name == "b"
+    assert deduced_input_2.value == "{{item.b}}"
 
 
 def test_task_fails_artifact_validation(no_op, artifact):

@@ -34,8 +34,8 @@ class Parameter:
         if value is not None and value_from is not None:
             raise ValueError("`value` and `value_from` args must be exclusive")
         self.name = name
-        self.value = value
-        self.default = default
+        self.value = str(value) if value is not None else None
+        self.default = str(default) if default is not None else None
         self.value_from = value_from
 
     def as_name(self, name: str):
@@ -57,7 +57,8 @@ class Parameter:
             setattr(parameter, "value_from", IoArgoprojWorkflowV1alpha1ValueFrom(**self.value_from))
         else:
             raise ValueError(
-                f"Parameter with name `{parameter.name}` cannot be interpreted as argument as neither of the following args are set: `value`, `value_from`, `default`"  # noqa
+                f"Parameter with name `{parameter.name}` cannot be interpreted as argument "
+                "as neither of the following args are set: `value`, `value_from`, `default`"
             )
         return parameter
 
@@ -89,3 +90,11 @@ class Parameter:
         if self.value:
             return self.value
         raise ValueError("Cannot represent as string as `value` is not set")
+
+    @property
+    def contains_item(self) -> bool:
+        """Check whether the parmeter contains an argo item reference"""
+        if self.value is not None:
+            if "{{item" in self.value:
+                return True
+        return False
