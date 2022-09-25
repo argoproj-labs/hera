@@ -7,8 +7,8 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 
 from hera import (
-    ConfigMapEnvFromSpec,
     ConfigMapEnv,
+    ConfigMapEnvFromSpec,
     ConfigMapVolume,
     EmptyDirVolume,
     Env,
