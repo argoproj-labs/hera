@@ -159,6 +159,12 @@ class Task(IO):
     resource_template: Optional[ResourceTemplate]
         Resource template for managing Kubernetes resources. Resource template allows you to create, delete or update
         any type of Kubernetes resource, it accepts any kubectl action and valid K8S manifest.
+    active_deadline_seconds: Optional[int]
+        Optional duration in seconds relative to the task start time which the task
+        is allowed to run.
+    timeout: Optional[str]
+        Set the total node execution timeout duration counting from the node's
+        start time. This duration also includes time in which the node spends in Pending state.
 
     Notes
     ------
@@ -196,6 +202,8 @@ class Task(IO):
         memoize: Optional[Memoize] = None,
         pod_spec_patch: Optional[str] = None,
         resource_template: Optional[ResourceTemplate] = None,
+        active_deadline_seconds: Optional[int] = None,
+        timeout: Optional[str] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -215,6 +223,8 @@ class Task(IO):
         self.with_sequence = with_sequence
         self.pod_spec_patch = pod_spec_patch
         self.resource_template: Optional[ResourceTemplate] = resource_template
+        self.active_deadline_seconds = active_deadline_seconds
+        self.timeout = timeout
 
         self.image = image
         self.image_pull_policy = image_pull_policy
@@ -904,6 +914,12 @@ class Task(IO):
 
         if self.pod_spec_patch is not None:
             setattr(template, "podSpecPatch", self.pod_spec_patch)
+
+        if self.active_deadline_seconds is not None:
+            setattr(template, "active_deadline_seconds", str(self.active_deadline_seconds))
+
+        if self.timeout is not None:
+            setattr(template, "timeout", self.timeout)
 
         return template
 
