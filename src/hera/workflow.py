@@ -76,6 +76,9 @@ class Workflow:
         Any global parameters for the workflow.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
+    active_deadline_seconds: Optional[int] = None
+        Optional duration in seconds relative to the workflow start time which the workflow
+        is allowed to run.
     """
 
     def __init__(
@@ -97,6 +100,7 @@ class Workflow:
         dag: Optional[DAG] = None,
         parameters: Optional[List[Parameter]] = None,
         tolerations: Optional[List[Toleration]] = None,
+        active_deadline_seconds: Optional[int] = None,
     ):
         self.name = validate_name(name)
         self.service = service or WorkflowService()
@@ -116,6 +120,7 @@ class Workflow:
         self.volume_claim_gc_strategy = volume_claim_gc_strategy
         self.host_aliases = host_aliases
         self.dag = dag
+        self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
         self.tasks: List["Task"] = []
 
@@ -188,6 +193,9 @@ class Workflow:
         if self.tolerations is not None:
             ts = [t.build() for t in self.tolerations]
             setattr(spec, "tolerations", ts)
+
+        if self.active_deadline_seconds is not None:
+            setattr(spec, "active_deadline_seconds", self.active_deadline_seconds)
 
         vct = self.dag._build_volume_claim_templates()
         if vct:
