@@ -7,11 +7,11 @@ from argo_workflows.models import IoArgoprojWorkflowV1alpha1Inputs
 from argo_workflows.models import Toleration as _ArgoToleration
 
 from hera import (
-    ConfigMapEnvFromSpec,
-    ConfigMapEnvSpec,
+    ConfigMapEnv,
+    ConfigMapEnvFrom,
     ConfigMapVolume,
     EmptyDirVolume,
-    EnvSpec,
+    Env,
     ExistingVolume,
     GCSArtifact,
     GitArtifact,
@@ -60,19 +60,16 @@ def test_retry_limits_fail_validation():
         Retry(duration=5, max_duration=4)
 
 
-def test_func_and_func_param_validation_raises_on_args_not_passed(op):
-    with pytest.raises(ValueError) as e:
+def test_func_and_func_param_validation_raises_on_empty_params(op):
+    with pytest.raises(AssertionError) as e:
         Task("t", op, [])
-    assert (
-        str(e.value)
-        == "`with_params` is empty and there exists non-default arguments which aren't covered by `inputs`: {'a'}"
-    )
+    assert str(e.value) == "`with_param` cannot be empty"
 
 
 def test_func_and_func_param_validation_raises_on_difference(op):
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(AssertionError) as e:
         Task("t", op, [{"a": 1}, {"b": 1}])
-    assert str(e.value) == "param in `with_params` misses non-default argument: {'a'}"
+    assert str(e.value) == "`with_param` contains dicts with different set of keys"
 
 
 def test_param_getter_returns_empty(no_op):
@@ -348,21 +345,34 @@ def test_task_get_retry_returns_expected_none(no_op):
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
     t = Task("t", kwarg_op)
-    generated_input = t.inputs[0]
-    assert isinstance(generated_input, Parameter)
-    assert generated_input.name == "a"
-    assert generated_input.default == "42"
+    deduced_input = t.inputs[0]
+    assert isinstance(deduced_input, Parameter)
+    assert deduced_input.name == "a"
+    assert deduced_input.default == "42"
 
     t = Task("t", kwarg_multi_op, [{"a": 50}])
-    generated_input_1 = t.inputs[0]
-    assert isinstance(generated_input_1, Parameter)
-    assert generated_input_1.name == "a"
-    assert generated_input_1.value == "{{item.a}}"
+    deduced_input_1 = t.inputs[0]
+    assert isinstance(deduced_input_1, Parameter)
+    assert deduced_input_1.name == "a"
+    assert deduced_input_1.value == "{{item.a}}"
 
-    generated_input_2 = t.inputs[1]
-    assert isinstance(generated_input_2, Parameter)
-    assert generated_input_2.name == "b"
-    assert generated_input_2.value == "43"
+    deduced_input_2 = t.inputs[1]
+    assert isinstance(deduced_input_2, Parameter)
+    assert deduced_input_2.name == "b"
+    assert deduced_input_2.value is None
+    assert deduced_input_2.default == "43"
+
+    t = Task("t", kwarg_multi_op, [{"b": 50}])
+    deduced_input_1 = t.inputs[0]
+    assert isinstance(deduced_input_1, Parameter)
+    assert deduced_input_1.name == "a"
+    assert deduced_input_1.value is None
+    assert deduced_input_1.default == "42"
+
+    deduced_input_2 = t.inputs[1]
+    assert isinstance(deduced_input_2, Parameter)
+    assert deduced_input_2.name == "b"
+    assert deduced_input_2.value == "{{item.b}}"
 
 
 def test_task_fails_artifact_validation(no_op, artifact):
@@ -477,14 +487,14 @@ def test_task_template_has_correct_annotations(op):
 
 
 def test_task_with_config_map_env_variable(no_op):
-    t = Task("t", no_op, env=[ConfigMapEnvSpec(name="n", config_map_name="cn", config_map_key="k")])
+    t = Task("t", no_op, env=[ConfigMapEnv(name="n", config_map_name="cn", config_map_key="k")])
     tt = t._build_template()
     assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
     assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
 
 
 def test_task_with_config_map_env_from(no_op):
-    t = Task("t", no_op, env=[ConfigMapEnvFromSpec(prefix="p", config_map_name="cn")])
+    t = Task("t", no_op, env=[ConfigMapEnvFrom(prefix="p", config_map_name="cn")])
     tt = t._build_template()
     assert tt.script.env_from[0].prefix == "p"
     assert tt.script.env_from[0].config_map_ref.name == "cn"
@@ -544,7 +554,7 @@ def test_task_adds_custom_resources(no_op):
 
 def test_task_adds_variable_as_env_var():
     t = Task("t")
-    t1 = Task("t1", "print(42)", env=[EnvSpec(name="IP", value_from_input=t.ip)])
+    t1 = Task("t1", "print(42)", env=[Env(name="IP", value_from_input=t.ip)])
     t1s = t1._build_script()
 
     assert t1s.env[0].name == "IP"
@@ -710,3 +720,10 @@ def test_task_template_contains_resource_template():
     tt = t._build_template()
     resource = resource_template.build()
     assert tt.resource == resource
+
+
+def test_task_template_with_resource_template_has_no_container():
+    resource_template = ResourceTemplate(action="create")
+    t = Task(name="t", resource_template=resource_template)
+    tt = t._build_template()
+    assert not hasattr(tt, "container")

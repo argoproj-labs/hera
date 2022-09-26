@@ -76,6 +76,11 @@ class Workflow:
         Any global parameters for the workflow.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
+    generate_name: bool = False
+        Whether to use the provided name as a prefix for workflow name generation
+    active_deadline_seconds: Optional[int] = None
+        Optional duration in seconds relative to the workflow start time which the workflow
+        is allowed to run.
     """
 
     def __init__(
@@ -97,6 +102,8 @@ class Workflow:
         dag: Optional[DAG] = None,
         parameters: Optional[List[Parameter]] = None,
         tolerations: Optional[List[Toleration]] = None,
+        generate_name: bool = False,
+        active_deadline_seconds: Optional[int] = None,
     ):
         self.name = validate_name(name)
         self.service = service or WorkflowService()
@@ -116,14 +123,26 @@ class Workflow:
         self.volume_claim_gc_strategy = volume_claim_gc_strategy
         self.host_aliases = host_aliases
         self.dag = dag
+        self.generate_name = generate_name
+        self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
         self.tasks: List["Task"] = []
+
+    def get_name(self) -> str:
+        """
+        Returns the name of the workflow. This is useful in combination with
+        `generate_name=True` as the name is created upon workflow creation
+        """
+        return "{{workflow.name}}"
 
     def _build_metadata(self, use_name=True) -> ObjectMeta:
         """Assembles the metadata of the workflow"""
         metadata = ObjectMeta()
         if use_name:
-            setattr(metadata, "name", self.name)
+            if self.generate_name:
+                setattr(metadata, "generate_name", self.name)
+            else:
+                setattr(metadata, "name", self.name)
         if self.labels:
             setattr(metadata, "labels", self.labels)
         if self.annotations:
@@ -188,6 +207,9 @@ class Workflow:
         if self.tolerations is not None:
             ts = [t.build() for t in self.tolerations]
             setattr(spec, "tolerations", ts)
+
+        if self.active_deadline_seconds is not None:
+            setattr(spec, "active_deadline_seconds", self.active_deadline_seconds)
 
         vct = self.dag._build_volume_claim_templates()
         if vct:

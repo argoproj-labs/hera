@@ -28,6 +28,21 @@ The general format is:
 - C from D
 
 ```
+
+# 4.0.0rc3 - DATE (26/09/2022)
+
+### Added
+
+- support for `withSequence` on `Task`
+- `generate_name` on worfklow
+- active deadline seconds/timeouts on tasks and workflows
+
+### Changed
+
+- `EnvSpec` naming to `Env`, including inheriting classes
+- pyproject Python limit from 3.11 to 4
+- error messages to be more descriptive
+
 # 4.0.0rc2 - DATE (19/09/2022)
 
 ### Added

@@ -18,11 +18,11 @@ def validate_name(name: str, max_length: Optional[int] = None) -> str:
         When the name is invalid according to specifications.
     """
     if max_length and len(name) > max_length:
-        raise ValueError(f"Name is too long. Max length: {max_length}, now: {len(name)}")
+        raise ValueError(f"Name is too long. Max length: {max_length}, found: {len(name)}")
     if "." in name:
         raise ValueError("Name cannot include a dot")
     if "_" in name:
-        raise ValueError("Name cannot include underscore.")
+        raise ValueError("Name cannot include an underscore")
 
     pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
     match_obj = re.match(pattern, name)

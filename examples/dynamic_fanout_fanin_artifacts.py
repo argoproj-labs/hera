@@ -37,7 +37,7 @@ with Workflow("artifact-test") as wf:
                 path="/tmp/output-files/",
                 archive={"none": {}},
                 bucket="<your bucket>",
-                key=f"fanout-{wf.name}",
+                key=f"fanout-{wf.get_name()}",
             )
         ],
     )
