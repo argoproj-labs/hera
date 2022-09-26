@@ -34,6 +34,8 @@ The general format is:
 ### Added
 
 - support for `withSequence` on `Task`
+- `generate_name` on worfklow
+- active deadline seconds/timeouts on tasks and workflows
 
 ### Changed
 

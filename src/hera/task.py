@@ -35,7 +35,7 @@ import hera
 from hera.affinity import Affinity
 from hera.artifact import Artifact
 from hera.env import Env
-from hera.env_from import BaseEnvFromSpec
+from hera.env_from import BaseEnvFrom
 from hera.image import ImagePullPolicy
 from hera.io import IO
 from hera.memoize import Memoize
@@ -122,7 +122,7 @@ class Task(IO):
         advantage of not overriding the set entrypoint of the container. As an example, a container by default may
         enter via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`.
         See notes, for when running with emissary executor.
-    env: Optional[List[Union[EnvSpec, BaseEnvFromSpec]]] = None
+    env: Optional[List[Union[Env, BaseEnvFrom]]] = None
         The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
         credentials, or other available secrets.
     resources: Optional[Resources] = None
@@ -181,7 +181,7 @@ class Task(IO):
         daemon: bool = False,
         command: Optional[List[str]] = None,
         args: Optional[List[str]] = None,
-        env: Optional[List[Union[Env, BaseEnvFromSpec]]] = None,
+        env: Optional[List[Union[Env, BaseEnvFrom]]] = None,
         resources: Optional[Resources] = None,
         volumes: Optional[List[BaseVolume]] = None,
         working_dir: Optional[str] = None,
@@ -789,7 +789,7 @@ class Task(IO):
     def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
         """Assembles the environment variables for the task"""
         env = [e.build() for e in self.env if isinstance(e, Env)]
-        env_from = [e.build() for e in self.env if isinstance(e, BaseEnvFromSpec)]
+        env_from = [e.build() for e in self.env if isinstance(e, BaseEnvFrom)]
         return env, env_from
 
     def _build_container_kwargs(self) -> Dict:

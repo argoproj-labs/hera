@@ -23,7 +23,7 @@ from hera.config import Config
 from hera.cron_workflow import ConcurrencyPolicy, CronWorkflow
 from hera.dag import DAG
 from hera.env import ConfigMapEnv, Env, FieldEnv, SecretEnv
-from hera.env_from import ConfigMapEnvFromSpec, SecretEnvFromSpec
+from hera.env_from import ConfigMapEnvFrom, SecretEnvFrom
 from hera.host_alias import HostAlias
 from hera.host_config import (
     get_global_host,

@@ -8,7 +8,7 @@ from argo_workflows.models import Toleration as _ArgoToleration
 
 from hera import (
     ConfigMapEnv,
-    ConfigMapEnvFromSpec,
+    ConfigMapEnvFrom,
     ConfigMapVolume,
     EmptyDirVolume,
     Env,
@@ -494,7 +494,7 @@ def test_task_with_config_map_env_variable(no_op):
 
 
 def test_task_with_config_map_env_from(no_op):
-    t = Task("t", no_op, env=[ConfigMapEnvFromSpec(prefix="p", config_map_name="cn")])
+    t = Task("t", no_op, env=[ConfigMapEnvFrom(prefix="p", config_map_name="cn")])
     tt = t._build_template()
     assert tt.script.env_from[0].prefix == "p"
     assert tt.script.env_from[0].config_map_ref.name == "cn"

@@ -16,7 +16,7 @@ class _NamedSecret:
 
 
 @dataclass
-class BaseEnvFromSpec:
+class BaseEnvFrom:
     """Environment variable specification from K8S resources.
 
     Attributes
@@ -33,7 +33,7 @@ class BaseEnvFromSpec:
 
 
 @dataclass
-class SecretEnvFromSpec(BaseEnvFromSpec, _NamedSecret):
+class SecretEnvFrom(BaseEnvFrom, _NamedSecret):
     """Environment variable specification from K8S secrets.
 
     Attributes
@@ -54,7 +54,7 @@ class SecretEnvFromSpec(BaseEnvFromSpec, _NamedSecret):
 
 
 @dataclass
-class ConfigMapEnvFromSpec(BaseEnvFromSpec, _NamedConfigMap):
+class ConfigMapEnvFrom(BaseEnvFrom, _NamedConfigMap):
     """Environment variable specification from K8S config map.
 
     Attributes
