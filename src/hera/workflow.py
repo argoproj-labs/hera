@@ -258,14 +258,13 @@ class Workflow:
         add_tasks(self, *ts)
         return self
 
-    def create(self) -> "Workflow":
+    def create(self) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the workflow"""
         assert self.dag
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
 
-        self.service.create_workflow(self.build())
-        return self
+        return self.service.create_workflow(self.build())
 
     def on_exit(self, other: Union[Task, DAG]) -> None:
         """Add a task or a DAG to execute upon workflow exit"""

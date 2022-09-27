@@ -100,18 +100,17 @@ class CronWorkflow(Workflow):
             spec=cron_workflow_spec,
         )
 
-    def create(self) -> "CronWorkflow":
+    def create(self) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Creates the cron workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
-        self.service.create_cron_workflow(self.build())
-        return self
+        return self.service.create_cron_workflow(self.build())
 
     def delete(self) -> Tuple[object, int, dict]:
         """Deletes the cron workflow"""
         return self.service.delete_cron_workflow(self.name)
 
-    def update(self) -> "CronWorkflow":
+    def update(self) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
         """Updates the cron workflow in the server"""
 
         # when update cron_workflow, metadata.resourceVersion and metadata.uid should be same as the previous value
@@ -119,8 +118,7 @@ class CronWorkflow(Workflow):
         cron_workflow = self.build()
         cron_workflow.metadata["resourceVersion"] = old_workflow.metadata["resourceVersion"]
         cron_workflow.metadata["uid"] = old_workflow.metadata["uid"]
-        self.service.update_cron_workflow(self.name, cron_workflow)
-        return self
+        return self.service.update_cron_workflow(self.name, cron_workflow)
 
     def suspend(self) -> Tuple[object, int, dict]:
         """Suspends the cron workflow"""
