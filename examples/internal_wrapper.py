@@ -8,7 +8,7 @@ from typing import Callable, List, Optional, Union
 from hera import (
     ExistingVolume,
     Resources,
-    Retry,
+    RetryStrategy,
     Task,
     Toleration,
     Workflow,
@@ -52,7 +52,7 @@ class MyTask(Task):
         resources: Resources = Resources(),
         tolerations: Optional[List[Toleration]] = None,
     ):
-        default_retry = Retry(duration=1, max_duration=20)
+        default_retry = RetryStrategy(backoff=dict(duration="1", max_duration="20"))
         # note that this gke-accelerator spec is only valid for GKE GPUs. For Azure and AWS you
         # might have to use the `node_selectors` field exclusively
         default_node_selectors = {"cloud.google.com/gke-accelerator": "nvidia-tesla-k80"}
@@ -66,7 +66,7 @@ class MyTask(Task):
             command=command,
             resources=resources,
             working_dir=default_working_dir,
-            retry=default_retry,
+            retry_strategy=default_retry,
             tolerations=tolerations,
             node_selectors=default_node_selectors,
         )

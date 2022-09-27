@@ -21,8 +21,8 @@ from hera import (
     Parameter,
     Resources,
     ResourceTemplate,
-    Retry,
     RetryPolicy,
+    RetryStrategy,
     S3Artifact,
     Task,
     TaskResult,
@@ -53,11 +53,6 @@ def test_next_does_not_set_dependency_multiple_times():
     with pytest.raises(ValueError):
         # Already added
         t1 >> t2
-
-
-def test_retry_limits_fail_validation():
-    with pytest.raises(AssertionError):
-        Retry(duration=5, max_duration=4)
 
 
 def test_func_and_func_param_validation_raises_on_empty_params(op):
@@ -273,7 +268,7 @@ def test_task_template_contains_expected_field_values_and_types(op, affinity):
         resources=Resources(gpus=1),
         tolerations=[GPUToleration],
         node_selectors={"abc": "123-gpu"},
-        retry=Retry(duration=1, max_duration=2),
+        retry_strategy=RetryStrategy(backoff=dict(duration="1", max_duration="2")),
         daemon=True,
         affinity=affinity,
         memoize=Memoize("a", "b", "1h"),
@@ -321,16 +316,20 @@ def test_task_template_does_not_add_affinity_when_none(no_op):
 
 
 def test_task_template_contains_expected_retry_strategy(no_op):
-    r = Retry(duration=3, max_duration=9)
-    t = Task("t", no_op, retry=r)
-    assert t.retry.duration == 3
-    assert t.retry.max_duration == 9
+    r = RetryStrategy(backoff=dict(duration="3", max_duration="9"))
+    t = Task("t", no_op, retry_strategy=r)
+    assert t.retry_strategy is not None
+    assert t.retry_strategy.backoff is not None
+    assert t.retry_strategy.backoff["duration"] == "3"
+    assert t.retry_strategy.backoff["max_duration"] == "9"
 
     tt = t._build_template()
-    tr = t._build_retry_strategy()
+    assert tt is not None
+    assert tt.retry_strategy is not None
+    assert tt.retry_strategy.backoff is not None
 
     template_backoff = tt.retry_strategy.backoff
-    retry_backoff = tr.backoff
+    retry_backoff = r.build().backoff
 
     assert int(template_backoff.duration) == int(retry_backoff.duration)
     assert int(template_backoff.max_duration) == int(retry_backoff.max_duration)
@@ -339,8 +338,8 @@ def test_task_template_contains_expected_retry_strategy(no_op):
 def test_task_get_retry_returns_expected_none(no_op):
     t = Task("t", no_op)
 
-    tr = t._build_retry_strategy()
-    assert tr is None
+    tt = t._build_template()
+    assert hasattr(tt, "retry_strategy") is False
 
 
 def test_task_sets_kwarg(kwarg_op, kwarg_multi_op):
@@ -591,14 +590,18 @@ def test_task_adds_other_task_on_error():
 
 
 def test_task_has_expected_retry_limit():
-    t = Task("t", retry=Retry(limit=5))
+    t = Task("t", retry_strategy=RetryStrategy(limit=5))
     tt = t._build_template()
+    assert tt is not None
+    assert tt.retry_strategy is not None
     assert tt.retry_strategy.limit == "5"
 
 
 def test_task_has_expected_retry_policy():
-    t = Task("t", retry=Retry(retry_policy=RetryPolicy.Always))
+    t = Task("t", retry_strategy=RetryStrategy(retry_policy=RetryPolicy.Always))
     tt = t._build_template()
+    assert tt is not None
+    assert tt.retry_strategy is not None
     assert tt.retry_strategy.retry_policy == "Always"
 
 
