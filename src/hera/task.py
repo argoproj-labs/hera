@@ -19,10 +19,8 @@ from argo_workflows.models import (
     Container,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
-    IoArgoprojWorkflowV1alpha1Backoff,
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Metadata,
-    IoArgoprojWorkflowV1alpha1RetryStrategy,
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     PersistentVolumeClaim,
@@ -43,7 +41,7 @@ from hera.operator import Operator
 from hera.parameter import Parameter
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
-from hera.retry import Retry
+from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
@@ -131,8 +129,8 @@ class Task(IO):
         Any volumes to mount or create for the task. See `hera.volumes`.
     working_dir: Optional[str] = None
         The working directory to be set inside the executing container context.
-    retry: Optional[Retry] = None
-        A task retry configuration. See `hera.retry.Retry`.
+    retry: Optional[RetryStrategy] = None
+        A task retry strategy configuration. See `hera.retry_strategy.RetryStrategy`.
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
     node_selectors: Optional[Dict[str, str]] = None
@@ -191,7 +189,7 @@ class Task(IO):
         resources: Optional[Resources] = None,
         volumes: Optional[List[BaseVolume]] = None,
         working_dir: Optional[str] = None,
-        retry: Optional[Retry] = None,
+        retry_strategy: Optional[RetryStrategy] = None,
         tolerations: Optional[List[Toleration]] = None,
         node_selectors: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
@@ -233,7 +231,7 @@ class Task(IO):
         self.args = args
         self.resources = resources
         self.working_dir = working_dir
-        self.retry = retry
+        self.retry_strategy = retry_strategy
         self.tolerations = tolerations
         self.node_selector = node_selectors
         self.labels = labels or {}
@@ -894,9 +892,8 @@ class Task(IO):
         if self.node_selector is not None:
             setattr(template, "node_selector", self.node_selector)
 
-        retry_strategy = self._build_retry_strategy()
-        if retry_strategy is not None:
-            setattr(template, "retry_strategy", retry_strategy)
+        if self.retry_strategy is not None:
+            setattr(template, "retry_strategy", self.retry_strategy.build())
 
         if self.source is not None:
             setattr(template, "script", self._build_script())
@@ -922,32 +919,6 @@ class Task(IO):
             setattr(template, "timeout", self.timeout)
 
         return template
-
-    def _build_retry_strategy(self) -> Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]:
-        """Assembles and returns a retry strategy for the task. This is dictated by the task `retry_limit`.
-
-        Returns
-        -------
-        Optional[IoArgoprojWorkflowV1alpha1RetryStrategy]
-            A V1alpha1RetryStrategy object if `retry_limit` is specified, None otherwise.
-        """
-        if self.retry:
-            strategy = IoArgoprojWorkflowV1alpha1RetryStrategy()
-            if self.retry.duration is not None and self.retry.max_duration is not None:
-                setattr(
-                    strategy,
-                    "backoff",
-                    IoArgoprojWorkflowV1alpha1Backoff(
-                        duration=str(self.retry.duration), max_duration=str(self.retry.max_duration)
-                    ),
-                )
-            if self.retry.limit is not None:
-                setattr(strategy, "limit", str(self.retry.limit))
-            if self.retry.retry_policy is not None:
-                setattr(strategy, "retry_policy", str(self.retry.retry_policy.value))
-
-            return strategy
-        return None
 
     def _build_tolerations(self) -> List[ArgoToleration]:
         """Assembles and returns the pod toleration objects required for scheduling a task.
