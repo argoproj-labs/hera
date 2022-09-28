@@ -221,9 +221,9 @@ class GitArtifact(Artifact):
             setattr(git, "password_secret", password_secret)
         if self.revision:
             setattr(git, "revision", self.revision)
-        if self.ssh_private_key_secret_name is not None:
+        if self.ssh_private_key_secret_key is not None:
             ssh_private_key_secret = SecretKeySelector(key=self.ssh_private_key_secret_key)
-            if self.password_secret_name is not None:
+            if self.ssh_private_key_secret_name is not None:
                 setattr(ssh_private_key_secret, "name", self.ssh_private_key_secret_name)
             setattr(git, "ssh_private_key_secret", ssh_private_key_secret)
         if self.username_secret_key is not None:

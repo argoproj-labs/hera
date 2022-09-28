@@ -5,6 +5,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
+    SecretKeySelector,
 )
 
 from hera import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact, Task
@@ -140,6 +141,34 @@ class TestGitArtifact:
 
         assert actual == expected
         assert actual_input == expected
+
+    def test_git_artifact_ssh_key_secret(self):
+        name = "git-artifact"
+        path = "/src"
+        repo = "https://github.com/awesome/awesome-repo.git"
+        revision = "main"
+        # name of the secret
+        secret_name = "git-ssh-key"
+        # key in secret
+        secret_key = "ssh-key"
+        secret_key_selector = SecretKeySelector(key=secret_key, name=secret_name)
+        expected = IoArgoprojWorkflowV1alpha1Artifact(
+            name=name,
+            path=path,
+            git=IoArgoprojWorkflowV1alpha1GitArtifact(
+                repo=repo, revision=revision, ssh_private_key_secret=secret_key_selector
+            ),
+        )
+        actual = GitArtifact(
+            name=name,
+            path=path,
+            repo=repo,
+            revision=revision,
+            ssh_private_key_secret_key=secret_key,
+            ssh_private_key_secret_name=secret_name,
+        )
+        assert actual.as_argument() == expected
+        assert actual.as_input() == expected
 
 
 class TestHTTPArtifact:

@@ -114,7 +114,7 @@ If you plan to submit contributions to Hera you can install Hera in a virtual en
 poetry install
 ```
 
-In you activated `poetry shell`, you can utilize the tasks found in `tox.ini`, e.g.:
+In your activated `poetry shell`, you can utilize the tasks found in `tox.ini`, e.g.:
 
 To run tests on all supported python versions with coverage run [tox](https://tox.wiki/en/latest/):
 

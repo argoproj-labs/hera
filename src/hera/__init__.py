@@ -39,8 +39,8 @@ from hera.operator import Operator
 from hera.parameter import Parameter
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
-from hera.retry_strategy import RetryStrategy
 from hera.retry_policy import RetryPolicy
+from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
 from hera.task import Task, TaskResult
 from hera.template_ref import TemplateRef
