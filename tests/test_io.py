@@ -75,7 +75,7 @@ class TestIO:
         assert hasattr(outputs.parameters[0], "name")
         assert outputs.parameters[0].name == "a"
 
-        io = IO(outputs=[Artifact("b", "/b"), Parameter("a",value="a")])
+        io = IO(outputs=[Artifact("b", "/b"), Parameter("a", value="a")])
         assert len(io.outputs) == 2
         assert isinstance(io.outputs[0], Artifact)
         assert isinstance(io.outputs[1], Parameter)
