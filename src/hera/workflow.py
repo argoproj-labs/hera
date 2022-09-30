@@ -106,7 +106,7 @@ class Workflow:
         active_deadline_seconds: Optional[int] = None,
     ):
         self.name = validate_name(name)
-        self.service = service or WorkflowService()
+        self._service = service
         self.parallelism = parallelism
         self.security_context = security_context
         self.service_account_name = service_account_name
@@ -127,6 +127,16 @@ class Workflow:
         self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
         self.tasks: List["Task"] = []
+
+    @property
+    def service(self) -> WorkflowService:
+        if self._service is None:
+            self._service = WorkflowService()
+        return self._service
+
+    @service.setter
+    def service(self, value: WorkflowService):
+        self._service = value
 
     def get_name(self) -> str:
         """
