@@ -11,7 +11,20 @@ from hera.io import IO
 
 class TestIO:
     def test_build_inputs_returns_expected_inputs(self):
-        io = IO(inputs=[Parameter("a"), Artifact("b", "/b")], outputs=[])
+        io = IO(inputs=[Artifact("b", "/b")])
+        assert len(io.inputs) == 1
+        assert isinstance(io.inputs[0], Artifact)
+        inputs = io._build_inputs()
+        assert hasattr(inputs, "artifacts")
+        assert len(inputs.artifacts) == 1
+        assert hasattr(inputs.artifacts[0], "name")
+        assert hasattr(inputs.artifacts[0], "path")
+        assert inputs.artifacts[0].name == "b"
+        assert inputs.artifacts[0].path == "/b"
+
+        io = IO(inputs=[Parameter("a")])
+        assert len(io.inputs) == 1
+        assert isinstance(io.inputs[0], Parameter)
         inputs = io._build_inputs()
         assert isinstance(inputs, IoArgoprojWorkflowV1alpha1Inputs)
         assert hasattr(inputs, "parameters")
@@ -19,6 +32,16 @@ class TestIO:
         assert hasattr(inputs.parameters[0], "name")
         assert inputs.parameters[0].name == "a"
 
+        io = IO(inputs=[Artifact("b", "/b"), Parameter("a")])
+        assert len(io.inputs) == 2
+        assert isinstance(io.inputs[0], Artifact)
+        assert isinstance(io.inputs[1], Parameter)
+        inputs = io._build_inputs()
+        assert isinstance(inputs, IoArgoprojWorkflowV1alpha1Inputs)
+        assert hasattr(inputs, "parameters")
+        assert len(inputs.parameters) == 1
+        assert hasattr(inputs.parameters[0], "name")
+        assert inputs.parameters[0].name == "a"
         assert hasattr(inputs, "artifacts")
         assert len(inputs.artifacts) == 1
         assert hasattr(inputs.artifacts[0], "name")
@@ -31,18 +54,37 @@ class TestIO:
         assert io._build_inputs() is None
 
     def test_build_outputs_returns_expected_outputs(self):
-        io = IO(inputs=[], outputs=[Parameter("a", value="42"), Artifact("b", "/b")])
+        io = IO(outputs=[Artifact("b", "/b")])
+        assert len(io.outputs) == 1
+        assert isinstance(io.outputs[0], Artifact)
+        outputs = io._build_outputs()
+        assert hasattr(outputs, "artifacts")
+        assert len(outputs.artifacts) == 1
+        assert hasattr(outputs.artifacts[0], "name")
+        assert hasattr(outputs.artifacts[0], "path")
+        assert outputs.artifacts[0].name == "b"
+        assert outputs.artifacts[0].path == "/b"
+
+        io = IO(outputs=[Parameter("a", value="a")])
+        assert len(io.outputs) == 1
+        assert isinstance(io.outputs[0], Parameter)
         outputs = io._build_outputs()
         assert isinstance(outputs, IoArgoprojWorkflowV1alpha1Outputs)
         assert hasattr(outputs, "parameters")
         assert len(outputs.parameters) == 1
         assert hasattr(outputs.parameters[0], "name")
-        assert hasattr(outputs.parameters[0], "value_from")
         assert outputs.parameters[0].name == "a"
-        assert isinstance(outputs.parameters[0].value_from, IoArgoprojWorkflowV1alpha1ValueFrom)
-        assert hasattr(outputs.parameters[0].value_from, "parameter")
-        assert outputs.parameters[0].value_from.parameter == "42"
 
+        io = IO(outputs=[Artifact("b", "/b"), Parameter("a",value="a")])
+        assert len(io.outputs) == 2
+        assert isinstance(io.outputs[0], Artifact)
+        assert isinstance(io.outputs[1], Parameter)
+        outputs = io._build_outputs()
+        assert isinstance(outputs, IoArgoprojWorkflowV1alpha1Outputs)
+        assert hasattr(outputs, "parameters")
+        assert len(outputs.parameters) == 1
+        assert hasattr(outputs.parameters[0], "name")
+        assert outputs.parameters[0].name == "a"
         assert hasattr(outputs, "artifacts")
         assert len(outputs.artifacts) == 1
         assert hasattr(outputs.artifacts[0], "name")

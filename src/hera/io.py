@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
 from argo_workflows.models import (
@@ -22,8 +22,8 @@ class IO:
         List of parameters or artifacts to use as outputs.
     """
 
-    inputs: List[Union[Parameter, Artifact]]
-    outputs: List[Union[Parameter, Artifact]]
+    inputs: List[Union[Parameter, Artifact]] = field(default_factory=lambda: [])
+    outputs: List[Union[Parameter, Artifact]] = field(default_factory=lambda: [])
 
     def _build_inputs(self) -> Optional[IoArgoprojWorkflowV1alpha1Inputs]:
         """Assembles the inputs of the task."""
