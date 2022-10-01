@@ -47,7 +47,7 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
 from hera.volumes import (
-    BaseVolume,
+    _BaseVolume,
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
@@ -187,7 +187,7 @@ class Task(IO):
         args: Optional[List[str]] = None,
         env: Optional[List[Union[Env, BaseEnvFrom]]] = None,
         resources: Optional[Resources] = None,
-        volumes: Optional[List[BaseVolume]] = None,
+        volumes: Optional[List[_BaseVolume]] = None,
         working_dir: Optional[str] = None,
         retry_strategy: Optional[RetryStrategy] = None,
         tolerations: Optional[List[Toleration]] = None,
@@ -495,7 +495,7 @@ class Task(IO):
         return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
 
     def get_parameter(self, name: str) -> Parameter:
-        """Returns a Parameter from this tasks' outputs based on the name.
+        """Returns a Parameter from the task's outputs based on the name.
 
         Parameters
         ----------
