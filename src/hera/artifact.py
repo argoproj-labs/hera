@@ -186,8 +186,8 @@ class GitArtifact(Artifact):
         username_secret_key: Optional[str] = None,
         password_secret_name: Optional[str] = None,
         password_secret_key: Optional[str] = None,
-        ssh_private_key_secret_key: Optional[str] = None,
         ssh_private_key_secret_name: Optional[str] = None,
+        ssh_private_key_secret_key: Optional[str] = None,
     ) -> None:
         self.repo = repo
         self.depth = depth
@@ -208,29 +208,37 @@ class GitArtifact(Artifact):
         git = IoArgoprojWorkflowV1alpha1GitArtifact(repo=self.repo)
         if self.depth is not None:
             setattr(git, "depth", self.depth)
+
         if self.disable_submodules is not None:
             setattr(git, "disable_submodules", self.disable_submodules)
+
         if self.fetch is not None:
             setattr(git, "fetch", self.fetch)
+
         if self.insecure_ignore_host_key is not None:
             setattr(git, "insecure_ignore_host_key", self.insecure_ignore_host_key)
-        if self.password_secret_key is not None:
-            password_secret = SecretKeySelector(key=self.password_secret_key)
-            if self.password_secret_name is not None:
-                setattr(password_secret, "name", self.password_secret_name)
-            setattr(git, "password_secret", password_secret)
-        if self.revision:
-            setattr(git, "revision", self.revision)
-        if self.ssh_private_key_secret_key is not None:
-            ssh_private_key_secret = SecretKeySelector(key=self.ssh_private_key_secret_key)
-            if self.ssh_private_key_secret_name is not None:
-                setattr(ssh_private_key_secret, "name", self.ssh_private_key_secret_name)
-            setattr(git, "ssh_private_key_secret", ssh_private_key_secret)
+
         if self.username_secret_key is not None:
             username_secret = SecretKeySelector(key=self.username_secret_key)
             if self.username_secret_name is not None:
                 setattr(username_secret, "name", self.username_secret_name)
             setattr(git, "username_secret", username_secret)
+
+        if self.password_secret_key is not None:
+            password_secret = SecretKeySelector(key=self.password_secret_key)
+            if self.password_secret_name is not None:
+                setattr(password_secret, "name", self.password_secret_name)
+            setattr(git, "password_secret", password_secret)
+
+        if self.revision:
+            setattr(git, "revision", self.revision)
+
+        if self.ssh_private_key_secret_key is not None:
+            ssh_private_key_secret = SecretKeySelector(key=self.ssh_private_key_secret_key)
+            if self.ssh_private_key_secret_name is not None:
+                setattr(ssh_private_key_secret, "name", self.ssh_private_key_secret_name)
+            setattr(git, "ssh_private_key_secret", ssh_private_key_secret)
+
         return IoArgoprojWorkflowV1alpha1Artifact(
             name=self.name,
             path=self.path,

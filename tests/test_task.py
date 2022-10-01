@@ -17,7 +17,6 @@ from hera import (
     GitArtifact,
     GPUToleration,
     Memoize,
-    Operator,
     Parameter,
     Resources,
     ResourceTemplate,

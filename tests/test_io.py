@@ -2,7 +2,6 @@ import pytest
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Inputs,
     IoArgoprojWorkflowV1alpha1Outputs,
-    IoArgoprojWorkflowV1alpha1ValueFrom,
 )
 
 from hera import Artifact, Parameter
