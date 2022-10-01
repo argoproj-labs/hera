@@ -2,10 +2,10 @@
 from typing import List, Optional, Union
 
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     PersistentVolumeClaim,
-    IoArgoprojWorkflowV1alpha1DAGTask,
 )
 from argo_workflows.models import Volume as ArgoVolume
 
@@ -136,5 +136,5 @@ class DAG(IO):
     def get_parameter(self, name: str) -> Parameter:
         """Returns a DAG output as a `Parameter` to use an input somewhere else"""
         if next((p for p in self.outputs if p.name == name), None) is None:
-            raise KeyError(f'Could not assemble a parameter as `{name}` is not a DAG output')
+            raise KeyError(f"Could not assemble a parameter as `{name}` is not a DAG output")
         return Parameter(name, value=f"{{{{inputs.parameters.{name}}}}}")

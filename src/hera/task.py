@@ -47,12 +47,12 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
 from hera.volumes import (
-    _BaseVolume,
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
     SecretVolume,
     Volume,
+    _BaseVolume,
 )
 from hera.workflow_status import WorkflowStatus
 
