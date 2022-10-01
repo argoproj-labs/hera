@@ -1,6 +1,18 @@
 import pytest
 
-from hera.resources import Resources
+from hera.resources import Resources, _merge_dicts
+
+
+def test_merge_dicts_raises_on_key_conflict():
+    with pytest.raises(Exception) as e:
+        _merge_dicts({"a": 1}, {"a": 2})
+    assert str(e.value) == "Conflict at `a`"
+
+
+def test_merge_dicts_passes_on_same_leaf_value():
+    d = _merge_dicts({"a": 1}, {"a": 1})
+    assert "a" in d
+    assert d["a"] == 1
 
 
 class TestResources:

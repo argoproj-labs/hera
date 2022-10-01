@@ -336,4 +336,4 @@ class TestWorkflow:
         assert str(e.value) == "'`b` is not a valid workflow parameter'"
 
     def test_get_name(self):
-        assert Workflow('w').get_name() == '{{workflow.name}}'
+        assert Workflow("w").get_name() == "{{workflow.name}}"

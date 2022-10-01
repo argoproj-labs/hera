@@ -750,11 +750,25 @@ print(42)
             Task("t", pod_spec_patch=42).validate()  # type: ignore
         assert str(e.value) == "`pod_spec_patch` must be `str` to handle argo expressions properly"
 
+        assert Task("t", pod_spec_patch="abc").validate() is None
+
     def test_build_arguments(self):
         args = Task("t", inputs=[Parameter("a", value="42"), GCSArtifact("a", "b", "c", "d")])._build_arguments()
         assert isinstance(args, IoArgoprojWorkflowV1alpha1Arguments)
         assert hasattr(args, "parameters")
         assert len(args.parameters) == 1
+        assert hasattr(args, "artifacts")
+        assert len(args.artifacts) == 1
+
+        args = Task("t", inputs=[Parameter("a", value="42")])._build_arguments()
+        assert isinstance(args, IoArgoprojWorkflowV1alpha1Arguments)
+        assert hasattr(args, "parameters")
+        assert len(args.parameters) == 1
+        assert not hasattr(args, "artifacts")
+
+        args = Task("t", inputs=[GCSArtifact("a", "b", "c", "d")])._build_arguments()
+        assert isinstance(args, IoArgoprojWorkflowV1alpha1Arguments)
+        assert not hasattr(args, "parameters")
         assert hasattr(args, "artifacts")
         assert len(args.artifacts) == 1
 
@@ -770,6 +784,12 @@ print(42)
         with pytest.raises(KeyError) as e:
             Task("t").get_parameter("a")
         assert str(e.value) == "'No output parameter named `a` found'"
+
+    def test_get_parameters_as(self):
+        p = Task("t").get_parameters_as("a")
+        assert isinstance(p, Parameter)
+        assert p.name == "a"
+        assert p.value == "{{tasks.t.outputs.parameters}}"
 
     def test_get_artifact(self):
         arti = Task("t", outputs=[GCSArtifact("a", "b", "c", "d")]).get_artifact("a")
