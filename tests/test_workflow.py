@@ -1,24 +1,29 @@
+from unittest import mock
 from unittest.mock import Mock
 
 import pytest
 from argo_workflows.models import HostAlias as ArgoHostAlias
-from argo_workflows.models import PodSecurityContext
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1WorkflowSpec,
+    PodSecurityContext,
+)
 
-from hera import (
+from hera.dag import DAG
+from hera.host_alias import HostAlias
+from hera.parameter import Parameter
+from hera.task import Task
+from hera.template_ref import TemplateRef
+from hera.toleration import GPUToleration
+from hera.ttl_strategy import TTLStrategy
+from hera.volume_claim_gc import VolumeClaimGCStrategy
+from hera.volumes import (
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
-    HostAlias,
     SecretVolume,
-    Task,
-    TemplateRef,
-    TTLStrategy,
     Volume,
-    VolumeClaimGCStrategy,
-    Workflow,
-    WorkflowSecurityContext,
 )
-from hera.parameter import Parameter
+from hera.workflow import Workflow, WorkflowSecurityContext
 
 
 @pytest.fixture
@@ -225,6 +230,7 @@ class TestWorkflow:
             assert meta.labels == {"test": "test"}
             assert hasattr(meta, "annotations")
             assert meta.annotations == {"test": "test"}
+            assert not hasattr(meta, "generate_name")
 
             meta = w._build_metadata(use_name=False)
             assert not hasattr(meta, "name")
@@ -233,7 +239,94 @@ class TestWorkflow:
             assert hasattr(meta, "annotations")
             assert meta.annotations == {"test": "test"}
 
+        with Workflow("test", generate_name=True) as w:
+            meta = w._build_metadata(use_name=True)
+            assert hasattr(meta, "generate_name")
+            assert meta.generate_name == "test"
+
     def test_service_sets_service_as_expected(self, setup):
-        with Workflow('w') as w:
+        with Workflow("w") as w:
             assert w._service is None
             assert w.service is not None
+
+    def test_build_spec(self, affinity):
+        with Workflow(
+            "w",
+            parallelism=50,
+            node_selectors={"a": "b"},
+            affinity=affinity,
+            tolerations=[GPUToleration],
+            active_deadline_seconds=42,
+        ) as w:
+            spec = w._build_spec()
+            assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
+            assert hasattr(spec, "parallelism")
+            assert spec.parallelism == 50
+            assert hasattr(spec, "affinity")
+            assert spec.affinity is not None
+            assert hasattr(spec, "tolerations")
+            assert len(spec.tolerations) == 1
+            assert hasattr(spec, "affinity")
+            assert hasattr(spec, "active_deadline_seconds")
+            assert spec.active_deadline_seconds == 42
+            assert hasattr(spec, "node_selector")
+            assert spec.node_selector == {"a": "b"}
+
+        with Workflow("w") as w:
+            spec = w._build_spec()
+            assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
+            assert not hasattr(spec, "parallelism")
+            assert not hasattr(spec, "affinity")
+            assert not hasattr(spec, "tolerations")
+            assert not hasattr(spec, "node_selector")
+            assert not hasattr(spec, "active_deadline_seconds")
+            assert not hasattr(spec, "on_exit")
+
+        with Workflow("w") as w:
+            w.on_exit(Task("x"))
+            spec = w._build_spec()
+            assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
+            assert hasattr(spec, "on_exit")
+            assert spec.on_exit == "x"
+
+    def test_enter_sets_expected_fields(self):
+        w = Workflow("w", dag=DAG("d"))
+        assert not w.in_context
+        with pytest.raises(ValueError) as e:
+            w.__enter__()
+        assert str(e.value) == "DAG already set for workflow"
+
+    def test_on_exit(self):
+        with Workflow("w") as w1:
+            x = Task("x")
+            w1.on_exit(x)
+            assert w1.exit_task == "x"
+            assert x.is_exit_task
+
+        with Workflow("w") as w2:
+            w2.on_exit(DAG("d"))
+            assert w2.exit_task == "d"
+
+        with Workflow("w") as w3:
+            with pytest.raises(ValueError) as e:
+                w3.on_exit(42)  # type: ignore
+            assert "Unrecognized exit type" in str(e.value)
+            assert "supported types are `Task` and `DAG`" in str(e.value)
+
+    def test_delete(self):
+        service = mock.Mock()
+        service.delete_workflow = mock.Mock()
+        with Workflow("w", service=service) as w:
+            w.delete()
+        w.service.delete_workflow.assert_called_once_with("w")  # type: ignore
+
+    def test_parameter(self):
+        with Workflow("w", parameters=[Parameter("a", value="42")]) as w:
+            p = w.get_parameter("a")
+            assert isinstance(p, Parameter)
+            assert p.name == "a"
+            assert p.value == "{{workflow.parameters.a}}"
+
+        with pytest.raises(KeyError) as e:
+            Workflow("w").get_parameter("a")
+        assert str(e.value) == "'`a` is not a valid workflow parameter'"

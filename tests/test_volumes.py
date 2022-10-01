@@ -13,9 +13,8 @@ class TestAccessMode:
 
 
 class TestBaseVolume:
-
     def test_build_claim_spec_returns_None(self):
-        assert _BaseVolume('/mnt')._build_claim_spec() is None
+        assert _BaseVolume("/mnt")._build_claim_spec() is None
 
 
 def test_empty_dir_volume_created_without_size():

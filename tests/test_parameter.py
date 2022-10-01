@@ -1,5 +1,4 @@
 import pytest
-from argo_workflows import ApiTypeError
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Parameter,
     IoArgoprojWorkflowV1alpha1ValueFrom,
@@ -41,7 +40,7 @@ class TestParameter:
             Parameter("a").as_argument()
         assert (
             str(e.value) == "Parameter with name `a` cannot be interpreted as argument "
-                            "as neither of the following args are set: `value`, `value_from`, `default`"
+            "as neither of the following args are set: `value`, `value_from`, `default`"
         )
 
     def test_as_input_returns_expected_parameter(self):
@@ -82,9 +81,9 @@ class TestParameter:
         assert str(e.value) == "Cannot represent `Parameter` as string as `value` is not set"
 
     def test_contains_items_returns_true_on_value_present(self):
-        p = Parameter('a', value='{{item.a}}')
+        p = Parameter("a", value="{{item.a}}")
         assert p.contains_item
 
     def test_contains_value_returns_expected_false(self):
-        p = Parameter('a', value='42')
+        p = Parameter("a", value="42")
         assert not p.contains_item

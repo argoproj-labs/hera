@@ -282,7 +282,7 @@ class Workflow:
         if isinstance(other, Task):
             self.exit_task = other.name
             other.is_exit_task = True
-        else:
+        elif isinstance(other, DAG):
             # If the exit task is a DAG, we need to propagate the DAG and its
             # templates by instantiating a task within the current context.
             # The name will never be used; it's only present because the
@@ -290,6 +290,8 @@ class Workflow:
             t = Task("temp-name-for-hera-exit-dag", dag=other)
             t.is_exit_task = True
             self.exit_task = other.name
+        else:
+            raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
 
     def delete(self) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
@@ -298,5 +300,5 @@ class Workflow:
     def get_parameter(self, name: str) -> Parameter:
         """Assembles the specified parameter name into a parameter specification"""
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
-            raise KeyError("`{name}` not in workflow parameters")
+            raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
