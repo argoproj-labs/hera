@@ -33,9 +33,11 @@ class TestDAGContext:
 
     def test_add_tasks_adds_expected_tasks(self):
         ctx = _DAG_context()
-        ctx.enter(DAG("d"))
-        assert len(ctx._dags) == 1
+        ctx.enter(DAG("a"))
+        ctx.enter(DAG("b"))
+        assert len(ctx._dags) == 2
         ctx.add_tasks(Task("a"), Task("b"))
-        assert len(ctx._dags[0].tasks) == 2
-        assert ctx._dags[0].tasks[0].name == "a"
-        assert ctx._dags[0].tasks[1].name == "b"
+        assert len(ctx._dags[0].tasks) == 0
+        assert len(ctx._dags[-1].tasks) == 2
+        assert ctx._dags[-1].tasks[0].name == "a"
+        assert ctx._dags[-1].tasks[1].name == "b"
