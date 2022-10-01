@@ -32,13 +32,13 @@ class Parameter:
         value_from: Optional[dict] = None,
     ) -> None:
         if value is not None and value_from is not None:
-            raise ValueError("`value` and `value_from` args must be exclusive")
+            raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
         self.name = name
         self.value = str(value) if value is not None else None
         self.default = str(default) if default is not None else None
         self.value_from = value_from
 
-    def as_name(self, name: str):
+    def as_name(self, name: str) -> "Parameter":
         """Changes the name of the parameter."""
         self.name = name
         return self
@@ -82,14 +82,14 @@ class Parameter:
             return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value_from=argo_value_from)
 
     def __str__(self):
-        """
-        Represent the parameter as a string by pointing to its value.
-        This is useful in situations where we want to concatinate string values, like
-        Task.args=["echo", wf.get_parameter("message")]
+        """Represent the parameter as a string by pointing to its value.
+
+        This is useful in situations where we want to concatenate string values such as
+        Task.args=["echo", wf.get_parameter("message")].
         """
         if self.value:
             return self.value
-        raise ValueError("Cannot represent as string as `value` is not set")
+        raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
 
     @property
     def contains_item(self) -> bool:

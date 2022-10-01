@@ -1,47 +1,82 @@
 import pytest
 from argo_workflows import ApiTypeError
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Parameter,
+    IoArgoprojWorkflowV1alpha1ValueFrom,
+)
 
-from hera import Parameter
-
-
-def test_parameter():
-    p = Parameter(name="o", value_from=dict(path="/test.txt", default="d"))
-    assert p.name == "o"
-    assert p.value_from
-    assert p.value_from["path"] == "/test.txt"
-    assert p.value_from["default"] == "d"
+from hera.parameter import Parameter
 
 
-# def test_parameter_as_signature():
-#     p = Parameter(name="i", value="v")
+class TestParameter:
+    def test_init_raises_value_error(self):
+        with pytest.raises(ValueError) as e:
+            Parameter("a", value_from=dict(a=42), value="42")
+        assert str(e.value) == "Cannot specify both `value` and `value_from` when instantiating `Parameter`"
 
+    def test_as_name_returns_expected_parameter(self):
+        p = Parameter("a", value="42").as_name("b")
+        assert isinstance(p, Parameter)
+        assert p.name == "b"
 
-def test_parameter_as_output():
-    p = Parameter(name="o", value_from=dict(path="/test.txt", default="d"))
-    o = p.as_output()
-    assert o.name == "o"
-    assert o.value_from["path"] == "/test.txt"
-    assert o.value_from["default"] == "d"
+    def test_as_argument_returns_None_on_default_with_no_values(self):
+        arg = Parameter("a", default="42").as_argument()
+        assert arg is None
 
+    def test_as_argument_returns_expected_parameter(self):
+        arg = Parameter("a", value="42").as_argument()
+        assert isinstance(arg, IoArgoprojWorkflowV1alpha1Parameter)
+        assert hasattr(arg, "value")
+        assert arg.value == "42"
 
-def test_parameter_as_input():
-    p = Parameter(name="i", value="v")
-    i = p.as_argument()
-    assert i is not None
-    assert i.name == "i"
-    assert i.value == "v"
+        arg = Parameter("a", value_from=dict(path="abc")).as_argument()
+        assert isinstance(arg, IoArgoprojWorkflowV1alpha1Parameter)
+        assert hasattr(arg, "value_from")
+        assert isinstance(arg.value_from, IoArgoprojWorkflowV1alpha1ValueFrom)
+        assert hasattr(arg.value_from, "path")
+        assert arg.value_from.path == "abc"
 
+    def test_as_argument_raises_value_error_on_misspec(self):
+        with pytest.raises(ValueError) as e:
+            Parameter("a").as_argument()
+        assert (
+            str(e.value) == "Parameter with name `a` cannot be interpreted as argument "
+            "as neither of the following args are set: `value`, `value_from`, `default`"
+        )
 
-def test_parameter_as_input_fail():
-    p = Parameter(name="i")
-    with pytest.raises(ValueError) as e:
-        p.as_argument()
-    # assert str(e.value) == "Parameter cannot be interpreted as input as there is no `value` or `value_from`"
+    def test_as_input_returns_expected_parameter(self):
+        param = Parameter("a", default="42").as_input()
+        assert isinstance(param, IoArgoprojWorkflowV1alpha1Parameter)
+        assert hasattr(param, "default")
+        assert param.default == "42"
 
+    def test_as_output_returns_expected_parameter(self):
+        param = Parameter("a", value_from=dict(path="abc")).as_output()
+        assert isinstance(param, IoArgoprojWorkflowV1alpha1Parameter)
+        assert hasattr(param, "name")
+        assert param.name == "a"
+        assert hasattr(param, "value_from")
+        assert isinstance(param.value_from, IoArgoprojWorkflowV1alpha1ValueFrom)
+        assert hasattr(param.value_from, "path")
+        assert not hasattr(param.value_from, "default")
+        assert not hasattr(param.value_from, "parameter")
+        assert param.value_from.path == "abc"
 
-def test_parameter_with_default_value():
-    p = Parameter(name="i", default="default_value")
-    assert p.as_argument() is None
-    assert p.as_input() is not None
-    with pytest.raises(ApiTypeError):
-        p.as_output()
+        param = Parameter("a", value="43", default="42").as_output()
+        assert isinstance(param, IoArgoprojWorkflowV1alpha1Parameter)
+        assert hasattr(param, "name")
+        assert param.name == "a"
+        assert hasattr(param, "value_from")
+        assert isinstance(param.value_from, IoArgoprojWorkflowV1alpha1ValueFrom)
+        assert hasattr(param.value_from, "default")
+        assert param.value_from.default == "42"
+        assert hasattr(param.value_from, "parameter")
+        assert param.value_from.parameter == "43"
+
+    def test_str_returns_expected_string(self):
+        assert str(Parameter("a", value="42")) == "42"
+
+    def test_str_raises_value_error_on_no_value_set(self):
+        with pytest.raises(ValueError) as e:
+            str(Parameter("a"))
+        assert str(e.value) == "Cannot represent `Parameter` as string as `value` is not set"
