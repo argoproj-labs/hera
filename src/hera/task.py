@@ -351,7 +351,7 @@ class Task(IO):
                 ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
                 self.next(o)
             return other
-        raise ValueError(f"Unknown type {type(other)}provided to `__rshift__`")
+        raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
     def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.Equals) -> "Task":
         """Execute this task conditionally on a workflow status."""
@@ -462,7 +462,7 @@ class Task(IO):
             ), "`with_param` is of unsupported type"
             assert len(self.with_param) != 0, "`with_param` cannot be empty"
         if self.with_sequence is not None:
-            assert isinstance(self.with_sequence, dict)
+            assert isinstance(self.with_sequence, dict), "Accepted type for `with_sequence` is `dict`"
         if self.source:
             self._validate_source()
         if self.pod_spec_patch is not None:
@@ -475,7 +475,7 @@ class Task(IO):
             if self.memoize:
                 assert self.memoize.key in args, "memoize key must be a parameter of the function"
 
-    def build_arguments(self) -> Optional[IoArgoprojWorkflowV1alpha1Arguments]:
+    def _build_arguments(self) -> Optional[IoArgoprojWorkflowV1alpha1Arguments]:
         """Assembles and returns the task arguments"""
         parameters = [obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)]
         parameters = [p for p in parameters if p is not None]  # Some parameters might not resolve
@@ -509,12 +509,12 @@ class Task(IO):
         """
         parameters = [p for p in self.outputs if isinstance(p, Parameter)]
         obj = next((output for output in parameters if output.name == name), None)
-        if obj:
+        if obj is not None:
             if isinstance(obj, Parameter):
                 value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
                 return Parameter(name, value, default=obj.default)
             raise NotImplementedError(type(obj))
-        raise KeyError(f"No output parameter named {name} found")
+        raise KeyError(f"No output parameter named `{name}` found")
 
     def get_artifact(self, name: str) -> Artifact:
         """Returns an Artifact from this tasks' outputs based on the name.
@@ -532,11 +532,11 @@ class Task(IO):
         """
         artifacts = [p for p in self.outputs if isinstance(p, Artifact)]
         obj = next((output for output in artifacts if output.name == name), None)
-        if obj:
+        if obj is not None:
             if isinstance(obj, Artifact):
                 return Artifact(name, path=obj.path, from_task=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
             raise NotImplementedError(type(obj))
-        raise KeyError(f"No output artifact named {name} found")
+        raise KeyError(f"No output artifact named `{name}` found")
 
     def get_result(self) -> str:
         """Returns the formatted field that points to the result/output of this task"""
@@ -953,7 +953,7 @@ class Task(IO):
             name=self.name,
             _check_type=False,
         )
-        arguments = self.build_arguments()
+        arguments = self._build_arguments()
         if arguments:
             setattr(task, "arguments", arguments)
 
