@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from argo_workflows.models import HostAlias as ArgoHostAlias
-from argo_workflows.models import ObjectMeta, PodSecurityContext
+from argo_workflows.models import PodSecurityContext
 
 from hera import (
     ConfigMapVolume,

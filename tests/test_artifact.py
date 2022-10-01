@@ -6,7 +6,6 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
     SecretKeySelector,
-
 )
 
 from hera import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact, Task
@@ -191,14 +190,14 @@ class TestGitArtifact:
         assert artifact.git.insecure_ignore_host_key
         assert hasattr(artifact.git, "username_secret")
         assert isinstance(artifact.git.username_secret, SecretKeySelector)
-        assert artifact.git.username_secret.key == 'key'
-        assert hasattr(artifact.git.username_secret, 'name')
-        assert artifact.git.username_secret.name == 'abc'
+        assert artifact.git.username_secret.key == "key"
+        assert hasattr(artifact.git.username_secret, "name")
+        assert artifact.git.username_secret.name == "abc"
         assert hasattr(artifact.git, "password_secret")
         assert isinstance(artifact.git.password_secret, SecretKeySelector)
-        assert artifact.git.password_secret.key == 'key'
-        assert hasattr(artifact.git.password_secret, 'name')
-        assert artifact.git.password_secret.name == 'abc'
+        assert artifact.git.password_secret.key == "key"
+        assert hasattr(artifact.git.password_secret, "name")
+        assert artifact.git.password_secret.name == "abc"
         assert hasattr(artifact.git, "revision")
         assert artifact.git.revision == "abc"
 
@@ -235,12 +234,12 @@ class TestGitArtifact:
         assert artifact.git.insecure_ignore_host_key
         assert hasattr(artifact.git, "username_secret")
         assert isinstance(artifact.git.username_secret, SecretKeySelector)
-        assert artifact.git.username_secret.key == 'key'
-        assert not hasattr(artifact.git.username_secret, 'name')
+        assert artifact.git.username_secret.key == "key"
+        assert not hasattr(artifact.git.username_secret, "name")
         assert hasattr(artifact.git, "password_secret")
         assert isinstance(artifact.git.password_secret, SecretKeySelector)
-        assert artifact.git.password_secret.key == 'key'
-        assert not hasattr(artifact.git.password_secret, 'name')
+        assert artifact.git.password_secret.key == "key"
+        assert not hasattr(artifact.git.password_secret, "name")
         assert hasattr(artifact.git, "revision")
         assert artifact.git.revision == "abc"
 
