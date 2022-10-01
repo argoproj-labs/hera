@@ -330,3 +330,6 @@ class TestWorkflow:
         with pytest.raises(KeyError) as e:
             Workflow("w").get_parameter("a")
         assert str(e.value) == "'`a` is not a valid workflow parameter'"
+
+    def test_get_name(self):
+        assert Workflow('w').get_name() == '{{workflow.name}}'
