@@ -198,6 +198,11 @@ class TestGitArtifact:
         assert artifact.git.password_secret.key == "key"
         assert hasattr(artifact.git.password_secret, "name")
         assert artifact.git.password_secret.name == "abc"
+        assert hasattr(artifact.git, "ssh_private_key_secret")
+        assert isinstance(artifact.git.ssh_private_key_secret, SecretKeySelector)
+        assert artifact.git.ssh_private_key_secret.key == "key"
+        assert hasattr(artifact.git.ssh_private_key_secret, "name")
+        assert artifact.git.ssh_private_key_secret.name == "abc"
         assert hasattr(artifact.git, "revision")
         assert artifact.git.revision == "abc"
 
@@ -212,7 +217,6 @@ class TestGitArtifact:
             insecure_ignore_host_key=True,
             username_secret_key="key",
             password_secret_key="key",
-            ssh_private_key_secret_name="abc",
             ssh_private_key_secret_key="key",
         ).as_argument()
         assert isinstance(artifact, IoArgoprojWorkflowV1alpha1Artifact)
@@ -240,6 +244,10 @@ class TestGitArtifact:
         assert isinstance(artifact.git.password_secret, SecretKeySelector)
         assert artifact.git.password_secret.key == "key"
         assert not hasattr(artifact.git.password_secret, "name")
+        assert hasattr(artifact.git, "ssh_private_key_secret")
+        assert isinstance(artifact.git.ssh_private_key_secret, SecretKeySelector)
+        assert artifact.git.ssh_private_key_secret.key == "key"
+        assert not hasattr(artifact.git.ssh_private_key_secret, "name")
         assert hasattr(artifact.git, "revision")
         assert artifact.git.revision == "abc"
 
