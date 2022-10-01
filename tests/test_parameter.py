@@ -41,7 +41,7 @@ class TestParameter:
             Parameter("a").as_argument()
         assert (
             str(e.value) == "Parameter with name `a` cannot be interpreted as argument "
-            "as neither of the following args are set: `value`, `value_from`, `default`"
+                            "as neither of the following args are set: `value`, `value_from`, `default`"
         )
 
     def test_as_input_returns_expected_parameter(self):
@@ -80,3 +80,11 @@ class TestParameter:
         with pytest.raises(ValueError) as e:
             str(Parameter("a"))
         assert str(e.value) == "Cannot represent `Parameter` as string as `value` is not set"
+
+    def test_contains_items_returns_true_on_value_present(self):
+        p = Parameter('a', value='{{item.a}}')
+        assert p.contains_item
+
+    def test_contains_value_returns_expected_false(self):
+        p = Parameter('a', value='42')
+        assert not p.contains_item
