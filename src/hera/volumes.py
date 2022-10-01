@@ -21,11 +21,11 @@ from hera.validators import validate_storage_units
 
 @dataclass
 class _Sized:
-    # the `size` field is optional because inheritors might or might not use the field. For instance, `EmptyDir` has the
-    # option of not using the `size`. By comparison, a `Volume` always requires a `size`. While this `_Sized` could be
-    # removed so that inheritors add their own fields, inheritors also use `_BaseVolume`, which contains optional and
-    # non-optional fields. Therefore, inheritors cannot introduce a required `size` field after inheriting from
-    # `_BaseVolume`, which is a limitation imposed by `dataclass`
+    # the `size` field is optional because inheritors might or might not use the field. For instance, `EmptyDir` has
+    # the option of not using the `size`. By comparison, a `Volume` always requires a `size`. While this `_Sized`
+    # could be removed so that inheritors add their own fields, inheritors also use `_BaseVolume`, which contains
+    # optional and non-optional fields. Therefore, inheritors cannot introduce a required `size` field after
+    # inheriting from `_BaseVolume`, which is a limitation imposed by `dataclass`
     size: Optional[str] = None
 
 
