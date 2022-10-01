@@ -21,6 +21,11 @@ from hera.validators import validate_storage_units
 
 @dataclass
 class _Sized:
+    # the `size` field is optional because inheritors might or might not use the field. For instance, `EmptyDir` has the
+    # option of not using the `size`. By comparison, a `Volume` always requires a `size`. While this `_Sized` could be
+    # removed so that inheritors add their own fields, inheritors also use `_BaseVolume`, which contains optional and
+    # non-optional fields. Therefore, inheritors cannot introduce a required `size` field after inheriting from
+    # `_BaseVolume`, which is a limitation imposed by `dataclass`
     size: Optional[str] = None
 
 
@@ -66,7 +71,7 @@ class AccessMode(str, Enum):
 
 
 @dataclass
-class BaseVolume:
+class _BaseVolume:
     """Base representation of a volume.
 
     Attributes
@@ -100,7 +105,7 @@ class BaseVolume:
 
 
 @dataclass
-class EmptyDirVolume(BaseVolume, _Sized):
+class EmptyDirVolume(_BaseVolume, _Sized):
     """A representation of an in-memory empty dir volume.
 
     When mounted, this volume results in the creation of a temporary filesystem (tmpfs). The mount path will map to
@@ -127,7 +132,7 @@ class EmptyDirVolume(BaseVolume, _Sized):
 
 
 @dataclass
-class ExistingVolume(BaseVolume):
+class ExistingVolume(_BaseVolume):
     """A representation of an existing volume. This can be used to mount existing volumes to workflow tasks"""
 
     def __post_init__(self):
@@ -147,7 +152,7 @@ class ExistingVolume(BaseVolume):
 
 
 @dataclass
-class SecretVolume(BaseVolume, _NamedSecret):
+class SecretVolume(_BaseVolume, _NamedSecret):
     """A volume representing a secret. This can be used to mount secrets to paths inside a task
 
     Attributes
@@ -164,7 +169,7 @@ class SecretVolume(BaseVolume, _NamedSecret):
 
 
 @dataclass
-class ConfigMapVolume(BaseVolume, _NamedConfigMap):
+class ConfigMapVolume(_BaseVolume, _NamedConfigMap):
     """A volume representing a config map. This can be used to mount config maps to paths inside a task
 
     Attributes
@@ -180,7 +185,7 @@ class ConfigMapVolume(BaseVolume, _NamedConfigMap):
 
 
 @dataclass
-class Volume(_Sized, BaseVolume):
+class Volume(_Sized, _BaseVolume):
     """A dynamically created and mountable volume representation.
 
     This is used to specify a volume mount for a particular task to be executed. It is recommended to not pass in a
