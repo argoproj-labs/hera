@@ -10,7 +10,7 @@ class TestResources:
         with pytest.raises(ValueError):
             Resources(memory_limit="4")
 
-    def test_init_raises_on_invalid_cpu():
+    def test_init_raises_on_invalid_cpu(self):
         with pytest.raises(AssertionError):
             Resources(cpu_limit=-1)
         with pytest.raises(AssertionError):
