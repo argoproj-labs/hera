@@ -141,6 +141,7 @@ class TestWorkflow:
     def test_wf_submit_with_default(self):
         with Workflow("w", labels={"foo": "bar"}) as w:
             w.service = Mock()
+            w.service.create_workflow = Mock()
         w.create()
         w.service.create_workflow.assert_called_with(w.build())
 
@@ -231,3 +232,8 @@ class TestWorkflow:
             assert meta.labels == {"test": "test"}
             assert hasattr(meta, "annotations")
             assert meta.annotations == {"test": "test"}
+
+    def test_service_sets_service_as_expected(self, setup):
+        with Workflow('w') as w:
+            assert w._service is None
+            assert w.service is not None
