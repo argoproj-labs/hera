@@ -19,7 +19,7 @@ def test_validate_name():
         validate_name("TEST")
     assert (
         str(e.value) == "Name is invalid: 'TEST'. Regex used for validation is "
-        "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+                        "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
     )
 
 
@@ -54,4 +54,8 @@ def test_json_serializable():
     with mock.patch("json.dumps") as dumps:
         dumps.side_effect = OverflowError
         assert not json_serializable(42)
+        dumps.assert_called_with(42)
+
+    with mock.patch("json.dumps") as dumps:
+        assert json_serializable(42)
         dumps.assert_called_with(42)
