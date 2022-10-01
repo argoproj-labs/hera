@@ -6,20 +6,29 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
     SecretKeySelector,
+
 )
 
 from hera import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact, Task
 
 
 class TestArtifact:
-    def test_artifact_as_argument_returns_expected_artifact(self):
+    def test_as_argument_returns_expected_artifact(self):
         artifact = Artifact("a", from_task="b", path="/a", sub_path="/b/c")
         argument = artifact.as_argument()
         assert isinstance(argument, IoArgoprojWorkflowV1alpha1Artifact)
+        assert argument.name == "a"
         assert hasattr(argument, "_from")
         assert argument._from == "b"
         assert hasattr(argument, "sub_path")
         assert argument.sub_path == "/b/c"
+
+        artifact = Artifact("a", path="/a")
+        argument = artifact.as_argument()
+        assert isinstance(argument, IoArgoprojWorkflowV1alpha1Artifact)
+        assert argument.name == "a"
+        assert not hasattr(argument, "_from")
+        assert not hasattr(argument, "sub_path")
 
     def test_output_artifact_contains_expected_fields(self):
         name = "test-artifact"
@@ -127,48 +136,113 @@ class TestGCSArtifact:
 
 
 class TestGitArtifact:
-    def test_git_artifact_returns_expected_output(self):
-        name = "git-artifact"
-        path = "/src"
-        repo = "https://github.com/awesome/awesome-repo.git"
-        revision = "main"
+    def test_as_argument_returns_expected_output(self):
+        artifact = GitArtifact("git-artifact", "/src", "https://github.com/awesome/awesome-repo.git").as_argument()
+        assert isinstance(artifact, IoArgoprojWorkflowV1alpha1Artifact)
+        assert hasattr(artifact, "name")
+        assert artifact.name == "git-artifact"
+        assert hasattr(artifact, "path")
+        assert artifact.path == "/src"
+        assert hasattr(artifact, "git")
+        assert isinstance(artifact.git, IoArgoprojWorkflowV1alpha1GitArtifact)
+        assert hasattr(artifact.git, "repo")
+        assert artifact.git.repo == "https://github.com/awesome/awesome-repo.git"
+        assert not hasattr(artifact.git, "depth")
+        assert not hasattr(artifact.git, "disable_submodules")
+        assert not hasattr(artifact.git, "fetch")
+        assert not hasattr(artifact.git, "insecure_ignore_host_key")
+        assert not hasattr(artifact.git, "password_secret")
+        assert not hasattr(artifact.git, "revision")
+        assert not hasattr(artifact.git, "ssh_private_key_secret")
+        assert not hasattr(artifact.git, "username_secret")
 
-        expected = IoArgoprojWorkflowV1alpha1Artifact(
-            name=name, path=path, git=IoArgoprojWorkflowV1alpha1GitArtifact(repo=repo, revision=revision)
-        )
-        actual = GitArtifact(name, path, repo, revision).as_argument()
-        actual_input = GitArtifact(name, path, repo, revision).as_input()
+        artifact = GitArtifact(
+            "git-artifact",
+            "/src",
+            "https://github.com/awesome/awesome-repo.git",
+            revision="abc",
+            depth=2,
+            disable_submodules=True,
+            fetch=["a", "b", "c"],
+            insecure_ignore_host_key=True,
+            username_secret_name="abc",
+            username_secret_key="key",
+            password_secret_name="abc",
+            password_secret_key="key",
+            ssh_private_key_secret_name="abc",
+            ssh_private_key_secret_key="key",
+        ).as_argument()
+        assert isinstance(artifact, IoArgoprojWorkflowV1alpha1Artifact)
+        assert hasattr(artifact, "name")
+        assert artifact.name == "git-artifact"
+        assert hasattr(artifact, "path")
+        assert artifact.path == "/src"
+        assert hasattr(artifact, "git")
+        assert isinstance(artifact.git, IoArgoprojWorkflowV1alpha1GitArtifact)
+        assert hasattr(artifact.git, "repo")
+        assert artifact.git.repo == "https://github.com/awesome/awesome-repo.git"
+        assert hasattr(artifact.git, "depth")
+        assert artifact.git.depth == 2
+        assert hasattr(artifact.git, "disable_submodules")
+        assert artifact.git.disable_submodules
+        assert hasattr(artifact.git, "fetch")
+        assert artifact.git.fetch == ["a", "b", "c"]
+        assert hasattr(artifact.git, "insecure_ignore_host_key")
+        assert artifact.git.insecure_ignore_host_key
+        assert hasattr(artifact.git, "username_secret")
+        assert isinstance(artifact.git.username_secret, SecretKeySelector)
+        assert artifact.git.username_secret.key == 'key'
+        assert hasattr(artifact.git.username_secret, 'name')
+        assert artifact.git.username_secret.name == 'abc'
+        assert hasattr(artifact.git, "password_secret")
+        assert isinstance(artifact.git.password_secret, SecretKeySelector)
+        assert artifact.git.password_secret.key == 'key'
+        assert hasattr(artifact.git.password_secret, 'name')
+        assert artifact.git.password_secret.name == 'abc'
+        assert hasattr(artifact.git, "revision")
+        assert artifact.git.revision == "abc"
 
-        assert actual == expected
-        assert actual_input == expected
-
-    def test_git_artifact_ssh_key_secret(self):
-        name = "git-artifact"
-        path = "/src"
-        repo = "https://github.com/awesome/awesome-repo.git"
-        revision = "main"
-        # name of the secret
-        secret_name = "git-ssh-key"
-        # key in secret
-        secret_key = "ssh-key"
-        secret_key_selector = SecretKeySelector(key=secret_key, name=secret_name)
-        expected = IoArgoprojWorkflowV1alpha1Artifact(
-            name=name,
-            path=path,
-            git=IoArgoprojWorkflowV1alpha1GitArtifact(
-                repo=repo, revision=revision, ssh_private_key_secret=secret_key_selector
-            ),
-        )
-        actual = GitArtifact(
-            name=name,
-            path=path,
-            repo=repo,
-            revision=revision,
-            ssh_private_key_secret_key=secret_key,
-            ssh_private_key_secret_name=secret_name,
-        )
-        assert actual.as_argument() == expected
-        assert actual.as_input() == expected
+        artifact = GitArtifact(
+            "git-artifact",
+            "/src",
+            "https://github.com/awesome/awesome-repo.git",
+            revision="abc",
+            depth=2,
+            disable_submodules=True,
+            fetch=["a", "b", "c"],
+            insecure_ignore_host_key=True,
+            username_secret_key="key",
+            password_secret_key="key",
+            ssh_private_key_secret_name="abc",
+            ssh_private_key_secret_key="key",
+        ).as_argument()
+        assert isinstance(artifact, IoArgoprojWorkflowV1alpha1Artifact)
+        assert hasattr(artifact, "name")
+        assert artifact.name == "git-artifact"
+        assert hasattr(artifact, "path")
+        assert artifact.path == "/src"
+        assert hasattr(artifact, "git")
+        assert isinstance(artifact.git, IoArgoprojWorkflowV1alpha1GitArtifact)
+        assert hasattr(artifact.git, "repo")
+        assert artifact.git.repo == "https://github.com/awesome/awesome-repo.git"
+        assert hasattr(artifact.git, "depth")
+        assert artifact.git.depth == 2
+        assert hasattr(artifact.git, "disable_submodules")
+        assert artifact.git.disable_submodules
+        assert hasattr(artifact.git, "fetch")
+        assert artifact.git.fetch == ["a", "b", "c"]
+        assert hasattr(artifact.git, "insecure_ignore_host_key")
+        assert artifact.git.insecure_ignore_host_key
+        assert hasattr(artifact.git, "username_secret")
+        assert isinstance(artifact.git.username_secret, SecretKeySelector)
+        assert artifact.git.username_secret.key == 'key'
+        assert not hasattr(artifact.git.username_secret, 'name')
+        assert hasattr(artifact.git, "password_secret")
+        assert isinstance(artifact.git.password_secret, SecretKeySelector)
+        assert artifact.git.password_secret.key == 'key'
+        assert not hasattr(artifact.git.password_secret, 'name')
+        assert hasattr(artifact.git, "revision")
+        assert artifact.git.revision == "abc"
 
 
 class TestHTTPArtifact:
