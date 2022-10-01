@@ -813,3 +813,21 @@ print(42)
         assert isinstance(p, Parameter)
         assert p.name == "a"
         assert p.value == "{{tasks.t.outputs.result}}"
+
+    def test_deduce_input_params(self):
+        params = Task("t", dag=DAG("d"))._deduce_input_params()
+        assert len(params) == 0
+
+        params = Task("t", dag=DAG("d", inputs=[Parameter("a", value="42")]))._deduce_input_params()
+        assert len(params) == 1
+        assert params[0].name == "a"
+        assert params[0].value == "{{item}}"
+
+        params = Task(
+            "t", dag=DAG("d", inputs=[Parameter("a", value="42"), Parameter("b", value="43")])
+        )._deduce_input_params()
+        assert len(params) == 2
+        assert params[0].name == "a"
+        assert params[0].value == "{{item.a}}"
+        assert params[1].name == "b"
+        assert params[1].value == "{{item.b}}"

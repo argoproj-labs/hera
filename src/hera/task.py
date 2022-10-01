@@ -672,7 +672,7 @@ class Task(IO):
         Returns
         -------
         List[Parameter]
-            A list representing the deduced parameters
+            A list representing the deduced parameters.
         """
         deduced_params: List[Parameter] = []
 
@@ -690,7 +690,7 @@ class Task(IO):
             if isinstance(spec, Env) and spec.value_from_input:
                 deduced_params.append(Parameter(name=spec.name, value=spec.value_from_input))
 
-        return deduced_params  # type: ignore
+        return deduced_params
 
     def _get_param_script_portion(self) -> Optional[str]:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
