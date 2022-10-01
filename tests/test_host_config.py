@@ -1,7 +1,15 @@
 import pytest
 
-from hera import Client, Config, set_global_host, get_global_host, set_global_token, get_global_token, \
-    set_global_namespace, get_global_namespace
+from hera import (
+    Client,
+    Config,
+    get_global_host,
+    get_global_namespace,
+    get_global_token,
+    set_global_host,
+    set_global_namespace,
+    set_global_token,
+)
 
 
 def test_config_assembles_host_from_global_host():
@@ -42,24 +50,24 @@ def test_config_fails_when_no_token_is_provided():
 
 
 def test_global_namespace_set_as_expected():
-    assert get_global_namespace() == 'default'
-    set_global_namespace('argo')
-    assert get_global_namespace() == 'argo'
-    set_global_namespace('default')
-    assert get_global_namespace() == 'default'
+    assert get_global_namespace() == "default"
+    set_global_namespace("argo")
+    assert get_global_namespace() == "argo"
+    set_global_namespace("default")
+    assert get_global_namespace() == "default"
 
 
 def test_global_host_set_as_expected():
     assert get_global_host() is None
-    set_global_host('host')
-    assert get_global_host() == 'host'
+    set_global_host("host")
+    assert get_global_host() == "host"
     set_global_host(None)
     assert get_global_host() is None
 
 
 def test_global_token_set_as_expected():
     assert get_global_token() is None
-    set_global_token('token')
-    assert get_global_token() == 'token'
+    set_global_token("token")
+    assert get_global_token() == "token"
     set_global_token(None)
     assert get_global_token() is None
