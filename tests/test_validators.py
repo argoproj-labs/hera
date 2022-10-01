@@ -55,3 +55,7 @@ def test_json_serializable():
         dumps.side_effect = OverflowError
         assert not json_serializable(42)
         dumps.assert_called_with(42)
+
+    with mock.patch("json.dumps") as dumps:
+        assert json_serializable(42)
+        dumps.assert_called_with(42)
