@@ -17,9 +17,6 @@ class RetryStrategy:
 
     Attributes
     ----------
-    affinity: Optional[Dict] = None
-        Affinity prevents running workflow's step on the same host.
-        See: https://argoproj.github.io/argo-workflows/fields/#retryaffinity
     backoff: Optional[Backoff] = None
         Backoff strategy. See `hera.backoff.Backoff` or https://argoproj.github.io/argo-workflows/fields/#backoff.
     expression: Optional[str] = None
@@ -31,8 +28,6 @@ class RetryStrategy:
         The strategy for performing retries, for example OnError vs OnFailure vs Always
     """
 
-    # TODO: make custom object for Backoff, Affinity
-    affinity: Optional[Dict] = None
     backoff: Optional[Backoff] = None
     expression: Optional[str] = None
     limit: Optional[int] = None
@@ -40,8 +35,6 @@ class RetryStrategy:
 
     def build(self):
         strategy = IoArgoprojWorkflowV1alpha1RetryStrategy()
-        if self.affinity is not None:
-            setattr(strategy, "affinity", IoArgoprojWorkflowV1alpha1RetryAffinity(**self.affinity))
         if self.backoff is not None:
             setattr(strategy, "backoff", self.backoff.build())
         if self.expression is not None:
