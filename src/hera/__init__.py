@@ -47,6 +47,7 @@ from hera.task import Task, TaskResult
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.ttl_strategy import TTLStrategy
+from hera.value_from import ValueFrom
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import (
     AccessMode,

@@ -32,6 +32,10 @@ class ValueFrom:
         `dag.get_parameter(...)`, and `workflow.get_parameter(...)`.
     path: Optional[str] = None
         Path in the container to retrieve an output parameter value from in container templates.
+
+    See Also
+    --------
+    https://argoproj.github.io/argo-workflows/fields/#valuefrom
     """
 
     config_map_key_ref: Optional[str] = None
