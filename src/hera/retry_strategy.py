@@ -43,7 +43,7 @@ class RetryStrategy:
         if self.affinity is not None:
             setattr(strategy, "affinity", IoArgoprojWorkflowV1alpha1RetryAffinity(**self.affinity))
         if self.backoff is not None:
-            setattr(strategy, "backoff", IoArgoprojWorkflowV1alpha1Backoff(**self.backoff))
+            setattr(strategy, "backoff", self.backoff.build())
         if self.expression is not None:
             setattr(strategy, "expression", self.expression)
         if self.limit is not None:

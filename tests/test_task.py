@@ -12,6 +12,7 @@ from argo_workflows.models import Toleration as _ArgoToleration
 from hera import (
     DAG,
     Artifact,
+    Backoff,
     ConfigMapEnv,
     ConfigMapEnvFrom,
     ConfigMapVolume,
@@ -251,7 +252,7 @@ print(42)
             resources=Resources(gpus=1),
             tolerations=[GPUToleration],
             node_selectors={"abc": "123-gpu"},
-            retry_strategy=RetryStrategy(backoff=dict(duration="1", max_duration="2")),
+            retry_strategy=RetryStrategy(backoff=Backoff(duration="1", max_duration="2")),
             daemon=True,
             affinity=affinity,
             memoize=Memoize("a", "b", "1h"),
@@ -297,7 +298,7 @@ print(42)
         assert not hasattr(tt, "affinity")
 
     def test_task_template_contains_expected_retry_strategy(self, no_op):
-        r = RetryStrategy(backoff=dict(duration="3", max_duration="9"))
+        r = RetryStrategy(backoff=Backoff(duration="3", max_duration="9"))
         t = Task("t", no_op, retry_strategy=r)
         assert t.retry_strategy is not None
         assert t.retry_strategy.backoff is not None
@@ -684,7 +685,7 @@ print(42)
         assert str(e.value) == "Cannot use both `dag` and `source`"
 
         with pytest.raises(ValueError) as e:
-            Task("t", dag=DAG("d"), template_ref="tref")
+            Task("t", dag=DAG("d"), template_ref=TemplateRef(name="tref"))
         assert str(e.value) == "Cannot use both `dag` and `template_ref`"
 
         with pytest.raises(ValueError) as e:
