@@ -50,6 +50,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 119
+skip-string-normalization = true
 target-version = ['py37']
 include = '\.pyi?$'
 
@@ -63,6 +64,7 @@ max-line-length = 119
 addopts = "-ra -q"
 
 [tool.isort]
+known_first_party = ["hera"]
 profile = "black"
 skip_gitignore = true
 skip_glob = [".venv/*", ".mypy_cache/*", ".pytest_cache/*", ".github/*", ".git/*"]
