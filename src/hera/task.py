@@ -7,13 +7,12 @@ import textwrap
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
-from argo_workflows.model.env_from_source import EnvFromSource
-
 if TYPE_CHECKING:
     from hera import DAG
 
 from argo_workflows.models import (
     Container,
+    EnvFromSource,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1DAGTask,
