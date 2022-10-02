@@ -31,6 +31,7 @@ class RetryStrategy:
         The strategy for performing retries, for example OnError vs OnFailure vs Always
     """
 
+    # TODO: make custom object for Backoff, Affinity
     affinity: Optional[Dict] = None
     backoff: Optional[Dict] = None
     expression: Optional[str] = None

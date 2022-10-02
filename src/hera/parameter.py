@@ -24,6 +24,7 @@ class Parameter:
         See https://argoproj.github.io/argo-workflows/fields/#valuefrom.
     """
 
+    # TODO: make custom object for ValueFrom
     def __init__(
         self,
         name: str,

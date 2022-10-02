@@ -176,6 +176,7 @@ class Task(IO):
         name: str,
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
+        # TODO: make custom object for Sequence
         with_sequence: Optional[dict] = None,
         inputs: Optional[List[Union[Parameter, Artifact]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
