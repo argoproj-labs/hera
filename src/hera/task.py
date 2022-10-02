@@ -47,12 +47,12 @@ from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
 from hera.volumes import (
-    BaseVolume,
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
     SecretVolume,
     Volume,
+    _BaseVolume,
 )
 from hera.workflow_status import WorkflowStatus
 
@@ -187,7 +187,7 @@ class Task(IO):
         args: Optional[List[str]] = None,
         env: Optional[List[Union[Env, BaseEnvFrom]]] = None,
         resources: Optional[Resources] = None,
-        volumes: Optional[List[BaseVolume]] = None,
+        volumes: Optional[List[_BaseVolume]] = None,
         working_dir: Optional[str] = None,
         retry_strategy: Optional[RetryStrategy] = None,
         tolerations: Optional[List[Toleration]] = None,
@@ -351,7 +351,7 @@ class Task(IO):
                 ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
                 self.next(o)
             return other
-        raise ValueError(f"Unknown type {type(other)}provided to `__rshift__`")
+        raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
     def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.Equals) -> "Task":
         """Execute this task conditionally on a workflow status."""
@@ -462,7 +462,7 @@ class Task(IO):
             ), "`with_param` is of unsupported type"
             assert len(self.with_param) != 0, "`with_param` cannot be empty"
         if self.with_sequence is not None:
-            assert isinstance(self.with_sequence, dict)
+            assert isinstance(self.with_sequence, dict), "Accepted type for `with_sequence` is `dict`"
         if self.source:
             self._validate_source()
         if self.pod_spec_patch is not None:
@@ -475,7 +475,7 @@ class Task(IO):
             if self.memoize:
                 assert self.memoize.key in args, "memoize key must be a parameter of the function"
 
-    def build_arguments(self) -> Optional[IoArgoprojWorkflowV1alpha1Arguments]:
+    def _build_arguments(self) -> Optional[IoArgoprojWorkflowV1alpha1Arguments]:
         """Assembles and returns the task arguments"""
         parameters = [obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)]
         parameters = [p for p in parameters if p is not None]  # Some parameters might not resolve
@@ -495,7 +495,7 @@ class Task(IO):
         return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
 
     def get_parameter(self, name: str) -> Parameter:
-        """Returns a Parameter from this tasks' outputs based on the name.
+        """Returns a Parameter from the task's outputs based on the name.
 
         Parameters
         ----------
@@ -509,12 +509,12 @@ class Task(IO):
         """
         parameters = [p for p in self.outputs if isinstance(p, Parameter)]
         obj = next((output for output in parameters if output.name == name), None)
-        if obj:
+        if obj is not None:
             if isinstance(obj, Parameter):
                 value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
                 return Parameter(name, value, default=obj.default)
             raise NotImplementedError(type(obj))
-        raise KeyError(f"No output parameter named {name} found")
+        raise KeyError(f"No output parameter named `{name}` found")
 
     def get_artifact(self, name: str) -> Artifact:
         """Returns an Artifact from this tasks' outputs based on the name.
@@ -532,11 +532,11 @@ class Task(IO):
         """
         artifacts = [p for p in self.outputs if isinstance(p, Artifact)]
         obj = next((output for output in artifacts if output.name == name), None)
-        if obj:
+        if obj is not None:
             if isinstance(obj, Artifact):
                 return Artifact(name, path=obj.path, from_task=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
             raise NotImplementedError(type(obj))
-        raise KeyError(f"No output artifact named {name} found")
+        raise KeyError(f"No output artifact named `{name}` found")
 
     def get_result(self) -> str:
         """Returns the formatted field that points to the result/output of this task"""
@@ -672,7 +672,7 @@ class Task(IO):
         Returns
         -------
         List[Parameter]
-            A list representing the deduced parameters
+            A list representing the deduced parameters.
         """
         deduced_params: List[Parameter] = []
 
@@ -690,7 +690,7 @@ class Task(IO):
             if isinstance(spec, Env) and spec.value_from_input:
                 deduced_params.append(Parameter(name=spec.name, value=spec.value_from_input))
 
-        return deduced_params  # type: ignore
+        return deduced_params
 
     def _get_param_script_portion(self) -> Optional[str]:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
@@ -953,7 +953,7 @@ class Task(IO):
             name=self.name,
             _check_type=False,
         )
-        arguments = self.build_arguments()
+        arguments = self._build_arguments()
         if arguments:
             setattr(task, "arguments", arguments)
 

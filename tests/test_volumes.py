@@ -1,6 +1,20 @@
 import pytest
 
-from hera import AccessMode, EmptyDirVolume, Volume
+from hera.volumes import AccessMode, EmptyDirVolume, Volume, _BaseVolume
+
+
+class TestAccessMode:
+    def test_str_returns_expected_value(self):
+        assert str(AccessMode.ReadWriteOnce) == "ReadWriteOnce"
+        assert str(AccessMode.ReadOnlyMany) == "ReadOnlyMany"
+        assert str(AccessMode.ReadWriteMany) == "ReadWriteMany"
+        assert str(AccessMode.ReadWriteOncePod) == "ReadWriteOncePod"
+        assert len(AccessMode) == 4
+
+
+class TestBaseVolume:
+    def test_build_claim_spec_returns_None(self):
+        assert _BaseVolume("/mnt")._build_claim_spec() is None
 
 
 def test_empty_dir_volume_created_without_size():

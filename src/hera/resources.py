@@ -8,17 +8,17 @@ from hera.validators import validate_storage_units
 
 
 # TODO: Move function?
-def merge_dicts(a: Dict, b: Dict, path=None):
+def _merge_dicts(a: Dict, b: Dict, path=None):
     if path is None:
         path = []
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
-                merge_dicts(a[key], b[key], path + [str(key)])
+                _merge_dicts(a[key], b[key], path + [str(key)])
             elif a[key] == b[key]:
                 pass  # same leaf value
             else:
-                raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
+                raise Exception("Conflict at `%s`" % ".".join(path + [str(key)]))
         else:
             a[key] = b[key]
     return a
@@ -80,22 +80,22 @@ class Resources:
         resources: Dict = dict()
 
         if self.cpu_limit is not None:
-            resources = merge_dicts(resources, dict(limit=dict(cpu=str(self.cpu_limit))))
+            resources = _merge_dicts(resources, dict(limit=dict(cpu=str(self.cpu_limit))))
 
         if self.cpu_request is not None:
-            resources = merge_dicts(resources, dict(request=dict(cpu=str(self.cpu_request))))
+            resources = _merge_dicts(resources, dict(request=dict(cpu=str(self.cpu_request))))
 
         if self.memory_limit is not None:
-            resources = merge_dicts(resources, dict(limit=dict(memory=self.memory_limit)))
+            resources = _merge_dicts(resources, dict(limit=dict(memory=self.memory_limit)))
 
         if self.memory_request is not None:
-            resources = merge_dicts(resources, dict(request=dict(memory=self.memory_request)))
+            resources = _merge_dicts(resources, dict(request=dict(memory=self.memory_request)))
 
         if self.gpus is not None:
-            resources = merge_dicts(resources, dict(request={self.gpu_flag: str(self.gpus)}))
-            resources = merge_dicts(resources, dict(limit={self.gpu_flag: str(self.gpus)}))
+            resources = _merge_dicts(resources, dict(request={self.gpu_flag: str(self.gpus)}))
+            resources = _merge_dicts(resources, dict(limit={self.gpu_flag: str(self.gpus)}))
 
         if self.custom_resources:
-            resources = merge_dicts(resources, self.custom_resources)
+            resources = _merge_dicts(resources, self.custom_resources)
 
         return ResourceRequirements(**resources)
