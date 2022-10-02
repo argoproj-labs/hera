@@ -42,6 +42,7 @@ from hera.resources import Resources
 from hera.retry_policy import RetryPolicy
 from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
+from hera.sequence import Sequence
 from hera.task import Task, TaskResult
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
