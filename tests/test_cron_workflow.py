@@ -65,14 +65,48 @@ class TestCronWorkflow:
     def test_create_calls_service_create(self, schedule, setup):
         with CronWorkflow("test", schedule) as cw:
             cw.service = mock.Mock()
+            cw.service.create_cron_workflow = mock.Mock()
         result = cw.create()
         assert isinstance(result, CronWorkflow)
         cw.service.create_cron_workflow.assert_called_once_with(cw.build())
 
         cw = CronWorkflow("test", schedule)
         cw.service = mock.Mock()
+        cw.service.create_cron_workflow = mock.Mock()
         with pytest.raises(ValueError) as e:
             cw.in_context = True
             cw.create()
         cw.service.create_cron_workflow.assert_not_called()
         assert str(e.value) == "Cannot invoke `create` when using a Hera context"
+
+    def test_delete_calls_service_delete(self, schedule, setup):
+        with CronWorkflow("cw", schedule) as cw:
+            cw.service = mock.Mock()
+            cw.service.delete_workflow = mock.Mock()
+        result = cw.delete()
+        assert isinstance(result, CronWorkflow)
+        cw.service.delete_workflow.assert_called_once()
+
+    def test_delete_calls_service_suspend(self, schedule, setup):
+        with CronWorkflow("cw", schedule) as cw:
+            cw.service = mock.Mock()
+            cw.service.suspend_cron_workflow = mock.Mock()
+        cw.suspend()
+        cw.service.suspend_cron_workflow.assert_called_once()
+
+    def test_delete_calls_service_resume(self, schedule, setup):
+        with CronWorkflow("cw", schedule) as cw:
+            cw.service = mock.Mock()
+            cw.service.resume_cron_workflow = mock.Mock()
+        cw.resume()
+        cw.service.resume_cron_workflow.assert_called_once()
+
+    def test_update_adds_expected_fields_to_cw_self(self, schedule, setup):
+        with CronWorkflow("cw", schedule) as cw:
+            cw.service = mock.Mock()
+            get_cron_return = mock.Mock()
+            get_cron_return.metadata = {'resourceVersion': '42', 'uid': '42'}
+            cw.service.get_cron_workflow = mock.Mock(return_value=get_cron_return)
+            cw.service.update_cron_workflow = mock.Mock()
+        cw.update()
+        cw.service.get_cron_workflow.assert_called_once()
