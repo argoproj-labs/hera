@@ -744,7 +744,7 @@ print(42)
     def test_validate(self):
         with pytest.raises(AssertionError) as e:
             Task("t", with_sequence=42).validate()  # type: ignore
-        assert str(e.value) == "Accepted type for `with_sequence` is `dict`"
+        assert str(e.value) == "Accepted type for `with_sequence` is `Sequence`"
 
         with pytest.raises(ValueError) as e:
             Task("t", pod_spec_patch=42).validate()  # type: ignore
