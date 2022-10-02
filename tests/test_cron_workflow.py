@@ -82,10 +82,9 @@ class TestCronWorkflow:
     def test_delete_calls_service_delete(self, schedule, setup):
         with CronWorkflow("cw", schedule) as cw:
             cw.service = mock.Mock()
-            cw.service.delete_workflow = mock.Mock()
-        result = cw.delete()
-        assert isinstance(result, CronWorkflow)
-        cw.service.delete_workflow.assert_called_once()
+            cw.service.delete_cron_workflow = mock.Mock()
+        cw.delete()
+        cw.service.delete_cron_workflow.assert_called_once()
 
     def test_delete_calls_service_suspend(self, schedule, setup):
         with CronWorkflow("cw", schedule) as cw:
