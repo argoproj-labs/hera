@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1ArchiveStrategy, IoArgoprojWorkflowV1alpha1TarStrategy
+
+from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1ArchiveStrategy,
+    IoArgoprojWorkflowV1alpha1TarStrategy,
+)
 
 
 @dataclass
@@ -26,10 +30,12 @@ class Archive:
         strategy = IoArgoprojWorkflowV1alpha1ArchiveStrategy()
         if self.disable_compression is not None and self.disable_compression:
             # this needs to be set only in the `True` case as `False` is also interpreted as `disable archiving`
-            setattr(strategy, '_none', self.disable_compression)
+            setattr(strategy, "_none", self.disable_compression)
         if self.tar_compression_level is not None:
-            setattr(strategy, 'tar', IoArgoprojWorkflowV1alpha1TarStrategy(compression_level=self.tar_compression_level))
+            setattr(
+                strategy, "tar", IoArgoprojWorkflowV1alpha1TarStrategy(compression_level=self.tar_compression_level)
+            )
         if self.zip is not None and self.zip:
             # this needs to be set only in the `True` case as `False` is also interpreted as `disable archiving`
-            setattr(strategy, 'zip', self.zip)
+            setattr(strategy, "zip", self.zip)
         return strategy

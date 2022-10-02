@@ -11,7 +11,7 @@ from hera.value_from import ValueFrom
 class TestParameter:
     def test_init_raises_value_error(self):
         with pytest.raises(ValueError) as e:
-            Parameter("a", value_from=ValueFrom(default='42'), value="42")
+            Parameter("a", value_from=ValueFrom(default="42"), value="42")
         assert str(e.value) == "Cannot specify both `value` and `value_from` when instantiating `Parameter`"
 
     def test_as_name_returns_expected_parameter(self):

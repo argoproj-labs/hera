@@ -8,7 +8,15 @@ from argo_workflows.models import (
     SecretKeySelector,
 )
 
-from hera import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact, Task, Archive
+from hera import (
+    Archive,
+    Artifact,
+    GCSArtifact,
+    GitArtifact,
+    HttpArtifact,
+    S3Artifact,
+    Task,
+)
 
 
 class TestArtifact:

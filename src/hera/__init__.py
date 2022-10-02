@@ -17,6 +17,7 @@ from hera.affinity import (
     PreferredSchedulingTerm,
     WeightedPodAffinityTerm,
 )
+from hera.archive import Archive
 from hera.artifact import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact
 from hera.client import Client
 from hera.config import Config
@@ -40,7 +41,6 @@ from hera.parameter import Parameter
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry_policy import RetryPolicy
-from hera.archive import Archive
 from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
 from hera.sequence import Sequence
