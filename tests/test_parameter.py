@@ -5,12 +5,13 @@ from argo_workflows.models import (
 )
 
 from hera.parameter import Parameter
+from hera.value_from import ValueFrom
 
 
 class TestParameter:
     def test_init_raises_value_error(self):
         with pytest.raises(ValueError) as e:
-            Parameter("a", value_from=dict(a=42), value="42")
+            Parameter("a", value_from=ValueFrom(default='42'), value="42")
         assert str(e.value) == "Cannot specify both `value` and `value_from` when instantiating `Parameter`"
 
     def test_as_name_returns_expected_parameter(self):
@@ -28,7 +29,7 @@ class TestParameter:
         assert hasattr(arg, "value")
         assert arg.value == "42"
 
-        arg = Parameter("a", value_from=dict(path="abc")).as_argument()
+        arg = Parameter("a", value_from=ValueFrom(path="abc")).as_argument()
         assert isinstance(arg, IoArgoprojWorkflowV1alpha1Parameter)
         assert hasattr(arg, "value_from")
         assert isinstance(arg.value_from, IoArgoprojWorkflowV1alpha1ValueFrom)
@@ -50,7 +51,7 @@ class TestParameter:
         assert param.default == "42"
 
     def test_as_output_returns_expected_parameter(self):
-        param = Parameter("a", value_from=dict(path="abc")).as_output()
+        param = Parameter("a", value_from=ValueFrom(path="abc")).as_output()
         assert isinstance(param, IoArgoprojWorkflowV1alpha1Parameter)
         assert hasattr(param, "name")
         assert param.name == "a"
