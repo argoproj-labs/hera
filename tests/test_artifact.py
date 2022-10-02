@@ -8,7 +8,7 @@ from argo_workflows.models import (
     SecretKeySelector,
 )
 
-from hera import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact, Task
+from hera import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact, Task, Archive
 
 
 class TestArtifact:
@@ -64,7 +64,7 @@ class TestArtifact:
 
 class TestS3Artifact:
     def test_as_argument_returns_expected_argument(self):
-        artifact = S3Artifact("a", "s3://test", "test", "test", archive={"zip": "test"})
+        artifact = S3Artifact("a", "s3://test", "test", "test", Archive(zip=True))
         argument = artifact.as_argument()
         assert isinstance(argument, IoArgoprojWorkflowV1alpha1Artifact)
         assert hasattr(argument, "name")
@@ -78,10 +78,10 @@ class TestS3Artifact:
         assert hasattr(argument, "archive")
         assert isinstance(argument.archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
         assert hasattr(argument.archive, "zip")
-        assert argument.archive.zip == "test"
+        assert argument.archive.zip
 
     def test_as_output_returns_expected_output(self):
-        artifact = S3Artifact("a", "s3://test", "test", "test", archive={"zip": "test"})
+        artifact = S3Artifact("a", "s3://test", "test", "test", Archive(zip=True))
         output = artifact.as_output()
         assert isinstance(output, IoArgoprojWorkflowV1alpha1Artifact)
         assert hasattr(output, "name")
@@ -95,12 +95,12 @@ class TestS3Artifact:
         assert hasattr(output, "archive")
         assert isinstance(output.archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
         assert hasattr(output.archive, "zip")
-        assert output.archive.zip == "test"
+        assert output.archive.zip
 
 
 class TestGCSArtifact:
     def test_as_argument_returns_expected_argument(self):
-        artifact = GCSArtifact("a", "gs://test", "test", "test", archive={"zip": "test"})
+        artifact = GCSArtifact("a", "gs://test", "test", "test", Archive(zip=True))
         argument = artifact.as_argument()
         assert isinstance(argument, IoArgoprojWorkflowV1alpha1Artifact)
         assert hasattr(argument, "name")
@@ -114,10 +114,10 @@ class TestGCSArtifact:
         assert hasattr(argument, "archive")
         assert isinstance(argument.archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
         assert hasattr(argument.archive, "zip")
-        assert argument.archive.zip == "test"
+        assert argument.archive.zip
 
     def test_as_output_returns_expected_output(self):
-        artifact = GCSArtifact("a", "gs://test", "test", "test", archive={"zip": "test"})
+        artifact = GCSArtifact("a", "gs://test", "test", "test", Archive(zip=True))
         output = artifact.as_output()
         assert isinstance(output, IoArgoprojWorkflowV1alpha1Artifact)
         assert hasattr(output, "name")
@@ -131,7 +131,7 @@ class TestGCSArtifact:
         assert hasattr(output, "archive")
         assert isinstance(output.archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
         assert hasattr(output.archive, "zip")
-        assert output.archive.zip == "test"
+        assert output.archive.zip
 
 
 class TestGitArtifact:
