@@ -94,8 +94,8 @@ class TestTask:
         script = t._get_param_script_portion()
         assert (
             script == "import json\n"
-                      "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-                      "except: a = '''{{inputs.parameters.a}}'''\n"
+            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+            "except: a = '''{{inputs.parameters.a}}'''\n"
         )
 
     def test_script_getter_returns_expected_string(self, op, typed_op):
@@ -103,23 +103,23 @@ class TestTask:
         script = t._get_script()
         assert (
             script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-                      "import json\n"
-                      "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-                      "except: a = '''{{inputs.parameters.a}}'''\n"
-                      "\n"
-                      "print(a)\n"
+            "import json\n"
+            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "\n"
+            "print(a)\n"
         )
 
         t = Task("t", typed_op, [{"a": 1}])
         script = t._get_script()
         assert (
             script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-                      "import json\n"
-                      "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-                      "except: a = '''{{inputs.parameters.a}}'''\n"
-                      "\n"
-                      "print(a)\n"
-                      'return [{"a": (a, a)}]\n'
+            "import json\n"
+            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "\n"
+            "print(a)\n"
+            'return [{"a": (a, a)}]\n'
         )
 
     def test_script_getter_parses_multi_line_function(self, long_op):
@@ -269,11 +269,11 @@ print(42)
         assert tt.name == "t"
         assert (
             tt.script.source == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-                                "import json\n"
-                                "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-                                "except: a = '''{{inputs.parameters.a}}'''\n"
-                                "\n"
-                                "print(a)\n"
+            "import json\n"
+            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "\n"
+            "print(a)\n"
         )
         assert tt.inputs.parameters[0].name == "a"
         assert len(tt.tolerations) == 1

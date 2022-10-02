@@ -1,11 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Backoff,
-    IoArgoprojWorkflowV1alpha1RetryAffinity,
-    IoArgoprojWorkflowV1alpha1RetryStrategy,
-)
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1RetryStrategy
 
 from hera.backoff import Backoff
 from hera.retry_policy import RetryPolicy
