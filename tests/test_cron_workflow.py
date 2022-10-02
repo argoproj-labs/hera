@@ -105,7 +105,7 @@ class TestCronWorkflow:
         with CronWorkflow("cw", schedule) as cw:
             cw.service = mock.Mock()
             get_cron_return = mock.Mock()
-            get_cron_return.metadata = {'resourceVersion': '42', 'uid': '42'}
+            get_cron_return.metadata = {"resourceVersion": "42", "uid": "42"}
             cw.service.get_cron_workflow = mock.Mock(return_value=get_cron_return)
             cw.service.update_cron_workflow = mock.Mock()
         cw.update()

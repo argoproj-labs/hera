@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional,Union
+from typing import Optional, Union
 
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1RetryStrategy
 
@@ -33,7 +33,7 @@ class RetryStrategy:
         if self.limit is not None and isinstance(self.limit, int):
             self.limit = str(self.limit)
 
-    def build(self)->IoArgoprojWorkflowV1alpha1RetryStrategy:
+    def build(self) -> IoArgoprojWorkflowV1alpha1RetryStrategy:
         strategy = IoArgoprojWorkflowV1alpha1RetryStrategy()
         if self.backoff is not None:
             setattr(strategy, "backoff", self.backoff.build())

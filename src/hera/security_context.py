@@ -25,7 +25,7 @@ class BaseSecurityContext:
     run_as_group: Optional[int] = None
     run_as_non_root: Optional[bool] = None
 
-    def _get_settable_attributes_as_kwargs(self):
+    def _get_settable_attributes_as_kwargs(self) -> dict:
         """Assembles non-None attribute mappings, from key to value"""
         attributes = asdict(self)
         settable_attributes = {k: v for k, v in attributes.items() if v is not None}
@@ -34,7 +34,7 @@ class BaseSecurityContext:
 
 @dataclass
 class WorkflowSecurityContext(BaseSecurityContext):
-    """Defines workflow level sercurity attributes and settings.
+    """Defines workflow level security attributes and settings.
 
     Attributes
     ----------
@@ -45,9 +45,9 @@ class WorkflowSecurityContext(BaseSecurityContext):
     run_as_group: Optional[int]
         Sets the user id of the user running in all the containers in the workflow.
     fs_group: Optional[int]
-        Allow an additional group to the all users running on all of the containers in the workflow.
+        Allow an additional group to all the users running on the containers in the workflow.
     run_as_non_root: Optional[bool]
-        Validates that all the tasks' container does not run as root, i.e UID does not equal 0.
+        Validates that all the tasks' container does not run as root, i.e, UID does not equal 0.
     """
 
     fs_group: Optional[int] = None
@@ -79,12 +79,12 @@ class TaskSecurityContext(BaseSecurityContext):
 
     additional_capabilities: List[str] = field(default_factory=list)
 
-    def _get_capabilties(self):
+    def _get_capabilties(self) -> Capabilities:
         """Assembles the capabilities of the task security context"""
         if self.additional_capabilities:
             return Capabilities(add=self.additional_capabilities)
 
-    def _get_settable_attributes_as_kwargs(self):
+    def _get_settable_attributes_as_kwargs(self) -> dict:
         settable_attributes = super()._get_settable_attributes_as_kwargs()
         if settable_attributes.pop("additional_capabilities", None):
             settable_attributes["capabilities"] = self._get_capabilties()
