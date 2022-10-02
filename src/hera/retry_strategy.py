@@ -7,6 +7,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1RetryStrategy,
 )
 
+from hera.backoff import Backoff
 from hera.retry_policy import RetryPolicy
 
 
@@ -19,9 +20,8 @@ class RetryStrategy:
     affinity: Optional[Dict] = None
         Affinity prevents running workflow's step on the same host.
         See: https://argoproj.github.io/argo-workflows/fields/#retryaffinity
-    backoff: Optional[Dict] = None
-        Backoff strategy.
-        See: https://argoproj.github.io/argo-workflows/fields/#backoff
+    backoff: Optional[Backoff] = None
+        Backoff strategy. See `hera.backoff.Backoff` or https://argoproj.github.io/argo-workflows/fields/#backoff.
     expression: Optional[str] = None
         Expression is a condition expression for when a node will be retried.
         If it evaluates to false, the node will not be retried and the retry strategy will be ignored
@@ -33,7 +33,7 @@ class RetryStrategy:
 
     # TODO: make custom object for Backoff, Affinity
     affinity: Optional[Dict] = None
-    backoff: Optional[Dict] = None
+    backoff: Optional[Backoff] = None
     expression: Optional[str] = None
     limit: Optional[int] = None
     retry_policy: RetryPolicy = RetryPolicy.Always
