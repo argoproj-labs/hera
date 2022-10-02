@@ -94,8 +94,8 @@ class TestTask:
         script = t._get_param_script_portion()
         assert (
             script == "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
+                      "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+                      "except: a = '''{{inputs.parameters.a}}'''\n"
         )
 
     def test_script_getter_returns_expected_string(self, op, typed_op):
@@ -103,23 +103,23 @@ class TestTask:
         script = t._get_script()
         assert (
             script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
+                      "import json\n"
+                      "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+                      "except: a = '''{{inputs.parameters.a}}'''\n"
+                      "\n"
+                      "print(a)\n"
         )
 
         t = Task("t", typed_op, [{"a": 1}])
         script = t._get_script()
         assert (
             script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
-            'return [{"a": (a, a)}]\n'
+                      "import json\n"
+                      "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+                      "except: a = '''{{inputs.parameters.a}}'''\n"
+                      "\n"
+                      "print(a)\n"
+                      'return [{"a": (a, a)}]\n'
         )
 
     def test_script_getter_parses_multi_line_function(self, long_op):
@@ -269,11 +269,11 @@ print(42)
         assert tt.name == "t"
         assert (
             tt.script.source == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
+                                "import json\n"
+                                "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
+                                "except: a = '''{{inputs.parameters.a}}'''\n"
+                                "\n"
+                                "print(a)\n"
         )
         assert tt.inputs.parameters[0].name == "a"
         assert len(tt.tolerations) == 1
@@ -302,8 +302,8 @@ print(42)
         t = Task("t", no_op, retry_strategy=r)
         assert t.retry_strategy is not None
         assert t.retry_strategy.backoff is not None
-        assert t.retry_strategy.backoff["duration"] == "3"
-        assert t.retry_strategy.backoff["max_duration"] == "9"
+        assert t.retry_strategy.backoff.duration == "3"
+        assert t.retry_strategy.backoff.max_duration == "9"
 
         tt = t._build_template()
         assert tt is not None
@@ -685,7 +685,7 @@ print(42)
         assert str(e.value) == "Cannot use both `dag` and `source`"
 
         with pytest.raises(ValueError) as e:
-            Task("t", dag=DAG("d"), template_ref=TemplateRef(name="tref"))
+            Task("t", dag=DAG("d"), template_ref=TemplateRef(name="tref", template="abc"))
         assert str(e.value) == "Cannot use both `dag` and `template_ref`"
 
         with pytest.raises(ValueError) as e:
