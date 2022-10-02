@@ -85,7 +85,6 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact.
     """
 
-    # TODO: make custom object for Archive
     def __init__(self, name: str, path: str, bucket: str, key: str, archive: Optional[Archive] = None) -> None:
         self.bucket = bucket
         self.key = key
