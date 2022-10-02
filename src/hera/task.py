@@ -219,7 +219,7 @@ class Task(IO):
         self.pod_spec_patch = pod_spec_patch
         self.resource_template: Optional[ResourceTemplate] = resource_template
         self.active_deadline_seconds: Optional[int] = active_deadline_seconds
-        self.timeout: Optional[int] = timeout
+        self.timeout: Optional[str] = timeout
 
         self.image = image
         self.image_pull_policy = image_pull_policy
