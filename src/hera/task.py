@@ -7,16 +7,12 @@ import textwrap
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
-from argo_workflows.model.env_from_source import EnvFromSource
-from argo_workflows.model.io_argoproj_workflow_v1alpha1_sequence import (
-    IoArgoprojWorkflowV1alpha1Sequence,
-)
-
 if TYPE_CHECKING:
     from hera import DAG
 
 from argo_workflows.models import (
     Container,
+    EnvFromSource,
     EnvVar,
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1DAGTask,
@@ -43,6 +39,7 @@ from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext
+from hera.sequence import Sequence
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
@@ -90,9 +87,9 @@ class Task(IO):
         function call with the given parameters. Otherwise, if parallel is False and the list of params is a list of
         lists (each list contains a series of values to pass to the function), the task will execute as a task
         group and schedule multiple function calls in parallel.
-    with_sequence: Optional[dict] = None,
-        Sequence is similar to `with_param` in that it generates a range of objects.
-        See: https://argoproj.github.io/argo-workflows/fields/#sequence
+    with_sequence: Optional[Sequence] = None
+        Sequence is similar to `with_param` in that it generates a range of objects. See `hera.sequence.Sequence` or
+        https://argoproj.github.io/argo-workflows/fields/#sequence.
     inputs: Optional[List[Union[Parameter, Artifact]]] = None
         `Input` or `Parameter` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
         parameter it cannot be used in conjunction with other types of inputs because of the dynamic aspect of the task
@@ -176,7 +173,7 @@ class Task(IO):
         name: str,
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
-        with_sequence: Optional[dict] = None,
+        with_sequence: Optional[Sequence] = None,
         inputs: Optional[List[Union[Parameter, Artifact]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional["DAG"] = None,
@@ -221,8 +218,8 @@ class Task(IO):
         self.with_sequence = with_sequence
         self.pod_spec_patch = pod_spec_patch
         self.resource_template: Optional[ResourceTemplate] = resource_template
-        self.active_deadline_seconds = active_deadline_seconds
-        self.timeout = timeout
+        self.active_deadline_seconds: Optional[int] = active_deadline_seconds
+        self.timeout: Optional[str] = timeout
 
         self.image = image
         self.image_pull_policy = image_pull_policy
@@ -462,7 +459,7 @@ class Task(IO):
             ), "`with_param` is of unsupported type"
             assert len(self.with_param) != 0, "`with_param` cannot be empty"
         if self.with_sequence is not None:
-            assert isinstance(self.with_sequence, dict), "Accepted type for `with_sequence` is `dict`"
+            assert isinstance(self.with_sequence, Sequence), "Accepted type for `with_sequence` is `Sequence`"
         if self.source:
             self._validate_source()
         if self.pod_spec_patch is not None:
@@ -599,7 +596,7 @@ class Task(IO):
 
         if self.with_sequence is not None:
             if len(non_default_params) == 1:
-                # Non-ambigious mapping; `with_sequence` yields non-nested items.
+                # Non-ambiguous mapping; `with_sequence` yields non-nested items.
                 non_default_params.pop().value = "{{item}}"
 
         if self.with_param is not None:
@@ -979,11 +976,7 @@ class Task(IO):
             elif not isinstance(self.with_param, str):
                 with_param = json.dumps(self.with_param)
             setattr(task, "with_param", with_param)
-        if self.with_sequence:
-            # Cast all values to str
-            sequence = dict()
-            for k, v in self.with_sequence.items():
-                sequence[k] = str(v)
-            setattr(task, "with_sequence", IoArgoprojWorkflowV1alpha1Sequence(**sequence))
+        if self.with_sequence is not None:
+            setattr(task, "with_sequence", self.with_sequence.build())
 
         return task

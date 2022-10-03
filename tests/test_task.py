@@ -4,7 +4,9 @@ import pytest
 from argo_workflows.models import (
     Capabilities,
     IoArgoprojWorkflowV1alpha1Arguments,
+    IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
+    IoArgoprojWorkflowV1alpha1Sequence,
     SecurityContext,
 )
 from argo_workflows.models import Toleration as _ArgoToleration
@@ -12,6 +14,7 @@ from argo_workflows.models import Toleration as _ArgoToleration
 from hera import (
     DAG,
     Artifact,
+    Backoff,
     ConfigMapEnv,
     ConfigMapEnvFrom,
     ConfigMapVolume,
@@ -29,6 +32,7 @@ from hera import (
     RetryPolicy,
     RetryStrategy,
     S3Artifact,
+    Sequence,
     Task,
     TaskResult,
     TaskSecurityContext,
@@ -231,6 +235,7 @@ print(42)
         assert len(s.arguments.parameters) == 1
         assert s.arguments.parameters[0].name == "a"
         assert s.arguments.parameters[0].value == "{{item.a}}"
+        assert not hasattr(s, "with_sequence")
 
     def test_task_template_does_not_contain_gpu_references(self, op):
         t = Task("t", op, [{"a": 1}], resources=Resources())
@@ -251,7 +256,7 @@ print(42)
             resources=Resources(gpus=1),
             tolerations=[GPUToleration],
             node_selectors={"abc": "123-gpu"},
-            retry_strategy=RetryStrategy(backoff=dict(duration="1", max_duration="2")),
+            retry_strategy=RetryStrategy(backoff=Backoff(duration="1", max_duration="2")),
             daemon=True,
             affinity=affinity,
             memoize=Memoize("a", "b", "1h"),
@@ -297,12 +302,12 @@ print(42)
         assert not hasattr(tt, "affinity")
 
     def test_task_template_contains_expected_retry_strategy(self, no_op):
-        r = RetryStrategy(backoff=dict(duration="3", max_duration="9"))
+        r = RetryStrategy(backoff=Backoff(duration="3", max_duration="9"))
         t = Task("t", no_op, retry_strategy=r)
         assert t.retry_strategy is not None
         assert t.retry_strategy.backoff is not None
-        assert t.retry_strategy.backoff["duration"] == "3"
-        assert t.retry_strategy.backoff["max_duration"] == "9"
+        assert t.retry_strategy.backoff.duration == "3"
+        assert t.retry_strategy.backoff.max_duration == "9"
 
         tt = t._build_template()
         assert tt is not None
@@ -684,12 +689,24 @@ print(42)
         assert str(e.value) == "Cannot use both `dag` and `source`"
 
         with pytest.raises(ValueError) as e:
-            Task("t", dag=DAG("d"), template_ref="tref")
+            Task("t", dag=DAG("d"), template_ref=TemplateRef(template="tref", name="abc"))
         assert str(e.value) == "Cannot use both `dag` and `template_ref`"
 
         with pytest.raises(ValueError) as e:
-            Task("t", with_param=["abc"], with_sequence={"a": "bc"})
+            Task("t", with_param=["abc"], with_sequence=Sequence("abc"))
         assert str(e.value) == "Cannot use both `with_sequence` and `with_param`"
+
+    def test_task_uses_sequences(self):
+        t = Task("t", with_sequence=Sequence("abc", start=1, end=42))._build_dag_task()
+        assert isinstance(t, IoArgoprojWorkflowV1alpha1DAGTask)
+        assert hasattr(t, "with_sequence")
+        assert isinstance(t.with_sequence, IoArgoprojWorkflowV1alpha1Sequence)
+        assert hasattr(t.with_sequence, "start")
+        assert hasattr(t.with_sequence, "end")
+        assert hasattr(t.with_sequence, "format")
+        assert t.with_sequence.start == "1"
+        assert t.with_sequence.end == "42"
+        assert t.with_sequence.format == "abc"
 
     def test_get_dependency_tasks_returns_None_on_no_depends(self):
         t = Task("t")
@@ -744,7 +761,7 @@ print(42)
     def test_validate(self):
         with pytest.raises(AssertionError) as e:
             Task("t", with_sequence=42).validate()  # type: ignore
-        assert str(e.value) == "Accepted type for `with_sequence` is `dict`"
+        assert str(e.value) == "Accepted type for `with_sequence` is `Sequence`"
 
         with pytest.raises(ValueError) as e:
             Task("t", pod_spec_patch=42).validate()  # type: ignore

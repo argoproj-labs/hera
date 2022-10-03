@@ -1,7 +1,6 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1ArchiveStrategy,
     IoArgoprojWorkflowV1alpha1Artifact,
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
@@ -9,6 +8,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1S3Artifact,
     SecretKeySelector,
 )
+
+from hera.archive import Archive
 
 
 class Artifact:
@@ -84,7 +85,7 @@ class BucketArtifact(Artifact):
     Don't use this directly. Use S3InputArtifact or GCSInputArtifact.
     """
 
-    def __init__(self, name: str, path: str, bucket: str, key: str, archive: Optional[Dict] = None) -> None:
+    def __init__(self, name: str, path: str, bucket: str, key: str, archive: Optional[Archive] = None) -> None:
         self.bucket = bucket
         self.key = key
         self.archive = archive
@@ -101,8 +102,8 @@ class S3Artifact(BucketArtifact):
             path=self.path,
             s3=IoArgoprojWorkflowV1alpha1S3Artifact(bucket=self.bucket, key=self.key),
         )
-        if self.archive:
-            setattr(artifact, "archive", IoArgoprojWorkflowV1alpha1ArchiveStrategy(**self.archive))
+        if self.archive is not None:
+            setattr(artifact, "archive", self.archive.build())
         return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
@@ -124,8 +125,8 @@ class GCSArtifact(BucketArtifact):
             path=self.path,
             gcs=IoArgoprojWorkflowV1alpha1GCSArtifact(bucket=self.bucket, key=self.key),
         )
-        if self.archive:
-            setattr(artifact, "archive", IoArgoprojWorkflowV1alpha1ArchiveStrategy(**self.archive))
+        if self.archive is not None:
+            setattr(artifact, "archive", self.archive.build())
         return artifact
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
