@@ -1,4 +1,4 @@
-from hera import Parameter, Task, Workflow
+from hera import Parameter, Task, ValueFrom, Workflow
 
 
 def generate():
@@ -29,7 +29,7 @@ with Workflow("dynamic-fanout-fanin") as w:
         "fanout",
         fanout,
         with_param=generate_task.get_result(),
-        outputs=[Parameter("value", value_from=dict(path="/tmp/value"))],
+        outputs=[Parameter("value", value_from=ValueFrom(path="/tmp/value"))],
     )
     fanin_task = Task("fanin", fanin, inputs=[fanout_task.get_parameters_as("values")])
 

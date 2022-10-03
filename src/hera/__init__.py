@@ -17,7 +17,9 @@ from hera.affinity import (
     PreferredSchedulingTerm,
     WeightedPodAffinityTerm,
 )
+from hera.archive import Archive
 from hera.artifact import Artifact, GCSArtifact, GitArtifact, HttpArtifact, S3Artifact
+from hera.backoff import Backoff
 from hera.client import Client
 from hera.config import Config
 from hera.cron_workflow import ConcurrencyPolicy, CronWorkflow
@@ -47,6 +49,7 @@ from hera.task import Task, TaskResult
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
 from hera.ttl_strategy import TTLStrategy
+from hera.value_from import ValueFrom
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import (
     AccessMode,

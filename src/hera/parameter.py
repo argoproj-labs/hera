@@ -6,6 +6,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ValueFrom,
 )
 
+from hera.value_from import ValueFrom
+
 
 class Parameter:
     """A representation of input from one task to another.
@@ -19,18 +21,17 @@ class Parameter:
         Value of the parameter, as an index into some field of the task.
     default: Optional[str] = None
         Default value of the parameter in case the `value` cannot be obtained based on the specification.
-    value_from: Optional[dict] = None
-        Describes a location in which to obtain the value to a parameter.
-        See https://argoproj.github.io/argo-workflows/fields/#valuefrom.
+    value_from: Optional[ValueFrom] = None
+        Describes a location in which to obtain the value to a parameter. See `hera.value_from.ValueFrom` or
+        https://argoproj.github.io/argo-workflows/fields/#valuefrom.
     """
 
-    # TODO: make custom object for ValueFrom
     def __init__(
         self,
         name: str,
         value: Optional[str] = None,
         default: Optional[str] = None,
-        value_from: Optional[dict] = None,
+        value_from: Optional[ValueFrom] = None,
     ) -> None:
         if value is not None and value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
@@ -55,7 +56,7 @@ class Parameter:
         if self.value:
             setattr(parameter, "value", self.value)
         elif self.value_from is not None:
-            setattr(parameter, "value_from", IoArgoprojWorkflowV1alpha1ValueFrom(**self.value_from))
+            setattr(parameter, "value_from", self.value_from.build())
         else:
             raise ValueError(
                 f"Parameter with name `{parameter.name}` cannot be interpreted as argument "
@@ -73,9 +74,7 @@ class Parameter:
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         """Assembles the parameter for use as an output of a task"""
         if self.value_from:
-            return IoArgoprojWorkflowV1alpha1Parameter(
-                name=self.name, value_from=IoArgoprojWorkflowV1alpha1ValueFrom(**self.value_from)
-            )
+            return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value_from=self.value_from.build())
         else:
             argo_value_from = IoArgoprojWorkflowV1alpha1ValueFrom(parameter=self.value)
             if self.default:
