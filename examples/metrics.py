@@ -3,7 +3,7 @@ This example showcases the classic diamond workflow along with metrics used to t
 how to use metrics and what metrics are accessible out of the box with Argo see:
 https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
 """
-from hera import Task, Workflow, Metric
+from hera import Metric, Task, Workflow
 
 
 def say(message: str):
