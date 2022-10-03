@@ -74,9 +74,7 @@ class Parameter:
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         """Assembles the parameter for use as an output of a task"""
         if self.value_from:
-            return IoArgoprojWorkflowV1alpha1Parameter(
-                name=self.name, value_from=self.value_from.build()
-            )
+            return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value_from=self.value_from.build())
         else:
             argo_value_from = IoArgoprojWorkflowV1alpha1ValueFrom(parameter=self.value)
             if self.default:
