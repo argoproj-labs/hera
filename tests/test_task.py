@@ -7,6 +7,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTask,
     IoArgoprojWorkflowV1alpha1Inputs,
     IoArgoprojWorkflowV1alpha1Sequence,
+    IoArgoprojWorkflowV1alpha1Template,
     SecurityContext,
 )
 from argo_workflows.models import Toleration as _ArgoToleration
@@ -25,6 +26,8 @@ from hera import (
     GitArtifact,
     GPUToleration,
     Memoize,
+    Metric,
+    Metrics,
     Operator,
     Parameter,
     Resources,
@@ -848,3 +851,22 @@ print(42)
         assert params[0].value == "{{item.a}}"
         assert params[1].name == "b"
         assert params[1].value == "{{item.b}}"
+
+    def test_template_contains_metrics(self):
+        t = Task(
+            "t",
+            metrics=Metrics(
+                [
+                    Metric(
+                        'a',
+                        'b',
+                    ),
+                    Metric(
+                        'c',
+                        'd',
+                    ),
+                ]
+            ),
+        )._build_template()
+        assert isinstance(t, IoArgoprojWorkflowV1alpha1Template)
+        assert hasattr(t, 'metrics')

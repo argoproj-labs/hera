@@ -37,6 +37,7 @@ from hera.host_config import (
 )
 from hera.image import ImagePullPolicy
 from hera.memoize import Memoize
+from hera.metric import Counter, Gauge, Histogram, Label, Metric, Metrics
 from hera.operator import Operator
 from hera.parameter import Parameter
 from hera.resource_template import ResourceTemplate

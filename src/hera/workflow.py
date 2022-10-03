@@ -14,6 +14,7 @@ import hera
 from hera.affinity import Affinity
 from hera.dag import DAG
 from hera.host_alias import HostAlias
+from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.security_context import WorkflowSecurityContext
 from hera.task import Task
@@ -81,6 +82,8 @@ class Workflow:
     active_deadline_seconds: Optional[int] = None
         Optional duration in seconds relative to the workflow start time which the workflow
         is allowed to run.
+    metrics: Optional[Union[Metric, List[Metric], Metrics]] = None
+        Any built-in/custom Prometheus metrics to track.
     """
 
     def __init__(
@@ -104,6 +107,7 @@ class Workflow:
         tolerations: Optional[List[Toleration]] = None,
         generate_name: bool = False,
         active_deadline_seconds: Optional[int] = None,
+        metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
     ):
         self.name = validate_name(name)
         self._service = service
@@ -127,6 +131,20 @@ class Workflow:
         self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
         self.tasks: List["Task"] = []
+        self.metrics: Optional[Metrics] = None
+        if metrics:
+            if isinstance(metrics, Metric):
+                self.metrics = Metrics([metrics])
+            elif isinstance(metrics, list):
+                assert all([isinstance(m, Metric) for m in metrics])
+                self.metrics = Metrics(metrics)
+            elif isinstance(metrics, Metrics):
+                self.metrics = metrics
+            else:
+                raise ValueError(
+                    "Unknown type provided for `metrics`, expected type is "
+                    "`Optional[Union[Metric, List[Metric], Metrics]]`"
+                )
 
     @property
     def service(self) -> WorkflowService:
@@ -231,6 +249,9 @@ class Workflow:
 
         if self.exit_task is not None:
             setattr(spec, "on_exit", self.exit_task)
+
+        if self.metrics is not None:
+            setattr(spec, "metrics", self.metrics.build())
 
         return spec
 

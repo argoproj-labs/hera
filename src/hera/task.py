@@ -33,6 +33,7 @@ from hera.env_from import BaseEnvFrom
 from hera.image import ImagePullPolicy
 from hera.io import IO
 from hera.memoize import Memoize
+from hera.metric import Metric, Metrics
 from hera.operator import Operator
 from hera.parameter import Parameter
 from hera.resource_template import ResourceTemplate
@@ -160,6 +161,8 @@ class Task(IO):
     timeout: Optional[str]
         Set the total node execution timeout duration counting from the node's
         start time. This duration also includes time in which the node spends in Pending state.
+    metrics: Optional[Union[Metric, List[Metric], Metrics]] = None
+        Any built-in/custom Prometheus metrics to track.
 
     Notes
     ------
@@ -199,6 +202,7 @@ class Task(IO):
         resource_template: Optional[ResourceTemplate] = None,
         active_deadline_seconds: Optional[int] = None,
         timeout: Optional[str] = None,
+        metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -220,6 +224,20 @@ class Task(IO):
         self.resource_template: Optional[ResourceTemplate] = resource_template
         self.active_deadline_seconds: Optional[int] = active_deadline_seconds
         self.timeout: Optional[str] = timeout
+        self.metrics: Optional[Metrics] = None
+        if metrics:
+            if isinstance(metrics, Metric):
+                self.metrics = Metrics([metrics])
+            elif isinstance(metrics, list):
+                assert all([isinstance(m, Metric) for m in metrics])
+                self.metrics = Metrics(metrics)
+            elif isinstance(metrics, Metrics):
+                self.metrics = metrics
+            else:
+                raise ValueError(
+                    "Unknown type provided for `metrics`, expected type is "
+                    "`Optional[Union[Metric, List[Metric], Metrics]]`"
+                )
 
         self.image = image
         self.image_pull_policy = image_pull_policy
@@ -914,6 +932,9 @@ class Task(IO):
 
         if self.timeout is not None:
             setattr(template, "timeout", self.timeout)
+
+        if self.metrics is not None:
+            setattr(template, "metrics", self.metrics.build())
 
         return template
 
