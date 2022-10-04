@@ -1,5 +1,5 @@
 # Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd
-from hera import GCSArtifact, Task, Workflow
+from hera import Archive, GCSArtifact, Task, Workflow
 
 
 def generate():
@@ -35,8 +35,8 @@ with Workflow("artifact-test") as wf:
             GCSArtifact(
                 "artifact-files",
                 path="/tmp/output-files/",
-                archive={"none": {}},
-                bucket="<your bucket>",
+                archive=Archive(disable_compression=True),
+                bucket="<your bucket name>",
                 key=f"fanout-{wf.get_name()}",
             )
         ],

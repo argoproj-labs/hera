@@ -30,7 +30,7 @@ class Archive:
         strategy = IoArgoprojWorkflowV1alpha1ArchiveStrategy()
         if self.disable_compression is not None and self.disable_compression:
             # this needs to be set only in the `True` case as `False` is also interpreted as `disable archiving`
-            setattr(strategy, "_none", self.disable_compression)
+            setattr(strategy, "none", {})
         if self.tar_compression_level is not None:
             setattr(
                 strategy, "tar", IoArgoprojWorkflowV1alpha1TarStrategy(compression_level=self.tar_compression_level)

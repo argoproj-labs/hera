@@ -600,8 +600,7 @@ class Task(IO):
                 source_signature[p.name] = None
 
         # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
-        input_params = [p for p in self.inputs if isinstance(p, Parameter)]
-        input_params_names = [p.name for p in input_params]
+        input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]
         deduced_params: List[Parameter] = [
             Parameter(name=n, default=v) for n, v in source_signature.items() if n not in input_params_names
         ]
@@ -667,10 +666,9 @@ class Task(IO):
 
         if (self.with_param is not None) or (self.with_sequence is not None):
             # Verify that we're utilizing 'item'
-            if not any([p.contains_item for p in input_params + deduced_params]):
+            if not any([p.contains_item for p in self.inputs + deduced_params]):  # type: ignore
                 raise ValueError(
-                    "`with_param` or `with_sequence` items are not defined as a value "
-                    "in any input parameters, nor could they be deduced"
+                    "`with_param` or `with_sequence` items are utilized in inputs, nor could they be deduced"
                 )
 
         return deduced_params
@@ -683,6 +681,7 @@ class Task(IO):
             - `with_param`
             - `with_sequence`
             - `source`
+            - `env`
 
         Returns
         -------
@@ -702,8 +701,13 @@ class Task(IO):
             deduced_params += self._deduce_input_params_from_source()
 
         for spec in self.env:
-            if isinstance(spec, Env) and spec.value_from_input:
-                deduced_params.append(Parameter(name=spec.name, value=spec.value_from_input))
+            if isinstance(spec, Env) and spec.value_from_input is not None:
+                value = (
+                    spec.value_from_input.value
+                    if isinstance(spec.value_from_input, Parameter)
+                    else spec.value_from_input
+                )
+                deduced_params.append(Parameter(name=spec.name, value=value))
 
         return deduced_params
 

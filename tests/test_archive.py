@@ -10,8 +10,8 @@ class TestArchive:
     def test_build_sets_expected_fields(self):
         archive = Archive(disable_compression=True).build()
         assert isinstance(archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
-        assert hasattr(archive, "_none")
-        assert archive._none
+        assert hasattr(archive, "none")
+        assert archive.none == {}
         assert not hasattr(archive, "tar")
         assert not hasattr(archive, "zip")
 
