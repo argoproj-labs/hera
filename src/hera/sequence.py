@@ -10,7 +10,7 @@ class Sequence:
 
     Attributes
     ----------
-    format: str
+    format: Optional[str]
         Format is a `printf` format string to format the value in the sequence.
     count: Optional[Union[int, str]]
         Number of elements in the sequence. Cannot be used with `end`.
@@ -25,7 +25,7 @@ class Sequence:
         When both `count` and `end` are specified.
     """
 
-    format: str
+    format: Optional[str] = None
     count: Optional[Union[int, str]] = None
     start: Optional[Union[int, str]] = None
     end: Optional[Union[int, str]] = None
@@ -48,7 +48,9 @@ class Sequence:
         IoArgoprojWorkflowV1alpha1Sequence
             The sequence to use for numeric range generation.
         """
-        sequence = IoArgoprojWorkflowV1alpha1Sequence(format=self.format)
+        sequence = IoArgoprojWorkflowV1alpha1Sequence()
+        if self.format is not None:
+            setattr(sequence, "format", self.format)
         if self.count is not None:
             setattr(sequence, "count", self.count)
         if self.start is not None and self.end is not None:
