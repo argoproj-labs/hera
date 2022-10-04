@@ -715,6 +715,15 @@ print(42)
         assert t.with_sequence.end == "42"
         assert t.with_sequence.format == "abc"
 
+    def test_task_utilize_items(self, no_op):
+        error_string = "`with_param` or `with_sequence` items are utilized in inputs, nor could they be deduced"
+        with pytest.raises(ValueError) as e:
+            Task("t", no_op, with_sequence=Sequence("abc", start=1, end=42))
+        assert str(e.value) == error_string
+        with pytest.raises(ValueError) as e:
+            Task("t", no_op, with_param=[1, 2, 3])
+        assert str(e.value) == error_string
+
     def test_get_dependency_tasks_returns_None_on_no_depends(self):
         t = Task("t")
         t.depends = None  # explicit setting

@@ -64,6 +64,19 @@ class Artifact:
         """Assembles the artifact specifications for use as an output of a task"""
         return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
 
+    @property
+    def contains_item(self) -> bool:
+        """Check whether the artifact contains an argo item reference"""
+        item = "{{item"
+        if self.path is not None and item in self.path:
+            return True
+        if self.sub_path is not None and item in self.sub_path:
+            return True
+        if self.from_task is not None and item in self.from_task:
+            return True
+
+        return False
+
 
 class BucketArtifact(Artifact):
     """This artifact is used to represent a bucket object as an artifact.
