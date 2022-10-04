@@ -18,7 +18,7 @@ with Workflow("test-env-variables", parameters=[Parameter("env-value", "wf-env-v
         inspect_envs,
         env=[
             Env(name="FIXED_ENV", value="fixed-env-value"),
-            Env(name="WF_ENV", value_from_input=wf.get_parameter("wf-env-value").value),
+            Env(name="WF_ENV", value_from_input=wf.get_parameter("env-value")),
             ConfigMapEnvFrom(
                 config_map_name="<your-reference>"
             ),  # Assumes the user has a config map in the k8s cluster
