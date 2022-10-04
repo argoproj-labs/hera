@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from argo_workflows.models import (
     ConfigMapKeySelector,
@@ -9,6 +9,8 @@ from argo_workflows.models import (
     ObjectFieldSelector,
     SecretKeySelector,
 )
+
+from hera.parameter import Parameter
 
 
 @dataclass
@@ -39,8 +41,9 @@ class Env:
         The value of the variable. This value is serialized for the client. It is up to the client to deserialize the
         value in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
         performed.
-    value_from_input: Optional[str] = None
-        A reference to an input parameter which will resolve to the value. The input parameter will be auto-generated.
+    value_from_input: Optional[Union[str, Parameter]] = None
+        An external reference which will resolve the env-value, E.g. another task's output parameter.
+        An input parameter will be auto-generated for the task the `Env` is instantiated in.
 
     Raises
     ------
@@ -50,7 +53,7 @@ class Env:
 
     name: str
     value: Optional[Any] = None
-    value_from_input: Optional[str] = None
+    value_from_input: Optional[Union[str, Parameter]] = None
 
     def build(self) -> EnvVar:
         """Constructs and returns the Argo environment specification"""
