@@ -145,11 +145,20 @@ class TestWorkflow:
             assert w.build().metadata.annotations == expected_annotations
 
     def test_wf_submit_with_default(self):
-        with Workflow("w", labels={"foo": "bar"}) as w:
+        with Workflow("w") as w:
             w.service = Mock()
-            w.service.create_workflow = Mock()
         w.create()
+        assert w.generated_name is None
         w.service.create_workflow.assert_called_with(w.build())
+
+    def test_wf_submit_with_generate_name(self):
+        returned_wf = Mock()
+        returned_wf.metadata = {"name": "w-12345"}
+        with Workflow("w-", generate_name=True) as w:
+            w.service = Mock()
+            w.service.create_workflow = Mock(return_value=returned_wf)
+        w.create()
+        assert w.generated_name == "w-12345"
 
     def test_wf_adds_image_pull_secrets(self):
         with Workflow("w", image_pull_secrets=["secret0", "secret1"]) as w:

@@ -78,7 +78,8 @@ class Workflow:
     tolerations: Optional[List[Toleration]] = None
         List of tolerations for the pod executing the task. This is used for scheduling purposes.
     generate_name: bool = False
-        Whether to use the provided name as a prefix for workflow name generation
+        Whether to use the provided name as a prefix for workflow name generation.
+        If set and the workflow is created, the field `generated_name` will be populated.
     active_deadline_seconds: Optional[int] = None
         Optional duration in seconds relative to the workflow start time which the workflow
         is allowed to run.
@@ -131,6 +132,7 @@ class Workflow:
         self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
         self.tasks: List["Task"] = []
+        self.generated_name: Optional[str] = None
         self.metrics: Optional[Metrics] = None
         if metrics:
             if isinstance(metrics, Metric):
@@ -295,7 +297,10 @@ class Workflow:
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
 
-        self.service.create_workflow(self.build())
+        resulting_argo_wf = self.service.create_workflow(self.build())
+        if self.generate_name:
+            self.generated_name = resulting_argo_wf.metadata.get("name")
+
         return self
 
     def on_exit(self, other: Union[Task, DAG]) -> None:
