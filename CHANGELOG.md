@@ -29,6 +29,19 @@ The general format is:
 
 ```
 
+# 4.0.0 - DATE (04/10/2022)
+
+### Added
+
+- archiving specifications
+- prometheus metrics
+- generated names on workflows
+- backoff custom object specification
+
+### Changed
+
+- Git artifact specification to set the correct fields based on input
+
 # 4.0.0rc3 - DATE (26/09/2022)
 
 ### Added
