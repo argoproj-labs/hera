@@ -648,7 +648,7 @@ class Task(IO):
 
         if (self.with_param is not None) or (self.with_sequence is not None):
             # Verify that we're utilizing 'item'
-            if not any([p.contains_item for p in self.inputs + deduced_params]):
+            if not any([p.contains_item for p in self.inputs + deduced_params]):  # type: ignore
                 raise ValueError(
                     "`with_param` or `with_sequence` items are utilized in inputs, nor could they be deduced"
                 )
