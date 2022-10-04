@@ -10,6 +10,7 @@ from argo_workflows.models import (
 
 from hera.dag import DAG
 from hera.host_alias import HostAlias
+from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.task import Task
 from hera.template_ref import TemplateRef
@@ -266,6 +267,18 @@ class TestWorkflow:
             affinity=affinity,
             tolerations=[GPUToleration],
             active_deadline_seconds=42,
+            metrics=Metrics(
+                [
+                    Metric(
+                        'a',
+                        'b',
+                    ),
+                    Metric(
+                        'c',
+                        'd',
+                    ),
+                ]
+            ),
         ) as w:
             spec = w._build_spec()
             assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
@@ -280,6 +293,7 @@ class TestWorkflow:
             assert spec.active_deadline_seconds == 42
             assert hasattr(spec, "node_selector")
             assert spec.node_selector == {"a": "b"}
+            assert hasattr(spec, "metrics")
 
         with Workflow("w") as w:
             spec = w._build_spec()
@@ -297,6 +311,7 @@ class TestWorkflow:
             assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
             assert hasattr(spec, "on_exit")
             assert spec.on_exit == "x"
+            assert not hasattr(spec, "metrics")
 
     def test_enter_sets_expected_fields(self):
         w = Workflow("w", dag=DAG("d"))
@@ -346,3 +361,13 @@ class TestWorkflow:
 
     def test_get_name(self):
         assert Workflow("w").get_name() == "{{workflow.name}}"
+
+    def test_workflow_adjusts_input_metrics(self):
+        with Workflow('w', metrics=Metric('a', 'b')) as w:
+            assert isinstance(w.metrics, Metrics)
+
+        with Workflow('w', metrics=[Metric('a', 'b')]) as w:
+            assert isinstance(w.metrics, Metrics)
+
+        with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
+            assert isinstance(w.metrics, Metrics)
