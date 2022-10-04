@@ -20,8 +20,7 @@ with Workflow("default-param-overwrite") as w:
     # will print `Hello, world!`
     consumer_default = Task("consumer-default", consumer)
     # will print `Another message for the world!`
-    consumer_param = Task("consumer-parameter", inputs=[generator_.get_result_as("message")])
+    consumer_param = Task("consumer-parameter", consumer, inputs=[generator_.get_result_as("message")])
 
-    generator_ >> consumer_default
-    generator_ >> consumer_param
+    generator_ >> [consumer_default, consumer_param]
 w.create()
