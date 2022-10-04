@@ -361,3 +361,13 @@ class TestWorkflow:
 
     def test_get_name(self):
         assert Workflow("w").get_name() == "{{workflow.name}}"
+
+    def test_workflow_adjusts_input_metrics(self):
+        with Workflow('w', metrics=Metric('a', 'b')) as w:
+            assert isinstance(w.metrics, Metrics)
+
+        with Workflow('w', metrics=[Metric('a', 'b')]) as w:
+            assert isinstance(w.metrics, Metrics)
+
+        with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
+            assert isinstance(w.metrics, Metrics)

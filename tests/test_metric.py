@@ -159,3 +159,29 @@ class TestMetrics:
         assert isinstance(ms, IoArgoprojWorkflowV1alpha1Metrics)
         assert hasattr(ms, 'prometheus')
         assert len(ms.prometheus) == 2
+
+        ms = Metrics(
+            [
+                Metric(
+                    'a',
+                    'b',
+                    counter=Counter('c'),
+                    gauge=Gauge(True, 'g'),
+                    histogram=Histogram([1.0, 2.0], 'h'),
+                    labels=[Label('lk', 'lv')],
+                    when='whenever',
+                ),
+                Metric(
+                    'a',
+                    'b',
+                    counter=Counter('c'),
+                    gauge=Gauge(True, 'g'),
+                    histogram=Histogram([1.0, 2.0], 'h'),
+                    labels=[Label('lk', 'lv')],
+                    when='whenever',
+                ),
+            ]
+        ).build()
+        assert isinstance(ms, IoArgoprojWorkflowV1alpha1Metrics)
+        assert hasattr(ms, 'prometheus')
+        assert len(ms.prometheus) == 2

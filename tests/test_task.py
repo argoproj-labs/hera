@@ -250,6 +250,7 @@ print(42)
         assert isinstance(tt.script.source, str)
         assert isinstance(tt.inputs, IoArgoprojWorkflowV1alpha1Inputs)
         assert not hasattr(tt, "node_selector")
+        assert not hasattr(tt, "timeout")
 
     def test_task_template_contains_expected_field_values_and_types(self, op, affinity):
         t = Task(
@@ -263,6 +264,7 @@ print(42)
             daemon=True,
             affinity=affinity,
             memoize=Memoize("a", "b", "1h"),
+            timeout="5m",
         )
         tt = t._build_template()
 
@@ -297,6 +299,8 @@ print(42)
         assert hasattr(tt, "affinity")
         assert tt.affinity is not None
         assert hasattr(tt, "memoize")
+        assert hasattr(tt, "timeout")
+        assert tt.timeout == "5m"
 
     def test_task_template_does_not_add_affinity_when_none(self, no_op):
         t = Task("t", no_op)
@@ -870,3 +874,13 @@ print(42)
         )._build_template()
         assert isinstance(t, IoArgoprojWorkflowV1alpha1Template)
         assert hasattr(t, 'metrics')
+
+    def test_task_adjusts_input_metrics(self):
+        t = Task('t', metrics=Metric('a', 'b'))
+        assert isinstance(t.metrics, Metrics)
+
+        t = Task('t', metrics=[Metric('a', 'b')])
+        assert isinstance(t.metrics, Metrics)
+
+        t = Task('t', metrics=Metrics([Metric('a', 'b')]))
+        assert isinstance(t.metrics, Metrics)
