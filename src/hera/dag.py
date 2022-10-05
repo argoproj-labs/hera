@@ -46,7 +46,7 @@ class DAG(IO):
         self.outputs = outputs or []
         self.tasks: List[Task] = []
 
-    def _build_templates(self) -> Optional[List[IoArgoprojWorkflowV1alpha1Template]]:
+    def _build_templates(self) -> List[IoArgoprojWorkflowV1alpha1Template]:
         """Assembles the templates from sub-DAGs of the DAG"""
         templates = [t for t in [t._build_template() for t in self.tasks] if t]
         # Assemble the templates from sub-dags
