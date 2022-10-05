@@ -29,6 +29,15 @@ The general format is:
 
 ```
 
+# 4.0.1 - DATE (05/10/2022)
+
+### Added
+
+- auto-setting of a DAG on the workflow so users do not necessarily need to supply one, so workflow additions
+  are executed against the set default DAG
+- a fix for positional args in sized volumes vs unsized volumes
+- the correct field specification for K8S resources
+
 # 4.0.0 - DATE (04/10/2022)
 
 ### Added
