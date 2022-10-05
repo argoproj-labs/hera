@@ -20,16 +20,6 @@ from hera.validators import validate_storage_units
 
 
 @dataclass
-class _Sized:
-    # the `size` field is optional because inheritors might or might not use the field. For instance, `EmptyDir` has
-    # the option of not using the `size`. By comparison, a `Volume` always requires a `size`. While this `_Sized`
-    # could be removed so that inheritors add their own fields, inheritors also use `_BaseVolume`, which contains
-    # optional and non-optional fields. Therefore, inheritors cannot introduce a required `size` field after
-    # inheriting from `_BaseVolume`, which is a limitation imposed by `dataclass`
-    size: Optional[str] = None
-
-
-@dataclass
 class _NamedConfigMap:
     config_map_name: str
 
@@ -70,8 +60,30 @@ class AccessMode(str, Enum):
         return str(self.value)
 
 
+# `@dataclass` doesn't support adding required fields after optional ones. This is
+# particularly challenging when a subclass would like to add additional required fields,
+# as is the case with `Volume.size` being required (but not set in `_BaseVolume`). To
+# work around this, we can split up the *arg/required parameters from the
+# **kwarg/optional ones into separate base classes. Then, subclasses can inherit with
+# the keyword baseclass coming before the positional one (`@dataclass` collects fields
+# in reverse MRO order) and inject a mixin class between them that introduces new
+# required fields. They should still inherit from `_BaseVolume` as the first base class
+# in order to include the methods.
+
+
 @dataclass
-class _BaseVolume:
+class _BaseVolumePositional:
+    mount_path: str
+
+
+@dataclass
+class _BaseVolumeKeyword:
+    name: Optional[str] = None
+    sub_path: Optional[str] = None
+
+
+@dataclass
+class _BaseVolume(_BaseVolumeKeyword, _BaseVolumePositional):
     """Base representation of a volume.
 
     Attributes
@@ -84,10 +96,6 @@ class _BaseVolume:
     sub_path: str
         Path within the volume from which the container's volume should be mounted.
     """
-
-    mount_path: str
-    name: Optional[str] = None
-    sub_path: Optional[str] = None
 
     def __post_init__(self):
         if self.name is None:
@@ -105,7 +113,12 @@ class _BaseVolume:
 
 
 @dataclass
-class EmptyDirVolume(_BaseVolume, _Sized):
+class _Sized:
+    size: str
+
+
+@dataclass
+class EmptyDirVolume(_BaseVolume):
     """A representation of an in-memory empty dir volume.
 
     When mounted, this volume results in the creation of a temporary filesystem (tmpfs). The mount path will map to
@@ -116,6 +129,7 @@ class EmptyDirVolume(_BaseVolume, _Sized):
 
     # default to /dev/shm since it represents the shared memory concept in Unix systems
     mount_path: str = "/dev/shm"
+    size: Optional[str] = None
 
     def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
@@ -185,7 +199,7 @@ class ConfigMapVolume(_BaseVolume, _NamedConfigMap):
 
 
 @dataclass
-class Volume(_Sized, _BaseVolume):
+class Volume(_BaseVolume, _BaseVolumeKeyword, _Sized, _BaseVolumePositional):
     """A dynamically created and mountable volume representation.
 
     This is used to specify a volume mount for a particular task to be executed. It is recommended to not pass in a
