@@ -66,11 +66,6 @@ class TestWorkflow:
         with Workflow("w") as w:
             assert "security_context" not in w.build().spec
 
-    def test_wf_does_not_add_empty_task(self, w):
-        t = None
-        w.add_task(t)
-        assert not w.dag.tasks
-
     def test_wf_adds_specified_tasks(self, no_op):
         n = 3
         ts = [Task(f"t{i}", no_op) for i in range(n)]

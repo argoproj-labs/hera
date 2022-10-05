@@ -121,8 +121,6 @@ class DAG(IO):
 
     def add_task(self, t: Task) -> "DAG":
         """Add a task to the DAG. Note that tasks are added automatically when the DAG context is used"""
-        if t is None:
-            return self
         self.tasks.append(t)
         return self
 
@@ -131,10 +129,7 @@ class DAG(IO):
 
         Note that tasks are added automatically when the DAG context is used
         """
-        for t in ts:
-            if t is None:
-                continue
-            self.tasks.append(t)
+        self.tasks.extend(ts)
         return self
 
     def get_parameter(self, name: str) -> Parameter:
