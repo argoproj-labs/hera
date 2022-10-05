@@ -80,20 +80,20 @@ class Resources:
         resources: Dict = dict()
 
         if self.cpu_limit is not None:
-            resources = _merge_dicts(resources, dict(limit=dict(cpu=str(self.cpu_limit))))
+            resources = _merge_dicts(resources, dict(limits=dict(cpu=str(self.cpu_limit))))
 
         if self.cpu_request is not None:
-            resources = _merge_dicts(resources, dict(request=dict(cpu=str(self.cpu_request))))
+            resources = _merge_dicts(resources, dict(requests=dict(cpu=str(self.cpu_request))))
 
         if self.memory_limit is not None:
-            resources = _merge_dicts(resources, dict(limit=dict(memory=self.memory_limit)))
+            resources = _merge_dicts(resources, dict(limits=dict(memory=self.memory_limit)))
 
         if self.memory_request is not None:
-            resources = _merge_dicts(resources, dict(request=dict(memory=self.memory_request)))
+            resources = _merge_dicts(resources, dict(requests=dict(memory=self.memory_request)))
 
         if self.gpus is not None:
-            resources = _merge_dicts(resources, dict(request={self.gpu_flag: str(self.gpus)}))
-            resources = _merge_dicts(resources, dict(limit={self.gpu_flag: str(self.gpus)}))
+            resources = _merge_dicts(resources, dict(requests={self.gpu_flag: str(self.gpus)}))
+            resources = _merge_dicts(resources, dict(limits={self.gpu_flag: str(self.gpus)}))
 
         if self.custom_resources:
             resources = _merge_dicts(resources, self.custom_resources)
