@@ -156,7 +156,7 @@ class TestDAG:
         assert str(e.value) == "'Could not assemble a parameter as `a` is not a DAG output'"
 
     def test_adds(self):
-        dag = DAG("test").add_tasks(Task('t1'), Task('t2'))  # type: ignore
+        dag = DAG("test").add_tasks(Task('t1'), Task('t2'))
         assert len(dag.tasks) == 2
 
         dag = DAG("test").add_task(Task('t'))
