@@ -181,7 +181,6 @@ class Workflow:
         """Assembles the spec of the workflow"""
         # Main difference between workflow and workflow template spec is that WT
         # (generally) doesn't have an entrypoint
-        assert self.dag is not None
         spec = IoArgoprojWorkflowV1alpha1WorkflowSpec()
         templates = self.dag._build_templates()
 
@@ -278,19 +277,16 @@ class Workflow:
 
     def add_task(self, t: Task) -> "Workflow":
         """Add a task to the workflow"""
-        assert self.dag is not None, "A `DAG` must be defined when adding a task to a workflow"
         self.dag.add_task(t)
         return self
 
     def add_tasks(self, *ts: Task) -> "Workflow":
         """Add a collection of tasks to the workflow"""
-        assert self.dag is not None, "A `DAG` must be defined when adding tasks to a workflow"
         self.dag.add_tasks(*ts)
         return self
 
     def create(self) -> "Workflow":
         """Creates the workflow"""
-        assert self.dag
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
 

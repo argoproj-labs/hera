@@ -365,20 +365,3 @@ class TestWorkflow:
 
         with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
             assert isinstance(w.metrics, Metrics)
-
-    def test_workflow_catches_none_dag_upon_task_insert(self):
-        w = Workflow('w')
-        assert w.dag is not None
-        assert w.dag.name == 'w'
-        w.dag = None
-        with pytest.raises(AssertionError) as e:
-            w.add_task(Task('t'))
-        assert str(e.value) == "A `DAG` must be defined when adding a task to a workflow"
-
-        with pytest.raises(AssertionError) as e:
-            w.add_tasks(Task('t1'), Task('t2'))
-        assert str(e.value) == "A `DAG` must be defined when adding tasks to a workflow"
-
-        w = Workflow('w', dag=DAG('w'))
-        assert w.dag is not None
-        assert w.dag.name == 'w'
