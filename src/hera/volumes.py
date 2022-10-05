@@ -20,17 +20,6 @@ from hera.validators import validate_storage_units
 
 
 @dataclass
-class _Sized:
-    # `_BaseVolume` contains optional and non-optional fields. However `@dataclass` does
-    # not support adding required fields after optional fields (ie: in subclasses). This
-    # is ok for `EmptyDirVolume` where `size: Optional[str]`, but `Volume` requires
-    # `size: str`, causing dataclass errors. To work around this, we can introduce an
-    # additional base class *that must come after `_BaseVolume` in the MRO*
-    # (`@dataclass` resolves field in reverse-MRO) that sets the required `size` field.
-    size: str
-
-
-@dataclass
 class _NamedConfigMap:
     config_map_name: str
 
@@ -71,8 +60,30 @@ class AccessMode(str, Enum):
         return str(self.value)
 
 
+# `@dataclass` doesn't support adding required fields after optional ones. This is
+# particularly challenging when a subclass would like to add additional required fields,
+# as is the case with `Volume.size` being required (but not set in `_BaseVolume`). To
+# work around this, we can split up the *arg/required parameters from the
+# **kwarg/optional ones into separate base classes. Then, subclasses can inherit with
+# the keyword baseclass coming before the positional one (`@dataclass` collects fields
+# in reverse MRO order) and inject a mixin class between them that introduces new
+# required fields. They should still inherit from `_BaseVolume` as the first base class
+# in order to include the methods.
+
+
 @dataclass
-class _BaseVolume:
+class _BaseVolumePositional:
+    mount_path: str
+
+
+@dataclass
+class _BaseVolumeKeyword:
+    name: Optional[str] = None
+    sub_path: Optional[str] = None
+
+
+@dataclass
+class _BaseVolume(_BaseVolumeKeyword, _BaseVolumePositional):
     """Base representation of a volume.
 
     Attributes
@@ -85,10 +96,6 @@ class _BaseVolume:
     sub_path: str
         Path within the volume from which the container's volume should be mounted.
     """
-
-    mount_path: str
-    name: Optional[str] = None
-    sub_path: Optional[str] = None
 
     def __post_init__(self):
         if self.name is None:
@@ -103,6 +110,11 @@ class _BaseVolume:
         if self.sub_path:
             setattr(vm, "sub_path", self.sub_path)
         return vm
+
+
+@dataclass
+class _Sized:
+    size: str
 
 
 @dataclass
@@ -187,7 +199,7 @@ class ConfigMapVolume(_BaseVolume, _NamedConfigMap):
 
 
 @dataclass
-class Volume(_BaseVolume, _Sized):
+class Volume(_BaseVolume, _BaseVolumeKeyword, _Sized, _BaseVolumePositional):
     """A dynamically created and mountable volume representation.
 
     This is used to specify a volume mount for a particular task to be executed. It is recommended to not pass in a
