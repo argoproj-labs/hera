@@ -154,3 +154,10 @@ class TestDAG:
         with pytest.raises(KeyError) as e:
             dag.get_parameter("a")
         assert str(e.value) == "'Could not assemble a parameter as `a` is not a DAG output'"
+
+    def test_adds(self):
+        dag = DAG("test").add_tasks(Task('t1'), Task('t2'))
+        assert len(dag.tasks) == 2
+
+        dag = DAG("test").add_task(Task('t'))
+        assert len(dag.tasks) == 1
