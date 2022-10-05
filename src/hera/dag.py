@@ -14,7 +14,6 @@ from hera.io import IO
 from hera.parameter import Parameter
 from hera.task import Task
 from hera.validators import validate_name
-from hera.workflow_editors import add_task, add_tasks
 
 
 class DAG(IO):
@@ -122,7 +121,9 @@ class DAG(IO):
 
     def add_task(self, t: Task) -> "DAG":
         """Add a task to the DAG. Note that tasks are added automatically when the DAG context is used"""
-        add_task(self, t)
+        if t is None:
+            return self
+        self.tasks.append(t)
         return self
 
     def add_tasks(self, *ts: Task) -> "DAG":
@@ -130,7 +131,10 @@ class DAG(IO):
 
         Note that tasks are added automatically when the DAG context is used
         """
-        add_tasks(self, *ts)
+        for t in ts:
+            if t is None:
+                continue
+            self.tasks.append(t)
         return self
 
     def get_parameter(self, name: str) -> Parameter:

@@ -22,7 +22,6 @@ from hera.toleration import Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_editors import add_task, add_tasks
 from hera.workflow_service import WorkflowService
 
 
@@ -280,13 +279,13 @@ class Workflow:
     def add_task(self, t: Task) -> "Workflow":
         """Add a task to the workflow"""
         assert self.dag is not None, "A `DAG` must be defined when adding a task to a workflow"
-        add_task(self.dag, t)
+        self.dag.add_task(t)
         return self
 
     def add_tasks(self, *ts: Task) -> "Workflow":
         """Add a collection of tasks to the workflow"""
         assert self.dag is not None, "A `DAG` must be defined when adding tasks to a workflow"
-        add_tasks(self.dag, *ts)
+        self.dag.add_tasks(*ts)
         return self
 
     def create(self) -> "Workflow":
