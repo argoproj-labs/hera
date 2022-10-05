@@ -69,15 +69,16 @@ class TestWorkflow:
     def test_wf_does_not_add_empty_task(self, w):
         t = None
         w.add_task(t)
-        assert not w.tasks
+        assert not w.dag.tasks
 
-    def test_wf_adds_specified_tasks(self, w, no_op):
+    def test_wf_adds_specified_tasks(self, no_op):
         n = 3
         ts = [Task(f"t{i}", no_op) for i in range(n)]
+        w = Workflow('w')
         w.add_tasks(*ts)
 
-        assert len(w.tasks) == n
-        for i, t in enumerate(w.tasks):
+        assert len(w.dag.tasks) == n
+        for i, t in enumerate(w.dag.tasks):
             assert ts[i].name == t.name
 
     def test_wf_adds_task_volume(self, w, no_op):
@@ -204,7 +205,7 @@ class TestWorkflow:
         t = Task("t", template_ref=TemplateRef(name="name", template="template"))
         w.add_task(t)
 
-        assert w.tasks[0] == t
+        assert w.dag.tasks[0] == t
 
         # Not add a Task with TemplateRef to w.spec.templates
         # Note: w.spec.templates[0] is a template of dag
@@ -316,9 +317,7 @@ class TestWorkflow:
     def test_enter_sets_expected_fields(self):
         w = Workflow("w", dag=DAG("d"))
         assert not w.in_context
-        with pytest.raises(ValueError) as e:
-            w.__enter__()
-        assert str(e.value) == "DAG already set for workflow"
+        assert w.dag.name == 'd'
 
     def test_on_exit(self):
         with Workflow("w") as w1:
@@ -371,3 +370,20 @@ class TestWorkflow:
 
         with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
             assert isinstance(w.metrics, Metrics)
+
+    def test_workflow_catches_none_dag_upon_task_insert(self):
+        w = Workflow('w')
+        assert w.dag is not None
+        assert w.dag.name == 'w'
+        w.dag = None
+        with pytest.raises(AssertionError) as e:
+            w.add_task(Task('t'))
+        assert str(e.value) == "A `DAG` must be defined when adding a task to a workflow"
+
+        with pytest.raises(AssertionError) as e:
+            w.add_tasks(Task('t1'), Task('t2'))
+        assert str(e.value) == "A `DAG` must be defined when adding tasks to a workflow"
+
+        w = Workflow('w', dag=DAG('w'))
+        assert w.dag is not None
+        assert w.dag.name == 'w'

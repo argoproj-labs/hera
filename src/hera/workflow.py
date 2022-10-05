@@ -127,11 +127,10 @@ class Workflow:
         self.in_context = False
         self.volume_claim_gc_strategy = volume_claim_gc_strategy
         self.host_aliases = host_aliases
-        self.dag = dag
+        self.dag = DAG(name) if dag is None else dag
         self.generate_name = generate_name
         self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
-        self.tasks: List["Task"] = []
         self.generated_name: Optional[str] = None
         self.metrics: Optional[Metrics] = None
         if metrics:
@@ -267,9 +266,6 @@ class Workflow:
         Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
         """
         self.in_context = True
-        if self.dag:
-            raise ValueError("DAG already set for workflow")
-        self.dag = DAG(name=self.name)
         hera.dag_context.enter(self.dag)
         return self
 
@@ -283,12 +279,14 @@ class Workflow:
 
     def add_task(self, t: Task) -> "Workflow":
         """Add a task to the workflow"""
-        add_task(self, t)
+        assert self.dag is not None, "A `DAG` must be defined when adding a task to a workflow"
+        add_task(self.dag, t)
         return self
 
     def add_tasks(self, *ts: Task) -> "Workflow":
         """Add a collection of tasks to the workflow"""
-        add_tasks(self, *ts)
+        assert self.dag is not None, "A `DAG` must be defined when adding tasks to a workflow"
+        add_tasks(self.dag, *ts)
         return self
 
     def create(self) -> "Workflow":
