@@ -711,7 +711,7 @@ class Task(IO):
 
         return deduced_params
 
-    def _get_param_script_portion(self) -> Optional[str]:
+    def _get_param_script_portion(self) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
         parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
         script that automatically imports json and loads/adds code to interpret each independent argument into the
@@ -788,7 +788,7 @@ class Task(IO):
             assert isinstance(self.source, str)
             return self.source
 
-    def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
+    def _build_volume_mounts(self) -> List[VolumeMount]:
         """Assembles the list of volumes to be mounted by the task.
 
         Returns
@@ -798,11 +798,11 @@ class Task(IO):
         """
         return [v._build_mount() for v in self.volumes]
 
-    def _build_volume_claim_templates(self) -> Optional[List[PersistentVolumeClaim]]:
+    def _build_volume_claim_templates(self) -> List[PersistentVolumeClaim]:
         """Assembles the list of volume claim templates to be created for the task."""
         return [v._build_claim_spec() for v in self.volumes if isinstance(v, Volume)]
 
-    def _build_persistent_volume_claims(self) -> Optional[List[ArgoVolume]]:
+    def _build_persistent_volume_claims(self) -> List[ArgoVolume]:
         """Assembles the list of Argo volume specifications"""
         return [
             v._build_claim_spec()
