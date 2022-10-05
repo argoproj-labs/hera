@@ -21,12 +21,13 @@ from hera.validators import validate_storage_units
 
 @dataclass
 class _Sized:
-    # the `size` field is optional because inheritors might or might not use the field. For instance, `EmptyDir` has
-    # the option of not using the `size`. By comparison, a `Volume` always requires a `size`. While this `_Sized`
-    # could be removed so that inheritors add their own fields, inheritors also use `_BaseVolume`, which contains
-    # optional and non-optional fields. Therefore, inheritors cannot introduce a required `size` field after
-    # inheriting from `_BaseVolume`, which is a limitation imposed by `dataclass`
-    size: Optional[str] = None
+    # `_BaseVolume` contains optional and non-optional fields. However `@dataclass` does
+    # not support adding required fields after optional fields (ie: in subclasses). This
+    # is ok for `EmptyDirVolume` where `size: Optional[str]`, but `Volume` requires
+    # `size: str`, causing dataclass errors. To work around this, we can introduce an
+    # additional base class *that must come after `_BaseVolume` in the MRO*
+    # (`@dataclass` resolves field in reverse-MRO) that sets the required `size` field.
+    size: str
 
 
 @dataclass
@@ -105,7 +106,7 @@ class _BaseVolume:
 
 
 @dataclass
-class EmptyDirVolume(_BaseVolume, _Sized):
+class EmptyDirVolume(_BaseVolume):
     """A representation of an in-memory empty dir volume.
 
     When mounted, this volume results in the creation of a temporary filesystem (tmpfs). The mount path will map to
@@ -116,6 +117,7 @@ class EmptyDirVolume(_BaseVolume, _Sized):
 
     # default to /dev/shm since it represents the shared memory concept in Unix systems
     mount_path: str = "/dev/shm"
+    size: Optional[str] = None
 
     def _build_claim_spec(self) -> ArgoVolume:
         """Constructs an Argo volume representation for mounting existing volumes to a step/task.
@@ -185,7 +187,7 @@ class ConfigMapVolume(_BaseVolume, _NamedConfigMap):
 
 
 @dataclass
-class Volume(_Sized, _BaseVolume):
+class Volume(_BaseVolume, _Sized):
     """A dynamically created and mountable volume representation.
 
     This is used to specify a volume mount for a particular task to be executed. It is recommended to not pass in a
