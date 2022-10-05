@@ -56,9 +56,9 @@ class TestResources:
 
     def test_built_resources_contain_expected_fields(self):
         r = Resources(cpu_request=1, memory_request="4Gi", cpu_limit=2, memory_limit="8Gi").build()
-        assert hasattr(r, "limit")
-        assert "cpu" in r.limit
-        assert "memory" in r.limit
-        assert hasattr(r, "request")
-        assert "cpu" in r.request
-        assert "memory" in r.request
+        assert hasattr(r, "limits")
+        assert "cpu" in r.limits
+        assert "memory" in r.limits
+        assert hasattr(r, "requests")
+        assert "cpu" in r.requests
+        assert "memory" in r.requests

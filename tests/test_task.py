@@ -167,16 +167,16 @@ print(42)
         t = Task("t", op, [{"a": 1}], resources=r)
         resources = t._build_script().resources
 
-        assert resources["request"]["cpu"] == "1"
-        assert resources["request"]["memory"] == "4Gi"
+        assert resources["requests"]["cpu"] == "1"
+        assert resources["requests"]["memory"] == "4Gi"
 
     def test_resources_returned_with_gpus(self, op):
         r = Resources(gpus=2)
         t = Task("t", op, [{"a": 1}], resources=r)
         resources = t._build_script().resources
 
-        assert resources["request"]["nvidia.com/gpu"] == "2"
-        assert resources["limit"]["nvidia.com/gpu"] == "2"
+        assert resources["requests"]["nvidia.com/gpu"] == "2"
+        assert resources["limits"]["nvidia.com/gpu"] == "2"
 
     def test_volume_mounts_returns_expected_volumes(self, no_op):
         t = Task(
@@ -482,7 +482,7 @@ print(42)
 
         assert tt.container.image == "python:3.7"
         assert tt.container.command[0] == "cowsay"
-        assert tt.container.resources["request"]["memory"] == "4Gi"
+        assert tt.container.resources["requests"]["memory"] == "4Gi"
 
     def test_task_allow_subclassing_when_assigned_next(self, no_op):
         class SubclassTask(Task):
