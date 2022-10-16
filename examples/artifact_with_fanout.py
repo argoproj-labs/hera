@@ -1,5 +1,6 @@
 from hera import Artifact, Task, Workflow
 
+
 def writer():
     import json
 

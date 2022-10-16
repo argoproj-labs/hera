@@ -707,7 +707,7 @@ class Task(IO):
                     if isinstance(spec.value_from_input, Parameter)
                     else spec.value_from_input
                 )
-                deduced_params.append(Parameter(name=spec.name, value=value))
+                deduced_params.append(Parameter(name=spec.param_name, value=value))
 
         return deduced_params
 

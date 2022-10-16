@@ -528,12 +528,13 @@ print(42)
         t1 = Task("t1", "print(42)", env=[Env(name="IP", value_from_input=t.ip)])
         t1s = t1._build_script()
 
+        expected_param_name = Env._sanitise_param_for_argo("IP")
         assert t1s.env[0].name == "IP"
-        assert t1s.env[0].value == "{{inputs.parameters.IP}}"
+        assert t1s.env[0].value == f"{{{{inputs.parameters.{expected_param_name}}}}}"
 
         t1g = t1._build_arguments()
         assert t1g
-        assert t1g.parameters[0].name == "IP"
+        assert t1g.parameters[0].name == expected_param_name
         assert t1g.parameters[0].value == "{{tasks.t.ip}}"
 
     def test_task_adds_other_task_on_success(self):
