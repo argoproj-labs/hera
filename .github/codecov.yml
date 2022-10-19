@@ -1,2 +1,0 @@
-coverage:
-  precision: 1  # Don't bother with very small changes, which are often caused by subtle division differences when SLOC are removed.
