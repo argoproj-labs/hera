@@ -1,2 +1,5 @@
 ignore:
     - "src/hera/_task_input.py"  # ignored because it contains a custom implementation to support `with_items`
+coverage:
+  round: down
+  precision: 1
