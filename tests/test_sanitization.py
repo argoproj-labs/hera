@@ -7,7 +7,7 @@ from hera import Env
 
 def test_param_name_sanitization():
     suffix_hash = lambda v: hashlib.md5(v.encode("utf-8")).hexdigest()
-    no_change = "no-change"
+    no_change = "no-change-42"
     no_change_expected = f"{no_change}-{suffix_hash(no_change)}"
     assert no_change_expected == Env._sanitise_param_for_argo(no_change)
 
