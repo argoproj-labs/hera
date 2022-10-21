@@ -23,4 +23,4 @@ Please keep in mind the following guidelines and practices when contributing to 
 ### Code of Conduct
 
 Please be mindful of and adhere to the Linux Foundation's
-[Code of Conduct](https://lfprojects.org/policies/code-of-conduct) when contributing to Horovod.
+[Code of Conduct](https://lfprojects.org/policies/code-of-conduct) when contributing to hera-workflows.
