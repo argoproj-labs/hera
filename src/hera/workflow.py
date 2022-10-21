@@ -37,6 +37,8 @@ class Workflow:
     ----------
     name: str
         The workflow name. Note that the workflow initiation will replace underscores with dashes.
+    dag_name: Optional[str] = None
+        Name of the underlying dag template. This will default to the name of the workflow.
     service: Optional[WorkflowService] = None
         A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
     parallelism: Optional[int] = None
@@ -89,6 +91,7 @@ class Workflow:
     def __init__(
         self,
         name: str,
+        dag_name: Optional[str] = None,
         service: Optional[WorkflowService] = None,
         parallelism: Optional[int] = None,
         service_account_name: Optional[str] = None,
@@ -110,6 +113,8 @@ class Workflow:
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
     ):
         self.name = validate_name(name)
+        dag_name = dag_name if dag_name is not None else self.name
+        self.dag = DAG(dag_name) if dag is None else dag
         self._service = service
         self.parallelism = parallelism
         self.security_context = security_context
@@ -126,7 +131,6 @@ class Workflow:
         self.in_context = False
         self.volume_claim_gc_strategy = volume_claim_gc_strategy
         self.host_aliases = host_aliases
-        self.dag = DAG(name) if dag is None else dag
         self.generate_name = generate_name
         self.active_deadline_seconds = active_deadline_seconds
         self.exit_task: Optional[str] = None
@@ -177,17 +181,12 @@ class Workflow:
             setattr(metadata, "annotations", self.annotations)
         return metadata
 
-    def _build_spec(self, workflow_template: bool = False) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
+    def _build_spec(self) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
         """Assembles the spec of the workflow"""
-        # Main difference between workflow and workflow template spec is that WT
-        # (generally) doesn't have an entrypoint
         spec = IoArgoprojWorkflowV1alpha1WorkflowSpec()
-        templates = self.dag._build_templates()
+        setattr(spec, "entrypoint", self.dag.name)  # This will be ignored for `WorkflowTemplate`
 
-        if not workflow_template:
-            templates += self.dag.build()
-            setattr(spec, "entrypoint", self.name)
-
+        templates = self.dag._build_templates() + self.dag.build()
         setattr(spec, "templates", templates)
 
         if self.parallelism is not None:

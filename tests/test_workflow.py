@@ -365,3 +365,12 @@ class TestWorkflow:
 
         with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
             assert isinstance(w.metrics, Metrics)
+
+    def test_workflow_sets_dag_name(self):
+        w = Workflow("w", dag_name="dag-name")
+        assert w.dag.name == "dag-name"
+        assert w.build().spec.templates[0].name == "dag-name"
+
+        w = Workflow("w")
+        assert w.dag.name == "w"
+        assert w.build().spec.templates[0].name == "w"

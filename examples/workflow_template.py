@@ -18,7 +18,7 @@ def tails():
     print("it was tails")
 
 
-with WorkflowTemplate("workflow-template") as w:
+with WorkflowTemplate("hera-workflow-templates", dag_name="coin-flip") as w:
     r = Task("r", random_code)
     Task("h", heads).on_other_result(r, "heads")
     Task("t", tails).on_other_result(r, "tails")
