@@ -22,5 +22,5 @@ Please keep in mind the following guidelines and practices when contributing to 
 
 ### Code of Conduct
 
-Please be mindful of and adhere to the Linux Foundation's
-[Code of Conduct](https://lfprojects.org/policies/code-of-conduct) when contributing to hera-workflows.
+Please be mindful of and adhere to the CNCF's
+[Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) when contributing to hera-workflows.
