@@ -5,6 +5,10 @@ appreciates your willingness to dedicate some time to Hera for the benefit of ev
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
 
+1. Your commit must be signed. Hera uses [an application](https://github.com/apps/dco) that enforces the Developer 
+   Certificate of Origin (DCO). Currently, a Contributor License Agreement 
+   ([CLA](https://github.com/cla-assistant/cla-assistant)) check also appears on submitted pull requests. This can be
+   safely ignored and is **not** a requirement for contributions to hera-workflows. This is an artifact as the Argo Project is slowly migrating projects from CLA to DCO. 
 1. Use `tox -e format` to format the repository code. `tox -e format` maps to a usage of
    [black](https://github.com/psf/black), and the repository adheres to whatever `black` uses as its strict pep8 format.
    No questions asked
@@ -18,5 +22,5 @@ Please keep in mind the following guidelines and practices when contributing to 
 
 ### Code of Conduct
 
-Please be mindful of and adhere to the Linux Foundation's
-[Code of Conduct](https://lfprojects.org/policies/code-of-conduct) when contributing to Horovod.
+Please be mindful of and adhere to the CNCF's
+[Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) when contributing to hera-workflows.
