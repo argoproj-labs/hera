@@ -113,7 +113,7 @@ class Workflow:
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
     ):
         self.name = validate_name(name)
-        dag_name = dag_name if dag_name is not None else self.name
+        dag_name = self.name is dag_name is None else dag_name
         self.dag = DAG(dag_name) if dag is None else dag
         self._service = service
         self.parallelism = parallelism
