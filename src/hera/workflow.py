@@ -255,7 +255,12 @@ class Workflow:
 
     def build(self) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Builds the workflow core representation"""
-        return IoArgoprojWorkflowV1alpha1Workflow(metadata=self._build_metadata(), spec=self._build_spec())
+        return IoArgoprojWorkflowV1alpha1Workflow(
+            api_version="argoproj.io/v1alpha1",
+            kind="Workflow",
+            metadata=self._build_metadata(),
+            spec=self._build_spec(),
+        )
 
     def __enter__(self) -> "Workflow":
         """Enter the context of the workflow.

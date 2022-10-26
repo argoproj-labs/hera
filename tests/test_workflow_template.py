@@ -11,6 +11,12 @@ class TestWorkflowTemplate:
         with WorkflowTemplate("test") as wt:
             template = wt.build()
             assert isinstance(template, IoArgoprojWorkflowV1alpha1WorkflowTemplate)
+            assert hasattr(template, "api_version")
+            assert template.api_version == "argoproj.io/v1alpha1"
+            assert isinstance(template.api_version, str)
+            assert hasattr(template, "kind")
+            assert isinstance(template.kind, str)
+            assert template.kind == "Workflow"
 
     def test_create_calls_service_create(self, setup):
         with WorkflowTemplate("test") as wt:

@@ -96,6 +96,8 @@ class CronWorkflow(Workflow):
             setattr(cron_workflow_spec, "timezone", self.timezone)
 
         return IoArgoprojWorkflowV1alpha1CronWorkflow(
+            api_version="argoproj.io/v1alpha1",
+            kind="CronWorkflow",
             metadata=workflow.metadata,
             spec=cron_workflow_spec,
         )
