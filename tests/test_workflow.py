@@ -384,3 +384,50 @@ class TestWorkflow:
         assert hasattr(wf, "kind")
         assert isinstance(wf.kind, str)
         assert wf.kind == "Workflow"
+
+    def test_to_yaml(self):
+        def hello():
+            print("Hello, Hera!")
+
+        # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+        with Workflow("hello-hera") as w:
+            Task("t", hello)
+
+        expected_yaml = """api_version: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: hello-hera
+spec:
+  entrypoint: hello-hera
+  templates:
+  - name: t
+    script:
+      command:
+      - python
+      image: python:3.7
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print("Hello, Hera!")
+
+        '
+  - dag:
+      tasks:
+      - name: t
+        template: t
+    name: hello-hera
+"""
+        assert w.to_yaml() == expected_yaml
+
+    def test_to_dict(self):
+        def hello():
+            print("Hello, Hera!")
+
+        # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+        with Workflow("hello-hera") as w:
+            Task("t", hello)
+
+        assert w.build().to_dict() == w.to_dict()

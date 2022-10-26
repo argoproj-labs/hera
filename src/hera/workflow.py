@@ -1,6 +1,7 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 from typing import Dict, List, Optional, Tuple, Union
 
+import yaml
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1VolumeClaimGC,
@@ -325,3 +326,12 @@ class Workflow:
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
+
+    def to_dict(self) -> dict:
+        """Returns the JSON/dictionary representation of the workflow"""
+        return self.build().to_dict()
+
+    def to_yaml(self) -> str:
+        """Returns a YAML representation of the workflow"""
+        self_dict = self.to_dict()
+        return yaml.dump(self_dict)
