@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 from argo_workflows.models import HostAlias as ArgoHostAlias
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     PodSecurityContext,
 )
@@ -277,7 +278,6 @@ class TestWorkflow:
             ),
         ) as w:
             spec = w._build_spec()
-            assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
             assert hasattr(spec, "parallelism")
             assert spec.parallelism == 50
             assert hasattr(spec, "affinity")
@@ -374,3 +374,13 @@ class TestWorkflow:
         w = Workflow("w")
         assert w.dag.name == "w"
         assert w.build().spec.templates[0].name == "w"
+
+    def test_build(self):
+        wf = Workflow("w").build()
+        assert isinstance(wf, IoArgoprojWorkflowV1alpha1Workflow)
+        assert hasattr(wf, "api_version")
+        assert wf.api_version == "argoproj.io/v1alpha1"
+        assert isinstance(wf.api_version, str)
+        assert hasattr(wf, "kind")
+        assert isinstance(wf.kind, str)
+        assert wf.kind == "Workflow"
