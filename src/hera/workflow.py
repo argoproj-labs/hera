@@ -333,5 +333,4 @@ class Workflow:
 
     def to_yaml(self) -> str:
         """Returns a YAML representation of the workflow"""
-        self_dict = self.to_dict()
-        return yaml.dump(self_dict)
+        return yaml.dump(self.to_dict())
