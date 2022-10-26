@@ -10,4 +10,4 @@ def hello():
 with Workflow("hello-hera") as w:
     Task("t", hello)
 
-print(w.to_yaml())
+w.create()
