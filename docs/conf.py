@@ -2,8 +2,9 @@ import os
 import sys
 from pathlib import Path
 
+sys.path.insert(0, os.path.abspath('..'))
+
 root_path = Path(__file__).parent.parent
-sys.path.insert(0, str(root_path))
 
 with open(root_path / 'pyproject.toml', 'r') as f:
     for line in f.readlines():
