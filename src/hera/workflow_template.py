@@ -20,7 +20,7 @@ class WorkflowTemplate(Workflow):
         """Builds the workflow"""
         spec = super()._build_spec()
         return IoArgoprojWorkflowV1alpha1WorkflowTemplate(
-            api_version="argoproj.io/v1alpha1", kind="Workflow", metadata=self._build_metadata(), spec=spec
+            api_version="argoproj.io/v1alpha1", kind="WorkflowTemplate", metadata=self._build_metadata(), spec=spec
         )
 
     def create(self) -> "WorkflowTemplate":
