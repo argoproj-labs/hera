@@ -1,5 +1,6 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import Dict, List, Optional, Tuple, Union
+import re
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import yaml
 from argo_workflows.models import (
@@ -333,4 +334,33 @@ class Workflow:
 
     def to_yaml(self) -> str:
         """Returns a YAML representation of the workflow"""
-        return yaml.dump(self.to_dict())
+        dict_repr = self.to_dict()
+        new_dict_repr: dict = {}
+        _traverse(dict_repr, new_dict_repr, _camel_case)
+        return yaml.dump(new_dict_repr)
+
+
+def _camel_case(s: str) -> str:
+    """Helper to turn a given string into a camel-cased string e.g `api_version` -> `apiVersion`"""
+    s = re.sub(r"(_|-)+", " ", s).title().replace(" ", "")
+    return ''.join([s[0].lower(), s[1:]])
+
+
+def _traverse(old_d: dict, new_d: dict, f: Callable) -> None:
+    """Traverses the old dictionary `old_d` keys and applies `f` to the key while storing the results in `new_d`"""
+    for k, v in old_d.items():
+        new_k = f(k)
+        if isinstance(v, dict):
+            new_d[new_k] = {}
+            _traverse(v, new_d[new_k], f)
+        elif isinstance(v, list):
+            new_d[new_k] = []
+            for el in v:
+                if isinstance(el, dict):
+                    new_el: dict = {}
+                    _traverse(el, new_el, f)
+                    new_d[new_k].append(new_el)
+                else:
+                    new_d[new_k].append(el)
+        else:
+            new_d[new_k] = v
