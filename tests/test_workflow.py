@@ -25,7 +25,7 @@ from hera.volumes import (
     SecretVolume,
     Volume,
 )
-from hera.workflow import Workflow, WorkflowSecurityContext, _camel_case, _traverse
+from hera.workflow import Workflow, WorkflowSecurityContext
 
 
 @pytest.fixture
@@ -390,15 +390,19 @@ class TestWorkflow:
             print("Hello, Hera!")
 
         # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-        with Workflow("hello-hera") as w:
+        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
             Task("t", hello)
 
         expected_yaml = """apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
+  labels:
+    a_b_c: a_b_c
   name: hello-hera
 spec:
   entrypoint: hello-hera
+  nodeSelector:
+    a_b_c: a_b_c
   templates:
   - name: t
     script:
@@ -431,61 +435,3 @@ spec:
             Task("t", hello)
 
         assert w.build().to_dict() == w.to_dict()
-
-
-class TestTraverse:
-    def test_traverse_applies_function_as_expected(self):
-        old_d = {}
-        new_d = {}
-        _traverse(old_d, new_d, _camel_case)
-        assert len(new_d) == 0
-
-        old_d = {'a': 1}
-        new_d = {}
-        exp_d = {'a': 1}
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d
-
-        old_d = {'a_a': 1}
-        new_d = {}
-        exp_d = {'aA': 1}
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d
-
-        old_d = {'a_a': {'b_b': 1}}
-        new_d = {}
-        exp_d = {'aA': {'bB': 1}}
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d
-
-        old_d = {'a_a': {'b_b': 1, 'c_c': []}}
-        new_d = {}
-        exp_d = {'aA': {'bB': 1, 'cC': []}}
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d
-
-        old_d = {'a_a': {'b_b': 1, 'c_c': [{'d_d': 1}]}}
-        new_d = {}
-        exp_d = {'aA': {'bB': 1, 'cC': [{'dD': 1}]}}
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d
-
-        old_d = {'a_a': {'b_b': 1, 'c_c': [{'d_d': {'e_e': 1}, 'f_f': [1, 2, 3]}]}}
-        new_d = {}
-        exp_d = {'aA': {'bB': 1, 'cC': [{'dD': {'eE': 1}, 'fF': [1, 2, 3]}]}}
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d
-
-        old_d = {
-            'a_a': {'b_b': 1, 'c_c': [{'d_d': {'e_e': 1}, 'f_f': [1, 2, 3]}]},
-            'b_b': {'b_b': 1, 'c_c': [{'d_d': {'e_e': 1}, 'f_f': [1, 2, 3]}]},
-            'c_c': [1, 2, 3],
-        }
-        new_d = {}
-        exp_d = {
-            'aA': {'bB': 1, 'cC': [{'dD': {'eE': 1}, 'fF': [1, 2, 3]}]},
-            'bB': {'bB': 1, 'cC': [{'dD': {'eE': 1}, 'fF': [1, 2, 3]}]},
-            'cC': [1, 2, 3],
-        }
-        _traverse(old_d, new_d, _camel_case)
-        assert new_d == exp_d

@@ -3,6 +3,7 @@ from typing import Tuple
 
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1WorkflowTemplate
 
+from hera.host_config import get_global_api_version
 from hera.workflow import Workflow
 
 
@@ -20,7 +21,10 @@ class WorkflowTemplate(Workflow):
         """Builds the workflow"""
         spec = super()._build_spec()
         return IoArgoprojWorkflowV1alpha1WorkflowTemplate(
-            api_version="argoproj.io/v1alpha1", kind="WorkflowTemplate", metadata=self._build_metadata(), spec=spec
+            api_version=get_global_api_version(),
+            kind=self.__class__.__name__,
+            metadata=self._build_metadata(),
+            spec=spec,
         )
 
     def create(self) -> "WorkflowTemplate":
