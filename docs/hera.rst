@@ -1,4 +1,4 @@
-hera package
+hera
 ============
 
 Submodules
