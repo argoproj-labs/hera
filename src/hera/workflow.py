@@ -1,6 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-import re
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import yaml
 from argo_workflows.model_utils import model_to_dict
