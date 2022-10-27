@@ -16,7 +16,7 @@ class TestWorkflowTemplate:
             assert isinstance(template.api_version, str)
             assert hasattr(template, "kind")
             assert isinstance(template.kind, str)
-            assert template.kind == "Workflow"
+            assert template.kind == "WorkflowTemplate"
 
     def test_create_calls_service_create(self, setup):
         with WorkflowTemplate("test") as wt:
