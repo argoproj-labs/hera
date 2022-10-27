@@ -393,7 +393,7 @@ class TestWorkflow:
         with Workflow("hello-hera") as w:
             Task("t", hello)
 
-        expected_yaml = """api_version: argoproj.io/v1alpha1
+        expected_yaml = """apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   name: hello-hera
