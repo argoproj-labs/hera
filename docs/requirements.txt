@@ -1,4 +1,4 @@
 sphinx
 sphinx-book-theme
 myst-parser
--e ../../  # hera itself
+-e .  # hera itself
