@@ -11,6 +11,7 @@ from argo_workflows.models import (
 
 from hera.dag import DAG
 from hera.host_alias import HostAlias
+from hera.host_config import set_global_service_account_name
 from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.task import Task
@@ -44,6 +45,13 @@ class TestWorkflow:
             expected_sa = "w-sa"
             assert w.service_account_name == expected_sa
             assert w.build().spec.service_account_name == expected_sa
+
+        set_global_service_account_name("w-sa")
+        with Workflow("w") as w:
+            expected_sa = "w-sa"
+            assert w.service_account_name == expected_sa
+            assert w.build().spec.service_account_name == expected_sa
+        set_global_service_account_name(None)
 
     def test_wf_does_not_contain_sa_if_one_is_not_specified(self, setup):
         with Workflow("w") as w:

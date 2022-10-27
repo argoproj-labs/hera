@@ -16,7 +16,7 @@ import hera
 from hera.affinity import Affinity
 from hera.dag import DAG
 from hera.host_alias import HostAlias
-from hera.host_config import get_global_api_version
+from hera.host_config import get_global_api_version, get_global_service_account_name
 from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.security_context import WorkflowSecurityContext
@@ -121,7 +121,9 @@ class Workflow:
         self._service = service
         self.parallelism = parallelism
         self.security_context = security_context
-        self.service_account_name = service_account_name
+        self.service_account_name = (
+            get_global_service_account_name() if service_account_name is None else service_account_name
+        )
         self.labels = labels
         self.annotations = annotations
         self.image_pull_secrets = image_pull_secrets

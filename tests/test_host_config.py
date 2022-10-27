@@ -6,11 +6,15 @@ from hera import (
     get_global_api_version,
     get_global_host,
     get_global_namespace,
+    get_global_service_account_name,
     get_global_token,
+    get_global_verify_ssl,
     set_global_api_version,
     set_global_host,
     set_global_namespace,
+    set_global_service_account_name,
     set_global_token,
+    set_global_verify_ssl,
 )
 
 
@@ -75,9 +79,25 @@ def test_global_token_set_as_expected():
     assert get_global_token() is None
 
 
+def test_global_verify_ssl_sets_as_expected():
+    assert get_global_verify_ssl()
+    set_global_verify_ssl(False)
+    assert not get_global_verify_ssl()
+    set_global_verify_ssl(True)
+    assert get_global_verify_ssl()
+
+
 def test_global_api_version_set_as_expected():
     assert get_global_api_version() == "argoproj.io/v1alpha1"
     set_global_api_version("testing_api_version")
     assert get_global_api_version() == "testing_api_version"
     set_global_api_version("argoproj.io/v1alpha1")
     assert get_global_api_version() == "argoproj.io/v1alpha1"
+
+
+def test_global_service_account_name_set_as_expected():
+    assert get_global_service_account_name() is None
+    set_global_service_account_name("sa")
+    assert get_global_service_account_name() == "sa"
+    set_global_service_account_name(None)
+    assert get_global_service_account_name() is None

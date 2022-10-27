@@ -4,7 +4,7 @@ from typing import Optional
 
 from argo_workflows.api_client import Configuration as ArgoConfig
 
-from hera.host_config import get_global_host
+from hera.host_config import get_global_host, get_global_verify_ssl
 
 try:
     import urllib3
@@ -26,14 +26,14 @@ class Config:
     host: Optional[str] = None
         The host of the Argo server to submit workflows to. An attempt to assemble a host from Argo K8S cluster
         environment variables is pursued if this is not specified.
-    verify_ssl: bool = True
-        Whether to perform SSL/TLS verification. Set this to false to skip verifying SSL certificate when submitting
-        workflows from an HTTPS server.
+    verify_ssl: Optional[bool] = None
+        Whether to perform SSL/TLS verification. Set this as False to skip verifying SSL certificate when submitting
+        workflows from an HTTPS server. Alternatively, you can set it globally via `host_config.set_global_verify_ssl`.
     """
 
-    def __init__(self, host: Optional[str] = None, verify_ssl: bool = True):
+    def __init__(self, host: Optional[str] = None, verify_ssl: Optional[bool] = None):
         self.host = host or self._assemble_host()
-        self.verify_ssl = verify_ssl
+        self.verify_ssl = get_global_verify_ssl() if verify_ssl is None else verify_ssl
         self._config = self.__get_config()
 
     def _assemble_host(self) -> str:
