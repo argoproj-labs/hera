@@ -17,9 +17,9 @@ class Backoff:
     max_duration: Optional[str] = None
         MaxDuration is the maximum amount of time allowed for the backoff strategy.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/fields/#backoff
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/fields/#backoff
     """
 
     duration: Optional[str] = None
