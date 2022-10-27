@@ -10,7 +10,7 @@ Welcome to Hera's documentation!
    :maxdepth: 2
    :caption: Hera
 
-   modules
+   src
 
 .. toctree::
    :maxdepth: 2
