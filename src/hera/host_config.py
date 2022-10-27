@@ -3,6 +3,25 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Optional, Union
 
+_api_version: str = "argoproj.io/v1alpha1"
+
+
+def set_global_api_version(v: str) -> None:
+    """Sets the global API version that is used to control the `api_version` field on Argo payload submissions.
+
+    Workflows, workflow templates, etc. use an API specification that is based on the requirements of Kubernetes:
+    https://kubernetes.io/docs/reference/using-api/#api-versioning
+    """
+    global _api_version
+    _api_version = v
+
+
+def get_global_api_version() -> str:
+    """Returns the set global API version. See `set_global_api_version` for more details"""
+    global _api_version
+    return _api_version
+
+
 _host: Optional[str] = None
 
 

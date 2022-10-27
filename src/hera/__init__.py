@@ -28,9 +28,11 @@ from hera.env import ConfigMapEnv, Env, FieldEnv, SecretEnv
 from hera.env_from import ConfigMapEnvFrom, SecretEnvFrom
 from hera.host_alias import HostAlias
 from hera.host_config import (
+    get_global_api_version,
     get_global_host,
     get_global_namespace,
     get_global_token,
+    set_global_api_version,
     set_global_host,
     set_global_namespace,
     set_global_token,
