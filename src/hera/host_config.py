@@ -47,7 +47,7 @@ def get_global_namespace() -> str:
     return _namespace
 
 
-_image: str = "python3.7"
+_image: str = "python:3.7"
 
 
 def set_global_task_image(image: str) -> None:

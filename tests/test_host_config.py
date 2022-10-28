@@ -76,8 +76,8 @@ def test_global_token_set_as_expected():
 
 
 def test_global_task_image_set_as_expected():
-    assert get_global_task_image() == "python3.7"
-    set_global_task_image("python3.9")
-    assert get_global_task_image() == "python3.9"
-    set_global_task_image("python3.7")
-    assert get_global_task_image() == "python3.7"
+    assert get_global_task_image() == "python:3.7"
+    set_global_task_image("python:3.9")
+    assert get_global_task_image() == "python:3.9"
+    set_global_task_image("python:3.7")
+    assert get_global_task_image() == "python:3.7"
