@@ -1,4 +1,6 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
+import json
+from types import ModuleType
 from typing import Dict, List, Optional, Tuple, Union
 
 from argo_workflows.model_utils import model_to_dict
@@ -25,6 +27,15 @@ from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_service import WorkflowService
+
+# PyYAML is an optional dependency
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
 
 
 class Workflow:
@@ -334,13 +345,13 @@ class Workflow:
 
     def to_json(self) -> str:
         """Returns the JSON representation of the workflow"""
-        return model_to_dict(self.build(), serialize=True)
+        return json.dumps(model_to_dict(self.build(), serialize=False))
 
     def to_yaml(self) -> str:
         """Returns a YAML representation of the workflow"""
-        try:
-            import yaml
-        except ImportError as e:
-            raise ImportError("Attempted to use `to_yaml` but PyYAML is not available. "
-                              "Install `hera-workflow[yaml]` to install the extra dependency")
-        return yaml.dump(self.to_dict())
+        if _yaml is None:
+            raise ImportError(
+                "Attempted to use `to_yaml` but PyYAML is not available. "
+                "Install `hera-workflow[yaml]` to install the extra dependency"
+            )
+        return _yaml.dump(model_to_dict(self.build()))

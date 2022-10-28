@@ -385,11 +385,26 @@ class TestWorkflow:
         assert isinstance(wf.kind, str)
         assert wf.kind == "Workflow"
 
+    def test_raises_on_no_yaml_available(self):
+        import yaml
+
+        import hera.workflow
+
+        # TODO: is there a better way to temporarily mock/patch this value to make this test more atomic?
+        hera.workflow._yaml = None
+        with pytest.raises(ImportError) as e:
+            Workflow('w').to_yaml()
+        assert (
+            str(e.value) == "Attempted to use `to_yaml` but PyYAML is not available. "
+            "Install `hera-workflow[yaml]` to install the extra dependency"
+        )
+
+        hera.workflow._yaml = yaml
+
     def test_to_yaml(self):
         def hello():
             print("Hello, Hera!")
 
-        # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
         with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
             Task("t", hello)
 
@@ -430,8 +445,45 @@ spec:
         def hello():
             print("Hello, Hera!")
 
-        # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+        with Workflow("hello-hera") as w:
+            Task("t", hello)
+        expected_dict = {
+            'api_version': 'argoproj.io/v1alpha1',
+            'kind': 'Workflow',
+            'metadata': {'name': 'hello-hera'},
+            'spec': {
+                'entrypoint': 'hello-hera',
+                'templates': [
+                    {
+                        'name': 't',
+                        'script': {
+                            'command': ['python'],
+                            'image': 'python:3.7',
+                            'source': 'import os\n'
+                            'import sys\n'
+                            'sys.path.append(os.getcwd())\n'
+                            'print("Hello, Hera!")\n',
+                        },
+                    },
+                    {'dag': {'tasks': [{'name': 't', 'template': 't'}]}, 'name': 'hello-hera'},
+                ],
+            },
+        }
+        assert expected_dict == w.to_dict()
+
+    def test_to_json(self):
+        def hello():
+            print("Hello, Hera!")
+
         with Workflow("hello-hera") as w:
             Task("t", hello)
 
-        assert w.build().to_dict() == w.to_dict()
+        expected_json = (
+            '{"metadata": {"name": "hello-hera"}, "spec": {"entrypoint": "hello-hera", '
+            '"templates": [{"name": "t", "script": {"image": "python:3.7", "source": '
+            '"import os\\nimport sys\\nsys.path.append(os.getcwd())\\nprint(\\"Hello, '
+            'Hera!\\")\\n", "command": ["python"]}}, {"name": "hello-hera", "dag": '
+            '{"tasks": [{"name": "t", "template": "t"}]}}]}, "api_version": '
+            '"argoproj.io/v1alpha1", "kind": "Workflow"}'
+        )
+        assert expected_json == w.to_json()
