@@ -32,11 +32,11 @@ python-dateutil = ">=2.8.2"
 urllib3 = ">=1.26.8"
 certifi = ">=2021.10.8"
 pytz = ">=2021.3"
-PyYAML = ">=6.0"
+pyyaml = { version = ">=6.0", optional = true }
 argo-workflows = { version = "6.3.5", allow-prereleases = true }
 
 [tool.poetry.extras]
-yaml = ["PyYAML>=6.0"]
+yaml = ["PyYAML"]
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
