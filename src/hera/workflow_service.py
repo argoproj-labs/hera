@@ -7,7 +7,7 @@ from argo_workflows.apis import (
     WorkflowTemplateServiceApi,
 )
 from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1ClusterWorkflowTemplateLintRequest,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateLintRequest,
     IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1CronWorkflow,
     IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest,
@@ -188,7 +188,7 @@ class WorkflowService:
         """
         return WorkflowTemplateServiceApi(api_client=self._api_client).lint_workflow_template(
             self._namespace,
-            IoArgoprojWorkflowV1alpha1ClusterWorkflowTemplateLintRequest(workflow=workflow, _check_type=False),
+            IoArgoprojWorkflowV1alpha1WorkflowTemplateLintRequest(workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
 

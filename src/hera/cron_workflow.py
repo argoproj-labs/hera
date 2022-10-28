@@ -115,9 +115,7 @@ class CronWorkflow(Workflow):
         if self.in_context:
             raise ValueError("Cannot invoke `lint` when using a Hera context")
 
-        resulting_argo_wf = self.service.lint_cron_workflow(self.build())
-        if self.generate_name:
-            self.generated_name = resulting_argo_wf.get("name")
+        self.service.lint_cron_workflow(self.build())
         return self
 
     def delete(self) -> Tuple[object, int, dict]:
