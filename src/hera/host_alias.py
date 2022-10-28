@@ -8,9 +8,9 @@ from argo_workflows.models import HostAlias as ArgoHostAlias
 class HostAlias:
     """mapping between IP and hostnames
 
-    See Also
+    Notes
     -----
-    https://github.com/argoproj/argo-workflows/blob/master/sdks/python/client/docs/HostAlias.md
+    See: https://github.com/argoproj/argo-workflows/blob/master/sdks/python/client/docs/HostAlias.md
     """
 
     hostnames: List[str]

@@ -2,12 +2,7 @@ from enum import Enum
 
 
 class VolumeClaimGCStrategy(str, Enum):
-    """A representation of the strategy to use when deleting volumes from completed workflows
-
-    Notes
-    -----
-        See also IoArgoprojWorkflowV1alpha1VolumeClaimGC.
-    """
+    """A representation of the strategy to use when deleting volumes from completed workflows"""
 
     OnWorkflowCompletion = "OnWorkflowCompletion"
     """delete volume claim when workflow is completed"""

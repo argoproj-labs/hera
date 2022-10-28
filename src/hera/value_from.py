@@ -33,9 +33,9 @@ class ValueFrom:
     path: Optional[str] = None
         Path in the container to retrieve an output parameter value from in container templates.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/fields/#valuefrom
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/fields/#valuefrom
     """
 
     config_map_key_ref: Optional[str] = None

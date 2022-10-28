@@ -15,9 +15,9 @@ from argo_workflows.models import (
 class Counter:
     """Counter metric component used to count specific events based on the given value.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
     value: str
@@ -30,9 +30,9 @@ class Counter:
 class Gauge:
     """Gauge metric component used to record intervals based on the given value.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
     realtime: bool
@@ -46,9 +46,9 @@ class Gauge:
 class Histogram:
     """Histogram metric that records the value at the specified bucket intervals.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
     buckets: List[float]
@@ -65,9 +65,9 @@ class Histogram:
 class Label:
     """Metric label that identified a specific metric by a key/value pair.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
     key: str
@@ -81,9 +81,9 @@ class Label:
 class Metric:
     """Prometheus metric that can be used at the workflow or task/template level.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
     name: str
@@ -114,9 +114,9 @@ class Metric:
 class Metrics:
     """A collection of Prometheus metrics.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
     metrics: List[Metric]
