@@ -339,8 +339,15 @@ class Workflow:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
 
-    def to_dict(self, serialize=True) -> dict:
-        """Returns the dictionary representation of the workflow"""
+    def to_dict(self, serialize: bool = True) -> dict:
+        """Returns the dictionary representation of the workflow.
+
+        Parameters
+        ----------
+        serialize: bool = True
+            Whether to serialize extra fields from the `Workflow` model into the returned dictionary. When this is set
+            to `False` extra fields, such as `node_selectors`, are not included in the returned payload.
+        """
         return model_to_dict(self.build(), serialize=serialize)
 
     def to_json(self) -> str:
