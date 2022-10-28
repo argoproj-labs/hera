@@ -47,6 +47,12 @@ class TestCronWorkflow:
         ) as w:
             cw = w.build()
             assert isinstance(cw, IoArgoprojWorkflowV1alpha1CronWorkflow)
+            assert hasattr(cw, "api_version")
+            assert cw.api_version == "argoproj.io/v1alpha1"
+            assert isinstance(cw.api_version, str)
+            assert hasattr(cw, "kind")
+            assert isinstance(cw.kind, str)
+            assert cw.kind == "CronWorkflow"
             assert hasattr(cw, "metadata")
             assert isinstance(cw.metadata, ObjectMeta)
             assert hasattr(cw, "spec")
