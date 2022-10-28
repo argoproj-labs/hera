@@ -31,8 +31,17 @@ class WorkflowTemplate(Workflow):
         """Creates a workflow template"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
-        assert self.dag is not None
         self.service.create_workflow_template(self.build())
+        return self
+
+    def lint(self) -> "WorkflowTemplate":
+        """Lint the workflow"""
+        if self.in_context:
+            raise ValueError("Cannot invoke `lint` when using a Hera context")
+
+        resulting_argo_wf = self.service.lint_workflow_template(self.build())
+        if self.generate_name:
+            self.generated_name = resulting_argo_wf.get("name")
         return self
 
     def update(self) -> "WorkflowTemplate":

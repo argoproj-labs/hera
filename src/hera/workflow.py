@@ -315,6 +315,16 @@ class Workflow:
 
         return self
 
+    def lint(self) -> "Workflow":
+        """Lint the workflow"""
+        if self.in_context:
+            raise ValueError("Cannot invoke `lint` when using a Hera context")
+
+        resulting_argo_wf = self.service.lint_workflow(self.build())
+        if self.generate_name:
+            self.generated_name = resulting_argo_wf.get("name")
+        return self
+
     def on_exit(self, other: Union[Task, DAG]) -> None:
         """Add a task or a DAG to execute upon workflow exit"""
         if isinstance(other, Task):
