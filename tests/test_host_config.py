@@ -101,10 +101,3 @@ def test_global_service_account_name_set_as_expected():
     assert get_global_service_account_name() == "sa"
     set_global_service_account_name(None)
     assert get_global_service_account_name() is None
-
-def test_global_api_version_set_as_expected():
-    assert get_global_api_version() == "argoproj.io/v1alpha1"
-    set_global_api_version("testing_api_version")
-    assert get_global_api_version() == "testing_api_version"
-    set_global_api_version("argoproj.io/v1alpha1")
-    assert get_global_api_version() == "argoproj.io/v1alpha1"
