@@ -165,7 +165,7 @@ class Task(IO):
         Any built-in/custom Prometheus metrics to track.
 
     Notes
-    ------
+    -----
     When argo is using the emissary executor, the command must be set even when using args. See,
     https://argoproj.github.io/argo-workflows/workflow-executors/#emissary-emissary for how to get a containers
     entrypoint, inorder to set it as the command and to be able to set args on the Tasks.
@@ -425,9 +425,9 @@ class Task(IO):
             When the task does not use `input_from`.
             When the task uses `continue_on_fail` or `continue_on_error`.
 
-        See Also
-        --------
-        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
+        Notes
+        -----
+        See: https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
         assert (self.with_param is not None) or (
             self.with_sequence is not None
@@ -455,9 +455,9 @@ class Task(IO):
             When the task does not use `input_from`.
             When the task uses `continue_on_fail` or `continue_on_error`.
 
-        See Also
-        --------
-        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
+        Notes
+        -----
+        See: https://argoproj.github.io/argo-workflows/enhanced-depends-logic/
         """
         assert (self.with_param is not None) or (
             self.with_sequence is not None
