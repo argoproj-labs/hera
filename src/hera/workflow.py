@@ -1,6 +1,9 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
+import json
+from types import ModuleType
 from typing import Dict, List, Optional, Tuple, Union
 
+from argo_workflows.model_utils import model_to_dict
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Arguments,
     IoArgoprojWorkflowV1alpha1VolumeClaimGC,
@@ -14,6 +17,7 @@ import hera
 from hera.affinity import Affinity
 from hera.dag import DAG
 from hera.host_alias import HostAlias
+from hera.host_config import get_global_api_version, get_global_service_account_name
 from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.security_context import WorkflowSecurityContext
@@ -23,6 +27,15 @@ from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_service import WorkflowService
+
+# PyYAML is an optional dependency
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
 
 
 class Workflow:
@@ -118,7 +131,9 @@ class Workflow:
         self._service = service
         self.parallelism = parallelism
         self.security_context = security_context
-        self.service_account_name = service_account_name
+        self.service_account_name = (
+            get_global_service_account_name() if service_account_name is None else service_account_name
+        )
         self.labels = labels
         self.annotations = annotations
         self.image_pull_secrets = image_pull_secrets
@@ -255,7 +270,12 @@ class Workflow:
 
     def build(self) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Builds the workflow core representation"""
-        return IoArgoprojWorkflowV1alpha1Workflow(metadata=self._build_metadata(), spec=self._build_spec())
+        return IoArgoprojWorkflowV1alpha1Workflow(
+            api_version=get_global_api_version(),
+            kind=self.__class__.__name__,
+            metadata=self._build_metadata(),
+            spec=self._build_spec(),
+        )
 
     def __enter__(self) -> "Workflow":
         """Enter the context of the workflow.
@@ -320,3 +340,27 @@ class Workflow:
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
+
+    def to_dict(self, serialize: bool = True) -> dict:
+        """Returns the dictionary representation of the workflow.
+
+        Parameters
+        ----------
+        serialize: bool = True
+            Whether to serialize extra fields from the `Workflow` model into the returned dictionary. When this is set
+            to `False` extra fields, such as `node_selectors`, are not included in the returned payload.
+        """
+        return model_to_dict(self.build(), serialize=serialize)
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of the workflow"""
+        return json.dumps(self.to_dict())
+
+    def to_yaml(self) -> str:
+        """Returns a YAML representation of the workflow"""
+        if _yaml is None:
+            raise ImportError(
+                "Attempted to use `to_yaml` but PyYAML is not available. "
+                "Install `hera-workflows[yaml]` to install the extra dependency"
+            )
+        return _yaml.dump(self.to_dict())

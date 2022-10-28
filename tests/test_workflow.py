@@ -4,12 +4,14 @@ from unittest.mock import Mock
 import pytest
 from argo_workflows.models import HostAlias as ArgoHostAlias
 from argo_workflows.models import (
+    IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     PodSecurityContext,
 )
 
 from hera.dag import DAG
 from hera.host_alias import HostAlias
+from hera.host_config import set_global_service_account_name
 from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.task import Task
@@ -43,6 +45,13 @@ class TestWorkflow:
             expected_sa = "w-sa"
             assert w.service_account_name == expected_sa
             assert w.build().spec.service_account_name == expected_sa
+
+        set_global_service_account_name("w-sa")
+        with Workflow("w") as w:
+            expected_sa = "w-sa"
+            assert w.service_account_name == expected_sa
+            assert w.build().spec.service_account_name == expected_sa
+        set_global_service_account_name(None)
 
     def test_wf_does_not_contain_sa_if_one_is_not_specified(self, setup):
         with Workflow("w") as w:
@@ -277,7 +286,6 @@ class TestWorkflow:
             ),
         ) as w:
             spec = w._build_spec()
-            assert isinstance(spec, IoArgoprojWorkflowV1alpha1WorkflowSpec)
             assert hasattr(spec, "parallelism")
             assert spec.parallelism == 50
             assert hasattr(spec, "affinity")
@@ -374,3 +382,115 @@ class TestWorkflow:
         w = Workflow("w")
         assert w.dag.name == "w"
         assert w.build().spec.templates[0].name == "w"
+
+    def test_build(self):
+        wf = Workflow("w").build()
+        assert isinstance(wf, IoArgoprojWorkflowV1alpha1Workflow)
+        assert hasattr(wf, "api_version")
+        assert wf.api_version == "argoproj.io/v1alpha1"
+        assert isinstance(wf.api_version, str)
+        assert hasattr(wf, "kind")
+        assert isinstance(wf.kind, str)
+        assert wf.kind == "Workflow"
+
+    def test_raises_on_no_yaml_available(self):
+        import yaml
+
+        import hera.workflow
+
+        # TODO: is there a better way to temporarily mock/patch this value to make this test more atomic?
+        hera.workflow._yaml = None
+        with pytest.raises(ImportError) as e:
+            Workflow('w').to_yaml()
+        assert (
+            str(e.value) == "Attempted to use `to_yaml` but PyYAML is not available. "
+            "Install `hera-workflows[yaml]` to install the extra dependency"
+        )
+
+        hera.workflow._yaml = yaml
+
+    def test_to_yaml(self):
+        def hello():
+            print("Hello, Hera!")
+
+        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+            Task("t", hello)
+
+        expected_yaml = """apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  labels:
+    a_b_c: a_b_c
+  name: hello-hera
+spec:
+  entrypoint: hello-hera
+  nodeSelector:
+    a_b_c: a_b_c
+  templates:
+  - name: t
+    script:
+      command:
+      - python
+      image: python:3.7
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print("Hello, Hera!")
+
+        '
+  - dag:
+      tasks:
+      - name: t
+        template: t
+    name: hello-hera
+"""
+        assert w.to_yaml() == expected_yaml
+
+    def test_to_dict(self):
+        def hello():
+            print("Hello, Hera!")
+
+        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+            Task("t", hello)
+        expected_dict = {
+            'metadata': {'name': 'hello-hera', 'labels': {'a_b_c': 'a_b_c'}},
+            'spec': {
+                'entrypoint': 'hello-hera',
+                'templates': [
+                    {
+                        'name': 't',
+                        'script': {
+                            'image': 'python:3.7',
+                            'source': 'import os\nimport sys\nsys.path.append(os.getcwd())\nprint("Hello, Hera!")\n',
+                            'command': ['python'],
+                        },
+                    },
+                    {'name': 'hello-hera', 'dag': {'tasks': [{'name': 't', 'template': 't'}]}},
+                ],
+                'nodeSelector': {'a_b_c': 'a_b_c'},
+            },
+            'apiVersion': 'argoproj.io/v1alpha1',
+            'kind': 'Workflow',
+        }
+        assert expected_dict == w.to_dict()
+
+    def test_to_json(self):
+        def hello():
+            print("Hello, Hera!")
+
+        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+            Task("t", hello)
+
+        expected_json = (
+            '{"metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}}, "spec": '
+            '{"entrypoint": "hello-hera", "templates": [{"name": "t", "script": {"image": '
+            '"python:3.7", "source": "import os\\nimport '
+            'sys\\nsys.path.append(os.getcwd())\\nprint(\\"Hello, Hera!\\")\\n", '
+            '"command": ["python"]}}, {"name": "hello-hera", "dag": {"tasks": [{"name": '
+            '"t", "template": "t"}]}}], "nodeSelector": {"a_b_c": "a_b_c"}}, '
+            '"apiVersion": "argoproj.io/v1alpha1", "kind": "Workflow"}'
+        )
+        assert expected_json == w.to_json()
