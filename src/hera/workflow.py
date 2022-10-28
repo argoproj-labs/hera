@@ -352,6 +352,6 @@ class Workflow:
         if _yaml is None:
             raise ImportError(
                 "Attempted to use `to_yaml` but PyYAML is not available. "
-                "Install `hera-workflow[yaml]` to install the extra dependency"
+                "Install `hera-workflows[yaml]` to install the extra dependency"
             )
         return _yaml.dump(model_to_dict(self.build()))
