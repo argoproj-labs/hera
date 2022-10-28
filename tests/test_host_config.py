@@ -5,9 +5,11 @@ from hera import (
     Config,
     get_global_host,
     get_global_namespace,
+    get_global_task_image,
     get_global_token,
     set_global_host,
     set_global_namespace,
+    set_global_task_image,
     set_global_token,
 )
 
@@ -71,3 +73,11 @@ def test_global_token_set_as_expected():
     assert get_global_token() == "token"
     set_global_token(None)
     assert get_global_token() is None
+
+
+def test_global_task_image_set_as_expected():
+    assert get_global_task_image() == "python3.7"
+    set_global_task_image("python3.9")
+    assert get_global_task_image() == "python3.9"
+    set_global_task_image("python3.7")
+    assert get_global_task_image() == "python3.7"

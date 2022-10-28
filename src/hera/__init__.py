@@ -30,9 +30,11 @@ from hera.host_alias import HostAlias
 from hera.host_config import (
     get_global_host,
     get_global_namespace,
+    get_global_task_image,
     get_global_token,
     set_global_host,
     set_global_namespace,
+    set_global_task_image,
     set_global_token,
 )
 from hera.image import ImagePullPolicy
