@@ -8,8 +8,9 @@ and its crew were specially protected by the goddess Hera.
 (https://en.wikipedia.org/wiki/Argo)
 
 [![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/cicd.yaml)
-
+[![Docs](https://readthedocs.org/projects/hera-workflows/badge/?version=latest)](https://hera-workflows.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/argoproj-labs/hera-workflows/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera-workflows)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [![Pypi](https://img.shields.io/pypi/v/hera-workflows.svg)](https://pypi.python.org/pypi/hera-workflows)
 [![CondaForge](https://anaconda.org/conda-forge/hera-workflows/badges/version.svg)](https://anaconda.org/conda-forge/hera-workflows)
@@ -19,7 +20,6 @@ and its crew were specially protected by the goddess Hera.
 [![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
