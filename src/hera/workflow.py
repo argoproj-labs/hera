@@ -315,6 +315,11 @@ class Workflow:
 
         return self
 
+    def lint(self) -> "Workflow":
+        """Lint the workflow"""
+        self.service.lint_workflow(self.build())
+        return self
+
     def on_exit(self, other: Union[Task, DAG]) -> None:
         """Add a task or a DAG to execute upon workflow exit"""
         if isinstance(other, Task):

@@ -344,7 +344,14 @@ class TestWorkflow:
         service.delete_workflow = mock.Mock()
         with Workflow("w", service=service) as w:
             w.delete()
-        w.service.delete_workflow.assert_called_once_with("w")  # type: ignore
+        w.service.delete_workflow.assert_called_once_with("w")
+
+    def test_lint(self):
+        service = mock.Mock()
+        service.lint_workflow = mock.Mock()
+        with Workflow("w", service=service) as w:
+            w.lint()
+        w.service.lint_workflow.assert_called_once_with(w.build())
 
     def test_parameter(self):
         with Workflow("w", parameters=[Parameter("a", value="42")]) as w:

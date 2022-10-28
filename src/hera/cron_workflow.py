@@ -110,6 +110,11 @@ class CronWorkflow(Workflow):
         self.service.create_cron_workflow(self.build())
         return self
 
+    def lint(self) -> "CronWorkflow":
+        """Lint the workflow"""
+        self.service.lint_cron_workflow(self.build())
+        return self
+
     def delete(self) -> Tuple[object, int, dict]:
         """Deletes the cron workflow"""
         return self.service.delete_cron_workflow(self.name)

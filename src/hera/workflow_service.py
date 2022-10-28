@@ -11,11 +11,14 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflow,
     IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest,
     IoArgoprojWorkflowV1alpha1CronWorkflowSuspendRequest,
+    IoArgoprojWorkflowV1alpha1LintCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
+    IoArgoprojWorkflowV1alpha1WorkflowLintRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateLintRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
 )
 
@@ -63,7 +66,7 @@ class WorkflowService:
 
         Parameters
         ----------
-        workflow: V1alpha1Workflow
+        workflow: IoArgoprojWorkflowV1alpha1Workflow
             The workflow to submit.
 
         Returns
@@ -78,6 +81,25 @@ class WorkflowService:
         return WorkflowServiceApi(api_client=self._api_client).create_workflow(
             self._namespace,
             IoArgoprojWorkflowV1alpha1WorkflowCreateRequest(workflow=workflow, _check_type=False),
+            _check_return_type=False,
+        )
+
+    def lint_workflow(self, workflow: IoArgoprojWorkflowV1alpha1Workflow) -> IoArgoprojWorkflowV1alpha1Workflow:
+        """Lints the given workflow.
+
+        Parameters
+        ----------
+        workflow: IoArgoprojWorkflowV1alpha1Workflow
+            Workflow to lint.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1Workflow
+            Linted workflow.
+        """
+        return WorkflowServiceApi(api_client=self._api_client).lint_workflow(
+            self._namespace,
+            IoArgoprojWorkflowV1alpha1WorkflowLintRequest(workflow=workflow, _check_type=False),
             _check_return_type=False,
         )
 
@@ -149,6 +171,27 @@ class WorkflowService:
         """
         return WorkflowServiceApi(api_client=self._api_client).delete_workflow(self._namespace, name)
 
+    def lint_workflow_template(
+        self, workflow: IoArgoprojWorkflowV1alpha1WorkflowTemplate
+    ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
+        """Lints the given workflow template.
+
+        Parameters
+        ----------
+        workflow: IoArgoprojWorkflowV1alpha1WorkflowTemplate
+            Workflow template to lint.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1WorkflowTemplate
+            Linted workflow template.
+        """
+        return WorkflowTemplateServiceApi(api_client=self._api_client).lint_workflow_template(
+            self._namespace,
+            IoArgoprojWorkflowV1alpha1WorkflowTemplateLintRequest(workflow=workflow, _check_type=False),
+            _check_return_type=False,
+        )
+
     def create_workflow_template(
         self, workflow_template: IoArgoprojWorkflowV1alpha1WorkflowTemplate
     ) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:
@@ -215,6 +258,27 @@ class WorkflowService:
         argo.workflows.client.ApiException: Raised upon any HTTP-related errors
         """
         return WorkflowTemplateServiceApi(api_client=self._api_client).delete_workflow_template(self._namespace, name)
+
+    def lint_cron_workflow(
+        self, workflow: IoArgoprojWorkflowV1alpha1CronWorkflow
+    ) -> IoArgoprojWorkflowV1alpha1CronWorkflow:
+        """Lints the given cron workflow.
+
+        Parameters
+        ----------
+        workflow: IoArgoprojWorkflowV1alpha1CronWorkflow
+            Cron workflow to lint.
+
+        Returns
+        -------
+        IoArgoprojWorkflowV1alpha1CronWorkflow
+            Linted cron workflow.
+        """
+        return CronWorkflowServiceApi(api_client=self._api_client).lint_cron_workflow(
+            self._namespace,
+            IoArgoprojWorkflowV1alpha1LintCronWorkflowRequest(workflow=workflow, _check_type=False),
+            _check_return_type=False,
+        )
 
     def create_cron_workflow(
         self, workflow: IoArgoprojWorkflowV1alpha1CronWorkflow

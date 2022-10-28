@@ -115,3 +115,10 @@ class TestCronWorkflow:
             cw.service.update_cron_workflow = mock.Mock()
         cw.update()
         cw.service.get_cron_workflow.assert_called_once()
+
+    def test_lint(self, schedule):
+        service = mock.Mock()
+        service.lint_cron_workflow = mock.Mock()
+        with CronWorkflow("w", schedule, service=service) as w:
+            w.lint()
+        w.service.lint_cron_workflow.assert_called_once_with(w.build())

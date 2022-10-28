@@ -41,6 +41,7 @@ Welcome to Hera's documentation!
    examples/internal_wrapper
    examples/k8s_sa
    examples/linear
+   examples/lint
    examples/memoize
    examples/metrics
    examples/multiple_dependencies
