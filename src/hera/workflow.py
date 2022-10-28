@@ -341,11 +341,11 @@ class Workflow:
 
     def to_dict(self) -> dict:
         """Returns the dictionary representation of the workflow"""
-        return model_to_dict(self.build(), serialize=False)
+        return model_to_dict(self.build())
 
     def to_json(self) -> str:
         """Returns the JSON representation of the workflow"""
-        return json.dumps(model_to_dict(self.build(), serialize=False))
+        return json.dumps(model_to_dict(self.build()))
 
     def to_yaml(self) -> str:
         """Returns a YAML representation of the workflow"""

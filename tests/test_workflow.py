@@ -445,29 +445,27 @@ spec:
         def hello():
             print("Hello, Hera!")
 
-        with Workflow("hello-hera") as w:
+        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
             Task("t", hello)
         expected_dict = {
-            'api_version': 'argoproj.io/v1alpha1',
-            'kind': 'Workflow',
-            'metadata': {'name': 'hello-hera'},
+            'metadata': {'name': 'hello-hera', 'labels': {'a_b_c': 'a_b_c'}},
             'spec': {
                 'entrypoint': 'hello-hera',
                 'templates': [
                     {
                         'name': 't',
                         'script': {
-                            'command': ['python'],
                             'image': 'python:3.7',
-                            'source': 'import os\n'
-                            'import sys\n'
-                            'sys.path.append(os.getcwd())\n'
-                            'print("Hello, Hera!")\n',
+                            'source': 'import os\nimport sys\nsys.path.append(os.getcwd())\nprint("Hello, Hera!")\n',
+                            'command': ['python'],
                         },
                     },
-                    {'dag': {'tasks': [{'name': 't', 'template': 't'}]}, 'name': 'hello-hera'},
+                    {'name': 'hello-hera', 'dag': {'tasks': [{'name': 't', 'template': 't'}]}},
                 ],
+                'nodeSelector': {'a_b_c': 'a_b_c'},
             },
+            'apiVersion': 'argoproj.io/v1alpha1',
+            'kind': 'Workflow',
         }
         assert expected_dict == w.to_dict()
 
@@ -475,15 +473,16 @@ spec:
         def hello():
             print("Hello, Hera!")
 
-        with Workflow("hello-hera") as w:
+        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
             Task("t", hello)
 
         expected_json = (
-            '{"metadata": {"name": "hello-hera"}, "spec": {"entrypoint": "hello-hera", '
-            '"templates": [{"name": "t", "script": {"image": "python:3.7", "source": '
-            '"import os\\nimport sys\\nsys.path.append(os.getcwd())\\nprint(\\"Hello, '
-            'Hera!\\")\\n", "command": ["python"]}}, {"name": "hello-hera", "dag": '
-            '{"tasks": [{"name": "t", "template": "t"}]}}]}, "api_version": '
-            '"argoproj.io/v1alpha1", "kind": "Workflow"}'
+            '{"metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}}, "spec": '
+            '{"entrypoint": "hello-hera", "templates": [{"name": "t", "script": {"image": '
+            '"python:3.7", "source": "import os\\nimport '
+            'sys\\nsys.path.append(os.getcwd())\\nprint(\\"Hello, Hera!\\")\\n", '
+            '"command": ["python"]}}, {"name": "hello-hera", "dag": {"tasks": [{"name": '
+            '"t", "template": "t"}]}}], "nodeSelector": {"a_b_c": "a_b_c"}}, '
+            '"apiVersion": "argoproj.io/v1alpha1", "kind": "Workflow"}'
         )
         assert expected_json == w.to_json()
