@@ -41,7 +41,14 @@ class TestWorkflowTemplate:
         wt.service.update_workflow_template.assert_called_once()
 
     def test_update_cals_service_delete(self, setup):
-        with WorkflowTemplate("test") as wt:
-            wt.service = mock.Mock()
-        wt.delete()
+        s = mock.Mock()
+        with WorkflowTemplate("test", service=s) as wt:
+            wt.delete()
         wt.service.delete_workflow_template.assert_called_once()
+
+    def test_lint(self):
+        service = mock.Mock()
+        service.lint_workflow_template = mock.Mock()
+        with WorkflowTemplate("w", service=service) as w:
+            w.lint()
+        w.service.lint_workflow_template.assert_called_once_with(w.build())

@@ -36,9 +36,6 @@ class WorkflowTemplate(Workflow):
 
     def lint(self) -> "WorkflowTemplate":
         """Lint the workflow"""
-        if self.in_context:
-            raise ValueError("Cannot invoke `lint` when using a Hera context")
-
         self.service.lint_workflow_template(self.build())
         return self
 

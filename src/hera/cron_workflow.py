@@ -112,9 +112,6 @@ class CronWorkflow(Workflow):
 
     def lint(self) -> "CronWorkflow":
         """Lint the workflow"""
-        if self.in_context:
-            raise ValueError("Cannot invoke `lint` when using a Hera context")
-
         self.service.lint_cron_workflow(self.build())
         return self
 
