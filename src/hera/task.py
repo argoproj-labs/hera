@@ -7,6 +7,8 @@ import textwrap
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
+from hera.host_config import get_global_task_image
+
 if TYPE_CHECKING:
     from hera import DAG
 
@@ -99,7 +101,7 @@ class Task(IO):
         `Output` objects that dictate the outputs of the task.
     dag: Optional["DAG"] = None
         The DAG the task should execute.
-    image: str = "python:3.7"
+    image: Optional[str] = None
         The image to use in the execution of the function.
     image_pull_policy: Optional[ImagePullPolicy] = None
         The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image or not.
@@ -180,7 +182,7 @@ class Task(IO):
         inputs: Optional[List[Union[Parameter, Artifact]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional["DAG"] = None,
-        image: str = "python:3.7",
+        image: Optional[str] = None,
         image_pull_policy: Optional[ImagePullPolicy] = None,
         daemon: bool = False,
         command: Optional[List[str]] = None,
@@ -239,7 +241,7 @@ class Task(IO):
                     "`Optional[Union[Metric, List[Metric], Metrics]]`"
                 )
 
-        self.image = image
+        self.image = image or get_global_task_image()
         self.image_pull_policy = image_pull_policy
         self.daemon = daemon
         self.command = command

@@ -97,3 +97,17 @@ def set_global_namespace(n: str) -> None:
 def get_global_namespace() -> str:
     """Returns the Argo Workflows global namespace"""
     return _namespace
+
+
+_image: str = "python:3.7"
+
+
+def set_global_task_image(image: str) -> None:
+    """Sets the Argo Task image at the global level which Tasks will use by default"""
+    global _image
+    _image = image
+
+
+def get_global_task_image() -> str:
+    """Returns the Argo Task global image"""
+    return _image
