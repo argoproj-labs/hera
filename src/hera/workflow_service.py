@@ -7,7 +7,6 @@ from argo_workflows.apis import (
     WorkflowTemplateServiceApi,
 )
 from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1WorkflowTemplateLintRequest,
     IoArgoprojWorkflowV1alpha1CreateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1CronWorkflow,
     IoArgoprojWorkflowV1alpha1CronWorkflowResumeRequest,
@@ -19,6 +18,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowLintRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateCreateRequest,
+    IoArgoprojWorkflowV1alpha1WorkflowTemplateLintRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
 )
 

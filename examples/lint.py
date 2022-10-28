@@ -1,6 +1,6 @@
 """This example showcases how to lint workflows supported by Hera"""
 
-from hera import CronWorkflow, Workflow, WorkflowTemplate, Task
+from hera import CronWorkflow, Task, Workflow, WorkflowTemplate
 
 
 def say(msg: str) -> None:
