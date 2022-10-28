@@ -51,7 +51,7 @@ _image: str = "python3.7"
 
 
 def set_global_task_image(image: str) -> None:
-    """Sets the Argo Task image at the global level so Tasks can use it by default"""
+    """Sets the Argo Task image at the global level which Tasks will use by default"""
     global _image
     _image = image
 
