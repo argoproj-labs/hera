@@ -339,13 +339,13 @@ class Workflow:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
 
-    def to_dict(self) -> dict:
+    def to_dict(self, serialize=True) -> dict:
         """Returns the dictionary representation of the workflow"""
-        return model_to_dict(self.build())
+        return model_to_dict(self.build(), serialize=serialize)
 
     def to_json(self) -> str:
         """Returns the JSON representation of the workflow"""
-        return json.dumps(model_to_dict(self.build()))
+        return json.dumps(self.to_dict())
 
     def to_yaml(self) -> str:
         """Returns a YAML representation of the workflow"""
@@ -354,4 +354,4 @@ class Workflow:
                 "Attempted to use `to_yaml` but PyYAML is not available. "
                 "Install `hera-workflows[yaml]` to install the extra dependency"
             )
-        return _yaml.dump(model_to_dict(self.build()))
+        return _yaml.dump(self.to_dict())
