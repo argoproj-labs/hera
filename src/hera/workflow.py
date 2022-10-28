@@ -1,7 +1,6 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 from typing import Dict, List, Optional, Tuple, Union
 
-import yaml
 from argo_workflows.model_utils import model_to_dict
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Arguments,
@@ -330,10 +329,18 @@ class Workflow:
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
 
     def to_dict(self) -> dict:
-        """Returns the JSON/dictionary representation of the workflow"""
-        return self.build().to_dict()
+        """Returns the dictionary representation of the workflow"""
+        return model_to_dict(self.build(), serialize=False)
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of the workflow"""
+        return model_to_dict(self.build(), serialize=True)
 
     def to_yaml(self) -> str:
         """Returns a YAML representation of the workflow"""
-        dict_repr = model_to_dict(self.build())
-        return yaml.dump(dict_repr)
+        try:
+            import yaml
+        except ImportError as e:
+            raise ImportError("Attempted to use `to_yaml` but PyYAML is not available. "
+                              "Install `hera-workflow[yaml]` to install the extra dependency")
+        return yaml.dump(self.to_dict())
