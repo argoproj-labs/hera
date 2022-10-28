@@ -39,6 +39,7 @@ The general format is:
 - global task image
 - global SSL verification flag
 - `lint` API on workflows
+- `value_from_input` on `Env` sanitization so that the name satisfies RFC1123 requirements
 
 ### Changed
 
