@@ -22,6 +22,39 @@ def get_global_api_version() -> str:
     return _api_version
 
 
+_service_account_name: Optional[str] = None
+
+
+def set_global_service_account_name(sa: Optional[str]) -> None:
+    """Sets the service account to use for workflow submissions on a global level"""
+    global _service_account_name
+    _service_account_name = sa
+
+
+def get_global_service_account_name() -> Optional[str]:
+    """Returns the set global service account"""
+    global _service_account_name
+    return _service_account_name
+
+
+_verify_ssl: bool = True
+
+
+def set_global_verify_ssl(v: bool) -> None:
+    """Sets the flag for whether to verify SSL on workflow submission globally.
+
+    Set this as False to skip verifying SSL certificate when submitting workflows from an HTTPS server.
+    """
+    global _verify_ssl
+    _verify_ssl = v
+
+
+def get_global_verify_ssl() -> bool:
+    """Returns the set global verify SSL option"""
+    global _verify_ssl
+    return _verify_ssl
+
+
 _host: Optional[str] = None
 
 
