@@ -29,6 +29,22 @@ The general format is:
 
 ```
 
+# 4.1.0 - DATE (28/10/2022)
+
+### Added
+
+- `to_yaml`, `to_dict`, and `to_json` on workflows
+- optional PyYAML dependency (`hera-workflows[yaml]`)
+- global default service account
+- global task image
+- global SSL verification flag
+- `lint` API on workflows
+
+### Changed
+
+- DAG template naming to fix the issue of DAGs not being present on workflow templates
+- version constraints on dependencies from `^` to `>=`
+
 # 4.0.1 - DATE (05/10/2022)
 
 ### Added
