@@ -49,7 +49,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "build"
-version = "0.8.0"
+version = "0.9.0"
 description = "A simple, correct PEP 517 build frontend"
 category = "dev"
 optional = false
@@ -120,7 +120,7 @@ python-versions = "*"
 
 [[package]]
 name = "exceptiongroup"
-version = "1.0.0rc9"
+version = "1.0.0"
 description = "Backport of PEP 654 (exception groups)"
 category = "dev"
 optional = false
@@ -445,6 +445,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "types-pyyaml"
+version = "6.0.12.1"
+description = "Typing stubs for PyYAML"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -498,7 +506,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<4"
-content-hash = "4f32b3298be4b07c0c07212d1860d5d5075b14737ece70cce09f19e6d032a867"
+content-hash = "65ae67a81994246a3ad0f706b61a40a9b6cf977ec8907e869427c321fd77407b"
 
 [metadata.files]
 argo-workflows = []
@@ -538,6 +546,7 @@ six = []
 tomli = []
 tox = []
 typed-ast = []
+types-pyyaml = []
 typing-extensions = []
 urllib3 = []
 virtualenv = []
