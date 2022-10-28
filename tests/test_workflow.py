@@ -396,7 +396,7 @@ class TestWorkflow:
             Workflow('w').to_yaml()
         assert (
             str(e.value) == "Attempted to use `to_yaml` but PyYAML is not available. "
-            "Install `hera-workflow[yaml]` to install the extra dependency"
+            "Install `hera-workflows[yaml]` to install the extra dependency"
         )
 
         hera.workflow._yaml = yaml
