@@ -12,9 +12,9 @@ class WorkflowTemplate(Workflow):
 
     See `hera.workflow.Workflow` for parameterization.
 
-    See Also
-    --------
-    https://argoproj.github.io/argo-workflows/workflow-templates/
+    Notes
+    -----
+    See: https://argoproj.github.io/argo-workflows/workflow-templates/
     """
 
     def build(self) -> IoArgoprojWorkflowV1alpha1WorkflowTemplate:

@@ -41,9 +41,9 @@ class NodeSelectorRequirement:
     values: Optional[List[str]] = None
         An optional list of values to assemble for the key to match, as dictated by the operator.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(self, key: str, operator: Union[LabelOperator, str], values: Optional[List[str]] = None) -> None:
@@ -79,9 +79,9 @@ class NodeSelectorTerm:
     fields: Optional[List[Field]] = None
         A list of fields for the node selector term to match. See `hera.affinity.NodeSelectorRequirement`.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(self, expressions: Optional[List[Expression]] = None, fields: Optional[List[Field]] = None) -> None:
@@ -117,9 +117,9 @@ class PreferredSchedulingTerm:
     weight: int
         Integer weight for the scheduling term. This is supposed to be between 1 and 100.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(self, node_selector_term: NodeSelectorTerm, weight: int) -> None:
@@ -150,9 +150,9 @@ class LabelSelectorRequirement:
     values: Optional[List[str]] = None
         An optional list of values to assemble for the key to match, as dictated by the operator.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(self, key: str, operator: Union[LabelOperator, str], values: Optional[List[str]] = None) -> None:
@@ -184,9 +184,9 @@ class LabelSelector:
     match_labels: Optional[Dict[str, str]] = None
         A list of labels to match, in the form of key value pairs.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(
@@ -228,9 +228,9 @@ class PodAffinityTerm:
     namespaces: Optional[List[str]] = None
         Namespace to match pod affinity term in.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(
@@ -273,9 +273,9 @@ class WeightedPodAffinityTerm:
     weight: int
         The weight of the pod affinity term. This should be between 1 and 100.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(
@@ -305,9 +305,9 @@ class PodAffinity:
     pod_affinity_terms: Optional[List[PodAffinityTerm]] = None
         Optional list of pod affinity terms. See also `hera.affinity.PodAffinityTerm`.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(
@@ -357,9 +357,9 @@ class PodAntiAffinity:
     pod_affinity_terms: Optional[List[PodAffinityTerm]] = None
         Optional list of pod affinity terms. See also `hera.affinity.PodAffinityTerm`.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(
@@ -409,9 +409,9 @@ class NodeSelector:
     terms: Optional[List[NodeSelectorTerm]] = None
         The terms to use for node selector assembly. See also `hera.affinity.NodeSelectorTerm`.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(self, terms: Optional[List[NodeSelectorTerm]] = None):
@@ -436,9 +436,9 @@ class NodeAffinity:
     node_selector: Optional[NodeSelector] = None
         Optional node selector for node affinity. See `hera.affinity.NodeSelector`.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(
@@ -492,9 +492,9 @@ class Affinity:
     node_affinity: Optional[NodeAffinity] = None
         Node affinity. See `hera.affinity.NodeAffinity`.
 
-    See also
-    --------
-        https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     """
 
     def __init__(

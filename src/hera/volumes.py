@@ -32,9 +32,9 @@ class _NamedSecret:
 class AccessMode(str, Enum):
     """A representations of the volume access modes for Kubernetes.
 
-    See Also
-    --------
-    https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
+    Notes
+    -----
+    See: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
     """
 
     ReadWriteOnce = "ReadWriteOnce"

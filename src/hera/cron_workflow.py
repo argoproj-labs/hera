@@ -15,9 +15,9 @@ from hera.workflow import Workflow
 class ConcurrencyPolicy(str, Enum):
     """Specifies how to treat concurrent executions of a job that is created by a cron workflow.
 
-    See Also
-    --------
-    https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/#concurrency-policy
+    Notes
+    -----
+    See https://kubernetes.io/docs/tasks/job/automated-tasks-with-cron-jobs/#concurrency-policy
     """
 
     Allow = "Allow"
