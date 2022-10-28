@@ -4,8 +4,10 @@
 The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
-
 (https://en.wikipedia.org/wiki/Argo)
+
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#<https://github.com/argoproj-labs/hera-workflows>)
 
 [![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/cicd.yaml)
 [![Docs](https://readthedocs.org/projects/hera-workflows/badge/?version=latest)](https://hera-workflows.readthedocs.io/en/latest/?badge=latest)
