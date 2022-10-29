@@ -13,6 +13,11 @@ Welcome to Hera's documentation!
    src
 
 .. toctree::
+   :caption: Expr Transpilation
+
+   expr
+
+.. toctree::
    :maxdepth: 2
    :caption: Examples
 
@@ -57,6 +62,7 @@ Welcome to Hera's documentation!
    examples/workflow_template_global_parameter
    examples/workflow_with_custom_image
    examples/workflow_with_template_ref
+
 
 
 Indices and tables

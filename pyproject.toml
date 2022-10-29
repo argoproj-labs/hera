@@ -48,6 +48,8 @@ build = "*"
 isort = "*"
 tox = "<4.0"
 types-PyYAML = "*"
+jsonpath-ng = "^1.5.3"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
