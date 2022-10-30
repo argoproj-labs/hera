@@ -60,6 +60,21 @@ class Node:
         """
         return UnaryOp(self, "+")
 
+    def __format__(self, format_spec: str) -> str:
+        """Supports easy output formatting to construct variable substitution expressions.
+
+        Examples
+        --------
+        f"{g.input.parameters.value:$}" == "{{input.parameters.value}}"
+        f"{g.input.parameters.value}" == "input.parameters.value"
+        """
+        # For more details around this see https://peps.python.org/pep-3101/
+        if not format_spec:
+            return repr(self)
+        if format_spec == "$":
+            return "{{" + repr(self) + "}}"
+        raise Exception(f"Invalid format spec '{format_spec}'. Only allowed value is '$'")
+
     def length(self):
         """Supports length builtin.
 

@@ -4,6 +4,18 @@
 
 Hera provides an easy way to construct `expr` expressions in `Python`. It supports the full language definition of `expr` including the enhancements added by `Argo`.
 
+## Usage
+
+The recommended way of using the `hera.expr` module is to construct the expression in Python. Once your expressions is ready to be used,
+you may call `str(<expression>)` to convert it to an appropriate `expr` expression. `hera` also supports formatting expressions such that they are surrounded by braces which is useful in Argo when substituting variables.. You can do this via Python string format literals and by adding `$` as a format string.
+
+Example:
+
+* `f"{g.input.parameters.value:$}" == "{{input.parameters.value}}"`: the `$` format string tells `hera` to insert the braces around the output expression.
+* `f"{g.input.parameters.value}" == "input.parameters.value"`: without any extra format strings, the output is the transpiled `expr` expression.
+* `str(g.input.parameters.value) == "input.parameters.value"`: calling `str` on a `hera.expr` expression also triggers the transpilation.
+
+
 ## Supported Literals
 
 The transpiler supports constant literals via the class `C`:
@@ -303,7 +315,7 @@ Note: `expr` allows you to omit `#` when accessing attributes in the predicate. 
 
 ## Sprig functions
 
-Spring functions may be called using the `sprig.<function>(*args)` syntax.
+Spring functions may be called using the `sprig.<function>(*args)` syntax. For a complete list of functions you may visit the [sprig function documentation](http://masterminds.github.io/sprig/)
 
 * `sprig.trim(g.test)` transpiles to `sprig.trim(test)`
 
