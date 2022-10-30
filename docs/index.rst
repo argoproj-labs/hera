@@ -25,6 +25,7 @@ Welcome to Hera's documentation!
    examples/artifact
    examples/artifact_with_fanout
    examples/coinflip
+   examples/complex_expr
    examples/conditional
    examples/container
    examples/custom_script

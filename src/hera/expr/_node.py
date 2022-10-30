@@ -66,6 +66,7 @@ class Node:
         Examples
         --------
         f"{g.input.parameters.value:$}" == "{{input.parameters.value}}"
+        f"{g.workflow.parameters.config.jsonpath('$.a'):=}" == "{{=jsonpath(workflow.parameters.config, '$.a')}}"
         f"{g.input.parameters.value}" == "input.parameters.value"
         """
         # For more details around this see https://peps.python.org/pep-3101/
@@ -73,7 +74,9 @@ class Node:
             return repr(self)
         if format_spec == "$":
             return "{{" + repr(self) + "}}"
-        raise Exception(f"Invalid format spec '{format_spec}'. Only allowed value is '$'")
+        if format_spec == "=":
+            return "{{=" + repr(self) + "}}"
+        raise Exception(f"Invalid format spec '{format_spec}'. Only allowed values are '$' and '='.")
 
     def length(self):
         """Supports length builtin.

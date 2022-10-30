@@ -66,6 +66,7 @@ def test_expr(expr, value):
     assert str(expr) == value
     assert f"{expr:}" == value
     assert f"{expr:$}" == "{{" + value + "}}"
+    assert f"{expr:=}" == "{{=" + value + "}}"
 
 
 def test_raises():
@@ -73,5 +74,5 @@ def test_raises():
         C(range(1, 2, 3))
     with pytest.raises(Exception, match="Only slices with a step size of 1 are allowed"):
         C([1, 2])[1:2:2]
-    with pytest.raises(Exception, match="Invalid format spec '!!'. Only allowed value is '.*'"):
+    with pytest.raises(Exception, match="Invalid format spec '!!'. Only allowed values are .*"):
         f"{C([1, 2])[1:2]:!!}"

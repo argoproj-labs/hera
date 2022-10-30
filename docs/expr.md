@@ -11,7 +11,8 @@ you may call `str(<expression>)` to convert it to an appropriate `expr` expressi
 
 Example:
 
-* `f"{g.input.parameters.value:$}" == "{{input.parameters.value}}"`: the `$` format string tells `hera` to insert the braces around the output expression.
+* `f"{g.input.parameters.value:$}" == "{{input.parameters.value}}"`: the `$` format string tells `hera` to insert the braces around the output as a simple variable.
+* `f"{g.workflow.parameters.config.jsonpath('$.a'):=}" == "{{=jsonpath(workflow.parameters.config, '$.a')}}"`: the `=` format string tells `hera` to insert the braces around the output and insert and equals sign and output a complex expression.
 * `f"{g.input.parameters.value}" == "input.parameters.value"`: without any extra format strings, the output is the transpiled `expr` expression.
 * `str(g.input.parameters.value) == "input.parameters.value"`: calling `str` on a `hera.expr` expression also triggers the transpilation.
 
