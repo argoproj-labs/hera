@@ -29,6 +29,12 @@ The general format is:
 
 ```
 
+# 4.2.0 - DATE (31/10/2022)
+
+### Added
+
+- `expr` module for constructing Argo expressions
+
 # 4.1.0 - DATE (28/10/2022)
 
 ### Added
