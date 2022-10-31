@@ -3,3 +3,6 @@ tasks:
       python -m pip install --upgrade pip
       python -m pip install "tox<4.0" poetry
       poetry install
+vscode:
+  extensions:
+    - littlefoxteam.vscode-python-test-adapter@0.3.16:tZ/6xOSSdKUaq6JCUVkD+A==
