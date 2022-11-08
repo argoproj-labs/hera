@@ -56,10 +56,9 @@ class WorkflowService:
         token: Optional[str] = None,
         namespace: Optional[str] = None,
     ):
-        self._host = host
-        self._verify_ssl = verify_ssl
         self._namespace = get_global_namespace() if namespace is None else namespace
-        self._api_client = Client(Config(host=self._host, verify_ssl=self._verify_ssl), token=token).api_client
+        self._config = Config(host=host, verify_ssl=verify_ssl)
+        self._api_client = Client(self._config, token=token).api_client
 
     def create_workflow(self, workflow: IoArgoprojWorkflowV1alpha1Workflow) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Creates the given workflow to the given namespace.
@@ -151,7 +150,7 @@ class WorkflowService:
         -----
         The returned path works only for Argo.
         """
-        return f"{self._host}/workflows/{self._namespace}/{name}?tab=workflow"
+        return f"{self._config.host}/workflows/{self._namespace}/{name}?tab=workflow"
 
     def delete_workflow(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow from the given namespace based on the specified name.
@@ -430,4 +429,4 @@ class WorkflowService:
         -----
         The returned path works only for Argo.
         """
-        return f"{self._host}/cron-workflows/{self._namespace}/{name}"
+        return f"{self._config.host}/cron-workflows/{self._namespace}/{name}"
