@@ -26,7 +26,9 @@ from hera.cron_workflow import ConcurrencyPolicy, CronWorkflow
 from hera.dag import DAG
 from hera.env import ConfigMapEnv, Env, FieldEnv, SecretEnv
 from hera.env_from import ConfigMapEnvFrom, SecretEnvFrom
+from hera.global_config import Config, GlobalConfig
 from hera.host_alias import HostAlias
+
 # the following host configurations are deprecated. See `GlobalConfig` instead
 from hera.host_config import (
     get_global_api_version,
@@ -57,7 +59,6 @@ from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
 from hera.sequence import Sequence
 from hera.task import Task, TaskResult
 from hera.template_ref import TemplateRef
-from hera.global_config import Config, GlobalConfig
 from hera.toleration import GPUToleration, Toleration
 from hera.ttl_strategy import TTLStrategy
 from hera.value_from import ValueFrom

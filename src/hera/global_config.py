@@ -1,10 +1,23 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Optional, Union, List
+from typing import List, Optional, Tuple, Union
 
-TaskHook = Callable[['Task'], None]
-WorkflowHook = Callable[['Workflow'], None]
+from typing_extensions import Protocol
+
+
+class TaskHook(Protocol):
+    from hera.task import Task
+
+    def __call__(self, t: Task) -> None:
+        ...
+
+
+class WorkflowHook(Protocol):
+    from hera.workflow import Workflow
+
+    def __call__(self, w: Workflow) -> None:
+        ...
 
 
 class _GlobalConfig:
@@ -110,10 +123,14 @@ class _GlobalConfig:
         return self._task_post_init_hooks[::-1]  # return hooks in FIFO order of execution
 
     @task_post_init_hooks.setter
-    def task_post_init_hooks(self, *h: TaskHook) -> None:
+    def task_post_init_hooks(self, h: Union[TaskHook, List[TaskHook], Tuple[TaskHook]]) -> None:
         """Adds a task post init hook. The hooks are executed in FIFO order"""
         # note, your IDE might show these instance checks as incorrect but, they should be fine
-        self._task_post_init_hooks.extend(h)
+        if isinstance(h, list) or isinstance(h, tuple):
+            for h_ in h:
+                self._task_post_init_hooks.append(h_)
+        else:
+            self._task_post_init_hooks.append(h)
 
     @property
     def workflow_post_init_hooks(self) -> List[WorkflowHook]:
@@ -121,9 +138,13 @@ class _GlobalConfig:
         return self._workflow_post_init_hooks[::-1]  # return hooks in FIFO order of execution
 
     @workflow_post_init_hooks.setter
-    def workflow_post_init_hooks(self, *h: WorkflowHook) -> None:
+    def workflow_post_init_hooks(self, h: Union[WorkflowHook, List[WorkflowHook], Tuple[WorkflowHook]]) -> None:
         """Adds a workflow post init hook. The hooks are executed in FIFO order"""
-        self._workflow_post_init_hooks.extend(h)
+        if isinstance(h, list) or isinstance(h, tuple):
+            for h_ in h:
+                self._workflow_post_init_hooks.append(h_)
+        else:
+            self._workflow_post_init_hooks.append(h)
 
 
 GlobalConfig = _GlobalConfig()

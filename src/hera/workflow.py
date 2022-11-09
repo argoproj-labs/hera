@@ -16,6 +16,7 @@ from argo_workflows.models import (
 import hera
 from hera.affinity import Affinity
 from hera.dag import DAG
+from hera.global_config import GlobalConfig
 from hera.host_alias import HostAlias
 from hera.host_config import get_global_api_version, get_global_service_account_name
 from hera.metric import Metric, Metrics
@@ -27,7 +28,6 @@ from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_service import WorkflowService
-from hera.global_config import GlobalConfig
 
 # PyYAML is an optional dependency
 _yaml: Optional[ModuleType] = None
