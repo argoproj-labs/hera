@@ -18,7 +18,6 @@ from hera.affinity import Affinity
 from hera.dag import DAG
 from hera.global_config import GlobalConfig
 from hera.host_alias import HostAlias
-from hera.host_config import get_global_api_version, get_global_service_account_name
 from hera.metric import Metric, Metrics
 from hera.parameter import Parameter
 from hera.security_context import WorkflowSecurityContext
@@ -133,7 +132,7 @@ class Workflow:
         self.parallelism = parallelism
         self.security_context = security_context
         self.service_account_name = (
-            get_global_service_account_name() if service_account_name is None else service_account_name
+            GlobalConfig.service_account_name if service_account_name is None else service_account_name
         )
         self.labels = labels
         self.annotations = annotations
@@ -274,7 +273,7 @@ class Workflow:
     def build(self) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Builds the workflow core representation"""
         return IoArgoprojWorkflowV1alpha1Workflow(
-            api_version=get_global_api_version(),
+            api_version=GlobalConfig.api_version,
             kind=self.__class__.__name__,
             metadata=self._build_metadata(),
             spec=self._build_spec(),

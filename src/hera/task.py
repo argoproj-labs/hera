@@ -7,8 +7,6 @@ import textwrap
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
-from hera.host_config import get_global_task_image
-
 if TYPE_CHECKING:
     from hera import DAG
 
@@ -242,7 +240,7 @@ class Task(IO):
                     "`Optional[Union[Metric, List[Metric], Metrics]]`"
                 )
 
-        self.image = image or get_global_task_image()
+        self.image = image or GlobalConfig.image
         self.image_pull_policy = image_pull_policy
         self.daemon = daemon
         self.command = command

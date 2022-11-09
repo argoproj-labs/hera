@@ -67,7 +67,7 @@ class _GlobalConfig:
         self._host = h
 
     @property
-    def token(self) -> Union[Optional[str], Callable[[], Optional[str]]]:
+    def token(self) -> Optional[str]:
         """Returns an Argo Workflows global token"""
         if self._token is None or isinstance(self._token, str):
             return self._token

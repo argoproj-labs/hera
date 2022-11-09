@@ -8,7 +8,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
 )
 
-from hera.host_config import get_global_api_version
+from hera.global_config import GlobalConfig
 from hera.workflow import Workflow
 
 
@@ -97,7 +97,7 @@ class CronWorkflow(Workflow):
             setattr(cron_workflow_spec, "timezone", self.timezone)
 
         return IoArgoprojWorkflowV1alpha1CronWorkflow(
-            api_version=get_global_api_version(),
+            api_version=GlobalConfig.api_version,
             kind=self.__class__.__name__,
             metadata=workflow.metadata,
             spec=cron_workflow_spec,

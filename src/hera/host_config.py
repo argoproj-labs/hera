@@ -4,7 +4,9 @@ import warnings
 from collections.abc import Callable
 from typing import Optional, Union
 
-_api_version: str = "argoproj.io/v1alpha1"
+from hera.global_config import GlobalConfig
+
+_api_version = GlobalConfig.api_version
 
 
 def set_global_api_version(v: str) -> None:
@@ -17,8 +19,7 @@ def set_global_api_version(v: str) -> None:
         "`host_config.set_global_api_version` is deprecated in favor of "
         "`global_config.GlobalConfig.api_version` and will be removed in a future version"
     )
-    global _api_version
-    _api_version = v
+    GlobalConfig.api_version = v
 
 
 def get_global_api_version() -> str:
@@ -27,11 +28,10 @@ def get_global_api_version() -> str:
         "`host_config.get_global_api_version` is deprecated in favor of "
         "`global_config.GlobalConfig.api_version` and will be removed in a future version"
     )
-    global _api_version
-    return _api_version
+    return GlobalConfig.api_version
 
 
-_service_account_name: Optional[str] = None
+_service_account_name = GlobalConfig.service_account_name
 
 
 def set_global_service_account_name(sa: Optional[str]) -> None:
@@ -40,8 +40,7 @@ def set_global_service_account_name(sa: Optional[str]) -> None:
         "`host_config.set_global_service_account_name` is deprecated in favor of "
         "`global_config.GlobalConfig.service_account_name` and will be removed in a future version"
     )
-    global _service_account_name
-    _service_account_name = sa
+    GlobalConfig.service_account_name = sa
 
 
 def get_global_service_account_name() -> Optional[str]:
@@ -50,11 +49,10 @@ def get_global_service_account_name() -> Optional[str]:
         "`host_config.get_global_service_account_name` is deprecated in favor of "
         "`global_config.GlobalConfig.service_account_name` and will be removed in a future version"
     )
-    global _service_account_name
-    return _service_account_name
+    return GlobalConfig.service_account_name
 
 
-_verify_ssl: bool = True
+_verify_ssl = GlobalConfig.verify_ssl
 
 
 def set_global_verify_ssl(v: bool) -> None:
@@ -66,8 +64,7 @@ def set_global_verify_ssl(v: bool) -> None:
         "`host_config.set_global_verify_ssl` is deprecated in favor of "
         "`global_config.GlobalConfig.verify_ssl` and will be removed in a future version"
     )
-    global _verify_ssl
-    _verify_ssl = v
+    GlobalConfig.verify_ssl = v
 
 
 def get_global_verify_ssl() -> bool:
@@ -76,11 +73,10 @@ def get_global_verify_ssl() -> bool:
         "`host_config.get_global_verify_ssl` is deprecated in favor of "
         "`global_config.GlobalConfig.verify_ssl` and will be removed in a future version"
     )
-    global _verify_ssl
-    return _verify_ssl
+    return GlobalConfig.verify_ssl
 
 
-_host: Optional[str] = None
+_host = GlobalConfig.host
 
 
 def set_global_host(h: Optional[str]) -> None:
@@ -89,8 +85,7 @@ def set_global_host(h: Optional[str]) -> None:
         "`host_config.set_global_host` is deprecated in favor of "
         "`global_config.GlobalConfig.host` and will be removed in a future version"
     )
-    global _host
-    _host = h
+    GlobalConfig.host = h
 
 
 def get_global_host() -> Optional[str]:
@@ -99,10 +94,10 @@ def get_global_host() -> Optional[str]:
         "`host_config.get_global_host` is deprecated in favor of "
         "`global_config.GlobalConfig.host` and will be removed in a future version"
     )
-    return _host
+    return GlobalConfig.host
 
 
-_token: Union[Optional[str], Callable[[], Optional[str]]] = None
+_token = GlobalConfig.token
 
 
 def set_global_token(t: Union[Optional[str], Callable[[], Optional[str]]]) -> None:
@@ -111,8 +106,7 @@ def set_global_token(t: Union[Optional[str], Callable[[], Optional[str]]]) -> No
         "`host_config.set_global_token` is deprecated in favor of "
         "`global_config.GlobalConfig.token` and will be removed in a future version"
     )
-    global _token
-    _token = t
+    GlobalConfig.token = t  # type: ignore
 
 
 def get_global_token() -> Optional[str]:
@@ -121,12 +115,10 @@ def get_global_token() -> Optional[str]:
         "`host_config.get_global_token` is deprecated in favor of "
         "`global_config.GlobalConfig.token` and will be removed in a future version"
     )
-    if _token is None or isinstance(_token, str):
-        return _token
-    return _token()
+    return GlobalConfig.token
 
 
-_namespace: str = "default"
+_namespace = GlobalConfig.namespace
 
 
 def set_global_namespace(n: str) -> None:
@@ -135,8 +127,7 @@ def set_global_namespace(n: str) -> None:
         "`host_config.set_global_namespace` is deprecated in favor of "
         "`global_config.GlobalConfig.namespace` and will be removed in a future version"
     )
-    global _namespace
-    _namespace = n
+    GlobalConfig.namespace = n
 
 
 def get_global_namespace() -> str:
@@ -145,10 +136,10 @@ def get_global_namespace() -> str:
         "`host_config.get_global_namespace` is deprecated in favor of "
         "`global_config.GlobalConfig.namespace` and will be removed in a future version"
     )
-    return _namespace
+    return GlobalConfig.namespace
 
 
-_image: str = "python:3.7"
+_image = GlobalConfig.image
 
 
 def set_global_task_image(image: str) -> None:
@@ -157,8 +148,7 @@ def set_global_task_image(image: str) -> None:
         "`host_config.set_global_task_image` is deprecated in favor of "
         "`global_config.GlobalConfig.image` and will be removed in a future version"
     )
-    global _image
-    _image = image
+    GlobalConfig.image = image
 
 
 def get_global_task_image() -> str:
@@ -167,4 +157,4 @@ def get_global_task_image() -> str:
         "`host_config.get_global_task_image` is deprecated in favor of "
         "`global_config.GlobalConfig.image` and will be removed in a future version"
     )
-    return _image
+    return GlobalConfig.image
