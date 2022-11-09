@@ -7,8 +7,14 @@ TaskHook = Callable[['Task'], None]
 WorkflowHook = Callable[['Workflow'], None]
 
 
-class GlobalConfig:
-    """Hera global configuration holds any user configuration such as global tokens, hooks, etc"""
+class _GlobalConfig:
+    """Hera global configuration holds any user configuration such as global tokens, hooks, etc.
+
+    Notes
+    -----
+    This should not be instantiated directly by the user. There is an instance of the `_GlobalConfig` in this module,
+    which is what should be used. Access as either `hera.GlobalConfig` or `hera.global_config.GlobalConfig/Config`.
+    """
 
     _host: Optional[str] = None
     _token: Union[Optional[str], Callable[[], Optional[str]]] = None
@@ -99,22 +105,26 @@ class GlobalConfig:
         self._service_account_name = sa
 
     @property
-    def task_post_init_hook(self) -> List[TaskHook]:
+    def task_post_init_hooks(self) -> List[TaskHook]:
         """Returns the set global task post init hooks"""
         return self._task_post_init_hooks[::-1]  # return hooks in FIFO order of execution
 
-    @task_post_init_hook.setter
-    def task_post_init_hook(self, *h: TaskHook) -> None:
+    @task_post_init_hooks.setter
+    def task_post_init_hooks(self, *h: TaskHook) -> None:
         """Adds a task post init hook. The hooks are executed in FIFO order"""
         # note, your IDE might show these instance checks as incorrect but, they should be fine
         self._task_post_init_hooks.extend(h)
 
     @property
-    def workflow_post_init_hook(self) -> List[WorkflowHook]:
+    def workflow_post_init_hooks(self) -> List[WorkflowHook]:
         """Returns the set global workflow post init hooks"""
         return self._workflow_post_init_hooks[::-1]  # return hooks in FIFO order of execution
 
-    @workflow_post_init_hook.setter
-    def workflow_post_init_hook(self, *h: WorkflowHook) -> None:
+    @workflow_post_init_hooks.setter
+    def workflow_post_init_hooks(self, *h: WorkflowHook) -> None:
         """Adds a workflow post init hook. The hooks are executed in FIFO order"""
         self._workflow_post_init_hooks.extend(h)
+
+
+GlobalConfig = _GlobalConfig()
+Config = GlobalConfig  # easier to use `Config` probably, support both for a better experience

@@ -27,6 +27,7 @@ from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.workflow_service import WorkflowService
+from hera.global_config import GlobalConfig
 
 # PyYAML is an optional dependency
 _yaml: Optional[ModuleType] = None
@@ -164,6 +165,8 @@ class Workflow:
                     "Unknown type provided for `metrics`, expected type is "
                     "`Optional[Union[Metric, List[Metric], Metrics]]`"
                 )
+        for hook in GlobalConfig.workflow_post_init_hooks:
+            hook(self)
 
     @property
     def service(self) -> WorkflowService:

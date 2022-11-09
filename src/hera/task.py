@@ -44,6 +44,7 @@ from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext
 from hera.sequence import Sequence
 from hera.template_ref import TemplateRef
+from hera.global_config import GlobalConfig
 from hera.toleration import Toleration
 from hera.validators import validate_name
 from hera.volumes import (
@@ -268,6 +269,9 @@ class Task(IO):
 
         if hera.dag_context.is_set():
             hera.dag_context.add_task(self)
+
+        for hook in GlobalConfig.task_post_init_hooks:
+            hook(self)
 
     @property
     def ip(self) -> str:
@@ -810,9 +814,9 @@ class Task(IO):
             v._build_claim_spec()
             for v in self.volumes
             if isinstance(v, ExistingVolume)
-            or isinstance(v, SecretVolume)
-            or isinstance(v, EmptyDirVolume)
-            or isinstance(v, ConfigMapVolume)
+               or isinstance(v, SecretVolume)
+               or isinstance(v, EmptyDirVolume)
+               or isinstance(v, ConfigMapVolume)
         ]
 
     def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
