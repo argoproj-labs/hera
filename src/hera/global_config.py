@@ -29,42 +29,32 @@ class _GlobalConfig:
     which is what should be used. Access as either `hera.GlobalConfig` or `hera.global_config.GlobalConfig/Config`.
     """
 
-    _host: Optional[str] = None
+    # note: protected attributes are ones that are computed/go through some light processing upon setting or
+    # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
+    host: Optional[str] = None
+    verify_ssl: bool = True
+    api_version: str = "argoproj.io/v1alpha1"
+    namespace: str = "default"
+    image: str = "python:3.7"
+    service_account_name: Optional[str] = None
+
     _token: Union[Optional[str], Callable[[], Optional[str]]] = None
-    _verify_ssl: bool = True
-
-    _api_version: str = "argoproj.io/v1alpha1"
-    _namespace: str = "default"
-    _image: str = "python:3.7"
-    _service_account_name: Optional[str] = None
-
     _task_post_init_hooks: Tuple[TaskHook, ...] = ()
     _workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
         self.__dict__.clear()
-        self._host = None
         self._token = None
-        self._verify_ssl = True
-
-        self._api_version = "argoproj.io/v1alpha1"
-        self._namespace = "default"
-        self._image = "python:3.7"
-        self._service_account_name = None
-
         self._task_post_init_hooks = ()
         self._workflow_post_init_hooks = ()
 
-    @property
-    def host(self) -> Optional[str]:
-        """Returns the Argo Workflows global host"""
-        return self._host
-
-    @host.setter
-    def host(self, h: Optional[str]) -> None:
-        """Sets the Argo Workflows host at a global level so services can use it"""
-        self._host = h
+        self.host = None
+        self.verify_ssl = True
+        self.api_version = "argoproj.io/v1alpha1"
+        self.namespace = "default"
+        self.image = "python:3.7"
+        self.service_account_name = None
 
     @property
     def token(self) -> Optional[str]:
@@ -77,60 +67,6 @@ class _GlobalConfig:
     def token(self, t: Union[Optional[str], Callable[[], Optional[str]]]) -> None:
         """Sets the Argo Workflows token at a global level so services can use it"""
         self._token = t
-
-    @property
-    def verify_ssl(self) -> bool:
-        """Returns the Argo Workflows global namespace"""
-        return self._verify_ssl
-
-    @verify_ssl.setter
-    def verify_ssl(self, v: bool) -> None:
-        """Sets the Argo Workflows namespace at the global level so services can use it"""
-        self._verify_ssl = v
-
-    @property
-    def api_version(self) -> str:
-        """Returns the set global API version. See `set_global_api_version` for more details"""
-        return self._api_version
-
-    @api_version.setter
-    def api_version(self, v: str) -> None:
-        """Sets the global API version that is used to control the `api_version` field on Argo payload submissions.
-
-        Workflows, workflow templates, etc. use an API specification that is based on the requirements of Kubernetes:
-        https://kubernetes.io/docs/reference/using-api/#api-versioning
-        """
-        self._api_version = v
-
-    @property
-    def namespace(self) -> str:
-        """Returns the Argo Workflows global namespace"""
-        return self._namespace
-
-    @namespace.setter
-    def namespace(self, n: str) -> None:
-        """Sets the Argo Workflows namespace at the global level so services can use it"""
-        self._namespace = n
-
-    @property
-    def image(self) -> str:
-        """Returns the Argo Task global image"""
-        return self._image
-
-    @image.setter
-    def image(self, i: str) -> None:
-        """Sets the Argo Task image at the global level which Tasks will use by default"""
-        self._image = i
-
-    @property
-    def service_account_name(self) -> Optional[str]:
-        """Returns the set global service account"""
-        return self._service_account_name
-
-    @service_account_name.setter
-    def service_account_name(self, sa: Optional[str]) -> None:
-        """Sets the service account to use for workflow submissions on a global level"""
-        self._service_account_name = sa
 
     @property
     def task_post_init_hooks(self) -> Tuple[TaskHook, ...]:
