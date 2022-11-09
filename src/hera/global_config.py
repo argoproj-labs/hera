@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import List, Optional, Tuple, Union
-
-from typing_extensions import Protocol
+from typing import List, Optional, Tuple, Union, Protocol, cast
 
 
 class TaskHook(Protocol):
@@ -130,7 +128,7 @@ class _GlobalConfig:
             for h_ in h:
                 self._task_post_init_hooks.append(h_)
         else:
-            self._task_post_init_hooks.append(h)
+            self._task_post_init_hooks.append(cast(TaskHook, h))
 
     @property
     def workflow_post_init_hooks(self) -> List[WorkflowHook]:
@@ -144,8 +142,7 @@ class _GlobalConfig:
             for h_ in h:
                 self._workflow_post_init_hooks.append(h_)
         else:
-            self._workflow_post_init_hooks.append(h)
+            self._workflow_post_init_hooks.append(cast(WorkflowHook, h))
 
 
 GlobalConfig = _GlobalConfig()
-Config = GlobalConfig  # easier to use `Config` probably, support both for a better experience
