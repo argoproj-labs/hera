@@ -10,6 +10,7 @@ from argo_workflows.models import (
 )
 
 from hera.dag import DAG
+from hera.global_config import _GlobalConfig
 from hera.host_alias import HostAlias
 from hera.host_config import set_global_service_account_name
 from hera.metric import Metric, Metrics
@@ -501,3 +502,15 @@ spec:
             '"apiVersion": "argoproj.io/v1alpha1", "kind": "Workflow"}'
         )
         assert expected_json == w.to_json()
+
+    def test_workflow_applies_hooks(self, global_config):
+        def hook1(w: Workflow) -> None:
+            w.service_account_name = "abc"
+
+        def hook2(w: Workflow) -> None:
+            w.labels = {'abc': '123'}
+
+        global_config.workflow_post_init_hooks = [hook1, hook2]
+        w = Workflow('w')
+        assert w.service_account_name == "abc"
+        assert w.labels == {'abc': '123'}

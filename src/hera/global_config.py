@@ -1,19 +1,21 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import List, Optional, Tuple, Union, Protocol, cast
+from typing import TYPE_CHECKING, Optional, Tuple, Union, cast
+
+from typing_extensions import Protocol
+
+if TYPE_CHECKING:
+    from hera.task import Task
+    from hera.workflow import Workflow
 
 
 class TaskHook(Protocol):
-    from hera.task import Task
-
     def __call__(self, t: Task) -> None:
         ...
 
 
 class WorkflowHook(Protocol):
-    from hera.workflow import Workflow
-
     def __call__(self, w: Workflow) -> None:
         ...
 
@@ -36,8 +38,23 @@ class _GlobalConfig:
     _image: str = "python:3.7"
     _service_account_name: Optional[str] = None
 
-    _task_post_init_hooks: List[TaskHook] = []
-    _workflow_post_init_hooks: List[WorkflowHook] = []
+    _task_post_init_hooks: Tuple[TaskHook, ...] = ()
+    _workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
+
+    def reset(self) -> None:
+        """Resets the global config container to its initial state"""
+        self.__dict__.clear()
+        self._host = None
+        self._token = None
+        self._verify_ssl = True
+
+        self._api_version = "argoproj.io/v1alpha1"
+        self._namespace = "default"
+        self._image = "python:3.7"
+        self._service_account_name = None
+
+        self._task_post_init_hooks = ()
+        self._workflow_post_init_hooks = ()
 
     @property
     def host(self) -> Optional[str]:
@@ -116,33 +133,31 @@ class _GlobalConfig:
         self._service_account_name = sa
 
     @property
-    def task_post_init_hooks(self) -> List[TaskHook]:
+    def task_post_init_hooks(self) -> Tuple[TaskHook, ...]:
         """Returns the set global task post init hooks"""
-        return self._task_post_init_hooks[::-1]  # return hooks in FIFO order of execution
+        return self._task_post_init_hooks
 
     @task_post_init_hooks.setter
-    def task_post_init_hooks(self, h: Union[TaskHook, List[TaskHook], Tuple[TaskHook]]) -> None:
+    def task_post_init_hooks(self, h: Union[TaskHook, Tuple[TaskHook, ...]]) -> None:
         """Adds a task post init hook. The hooks are executed in FIFO order"""
         # note, your IDE might show these instance checks as incorrect but, they should be fine
         if isinstance(h, list) or isinstance(h, tuple):
-            for h_ in h:
-                self._task_post_init_hooks.append(h_)
+            self._task_post_init_hooks = self._task_post_init_hooks + tuple(h)
         else:
-            self._task_post_init_hooks.append(cast(TaskHook, h))
+            self._task_post_init_hooks = self._task_post_init_hooks + (cast(TaskHook, h),)
 
     @property
-    def workflow_post_init_hooks(self) -> List[WorkflowHook]:
+    def workflow_post_init_hooks(self) -> Tuple[WorkflowHook, ...]:
         """Returns the set global workflow post init hooks"""
-        return self._workflow_post_init_hooks[::-1]  # return hooks in FIFO order of execution
+        return self._workflow_post_init_hooks
 
     @workflow_post_init_hooks.setter
-    def workflow_post_init_hooks(self, h: Union[WorkflowHook, List[WorkflowHook], Tuple[WorkflowHook]]) -> None:
+    def workflow_post_init_hooks(self, h: Union[WorkflowHook, Tuple[WorkflowHook, ...]]) -> None:
         """Adds a workflow post init hook. The hooks are executed in FIFO order"""
         if isinstance(h, list) or isinstance(h, tuple):
-            for h_ in h:
-                self._workflow_post_init_hooks.append(h_)
+            self._workflow_post_init_hooks = self._workflow_post_init_hooks + tuple(h)
         else:
-            self._workflow_post_init_hooks.append(cast(WorkflowHook, h))
+            self._workflow_post_init_hooks = self._workflow_post_init_hooks + (cast(WorkflowHook, h),)
 
 
 GlobalConfig = _GlobalConfig()
