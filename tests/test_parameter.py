@@ -80,3 +80,16 @@ class TestParameter:
     def test_contains_value_returns_expected_false(self):
         p = Parameter("a", value="42")
         assert not p.contains_item
+
+    def test_value_and_value_from_not_set_together(self):
+        with pytest.raises(ValueError) as e:
+            Parameter('a', value='42', value_from=ValueFrom())
+
+        p = Parameter('a', value='42')
+        assert p.value_from is None
+        assert p.value is not None
+
+        p = Parameter('a', value_from=ValueFrom(path='/test'))
+        assert p.value is None
+        assert p.value_from is not None
+        assert p.value_from.path == "/test"
