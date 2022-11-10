@@ -67,6 +67,9 @@ class TestGlobalConfig:
 
         c.task_post_init_hooks = [hook1, hook2]
         assert len(c.task_post_init_hooks) == 2
+
+        c.task_post_init_hooks = [hook1, hook2]
+        assert len(c.task_post_init_hooks) == 4
         c.reset()
 
     def test_workflow_post_init_hooks(self):
@@ -81,4 +84,7 @@ class TestGlobalConfig:
 
         c.workflow_post_init_hooks = [hook1, hook2]
         assert len(c.workflow_post_init_hooks) == 2
+
+        c.workflow_post_init_hooks = [hook1, hook2]
+        assert len(c.workflow_post_init_hooks) == 4
         c.reset()

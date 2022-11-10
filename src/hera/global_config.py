@@ -10,12 +10,18 @@ if TYPE_CHECKING:
     from hera.workflow import Workflow
 
 
-class TaskHook(Protocol):
+# usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested
+# but protocols encourage nominal typing, so any function definition that implements a protocol will not be "noticed"
+# by coverage. See `test_global_config` for test coverage
+class TaskHook(Protocol):  # pragma: no cover
     def __call__(self, t: Task) -> None:
         ...
 
 
-class WorkflowHook(Protocol):
+# usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested
+# but protocols encourage nominal typing, so any function definition that implements a protocol will not be "noticed"
+# by coverage. See `test_global_config` for test coverage
+class WorkflowHook(Protocol):  # pragma: no cover
     def __call__(self, w: Workflow) -> None:
         ...
 
