@@ -38,6 +38,7 @@ Welcome to Hera's documentation!
    examples/dynamic_fanout_fanin_artifacts
    examples/env
    examples/existing_volume
+   examples/gitops
    examples/global_host
    examples/global_parameters
    examples/gpu
