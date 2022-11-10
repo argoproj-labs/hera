@@ -35,25 +35,23 @@ class _GlobalConfig:
     which is what should be used. Access as either `hera.GlobalConfig` or `hera.global_config.GlobalConfig/Config`.
     """
 
-    # note: protected attributes are ones that are computed/go through some light processing upon setting or
+    # protected attributes are ones that are computed/go through some light processing upon setting or
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
+    _token: Union[Optional[str], Callable[[], Optional[str]]] = None
+
     host: Optional[str] = None
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
     namespace: str = "default"
     image: str = "python:3.7"
     service_account_name: Optional[str] = None
-
-    _token: Union[Optional[str], Callable[[], Optional[str]]] = None
-    _task_post_init_hooks: Tuple[TaskHook, ...] = ()
-    _workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
+    task_post_init_hooks: Tuple[TaskHook, ...] = ()
+    workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
         self.__dict__.clear()
         self._token = None
-        self._task_post_init_hooks = ()
-        self._workflow_post_init_hooks = ()
 
         self.host = None
         self.verify_ssl = True
@@ -61,6 +59,8 @@ class _GlobalConfig:
         self.namespace = "default"
         self.image = "python:3.7"
         self.service_account_name = None
+        self.task_post_init_hooks = ()
+        self.workflow_post_init_hooks = ()
 
     @property
     def token(self) -> Optional[str]:
@@ -73,33 +73,6 @@ class _GlobalConfig:
     def token(self, t: Union[Optional[str], Callable[[], Optional[str]]]) -> None:
         """Sets the Argo Workflows token at a global level so services can use it"""
         self._token = t
-
-    @property
-    def task_post_init_hooks(self) -> Tuple[TaskHook, ...]:
-        """Returns the set global task post init hooks"""
-        return self._task_post_init_hooks
-
-    @task_post_init_hooks.setter
-    def task_post_init_hooks(self, h: Union[TaskHook, Tuple[TaskHook, ...]]) -> None:
-        """Adds a task post init hook. The hooks are executed in FIFO order"""
-        # note, your IDE might show these instance checks as incorrect but, they should be fine
-        if isinstance(h, list) or isinstance(h, tuple):
-            self._task_post_init_hooks = self._task_post_init_hooks + tuple(h)
-        else:
-            self._task_post_init_hooks = self._task_post_init_hooks + (cast(TaskHook, h),)
-
-    @property
-    def workflow_post_init_hooks(self) -> Tuple[WorkflowHook, ...]:
-        """Returns the set global workflow post init hooks"""
-        return self._workflow_post_init_hooks
-
-    @workflow_post_init_hooks.setter
-    def workflow_post_init_hooks(self, h: Union[WorkflowHook, Tuple[WorkflowHook, ...]]) -> None:
-        """Adds a workflow post init hook. The hooks are executed in FIFO order"""
-        if isinstance(h, list) or isinstance(h, tuple):
-            self._workflow_post_init_hooks = self._workflow_post_init_hooks + tuple(h)
-        else:
-            self._workflow_post_init_hooks = self._workflow_post_init_hooks + (cast(WorkflowHook, h),)
 
 
 GlobalConfig = _GlobalConfig()
