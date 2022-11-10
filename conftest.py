@@ -21,14 +21,22 @@ from hera.affinity import (
 )
 from hera.artifact import Artifact
 from hera.cron_workflow import CronWorkflow
+from hera.global_config import GlobalConfig
 from hera.workflow import Workflow
 from hera.workflow_template import WorkflowTemplate
 
 
 @pytest.fixture
 def setup():
-    set_global_host("https://abc.com")
-    set_global_token("abc")
+    GlobalConfig.host = "https://abc.com"
+    GlobalConfig.token = "abc"
+    yield GlobalConfig
+
+
+@pytest.fixture(scope="function")
+def global_config():
+    yield GlobalConfig
+    GlobalConfig.reset()
 
 
 @pytest.fixture(scope="function")

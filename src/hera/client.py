@@ -4,7 +4,7 @@ from typing import Optional
 from argo_workflows.api_client import ApiClient as ArgoApiClient
 
 from hera.config import Config
-from hera.host_config import get_global_token
+from hera.global_config import GlobalConfig
 
 
 class Client:
@@ -29,7 +29,7 @@ class Client:
 
     def __init__(self, config: Config, token: Optional[str] = None):
         if token is None:
-            token = get_global_token()
+            token = GlobalConfig.token
             assert token, "No token was provided and no global token was found."
 
         self._client = ArgoApiClient(

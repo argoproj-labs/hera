@@ -39,7 +39,7 @@ def do():
 
 
 with Workflow("gpu") as w:
-    gke_k80_gpu = {"cloud.google.com/gke-accelerator": "nvidia-tesla-k80"}
+    gke_k80_gpu = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
     d = Task(
         "do",
         do,

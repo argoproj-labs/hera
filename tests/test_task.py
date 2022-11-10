@@ -1,4 +1,5 @@
 import json
+from unittest import mock
 
 import pytest
 from argo_workflows.models import (
@@ -44,6 +45,7 @@ from hera import (
     Volume,
     WorkflowStatus,
 )
+from hera.global_config import _GlobalConfig
 
 
 class TestTask:
@@ -894,3 +896,15 @@ print(42)
 
         t = Task('t', metrics=Metrics([Metric('a', 'b')]))
         assert isinstance(t.metrics, Metrics)
+
+    def test_task_applies_hooks(self, global_config):
+        def hook1(t: Task) -> None:
+            t.when = "test123"
+
+        def hook2(t: Task) -> None:
+            t.labels = {'abc': '123'}
+
+        global_config.task_post_init_hooks = [hook1, hook2]
+        t = Task('test')
+        assert t.when == "test123"
+        assert t.labels == {'abc': '123'}

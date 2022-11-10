@@ -4,7 +4,7 @@ from typing import Optional
 
 from argo_workflows.api_client import Configuration as ArgoConfig
 
-from hera.host_config import get_global_host, get_global_verify_ssl
+from hera.global_config import GlobalConfig
 
 try:
     import urllib3
@@ -33,7 +33,7 @@ class Config:
 
     def __init__(self, host: Optional[str] = None, verify_ssl: Optional[bool] = None):
         self.host = host or self._assemble_host()
-        self.verify_ssl = get_global_verify_ssl() if verify_ssl is None else verify_ssl
+        self.verify_ssl = GlobalConfig.verify_ssl if verify_ssl is None else verify_ssl
         self._config = self.__get_config()
 
     def _assemble_host(self) -> str:
@@ -54,7 +54,7 @@ class Config:
         str
             Assembled host.
         """
-        host = get_global_host()
+        host = GlobalConfig.host
         if host is not None:
             return host
 

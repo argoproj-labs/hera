@@ -24,7 +24,7 @@ from argo_workflows.models import (
 
 from hera.client import Client
 from hera.config import Config
-from hera.host_config import get_global_namespace
+from hera.global_config import GlobalConfig
 from hera.workflow_status import WorkflowStatus
 
 
@@ -56,7 +56,7 @@ class WorkflowService:
         token: Optional[str] = None,
         namespace: Optional[str] = None,
     ):
-        self._namespace = get_global_namespace() if namespace is None else namespace
+        self._namespace = GlobalConfig.namespace if namespace is None else namespace
         self._config = Config(host=host, verify_ssl=verify_ssl)
         self._api_client = Client(self._config, token=token).api_client
 

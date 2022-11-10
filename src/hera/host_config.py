@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable
 from typing import Optional, Union
 
-_api_version: str = "argoproj.io/v1alpha1"
+from hera.global_config import GlobalConfig
+
+_api_version = GlobalConfig.api_version
 
 
 def set_global_api_version(v: str) -> None:
@@ -12,32 +15,44 @@ def set_global_api_version(v: str) -> None:
     Workflows, workflow templates, etc. use an API specification that is based on the requirements of Kubernetes:
     https://kubernetes.io/docs/reference/using-api/#api-versioning
     """
-    global _api_version
-    _api_version = v
+    warnings.warn(
+        "`host_config.set_global_api_version` is deprecated in favor of "
+        "`global_config.GlobalConfig.api_version` and will be removed in a future version"
+    )
+    GlobalConfig.api_version = v
 
 
 def get_global_api_version() -> str:
     """Returns the set global API version. See `set_global_api_version` for more details"""
-    global _api_version
-    return _api_version
+    warnings.warn(
+        "`host_config.get_global_api_version` is deprecated in favor of "
+        "`global_config.GlobalConfig.api_version` and will be removed in a future version"
+    )
+    return GlobalConfig.api_version
 
 
-_service_account_name: Optional[str] = None
+_service_account_name = GlobalConfig.service_account_name
 
 
 def set_global_service_account_name(sa: Optional[str]) -> None:
     """Sets the service account to use for workflow submissions on a global level"""
-    global _service_account_name
-    _service_account_name = sa
+    warnings.warn(
+        "`host_config.set_global_service_account_name` is deprecated in favor of "
+        "`global_config.GlobalConfig.service_account_name` and will be removed in a future version"
+    )
+    GlobalConfig.service_account_name = sa
 
 
 def get_global_service_account_name() -> Optional[str]:
     """Returns the set global service account"""
-    global _service_account_name
-    return _service_account_name
+    warnings.warn(
+        "`host_config.get_global_service_account_name` is deprecated in favor of "
+        "`global_config.GlobalConfig.service_account_name` and will be removed in a future version"
+    )
+    return GlobalConfig.service_account_name
 
 
-_verify_ssl: bool = True
+_verify_ssl = GlobalConfig.verify_ssl
 
 
 def set_global_verify_ssl(v: bool) -> None:
@@ -45,69 +60,101 @@ def set_global_verify_ssl(v: bool) -> None:
 
     Set this as False to skip verifying SSL certificate when submitting workflows from an HTTPS server.
     """
-    global _verify_ssl
-    _verify_ssl = v
+    warnings.warn(
+        "`host_config.set_global_verify_ssl` is deprecated in favor of "
+        "`global_config.GlobalConfig.verify_ssl` and will be removed in a future version"
+    )
+    GlobalConfig.verify_ssl = v
 
 
 def get_global_verify_ssl() -> bool:
     """Returns the set global verify SSL option"""
-    global _verify_ssl
-    return _verify_ssl
+    warnings.warn(
+        "`host_config.get_global_verify_ssl` is deprecated in favor of "
+        "`global_config.GlobalConfig.verify_ssl` and will be removed in a future version"
+    )
+    return GlobalConfig.verify_ssl
 
 
-_host: Optional[str] = None
+_host = GlobalConfig.host
 
 
 def set_global_host(h: Optional[str]) -> None:
     """Sets the Argo Workflows host at a global level so services can use it"""
-    global _host
-    _host = h
+    warnings.warn(
+        "`host_config.set_global_host` is deprecated in favor of "
+        "`global_config.GlobalConfig.host` and will be removed in a future version"
+    )
+    GlobalConfig.host = h
 
 
 def get_global_host() -> Optional[str]:
     """Returns the Argo Workflows global host"""
-    return _host
+    warnings.warn(
+        "`host_config.get_global_host` is deprecated in favor of "
+        "`global_config.GlobalConfig.host` and will be removed in a future version"
+    )
+    return GlobalConfig.host
 
 
-_token: Union[Optional[str], Callable[[], Optional[str]]] = None
+_token = GlobalConfig.token
 
 
 def set_global_token(t: Union[Optional[str], Callable[[], Optional[str]]]) -> None:
     """Sets the Argo Workflows token at a global level so services can use it"""
-    global _token
-    _token = t
+    warnings.warn(
+        "`host_config.set_global_token` is deprecated in favor of "
+        "`global_config.GlobalConfig.token` and will be removed in a future version"
+    )
+    GlobalConfig.token = t  # type: ignore
 
 
 def get_global_token() -> Optional[str]:
     """Returns an Argo Workflows global token"""
-    if _token is None or isinstance(_token, str):
-        return _token
-    return _token()
+    warnings.warn(
+        "`host_config.get_global_token` is deprecated in favor of "
+        "`global_config.GlobalConfig.token` and will be removed in a future version"
+    )
+    return GlobalConfig.token
 
 
-_namespace: str = "default"
+_namespace = GlobalConfig.namespace
 
 
 def set_global_namespace(n: str) -> None:
     """Sets the Argo Workflows namespace at the global level so services can use it"""
-    global _namespace
-    _namespace = n
+    warnings.warn(
+        "`host_config.set_global_namespace` is deprecated in favor of "
+        "`global_config.GlobalConfig.namespace` and will be removed in a future version"
+    )
+    GlobalConfig.namespace = n
 
 
 def get_global_namespace() -> str:
     """Returns the Argo Workflows global namespace"""
-    return _namespace
+    warnings.warn(
+        "`host_config.get_global_namespace` is deprecated in favor of "
+        "`global_config.GlobalConfig.namespace` and will be removed in a future version"
+    )
+    return GlobalConfig.namespace
 
 
-_image: str = "python:3.7"
+_image = GlobalConfig.image
 
 
 def set_global_task_image(image: str) -> None:
     """Sets the Argo Task image at the global level which Tasks will use by default"""
-    global _image
-    _image = image
+    warnings.warn(
+        "`host_config.set_global_task_image` is deprecated in favor of "
+        "`global_config.GlobalConfig.image` and will be removed in a future version"
+    )
+    GlobalConfig.image = image
 
 
 def get_global_task_image() -> str:
     """Returns the Argo Task global image"""
-    return _image
+    warnings.warn(
+        "`host_config.get_global_task_image` is deprecated in favor of "
+        "`global_config.GlobalConfig.image` and will be removed in a future version"
+    )
+    return GlobalConfig.image

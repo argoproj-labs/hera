@@ -56,7 +56,7 @@ class MyTask(Task):
         default_retry = RetryStrategy(backoff=dict(duration="1", max_duration="20"))
         # note that this gke-accelerator spec is only valid for GKE GPUs. For Azure and AWS you
         # might have to use the `node_selectors` field exclusively
-        default_node_selectors = {"cloud.google.com/gke-accelerator": "nvidia-tesla-k80"}
+        default_node_selectors = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
         default_working_dir = "/my-volume"
         resources.existing_volume = ExistingVolume(name="my-volume", mount_path="/my-volume")
         super(MyTask, self).__init__(
