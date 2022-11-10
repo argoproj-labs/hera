@@ -10,7 +10,7 @@ task parameter definition.
 ## Workflow definition (Python)
 
 ```python
-from hera import Task, Workflow, Parameter
+from hera import Parameter, Task, Workflow
 
 
 def say(msg: str):

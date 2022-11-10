@@ -6,7 +6,7 @@ parameterizes the workflow global parameter called `msg` to have a `value` of `h
 the `Task` via the global parameter `w.get_parameter('msg')`, which sets the `'{{workflow.parameters.msg}}'` on the
 task parameter definition.
 """
-from hera import Task, Workflow, Parameter
+from hera import Parameter, Task, Workflow
 
 
 def say(msg: str):
