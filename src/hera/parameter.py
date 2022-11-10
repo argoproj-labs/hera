@@ -35,6 +35,8 @@ class Parameter:
         default: Optional[str] = None,
         value_from: Optional[ValueFrom] = None,
     ) -> None:
+        if value is not None and value_from is not None:
+            raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
         self.name = name
         self.value = str(value) if value is not None else None
         self.default = str(default) if default is not None else None
