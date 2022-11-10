@@ -18,7 +18,9 @@ class Parameter:
         The name of the task to take input from. The task's results are expected via stdout. Specifically, the task is
         expected to perform the script illustrated in Examples.
     value: Optional[str] = None
-        Value of the parameter, as an index into some field of the task.
+        Value of the parameter, as an index into some field of the task. If this is left as `None`, along with
+        `value_from` being left as `None`, as is the case in GitOps patterns, the submitter has to likely supply the
+        parameter value via the ArgoCLI.
     default: Optional[str] = None
         Default value of the parameter in case the `value` cannot be obtained based on the specification.
     value_from: Optional[ValueFrom] = None
@@ -53,15 +55,10 @@ class Parameter:
         parameter = IoArgoprojWorkflowV1alpha1Parameter(
             name=self.name,
         )
-        if self.value:
+        if self.value is not None:
             setattr(parameter, "value", self.value)
         elif self.value_from is not None:
             setattr(parameter, "value_from", self.value_from.build())
-        else:
-            raise ValueError(
-                f"Parameter with name `{parameter.name}` cannot be interpreted as argument "
-                "as neither of the following args are set: `value`, `value_from`, `default`"
-            )
         return parameter
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Parameter:
@@ -87,14 +84,15 @@ class Parameter:
         This is useful in situations where we want to concatenate string values such as
         Task.args=["echo", wf.get_parameter("message")].
         """
-        if self.value:
-            return self.value
-        raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
+        if self.value is None:
+            raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
+        return self.value
 
     @property
     def contains_item(self) -> bool:
-        """Check whether the parmeter contains an argo item reference"""
-        if self.value is not None:
-            if "{{item" in self.value:
-                return True
+        """Check whether the parameter contains an argo item reference"""
+        if self.value is None:
+            return False
+        elif "{{item" in self.value:
+            return True
         return False

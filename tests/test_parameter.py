@@ -36,14 +36,6 @@ class TestParameter:
         assert hasattr(arg.value_from, "path")
         assert arg.value_from.path == "abc"
 
-    def test_as_argument_raises_value_error_on_misspec(self):
-        with pytest.raises(ValueError) as e:
-            Parameter("a").as_argument()
-        assert (
-            str(e.value) == "Parameter with name `a` cannot be interpreted as argument "
-            "as neither of the following args are set: `value`, `value_from`, `default`"
-        )
-
     def test_as_input_returns_expected_parameter(self):
         param = Parameter("a", default="42").as_input()
         assert isinstance(param, IoArgoprojWorkflowV1alpha1Parameter)
@@ -88,3 +80,16 @@ class TestParameter:
     def test_contains_value_returns_expected_false(self):
         p = Parameter("a", value="42")
         assert not p.contains_item
+
+    def test_value_and_value_from_not_set_together(self):
+        with pytest.raises(ValueError) as e:
+            Parameter('a', value='42', value_from=ValueFrom())
+
+        p = Parameter('a', value='42')
+        assert p.value_from is None
+        assert p.value is not None
+
+        p = Parameter('a', value_from=ValueFrom(path='/test'))
+        assert p.value is None
+        assert p.value_from is not None
+        assert p.value_from.path == "/test"
