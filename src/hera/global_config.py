@@ -50,17 +50,7 @@ class _GlobalConfig:
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
-        self.__dict__.clear()
-        self._token = None
-
-        self.host = None
-        self.verify_ssl = True
-        self.api_version = "argoproj.io/v1alpha1"
-        self.namespace = "default"
-        self.image = "python:3.7"
-        self.service_account_name = None
-        self.task_post_init_hooks = ()
-        self.workflow_post_init_hooks = ()
+        self.__dict__.clear()  # Wipe instance values to fallback to the class defaults
 
     @property
     def token(self) -> Optional[str]:
