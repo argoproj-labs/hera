@@ -69,6 +69,10 @@ max-line-length = 119
 
 [tool.pytest.ini_options]
 addopts = "-ra -q"
+filterwarnings = [
+    # Hide the hera.host_config deprecations
+    'ignore:.*is deprecated in favor of `global_config.GlobalConfig',
+]
 
 [tool.isort]
 known_first_party = ["hera"]
