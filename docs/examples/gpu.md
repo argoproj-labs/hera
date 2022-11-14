@@ -20,7 +20,7 @@ def do():
     | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
     |                               |                      |               MIG M. |
     |===============================+======================+======================|
-    |   0  Tesla K80           Off  | 00000000:00:05.0 Off |                    0 |
+    |   0  Tesla T4            Off  | 00000000:00:05.0 Off |                    0 |
     | N/A   67C    P8    33W / 149W |      0MiB / 11441MiB |      0%      Default |
     |                               |                      |                  N/A |
     +-------------------------------+----------------------+----------------------+
@@ -39,14 +39,14 @@ def do():
 
 
 with Workflow("gpu") as w:
-    gke_k80_gpu = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
+    gke_t4_gpu = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
     d = Task(
         "do",
         do,
         image="horovod/horovod:0.22.1",
         resources=Resources(gpus=1),
         tolerations=[GPUToleration],
-        node_selectors=gke_k80_gpu,
+        node_selectors=gke_t4_gpu,
     )
 
 w.create()

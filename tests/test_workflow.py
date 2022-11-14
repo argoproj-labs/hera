@@ -10,7 +10,6 @@ from argo_workflows.models import (
 )
 
 from hera.dag import DAG
-from hera.global_config import _GlobalConfig
 from hera.host_alias import HostAlias
 from hera.host_config import set_global_service_account_name
 from hera.metric import Metric, Metrics

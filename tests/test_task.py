@@ -45,7 +45,6 @@ from hera import (
     Volume,
     WorkflowStatus,
 )
-from hera.global_config import _GlobalConfig
 
 
 class TestTask:
