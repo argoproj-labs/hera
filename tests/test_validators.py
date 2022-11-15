@@ -10,9 +10,6 @@ def test_validate_name():
         validate_name("test", max_length=1)
     assert str(e.value) == "Name is too long. Max length: 1, found: 4"
     with pytest.raises(ValueError) as e:
-        validate_name("test.42")
-    assert str(e.value) == "Name cannot include a dot"
-    with pytest.raises(ValueError) as e:
         validate_name("test_42")
     assert str(e.value) == "Name cannot include an underscore"
     with pytest.raises(ValueError) as e:

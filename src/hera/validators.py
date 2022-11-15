@@ -19,8 +19,6 @@ def validate_name(name: str, max_length: Optional[int] = None) -> str:
     """
     if max_length and len(name) > max_length:
         raise ValueError(f"Name is too long. Max length: {max_length}, found: {len(name)}")
-    if "." in name:
-        raise ValueError("Name cannot include a dot")
     if "_" in name:
         raise ValueError("Name cannot include an underscore")
 
