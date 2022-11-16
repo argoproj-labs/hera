@@ -925,7 +925,7 @@ class Task(IO):
         else:
             setattr(template, "container", self._build_container())
 
-        affinity = self.affinity._build() if self.affinity else None
+        affinity = self.affinity.build() if self.affinity else None
         if affinity is not None:
             setattr(template, "affinity", affinity)
 
