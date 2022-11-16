@@ -51,7 +51,7 @@ class NodeSelectorRequirement:
         self.operator: str = str(operator)
         self.values = values
 
-    def _build(self) -> Optional[ArgoNodeSelectorRequirement]:
+    def build(self) -> Optional[ArgoNodeSelectorRequirement]:
         """Assembles the Argo node selector requirement"""
         if self.values is not None:
             return ArgoNodeSelectorRequirement(
@@ -88,17 +88,17 @@ class NodeSelectorTerm:
         self.expressions = expressions
         self.fields = fields
 
-    def _build(self) -> Optional[ArgoNodeSelectorTerm]:
+    def build(self) -> Optional[ArgoNodeSelectorTerm]:
         """Assembles the Argo node selector term"""
         term = ArgoNodeSelectorTerm()
 
         if self.expressions is not None:
-            match_expressions = [expression._build() for expression in self.expressions]
+            match_expressions = [expression.build() for expression in self.expressions]
             if any(match_expressions):
                 setattr(term, "match_expressions", match_expressions)
 
         if self.fields is not None:
-            match_fields = [field._build() for field in self.fields]
+            match_fields = [field.build() for field in self.fields]
             if any(match_fields):
                 setattr(term, "match_fields", match_fields)
 
@@ -127,9 +127,9 @@ class PreferredSchedulingTerm:
         assert 1 <= weight <= 100, "Node selector weight for scheduling term preference should be between 1 and 100"
         self.weight = weight
 
-    def _build(self) -> Optional[ArgoPreferredSchedulingTerm]:
+    def build(self) -> Optional[ArgoPreferredSchedulingTerm]:
         """Assembles the Argo preferred scheduling term"""
-        node_selector_term = self.node_selector_term._build()
+        node_selector_term = self.node_selector_term.build()
         if node_selector_term is not None:
             return ArgoPreferredSchedulingTerm(
                 preference=node_selector_term,
@@ -160,7 +160,7 @@ class LabelSelectorRequirement:
         self.operator: str = str(operator)
         self.values = values
 
-    def _build(self) -> ArgoLabelSelectorRequirement:
+    def build(self) -> ArgoLabelSelectorRequirement:
         """Assembles the Argo label selector requirement"""
         if self.values is not None:
             return ArgoLabelSelectorRequirement(
@@ -197,12 +197,12 @@ class LabelSelector:
         self.label_selector_requirements = label_selector_requirements
         self.match_labels = match_labels
 
-    def _build(self) -> Optional[ArgoLabelSelector]:
+    def build(self) -> Optional[ArgoLabelSelector]:
         """Assembles the Argo label selector"""
         selector = ArgoLabelSelector()
 
         if self.label_selector_requirements is not None:
-            match_expressions = [expression._build() for expression in self.label_selector_requirements]
+            match_expressions = [expression.build() for expression in self.label_selector_requirements]
             if any(match_expressions):
                 setattr(selector, "match_expressions", match_expressions)
 
@@ -245,15 +245,15 @@ class PodAffinityTerm:
         self.namespace_selector = namespace_selector
         self.namespaces = namespaces
 
-    def _build(self) -> Optional[ArgoPodAffinityTerm]:
+    def build(self) -> Optional[ArgoPodAffinityTerm]:
         """Assembles the pod affinity term"""
         term = ArgoPodAffinityTerm(topology_key=self.topology_key)
 
         if self.label_selector is not None:
-            setattr(term, "label_selector", self.label_selector._build())
+            setattr(term, "label_selector", self.label_selector.build())
 
         if self.namespace_selector is not None:
-            setattr(term, "namespace_selector", self.namespace_selector._build())
+            setattr(term, "namespace_selector", self.namespace_selector.build())
 
         if self.namespaces is not None:
             setattr(term, "namespaces", self.namespaces)
@@ -287,10 +287,10 @@ class WeightedPodAffinityTerm:
         assert 1 <= weight <= 100, "Pod affinity term weight should be between 1 and 100"
         self.weight = weight
 
-    def _build(self) -> ArgoWeightedPodAffinityTerm:
+    def build(self) -> ArgoWeightedPodAffinityTerm:
         """Assembles the weighted pod affinity term"""
         return ArgoWeightedPodAffinityTerm(
-            pod_affinity_term=self.pod_affinity_term._build(),
+            pod_affinity_term=self.pod_affinity_term.build(),
             weight=self.weight,
         )
 
@@ -318,13 +318,13 @@ class PodAffinity:
         self.weighted_pod_affinities = weighted_pod_affinities
         self.pod_affinity_terms = pod_affinity_terms
 
-    def _build(self) -> Optional[ArgoPodAffinity]:
+    def build(self) -> Optional[ArgoPodAffinity]:
         """Assembles the pod affinity"""
         affinity = ArgoPodAffinity()
 
         if self.weighted_pod_affinities is not None:
             preferred_during_scheduling_ignored_during_execution = [
-                term._build() for term in self.weighted_pod_affinities
+                term.build() for term in self.weighted_pod_affinities
             ]
             if any(preferred_during_scheduling_ignored_during_execution):
                 setattr(
@@ -334,7 +334,7 @@ class PodAffinity:
                 )
 
         if self.pod_affinity_terms:
-            required_during_scheduling_ignored_during_execution = [term._build() for term in self.pod_affinity_terms]
+            required_during_scheduling_ignored_during_execution = [term.build() for term in self.pod_affinity_terms]
             if any(required_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
@@ -370,13 +370,13 @@ class PodAntiAffinity:
         self.weighted_pod_affinities = weighted_pod_affinities
         self.pod_affinity_terms = pod_affinity_terms
 
-    def _build(self) -> Optional[ArgoPodAntiAffinity]:
+    def build(self) -> Optional[ArgoPodAntiAffinity]:
         """Assembles the pod anti affinity"""
         affinity = ArgoPodAntiAffinity()
 
         if self.weighted_pod_affinities is not None:
             preferred_during_scheduling_ignored_during_execution = [
-                term._build() for term in self.weighted_pod_affinities
+                term.build() for term in self.weighted_pod_affinities
             ]
             if any(preferred_during_scheduling_ignored_during_execution):
                 setattr(
@@ -386,7 +386,7 @@ class PodAntiAffinity:
                 )
 
         if self.pod_affinity_terms is not None:
-            required_during_scheduling_ignored_during_execution = [term._build() for term in self.pod_affinity_terms]
+            required_during_scheduling_ignored_during_execution = [term.build() for term in self.pod_affinity_terms]
             if any(required_during_scheduling_ignored_during_execution):
                 setattr(
                     affinity,
@@ -417,10 +417,10 @@ class NodeSelector:
     def __init__(self, terms: Optional[List[NodeSelectorTerm]] = None):
         self.terms = terms
 
-    def _build(self) -> Optional[ArgoNodeSelector]:
+    def build(self) -> Optional[ArgoNodeSelector]:
         """Assembles the node selector"""
         if self.terms is not None:
-            terms = [term._build() if term else None for term in self.terms]
+            terms = [term.build() if term else None for term in self.terms]
             if any(terms):
                 return ArgoNodeSelector(node_selector_terms=terms)
         return None
@@ -449,13 +449,13 @@ class NodeAffinity:
         self.preferred_scheduling_terms = preferred_scheduling_terms
         self.node_selector = node_selector
 
-    def _build(self) -> Optional[ArgoNodeAffinity]:
+    def build(self) -> Optional[ArgoNodeAffinity]:
         """Assembles the node affinity"""
         affinity = ArgoNodeAffinity()
 
         if self.preferred_scheduling_terms is not None:
             preferred_during_scheduling_ignored_during_execution = [
-                term._build() for term in self.preferred_scheduling_terms
+                term.build() for term in self.preferred_scheduling_terms
             ]
             if any(preferred_during_scheduling_ignored_during_execution):
                 setattr(
@@ -465,7 +465,7 @@ class NodeAffinity:
                 )
 
         if self.node_selector is not None:
-            required_during_scheduling_ignored_during_execution = self.node_selector._build()
+            required_during_scheduling_ignored_during_execution = self.node_selector.build()
             if required_during_scheduling_ignored_during_execution:
                 setattr(
                     affinity,
@@ -507,20 +507,20 @@ class Affinity:
         self.pod_anti_affinity = pod_anti_affinity
         self.node_affinity = node_affinity
 
-    def _build(self) -> Optional[ArgoAffinity]:
+    def build(self) -> Optional[ArgoAffinity]:
         """Assembles an affinity"""
         affinity = ArgoAffinity()
 
         if self.pod_affinity is not None:
-            pod_affinity = self.pod_affinity._build()
+            pod_affinity = self.pod_affinity.build()
             setattr(affinity, "pod_affinity", pod_affinity)
 
         if self.pod_anti_affinity is not None:
-            pod_anti_affinity = self.pod_anti_affinity._build()
+            pod_anti_affinity = self.pod_anti_affinity.build()
             setattr(affinity, "pod_anti_affinity", pod_anti_affinity)
 
         if self.node_affinity is not None:
-            node_affinity = self.node_affinity._build()
+            node_affinity = self.node_affinity.build()
             setattr(affinity, "node_affinity", node_affinity)
 
         if (

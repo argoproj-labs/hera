@@ -244,7 +244,7 @@ class Workflow:
             )
 
         if self.affinity is not None:
-            setattr(spec, "affinity", self.affinity._build())
+            setattr(spec, "affinity", self.affinity.build())
 
         if self.node_selector is not None:
             setattr(spec, "node_selector", self.node_selector)

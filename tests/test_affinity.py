@@ -37,14 +37,14 @@ def test_node_selector_requirement_returns_expected_spec():
     assert node_selector_requirement.operator == LabelOperator.In
     assert node_selector_requirement.values == ["value"]
 
-    spec = node_selector_requirement._build()
+    spec = node_selector_requirement.build()
     assert isinstance(spec, ArgoNodeSelectorRequirement)
     assert spec.key == "a"
     assert spec.operator == "In"
     assert spec.values == ["value"]
 
     node_selector_requirement = NodeSelectorRequirement("a", LabelOperator.In)
-    spec = node_selector_requirement._build()
+    spec = node_selector_requirement.build()
     assert isinstance(spec, ArgoNodeSelectorRequirement)
     assert spec.key == "a"
     assert spec.operator == "In"
@@ -57,7 +57,7 @@ def test_node_selector_term_returns_expected_spec():
     assert node_selector_term.expressions == expressions
     assert node_selector_term.fields == fields
 
-    spec = node_selector_term._build()
+    spec = node_selector_term.build()
     assert isinstance(spec, ArgoNodeSelectorTerm)
     assert spec.match_expressions == [
         ArgoNodeSelectorRequirement(key="a", operator="In", values=["value"]),
@@ -67,13 +67,13 @@ def test_node_selector_term_returns_expected_spec():
     ]
 
     node_selector_term = NodeSelectorTerm()
-    spec = node_selector_term._build()
+    spec = node_selector_term.build()
     assert spec is None
 
 
 def test_preferred_scheduling_term_returns_expected_spec():
     term = PreferredSchedulingTerm(NodeSelectorTerm(), 1)
-    spec = term._build()
+    spec = term.build()
     assert spec is None
 
     expressions = [Expression("a", LabelOperator.In, ["value"])]
@@ -86,7 +86,7 @@ def test_preferred_scheduling_term_returns_expected_spec():
     assert term.node_selector_term == node_selector_term
     assert term.weight == 1
 
-    spec = term._build()
+    spec = term.build()
     assert isinstance(spec, ArgoPreferredSchedulingTerm)
     assert spec.preference is not None
     assert spec.preference.match_expressions == [
@@ -104,14 +104,14 @@ def test_label_selector_requirement():
     assert label_selector_requirement.operator == LabelOperator.In
     assert label_selector_requirement.values == ["value"]
 
-    spec = label_selector_requirement._build()
+    spec = label_selector_requirement.build()
     assert isinstance(spec, ArgoLabelSelectorRequirement)
     assert spec.key == "a"
     assert spec.operator == "In"
     assert spec.values == ["value"]
 
     label_selector_requirement = LabelSelectorRequirement("a", LabelOperator.In)
-    spec = label_selector_requirement._build()
+    spec = label_selector_requirement.build()
     assert isinstance(spec, ArgoLabelSelectorRequirement)
     assert spec.key == "a"
     assert spec.operator == "In"
@@ -123,7 +123,7 @@ def test_label_selector():
         match_labels={"a": "b"},
     )
 
-    spec = label_selector._build()
+    spec = label_selector.build()
     assert isinstance(spec, ArgoLabelSelector)
     assert spec.match_expressions == [
         ArgoLabelSelectorRequirement(key="a", operator="In", values=["value"]),
@@ -135,7 +135,7 @@ def test_label_selector():
         label_selector_requirements=[LabelSelectorRequirement("a", LabelOperator.In)], match_labels={"a": "b"}
     )
 
-    spec = label_selector._build()
+    spec = label_selector.build()
     assert isinstance(spec, ArgoLabelSelector)
     assert spec.match_expressions == [
         ArgoLabelSelectorRequirement(key="a", operator="In"),
@@ -144,7 +144,7 @@ def test_label_selector():
     assert spec.match_labels == {"a": "b"}
 
     label_selector = LabelSelector()
-    spec = label_selector._build()
+    spec = label_selector.build()
     assert spec is None
 
 
@@ -165,7 +165,7 @@ def test_pod_affinity_term():
     assert pod_affinity_term.namespace_selector == label_selector
     assert pod_affinity_term.namespaces == ["a"]
 
-    spec = pod_affinity_term._build()
+    spec = pod_affinity_term.build()
     assert isinstance(spec, ArgoPodAffinityTerm)
     assert spec.label_selector.match_expressions == [
         ArgoLabelSelectorRequirement(key="a", operator="In", values=["value"]),
@@ -176,7 +176,7 @@ def test_pod_affinity_term():
     assert spec.namespaces == ["a"]
 
     pod_affinity_term = PodAffinityTerm("a")
-    spec = pod_affinity_term._build()
+    spec = pod_affinity_term.build()
     assert spec is None
 
 
@@ -196,7 +196,7 @@ def test_weighted_pod_affinity_term():
         ),
     )
 
-    spec = weighted_pod_affinity_term._build()
+    spec = weighted_pod_affinity_term.build()
     assert isinstance(spec, ArgoWeightedPodAffinityTerm)
     assert spec.weight == 1
     assert spec.pod_affinity_term.label_selector.match_expressions == [
@@ -247,7 +247,7 @@ def test_pod_affinity():
         ],
     )
 
-    spec = pod_affinity._build()
+    spec = pod_affinity.build()
     assert isinstance(spec, ArgoPodAffinity)
     assert spec.required_during_scheduling_ignored_during_execution == [
         ArgoPodAffinityTerm(
@@ -269,7 +269,7 @@ def test_pod_affinity():
     ]
 
     pod_affinity = PodAffinity()
-    spec = pod_affinity._build()
+    spec = pod_affinity.build()
     assert spec is None
 
 
@@ -311,7 +311,7 @@ def test_pod_anti_affinity():
             )
         ],
     )
-    spec = pod_affinity._build()
+    spec = pod_affinity.build()
     assert isinstance(spec, ArgoPodAntiAffinity)
     assert spec.required_during_scheduling_ignored_during_execution == [
         ArgoPodAffinityTerm(
@@ -333,7 +333,7 @@ def test_pod_anti_affinity():
     ]
 
     pod_affinity = PodAntiAffinity()
-    spec = pod_affinity._build()
+    spec = pod_affinity.build()
     assert spec is None
 
 
@@ -358,7 +358,7 @@ def test_node_affinity():
         ),
     )
 
-    spec = node_affinity._build()
+    spec = node_affinity.build()
     assert isinstance(spec, ArgoNodeAffinity)
     assert spec.preferred_during_scheduling_ignored_during_execution == [
         ArgoPreferredSchedulingTerm(
@@ -491,17 +491,17 @@ def test_affinity():
             ),
         ),
     )
-    assert affinity._build() is not None
+    assert affinity.build() is not None
 
     affinity = Affinity()
-    assert affinity._build() is None
+    assert affinity.build() is None
 
 
 def test_node_selector_returns_none_on_empty_spec():
     node_selector = NodeSelector()
-    assert node_selector._build() is None
+    assert node_selector.build() is None
 
 
 def test_node_affinity_returns_none_on_empty_spec():
     node_affinity = NodeAffinity()
-    assert node_affinity._build() is None
+    assert node_affinity.build() is None
