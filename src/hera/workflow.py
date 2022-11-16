@@ -1,7 +1,7 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 import json
 from types import ModuleType
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, TypeVar, Union
 
 from argo_workflows.model_utils import model_to_dict
 from argo_workflows.models import (
@@ -36,6 +36,8 @@ try:
     _yaml = yaml
 except ImportError:
     _yaml = None
+
+WorkflowType = TypeVar("WorkflowType", bound="Workflow")
 
 
 class Workflow:
@@ -102,7 +104,7 @@ class Workflow:
     """
 
     def __init__(
-        self,
+        self: WorkflowType,
         name: str,
         dag_name: Optional[str] = None,
         service: Optional[WorkflowService] = None,
@@ -168,23 +170,23 @@ class Workflow:
             hook(self)
 
     @property
-    def service(self) -> WorkflowService:
+    def service(self: WorkflowType) -> WorkflowService:
         if self._service is None:
             self._service = WorkflowService()
         return self._service
 
     @service.setter
-    def service(self, value: WorkflowService):
+    def service(self: WorkflowType, value: WorkflowService):
         self._service = value
 
-    def get_name(self) -> str:
+    def get_name(self: WorkflowType) -> str:
         """
         Returns the name of the workflow. This is useful in combination with
         `generate_name=True` as the name is created upon workflow creation
         """
         return "{{workflow.name}}"
 
-    def _build_metadata(self, use_name=True) -> ObjectMeta:
+    def _build_metadata(self: WorkflowType, use_name=True) -> ObjectMeta:
         """Assembles the metadata of the workflow"""
         metadata = ObjectMeta()
         if use_name:
@@ -198,7 +200,7 @@ class Workflow:
             setattr(metadata, "annotations", self.annotations)
         return metadata
 
-    def _build_spec(self) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
+    def _build_spec(self: WorkflowType) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
         """Assembles the spec of the workflow"""
         spec = IoArgoprojWorkflowV1alpha1WorkflowSpec()
         setattr(spec, "entrypoint", self.dag.name)  # This will be ignored for `WorkflowTemplate`
@@ -270,7 +272,7 @@ class Workflow:
 
         return spec
 
-    def build(self) -> IoArgoprojWorkflowV1alpha1Workflow:
+    def build(self: WorkflowType) -> IoArgoprojWorkflowV1alpha1Workflow:
         """Builds the workflow core representation"""
         return IoArgoprojWorkflowV1alpha1Workflow(
             api_version=GlobalConfig.api_version,
@@ -279,7 +281,7 @@ class Workflow:
             spec=self._build_spec(),
         )
 
-    def __enter__(self) -> "Workflow":
+    def __enter__(self: WorkflowType) -> WorkflowType:
         """Enter the context of the workflow.
 
         Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
@@ -288,7 +290,7 @@ class Workflow:
         hera.dag_context.enter(self.dag)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self: WorkflowType, exc_type, exc_val, exc_tb) -> None:
         """Leave the context of the workflow.
 
         This supports using `with Workflow(...)`.
@@ -296,17 +298,17 @@ class Workflow:
         self.in_context = False
         hera.dag_context.exit()
 
-    def add_task(self, t: Task) -> "Workflow":
+    def add_task(self: WorkflowType, t: Task) -> WorkflowType:
         """Add a task to the workflow"""
         self.dag.add_task(t)
         return self
 
-    def add_tasks(self, *ts: Task) -> "Workflow":
+    def add_tasks(self: WorkflowType, *ts: Task) -> WorkflowType:
         """Add a collection of tasks to the workflow"""
         self.dag.add_tasks(*ts)
         return self
 
-    def create(self) -> "Workflow":
+    def create(self: WorkflowType) -> WorkflowType:
         """Creates the workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
@@ -317,12 +319,12 @@ class Workflow:
 
         return self
 
-    def lint(self) -> "Workflow":
+    def lint(self: WorkflowType) -> WorkflowType:
         """Lint the workflow"""
         self.service.lint_workflow(self.build())
         return self
 
-    def on_exit(self, other: Union[Task, DAG]) -> None:
+    def on_exit(self: WorkflowType, other: Union[Task, DAG]) -> None:
         """Add a task or a DAG to execute upon workflow exit"""
         if isinstance(other, Task):
             self.exit_task = other.name
@@ -338,17 +340,17 @@ class Workflow:
         else:
             raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
 
-    def delete(self) -> Tuple[object, int, dict]:
+    def delete(self: WorkflowType) -> Tuple[object, int, dict]:
         """Deletes the workflow"""
         return self.service.delete_workflow(self.name)
 
-    def get_parameter(self, name: str) -> Parameter:
+    def get_parameter(self: WorkflowType, name: str) -> Parameter:
         """Assembles the specified parameter name into a parameter specification"""
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
 
-    def to_dict(self, serialize: bool = True) -> dict:
+    def to_dict(self: WorkflowType, serialize: bool = True) -> dict:
         """Returns the dictionary representation of the workflow.
 
         Parameters
@@ -359,11 +361,11 @@ class Workflow:
         """
         return model_to_dict(self.build(), serialize=serialize)
 
-    def to_json(self) -> str:
+    def to_json(self: WorkflowType) -> str:
         """Returns the JSON representation of the workflow"""
         return json.dumps(self.to_dict())
 
-    def to_yaml(self) -> str:
+    def to_yaml(self: WorkflowType) -> str:
         """Returns a YAML representation of the workflow"""
         if _yaml is None:
             raise ImportError(
