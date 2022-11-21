@@ -51,7 +51,18 @@ class DAG(IO):
         # Assemble the templates from sub-dags
         sub_templates = [t.dag._build_templates() for t in self.tasks if t.dag]
         sub_templates = [t for sublist in sub_templates for t in sublist]  # flatten
-        return templates + sub_templates
+
+        dag_subtemplates = []
+        for t in self.tasks:
+            if t.is_exit_task and t.dag is not None:
+                # we have already built the DAG template, but we need an exit template that
+                # references the DAG itself, so it can be references as a template on its own
+                dag_subtemplates.append(
+                    IoArgoprojWorkflowV1alpha1Template(name=t.name, dag=IoArgoprojWorkflowV1alpha1DAGTemplate(
+                        tasks=[IoArgoprojWorkflowV1alpha1DAGTask(name=f"{t.name}-{t.dag.name}", template=t.dag.name)]))
+                )
+
+        return templates + sub_templates + dag_subtemplates
 
     def _build_dag_tasks(self) -> Optional[List[IoArgoprojWorkflowV1alpha1DAGTask]]:
         """Assembles all the DAG tasks"""
