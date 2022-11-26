@@ -1,5 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
     from hera.task import Task
@@ -15,7 +15,6 @@ from argo_workflows.models import Volume as ArgoVolume
 from hera.artifact import Artifact
 from hera.io import IO
 from hera.parameter import Parameter
-
 from hera.validators import validate_name
 
 

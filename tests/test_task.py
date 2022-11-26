@@ -809,6 +809,29 @@ print(42)
 
         assert Task("t")._build_arguments() is None
 
+        args = Task(
+            "t",
+            inputs=[
+                {"a": 1, "b": "abc", "c": {"d": "test"}},
+                Parameter("e", value="test"),
+                GCSArtifact("a", "b", "c", "d"),
+            ],
+        )._build_arguments()
+        assert isinstance(args, IoArgoprojWorkflowV1alpha1Arguments)
+        assert hasattr(args, "parameters")
+        assert len(args.parameters) == 4
+        assert hasattr(args, "artifacts")
+        assert len(args.artifacts) == 1
+        assert args.parameters[0].name == "a"
+        assert args.parameters[0].value == json.dumps(1)
+        assert args.parameters[1].name == "b"
+        assert args.parameters[1].value == "abc"
+        assert args.parameters[2].name == "c"
+        assert args.parameters[2].value == json.dumps({"d": "test"})
+        assert args.parameters[3].name == "e"
+        assert args.parameters[3].value == "test"
+        assert args.artifacts[0].name == "a"
+
     def test_get_parameter(self):
         param = Task("t", outputs=[Parameter("a", value="42", default="43")]).get_parameter("a")
         assert isinstance(param, Parameter)

@@ -23,9 +23,9 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
-from hera.dag import DAG
 from hera.affinity import Affinity
 from hera.artifact import Artifact
+from hera.dag import DAG
 from hera.env import Env
 from hera.env_from import BaseEnvFrom
 from hera.global_config import GlobalConfig
@@ -176,7 +176,7 @@ class Task(IO):
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
         with_sequence: Optional[Sequence] = None,
-        inputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        inputs: Optional[List[Union[Parameter, Artifact, Dict[str, Any]]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional[DAG] = None,
         image: Optional[str] = None,
@@ -214,7 +214,7 @@ class Task(IO):
         self.source = source
         self.memoize = memoize
         self.volumes = volumes or []
-        self.inputs = inputs or []
+        self.inputs = [] if inputs is None else self._parse_inputs(inputs)
         self.outputs = outputs or []
         self.env = env or []
         self.with_param = with_param
@@ -273,6 +273,32 @@ class Task(IO):
     def ip(self) -> str:
         """Returns the specifications for the IP property of the task"""
         return f"{{{{tasks.{self.name}.ip}}}}"
+
+    def _parse_inputs(
+        self, inputs: List[Union[Parameter, Artifact, Dict[str, Any]]]
+    ) -> List[Union[Parameter, Artifact]]:
+        """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
+
+        Parameters
+        ----------
+        inputs: List[Union[Parameter, Artifact, Dict[str, Any]]]
+            The list of inputs specified on the task. The `Dict` aspect is treated as a mapped collection of
+            Parameters.
+
+        Returns
+        -------
+        List[Union[Parameter, Artifact]]
+            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
+            independent parameters.
+        """
+        result = []
+        for i in inputs:
+            if isinstance(i, Parameter) or isinstance(i, Artifact):
+                result.append(i)
+            elif isinstance(i, dict):
+                for k, v in i.items():
+                    result.append(Parameter(k, value=v))
+        return result
 
     def _get_dependency_tasks(self) -> List[str]:
         """Extract task names from `depends` string"""

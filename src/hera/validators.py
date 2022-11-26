@@ -1,7 +1,6 @@
 """Holds a collection of validators that are shared in V1"""
-import json
 import re
-from typing import Any, Optional
+from typing import Optional
 
 
 def validate_name(name: str, max_length: Optional[int] = None) -> str:
@@ -56,26 +55,3 @@ def validate_storage_units(value: str) -> None:
     else:
         unit = unit_search.group(0)
         assert unit in supported_units, f"unsupported unit for parsed value {value}"
-
-
-def json_serializable(value: Any) -> True:  # type: ignore
-    """Check if the given value is JSON serializable.
-
-    Parameters
-    ----------
-    value: Union[Any]
-        The value to check.
-
-    Returns
-    -------
-    bool
-        Whether the given value can be JSON serialized or not.
-    """
-    if not value:
-        return True  # serialized as 'null'
-
-    try:
-        json.dumps(value)
-    except (TypeError, OverflowError):
-        return False
-    return True

@@ -1,5 +1,6 @@
 """Holds input model specifications"""
-from typing import Optional
+import json
+from typing import Any, Optional
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Parameter,
@@ -17,10 +18,10 @@ class Parameter:
     name: str
         The name of the task to take input from. The task's results are expected via stdout. Specifically, the task is
         expected to perform the script illustrated in Examples.
-    value: Optional[str] = None
+    value: Optional[Any] = None
         Value of the parameter, as an index into some field of the task. If this is left as `None`, along with
         `value_from` being left as `None`, as is the case in GitOps patterns, the submitter has to likely supply the
-        parameter value via the ArgoCLI.
+        parameter value via the Argo CLI. Note that if a value is supplied a `json.dumps` will be applied to it.
     default: Optional[str] = None
         Default value of the parameter in case the `value` cannot be obtained based on the specification.
     value_from: Optional[ValueFrom] = None
@@ -31,14 +32,17 @@ class Parameter:
     def __init__(
         self,
         name: str,
-        value: Optional[str] = None,
+        value: Optional[Any] = None,
         default: Optional[str] = None,
         value_from: Optional[ValueFrom] = None,
     ) -> None:
         if value is not None and value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
         self.name = name
-        self.value = str(value) if value is not None else None
+        if value is None or isinstance(value, str):
+            self.value = value
+        else:
+            self.value = json.dumps(value)  # None serialized as `null`
         self.default = str(default) if default is not None else None
         self.value_from = value_from
 
