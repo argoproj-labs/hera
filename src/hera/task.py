@@ -5,10 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-
-if TYPE_CHECKING:
-    from hera import DAG
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from argo_workflows.models import (
     Container,
@@ -26,6 +23,7 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
+from hera import DAG
 from hera.affinity import Affinity
 from hera.artifact import Artifact
 from hera.env import Env
@@ -98,7 +96,7 @@ class Task(IO):
         creation process when provided with an `InputFrom`.
     outputs: Optional[List[Union[Parameter, Artifact]]] = None
         `Output` objects that dictate the outputs of the task.
-    dag: Optional["DAG"] = None
+    dag: Optional[DAG] = None
         The DAG the task should execute.
     image: Optional[str] = None
         The image to use in the execution of the function.
@@ -180,7 +178,7 @@ class Task(IO):
         with_sequence: Optional[Sequence] = None,
         inputs: Optional[List[Union[Parameter, Artifact]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
-        dag: Optional["DAG"] = None,
+        dag: Optional[DAG] = None,
         image: Optional[str] = None,
         image_pull_policy: Optional[ImagePullPolicy] = None,
         daemon: bool = False,
@@ -393,10 +391,21 @@ class Task(IO):
         """Execute `other` when this task errors."""
         return self.next(other, on=TaskResult.Errored)
 
-    def on_exit(self, other: "Task") -> "Task":
+    def on_exit(self, other: Union["Task", DAG]) -> "Task":
         """Execute `other` on completion (exit) of this Task."""
-        self.exit_task = other.name
-        other.is_exit_task = True
+        if isinstance(other, Task):
+            self.exit_task = other.name
+            other.is_exit_task = True
+        elif isinstance(other, DAG):
+            # If the exit task is a DAG, we need to propagate the DAG and its
+            # templates by instantiating a task within the current context.
+            # The name will never be used; it's only present because the
+            # field is mandatory.
+            t = Task("temp-name-for-hera-exit-dag", dag=other)
+            t.is_exit_task = True
+            self.exit_task = other.name
+        else:
+            raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
         return self
 
     def on_other_result(self, other: "Task", value: str, operator: Operator = Operator.Equals) -> "Task":
