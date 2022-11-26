@@ -23,7 +23,7 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
-from hera import DAG
+from hera.dag import DAG
 from hera.affinity import Affinity
 from hera.artifact import Artifact
 from hera.env import Env
@@ -393,6 +393,14 @@ class Task(IO):
 
     def on_exit(self, other: Union["Task", DAG]) -> "Task":
         """Execute `other` on completion (exit) of this Task."""
+        # in instances when `other` contains a DAG it is the DAG that needs a template to be
+        # created. Therefore, this "resets" the `other` to be the DAG that needs to be used
+        if isinstance(other, Task) and other.dag is not None:
+            raise ValueError(
+                "Provided `Task` contains a `DAG` set. Only `Task`s with `source` are supported or pure `DAG`s. "
+                "Try passing in `Task.dag` or set `source` on `Task` if you have a single task to run on exit."
+            )
+
         if isinstance(other, Task):
             self.exit_task = other.name
             other.is_exit_task = True
@@ -821,9 +829,9 @@ class Task(IO):
             v._build_claim_spec()
             for v in self.volumes
             if isinstance(v, ExistingVolume)
-            or isinstance(v, SecretVolume)
-            or isinstance(v, EmptyDirVolume)
-            or isinstance(v, ConfigMapVolume)
+               or isinstance(v, SecretVolume)
+               or isinstance(v, EmptyDirVolume)
+               or isinstance(v, ConfigMapVolume)
         ]
 
     def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
