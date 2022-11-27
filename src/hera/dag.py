@@ -1,5 +1,8 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import List, Optional, Union
+from typing import List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from hera.task import Task
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTask,
@@ -12,7 +15,7 @@ from argo_workflows.models import Volume as ArgoVolume
 from hera.artifact import Artifact
 from hera.io import IO
 from hera.parameter import Parameter
-from hera.task import Task
+
 from hera.validators import validate_name
 
 
@@ -43,7 +46,7 @@ class DAG(IO):
         self.name = validate_name(name)
         self.inputs = inputs or []
         self.outputs = outputs or []
-        self.tasks: List[Task] = []
+        self.tasks: List["Task"] = []
 
     def _build_templates(self) -> List[IoArgoprojWorkflowV1alpha1Template]:
         """Assembles the templates from sub-DAGs of the DAG"""
@@ -119,12 +122,12 @@ class DAG(IO):
         self.in_context = False
         dag_context.exit()
 
-    def add_task(self, t: Task) -> "DAG":
+    def add_task(self, t: "Task") -> "DAG":
         """Add a task to the DAG. Note that tasks are added automatically when the DAG context is used"""
         self.tasks.append(t)
         return self
 
-    def add_tasks(self, *ts: Task) -> "DAG":
+    def add_tasks(self, *ts: "Task") -> "DAG":
         """Add a collection of tasks to the DAG.
 
         Note that tasks are added automatically when the DAG context is used

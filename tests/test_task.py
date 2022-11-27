@@ -907,3 +907,26 @@ print(42)
         t = Task('test')
         assert t.when == "test123"
         assert t.labels == {'abc': '123'}
+
+    def test_task_applies_exit(self, no_op):
+        with pytest.raises(ValueError) as e:
+            Task('t', source=no_op).on_exit(Task('e', dag=DAG('d')))
+        assert (
+            str(e.value)
+            == "Provided `Task` contains a `DAG` set. Only `Task`s with `source` are supported or pure `DAG`s. "
+            "Try passing in `Task.dag` or set `source` on `Task` if you have a single task to run on exit."
+        )
+
+        o = Task('e', source=no_op)
+        t = Task('t', source=no_op).on_exit(o)
+        assert o.is_exit_task
+        assert t.exit_task == "e"
+
+        d = DAG('d')
+        t = Task('t', source=no_op).on_exit(d)
+        assert t.exit_task == "d"
+
+        o = 42
+        with pytest.raises(ValueError) as e:
+            Task('t', source=no_op).on_exit(o)  # type: ignore
+        assert str(e.value) == f"Unrecognized exit type {type(o)}, supported types are `Task` and `DAG`"
