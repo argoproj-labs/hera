@@ -283,7 +283,7 @@ class Task(IO):
 
     @property
     def id(self) -> str:
-        """Returns the field reference for the ID of the task.
+        """Unique ID of container task.
 
         See Also
         --------
@@ -293,7 +293,7 @@ class Task(IO):
 
     @property
     def ip(self) -> str:
-        """Returns the field reference for the IP of the task.
+        """IP address of the daemon container task.
 
         See Also
         --------
@@ -303,7 +303,7 @@ class Task(IO):
 
     @property
     def status(self) -> str:
-        """Returns the field reference for the status of the task.
+        """Phase status of the task.
 
         See Also
         --------
@@ -313,7 +313,7 @@ class Task(IO):
 
     @property
     def exit_code(self) -> str:
-        """Returns the field reference for the exit code of the task.
+        """Exit code of script or container task.
 
         See Also
         --------
@@ -323,7 +323,7 @@ class Task(IO):
 
     @property
     def started_at(self) -> str:
-        """Returns the field reference for the started time of the task.
+        """Time-stamp when the task started.
 
         See Also
         --------
@@ -333,7 +333,7 @@ class Task(IO):
 
     @property
     def finished_at(self) -> str:
-        """Returns the field reference for the finished time of the task.
+        """Time-stamp when the task finished.
 
         See Also
         --------
