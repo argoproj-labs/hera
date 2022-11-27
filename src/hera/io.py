@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Inputs,
@@ -16,19 +16,69 @@ class IO:
 
     Parameters
     ----------
-    inputs: List[Union[Parameter, Artifact]]
-        List of parameters or artifacts to use as inputs.
+    inputs: Union[
+        List[Union[Parameter, Artifact]],
+        List[Union[Parameter, Artifact, Dict[str, Any]]],
+        Dict[str, Any],
+    ] = None,
+        `Input` or `Parameter` objects that hold parameter inputs. When a dictionary is specified all the key/value
+        pairs will be transformed into `Parameter`s. The `key` will be the `name` field of the `Parameter` while the
+        `value` will be the `value` field of the `Parameter.
     outputs: List[Union[Parameter, Artifact]]
         List of parameters or artifacts to use as outputs.
     """
 
-    inputs: List[Union[Parameter, Artifact]] = field(default_factory=lambda: [])
+    inputs: Union[
+        List[Union[Parameter, Artifact]],
+        List[Union[Parameter, Artifact, Dict[str, Any]]],
+        Dict[str, Any],
+    ] = field(  # type: ignore
+        default_factory=lambda: []
+    )
     outputs: List[Union[Parameter, Artifact]] = field(default_factory=lambda: [])
+
+    def __post_init__(self) -> None:
+        self.inputs = self._parse_inputs(self.inputs)
+
+    def _parse_inputs(
+        self,
+        inputs: Union[
+            List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]
+        ],
+    ) -> List[Union[Parameter, Artifact]]:
+        """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
+
+        Parameters
+        ----------
+        inputs: Union[Dict[str, Any], List[Union[Parameter, Artifact, Dict[str, Any]]]]
+            The list of inputs specified on the task. The `Dict` aspect is treated as a mapped collection of
+            Parameters. If a single dictionary is specified, all the fields are transformed into `Parameter`s. The key
+            is the `name` of the `Parameter` and the `value` is the `value` field of the `Parameter.
+
+        Returns
+        -------
+        List[Union[Parameter, Artifact]]
+            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
+            independent parameters.
+        """
+        result: List[Union[Parameter, Artifact]] = []
+        if isinstance(inputs, dict):
+            for k, v in inputs.items():
+                result.append(Parameter(k, value=v))
+        else:
+            for i in inputs:
+                if isinstance(i, Parameter) or isinstance(i, Artifact):
+                    result.append(i)
+                elif isinstance(i, dict):
+                    for k, v in i.items():
+                        result.append(Parameter(k, value=v))
+        return result
 
     def _build_inputs(self) -> Optional[IoArgoprojWorkflowV1alpha1Inputs]:
         """Assembles the inputs of the task."""
-        parameters = [obj.as_input() for obj in self.inputs if isinstance(obj, Parameter)]
-        artifacts = [obj.as_input() for obj in self.inputs if isinstance(obj, Artifact)]
+        parsed_inputs = self._parse_inputs(self.inputs)
+        parameters = [obj.as_input() for obj in parsed_inputs if isinstance(obj, Parameter)]
+        artifacts = [obj.as_input() for obj in parsed_inputs if isinstance(obj, Artifact)]
         if len(parameters) + len(artifacts) == 0:
             return None
         inputs = IoArgoprojWorkflowV1alpha1Inputs()

@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 from argo_workflows.models import (
     Container,
@@ -90,10 +90,16 @@ class Task(IO):
     with_sequence: Optional[Sequence] = None
         Sequence is similar to `with_param` in that it generates a range of objects. See `hera.sequence.Sequence` or
         https://argoproj.github.io/argo-workflows/fields/#sequence.
-    inputs: Optional[List[Union[Parameter, Artifact]]] = None
-        `Input` or `Parameter` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
-        parameter it cannot be used in conjunction with other types of inputs because of the dynamic aspect of the task
-        creation process when provided with an `InputFrom`.
+    inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+    ] = None,
+        `Input` or `Parameter` objects that hold parameter inputs. When a dictionary is specified all the key/value
+        pairs will be transformed into `Parameter`s. The `key` will be the `name` field of the `Parameter` while the
+        `value` will be the `value` field of the `Parameter.
     outputs: Optional[List[Union[Parameter, Artifact]]] = None
         `Output` objects that dictate the outputs of the task.
     dag: Optional[DAG] = None
@@ -176,7 +182,9 @@ class Task(IO):
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
         with_sequence: Optional[Sequence] = None,
-        inputs: Optional[List[Union[Parameter, Artifact, Dict[str, Any]]]] = None,
+        inputs: Optional[
+            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
+        ] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional[DAG] = None,
         image: Optional[str] = None,
@@ -261,6 +269,10 @@ class Task(IO):
         self.when: Optional[str] = None
 
         self.validate()
+
+        # here we cast for otherwise `mypy` complains that Hera adds an incompatible type with a dictionary, which is
+        # an acceptable type for the `inputs` field upon `init`
+        self.inputs = cast(List[Union[Parameter, Artifact]], self.inputs)
         self.inputs += self._deduce_input_params()
 
         if hera.dag_context.is_set():
@@ -273,32 +285,6 @@ class Task(IO):
     def ip(self) -> str:
         """Returns the specifications for the IP property of the task"""
         return f"{{{{tasks.{self.name}.ip}}}}"
-
-    def _parse_inputs(
-        self, inputs: List[Union[Parameter, Artifact, Dict[str, Any]]]
-    ) -> List[Union[Parameter, Artifact]]:
-        """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
-
-        Parameters
-        ----------
-        inputs: List[Union[Parameter, Artifact, Dict[str, Any]]]
-            The list of inputs specified on the task. The `Dict` aspect is treated as a mapped collection of
-            Parameters.
-
-        Returns
-        -------
-        List[Union[Parameter, Artifact]]
-            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
-            independent parameters.
-        """
-        result = []
-        for i in inputs:
-            if isinstance(i, Parameter) or isinstance(i, Artifact):
-                result.append(i)
-            elif isinstance(i, dict):
-                for k, v in i.items():
-                    result.append(Parameter(k, value=v))
-        return result
 
     def _get_dependency_tasks(self) -> List[str]:
         """Extract task names from `depends` string"""
@@ -739,6 +725,7 @@ class Task(IO):
 
         if self.dag:
             if self.dag.inputs:
+                self.dag.inputs = cast(List[Union[Parameter, Artifact]], self.dag.inputs)
                 if len(self.dag.inputs) == 1:
                     deduced_params.append(Parameter(name=self.dag.inputs[0].name, value="{{item}}"))
                 else:

@@ -1,5 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
     from hera.task import Task
@@ -30,8 +30,16 @@ class DAG(IO):
     ----------
     name: str
         The workflow name. Note that the workflow initiation will replace underscores with dashes.
-    inputs: Optional[List[Union[Parameter, Artifact]]] = None
-        Any inputs to set on the DAG at a global level.
+    inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+    ] = None,
+        `Input` or `Parameter` objects that hold parameter inputs. When a dictionary is specified all the key/value
+        pairs will be transformed into `Parameter`s. The `key` will be the `name` field of the `Parameter` while the
+        `value` will be the `value` field of the `Parameter.
     outputs: Optional[List[Union[Parameter, Artifact]]] = None
         Any outputs to set on the DAG at a global level.
     """
@@ -39,11 +47,17 @@ class DAG(IO):
     def __init__(
         self,
         name: str,
-        inputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+        ] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
     ):
         self.name = validate_name(name)
-        self.inputs = inputs or []
+        self.inputs = [] if inputs is None else self._parse_inputs(inputs)
         self.outputs = outputs or []
         self.tasks: List["Task"] = []
 

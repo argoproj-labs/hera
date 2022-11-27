@@ -809,6 +809,17 @@ print(42)
 
         assert Task("t")._build_arguments() is None
 
+        args = Task("t", inputs={"a": 1, "b": "abc", "c": {"d": "test"}})._build_arguments()
+        assert isinstance(args, IoArgoprojWorkflowV1alpha1Arguments)
+        assert hasattr(args, "parameters")
+        assert len(args.parameters) == 3
+        assert args.parameters[0].name == "a"
+        assert args.parameters[0].value == json.dumps(1)
+        assert args.parameters[1].name == "b"
+        assert args.parameters[1].value == "abc"
+        assert args.parameters[2].name == "c"
+        assert args.parameters[2].value == json.dumps({"d": "test"})
+
         args = Task(
             "t",
             inputs=[
