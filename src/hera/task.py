@@ -282,9 +282,64 @@ class Task(IO):
             hook(self)
 
     @property
+    def id(self) -> str:
+        """Returns the field reference for the ID of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.id}}}}"
+
+    @property
     def ip(self) -> str:
-        """Returns the specifications for the IP property of the task"""
+        """Returns the field reference for the IP of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
         return f"{{{{tasks.{self.name}.ip}}}}"
+
+    @property
+    def status(self) -> str:
+        """Returns the field reference for the status of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.status}}}}"
+
+    @property
+    def exit_code(self) -> str:
+        """Returns the field reference for the exit code of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.exitCode}}}}"
+
+    @property
+    def started_at(self) -> str:
+        """Returns the field reference for the started time of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.startedAt}}}}"
+
+    @property
+    def finished_at(self) -> str:
+        """Returns the field reference for the finished time of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.finishedAt}}}}"
 
     def _get_dependency_tasks(self) -> List[str]:
         """Extract task names from `depends` string"""
