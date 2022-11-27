@@ -15,7 +15,6 @@ from argo_workflows.models import Volume as ArgoVolume
 from hera.artifact import Artifact
 from hera.io import IO
 from hera.parameter import Parameter
-
 from hera.validators import validate_name
 
 
