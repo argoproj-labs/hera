@@ -16,6 +16,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Metadata,
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
+    IoArgoprojWorkflowV1alpha1UserContainer,
     PersistentVolumeClaim,
 )
 from argo_workflows.models import Toleration as ArgoToleration
