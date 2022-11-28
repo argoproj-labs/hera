@@ -526,17 +526,29 @@ print(42)
 
     def test_task_adds_variable_as_env_var(self):
         t = Task("t")
-        t1 = Task("t1", "print(42)", env=[Env(name="IP", value_from_input=t.ip)])
+        t1 = Task(
+            "t1",
+            "print(42)",
+            env=[
+                Env(name="id", value_from_input=t.id),
+                Env(name="ip", value_from_input=t.ip),
+                Env(name="status", value_from_input=t.status),
+                Env(name="exit_code", value_from_input=t.exit_code),
+                Env(name="started_at", value_from_input=t.started_at),
+                Env(name="finished_at", value_from_input=t.finished_at),
+            ],
+        )
         t1s = t1._build_script()
 
-        expected_param_name = Env._sanitise_param_for_argo("IP")
-        assert t1s.env[0].name == "IP"
-        assert t1s.env[0].value == f"{{{{inputs.parameters.{expected_param_name}}}}}"
+        expected_param_name = Env._sanitise_param_for_argo("ip")
+        assert t1s.env[1].name == "ip"
+        assert t1s.env[1].value == f"{{{{inputs.parameters.{expected_param_name}}}}}"
 
         t1g = t1._build_arguments()
-        assert t1g
-        assert t1g.parameters[0].name == expected_param_name
-        assert t1g.parameters[0].value == "{{tasks.t.ip}}"
+        assert t1g is not None
+        assert len(t1g.parameters) == 6
+        assert t1g.parameters[1].name == expected_param_name
+        assert t1g.parameters[1].value == "{{tasks.t.ip}}"
 
     def test_task_adds_other_task_on_success(self):
         t = Task("t")
@@ -964,3 +976,12 @@ print(42)
         with pytest.raises(ValueError) as e:
             Task('t', source=no_op).on_exit(o)  # type: ignore
         assert str(e.value) == f"Unrecognized exit type {type(o)}, supported types are `Task` and `DAG`"
+
+    def test_task_properties(self):
+        t = Task('t')
+        assert t.id == "{{tasks.t.id}}"
+        assert t.ip == "{{tasks.t.ip}}"
+        assert t.status == "{{tasks.t.status}}"
+        assert t.exit_code == "{{tasks.t.exitCode}}"
+        assert t.started_at == "{{tasks.t.startedAt}}"
+        assert t.finished_at == "{{tasks.t.finishedAt}}"

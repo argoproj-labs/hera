@@ -282,9 +282,64 @@ class Task(IO):
             hook(self)
 
     @property
+    def id(self) -> str:
+        """Unique ID of container task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.id}}}}"
+
+    @property
     def ip(self) -> str:
-        """Returns the specifications for the IP property of the task"""
+        """IP address of the daemon container task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
         return f"{{{{tasks.{self.name}.ip}}}}"
+
+    @property
+    def status(self) -> str:
+        """Phase status of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.status}}}}"
+
+    @property
+    def exit_code(self) -> str:
+        """Exit code of script or container task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.exitCode}}}}"
+
+    @property
+    def started_at(self) -> str:
+        """Time-stamp when the task started.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.startedAt}}}}"
+
+    @property
+    def finished_at(self) -> str:
+        """Time-stamp when the task finished.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.finishedAt}}}}"
 
     def _get_dependency_tasks(self) -> List[str]:
         """Extract task names from `depends` string"""
