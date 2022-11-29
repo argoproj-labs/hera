@@ -1,6 +1,7 @@
-from argo_workflows.models import ContainerPort as ArgoContainerPort
-from typing import Optional
 from enum import Enum
+from typing import Optional
+
+from argo_workflows.models import ContainerPort as ArgoContainerPort
 
 
 class Protocol(Enum):

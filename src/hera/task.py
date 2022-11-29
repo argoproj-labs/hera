@@ -40,6 +40,7 @@ from hera.resources import Resources
 from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext
 from hera.sequence import Sequence
+from hera.sidecar import Sidecar
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
@@ -168,6 +169,8 @@ class Task(IO):
         start time. This duration also includes time in which the node spends in Pending state.
     metrics: Optional[Union[Metric, List[Metric], Metrics]] = None
         Any built-in/custom Prometheus metrics to track.
+    sidecars: Optional[List[Sidecar]] = None
+        List of sidecars to create for the main pods of the container that runs the task.
 
     Notes
     -----
@@ -210,6 +213,7 @@ class Task(IO):
         active_deadline_seconds: Optional[int] = None,
         timeout: Optional[str] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
+        sidecars: Optional[List[Sidecar]] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -246,6 +250,7 @@ class Task(IO):
                     "`Optional[Union[Metric, List[Metric], Metrics]]`"
                 )
 
+        self.sidecars = sidecars
         self.image = image or GlobalConfig.image
         self.image_pull_policy = image_pull_policy
         self.daemon = daemon
@@ -1028,6 +1033,9 @@ class Task(IO):
 
         if self.metrics is not None:
             setattr(template, "metrics", self.metrics.build())
+
+        if self.sidecars is not None:
+            setattr(template, "sidecars", [sc.build() for sc in self.sidecars])
 
         return template
 

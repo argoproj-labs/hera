@@ -1,13 +1,11 @@
 from enum import Enum
 from typing import List, Optional
 
-from argo_workflows.models import (
-    ExecAction as ArgoExecAction,
-    HTTPGetAction as ArgoHTTPGetAction,
-    TCPSocketAction as ArgoTCPSocketAction,
-    HTTPHeader as ArgoHTTPHeader,
-    GRPCAction as ArgoGRPCAction,
-)
+from argo_workflows.models import ExecAction as ArgoExecAction
+from argo_workflows.models import GRPCAction as ArgoGRPCAction
+from argo_workflows.models import HTTPGetAction as ArgoHTTPGetAction
+from argo_workflows.models import HTTPHeader as ArgoHTTPHeader
+from argo_workflows.models import TCPSocketAction as ArgoTCPSocketAction
 
 
 class Scheme(Enum):

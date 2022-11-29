@@ -1,8 +1,6 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1UserContainer,
-)
+from argo_workflows.models import IoArgoprojWorkflowV1alpha1UserContainer
 
 from hera.env import Env
 from hera.env_from import BaseEnvFrom
@@ -12,7 +10,7 @@ from hera.port import ContainerPort
 from hera.probe import Probe
 from hera.resources import Resources
 from hera.security_context import BaseSecurityContext
-from hera.volumes import VolumeMount, VolumeDevice
+from hera.volumes import VolumeDevice, VolumeMount
 
 
 class Sidecar:

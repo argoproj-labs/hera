@@ -1,9 +1,7 @@
 from typing import Optional
 
-from argo_workflows.models import (
-    Lifecycle as ArgoLifecycle,
-    LifecycleHandler as ArgoLifecycleHandler,
-)
+from argo_workflows.models import Lifecycle as ArgoLifecycle
+from argo_workflows.models import LifecycleHandler as ArgoLifecycleHandler
 
 from hera.action import ExecAction, HTTPGetAction, TCPSocketAction
 
