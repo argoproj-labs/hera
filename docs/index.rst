@@ -58,6 +58,9 @@ Welcome to Hera's documentation!
    examples/post_init_hooks
    examples/retry
    examples/secret_volume
+   examples/sidecar
+   examples/sidecar_dind
+   examples/sidecar_nginx
    examples/task_exit_handler
    examples/volume
    examples/with_sequence
