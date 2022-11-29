@@ -14,7 +14,8 @@ from argo_workflows.models import (
     SecretVolumeSource,
 )
 from argo_workflows.models import Volume as ArgoVolume
-from argo_workflows.models import VolumeMount
+from argo_workflows.models import VolumeMount as ArgoVolumeMount
+from argo_workflows.models import VolumeDevice as ArgoVolumeDevice
 
 from hera.validators import validate_storage_units
 
@@ -104,9 +105,9 @@ class _BaseVolume(_BaseVolumeKeyword, _BaseVolumePositional):
     def _build_claim_spec(self):
         return None
 
-    def _build_mount(self) -> VolumeMount:
+    def _build_mount(self) -> ArgoVolumeMount:
         """Constructs and returns an Argo volume mount representation for tasks"""
-        vm = VolumeMount(name=self.name, mount_path=self.mount_path)
+        vm = ArgoVolumeMount(name=self.name, mount_path=self.mount_path)
         if self.sub_path:
             setattr(vm, "sub_path", self.sub_path)
         return vm
@@ -115,6 +116,72 @@ class _BaseVolume(_BaseVolumeKeyword, _BaseVolumePositional):
 @dataclass
 class _Sized:
     size: str
+
+
+@dataclass
+class VolumeMount(_BaseVolume):
+    """A base representation of volume mount
+
+    Attributes
+    ----------
+    name: Optional[str]
+        The name of the volume. One will be generated if the name is not specified. It is recommended to not pass a
+        name to avoid any potential naming conflicts with existing empty dir volumes.
+    mount_path: str
+        The mounting point in the task e.g /mnt/my_path.
+    sub_path: str
+        Path within the volume from which the container's volume should be mounted.
+    mount_propagation: Optional[str] = None
+        Determines how mounts are propagated from the host to container and the other way around.
+    read_only: bool = False
+        Mounted read-only if true, read-write otherwise.
+    sub_path_expr: Optional[str] = ""
+        Expanded path within the volume from which the container's volume should be mounted. Behaves similarly to
+        `sub_path` but environment variable references $(VAR_NAME) are expanded using the container's
+        environment. Mutually exclusive with `sub_path`.
+    """
+
+    mount_propagation: Optional[str] = None
+    read_only: Optional[bool] = None
+    sub_path_expr: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.sub_path is not None and self.sub_path_expr is None:
+            raise ValueError("`sub_path` and `sub_path_expr` are mutually exclusive")
+        if self.sub_path_expr is not None and self.sub_path is None:
+            raise ValueError("`sub_path_expr` and `sub_path` are mutually exclusive")
+
+    def _build_mount(self) -> ArgoVolumeMount:
+        volume = ArgoVolumeMount(self.mount_path, self.name)
+        if self.mount_propagation is not None:
+            setattr(volume, "mount_propagation", self.mount_propagation)
+        if self.read_only is not None:
+            setattr(volume, "read_only", self.read_only)
+        if self.sub_path is not None:
+            setattr(volume, "sub_path", self.sub_path)
+        if self.sub_path_expr is not None:
+            setattr(volume, "sub_path_expr", self.sub_path_expr)
+        return volume
+
+
+@dataclass
+class VolumeDevice:
+    """Volume device representation.
+
+    Parameters
+    ----------
+    name: Optional[str] = None
+        Name of the persistent volume claim to map.
+    device_path: str
+        Path inside the container that the device will be mapped to.
+    """
+
+    def __int__(self, name: str, device_path: str) -> None:
+        self.name = name
+        self.device_path = device_path
+
+    def build(self) -> ArgoVolumeDevice:
+        return ArgoVolumeDevice(self.device_path, self.name)
 
 
 @dataclass
