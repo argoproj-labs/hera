@@ -41,6 +41,7 @@ from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext
 from hera.sequence import Sequence
 from hera.sidecar import Sidecar
+from hera.suspend import Suspend
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
@@ -171,6 +172,8 @@ class Task(IO):
         Any built-in/custom Prometheus metrics to track.
     sidecars: Optional[List[Sidecar]] = None
         List of sidecars to create for the main pods of the container that runs the task.
+    suspend: Optional[Suspend] = None
+        How long to suspend the task post execution.
 
     Notes
     -----
@@ -214,6 +217,7 @@ class Task(IO):
         timeout: Optional[str] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
         sidecars: Optional[List[Sidecar]] = None,
+        suspend: Optional[Suspend] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -251,6 +255,7 @@ class Task(IO):
                 )
 
         self.sidecars = sidecars
+        self.suspend = suspend
         self.image = image or GlobalConfig.image
         self.image_pull_policy = image_pull_policy
         self.daemon = daemon
@@ -1012,6 +1017,8 @@ class Task(IO):
             setattr(template, "script", self._build_script())
         elif self.resource_template is not None:
             setattr(template, "resource", self.resource_template.build())
+        elif self.suspend is not None:
+            setattr(template, "suspend", self.suspend.build())
         else:
             setattr(template, "container", self._build_container())
 
