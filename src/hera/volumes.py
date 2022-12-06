@@ -150,6 +150,8 @@ class VolumeMount(_BaseVolume):
             raise ValueError("`sub_path` and `sub_path_expr` are mutually exclusive")
         if self.sub_path_expr is not None and self.sub_path is None:
             raise ValueError("`sub_path_expr` and `sub_path` are mutually exclusive")
+        if self.name is None:
+            self.name = str(uuid.uuid4())
 
     def _build_mount(self) -> ArgoVolumeMount:
         volume = ArgoVolumeMount(self.mount_path, self.name)
@@ -176,7 +178,7 @@ class VolumeDevice:
         Path inside the container that the device will be mapped to.
     """
 
-    def __int__(self, name: str, device_path: str) -> None:
+    def __init__(self, name: str, device_path: str) -> None:
         self.name = name
         self.device_path = device_path
 

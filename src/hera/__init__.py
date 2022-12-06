@@ -80,6 +80,7 @@ from hera.volumes import (
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
+VolumeDevice,VolumeMount,
     SecretVolume,
     Volume,
 )

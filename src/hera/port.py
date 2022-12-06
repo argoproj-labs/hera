@@ -6,8 +6,8 @@ from argo_workflows.models import ContainerPort as ArgoContainerPort
 
 class Protocol(Enum):
     udp = "UDP"
-    tcp = "tcp"
-    sctp = "sctp"
+    tcp = "TCP"
+    sctp = "SCTP"
 
 
 class ContainerPort:

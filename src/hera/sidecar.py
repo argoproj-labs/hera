@@ -41,13 +41,13 @@ class Sidecar:
         an Env with a duplicate key will take precedence.
     image: Optional[str] = None
         Docker image name. More info: https://kubernetes.io/docs/concepts/containers/images
-    image_pull_policy: ImagePullPolicy = ImagePullPolicy.Always
+    image_pull_policy: Optional[ImagePullPolicy] = None
         Optional image pull policy. See `ImagePullPolicy`.
     lifecycle: Optional[Lifecycle] = None
         Optional lifecycle. See `Lifecycle`.
     liveness_probe: Optional[Probe] = None
         Optional liveness probe. See `Probe`.
-    mirror_volume_mounts: Optional[bool] = False
+    mirror_volume_mounts: Optional[bool] = None
         If True, will mount the same volumes specified in the main container to the container (including artifacts),
         at the same mountPaths. This enables dind daemon to partially see the same filesystem as the main container
         in order to use features such as docker volume binding.
@@ -74,12 +74,12 @@ class Sidecar:
         remains open and accepts data until the client disconnects, at which time stdin is closed and remains
         closed until the container is restarted. If this flag is false, a container processes that reads from stdin
         will never receive an EOF.
-    termination_message_path: Optional[str] = "/dev/termination-log"
+    termination_message_path: Optional[str] = None
         Path at which the file to which the container's termination message will be written is mounted into the
         container's filesystem. Message written is intended to be brief final status, such as an assertion failure
         message. Will be truncated by the node if greater than 4096 bytes. The total message length across all
         containers will be limited to 12kb.
-    termination_message_policy: Optional[str] = "File"
+    termination_message_policy: Optional[str] = None
         Indicate how the termination message should be populated. File will use the contents of terminationMessagePath
          to populate the container status message on both success and failure. FallbackToLogsOnError will use the
          last chunk of container log output if the termination message file is empty and the container exited with
@@ -103,20 +103,20 @@ class Sidecar:
         env: Optional[List[Env]] = None,
         env_from: Optional[List[BaseEnvFrom]] = None,
         image: Optional[str] = None,
-        image_pull_policy: ImagePullPolicy = ImagePullPolicy.Always,
+        image_pull_policy: Optional[ImagePullPolicy] = None,
         lifecycle: Optional[Lifecycle] = None,
         liveness_probe: Optional[Probe] = None,
-        mirror_volume_mounts: Optional[bool] = False,
+        mirror_volume_mounts: Optional[bool] = None,
         ports: Optional[List[ContainerPort]] = None,
         readiness_probe: Optional[Probe] = None,
         resources: Optional[Resources] = None,
         security_context: Optional[BaseSecurityContext] = None,
         startup_probe: Optional[Probe] = None,
-        stdin: bool = False,
-        stdin_once: bool = False,
-        termination_message_path: str = "/dev/termination-log",
-        termination_message_policy: Optional[str] = "File",
-        tty: bool = False,
+        stdin: Optional[bool] = None,
+        stdin_once: Optional[bool] = None,
+        termination_message_path: Optional[str] = None,
+        termination_message_policy: Optional[str] = None,
+        tty: Optional[bool] = None,
         volume_devices: Optional[List[VolumeDevice]] = None,
         volume_mounts: Optional[List[VolumeMount]] = None,
         working_dir: Optional[str] = None,
