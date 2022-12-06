@@ -1,0 +1,28 @@
+---
+name: PyPI publish
+# Publish once a maintainer clicks publish on a draft release
+on:
+  release:
+    types: [released]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install base dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry twine
+      - name: Bump version number
+        run: poetry version ${{ github.event.release.tag_name }}
+      - name: Build and publish
+        env:
+          PYPI_USERNAME: __token__
+          PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          poetry build
+          twine upload -u __token__ -p $PYPI_PASSWORD --skip-existing dist/* 
