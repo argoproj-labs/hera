@@ -1,7 +1,18 @@
-from hera.action import GRPCAction, HTTPGetAction, HTTPHeader, Scheme, TCPSocketAction, ExecAction
 import pytest
-from argo_workflows.models import GRPCAction as ArgoGRPCAction, ExecAction as ArgoExecAction, \
-    HTTPHeader as ArgoHTTPHeader, HTTPGetAction as ArgoHTTPGetAction, TCPSocketAction as ArgoTCPSocketAction
+
+from hera.action import (
+    ArgoExecAction,
+    ArgoGRPCAction,
+    ArgoHTTPGetAction,
+    ArgoHTTPHeader,
+    ArgoTCPSocketAction,
+    ExecAction,
+    GRPCAction,
+    HTTPGetAction,
+    HTTPHeader,
+    Scheme,
+    TCPSocketAction,
+)
 
 
 class TestAction:
@@ -51,8 +62,9 @@ class TestAction:
         assert not hasattr(a, "path")
         assert not hasattr(a, "scheme")
 
-        a = HTTPGetAction("443", host="abc", http_headers=[HTTPHeader("a", "1")], path="/test",
-                          scheme=Scheme.https).build()
+        a = HTTPGetAction(
+            "443", host="abc", http_headers=[HTTPHeader("a", "1")], path="/test", scheme=Scheme.https
+        ).build()
         assert isinstance(a, ArgoHTTPGetAction)
         assert hasattr(a, "port")
         assert hasattr(a, "host")

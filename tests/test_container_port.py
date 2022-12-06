@@ -1,9 +1,9 @@
-from hera.port import Protocol, ContainerPort, ArgoContainerPort
 import pytest
+
+from hera.port import ArgoContainerPort, ContainerPort, Protocol
 
 
 class TestPort:
-
     def test_protocol(self):
         assert len(Protocol) == 3
         assert Protocol.udp == "UDP"

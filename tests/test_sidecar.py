@@ -1,10 +1,22 @@
-from hera import Sidecar, Env, SecretEnvFrom, ImagePullPolicy, Lifecycle, Probe, ContainerPort, Resources, \
-    TaskSecurityContext, VolumeDevice, VolumeMount, LifecycleHandler
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1UserContainer
+
+from hera import (
+    ContainerPort,
+    Env,
+    ImagePullPolicy,
+    Lifecycle,
+    LifecycleHandler,
+    Probe,
+    Resources,
+    SecretEnvFrom,
+    Sidecar,
+    TaskSecurityContext,
+    VolumeDevice,
+    VolumeMount,
+)
 
 
 class TestSideCar:
-
     def test_builds_expected_container(self):
         s = Sidecar("test").build()
         assert isinstance(s, IoArgoprojWorkflowV1alpha1UserContainer)

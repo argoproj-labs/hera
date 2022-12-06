@@ -1,7 +1,9 @@
 from typing import Optional
 
+from argo_workflows.model.lifecycle_handler import (
+    LifecycleHandler as ArgoLifecycleHandler,
+)
 from argo_workflows.models import Lifecycle as ArgoLifecycle
-from argo_workflows.model.lifecycle_handler import LifecycleHandler as ArgoLifecycleHandler
 
 from hera.action import ExecAction, HTTPGetAction, TCPSocketAction
 
@@ -51,8 +53,9 @@ class Lifecycle:
         Post start lifecycle handler.
     """
 
-    def __init__(self, post_start: Optional[LifecycleHandler] = None,
-                 pre_stop: Optional[LifecycleHandler] = None) -> None:
+    def __init__(
+        self, post_start: Optional[LifecycleHandler] = None, pre_stop: Optional[LifecycleHandler] = None
+    ) -> None:
         self.post_start = post_start
         self.pre_stop = pre_stop
 
