@@ -98,9 +98,9 @@ class HTTPGetAction:
         scheme: Optional[Scheme] = None,
     ):
         self.port = port
-        self.host = host
-        self.http_headers = http_headers
-        self.path = path
+        self.host: Optional[str] = host  # some IDEs might complain about special forms, so setting an explicit type
+        self.http_headers: Optional[List[HTTPHeader]] = http_headers
+        self.path: Optional[str] = path
         self.scheme = scheme
 
     def build(self) -> ArgoHTTPGetAction:
@@ -108,11 +108,11 @@ class HTTPGetAction:
         if self.host is not None:
             setattr(action, "host", self.host)
         if self.http_headers is not None:
-            setattr(action, "http_headers", self.http_headers)
+            setattr(action, "http_headers", [h.build() for h in self.http_headers])
         if self.path is not None:
             setattr(action, "path", self.path)
         if self.scheme is not None:
-            setattr(action, "path", self.scheme.value)
+            setattr(action, "scheme", self.scheme.value)
         return action
 
 
@@ -121,7 +121,7 @@ class TCPSocketAction:
 
     Parameters
     ----------
-    port:str
+    port: str
         Port to target for the HTTP call.
     host: Optional[str] = None
         Host name to connect to, defaults to the pod IP.
@@ -133,6 +133,6 @@ class TCPSocketAction:
 
     def build(self) -> ArgoTCPSocketAction:
         action = ArgoTCPSocketAction(self.port)
-        if self.host is None:
+        if self.host is not None:
             setattr(action, "host", self.host)
         return action
