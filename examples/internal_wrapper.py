@@ -3,7 +3,7 @@ This example showcases how clients can simplify their workflow submission proces
 top of Hera to support consistency in submission across users, teams, etc.
 """
 
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 from hera import (
     ExistingVolume,
@@ -26,7 +26,7 @@ def generate_token() -> str:
 
 
 class MyWorkflowService(WorkflowService):
-    """Internal WorkflowService wrapper around Hera's WorkflowService to support consistency in auth token generation"""
+    """Internal service wrapper around Hera's WorkflowService to support consistency in auth token generation"""
 
     def __init__(self, host: str = "https://my-argo-domain.com", token: str = generate_token()):
         super(MyWorkflowService, self).__init__(host=host, token=token, namespace="my-default-k8s-namespace")

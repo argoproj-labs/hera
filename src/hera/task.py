@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 from argo_workflows.models import (
     Container,
@@ -23,9 +23,9 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
-from hera.dag import DAG
 from hera.affinity import Affinity
 from hera.artifact import Artifact
+from hera.dag import DAG
 from hera.env import Env
 from hera.env_from import BaseEnvFrom
 from hera.global_config import GlobalConfig
@@ -90,10 +90,16 @@ class Task(IO):
     with_sequence: Optional[Sequence] = None
         Sequence is similar to `with_param` in that it generates a range of objects. See `hera.sequence.Sequence` or
         https://argoproj.github.io/argo-workflows/fields/#sequence.
-    inputs: Optional[List[Union[Parameter, Artifact]]] = None
-        `Input` or `Parameter` objects that hold parameter inputs. Note that while `InputFrom` is an accepted input
-        parameter it cannot be used in conjunction with other types of inputs because of the dynamic aspect of the task
-        creation process when provided with an `InputFrom`.
+    inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+    ] = None,
+        `Input` or `Parameter` objects that hold parameter inputs. When a dictionary is specified all the key/value
+        pairs will be transformed into `Parameter`s. The `key` will be the `name` field of the `Parameter` while the
+        `value` will be the `value` field of the `Parameter.
     outputs: Optional[List[Union[Parameter, Artifact]]] = None
         `Output` objects that dictate the outputs of the task.
     dag: Optional[DAG] = None
@@ -176,7 +182,9 @@ class Task(IO):
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
         with_sequence: Optional[Sequence] = None,
-        inputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        inputs: Optional[
+            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
+        ] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional[DAG] = None,
         image: Optional[str] = None,
@@ -214,7 +222,7 @@ class Task(IO):
         self.source = source
         self.memoize = memoize
         self.volumes = volumes or []
-        self.inputs = inputs or []
+        self.inputs = [] if inputs is None else self._parse_inputs(inputs)
         self.outputs = outputs or []
         self.env = env or []
         self.with_param = with_param
@@ -261,6 +269,10 @@ class Task(IO):
         self.when: Optional[str] = None
 
         self.validate()
+
+        # here we cast for otherwise `mypy` complains that Hera adds an incompatible type with a dictionary, which is
+        # an acceptable type for the `inputs` field upon `init`
+        self.inputs = cast(List[Union[Parameter, Artifact]], self.inputs)
         self.inputs += self._deduce_input_params()
 
         if hera.dag_context.is_set():
@@ -270,9 +282,64 @@ class Task(IO):
             hook(self)
 
     @property
+    def id(self) -> str:
+        """Unique ID of container task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.id}}}}"
+
+    @property
     def ip(self) -> str:
-        """Returns the specifications for the IP property of the task"""
+        """IP address of the daemon container task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
         return f"{{{{tasks.{self.name}.ip}}}}"
+
+    @property
+    def status(self) -> str:
+        """Phase status of the task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.status}}}}"
+
+    @property
+    def exit_code(self) -> str:
+        """Exit code of script or container task.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.exitCode}}}}"
+
+    @property
+    def started_at(self) -> str:
+        """Time-stamp when the task started.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.startedAt}}}}"
+
+    @property
+    def finished_at(self) -> str:
+        """Time-stamp when the task finished.
+
+        See Also
+        --------
+        https://argoproj.github.io/argo-workflows/variables/#dag-templates
+        """
+        return f"{{{{tasks.{self.name}.finishedAt}}}}"
 
     def _get_dependency_tasks(self) -> List[str]:
         """Extract task names from `depends` string"""
@@ -713,6 +780,7 @@ class Task(IO):
 
         if self.dag:
             if self.dag.inputs:
+                self.dag.inputs = cast(List[Union[Parameter, Artifact]], self.dag.inputs)
                 if len(self.dag.inputs) == 1:
                     deduced_params.append(Parameter(name=self.dag.inputs[0].name, value="{{item}}"))
                 else:

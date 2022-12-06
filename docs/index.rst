@@ -54,6 +54,7 @@ Welcome to Hera's documentation!
    examples/multiple_dependencies
    examples/parallel_dag
    examples/parallel_diamonds
+   examples/parameters
    examples/post_init_hooks
    examples/retry
    examples/secret_volume

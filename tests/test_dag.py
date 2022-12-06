@@ -105,7 +105,7 @@ class TestDAG:
     def test_build(self):
         dag = DAG(
             "test",
-            inputs=[Parameter("p1"), Artifact("a1", "/a1")],
+            inputs=[Parameter("p1"), Artifact("a1", "/a1"), {"a": 1, "b": 2}],
             outputs=[Parameter("p2", value="p2"), Artifact("a2", "/a2")],
         )
         templates = dag.build()
@@ -161,3 +161,8 @@ class TestDAG:
 
         dag = DAG("test").add_task(Task('t'))
         assert len(dag.tasks) == 1
+
+    def test_parses_inputs_as_expected(self):
+        d = DAG("d", inputs={"a": 1, "b": 2})
+        assert len(d.inputs) == 2
+        assert all([isinstance(i, Parameter) for i in d.inputs])

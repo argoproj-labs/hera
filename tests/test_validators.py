@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from hera.validators import json_serializable, validate_name, validate_storage_units
+from hera.validators import validate_name, validate_storage_units
 
 
 def test_validate_name():
@@ -38,21 +38,3 @@ def test_storage_validation_raises_assertion_error_on_unit_not_supported():
     with pytest.raises(AssertionError) as e:
         validate_storage_units(val)
     assert str(e.value) == f"unsupported unit for parsed value {val}"
-
-
-def test_json_serializable():
-    assert json_serializable(None)
-
-    with mock.patch("json.dumps") as dumps:
-        dumps.side_effect = TypeError
-        assert not json_serializable(42)
-        dumps.assert_called_with(42)
-
-    with mock.patch("json.dumps") as dumps:
-        dumps.side_effect = OverflowError
-        assert not json_serializable(42)
-        dumps.assert_called_with(42)
-
-    with mock.patch("json.dumps") as dumps:
-        assert json_serializable(42)
-        dumps.assert_called_with(42)

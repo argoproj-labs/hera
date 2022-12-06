@@ -1,6 +1,7 @@
 """This example showcases how to string together complex expressions.
 
-This example is a python replica of https://github.com/argoproj/argo-workflows/blob/master/examples/expression-reusing-verbose-snippets.yaml
+This example is a python replica of
+https://github.com/argoproj/argo-workflows/blob/master/examples/expression-reusing-verbose-snippets.yaml
 """
 import base64
 import json
