@@ -37,6 +37,15 @@ class TestArtifact:
         assert not hasattr(argument, "_from")
         assert not hasattr(argument, "sub_path")
 
+    def test_as_output_returns_expected_artifact(self):
+        artifact = Artifact("a", path="/a", archive=Archive(disable_compression=True))
+        argument = artifact.as_output()
+        assert isinstance(argument, IoArgoprojWorkflowV1alpha1Artifact)
+        assert argument.name == "a"
+        assert hasattr(argument, "archive")
+        assert isinstance(argument.archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
+        assert hasattr(argument.archive, "none")
+
     def test_output_artifact_contains_expected_fields(self):
         name = "test-artifact"
         path = "/input/path"
