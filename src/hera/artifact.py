@@ -5,6 +5,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
+    IoArgoprojWorkflowV1alpha1RawArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
     SecretKeySelector,
 )
@@ -287,6 +288,36 @@ class HttpArtifact(Artifact):
             name=self.name,
             path=self.path,
             http=IoArgoprojWorkflowV1alpha1HTTPArtifact(url=self.url),
+        )
+
+    def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an input to a task"""
+        return self.as_argument()
+
+
+class RawArtifact(Artifact):
+    """This artifact allows raw string content to be placed as an artifact in a container.
+
+    Parameters
+    ----------
+    name: str
+        The name of the artifact.
+    path: str
+        The container path to the artifact.
+    data: str
+        The string contents of the artifact.
+    """
+
+    def __init__(self, name: str, path: str, data: str) -> None:
+        self.data = data
+        super(RawArtifact, self).__init__(name, path)
+
+    def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an argument of a task"""
+        return IoArgoprojWorkflowV1alpha1Artifact(
+            name=self.name,
+            path=self.path,
+            raw=IoArgoprojWorkflowV1alpha1RawArtifact(data=self.data),
         )
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
