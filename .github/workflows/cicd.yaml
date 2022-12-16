@@ -128,3 +128,6 @@ jobs:
           directory: .tox/
           fail_ci_if_error: true
         if: ${{ always() }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true

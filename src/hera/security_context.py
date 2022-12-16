@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass, field
 from typing import List, Optional
 
+from argo_workflows.model_utils import ModelNormal
 from argo_workflows.models import Capabilities, PodSecurityContext, SecurityContext
 
 
@@ -31,6 +32,9 @@ class BaseSecurityContext:
         settable_attributes = {k: v for k, v in attributes.items() if v is not None}
         return settable_attributes
 
+    def build(self) -> ModelNormal:
+        raise NotImplementedError()
+
 
 @dataclass
 class WorkflowSecurityContext(BaseSecurityContext):
@@ -57,6 +61,10 @@ class WorkflowSecurityContext(BaseSecurityContext):
         settable_attributes = self._get_settable_attributes_as_kwargs()
         security_context = PodSecurityContext(**settable_attributes)
         return security_context
+
+    def build(self) -> PodSecurityContext:
+        """Wrapper around legacy `get_security_context`"""
+        return self.get_security_context()
 
 
 @dataclass
