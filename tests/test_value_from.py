@@ -37,7 +37,7 @@ class TestValueFrom:
         for field_to_test in fields_to_test:
             if field_to_test == "supplied":
                 vf = ValueFrom(supplied=True).build()
-                assert vf.get(field_to_test) == "{}"
+                assert vf.get(field_to_test)
                 assert isinstance(vf, IoArgoprojWorkflowV1alpha1ValueFrom)
                 assert not hasattr(vf, "config_map_key_ref")
                 assert hasattr(vf, field_to_test)
