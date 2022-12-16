@@ -5,6 +5,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
+    IoArgoprojWorkflowV1alpha1RawArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
     SecretKeySelector,
 )
@@ -28,13 +29,23 @@ class Artifact:
         respective volume.
     from_task: Optional[str] = None
         The name of the task that generates the artifact.
+    archive: Optional[Archive] = None
+        The archive to use for the artifact.
     """
 
-    def __init__(self, name: str, path: str, from_task: Optional[str] = None, sub_path: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        path: str,
+        from_task: Optional[str] = None,
+        sub_path: Optional[str] = None,
+        archive: Optional[Archive] = None,
+    ) -> None:
         self.name = name
         self.path = path
         self.from_task = from_task
         self.sub_path = sub_path
+        self.archive = archive
 
     def as_name(self, name: str):
         """Changes the name of the artifact."""
@@ -62,7 +73,10 @@ class Artifact:
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Artifact:
         """Assembles the artifact specifications for use as an output of a task"""
-        return IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
+        artifact = IoArgoprojWorkflowV1alpha1Artifact(name=self.name, path=self.path)
+        if self.archive is not None:
+            setattr(artifact, "archive", self.archive.build())
+        return artifact
 
     @property
     def contains_item(self) -> bool:
@@ -101,8 +115,7 @@ class BucketArtifact(Artifact):
     def __init__(self, name: str, path: str, bucket: str, key: str, archive: Optional[Archive] = None) -> None:
         self.bucket = bucket
         self.key = key
-        self.archive = archive
-        super(BucketArtifact, self).__init__(name, path)
+        super(BucketArtifact, self).__init__(name, path, archive=archive)
 
 
 class S3Artifact(BucketArtifact):
@@ -287,6 +300,36 @@ class HttpArtifact(Artifact):
             name=self.name,
             path=self.path,
             http=IoArgoprojWorkflowV1alpha1HTTPArtifact(url=self.url),
+        )
+
+    def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an input to a task"""
+        return self.as_argument()
+
+
+class RawArtifact(Artifact):
+    """This artifact allows raw string content to be placed as an artifact in a container.
+
+    Parameters
+    ----------
+    name: str
+        The name of the artifact.
+    path: str
+        The container path to the artifact.
+    data: str
+        The string contents of the artifact.
+    """
+
+    def __init__(self, name: str, path: str, data: str) -> None:
+        self.data = data
+        super(RawArtifact, self).__init__(name, path)
+
+    def as_argument(self) -> IoArgoprojWorkflowV1alpha1Artifact:
+        """Assembles the artifact for use as an argument of a task"""
+        return IoArgoprojWorkflowV1alpha1Artifact(
+            name=self.name,
+            path=self.path,
+            raw=IoArgoprojWorkflowV1alpha1RawArtifact(data=self.data),
         )
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Artifact:

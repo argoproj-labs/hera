@@ -12,7 +12,7 @@ class Probe:
     ----------
     """
 
-    def __int__(
+    def __init__(
         self,
         _exec: Optional[ExecAction] = None,
         failure_threshold: Optional[int] = None,

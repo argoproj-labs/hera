@@ -4,6 +4,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1GCSArtifact,
     IoArgoprojWorkflowV1alpha1GitArtifact,
     IoArgoprojWorkflowV1alpha1HTTPArtifact,
+    IoArgoprojWorkflowV1alpha1RawArtifact,
     IoArgoprojWorkflowV1alpha1S3Artifact,
     SecretKeySelector,
 )
@@ -14,6 +15,7 @@ from hera import (
     GCSArtifact,
     GitArtifact,
     HttpArtifact,
+    RawArtifact,
     S3Artifact,
     Task,
 )
@@ -36,6 +38,15 @@ class TestArtifact:
         assert argument.name == "a"
         assert not hasattr(argument, "_from")
         assert not hasattr(argument, "sub_path")
+
+    def test_as_output_returns_expected_artifact(self):
+        artifact = Artifact("a", path="/a", archive=Archive(disable_compression=True))
+        argument = artifact.as_output()
+        assert isinstance(argument, IoArgoprojWorkflowV1alpha1Artifact)
+        assert argument.name == "a"
+        assert hasattr(argument, "archive")
+        assert isinstance(argument.archive, IoArgoprojWorkflowV1alpha1ArchiveStrategy)
+        assert hasattr(argument.archive, "none")
 
     def test_output_artifact_contains_expected_fields(self):
         name = "test-artifact"
@@ -274,3 +285,19 @@ class TestHTTPArtifact:
 
         assert actual == expected
         assert actual_input == expected
+
+
+class TestRawArtifact:
+    def test_as_input_returns_expected_artifact(self):
+        name = "toupie"
+        path = "/abc"
+        data = "foobar"
+        raw = IoArgoprojWorkflowV1alpha1RawArtifact(data=data)
+        artifact = RawArtifact(name, path=path, data=data)
+        input = artifact.as_input()
+        assert isinstance(input, IoArgoprojWorkflowV1alpha1Artifact)
+        assert input.name == name
+        assert hasattr(input, "path")
+        assert input.path == path
+        assert hasattr(input, "raw")
+        assert input.raw == raw
