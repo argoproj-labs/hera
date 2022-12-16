@@ -29,6 +29,27 @@ The general format is:
 
 ```
 
+# 4.3.0 - DATE (16/12/2022)
+
+### Added
+
+- support for global hooks on task and workflow
+- support for unset parameters so Hera can be used in a GitOps style
+- better Workflow typing for inheritance
+- exit DAGs on workflows and tasks
+- mapping Python source specs via dictionaries on inputs
+- all accessible task properties
+- sidecars
+- suspend
+- artifact compression
+- raw artifact
+- PyYAML kwargs on `to_yaml`
+- supplied option on value from and parameter feature parity
+
+### Changed
+
+- workflow link from service when using the global host
+
 # 4.2.0 - DATE (31/10/2022)
 
 ### Added
