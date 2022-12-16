@@ -1,8 +1,8 @@
-# Dynamic fanout with containers
+# Dynamic Fanout Container
 
 This example showcases how clients can use Hera to dynamically generate tasks that process outputs from one task in
-parallel. Differ from dynamic_fanout.py, this example uses a container to generate the tasks and the dynamically created
-tasks are also container only.
+parallel. Differ from dynamic_fanout.py, this example uses a container to generate the tasks and the dynamically
+created tasks are also container only.
 More details can be found here: https://github.com/argoproj-labs/hera-workflows/issues/250
 
 ```python

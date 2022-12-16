@@ -1,9 +1,8 @@
 # Hello Hera
 
-This example showcases the hello world example of Hera.
+This example showcases the hello world example of Hera
 
 ```python
-
 from hera import Task, Workflow
 
 
@@ -16,5 +15,4 @@ with Workflow("hello-hera") as w:
     Task("t", hello)
 
 w.create()
-
 ```

@@ -1,4 +1,4 @@
-# Parallel diamonds
+# Parallel Diamonds
 
 This example showcases how one can schedule a diamond structure with parallel processing through Hera
 
@@ -35,5 +35,4 @@ with Workflow("parallel-diamonds") as w:
     )
 
 w.create()
-
 ```

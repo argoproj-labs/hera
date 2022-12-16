@@ -1,4 +1,6 @@
-# Workflow with template ref
+# Workflow With Template Ref
+
+
 
 ```python
 from hera import Task, TemplateRef, Workflow
@@ -8,5 +10,4 @@ with Workflow("workflow-with-template-ref") as w:
     Task("coin-flip", template_ref=TemplateRef(name="hera-workflow-templates", template="coin-flip"))
 
 w.create()
-
 ```

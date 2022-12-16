@@ -30,5 +30,4 @@ with Workflow(
     Task("do", do, volumes=[Volume(size="50Gi", mount_path="/vol")])
 
 w.create()
-
 ```

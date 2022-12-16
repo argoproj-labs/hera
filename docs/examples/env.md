@@ -1,4 +1,4 @@
-# Dynamic environment variables
+# Env
 
 This example showcases how Hera can dynamically set environmental variables
 

@@ -1,4 +1,4 @@
-# Dynamic fanout and fanin with artifacts
+# Dynamic Fanout Fanin Artifacts
 
 Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd
 

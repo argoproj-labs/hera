@@ -1,7 +1,7 @@
-# Enablement of https://argoproj.github.io/argo-workflows/variables/
-# This example creates two tasks, one of the Tasks is a deamond task and its IP address is shared with the second task
-# The daemoned task operates as server, serving an example payload, with the second task operating as a client, making
-# http requests to the server
+"""Enablement of https://argoproj.github.io/argo-workflows/variables/
+This example creates two tasks, one of the Tasks is a deamond task and its IP address is shared with the second task
+The daemoned task operates as server, serving an example payload, with the second task operating as a client, making
+http requests to the server."""
 
 from hera import Env, Task, Workflow
 

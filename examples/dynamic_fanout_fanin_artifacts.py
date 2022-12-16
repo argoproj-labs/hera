@@ -1,4 +1,4 @@
-# Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd
+"""Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd"""
 from hera import Archive, GCSArtifact, Task, Workflow
 
 

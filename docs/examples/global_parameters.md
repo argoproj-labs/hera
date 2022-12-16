@@ -1,4 +1,6 @@
-# Global parameters
+# Global Parameters
+
+
 
 ```python
 from hera import Parameter, Task, Workflow
@@ -12,5 +14,4 @@ with Workflow("global-parameters", parameters=[Parameter("v", "42")]) as w:
     Task("t", foo, inputs=[w.get_parameter("v")])
 
 w.create()
-
 ```

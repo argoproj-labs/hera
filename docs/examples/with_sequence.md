@@ -1,4 +1,4 @@
-# With sequence
+# With Sequence
 
 This example showcases how to generate and parallelize generated sequences
 
@@ -23,5 +23,4 @@ with Workflow("with-sequence-example") as w:
     t1 >> [t2, t3]
 
 w.create()
-
 ```

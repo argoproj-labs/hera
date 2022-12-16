@@ -1,6 +1,6 @@
-# K8S service account token
+# K8S Sa
 
-This example showcases the hello world example of Hera using kubernetes user token.
+This example showcases the hello world example of Hera using kubernetes user token
 
 ```python
 import base64

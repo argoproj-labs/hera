@@ -1,9 +1,9 @@
-# Linting
+# Lint
 
-This example showcases how to lint workflows supported by Hera.
+This example showcases how to lint workflows supported by Hera
 
 ```python
-from hera import CronWorkflow, Workflow, WorkflowTemplate, Task
+from hera import CronWorkflow, Task, Workflow, WorkflowTemplate
 
 
 def say(msg: str) -> None:

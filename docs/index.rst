@@ -18,60 +18,11 @@ Welcome to Hera's documentation!
    expr
 
 .. toctree::
+   :glob:
    :maxdepth: 2
    :caption: Examples
 
-   examples/any_success_all_fail
-   examples/artifact
-   examples/artifact_with_fanout
-   examples/coinflip
-   examples/complex_expr
-   examples/conditional
-   examples/container
-   examples/custom_script
-   examples/daemon
-   examples/default_param_overwrite
-   examples/diamond
-   examples/dynamic_fanout
-   examples/dynamic_fanout_container
-   examples/dynamic_fanout_fanin
-   examples/dynamic_fanout_fanin_artifacts
-   examples/env
-   examples/existing_volume
-   examples/gitops
-   examples/global_host
-   examples/global_parameters
-   examples/gpu
-   examples/hello_hera
-   examples/hello_hera_cron
-   examples/input_output
-   examples/internal_wrapper
-   examples/k8s_sa
-   examples/linear
-   examples/lint
-   examples/memoize
-   examples/metrics
-   examples/multiple_dependencies
-   examples/parallel_dag
-   examples/parallel_diamonds
-   examples/parameters
-   examples/post_init_hooks
-   examples/retry
-   examples/secret_volume
-   examples/sidecar
-   examples/sidecar_dind
-   examples/sidecar_nginx
-   examples/suspend
-   examples/task_exit_handler
-   examples/volume
-   examples/with_sequence
-   examples/workflow_on_exit
-   examples/workflow_template
-   examples/workflow_template_global_parameter
-   examples/workflow_with_custom_image
-   examples/workflow_with_template_ref
-
-
+   examples/*
 
 Indices and tables
 ==================

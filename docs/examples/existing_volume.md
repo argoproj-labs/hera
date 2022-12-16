@@ -1,4 +1,4 @@
-# Existing volume
+# Existing Volume
 
 This example showcases how Hera supports mounting existing volumes. These volumes are expected to already be
 provisioned and available as a persistent volume claim in the K8S cluster where Argo runs.
@@ -22,5 +22,4 @@ with Workflow("existing-volume") as w:
     )
 
 w.create()
-
 ```

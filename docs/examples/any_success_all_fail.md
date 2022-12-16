@@ -1,4 +1,6 @@
-# Any success all fail
+# Any Success All Fail
+
+
 
 ```python
 from hera import Task, Workflow
@@ -30,5 +32,4 @@ with Workflow("any-success-all-fail") as w:
     t2.when_all_failed(t3)
 
 w.create()
-
 ```

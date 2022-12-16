@@ -1,6 +1,6 @@
 # Hello Hera Cron
 
-This example showcases the cron hello world example of Hera.
+This example showcases the cron hello world example of Hera
 
 ```python
 from hera import CronWorkflow, Task

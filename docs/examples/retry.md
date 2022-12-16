@@ -21,5 +21,4 @@ with Workflow("retry") as w:
     Task("fail", random_fail, retry_strategy=RetryStrategy(backoff=Backoff(duration="5", max_duration="60")))
 
 w.create()
-
 ```
