@@ -61,6 +61,7 @@ Welcome to Hera's documentation!
    examples/sidecar
    examples/sidecar_dind
    examples/sidecar_nginx
+   examples/suspend
    examples/task_exit_handler
    examples/volume
    examples/with_sequence

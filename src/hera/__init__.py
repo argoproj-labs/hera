@@ -76,6 +76,7 @@ from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext, WorkflowSecurityContext
 from hera.sequence import Sequence
 from hera.sidecar import Sidecar
+from hera.suspend import Suspend
 from hera.task import Task, TaskResult
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration, Toleration
