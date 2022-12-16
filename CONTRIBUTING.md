@@ -14,7 +14,7 @@ Please keep in mind the following guidelines and practices when contributing to 
    No questions asked
 1. Use `tox` to lint, run tests, and typecheck on the project
 1. Add unit tests for any new code you write
-1. Add an example, or extend an existing example, with any new features you may add
+1. Add an example, or extend an existing example, with any new features you may add. Use `tox -e generate-examples` to ensure that the documentation and examples are in sync.
 1. Increment the version of Hera. Hera adheres to [semantic versioning](https://semver.org/). This increment can be
    performed in the [pyproject.toml](https://github.com/argoproj-labs/hera-workflows/blob/main/pyproject.toml) file. A
    [CHANGELOG](https://github.com/argoproj-labs/hera-workflows/blob/main/CHANGELOG.md) entry is expected along with
