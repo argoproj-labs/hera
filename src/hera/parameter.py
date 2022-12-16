@@ -1,6 +1,6 @@
 """Holds input model specifications"""
 import json
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Parameter,
@@ -27,6 +27,13 @@ class Parameter:
     value_from: Optional[ValueFrom] = None
         Describes a location in which to obtain the value to a parameter. See `hera.value_from.ValueFrom` or
         https://argoproj.github.io/argo-workflows/fields/#valuefrom.
+    description: Optional[str] = None
+        An optional parameter description.
+    enum: Optional[List[str]] = None
+        Holds a list of string values to choose from, for the actual value of the parameter.
+    global_name: Optional[str] = None
+        Exports an output parameter to the global scope, making it available as
+        '{{workflow.outputs.parameters.XXXX}} and in workflow.status.outputs.parameters.
     """
 
     def __init__(
@@ -35,6 +42,9 @@ class Parameter:
         value: Optional[Any] = None,
         default: Optional[str] = None,
         value_from: Optional[ValueFrom] = None,
+        description: Optional[str] = None,
+        enum: Optional[List[str]] = None,
+        global_name: Optional[str] = None,
     ) -> None:
         if value is not None and value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
@@ -45,6 +55,9 @@ class Parameter:
             self.value = json.dumps(value)  # None serialized as `null`
         self.default = str(default) if default is not None else None
         self.value_from = value_from
+        self.description = description
+        self.enum = enum
+        self.global_name = global_name
 
     def as_name(self, name: str) -> "Parameter":
         """Changes the name of the parameter."""
@@ -56,9 +69,12 @@ class Parameter:
         if self.value is None and self.value_from is None and self.default:
             # Argument not necessary as default is set for the input.
             return None
-        parameter = IoArgoprojWorkflowV1alpha1Parameter(
-            name=self.name,
-        )
+        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
+        if self.global_name is not None:
+            setattr(parameter, "global_name", self.global_name)
+        if self.description is not None:
+            setattr(parameter, "description", self.description)
+
         if self.value is not None:
             setattr(parameter, "value", self.value)
         elif self.value_from is not None:
@@ -70,17 +86,28 @@ class Parameter:
         parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
         if self.default:
             setattr(parameter, "default", self.default)
+        if self.description is not None:
+            setattr(parameter, "description", self.description)
         return parameter
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         """Assembles the parameter for use as an output of a task"""
+        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
         if self.value_from:
-            return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value_from=self.value_from.build())
+            setattr(parameter, "value_from", self.value_from.build())
         else:
             argo_value_from = IoArgoprojWorkflowV1alpha1ValueFrom(parameter=self.value)
             if self.default:
                 setattr(argo_value_from, "default", self.default)
-            return IoArgoprojWorkflowV1alpha1Parameter(name=self.name, value_from=argo_value_from)
+            setattr(parameter, "value_from", argo_value_from)
+
+        if self.global_name is not None:
+            setattr(parameter, "global_name", self.global_name)
+        if self.description is not None:
+            setattr(parameter, "description", self.description)
+        if self.enum is not None:
+            setattr(parameter, "enum", self.enum)
+        return parameter
 
     def __str__(self):
         """Represent the parameter as a string by pointing to its value.

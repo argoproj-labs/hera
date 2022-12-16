@@ -32,6 +32,8 @@ class ValueFrom:
         `dag.get_parameter(...)`, and `workflow.get_parameter(...)`.
     path: Optional[str] = None
         Path in the container to retrieve an output parameter value from in container templates.
+    supplied: Optional[bool] = None
+        Whether the value will be filled via CLI, API, UI, etc.
 
     Notes
     -----
@@ -46,6 +48,7 @@ class ValueFrom:
     json_path: Optional[str] = None
     parameter: Optional[str] = None
     path: Optional[str] = None
+    supplied: Optional[bool] = None
 
     def __post_init__(self):
         fields = vars(self)
@@ -70,4 +73,6 @@ class ValueFrom:
             setattr(value_from, "parameter", self.parameter)
         if self.path is not None:
             setattr(value_from, "path", self.path)
+        if self.supplied is not None:
+            setattr(value_from, "supplied", "{}")  # placeholder, actual value comes from API, CLI, UI, etc.
         return value_from
