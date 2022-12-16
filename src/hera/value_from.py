@@ -48,7 +48,7 @@ class ValueFrom:
     json_path: Optional[str] = None
     parameter: Optional[str] = None
     path: Optional[str] = None
-    supplied: Optional[bool] = None
+    supplied: bool = False
 
     def __post_init__(self):
         fields = vars(self)
