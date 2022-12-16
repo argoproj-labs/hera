@@ -15,7 +15,7 @@ class WorkflowStatus(str, Enum):
 
     @classmethod
     def from_argo_status(cls, s: str) -> "WorkflowStatus":
-        """Turns an Argo status into a Dyno workflows representation"""
+        """Turns an Argo status into a Hera workflow status representation"""
         switch = {
             "Running": WorkflowStatus.Running,
             "Succeeded": WorkflowStatus.Succeeded,
