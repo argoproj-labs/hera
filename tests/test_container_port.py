@@ -6,9 +6,9 @@ from hera.port import ArgoContainerPort, ContainerPort, Protocol
 class TestPort:
     def test_protocol(self):
         assert len(Protocol) == 3
-        assert Protocol.udp == "UDP"
-        assert Protocol.tcp == "TCP"
-        assert Protocol.sctp == "SCTP"
+        assert Protocol.udp.value == "UDP"
+        assert Protocol.tcp.value == "TCP"
+        assert Protocol.sctp.value == "SCTP"
 
     def test_container_port(self):
         with pytest.raises(AssertionError) as e:
