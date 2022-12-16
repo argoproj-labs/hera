@@ -152,3 +152,6 @@ jobs:
         run: |
           poetry build
           twine upload -u __token__ -p $PYPI_PASSWORD --skip-existing dist/* 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
