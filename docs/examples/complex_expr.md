@@ -1,9 +1,9 @@
-# Complex expr
+# Complex Expr
 
 This example showcases how to string together complex expressions.
 
-This example is a Python replica of [expression-reusing-verbose-snippets](https://github.com/argoproj/argo-workflows/blob/master/examples/expression-reusing-verbose-snippets.yaml) from [Argo Workflows examples](https://github.com/argoproj/argo-workflows/tree/master/examples).
-
+This example is a python replica of
+https://github.com/argoproj/argo-workflows/blob/master/examples/expression-reusing-verbose-snippets.yaml
 
 ```python
 import base64
@@ -54,5 +54,5 @@ with Workflow("expression-reusing-verbose-snippets-", generate_name=True) as w:
         image="debian:9.4",
     )
 
-w.create()
+print(w.to_yaml())
 ```

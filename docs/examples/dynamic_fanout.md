@@ -1,4 +1,4 @@
-# Dynamic fanout
+# Dynamic Fanout
 
 This example showcases how clients can use Hera to dynamically generate tasks that process outputs from one task in
 parallel. This is useful for batch jobs and instances where clients do not know ahead of time how many tasks/entities

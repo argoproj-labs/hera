@@ -1,4 +1,4 @@
-# Workflow with custom image
+# Workflow With Custom Image
 
 This example showcases how to run a container, rather than a Python, function, as the payload of a task in Hera
 

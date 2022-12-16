@@ -1,7 +1,7 @@
 # Diamond
 
-This example showcases the classic diamond workflow that is used as an example by Argo documentation and other
-libraries.
+This example showcases the classic diamond workflow that is used as an example by Argo documentation and
+other libraries.
 
 ```python
 from hera import Task, Workflow

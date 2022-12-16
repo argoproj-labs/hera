@@ -1,6 +1,6 @@
-# Global host
+# Global Host
 
-This example showcases how to set an Argo Workflows host and token at a global level.
+This example showcases how to set an Argo Workflows host and token at a global level
 
 ```python
 from hera import Task, Workflow, set_global_host, set_global_token

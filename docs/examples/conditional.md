@@ -1,6 +1,6 @@
 # Conditional
 
-This example showcases conditional execution on success, failure, and error.
+This example showcases conditional execution on success, failure, and error
 
 ```python
 from hera import Task, Workflow

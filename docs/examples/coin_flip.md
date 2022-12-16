@@ -1,9 +1,9 @@
-# Workflow Template
+# Coin Flip
 
 This example showcases the classic conditional workflow coin-flip.
 
 ```python
-from hera import Task, WorkflowTemplate
+from hera import Task, Workflow
 
 
 def random_code():
@@ -21,10 +21,14 @@ def tails():
     print("it was tails")
 
 
-with WorkflowTemplate("hera-workflow-templates", dag_name="coin-flip") as w:
+# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
+with Workflow("coin-flip") as w:
     r = Task("r", random_code)
-    Task("h", heads).on_other_result(r, "heads")
-    Task("t", tails).on_other_result(r, "tails")
+    h = Task("h", heads)
+    t = Task("t", tails)
+
+    h.on_other_result(r, "heads")
+    t.on_other_result(r, "tails")
 
 w.create()
 ```

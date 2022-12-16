@@ -3,7 +3,7 @@
 This example showcases how one can set parameters on Hera tasks
 
 ```python
-from hera import Task, Workflow, set_global_host, set_global_token
+from hera import Task, Workflow
 
 
 def hello(a: str, b: int, c: dict):

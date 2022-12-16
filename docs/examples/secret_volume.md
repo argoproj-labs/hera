@@ -1,4 +1,4 @@
-# Secret volume
+# Secret Volume
 
 This example showcases how clients can mount secrets inside a task
 
@@ -20,5 +20,4 @@ with Workflow("secret-volume") as w:
     Task("use_secret", use_secret, volumes=[SecretVolume(secret_name="secret-file", mount_path="/secret/")])
 
 w.create()
-
 ```

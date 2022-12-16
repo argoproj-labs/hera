@@ -1,4 +1,6 @@
-# Artifact with fanout
+# Artifact With Fanout
+
+
 
 ```python
 from hera import Artifact, Task, Workflow
@@ -39,5 +41,4 @@ with Workflow("artifact-with-fanout") as w:
     w_t >> f_t >> c_t
 
 w.create()
-
 ```

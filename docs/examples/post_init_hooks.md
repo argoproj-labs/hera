@@ -1,8 +1,7 @@
-# Post init hooks
+# Post Init Hooks
 
 This example showcases how to register two global workflow hooks, which will modify the workflow post-init.
-
-See `hera.global_config.WorkflowHook` for the `Protocol` specification of the hook implementation/type signature.
+See `hera.global_config.WorkflowHook` for the `Protocol` specification of the hook implementation/type signature
 
 ```python
 from hera import GlobalConfig, Task, Workflow

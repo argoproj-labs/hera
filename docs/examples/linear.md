@@ -1,6 +1,6 @@
 # Linear
 
-This example showcases how to structure a linear chain of tasks.
+This example showcases how to structure a linear chain of tasks
 
 ```python
 from hera import Task, Workflow
@@ -27,5 +27,4 @@ with Workflow("linear") as w:
     Task("t1", task_1) >> Task("t2", task_2) >> Task("t3", task_3) >> Task("t4", task_4)
 
 w.create()
-
 ```

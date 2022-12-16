@@ -1,6 +1,6 @@
-# Docker in Docker sidecar container
+# Sidecar Dind
 
-This example showcases how one can run Docker in Docker with a sidecar container with Hera.
+This example showcases how one can run Docker in Docker with a sidecar container with Hera
 
 ```python
 from hera import Env, Sidecar, Task, TaskSecurityContext, Workflow

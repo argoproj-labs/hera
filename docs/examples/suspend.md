@@ -1,6 +1,6 @@
 # Suspend
 
-This example showcases how to use a `suspend` template with Hera.
+This example showcases how to use a `suspend` template with Hera
 
 ```python
 from hera import Suspend, Task, Workflow

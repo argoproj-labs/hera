@@ -1,4 +1,6 @@
-# Workflow on exit
+# Workflow On Exit
+
+
 
 ```python
 from hera import DAG, Task, Workflow, WorkflowStatus
@@ -23,5 +25,4 @@ with Workflow("on-exit") as w:
 
     w.on_exit(exit_procedure)
 w.create()
-
 ```

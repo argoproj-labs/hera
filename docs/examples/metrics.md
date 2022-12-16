@@ -1,7 +1,7 @@
-# Prometheus metrics
+# Metrics
 
 This example showcases the classic diamond workflow along with metrics used to track the workflow. For information on
-how to use metrics and what metrics are accessible out of the box with Argo see: 
+how to use metrics and what metrics are accessible out of the box with Argo see:
 https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
 
 ```python
@@ -22,5 +22,4 @@ with Workflow("diamond", metrics=[Metric("w", "help-w")]) as w:
     a >> [b, c] >> d
 
 w.create()
-
 ```

@@ -1,4 +1,4 @@
-# Parallel DAG
+# Parallel Dag
 
 This example showcases how one can schedule a workflow with a parallel DAG task through Hera
 
@@ -32,5 +32,4 @@ with Workflow("parallel-dag") as wf:
     t1 >> t2
 
 wf.create()
-
 ```

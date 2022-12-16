@@ -1,4 +1,4 @@
-# GPU
+# Gpu
 
 This task showcases how clients can request a particular number of GPUs to be available for a task and the specific
 type of GPU to request. The task uses the Horovod image as it provides Python and NVIDIA SMI.

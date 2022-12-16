@@ -1,6 +1,6 @@
-# NGINX sidecar
+# Sidecar Nginx
 
-This example showcases how one can run an Nginx sidecar container with Hera.
+This example showcases how one can run an Nginx sidecar container with Hera
 
 ```python
 from hera import Sidecar, Task, Workflow

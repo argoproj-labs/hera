@@ -1,6 +1,6 @@
 # Container
 
-This example showcases how to run a container, rather than a Python, function, as the payload of a task in Hera.
+This example showcases how to run a container, rather than a Python, function, as the payload of a task in Hera
 
 ```python
 from hera import Task, Workflow
