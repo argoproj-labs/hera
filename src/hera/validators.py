@@ -21,7 +21,7 @@ def validate_name(name: str, max_length: Optional[int] = None) -> str:
     if "_" in name:
         raise ValueError("Name cannot include an underscore")
 
-    pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
     match_obj = re.fullmatch(pattern, name)
     if not match_obj:
         raise ValueError(f"Name is invalid: '{name}'. Regex used for validation is {pattern}")
