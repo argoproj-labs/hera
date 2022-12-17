@@ -3,7 +3,7 @@ import re
 from typing import Optional
 
 
-def validate_name(name: str, max_length: Optional[int] = None) -> str:
+def validate_name(name: str, max_length: Optional[int] = None, generate_name: bool = False) -> str:
     """Validates a name according to standard argo/kubernetes limitations
 
     Parameters
@@ -22,6 +22,8 @@ def validate_name(name: str, max_length: Optional[int] = None) -> str:
         raise ValueError("Name cannot include an underscore")
 
     pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
+    if generate_name:
+        pattern += r"(\.?|-*)"
     match_obj = re.fullmatch(pattern, name)
     if not match_obj:
         raise ValueError(f"Name is invalid: '{name}'. Regex used for validation is {pattern}")

@@ -21,6 +21,14 @@ def test_validate_name():
     with pytest.raises(ValueError):
         validate_name("test-")
     validate_name("test.a")
+    validate_name("test-", generate_name=True)
+    validate_name("test.", generate_name=True)
+    with pytest.raises(ValueError) as e:
+        validate_name("test.-", generate_name=True)
+    assert (
+        str(e.value) == "Name is invalid: 'test.-'. Regex used for validation is "
+        r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*(\.?|-*)"
+    )
 
 
 def test_storage_validation_passes():
