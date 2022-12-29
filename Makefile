@@ -11,3 +11,13 @@ typecheck:
 examples:
 	python generate.py
 	git diff --exit-code -- examples
+
+models:
+	datamodel-codegen \
+	  --url https://raw.githubusercontent.com/argoproj/argo-workflows/master/api/openapi-spec/swagger.json \
+	  --use-annotated \
+	  --snake-case-field \
+	  --target-python-version 3.7 \
+	  --output src/hera/models/workflows \
+	  --base-class hera.ArgoBaseModel
+	$(MAKE) format

@@ -1,3 +1,4 @@
+from hera._base_model import ArgoBaseModel
 from hera._context import dag_context
 from hera._version import version
 from hera.action import (
