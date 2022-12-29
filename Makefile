@@ -1,23 +1,28 @@
-lint:
-	pflake8 src examples
+.PHONY: help
 
-format:
-	black --verbose src tests examples conftest.py
-	isort src tests examples conftest.py
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-typecheck:
-	mypy --show-traceback --namespace-packages --explicit-package-bases -p hera
+lint: ## Lint the source and example directories
+	@pflake8 src examples
 
-examples:
-	python generate.py
-	git diff --exit-code -- examples
+format: ## Format and sort imports for source, tests, etc.
+	@black --verbose src tests examples conftest.py
+	@isort src tests examples conftest.py
 
-models:
-	datamodel-codegen \
-	  --url https://raw.githubusercontent.com/argoproj/argo-workflows/master/api/openapi-spec/swagger.json \
-	  --use-annotated \
-	  --snake-case-field \
-	  --target-python-version 3.7 \
-	  --output src/hera/models/workflows \
-	  --base-class hera.ArgoBaseModel
-	$(MAKE) format
+typecheck: ## Run typecheck on the project and report any issues
+	@mypy --show-traceback --namespace-packages --explicit-package-bases -p hera
+
+examples: ## Generate all the example Markdown files in `/docs` based on the examples directory
+	@python generate.py
+	@git diff --exit-code -- examples
+
+models: ## Generate all the Argo Workflows models
+	@datamodel-codegen \
+		--url https://raw.githubusercontent.com/argoproj/argo-workflows/master/api/openapi-spec/swagger.json \
+		--use-annotated \
+		--snake-case-field \
+		--target-python-version 3.7 \
+		--output src/hera/models/workflows \
+		--base-class hera.ArgoBaseModel
+	@$(MAKE) format
