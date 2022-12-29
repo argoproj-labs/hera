@@ -7,11 +7,11 @@ lint: ## Lint the source and example directories
 	@pflake8 src examples
 
 format: ## Format and sort imports for source, tests, etc.
-	@black --verbose src tests examples conftest.py
+	@black src tests examples conftest.py
 	@isort src tests examples conftest.py
 
 typecheck: ## Run typecheck on the project and report any issues
-	@mypy --show-traceback --namespace-packages --explicit-package-bases -p hera
+	@mypy -p hera --exclude src/hera/models
 
 examples: ## Generate all the example Markdown files in `/docs` based on the examples directory
 	@python generate.py
