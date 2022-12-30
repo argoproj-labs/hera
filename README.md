@@ -51,7 +51,7 @@ command for port forward!
 
 > **Note**
 > Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens in place,
-> it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes v1.22+ 
+> it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes v1.24+ 
 > in order for hera-workflows to communicate to the Argo Server.
 
 # Installation
