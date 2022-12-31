@@ -99,7 +99,7 @@ class Node:
         """
         return Callable("asInt", self)
 
-    def check(self, truthy_value: 'Node', falsy_value: 'Node') -> 'Check':
+    def check(self, truthy_value: "Node", falsy_value: "Node") -> "Check":
         """Supports ternary operator.
 
         Transpiles `var.check(truthy_value, falsy_value)` to `var ? truthy_value : falsy_value`.
@@ -216,11 +216,11 @@ for builtin in BUILTINS:
 
 def _constant_repr(obj):
     if obj is None:
-        return 'nil'
+        return "nil"
     if obj is True:
-        return 'true'
+        return "true"
     if obj is False:
-        return 'false'
+        return "false"
     if isinstance(obj, range):
         return f"{obj.start}..{obj.stop - 1}"
     if isinstance(obj, list):
@@ -332,8 +332,8 @@ class GetItem(Node):
         if isinstance(attribute, slice):
             if attribute.step and attribute.step != 1:
                 raise Exception("Only slices with a step size of 1 are allowed")
-            start = attribute.start if attribute.start is not None else ''
-            stop = attribute.stop if attribute.stop is not None else ''
+            start = attribute.start if attribute.start is not None else ""
+            stop = attribute.stop if attribute.stop is not None else ""
             self.attribute = f"{start}:{stop}"
         else:
             self.attribute = repr(attribute)

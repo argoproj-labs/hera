@@ -63,8 +63,8 @@ class Env:
         """Argo has some strict parameter validation. To satisfy, we replace all ._ with a dash,
         take only first 32 characters from a-zA-Z0-9-, and append md5 digest of the original string."""
         # NOTE move this to some general purpose utils?
-        replaced_dashes = v.translate(str.maketrans({e: '-' for e in "_."}))  # type: ignore
-        legit_set = string.ascii_letters + string.digits + '-'
+        replaced_dashes = v.translate(str.maketrans({e: "-" for e in "_."}))  # type: ignore
+        legit_set = string.ascii_letters + string.digits + "-"
         legit_prefix = "".join(islice((c for c in replaced_dashes if c in legit_set), 32))
         hash_suffix = hashlib.md5(v.encode("utf-8")).hexdigest()
         return f"{legit_prefix}-{hash_suffix}"

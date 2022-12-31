@@ -78,7 +78,7 @@ class TestWorkflow:
     def test_wf_adds_specified_tasks(self, no_op):
         n = 3
         ts = [Task(f"t{i}", no_op) for i in range(n)]
-        w = Workflow('w')
+        w = Workflow("w")
         w.add_tasks(*ts)
 
         assert len(w.dag.tasks) == n
@@ -275,12 +275,12 @@ class TestWorkflow:
             metrics=Metrics(
                 [
                     Metric(
-                        'a',
-                        'b',
+                        "a",
+                        "b",
                     ),
                     Metric(
-                        'c',
-                        'd',
+                        "c",
+                        "d",
                     ),
                 ]
             ),
@@ -320,7 +320,7 @@ class TestWorkflow:
     def test_enter_sets_expected_fields(self):
         w = Workflow("w", dag=DAG("d"))
         assert not w.in_context
-        assert w.dag.name == 'd'
+        assert w.dag.name == "d"
 
     def test_on_exit(self):
         with Workflow("w") as w1:
@@ -372,13 +372,13 @@ class TestWorkflow:
         assert Workflow("w").get_name() == "{{workflow.name}}"
 
     def test_workflow_adjusts_input_metrics(self):
-        with Workflow('w', metrics=Metric('a', 'b')) as w:
+        with Workflow("w", metrics=Metric("a", "b")) as w:
             assert isinstance(w.metrics, Metrics)
 
-        with Workflow('w', metrics=[Metric('a', 'b')]) as w:
+        with Workflow("w", metrics=[Metric("a", "b")]) as w:
             assert isinstance(w.metrics, Metrics)
 
-        with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
+        with Workflow("w", metrics=Metrics([Metric("a", "b")])) as w:
             assert isinstance(w.metrics, Metrics)
 
     def test_workflow_sets_dag_name(self):
@@ -408,7 +408,7 @@ class TestWorkflow:
         # TODO: is there a better way to temporarily mock/patch this value to make this test more atomic?
         hera.workflow._yaml = None
         with pytest.raises(ImportError) as e:
-            Workflow('w').to_yaml()
+            Workflow("w").to_yaml()
         assert (
             str(e.value) == "Attempted to use `to_yaml` but PyYAML is not available. "
             "Install `hera-workflows[yaml]` to install the extra dependency"
@@ -420,7 +420,7 @@ class TestWorkflow:
         def hello():
             print("Hello, Hera!")
 
-        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+        with Workflow("hello-hera", node_selectors={"a_b_c": "a_b_c"}, labels={"a_b_c": "a_b_c"}) as w:
             Task("t", hello)
 
         expected_yaml = """apiVersion: argoproj.io/v1alpha1
@@ -460,27 +460,27 @@ spec:
         def hello():
             print("Hello, Hera!")
 
-        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+        with Workflow("hello-hera", node_selectors={"a_b_c": "a_b_c"}, labels={"a_b_c": "a_b_c"}) as w:
             Task("t", hello)
         expected_dict = {
-            'metadata': {'name': 'hello-hera', 'labels': {'a_b_c': 'a_b_c'}},
-            'spec': {
-                'entrypoint': 'hello-hera',
-                'templates': [
+            "metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}},
+            "spec": {
+                "entrypoint": "hello-hera",
+                "templates": [
                     {
-                        'name': 't',
-                        'script': {
-                            'image': 'python:3.7',
-                            'source': 'import os\nimport sys\nsys.path.append(os.getcwd())\nprint("Hello, Hera!")\n',
-                            'command': ['python'],
+                        "name": "t",
+                        "script": {
+                            "image": "python:3.7",
+                            "source": 'import os\nimport sys\nsys.path.append(os.getcwd())\nprint("Hello, Hera!")\n',
+                            "command": ["python"],
                         },
                     },
-                    {'name': 'hello-hera', 'dag': {'tasks': [{'name': 't', 'template': 't'}]}},
+                    {"name": "hello-hera", "dag": {"tasks": [{"name": "t", "template": "t"}]}},
                 ],
-                'nodeSelector': {'a_b_c': 'a_b_c'},
+                "nodeSelector": {"a_b_c": "a_b_c"},
             },
-            'apiVersion': 'argoproj.io/v1alpha1',
-            'kind': 'Workflow',
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Workflow",
         }
         assert expected_dict == w.to_dict()
 
@@ -488,7 +488,7 @@ spec:
         def hello():
             print("Hello, Hera!")
 
-        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+        with Workflow("hello-hera", node_selectors={"a_b_c": "a_b_c"}, labels={"a_b_c": "a_b_c"}) as w:
             Task("t", hello)
 
         expected_json = (
@@ -507,9 +507,9 @@ spec:
             w.service_account_name = "abc"
 
         def hook2(w: Workflow) -> None:
-            w.labels = {'abc': '123'}
+            w.labels = {"abc": "123"}
 
         global_config.workflow_post_init_hooks = [hook1, hook2]
-        w = Workflow('w')
+        w = Workflow("w")
         assert w.service_account_name == "abc"
-        assert w.labels == {'abc': '123'}
+        assert w.labels == {"abc": "123"}

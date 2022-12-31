@@ -37,7 +37,7 @@ def construct_weekly_temps():
 with Workflow("expression-reusing-verbose-snippets-", generate_name=True) as w:
     w.parameters = [Parameter(name="weather", value=encoded_data)]
     week_temps = construct_weekly_temps()
-    week_temps_jsonpath = g.inputs.parameters['week-temps'].jsonpath
+    week_temps_jsonpath = g.inputs.parameters["week-temps"].jsonpath
     Task(
         name="main",
         inputs=[Parameter(name="week-temps", value=f"{week_temps:=}")],

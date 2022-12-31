@@ -148,25 +148,25 @@ class Sidecar:
     def build(self) -> IoArgoprojWorkflowV1alpha1UserContainer:
         container = IoArgoprojWorkflowV1alpha1UserContainer(self.name)
         if self.args is not None:
-            setattr(container, 'args', self.args)
+            setattr(container, "args", self.args)
         if self.command is not None:
-            setattr(container, 'command', self.command)
+            setattr(container, "command", self.command)
         if self.env is not None:
-            setattr(container, 'env', [e.build() for e in self.env])
+            setattr(container, "env", [e.build() for e in self.env])
         if self.env_from is not None:
-            setattr(container, 'env_from', [e.build() for e in self.env_from])
+            setattr(container, "env_from", [e.build() for e in self.env_from])
         if self.image is not None:
-            setattr(container, 'image', self.image)
+            setattr(container, "image", self.image)
         if self.image_pull_policy is not None:
-            setattr(container, 'image_pull_policy', self.image_pull_policy.value)
+            setattr(container, "image_pull_policy", self.image_pull_policy.value)
         if self.lifecycle is not None:
-            setattr(container, 'lifecycle', self.lifecycle.build())
+            setattr(container, "lifecycle", self.lifecycle.build())
         if self.liveness_probe is not None:
-            setattr(container, 'liveness_probe', self.liveness_probe.build())
+            setattr(container, "liveness_probe", self.liveness_probe.build())
         if self.mirror_volume_mounts is not None:
-            setattr(container, 'mirror_volume_mounts', self.mirror_volume_mounts)
+            setattr(container, "mirror_volume_mounts", self.mirror_volume_mounts)
         if self.ports is not None:
-            setattr(container, 'ports', [p.build() for p in self.ports])
+            setattr(container, "ports", [p.build() for p in self.ports])
         if self.readiness_probe is not None:
             setattr(container, "readiness_probe", self.readiness_probe.build())
         if self.resources is not None:

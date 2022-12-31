@@ -7,16 +7,16 @@ class TestGlobalConfig:
     def test_host(self):
         c = _GlobalConfig()
         assert c.host is None
-        c.host = '123'
-        assert c.host == '123'
+        c.host = "123"
+        assert c.host == "123"
 
     def test_token(self):
         c = _GlobalConfig()
         assert c.token is None
-        c.token = '123'
-        assert c.token == '123'
-        c.token = lambda: '123'
-        assert c.token == '123'
+        c.token = "123"
+        assert c.token == "123"
+        c.token = lambda: "123"
+        assert c.token == "123"
 
     def test_verify_ssl(self):
         c = _GlobalConfig()
@@ -53,7 +53,7 @@ class TestGlobalConfig:
         assert c.task_post_init_hooks == ()
 
         def hook1(t: Task) -> None:
-            t.name = '123'
+            t.name = "123"
 
         def hook2(t: Task) -> None:
             t.image = "abc"
@@ -69,7 +69,7 @@ class TestGlobalConfig:
         assert c.workflow_post_init_hooks == ()
 
         def hook1(w: Workflow) -> None:
-            w.name = '123'
+            w.name = "123"
 
         def hook2(w: Workflow) -> None:
             w.service_account_name = "abc"

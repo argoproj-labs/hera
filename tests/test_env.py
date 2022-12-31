@@ -30,7 +30,7 @@ class TestEnv:
 
     def test_param_name_raises_on_no_value_input(self):
         with pytest.raises(ValueError) as e:
-            _ = FieldEnv('test', 'test').param_name
+            _ = FieldEnv("test", "test").param_name
         assert (
             str(e.value) == "unexpected use of `param_name` -- without value_from_input, no param should be generated"
         )

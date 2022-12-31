@@ -10,6 +10,6 @@ def hello(a: str, b: int, c: dict):
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow("parameters") as w:
-    Task('hello', source=hello, inputs={"a": "world", "b": 42, "c": {"k": "v"}})
+    Task("hello", source=hello, inputs={"a": "world", "b": 42, "c": {"k": "v"}})
 
 w.create()

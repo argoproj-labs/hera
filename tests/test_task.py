@@ -919,27 +919,27 @@ print(42)
             metrics=Metrics(
                 [
                     Metric(
-                        'a',
-                        'b',
+                        "a",
+                        "b",
                     ),
                     Metric(
-                        'c',
-                        'd',
+                        "c",
+                        "d",
                     ),
                 ]
             ),
         )._build_template()
         assert isinstance(t, IoArgoprojWorkflowV1alpha1Template)
-        assert hasattr(t, 'metrics')
+        assert hasattr(t, "metrics")
 
     def test_task_adjusts_input_metrics(self):
-        t = Task('t', metrics=Metric('a', 'b'))
+        t = Task("t", metrics=Metric("a", "b"))
         assert isinstance(t.metrics, Metrics)
 
-        t = Task('t', metrics=[Metric('a', 'b')])
+        t = Task("t", metrics=[Metric("a", "b")])
         assert isinstance(t.metrics, Metrics)
 
-        t = Task('t', metrics=Metrics([Metric('a', 'b')]))
+        t = Task("t", metrics=Metrics([Metric("a", "b")]))
         assert isinstance(t.metrics, Metrics)
 
     def test_task_applies_hooks(self, global_config):
@@ -947,38 +947,38 @@ print(42)
             t.when = "test123"
 
         def hook2(t: Task) -> None:
-            t.labels = {'abc': '123'}
+            t.labels = {"abc": "123"}
 
         global_config.task_post_init_hooks = [hook1, hook2]
-        t = Task('test')
+        t = Task("test")
         assert t.when == "test123"
-        assert t.labels == {'abc': '123'}
+        assert t.labels == {"abc": "123"}
 
     def test_task_applies_exit(self, no_op):
         with pytest.raises(ValueError) as e:
-            Task('t', source=no_op).on_exit(Task('e', dag=DAG('d')))
+            Task("t", source=no_op).on_exit(Task("e", dag=DAG("d")))
         assert (
             str(e.value)
             == "Provided `Task` contains a `DAG` set. Only `Task`s with `source` are supported or pure `DAG`s. "
             "Try passing in `Task.dag` or set `source` on `Task` if you have a single task to run on exit."
         )
 
-        o = Task('e', source=no_op)
-        t = Task('t', source=no_op).on_exit(o)
+        o = Task("e", source=no_op)
+        t = Task("t", source=no_op).on_exit(o)
         assert o.is_exit_task
         assert t.exit_task == "e"
 
-        d = DAG('d')
-        t = Task('t', source=no_op).on_exit(d)
+        d = DAG("d")
+        t = Task("t", source=no_op).on_exit(d)
         assert t.exit_task == "d"
 
         o = 42
         with pytest.raises(ValueError) as e:
-            Task('t', source=no_op).on_exit(o)  # type: ignore
+            Task("t", source=no_op).on_exit(o)  # type: ignore
         assert str(e.value) == f"Unrecognized exit type {type(o)}, supported types are `Task` and `DAG`"
 
     def test_task_properties(self):
-        t = Task('t')
+        t = Task("t")
         assert t.id == "{{tasks.t.id}}"
         assert t.ip == "{{tasks.t.ip}}"
         assert t.status == "{{tasks.t.status}}"

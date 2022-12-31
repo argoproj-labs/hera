@@ -98,15 +98,15 @@ class Metric:
     def build(self) -> IoArgoprojWorkflowV1alpha1Prometheus:
         metric = IoArgoprojWorkflowV1alpha1Prometheus(self.help, self.name)
         if self.counter is not None:
-            setattr(metric, 'counter', self.counter.build())
+            setattr(metric, "counter", self.counter.build())
         if self.gauge is not None:
-            setattr(metric, 'gauge', self.gauge.build())
+            setattr(metric, "gauge", self.gauge.build())
         if self.histogram is not None:
-            setattr(metric, 'histogram', self.histogram.build())
+            setattr(metric, "histogram", self.histogram.build())
         if self.labels is not None:
-            setattr(metric, 'labels', [label.build() for label in self.labels])
+            setattr(metric, "labels", [label.build() for label in self.labels])
         if self.when is not None:
-            setattr(metric, 'when', self.when)
+            setattr(metric, "when", self.when)
         return metric
 
 
