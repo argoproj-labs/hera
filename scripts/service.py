@@ -66,15 +66,14 @@ class ServiceEndpoint:
         # docstring
         if self.summary is not None:
             signature = f"""{signature}
-        \"\"\"{self.summary}\"\"\"
-"""
+        \"\"\"{self.summary}\"\"\""""
 
         # url
         path_params = [p for p in self.params if p.in_ == "path"]
         if len(path_params) == 0:
             req_url = f"os.path.join(self.host, '{self.url}')"
         else:
-            req_url_params = ", ".join([f"{p.name}={p.name}" for p in path_params])
+            req_url_params = ", ".join([f"{p.field}={p.name}" for p in path_params])
             req_url = f"os.path.join(self.host, '{self.url}').format({req_url_params})"
 
         # query params
@@ -99,25 +98,27 @@ class ServiceEndpoint:
 
         # return value
         if self.response.ref == "str":
-            var = "resp"
-            ret_val = "pickle.dump(resp)"
+            ret_val = "str(resp.content)"
         elif "Response" in self.response.ref:
-            var = "_"
             ret_val = f"{self.response}()"
         else:
-            var = "resp"
-            ret_val = f"{self.response}(**resp)"
+            ret_val = f"{self.response}(**resp.json())"
 
         return f"""
     {signature}
-        {var} = requests.{self.method}(
+        resp = requests.{self.method}(
             url={req_url}, 
             params={params}, 
             headers={headers}, 
             data={body}, 
             verify=self.verify_ssl
-        ).json()
-        return {ret_val}"""
+        )
+        
+        if resp.ok:
+            return {ret_val}
+        else:
+            resp.raise_for_status()
+"""
 
 
 def get_openapi_spec_url() -> str:

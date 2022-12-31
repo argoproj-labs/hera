@@ -34,7 +34,7 @@ class _GlobalConfig:
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
-        self.__dict__.clear()  # Wipe instance values to fallback to the class defaults
+        self.__dict__.clear()  # Wipe instance values to fall back to the class defaults
 
     @property
     def token(self) -> Optional[str]:

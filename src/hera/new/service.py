@@ -50,8 +50,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowList(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
         resp = requests.get(
@@ -60,8 +64,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return LabelKeys(**resp)
+        )
+
+        if resp.ok:
+            return LabelKeys(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def list_archived_workflow_label_values(
         self,
@@ -91,8 +99,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return LabelValues(**resp)
+        )
+
+        if resp.ok:
+            return LabelValues(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_archived_workflow(self, uid: str) -> Workflow:
         resp = requests.get(
@@ -101,18 +113,26 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return ArchivedWorkflowDeletedResponse()
+        )
+
+        if resp.ok:
+            return ArchivedWorkflowDeletedResponse()
+        else:
+            resp.raise_for_status()
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
@@ -121,8 +141,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
@@ -131,8 +155,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def list_cluster_workflow_templates(
         self,
@@ -162,8 +190,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return ClusterWorkflowTemplateList(**resp)
+        )
+
+        if resp.ok:
+            return ClusterWorkflowTemplateList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
@@ -172,8 +204,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return ClusterWorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return ClusterWorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
@@ -182,8 +218,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return ClusterWorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return ClusterWorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_cluster_workflow_template(
         self, name: str, resource_version: Optional[str] = None
@@ -194,8 +234,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return ClusterWorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return ClusterWorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def update_cluster_workflow_template(
         self, name: str, req: ClusterWorkflowTemplateUpdateRequest
@@ -206,8 +250,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return ClusterWorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return ClusterWorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_cluster_workflow_template(
         self,
@@ -219,7 +267,7 @@ class Service:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> ClusterWorkflowTemplateDeleteResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
@@ -232,8 +280,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return ClusterWorkflowTemplateDeleteResponse()
+        )
+
+        if resp.ok:
+            return ClusterWorkflowTemplateDeleteResponse()
+        else:
+            resp.raise_for_status()
 
     def list_cron_workflows(
         self,
@@ -264,8 +316,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflowList(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflowList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def create_cron_workflow(self, namespace: str, req: CreateCronWorkflowRequest) -> CronWorkflow:
         resp = requests.post(
@@ -274,8 +330,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflow(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def lint_cron_workflow(self, namespace: str, req: LintCronWorkflowRequest) -> CronWorkflow:
         resp = requests.post(
@@ -284,8 +344,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflow(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_cron_workflow(self, namespace: str, name: str, resource_version: Optional[str] = None) -> CronWorkflow:
         resp = requests.get(
@@ -296,8 +360,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflow(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def update_cron_workflow(self, namespace: str, name: str, req: UpdateCronWorkflowRequest) -> CronWorkflow:
         resp = requests.put(
@@ -308,8 +376,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflow(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_cron_workflow(
         self,
@@ -322,7 +394,7 @@ class Service:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> CronWorkflowDeletedResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
@@ -337,8 +409,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflowDeletedResponse()
+        )
+
+        if resp.ok:
+            return CronWorkflowDeletedResponse()
+        else:
+            resp.raise_for_status()
 
     def resume_cron_workflow(self, namespace: str, name: str, req: CronWorkflowResumeRequest) -> CronWorkflow:
         resp = requests.put(
@@ -349,8 +425,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflow(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def suspend_cron_workflow(self, namespace: str, name: str, req: CronWorkflowSuspendRequest) -> CronWorkflow:
         resp = requests.put(
@@ -361,8 +441,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return CronWorkflow(**resp)
+        )
+
+        if resp.ok:
+            return CronWorkflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def list_event_sources(
         self,
@@ -393,8 +477,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return EventSourceList(**resp)
+        )
+
+        if resp.ok:
+            return EventSourceList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def create_event_source(self, namespace: str, req: CreateEventSourceRequest) -> EventSource:
         resp = requests.post(
@@ -403,8 +491,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return EventSource(**resp)
+        )
+
+        if resp.ok:
+            return EventSource(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_event_source(self, namespace: str, name: str) -> EventSource:
         resp = requests.get(
@@ -415,8 +507,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return EventSource(**resp)
+        )
+
+        if resp.ok:
+            return EventSource(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def update_event_source(self, namespace: str, name: str, req: UpdateEventSourceRequest) -> EventSource:
         resp = requests.put(
@@ -427,8 +523,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return EventSource(**resp)
+        )
+
+        if resp.ok:
+            return EventSource(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_event_source(
         self,
@@ -441,7 +541,7 @@ class Service:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> EventSourceDeletedResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
@@ -456,11 +556,15 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return EventSourceDeletedResponse()
+        )
+
+        if resp.ok:
+            return EventSourceDeletedResponse()
+        else:
+            resp.raise_for_status()
 
     def receive_event(self, namespace: str, discriminator: str, req: Item) -> EventResponse:
-        _ = requests.post(
+        resp = requests.post(
             url=os.path.join(self.host, "/api/v1/events/{namespace}/{discriminator}").format(
                 namespace=namespace, discriminator=discriminator
             ),
@@ -468,18 +572,26 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return EventResponse()
+        )
+
+        if resp.ok:
+            return EventResponse()
+        else:
+            resp.raise_for_status()
 
     def get_info(self) -> InfoResponse:
-        _ = requests.get(
+        resp = requests.get(
             url=os.path.join(self.host, "/api/v1/info"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return InfoResponse()
+        )
+
+        if resp.ok:
+            return InfoResponse()
+        else:
+            resp.raise_for_status()
 
     def list_sensors(
         self,
@@ -510,8 +622,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return SensorList(**resp)
+        )
+
+        if resp.ok:
+            return SensorList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def create_sensor(self, namespace: str, req: CreateSensorRequest) -> Sensor:
         resp = requests.post(
@@ -520,8 +636,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Sensor(**resp)
+        )
+
+        if resp.ok:
+            return Sensor(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_sensor(self, namespace: str, name: str, resource_version: Optional[str] = None) -> Sensor:
         resp = requests.get(
@@ -530,8 +650,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return Sensor(**resp)
+        )
+
+        if resp.ok:
+            return Sensor(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def update_sensor(self, namespace: str, name: str, req: UpdateSensorRequest) -> Sensor:
         resp = requests.put(
@@ -540,8 +664,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Sensor(**resp)
+        )
+
+        if resp.ok:
+            return Sensor(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_sensor(
         self,
@@ -554,7 +682,7 @@ class Service:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> DeleteSensorResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
@@ -567,8 +695,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return DeleteSensorResponse()
+        )
+
+        if resp.ok:
+            return DeleteSensorResponse()
+        else:
+            resp.raise_for_status()
 
     def watch_event_sources(
         self,
@@ -599,8 +731,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return EventSourceWatchEvent(**resp)
+        )
+
+        if resp.ok:
+            return EventSourceWatchEvent(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def event_sources_logs(
         self,
@@ -641,8 +777,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return LogEntry(**resp)
+        )
+
+        if resp.ok:
+            return LogEntry(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def watch_events(
         self,
@@ -673,8 +813,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return Event(**resp)
+        )
+
+        if resp.ok:
+            return Event(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def watch_sensors(
         self,
@@ -705,8 +849,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return SensorWatchEvent(**resp)
+        )
+
+        if resp.ok:
+            return SensorWatchEvent(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def sensors_logs(
         self,
@@ -745,28 +893,40 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return LogEntry(**resp)
+        )
+
+        if resp.ok:
+            return LogEntry(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def collect_event(self, req: CollectEventRequest) -> CollectEventResponse:
-        _ = requests.post(
+        resp = requests.post(
             url=os.path.join(self.host, "/api/v1/tracking/event"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return CollectEventResponse()
+        )
+
+        if resp.ok:
+            return CollectEventResponse()
+        else:
+            resp.raise_for_status()
 
     def get_user_info(self) -> GetUserInfoResponse:
-        _ = requests.get(
+        resp = requests.get(
             url=os.path.join(self.host, "/api/v1/userinfo"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return GetUserInfoResponse()
+        )
+
+        if resp.ok:
+            return GetUserInfoResponse()
+        else:
+            resp.raise_for_status()
 
     def get_version(self) -> Version:
         resp = requests.get(
@@ -775,8 +935,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return Version(**resp)
+        )
+
+        if resp.ok:
+            return Version(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def list_workflow_event_bindings(
         self,
@@ -807,8 +971,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowEventBindingList(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowEventBindingList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def watch_workflows(
         self,
@@ -841,8 +1009,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowWatchEvent(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowWatchEvent(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def list_workflow_templates(
         self,
@@ -873,8 +1045,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowTemplateList(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowTemplateList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def create_workflow_template(self, namespace: str, req: WorkflowTemplateCreateRequest) -> WorkflowTemplate:
         resp = requests.post(
@@ -883,8 +1059,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def lint_workflow_template(self, namespace: str, req: WorkflowTemplateLintRequest) -> WorkflowTemplate:
         resp = requests.post(
@@ -893,8 +1073,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_workflow_template(
         self, namespace: str, name: str, resource_version: Optional[str] = None
@@ -907,8 +1091,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def update_workflow_template(
         self, namespace: str, name: str, req: WorkflowTemplateUpdateRequest
@@ -921,8 +1109,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowTemplate(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowTemplate(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_workflow_template(
         self,
@@ -935,7 +1127,7 @@ class Service:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> WorkflowTemplateDeleteResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
@@ -950,8 +1142,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowTemplateDeleteResponse()
+        )
+
+        if resp.ok:
+            return WorkflowTemplateDeleteResponse()
+        else:
+            resp.raise_for_status()
 
     def list_workflows(
         self,
@@ -984,8 +1180,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowList(**resp)
+        )
+
+        if resp.ok:
+            return WorkflowList(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def create_workflow(self, namespace: str, req: WorkflowCreateRequest) -> Workflow:
         resp = requests.post(
@@ -994,8 +1194,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def lint_workflow(self, namespace: str, req: WorkflowLintRequest) -> Workflow:
         resp = requests.post(
@@ -1004,8 +1208,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def submit_workflow(self, namespace: str, req: WorkflowSubmitRequest) -> Workflow:
         resp = requests.post(
@@ -1014,8 +1222,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_workflow(
         self, namespace: str, name: str, resource_version: Optional[str] = None, fields: Optional[str] = None
@@ -1026,8 +1238,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def delete_workflow(
         self,
@@ -1041,7 +1257,7 @@ class Service:
         dry_run: Optional[list] = None,
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
-        _ = requests.delete(
+        resp = requests.delete(
             url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
@@ -1055,8 +1271,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return WorkflowDeleteResponse()
+        )
+
+        if resp.ok:
+            return WorkflowDeleteResponse()
+        else:
+            resp.raise_for_status()
 
     def workflow_logs(
         self,
@@ -1098,8 +1318,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return LogEntry(**resp)
+        )
+
+        if resp.ok:
+            return LogEntry(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def resubmit_workflow(self, namespace: str, name: str, req: WorkflowResubmitRequest) -> Workflow:
         resp = requests.put(
@@ -1110,8 +1334,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def resume_workflow(self, namespace: str, name: str, req: WorkflowResumeRequest) -> Workflow:
         resp = requests.put(
@@ -1122,8 +1350,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def retry_workflow(self, namespace: str, name: str, req: WorkflowRetryRequest) -> Workflow:
         resp = requests.put(
@@ -1134,8 +1366,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def set_workflow(self, namespace: str, name: str, req: WorkflowSetRequest) -> Workflow:
         resp = requests.put(
@@ -1146,8 +1382,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def stop_workflow(self, namespace: str, name: str, req: WorkflowStopRequest) -> Workflow:
         resp = requests.put(
@@ -1158,8 +1398,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def suspend_workflow(self, namespace: str, name: str, req: WorkflowSuspendRequest) -> Workflow:
         resp = requests.put(
@@ -1170,8 +1414,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def terminate_workflow(self, namespace: str, name: str, req: WorkflowTerminateRequest) -> Workflow:
         resp = requests.put(
@@ -1182,8 +1430,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
             verify=self.verify_ssl,
-        ).json()
-        return Workflow(**resp)
+        )
+
+        if resp.ok:
+            return Workflow(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def pod_logs(
         self,
@@ -1204,10 +1456,9 @@ class Service:
         selector: Optional[str] = None,
     ) -> LogEntry:
         """DEPRECATED: Cannot work via HTTP if podName is an empty string. Use WorkflowLogs."""
-
         resp = requests.get(
             url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/{podName}/log").format(
-                namespace=namespace, name=name, pod_name=pod_name
+                namespace=namespace, name=name, podName=pod_name
             ),
             params={
                 "logOptions.container": container,
@@ -1226,8 +1477,12 @@ class Service:
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return LogEntry(**resp)
+        )
+
+        if resp.ok:
+            return LogEntry(**resp.json())
+        else:
+            resp.raise_for_status()
 
     def get_artifact_file(
         self,
@@ -1239,78 +1494,93 @@ class Service:
         artifact_discriminator: str,
     ) -> str:
         """Get an artifact."""
-
         resp = requests.get(
             url=os.path.join(
                 self.host,
                 "/artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
                 namespace=namespace,
-                id_discriminator=id_discriminator,
-                id_=id_,
-                node_id=node_id,
-                artifact_name=artifact_name,
-                artifact_discriminator=artifact_discriminator,
+                idDiscriminator=id_discriminator,
+                id=id_,
+                nodeId=node_id,
+                artifactName=artifact_name,
+                artifactDiscriminator=artifact_discriminator,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return pickle.dump(resp)
+        )
+
+        if resp.ok:
+            return str(resp.content)
+        else:
+            resp.raise_for_status()
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
-
         resp = requests.get(
             url=os.path.join(self.host, "/artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
-                uid=uid, node_id=node_id, artifact_name=artifact_name
+                uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return pickle.dump(resp)
+        )
+
+        if resp.ok:
+            return str(resp.content)
+        else:
+            resp.raise_for_status()
 
     def get_output_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact."""
-
         resp = requests.get(
             url=os.path.join(self.host, "/artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
-                namespace=namespace, name=name, node_id=node_id, artifact_name=artifact_name
+                namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return pickle.dump(resp)
+        )
+
+        if resp.ok:
+            return str(resp.content)
+        else:
+            resp.raise_for_status()
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
-
         resp = requests.get(
             url=os.path.join(self.host, "/input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
-                uid=uid, node_id=node_id, artifact_name=artifact_name
+                uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return pickle.dump(resp)
+        )
+
+        if resp.ok:
+            return str(resp.content)
+        else:
+            resp.raise_for_status()
 
     def get_input_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact."""
-
         resp = requests.get(
             url=os.path.join(self.host, "/input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
-                namespace=namespace, name=name, node_id=node_id, artifact_name=artifact_name
+                namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
-        ).json()
-        return pickle.dump(resp)
+        )
+
+        if resp.ok:
+            return str(resp.content)
+        else:
+            resp.raise_for_status()
