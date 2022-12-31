@@ -122,9 +122,8 @@ class ServiceEndpoint:
 
 
 def get_openapi_spec_url() -> str:
-    # assert len(sys.argv) == 2, "Expected a single argv arguments - the Argo OpenAPI spec URL"
-    # return sys.argv[1]
-    return "https://raw.githubusercontent.com/argoproj/argo-workflows/master/api/openapi-spec/swagger.json"
+    assert len(sys.argv) == 2, "Expected a single argv arguments - the Argo OpenAPI spec URL"
+    return sys.argv[1]
 
 
 def get_openapi_spec(url: str) -> dict:
@@ -294,7 +293,7 @@ def write_service(service: str, path: Path) -> None:
         f.write(service)
 
 
-def create_service() -> str:
+def create_service() -> None:
     url = get_openapi_spec_url()
     payload = get_openapi_spec(url)
     consumes = get_consumes(payload)
