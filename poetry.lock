@@ -31,18 +31,6 @@ importlib-metadata = {version = ">=0.23,<5", markers = "python_version == \"3.7\
 test = ["coverage", "flake8", "pexpect", "wheel"]
 
 [[package]]
-name = "argo-workflows"
-version = "6.3.5"
-description = "Argo Workflows API"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-python-dateutil = "*"
-urllib3 = ">=1.25.3"
-
-[[package]]
 name = "attrs"
 version = "22.2.0"
 description = "Classes Without Boilerplate"
@@ -559,14 +547,11 @@ requests = ["requests"]
 
 [[package]]
 name = "packaging"
-version = "21.3"
+version = "22.0"
 description = "Core utilities for Python packages"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+python-versions = ">=3.7"
 
 [[package]]
 name = "pathable"
@@ -645,7 +630,7 @@ python-versions = "*"
 
 [[package]]
 name = "prance"
-version = "0.22.11.4.0"
+version = "0.21.8.0"
 description = "Resolving Swagger/OpenAPI 2.0 and 3.0.0 Parser"
 category = "dev"
 optional = false
@@ -653,7 +638,6 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 chardet = ">=3.0,<5.0"
-packaging = ">=21.3,<22.0"
 requests = ">=2.25,<3.0"
 "ruamel.yaml" = ">=0.17.10,<0.18.0"
 semver = ">=2.13,<3.0"
@@ -664,7 +648,7 @@ cli = ["click (>=7.0,<8.0)"]
 dev = ["bumpversion (>=0.6)", "pytest (>=6.1)", "pytest-cov (>=2.11)", "sphinx (>=3.4)", "towncrier (>=19.2)", "tox (>=3.4)"]
 flex = ["flex (>=6.13,<7.0)"]
 icu = ["PyICU (>=2.4,<3.0)"]
-osv = ["openapi-spec-validator (>=0.5.1,<0.6.0)"]
+osv = ["openapi-spec-validator (>=0.2.1)"]
 ssv = ["swagger-spec-validator (>=2.4,<3.0)"]
 
 [[package]]
@@ -706,17 +690,6 @@ description = "passive checker of Python programs"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
-
-[[package]]
-name = "pyparsing"
-version = "3.0.9"
-description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "dev"
-optional = false
-python-versions = ">=3.6.8"
-
-[package.extras]
-diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyproject-flake8"
@@ -1003,7 +976,7 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<4"
-content-hash = "0e04a432a2336980545d2a335b1a7248273470a29426920ecde0adb04e2dbdc1"
+content-hash = "9be7d85b264adf512f6b890cd8f1c7fef87d2e1e77ca720c520a455e9aa9b345"
 
 [metadata.files]
 anyio = [
@@ -1013,10 +986,6 @@ anyio = [
 argcomplete = [
     {file = "argcomplete-2.0.0-py2.py3-none-any.whl", hash = "sha256:cffa11ea77999bb0dd27bb25ff6dc142a6796142f68d45b1a26b11f58724561e"},
     {file = "argcomplete-2.0.0.tar.gz", hash = "sha256:6372ad78c89d662035101418ae253668445b391755cfe94ea52f1b9d22425b20"},
-]
-argo-workflows = [
-    {file = "argo-workflows-6.3.5.tar.gz", hash = "sha256:e7354f272d8860a0e535380ca0affcfc9b898cc7e9bdf1d692104205b22d71ad"},
-    {file = "argo_workflows-6.3.5-py3-none-any.whl", hash = "sha256:f58c9db253c6f70ad601acc9e98329f3e8456377bdf4c524f8f21dda9a59c1d9"},
 ]
 attrs = [
     {file = "attrs-22.2.0-py3-none-any.whl", hash = "sha256:29e95c7f6778868dbd49170f98f8818f78f3dc5e0e37c0b1f474e3561b240836"},
@@ -1313,8 +1282,8 @@ openapi-spec-validator = [
     {file = "openapi_spec_validator-0.5.1-py3-none-any.whl", hash = "sha256:4a8aee1e45b1ac868e07ab25e18828fe9837baddd29a8e20fdb3d3c61c8eea3d"},
 ]
 packaging = [
-    {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
-    {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
+    {file = "packaging-22.0-py3-none-any.whl", hash = "sha256:957e2148ba0e1a3b282772e791ef1d8083648bc131c8ab0c1feba110ce1146c3"},
+    {file = "packaging-22.0.tar.gz", hash = "sha256:2198ec20bd4c017b8f9717e00f0c8714076fc2fd93816750ab48e2c41de2cfd3"},
 ]
 pathable = [
     {file = "pathable-0.4.3-py3-none-any.whl", hash = "sha256:cdd7b1f9d7d5c8b8d3315dbf5a86b2596053ae845f056f57d97c0eefff84da14"},
@@ -1345,8 +1314,8 @@ ply = [
     {file = "ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
 ]
 prance = [
-    {file = "prance-0.22.11.4.0-py3-none-any.whl", hash = "sha256:c15e9ca889b56262e4c2aee354f52918ba5e54f46bb3da42b806d8bbd8255ee9"},
-    {file = "prance-0.22.11.4.0.tar.gz", hash = "sha256:814a523bc1ff18383c12cb523ce44c90fe8792bf5f48d8cc33c9f658276658ed"},
+    {file = "prance-0.21.8.0-py3-none-any.whl", hash = "sha256:51ec41d10b317bf5d4e74782a7f7f0c0488c6042433b5b4fde2a988cd069d235"},
+    {file = "prance-0.21.8.0.tar.gz", hash = "sha256:ce06feef8814c3436645f3b094e91067b1a111bc860a51f239f93437a8d4b00e"},
 ]
 py = [
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
@@ -1397,10 +1366,6 @@ pydantic = [
 pyflakes = [
     {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
     {file = "pyflakes-2.5.0.tar.gz", hash = "sha256:491feb020dca48ccc562a8c0cbe8df07ee13078df59813b83959cbdada312ea3"},
-]
-pyparsing = [
-    {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
-    {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
 pyproject-flake8 = [
     {file = "pyproject-flake8-5.0.4.post1.tar.gz", hash = "sha256:c2dfdf1064f47efbb2e4faf1a32b0b6a6ea67dc4d1debb98d862b0cdee377941"},
