@@ -27,14 +27,15 @@ class Config:
         The host of the Argo server to submit workflows to. An attempt to assemble a host from Argo K8S cluster
         environment variables is pursued if this is not specified.
     verify_ssl: Optional[bool] = None
-        Whether to perform SSL/TLS verification. Set this as False to skip verifying SSL certificate when submitting
-        workflows from an HTTPS server. Alternatively, you can set it globally via `host_config.set_global_verify_ssl`.
+        DEPRECATED: Use GlobalConfig.verify_ssl instead. Whether to perform SSL/TLS verification. Set this as False
+        to skip verifying SSL certificate when submitting workflows from an HTTPS server. Alternatively, you can set
+        it globally via `global_config.GlobalConfig.verify_ssl`.
     """
 
     def __init__(self, host: Optional[str] = None, verify_ssl: Optional[bool] = None):
         self.host = host or self._assemble_host()
         self.verify_ssl = GlobalConfig.verify_ssl if verify_ssl is None else verify_ssl
-        self._config = self.__get_config()
+        self._config = self._get_config()
 
     def _assemble_host(self) -> str:
         """Assembles a host from the default K8S cluster env variables with Argo's address.
@@ -64,7 +65,7 @@ class Config:
         tcp_port = os.getenv("ARGO_SERVER_PORT_2746_TCP_PORT", None)
         return f"https://{tcp_addr}:{tcp_port}" if tcp_port else f"https://{tcp_addr}"
 
-    def __get_config(self) -> ArgoConfig:
+    def _get_config(self) -> ArgoConfig:
         """Assembles the Argo configuration.
 
         This attempts to get environment variables that are typically

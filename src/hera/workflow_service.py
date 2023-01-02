@@ -37,9 +37,9 @@ class WorkflowService:
         The host of the Argo server to submit workflows to. An attempt to assemble a host from the globally set host
         (`hera.set_global_host`) is performed, followed by an attempt to get a host from Argo K8S cluster
         environment variables if this is not specified.
-    verify_ssl: bool = True
-        Whether to perform SSL/TLS verification. Set this to false to skip verifying SSL certificate when submitting
-        workflows from an HTTPS server.
+    verify_ssl: Optional[bool] = True
+        DEPRECATED: Use GlobalConfig.verify_ssl instead. Whether to perform SSL/TLS verification. Set this as False
+        to skip verifying SSL certificate when submitting workflows from an HTTPS server.
     token: Optional[str] = None
         The token to use for authentication purposes. Note that this assumes the Argo deployment is fronted with a
         deployment/service that can intercept a request and check the Bearer token. An attempt is performed to get the
@@ -52,7 +52,7 @@ class WorkflowService:
     def __init__(
         self,
         host: Optional[str] = None,
-        verify_ssl: bool = True,
+        verify_ssl: Optional[bool] = True,
         token: Optional[str] = None,
         namespace: Optional[str] = None,
     ):
