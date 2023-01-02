@@ -7,51 +7,15 @@ import textwrap
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from argo_workflows.models import (
-    Container,
-    EnvFromSource,
-    EnvVar,
-    IoArgoprojWorkflowV1alpha1Arguments,
-    IoArgoprojWorkflowV1alpha1DAGTask,
-    IoArgoprojWorkflowV1alpha1Metadata,
-    IoArgoprojWorkflowV1alpha1ScriptTemplate,
-    IoArgoprojWorkflowV1alpha1Template,
-    PersistentVolumeClaim,
-)
-from argo_workflows.models import Toleration as ArgoToleration
-from argo_workflows.models import Volume as ArgoVolume
-from argo_workflows.models import VolumeMount
+from pydantic import Field
 
 import hera
-from hera.affinity import Affinity
-from hera.artifact import Artifact
 from hera.dag import DAG
 from hera.env import Env
-from hera.env_from import BaseEnvFrom
 from hera.global_config import GlobalConfig
 from hera.image import ImagePullPolicy
-from hera.io import IO
-from hera.memoize import Memoize
-from hera.metric import Metric, Metrics
-from hera.operator import Operator
-from hera.parameter import Parameter
-from hera.resource_template import ResourceTemplate
-from hera.resources import Resources
-from hera.retry_strategy import RetryStrategy
-from hera.security_context import TaskSecurityContext
-from hera.sequence import Sequence
-from hera.sidecar import Sidecar
-from hera.template_ref import TemplateRef
-from hera.toleration import Toleration
+from hera.models import *
 from hera.validators import validate_name
-from hera.volumes import (
-    ConfigMapVolume,
-    EmptyDirVolume,
-    ExistingVolume,
-    SecretVolume,
-    Volume,
-    _BaseVolume,
-)
 from hera.workflow_status import WorkflowStatus
 
 
@@ -69,151 +33,152 @@ class TaskResult(str, Enum):
         return str(self.value)
 
 
-class Task(IO):
-    """An Argo task representation. This is used to submit functions to be executed on Argo.
-
-    The task can take a function, along with its parameters, resource configuration, a volume, etc, and submit it for
-    remote execution.
-
-    Parameters
-    ----------
-    name: str
-        The name of the task to submit as part of a workflow.
-    source: Optional[Union[Callable, str]] = None
-        The function to execute remotely. If a string is supplied it is submitted as a literal, otherwise the callable
-        is parsed and submitted.
-    with_param: Optional[Any] = None
-        The parameters of the function to execute. Note that this works together with parallel. If the params are
-        constructed using a single list of values and parallel is False, it is going to be interpreted as a single
-        function call with the given parameters. Otherwise, if parallel is False and the list of params is a list of
-        lists (each list contains a series of values to pass to the function), the task will execute as a task
-        group and schedule multiple function calls in parallel.
-    with_sequence: Optional[Sequence] = None
-        Sequence is similar to `with_param` in that it generates a range of objects. See `hera.sequence.Sequence` or
-        https://argoproj.github.io/argo-workflows/fields/#sequence.
-    inputs: Optional[
-            Union[
-                List[Union[Parameter, Artifact]],
-                List[Union[Parameter, Artifact, Dict[str, Any]]],
-                Dict[str, Any],
-            ]
-    ] = None,
-        `Input` or `Parameter` objects that hold parameter inputs. When a dictionary is specified all the key/value
-        pairs will be transformed into `Parameter`s. The `key` will be the `name` field of the `Parameter` while the
-        `value` will be the `value` field of the `Parameter.
-    outputs: Optional[List[Union[Parameter, Artifact]]] = None
-        `Output` objects that dictate the outputs of the task.
-    dag: Optional[DAG] = None
-        The DAG the task should execute.
-    image: Optional[str] = None
-        The image to use in the execution of the function.
-    image_pull_policy: Optional[ImagePullPolicy] = None
-        The image_pull_policy represents the way to tell Kubernetes if your Task needs to pull and image or not.
-        In case of local development/testing this can be set to 'Never'.
-    daemon: bool = False
-        Whether to run the task as a daemon.
-    command: Optional[List[str]] = None
-        The command to use in the environment where the function runs in order to run the specific function. Note that
-        the specified function is parsed, stored as a string, and ultimately placed in a separate file inside the task
-        and invoked via `python script_file.py`. Also note, that when neither command nor args are set, the command
-        will default to python. This command offers users the opportunity to start up the script in a different way
-        e.g `time python` to time execution, `horovodrun -p X` to use horovod from an image that allows training models
-        on multiple GPUs, etc.
-    args: Optional[List[str]] = None
-        Optional list of arguments to run in the container. This can be used as an alternative to command, with the
-        advantage of not overriding the set entrypoint of the container. As an example, a container by default may
-        enter via a `python` command, so if a Task runs a `script.py`, only args need to be set to `['script.py']`.
-        See notes, for when running with emissary executor.
-    env: Optional[List[Union[Env, BaseEnvFrom]]] = None
-        The environment specifications to load. This operates on a single Enum that specifies whether to load the AWS
-        credentials, or other available secrets.
-    resources: Optional[Resources] = None
-        A task resources configuration. See `hera.resources.Resources`.
-    volumes: Optional[List[BaseVolume]] = None
-        Any volumes to mount or create for the task. See `hera.volumes`.
-    working_dir: Optional[str] = None
-        The working directory to be set inside the executing container context.
-    retry: Optional[RetryStrategy] = None
-        A task retry strategy configuration. See `hera.retry_strategy.RetryStrategy`.
-    tolerations: Optional[List[Toleration]] = None
-        List of tolerations for the pod executing the task. This is used for scheduling purposes.
-    node_selectors: Optional[Dict[str, str]] = None
-        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
-        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
-        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
-        they submit the workflow to.
-    labels: Optional[Dict[str, str]] = None
-        A dictionary of labels to attach to the Task Template object metadata.
-    annotations: Optional[Dict[str, str]] = None
-        A dictionary of annotations to attach to the Task Template object metadata.
-    security_context: Optional[TaskSecurityContext] = None
-        Define security settings for the task container, overrides workflow security context.
-    template_ref: Optional[TemplateRef] = None
-        A template name reference to use with this task. Note that this is prioritized over a new template creation
-        for each task definition.
-    affinity: Optional[Affinity] = None
-        The task affinity. This dictates the scheduling protocol of the pods running the task.
-    memoize: Optional[Memoize] = None
-        The memoize configuration for the task.
-    pod_spec_patch: Optional[str] = None
-        The fields of the task to patch, and how.
-        See https://github.com/argoproj/argo-workflows/blob/master/examples/pod-spec-patch.yaml for an example.
-    resource_template: Optional[ResourceTemplate]
-        Resource template for managing Kubernetes resources. Resource template allows you to create, delete or update
-        any type of Kubernetes resource, it accepts any kubectl action and valid K8S manifest.
-    active_deadline_seconds: Optional[int]
-        Optional duration in seconds relative to the task start time which the task
-        is allowed to run.
-    timeout: Optional[str]
-        Set the total node execution timeout duration counting from the node's
-        start time. This duration also includes time in which the node spends in Pending state.
-    metrics: Optional[Union[Metric, List[Metric], Metrics]] = None
-        Any built-in/custom Prometheus metrics to track.
-    sidecars: Optional[List[Sidecar]] = None
-        List of sidecars to create for the main pods of the container that runs the task.
-
-    Notes
-    -----
-    When argo is using the emissary executor, the command must be set even when using args. See,
-    https://argoproj.github.io/argo-workflows/workflow-executors/#emissary-emissary for how to get a containers
-    entrypoint, inorder to set it as the command and to be able to set args on the Tasks.
-    """
-
+class Task:
     def __init__(
         self,
-        name: str,
-        source: Optional[Union[Callable, str]] = None,
-        with_param: Optional[Any] = None,
-        with_sequence: Optional[Sequence] = None,
-        inputs: Optional[
-            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
-        ] = None,
-        outputs: Optional[List[Union[Parameter, Artifact]]] = None,
-        dag: Optional[DAG] = None,
-        image: Optional[str] = None,
-        image_pull_policy: Optional[ImagePullPolicy] = None,
-        daemon: bool = False,
-        command: Optional[List[str]] = None,
-        args: Optional[List[str]] = None,
-        env: Optional[List[Union[Env, BaseEnvFrom]]] = None,
-        resources: Optional[Resources] = None,
-        volumes: Optional[List[_BaseVolume]] = None,
-        working_dir: Optional[str] = None,
-        retry_strategy: Optional[RetryStrategy] = None,
-        tolerations: Optional[List[Toleration]] = None,
-        node_selectors: Optional[Dict[str, str]] = None,
-        labels: Optional[Dict[str, str]] = None,
-        annotations: Optional[Dict[str, str]] = None,
-        security_context: Optional[TaskSecurityContext] = None,
+        name: str = Field(..., description="Name is the name of the target"),
+        arguments: Optional[Arguments] = None,
+        continue_on: Optional[ContinueOn] = None,
+        dependencies: Optional[List[str]] = None,
+        depends: Optional[str] = None,
+        hooks: Optional[Dict[str, LifecycleHook]] = None,
+        inline: Optional[Template] = None,
+        on_exit: Optional[str] = None,
+        template: Optional[str] = None,
         template_ref: Optional[TemplateRef] = None,
-        affinity: Optional[Affinity] = None,
-        memoize: Optional[Memoize] = None,
-        pod_spec_patch: Optional[str] = None,
-        resource_template: Optional[ResourceTemplate] = None,
-        active_deadline_seconds: Optional[int] = None,
-        timeout: Optional[str] = None,
-        metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
-        sidecars: Optional[List[Sidecar]] = None,
+        when: Optional[str] = None,
+        with_items: Optional[List[Item]] = None,
+        with_param: Optional[str] = None,
+        with_sequence: Optional[Sequence] = None,
+		active_deadline_seconds: Optional[intstr.IntOrString] = None,
+		affinity: Optional[v1.Affinity] = None,
+
+	archive_location: Optional[ArtifactLocation] = None,
+	automount_service_account_token: Optional[bool] = None,
+	container: Optional[v1.Container] = None,
+	container_set: Optional[ContainerSetTemplate] = None,
+	daemon: Optional[bool] = None,
+	dag: Optional[DAGTemplate] = Field(None, description="DAG template subtype which runs a DAG"),
+	data: Optional[Data] = Field(None, description="Data is a data template"),
+	executor: Optional[ExecutorConfig] = Field(
+		None, description="Executor holds configurations of the executor container."
+	),
+	fail_fast: Optional[bool] = Field(
+		None,
+		alias="failFast",
+		description=(
+			"FailFast, if specified, will fail this template if any of its child pods has failed. This is useful for"
+			" when this template is expanded with `withItems`, etc."
+		),
+	),
+	host_aliases: Optional[List[v1.HostAlias]] = Field(
+		None,
+		alias="hostAliases",
+		description="HostAliases is an optional list of hosts and IPs that will be injected into the pod spec",
+	),
+	http: Optional[HTTP] = Field(None, description="HTTP makes a HTTP request")
+	init_containers: Optional[List[UserContainer]] = Field(
+		None,
+		alias="initContainers",
+		description="InitContainers is a list of containers which run before the main container.",
+	),
+	inputs: Optional[Inputs] = Field(
+		None, description="Inputs describe what inputs parameters and artifacts are supplied to this template"
+	),
+	memoize: Optional[Memoize] = Field(
+		None, description="Memoize allows templates to use outputs generated from already executed templates"
+	),
+	metadata: Optional[Metadata] = Field(
+		None, description="Metdata sets the pods's metadata, i.e. annotations and labels"
+	),
+	metrics: Optional[Metrics] = Field(None, description="Metrics are a list of metrics emitted from this template"),
+	name: Optional[str] = Field(None, description="Name is the name of the template"),
+	node_selector: Optional[Dict[str, str]] = Field(
+		None,
+		alias="nodeSelector",
+		description=(
+			"NodeSelector is a selector to schedule this step of the workflow to be run on the selected node(s)."
+			" Overrides the selector set at the workflow level."
+		),
+	),
+	outputs: Optional[Outputs] = Field(
+		None, description="Outputs describe the parameters and artifacts that this template produces"
+	),
+	parallelism: Optional[int] = Field(
+		None,
+		description=(
+			"Parallelism limits the max total parallel pods that can execute at the same time within the boundaries of"
+			" this template invocation. If additional steps/dag templates are invoked, the pods created by those"
+			" templates will not be counted towards this total."
+		),
+	),
+	plugin: Optional[Plugin] = Field(None, description="Plugin is a plugin template"),
+	pod_spec_patch: Optional[str] = Field(
+		None,
+		alias="podSpecPatch",
+		description=(
+			"PodSpecPatch holds strategic merge patch to apply against the pod spec. Allows parameterization of"
+			" container fields which are not strings (e.g. resource limits)."
+		),
+	),
+	priority: Optional[int] = Field(None, description="Priority to apply to workflow pods.")
+	priority_class_name: Optional[str] = Field(
+		None, alias="priorityClassName", description="PriorityClassName to apply to workflow pods."
+	),
+	resource: Optional[ResourceTemplate] = Field(
+		None, description="Resource template subtype which can run k8s resources"
+	),
+	retry_strategy: Optional[RetryStrategy] = Field(
+		None, alias="retryStrategy", description="RetryStrategy describes how to retry a template when it fails"
+	),
+	scheduler_name: Optional[str] = Field(
+		None,
+		alias="schedulerName",
+		description=(
+			"If specified, the pod will be dispatched by specified scheduler. Or it will be dispatched by workflow"
+			" scope scheduler if specified. If neither specified, the pod will be dispatched by default scheduler."
+		),
+	),
+	script: Optional[ScriptTemplate] = Field(None, description="Script runs a portion of code against an interpreter")
+	security_context: Optional[v1.PodSecurityContext] = Field(
+		None,
+		alias="securityContext",
+		description=(
+			"SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to"
+			" empty.  See type description for default values of each field."
+		),
+	),
+	service_account_name: Optional[str] = Field(
+		None, alias="serviceAccountName", description="ServiceAccountName to apply to workflow pods"
+	),
+	sidecars: Optional[List[UserContainer]] = Field(
+		None,
+		description=(
+			"Sidecars is a list of containers which run alongside the main container Sidecars are automatically killed"
+			" when the main container completes"
+		),
+	),
+	steps: Optional[List[ParallelSteps]] = Field(
+		None, description="Steps define a series of sequential/parallel workflow steps"
+	),
+	suspend: Optional[SuspendTemplate] = Field(
+		None, description="Suspend template subtype which can suspend a workflow when reaching the step"
+	),
+	synchronization: Optional[Synchronization] = Field(
+		None, description="Synchronization holds synchronization lock configuration for this template"
+	),
+	timeout: Optional[str] = Field(
+		None,
+		description=(
+			"Timeout allows to set the total node execution timeout duration counting from the node's start time. This"
+			" duration also includes time in which the node spends in Pending state. This duration may not be applied"
+			" to Step or DAG templates."
+		),
+	),
+	tolerations: Optional[List[v1.Toleration]] = Field(None, description="Tolerations to apply to workflow pods."),
+	volumes: Optional[List[v1.Volume]] = Field(
+		None, description="Volumes is a list of volumes that can be mounted by containers in a template."
+	),
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -363,12 +328,12 @@ class Task(IO):
         Parameters
         ----------
         other: Task
-            The other task to set a dependency for. The new dependency of the task is this task.
+                The other task to set a dependency for. The new dependency of the task is this task.
 
         Returns
         -------
         Task
-            The other task that was specified.
+                The other task that was specified.
 
         Examples
         --------
@@ -400,12 +365,12 @@ class Task(IO):
         Parameters
         ----------
         other: List["Task"]
-            The list of upstream dependencies of this task.
+                The list of upstream dependencies of this task.
 
         Returns
         -------
         Task
-            This task/`self`.
+                This task/`self`.
         """
         assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
         for o in other:
@@ -418,12 +383,12 @@ class Task(IO):
         Parameters
         ----------
         other: Union["Task", List["Task"]]
-            The other task(s) to set a dependency for. The new dependency of the task is this task.
+                The other task(s) to set a dependency for. The new dependency of the task is this task.
 
         Returns
         -------
         Union["Task", List["Task"]]
-            The other task/s that was/were specified as the dependencies.
+                The other task/s that was/were specified as the dependencies.
 
         Examples
         --------
@@ -504,19 +469,19 @@ class Task(IO):
         Parameters
         ----------
         other: Task
-            The other task to execute when any of the tasks of this task group have succeeded.
+                The other task to execute when any of the tasks of this task group have succeeded.
 
         Returns
         -------
         Task
-            The current task.
+                The current task.
 
         Raises
         ------
         AssertionError
-            When the task does not contain multiple `func_params` to process.
-            When the task does not use `input_from`.
-            When the task uses `continue_on_fail` or `continue_on_error`.
+                When the task does not contain multiple `func_params` to process.
+                When the task does not use `input_from`.
+                When the task uses `continue_on_fail` or `continue_on_error`.
 
         Notes
         -----
@@ -534,19 +499,19 @@ class Task(IO):
         Parameters
         ----------
         other: Task
-            The other task to execute when all of the tasks of this task group have failed.
+                The other task to execute when all of the tasks of this task group have failed.
 
         Returns
         -------
         Task
-            The current task.
+                The current task.
 
         Raises
         ------
         AssertionError
-            When the task does not contain multiple `func_params` to process.
-            When the task does not use `input_from`.
-            When the task uses `continue_on_fail` or `continue_on_error`.
+                When the task does not contain multiple `func_params` to process.
+                When the task does not use `input_from`.
+                When the task uses `continue_on_fail` or `continue_on_error`.
 
         Notes
         -----
@@ -608,11 +573,11 @@ class Task(IO):
         Parameters
         ----------
         name: str
-            The name of the parameter to extract as an output.
+                The name of the parameter to extract as an output.
         Returns
         -------
         Parameter
-            Parameter with the same name
+                Parameter with the same name
 
         """
         parameters = [p for p in self.outputs if isinstance(p, Parameter)]
@@ -630,12 +595,12 @@ class Task(IO):
         Parameters
         ----------
         name: str
-            The name of the parameter to extract as an output.
+                The name of the parameter to extract as an output.
 
         Returns
         -------
         Artifact
-            Artifact with the same name
+                Artifact with the same name
 
         """
         artifacts = [p for p in self.outputs if isinstance(p, Artifact)]
@@ -770,16 +735,16 @@ class Task(IO):
         self,
     ) -> List[Parameter]:
         """Deduce missing input parameters based on the contents of:
-            - `inputs`
-            - `with_param`
-            - `with_sequence`
-            - `source`
-            - `env`
+                - `inputs`
+                - `with_param`
+                - `with_sequence`
+                - `source`
+                - `env`
 
         Returns
         -------
         List[Parameter]
-            A list representing the deduced parameters.
+                A list representing the deduced parameters.
         """
         deduced_params: List[Parameter] = []
 
@@ -814,7 +779,7 @@ class Task(IO):
         Returns
         -------
         str
-            The string representation of the script to load.
+                The string representation of the script to load.
         """
         inputs = [i.as_input() for i in self.inputs if isinstance(i, Parameter)]
         inputs = [a for a in inputs if a is not None]
@@ -837,7 +802,7 @@ class Task(IO):
         Returns
         -------
         str
-            Final formatted script.
+                Final formatted script.
         """
         if callable(self.source):
             signature = inspect.signature(self.source)
@@ -888,7 +853,7 @@ class Task(IO):
         Returns
         -------
         List[VolumeMount]
-            The list of volume mounts to be added to the task specification.
+                The list of volume mounts to be added to the task specification.
         """
         return [v._build_mount() for v in self.volumes]
 
@@ -941,7 +906,7 @@ class Task(IO):
         Returns
         -------
         IoArgoprojWorkflowV1alpha1ScriptTemplate
-            The script template representation of the task.
+                The script template representation of the task.
         """
         kwargs = self._build_container_kwargs()
         kwargs["source"] = self._get_script()
@@ -954,7 +919,7 @@ class Task(IO):
         Returns
         -------
         Container
-            The container template representation of the task.
+                The container template representation of the task.
         """
         container_args = self._build_container_kwargs()
         container = Container(**container_args)
@@ -967,7 +932,7 @@ class Task(IO):
         Returns
         -------
         IoArgoprojWorkflowV1alpha1Template
-            The template representation of the task.
+                The template representation of the task.
         """
         if self.template_ref is not None:
             # Template already exists in cluster
@@ -1045,7 +1010,7 @@ class Task(IO):
         Returns
         -------
         Optional[List[_ArgoToleration]]
-            The list of assembled tolerations.
+                The list of assembled tolerations.
 
         Notes
         -----
@@ -1066,7 +1031,7 @@ class Task(IO):
         Returns
         -------
         V1alpha1DAGTask
-            The graph task representation.
+                The graph task representation.
         """
         task = IoArgoprojWorkflowV1alpha1DAGTask(
             name=self.name,
