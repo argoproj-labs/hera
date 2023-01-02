@@ -1,0 +1,18 @@
+name: Update Draft Release
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update:
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+    name: Update Draft Release
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - id: release-drafter
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
