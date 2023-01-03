@@ -4,10 +4,7 @@ import copy
 import inspect
 import json
 import textwrap
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
-
-from pydantic import Field
+from typing import Callable, Dict, List, Optional, Union, cast
 
 import hera
 from hera.dag import DAG
@@ -15,6 +12,7 @@ from hera.env import Env
 from hera.global_config import GlobalConfig
 from hera.image import ImagePullPolicy
 from hera.models import *
+from hera.operator import Operator
 from hera.validators import validate_name
 from hera.workflow_status import WorkflowStatus
 
@@ -36,8 +34,30 @@ class TaskResult(str, Enum):
 class Task:
     def __init__(
         self,
-        name: str = Field(..., description="Name is the name of the target"),
-        arguments: Optional[Arguments] = None,
+        name: str,
+        args: Optional[List[str]] = None,
+        command: Optional[List[str]] = None,
+        env: Optional[List[v1.EnvVar]] = None,
+        env_from: Optional[List[v1.EnvFromSource]] = None,
+        image: Optional[str] = None,
+        image_pull_policy: Optional[str] = None,
+        lifecycle: Optional[v1.Lifecycle] = None,
+        liveness_probe: Optional[v1.Probe] = None,
+        ports: Optional[List[v1.ContainerPort]] = None,
+        readiness_probe: Optional[v1.Probe] = None,
+        resources: Optional[v1.ResourceRequirements] = None,
+        security_context: Optional[v1.SecurityContext] = None,
+        source: Optional[Union[Callable, str]] = None,
+        startup_probe: Optional[v1.Probe] = None,
+        stdin: Optional[bool] = None,
+        stdin_once: Optional[bool] = None,
+        termination_message_path: Optional[str] = None,
+        termination_message_policy: Optional[str] = None,
+        tty: Optional[bool] = None,
+        volume_devices: Optional[List[v1.VolumeDevice]] = None,
+        volume_mounts: Optional[List[v1.VolumeMount]] = None,
+        working_dir: Optional[str] = None,
+        arguments: Optional[List[Union[Parameter, Artifact]]] = None,
         continue_on: Optional[ContinueOn] = None,
         dependencies: Optional[List[str]] = None,
         depends: Optional[str] = None,
@@ -50,143 +70,143 @@ class Task:
         with_items: Optional[List[Item]] = None,
         with_param: Optional[str] = None,
         with_sequence: Optional[Sequence] = None,
-		active_deadline_seconds: Optional[intstr.IntOrString] = None,
-		affinity: Optional[v1.Affinity] = None,
-
-	archive_location: Optional[ArtifactLocation] = None,
-	automount_service_account_token: Optional[bool] = None,
-	container: Optional[v1.Container] = None,
-	container_set: Optional[ContainerSetTemplate] = None,
-	daemon: Optional[bool] = None,
-	dag: Optional[DAGTemplate] = Field(None, description="DAG template subtype which runs a DAG"),
-	data: Optional[Data] = Field(None, description="Data is a data template"),
-	executor: Optional[ExecutorConfig] = Field(
-		None, description="Executor holds configurations of the executor container."
-	),
-	fail_fast: Optional[bool] = Field(
-		None,
-		alias="failFast",
-		description=(
-			"FailFast, if specified, will fail this template if any of its child pods has failed. This is useful for"
-			" when this template is expanded with `withItems`, etc."
-		),
-	),
-	host_aliases: Optional[List[v1.HostAlias]] = Field(
-		None,
-		alias="hostAliases",
-		description="HostAliases is an optional list of hosts and IPs that will be injected into the pod spec",
-	),
-	http: Optional[HTTP] = Field(None, description="HTTP makes a HTTP request")
-	init_containers: Optional[List[UserContainer]] = Field(
-		None,
-		alias="initContainers",
-		description="InitContainers is a list of containers which run before the main container.",
-	),
-	inputs: Optional[Inputs] = Field(
-		None, description="Inputs describe what inputs parameters and artifacts are supplied to this template"
-	),
-	memoize: Optional[Memoize] = Field(
-		None, description="Memoize allows templates to use outputs generated from already executed templates"
-	),
-	metadata: Optional[Metadata] = Field(
-		None, description="Metdata sets the pods's metadata, i.e. annotations and labels"
-	),
-	metrics: Optional[Metrics] = Field(None, description="Metrics are a list of metrics emitted from this template"),
-	name: Optional[str] = Field(None, description="Name is the name of the template"),
-	node_selector: Optional[Dict[str, str]] = Field(
-		None,
-		alias="nodeSelector",
-		description=(
-			"NodeSelector is a selector to schedule this step of the workflow to be run on the selected node(s)."
-			" Overrides the selector set at the workflow level."
-		),
-	),
-	outputs: Optional[Outputs] = Field(
-		None, description="Outputs describe the parameters and artifacts that this template produces"
-	),
-	parallelism: Optional[int] = Field(
-		None,
-		description=(
-			"Parallelism limits the max total parallel pods that can execute at the same time within the boundaries of"
-			" this template invocation. If additional steps/dag templates are invoked, the pods created by those"
-			" templates will not be counted towards this total."
-		),
-	),
-	plugin: Optional[Plugin] = Field(None, description="Plugin is a plugin template"),
-	pod_spec_patch: Optional[str] = Field(
-		None,
-		alias="podSpecPatch",
-		description=(
-			"PodSpecPatch holds strategic merge patch to apply against the pod spec. Allows parameterization of"
-			" container fields which are not strings (e.g. resource limits)."
-		),
-	),
-	priority: Optional[int] = Field(None, description="Priority to apply to workflow pods.")
-	priority_class_name: Optional[str] = Field(
-		None, alias="priorityClassName", description="PriorityClassName to apply to workflow pods."
-	),
-	resource: Optional[ResourceTemplate] = Field(
-		None, description="Resource template subtype which can run k8s resources"
-	),
-	retry_strategy: Optional[RetryStrategy] = Field(
-		None, alias="retryStrategy", description="RetryStrategy describes how to retry a template when it fails"
-	),
-	scheduler_name: Optional[str] = Field(
-		None,
-		alias="schedulerName",
-		description=(
-			"If specified, the pod will be dispatched by specified scheduler. Or it will be dispatched by workflow"
-			" scope scheduler if specified. If neither specified, the pod will be dispatched by default scheduler."
-		),
-	),
-	script: Optional[ScriptTemplate] = Field(None, description="Script runs a portion of code against an interpreter")
-	security_context: Optional[v1.PodSecurityContext] = Field(
-		None,
-		alias="securityContext",
-		description=(
-			"SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to"
-			" empty.  See type description for default values of each field."
-		),
-	),
-	service_account_name: Optional[str] = Field(
-		None, alias="serviceAccountName", description="ServiceAccountName to apply to workflow pods"
-	),
-	sidecars: Optional[List[UserContainer]] = Field(
-		None,
-		description=(
-			"Sidecars is a list of containers which run alongside the main container Sidecars are automatically killed"
-			" when the main container completes"
-		),
-	),
-	steps: Optional[List[ParallelSteps]] = Field(
-		None, description="Steps define a series of sequential/parallel workflow steps"
-	),
-	suspend: Optional[SuspendTemplate] = Field(
-		None, description="Suspend template subtype which can suspend a workflow when reaching the step"
-	),
-	synchronization: Optional[Synchronization] = Field(
-		None, description="Synchronization holds synchronization lock configuration for this template"
-	),
-	timeout: Optional[str] = Field(
-		None,
-		description=(
-			"Timeout allows to set the total node execution timeout duration counting from the node's start time. This"
-			" duration also includes time in which the node spends in Pending state. This duration may not be applied"
-			" to Step or DAG templates."
-		),
-	),
-	tolerations: Optional[List[v1.Toleration]] = Field(None, description="Tolerations to apply to workflow pods."),
-	volumes: Optional[List[v1.Volume]] = Field(
-		None, description="Volumes is a list of volumes that can be mounted by containers in a template."
-	),
+        active_deadline_seconds: Optional[intstr.IntOrString] = None,
+        affinity: Optional[v1.Affinity] = None,
+        archive_location: Optional[ArtifactLocation] = None,
+        automount_service_account_token: Optional[bool] = None,
+        container: Optional[v1.Container] = None,
+        container_set: Optional[ContainerSetTemplate] = None,
+        daemon: Optional[bool] = None,
+        dag: Optional[DAG] = None,
+        data: Optional[Data] = None,
+        executor: Optional[ExecutorConfig] = None,
+        fail_fast: Optional[bool] = None,
+        host_aliases: Optional[List[v1.HostAlias]] = None,
+        http: Optional[HTTP] = None,
+        init_containers: Optional[List[UserContainer]] = None,
+        inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+        ] = None,
+        outputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        exit_code: Optional[str] = None,
+        result: Optional[str] = None,
+        memoize: Optional[Memoize] = None,
+        metadata: Optional[Metadata] = None,
+        metrics: Optional[Union[Prometheus, Metrics]] = None,
+        node_selector: Optional[Dict[str, str]] = None,
+        annotations: Optional[Dict[str, str]] = None,
+        labels: Optional[Dict[str, str]] = None,
+        parallelism: Optional[int] = None,
+        plugin: Optional[Plugin] = None,
+        pod_spec_patch: Optional[str] = None,
+        priority: Optional[int] = None,
+        priority_class_name: Optional[str] = None,
+        resource: Optional[ResourceTemplate] = None,
+        retry_strategy: Optional[RetryStrategy] = None,
+        scheduler_name: Optional[str] = None,
+        service_account_name: Optional[str] = None,
+        sidecars: Optional[List[UserContainer]] = None,
+        suspend: Optional[SuspendTemplate] = None,
+        synchronization: Optional[Synchronization] = None,
+        timeout: Optional[str] = None,
+        tolerations: Optional[List[v1.Toleration]] = None,
+        volumes: Optional[List[v1.Volume]] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
         if dag and template_ref:
             raise ValueError("Cannot use both `dag` and `template_ref`")
+        if dag and suspend:
+            raise ValueError("Cannot use both `dag` and `suspend`")
         if with_param is not None and with_sequence is not None:
             raise ValueError("Cannot use both `with_sequence` and `with_param`")
-        self.name = validate_name(name)
+
+        self.name: str = validate_name(name)
+        self.args: Optional[List[str]] = args
+        self.command: Optional[List[str]] = command
+        self.env: Optional[List[v1.EnvVar]] = env
+        self.env_from: Optional[List[v1.EnvFromSource]] = env_from
+        self.image: Optional[str] = image or GlobalConfig.image
+        self.image_pull_policy: Optional[str] = image_pull_policy or ImagePullPolicy.always.value
+        self.lifecycle: Optional[v1.Lifecycle] = lifecycle
+        self.liveness_probe: Optional[v1.Probe] = liveness_probe
+        self.ports: Optional[List[v1.ContainerPort]] = ports
+        self.readiness_probe: Optional[v1.Probe] = readiness_probe
+        self.resources: Optional[v1.ResourceRequirements] = resources
+        self.security_context: Optional[v1.SecurityContext] = security_context
+        self.source: Optional[Union[Callable, str]] = source
+        self.startup_probe: Optional[v1.Probe] = startup_probe
+        self.stdin: Optional[bool] = stdin
+        self.stdin_once: Optional[bool] = stdin_once
+        self.termination_message_path: Optional[str] = termination_message_path
+        self.termination_message_policy: Optional[str] = termination_message_policy
+        self.tty: Optional[bool] = tty
+        self.volume_devices: Optional[List[v1.VolumeDevice]] = volume_devices
+        self.volume_mounts: Optional[List[v1.VolumeMount]] = volume_mounts
+        self.working_dir: Optional[str] = working_dir
+        self.arguments: Optional[List[Artifact, Parameter]] = arguments
+        self.continue_on: Optional[ContinueOn] = continue_on
+        self.dependencies: Optional[List[str]] = dependencies
+        self.depends: Optional[str] = depends
+        self.hooks: Optional[Dict[str, LifecycleHook]] = hooks
+        self.inline: Optional[Template] = inline
+        self.on_exit: Optional[str] = on_exit
+        self.template: Optional[str] = template
+        self.template_ref: Optional[TemplateRef] = template_ref
+        self.when: Optional[str] = when
+        self.with_items: Optional[List[Item]] = with_items
+        self.with_param: Optional[str] = with_param
+        self.with_sequence: Optional[Sequence] = with_sequence
+        self.active_deadline_seconds: Optional[intstr.IntOrString] = active_deadline_seconds
+        self.affinity: Optional[v1.Affinity] = affinity
+        self.archive_location: Optional[ArtifactLocation] = archive_location
+        self.automount_service_account_token: Optional[bool] = automount_service_account_token
+        self.container: Optional[v1.Container] = container
+        self.container_set: Optional[ContainerSetTemplate] = container_set
+        self.daemon: Optional[bool] = daemon
+        self.dag: Optional[DAGTemplate] = dag
+        self.data: Optional[Data] = data
+        self.executor: Optional[ExecutorConfig] = executor
+        self.fail_fast: Optional[bool] = fail_fast
+        self.host_aliases: Optional[List[v1.HostAlias]] = host_aliases
+        self.http: Optional[HTTP] = http
+        self.init_containers: Optional[List[UserContainer]] = init_containers
+        self.inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+        ] = self._parse_inputs(inputs)
+        self.outputs: Optional[List[Union[Parameter, Artifact]]] = outputs or []
+        self.exit_code: Optional[str] = exit_code
+        self.result: Optional[str] = result
+        self.memoize: Optional[Memoize] = memoize
+        self.metadata: Optional[Metadata] = metadata
+        self.metrics: Optional[Metrics] = self._parse_metrics(metrics)
+        self.node_selector: Optional[Dict[str, str]] = node_selector
+        self.annotations: Optional[Dict[str, str]] = annotations
+        self.labels: Optional[Dict[str, str]] = labels
+        self.parallelism: Optional[int] = parallelism
+        self.plugin: Optional[Plugin] = plugin
+        self.pod_spec_patch: Optional[str] = pod_spec_patch
+        self.priority: Optional[int] = priority
+        self.priority_class_name: Optional[str] = priority_class_name
+        self.resource: Optional[ResourceTemplate] = resource
+        self.retry_strategy: Optional[RetryStrategy] = retry_strategy
+        self.scheduler_name: Optional[str] = scheduler_name
+        self.service_account_name: Optional[str] = service_account_name
+        self.sidecars: Optional[List[UserContainer]] = sidecars
+        self.suspend: Optional[SuspendTemplate] = suspend
+        self.synchronization: Optional[Synchronization] = synchronization
+        self.timeout: Optional[str] = timeout
+        self.tolerations: Optional[List[v1.Toleration]] = tolerations
+        self.volumes: Optional[List[v1.Volume]] = volumes
+
         self.dag = dag
         self.source = source
         self.memoize = memoize
@@ -197,46 +217,13 @@ class Task:
         self.with_param = with_param
         self.with_sequence = with_sequence
         self.pod_spec_patch = pod_spec_patch
-        self.resource_template: Optional[ResourceTemplate] = resource_template
+        self.resource_template: Optional[ResourceTemplate] = resource
         self.active_deadline_seconds: Optional[int] = active_deadline_seconds
         self.timeout: Optional[str] = timeout
-        self.metrics: Optional[Metrics] = None
-        if metrics:
-            if isinstance(metrics, Metric):
-                self.metrics = Metrics([metrics])
-            elif isinstance(metrics, list):
-                assert all([isinstance(m, Metric) for m in metrics])
-                self.metrics = Metrics(metrics)
-            elif isinstance(metrics, Metrics):
-                self.metrics = metrics
-            else:
-                raise ValueError(
-                    "Unknown type provided for `metrics`, expected type is "
-                    "`Optional[Union[Metric, List[Metric], Metrics]]`"
-                )
-
-        self.sidecars = sidecars
-        self.image = image or GlobalConfig.image
-        self.image_pull_policy = image_pull_policy
-        self.daemon = daemon
-        self.command = command
-        self.args = args
         self.resources = resources
-        self.working_dir = working_dir
-        self.retry_strategy = retry_strategy
-        self.tolerations = tolerations
-        self.node_selector = node_selectors
-        self.labels = labels or {}
-        self.annotations = annotations or {}
-
-        self.security_context = security_context
-        self.template_ref = template_ref
-        self.affinity = affinity
 
         self.exit_task: Optional[str] = None
         self.is_exit_task: bool = False
-        self.depends: Optional[str] = None
-        self.when: Optional[str] = None
 
         self.validate()
 
@@ -250,6 +237,70 @@ class Task:
 
         for hook in GlobalConfig.task_post_init_hooks:
             hook(self)
+
+    def _parse_metrics(self, metrics: Optional[Union[Prometheus, Metrics]]) -> Optional[Metrics]:
+        """Parses provided combination of metrics into a single `Metrics` object.
+
+        Parameters
+        ----------
+        metrics: Optional[Union[Prometheus, Metrics]]
+            Optional `Metrics` or single `Prometheus` instance to convert into `Metrics`.
+
+        Returns
+        -------
+        Optional[Metrics]
+            Constructed `Metrics`.
+        """
+        if metrics is None:
+            return None
+        if isinstance(metrics, Prometheus):
+            return Metrics(prometheus=[metrics])
+        elif isinstance(metrics, list):
+            assert all([isinstance(m, Prometheus) for m in metrics])
+            return Metrics(prometheus=metrics)
+        elif isinstance(metrics, Metrics):
+            return metrics
+        raise ValueError(
+            "Unknown type provided for `metrics`, expected type is `Optional[Union[Metric, List[Metric], Metrics]]`,"
+            f"received {type(metrics)}"
+        )
+
+    def _parse_inputs(
+        self,
+        inputs: Optional[
+            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
+        ],
+    ) -> List[Union[Parameter, Artifact]]:
+        """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
+
+        Parameters
+        ----------
+        inputs: Union[Dict[str, Any], List[Union[Parameter, Artifact, Dict[str, Any]]]]
+            The list of inputs specified on the task. The `Dict` aspect is treated as a mapped collection of
+            Parameters. If a single dictionary is specified, all the fields are transformed into `Parameter`s. The key
+            is the `name` of the `Parameter` and the `value` is the `value` field of the `Parameter.
+
+        Returns
+        -------
+        List[Union[Parameter, Artifact]]
+            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
+            independent parameters.
+        """
+        if inputs is None:
+            return []
+
+        result: List[Union[Parameter, Artifact]] = []
+        if isinstance(inputs, dict):
+            for k, v in inputs.items():
+                result.append(Parameter(name=k, value=v))
+        else:
+            for i in inputs:
+                if isinstance(i, Parameter) or isinstance(i, Artifact):
+                    result.append(i)
+                elif isinstance(i, dict):
+                    for k, v in i.items():
+                        result.append(Parameter(name=k, value=v))
+        return result
 
     @property
     def id(self) -> str:
@@ -322,18 +373,22 @@ class Task:
         task_names = [t.split(".")[0] for t in tasks]
         return task_names
 
-    def next(self, other: "Task", operator: Operator = Operator.And, on: Optional[TaskResult] = None) -> "Task":
+    def next(self, other: "Task", operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> "Task":
         """Sets this task as a dependency of the other passed task.
 
         Parameters
         ----------
         other: Task
-                The other task to set a dependency for. The new dependency of the task is this task.
+            The other task to set a dependency for. The new dependency of the task is this task.
+        operator: Operator = Operator.and_
+            Operator to apply on the result.
+        on: Optional[TaskResult] = None
+            The task result to perform the `operator` on.
 
         Returns
         -------
         Task
-                The other task that was specified.
+            The other task that was specified.
 
         Examples
         --------
@@ -343,7 +398,6 @@ class Task:
         assert issubclass(other.__class__, Task)
 
         condition = f".{on}" if on else ""
-
         if other.depends is None:
             # First dependency
             other.depends = self.name + condition
@@ -365,12 +419,12 @@ class Task:
         Parameters
         ----------
         other: List["Task"]
-                The list of upstream dependencies of this task.
+            The list of upstream dependencies of this task.
 
         Returns
         -------
         Task
-                This task/`self`.
+            This task/`self`.
         """
         assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
         for o in other:
@@ -383,12 +437,12 @@ class Task:
         Parameters
         ----------
         other: Union["Task", List["Task"]]
-                The other task(s) to set a dependency for. The new dependency of the task is this task.
+            The other task(s) to set a dependency for. The new dependency of the task is this task.
 
         Returns
         -------
         Union["Task", List["Task"]]
-                The other task/s that was/were specified as the dependencies.
+            The other task/s that was/were specified as the dependencies.
 
         Examples
         --------
@@ -407,11 +461,11 @@ class Task:
             return other
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
-    def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.Equals) -> "Task":
+    def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator) -> "Task":
         """Execute this task conditionally on a workflow status."""
         expression = f"{{{{workflow.status}}}} {op} {status}"
         if self.when:
-            self.when += f" {Operator.And} {expression}"
+            self.when += f" {Operator.and_} {expression}"
         else:
             self.when = expression
         return self
@@ -453,11 +507,11 @@ class Task:
             raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
         return self
 
-    def on_other_result(self, other: "Task", value: str, operator: Operator = Operator.Equals) -> "Task":
+    def on_other_result(self, other: "Task", value: str, operator: Operator = Operator.equals) -> "Task":
         """Execute this task based on the `other` result"""
         expression = f"'{other.get_result()}' {operator} {value}"
         if self.when:
-            self.when += f" {Operator.And} {expression}"
+            self.when += f" {Operator.and_} {expression}"
         else:
             self.when = expression
         other.next(self)
@@ -469,19 +523,19 @@ class Task:
         Parameters
         ----------
         other: Task
-                The other task to execute when any of the tasks of this task group have succeeded.
+            The other task to execute when any of the tasks of this task group have succeeded.
 
         Returns
         -------
         Task
-                The current task.
+            The current task.
 
         Raises
         ------
         AssertionError
-                When the task does not contain multiple `func_params` to process.
-                When the task does not use `input_from`.
-                When the task uses `continue_on_fail` or `continue_on_error`.
+            When the task does not contain multiple `func_params` to process.
+            When the task does not use `input_from`.
+            When the task uses `continue_on_fail` or `continue_on_error`.
 
         Notes
         -----
@@ -499,19 +553,19 @@ class Task:
         Parameters
         ----------
         other: Task
-                The other task to execute when all of the tasks of this task group have failed.
+            The other task to execute when all of the tasks of this task group have failed.
 
         Returns
         -------
         Task
-                The current task.
+            The current task.
 
         Raises
         ------
         AssertionError
-                When the task does not contain multiple `func_params` to process.
-                When the task does not use `input_from`.
-                When the task uses `continue_on_fail` or `continue_on_error`.
+            When the task does not contain multiple `func_params` to process.
+            When the task does not use `input_from`.
+            When the task uses `continue_on_fail` or `continue_on_error`.
 
         Notes
         -----
@@ -522,6 +576,23 @@ class Task:
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
 
         return self.next(other, on=TaskResult.AllFailed)
+
+    def _validate_io(self):
+        """
+        Validates that the given function and corresponding params fit one another, raises AssertionError if
+        conditions are not satisfied.
+        """
+        i_parameters = [obj for obj in self.inputs if isinstance(obj, Parameter)]
+        i_artifacts = [obj for obj in self.inputs if isinstance(obj, Artifact)]
+        assert len(set([i.name for i in i_parameters])) == len(i_parameters), "input parameters must have unique names"
+        assert len(set([i.name for i in i_artifacts])) == len(i_artifacts), "input artifacts must have unique names"
+
+        o_parameters = [obj for obj in self.outputs if isinstance(obj, Parameter)]
+        o_artifacts = [obj for obj in self.outputs if isinstance(obj, Artifact)]
+        assert len(set([o.name for o in o_parameters])) == len(
+            o_parameters
+        ), "output parameters must have unique names"
+        assert len(set([o.name for o in o_artifacts])) == len(o_artifacts), "output artifacts must have unique names"
 
     def validate(self):
         """
@@ -548,20 +619,15 @@ class Task:
             if self.memoize:
                 assert self.memoize.key in args, "memoize key must be a parameter of the function"
 
-    def _build_arguments(self) -> Optional[IoArgoprojWorkflowV1alpha1Arguments]:
+    def _build_arguments(self) -> Optional[Arguments]:
         """Assembles and returns the task arguments"""
-        parameters = [obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)]
+        parameters = [obj for obj in self.inputs if isinstance(obj, Parameter)]
         parameters = [p for p in parameters if p is not None]  # Some parameters might not resolve
-        artifacts = [obj.as_argument() for obj in self.inputs if isinstance(obj, Artifact)]
+        artifacts = [obj for obj in self.inputs if isinstance(obj, Artifact)]
         if len(parameters) + len(artifacts) == 0:
             # Some inputs do not require arguments (defaults)
             return None
-        arguments = IoArgoprojWorkflowV1alpha1Arguments()
-        if parameters:
-            setattr(arguments, "parameters", parameters)
-        if artifacts:
-            setattr(arguments, "artifacts", artifacts)
-        return arguments
+        return Arguments(artifacts=artifacts, parameters=parameters)
 
     def get_parameters_as(self, name):
         """Gets all the output parameters from this task"""
@@ -573,11 +639,11 @@ class Task:
         Parameters
         ----------
         name: str
-                The name of the parameter to extract as an output.
+            The name of the parameter to extract as an output.
         Returns
         -------
         Parameter
-                Parameter with the same name
+            Parameter with the same name
 
         """
         parameters = [p for p in self.outputs if isinstance(p, Parameter)]
@@ -585,7 +651,7 @@ class Task:
         if obj is not None:
             if isinstance(obj, Parameter):
                 value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
-                return Parameter(name, value, default=obj.default)
+                return Parameter(name=name, value=value, default=obj.default)
             raise NotImplementedError(type(obj))
         raise KeyError(f"No output parameter named `{name}` found")
 
@@ -595,19 +661,19 @@ class Task:
         Parameters
         ----------
         name: str
-                The name of the parameter to extract as an output.
+            The name of the parameter to extract as an output.
 
         Returns
         -------
         Artifact
-                Artifact with the same name
+            Artifact with the same name
 
         """
         artifacts = [p for p in self.outputs if isinstance(p, Artifact)]
         obj = next((output for output in artifacts if output.name == name), None)
         if obj is not None:
             if isinstance(obj, Artifact):
-                return Artifact(name, path=obj.path, from_task=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
+                return Artifact(name=name, path=obj.path, from_=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
             raise NotImplementedError(type(obj))
         raise KeyError(f"No output artifact named `{name}` found")
 
@@ -620,7 +686,7 @@ class Task:
         return f"{self.get_result()} {operator} {value}"
 
     def get_result_as(self, name: str) -> Parameter:
-        return Parameter(name, value=f"{{{{tasks.{self.name}.outputs.result}}}}")
+        return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.result}}}}")
 
     def get_command(self) -> Optional[List]:
         """
@@ -635,7 +701,7 @@ class Task:
 
     def get_args(self) -> Optional[List[str]]:
         """Returns the arguments of the task"""
-        if not self.args:
+        if self.args is None:
             return None
         return [str(arg) for arg in self.args]
 
@@ -735,16 +801,16 @@ class Task:
         self,
     ) -> List[Parameter]:
         """Deduce missing input parameters based on the contents of:
-                - `inputs`
-                - `with_param`
-                - `with_sequence`
-                - `source`
-                - `env`
+            - `inputs`
+            - `with_param`
+            - `with_sequence`
+            - `source`
+            - `env`
 
         Returns
         -------
         List[Parameter]
-                A list representing the deduced parameters.
+            A list representing the deduced parameters.
         """
         deduced_params: List[Parameter] = []
 
@@ -779,9 +845,9 @@ class Task:
         Returns
         -------
         str
-                The string representation of the script to load.
+            The string representation of the script to load.
         """
-        inputs = [i.as_input() for i in self.inputs if isinstance(i, Parameter)]
+        inputs = [i for i in self.inputs if isinstance(i, Parameter)]
         inputs = [a for a in inputs if a is not None]
         extract = "import json\n"
         for param in sorted(inputs, key=lambda x: x.name):
@@ -802,7 +868,7 @@ class Task:
         Returns
         -------
         str
-                Final formatted script.
+            Final formatted script.
         """
         if callable(self.source):
             signature = inspect.signature(self.source)
@@ -853,7 +919,7 @@ class Task:
         Returns
         -------
         List[VolumeMount]
-                The list of volume mounts to be added to the task specification.
+            The list of volume mounts to be added to the task specification.
         """
         return [v._build_mount() for v in self.volumes]
 
@@ -872,46 +938,35 @@ class Task:
             or isinstance(v, ConfigMapVolume)
         ]
 
-    def _build_env(self) -> Tuple[List[EnvVar], List[EnvFromSource]]:
-        """Assembles the environment variables for the task"""
-        env = [e.build() for e in self.env if isinstance(e, Env)]
-        env_from = [e.build() for e in self.env if isinstance(e, BaseEnvFrom)]
-        return env, env_from
-
     def _build_container_kwargs(self) -> Dict:
         """Assemble the kwargs which will be used as a base for both script and container"""
         pull_policy = None
         if self.image_pull_policy:
-            pull_policy = self.image_pull_policy.value
-
-        env, env_from = self._build_env()
+            pull_policy = self.image_pull_policy
 
         kwargs = dict(
             image=self.image,
             image_pull_policy=pull_policy,
             command=self.get_command(),
-            resources=self.resources.build() if self.resources else None,
+            resources=self.resources,
             args=self.get_args(),
-            env=env,
-            env_from=env_from,
+            env=self.env,
+            env_from=self.env_from,
             working_dir=self.working_dir,
             volume_mounts=self._build_volume_mounts(),
-            security_context=self.security_context.build() if self.security_context else None,
+            security_context=self.security_context,
         )
         return {k: v for k, v in kwargs.items() if v}  # treats empty lists/None as false
 
-    def _build_script(self) -> IoArgoprojWorkflowV1alpha1ScriptTemplate:
+    def _build_script(self) -> ScriptTemplate:
         """Assembles and returns the script template that contains the definition of the script to run in a task.
 
         Returns
         -------
-        IoArgoprojWorkflowV1alpha1ScriptTemplate
-                The script template representation of the task.
+        ScriptTemplate
+            The script template representation of the task.
         """
-        kwargs = self._build_container_kwargs()
-        kwargs["source"] = self._get_script()
-        template = IoArgoprojWorkflowV1alpha1ScriptTemplate(**kwargs)
-        return template
+        return ScriptTemplate(**self._build_container_kwargs(), source=self._get_script())
 
     def _build_container(self) -> Container:
         """Assembles and returns the container for the task to run in.
@@ -919,151 +974,114 @@ class Task:
         Returns
         -------
         Container
-                The container template representation of the task.
+            The container template representation of the task.
         """
         container_args = self._build_container_kwargs()
         container = Container(**container_args)
         return container
 
-    def _build_template(self) -> Optional[IoArgoprojWorkflowV1alpha1Template]:
+    def _build_template(self) -> Optional[Template]:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
         configuration required for the task be executed.
 
         Returns
         -------
-        IoArgoprojWorkflowV1alpha1Template
-                The template representation of the task.
+        Template
+            The template representation of the task.
         """
         if self.template_ref is not None:
             # Template already exists in cluster
             return None
         if self.dag is not None:
             return None
-        template = IoArgoprojWorkflowV1alpha1Template(
+
+        template = Template(
+            active_deadline_seconds=self.active_deadline_seconds,
+            affinity=self.affinity,
+            archive_location=self.archive_location,
+            automount_service_account_token=self.automount_service_account_token,
+            daemon=self.daemon,
+            dag=self.dag,
+            executor=self.executor,
+            fail_fast=self.fail_fast,
+            host_aliases=self.host_aliases,
+            http=self.http,
+            init_containers=self.init_containers,
+            inputs=Inputs(
+                artifacts=list(filter(lambda i: isinstance(i, Artifact), self.inputs)),
+                parameters=list(filter(lambda i: isinstance(i, Parameter), self.inputs)),
+            ),
+            memoize=self.memoize,
+            metadata=Metadata(annotations=self.annotations, labels=self.labels),
+            metrics=self.metrics,
             name=self.name,
+            node_selector=self.node_selector,
+            outputs=Outputs(
+                artifacts=list(filter(lambda o: isinstance(o, Artifact), self.outputs)),
+                parameters=list(filter(lambda o: isinstance(o, Parameter), self.outputs)),
+                exit_code=self.exit_code,
+                result=self.result,
+            ),
+            plugin=self.plugin,
+            pod_spec_patch=self.pod_spec_patch,
+            priority=self.priority,
+            priority_class_name=self.priority_class_name,
+            resource=self.resource,
+            retry_strategy=self.retry_strategy,
+            scheduler_name=self.scheduler_name,
+            security_context=self.security_context,
+            service_account_name=self.service_account_name,
+            sidecars=self.sidecars,
+            synchronization=self.synchronization,
+            timeout=self.timeout,
+            tolerations=self.tolerations,
+            volumes=self.volumes,
         )
-
-        if len(self.labels) + len(self.annotations) != 0:
-            metadata = IoArgoprojWorkflowV1alpha1Metadata()
-            if self.labels:
-                setattr(metadata, "labels", self.labels)
-            if self.annotations:
-                setattr(metadata, "annotations", self.annotations)
-            setattr(template, "metadata", metadata)
-
-        built_inputs = self._build_inputs()
-        built_outputs = self._build_outputs()
-        built_tolerations = self._build_tolerations()
-
-        if built_inputs is not None:
-            setattr(template, "inputs", built_inputs)
-
-        if built_outputs is not None:
-            setattr(template, "outputs", built_outputs)
-
-        if built_tolerations != []:
-            setattr(template, "tolerations", built_tolerations)
-
-        if self.daemon:
-            setattr(template, "daemon", True)
-
-        if self.node_selector is not None:
-            setattr(template, "node_selector", self.node_selector)
-
-        if self.retry_strategy is not None:
-            setattr(template, "retry_strategy", self.retry_strategy.build())
 
         if self.source is not None:
             setattr(template, "script", self._build_script())
+            template.script = self._build_script()
         elif self.resource_template is not None:
-            setattr(template, "resource", self.resource_template.build())
+            template.resource = self.resource
         else:
-            setattr(template, "container", self._build_container())
-
-        affinity = self.affinity.build() if self.affinity else None
-        if affinity is not None:
-            setattr(template, "affinity", affinity)
-
-        if self.memoize is not None:
-            setattr(template, "memoize", self.memoize.build())
-
-        if self.pod_spec_patch is not None:
-            setattr(template, "podSpecPatch", self.pod_spec_patch)
-
-        if self.active_deadline_seconds is not None:
-            setattr(template, "active_deadline_seconds", str(self.active_deadline_seconds))
-
-        if self.timeout is not None:
-            setattr(template, "timeout", self.timeout)
-
-        if self.metrics is not None:
-            setattr(template, "metrics", self.metrics.build())
-
-        if self.sidecars is not None:
-            setattr(template, "sidecars", [sc.build() for sc in self.sidecars])
-
+            template.container = self._build_container()
         return template
 
-    def _build_tolerations(self) -> List[ArgoToleration]:
-        """Assembles and returns the pod toleration objects required for scheduling a task.
-
-        Returns
-        -------
-        Optional[List[_ArgoToleration]]
-                The list of assembled tolerations.
-
-        Notes
-        -----
-        If the task includes a GPU resource specification the client is responsible for specifying a GPU toleration.
-        For GKE and Azure workloads `hera.toleration.GPUToleration` can be specified.
-        """
-        if self.tolerations is None:
-            return []
-        else:
-            return [
-                ArgoToleration(key=t.key, effect=t.effect, operator=t.operator, value=t.value)
-                for t in self.tolerations
-            ]
-
-    def _build_dag_task(self) -> IoArgoprojWorkflowV1alpha1DAGTask:
+    def _build_dag_task(self) -> DAGTask:
         """Assembles and returns the graph task specification of the task.
 
         Returns
         -------
-        V1alpha1DAGTask
-                The graph task representation.
+        DAGTask
+            The graph task representation.
         """
-        task = IoArgoprojWorkflowV1alpha1DAGTask(
+        t = DAGTask(
+            arguments=Arguments(
+                artifacts=list(filter(lambda a: isinstance(a, Artifact), self.arguments)),
+                parameters=list(filter(lambda a: isinstance(a, Parameter), self.arguments)),
+            ),
+            continue_on=self.continue_on,
+            dependencies=self.dependencies,
+            depends=self.depends,
+            hooks=self.hooks,
+            inline=self.inline,
             name=self.name,
-            _check_type=False,
+            on_exit=self.exit_task,
+            when=self.when,
+            with_items=self.with_items,
+            with_sequence=self.with_sequence,
         )
-        arguments = self._build_arguments()
-        if arguments:
-            setattr(task, "arguments", arguments)
-
-        if self.exit_task:
-            setattr(task, "on_exit", self.exit_task)
-
-        if self.depends:
-            setattr(task, "depends", self.depends)
-
-        if self.when:
-            setattr(task, "when", self.when)
 
         if self.template_ref is not None:
-            setattr(task, "template_ref", self.template_ref.build())
+            t.template_ref = self.template_ref
         else:
-            name = self.name if not self.dag else self.dag.name
-            setattr(task, "template", name)
+            t.template = self.dag.name if self.dag else self.name
 
-        if self.with_param:
+        if self.with_param is not None:
             with_param = self.with_param
             if isinstance(with_param, Parameter):
                 with_param = str(with_param)  # this will get the value
             elif not isinstance(self.with_param, str):
                 with_param = json.dumps(self.with_param)
-            setattr(task, "with_param", with_param)
-        if self.with_sequence is not None:
-            setattr(task, "with_sequence", self.with_sequence.build())
-
-        return task
+            t.with_param = with_param
+        return t

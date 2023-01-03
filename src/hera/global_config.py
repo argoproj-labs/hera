@@ -3,27 +3,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Optional, Tuple, Union
 
-from typing_extensions import Protocol
-
 if TYPE_CHECKING:
     from hera.task import Task
     from hera.workflow import Workflow
-
-
-# usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested
-# but protocols encourage nominal typing, so any function definition that implements a protocol will not be "noticed"
-# by coverage. See `test_global_config` for test coverage
-class TaskHook(Protocol):  # pragma: no cover
-    def __call__(self, t: Task) -> None:
-        ...
-
-
-# usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested
-# but protocols encourage nominal typing, so any function definition that implements a protocol will not be "noticed"
-# by coverage. See `test_global_config` for test coverage
-class WorkflowHook(Protocol):  # pragma: no cover
-    def __call__(self, w: Workflow) -> None:
-        ...
 
 
 class _GlobalConfig:
@@ -45,8 +27,8 @@ class _GlobalConfig:
     namespace: str = "default"
     image: str = "python:3.7"
     service_account_name: Optional[str] = None
-    task_post_init_hooks: Tuple[TaskHook, ...] = ()
-    workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
+    task_post_init_hooks: Tuple[Callable[[Task], []], ...] = ()
+    workflow_post_init_hooks: Tuple[Callable[[Workflow], []], ...] = ()
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
