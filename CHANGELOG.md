@@ -29,12 +29,6 @@ The general format is:
 
 ```
 
-# 4.3.0 - DATE (30/12/2022)
-
-### Added
-
-- Note added to README for use of authentication method and Bearer token
-
 # 4.3.0 - DATE (16/12/2022)
 
 ### Added
