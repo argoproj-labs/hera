@@ -57,7 +57,8 @@ class WorkflowService:
         namespace: Optional[str] = None,
     ):
         self._namespace = GlobalConfig.namespace if namespace is None else namespace
-        self._config = Config(host=host, verify_ssl=verify_ssl)
+        # verify SSL passed through `GlobalConfig`
+        self._config = Config(host=host)
         self._api_client = Client(self._config, token=token).api_client
 
     def create_workflow(self, workflow: IoArgoprojWorkflowV1alpha1Workflow) -> IoArgoprojWorkflowV1alpha1Workflow:
