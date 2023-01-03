@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional, Union
+
 from pydantic import validator
+
 from hera.models import Sequence as ModelSequence
 
 
 @dataclass
 class Sequence(ModelSequence):
-
     @validator("count", pre=True)
     def count_to_str(cls, v):
         if v is None:

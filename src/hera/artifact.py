@@ -4,7 +4,6 @@ from hera.models import Artifact as ModelArtifact
 
 
 class Artifact(ModelArtifact):
-
     def as_name(self, name: str):
         """Changes the name of the artifact."""
         self.name = name
