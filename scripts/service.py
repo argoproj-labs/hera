@@ -302,7 +302,7 @@ def create_service() -> None:
     endpoints = get_endpoints(paths, consumes=consumes, produces=produces)
     service_def = get_service_def()
     result = make_service(service_def, endpoints)
-    path = Path(__name__).parent / "src/hera/new/service.py"
+    path = Path(__name__).parent / "src/hera/service.py"
     write_service(result, path)
 
 
