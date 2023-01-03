@@ -27,9 +27,7 @@ class Config:
         The host of the Argo server to submit workflows to. An attempt to assemble a host from Argo K8S cluster
         environment variables is pursued if this is not specified.
     verify_ssl: Optional[bool] = None
-        DEPRECATED: Use GlobalConfig.verify_ssl instead. Whether to perform SSL/TLS verification. Set this as False
-        to skip verifying SSL certificate when submitting workflows from an HTTPS server. Alternatively, you can set
-        it globally via `global_config.GlobalConfig.verify_ssl`.
+        Whether to perform SSL/TLS verification. See `GlobalConfig.verify_ssl`.
     """
 
     def __init__(self, host: Optional[str] = None, verify_ssl: Optional[bool] = None):
