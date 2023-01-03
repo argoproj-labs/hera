@@ -38,19 +38,19 @@ class AccessMode(str, Enum):
     See: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
     """
 
-    ReadWriteOnce = "ReadWriteOnce"
+    read_write_once = "ReadWriteOnce"
     """
     The volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple
     pods to access the volume when the pods are running on the same node
     """
 
-    ReadOnlyMany = "ReadOnlyMany"
+    read_only_many = "ReadOnlyMany"
     """The volume can be mounted as read-only by many nodes"""
 
-    ReadWriteMany = "ReadWriteMany"
+    read_write_many = "ReadWriteMany"
     """The volume can be mounted as read-write by many nodes"""
 
-    ReadWriteOncePod = "ReadWriteOncePod"
+    read_write_once_pod = "ReadWriteOncePod"
     """
     The volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to
     ensure that only one pod across whole cluster can read that PVC or write to it. This is only supported for CSI

@@ -1,7 +1,7 @@
 from types import ModuleType
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 
 _yaml: Optional[ModuleType] = None
 try:
@@ -15,6 +15,9 @@ except ImportError:
 class ArgoBaseModel(BaseModel):
     class Config:
         allow_population_by_field_name = True
+        extra = Extra.forbid
+        allow_mutation = True
+        use_enum_values = True
 
     def to_yaml(self, **yaml_kwargs) -> str:
         """Returns a YAML representation of the object"""

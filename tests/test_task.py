@@ -579,7 +579,7 @@ print(42)
         assert tt.retry_strategy.limit == "5"
 
     def test_task_has_expected_retry_policy(self):
-        t = Task("t", retry_strategy=RetryStrategy(retry_policy=RetryPolicy.Always))
+        t = Task("t", retry_strategy=RetryStrategy(retry_policy=RetryPolicy.always))
         tt = t._build_template()
         assert tt is not None
         assert tt.retry_strategy is not None

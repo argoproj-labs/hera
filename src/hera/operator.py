@@ -1,9 +1,9 @@
 from enum import Enum
 
-from hera.models import Operator as GeneratedOperator
+from hera.models import Operator as ModelOperator
 
 
-class Operator(GeneratedOperator):
+class Operator(ModelOperator):
     """Operator is a representation of mathematical comparison symbols.
 
      This can be used on tasks that execute conditionally based on the output of another task.

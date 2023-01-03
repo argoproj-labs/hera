@@ -13,16 +13,16 @@ class RetryPolicy(str, Enum):
         TRANSIENT_ERROR_PATTERN environment variable. Available in version 3.0 and later.
     """
 
-    Always = "Always"
+    always = "Always"
     """Retry all failed steps"""
 
-    OnFailure = "OnFailure"
+    on_failure = "OnFailure"
     """Retry steps whose main container is marked as failed in Kubernetes"""
 
-    OnError = "OnError"
+    on_error = "OnError"
     """Retry steps that encounter Argo controller errors, or whose init or wait containers fail"""
 
-    OnTransientError = "OnTransientError"
+    on_transient_error = "OnTransientError"
     """Retry steps that encounter errors defined as transient, or errors matching the `TRANSIENT_ERROR_PATTERN`
     environment variable.
 

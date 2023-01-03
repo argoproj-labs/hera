@@ -1,59 +1,38 @@
 from dataclasses import dataclass
 from typing import Optional, Union
-
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1Sequence
+from pydantic import validator
+from hera.models import Sequence as ModelSequence
 
 
 @dataclass
-class Sequence:
-    """Sequence is a representation that can be used to expand a workflow step into numeric ranges.
+class Sequence(ModelSequence):
 
-    Attributes
-    ----------
-    format: Optional[str]
-        Format is a `printf` format string to format the value in the sequence.
-    count: Optional[Union[int, str]]
-        Number of elements in the sequence. Cannot be used with `end`.
-    start: Optional[Union[int, str]]
-        Number at which to start the sequence.
-    end: Optional[Union[int, str]]
-        Number at which to end the sequence. Cannot be used with `count`.
+    @validator("count", pre=True)
+    def count_to_str(cls, v):
+        if v is None:
+            return v
 
-    Raises
-    ------
-    ValueError
-        When both `count` and `end` are specified.
-    """
+        assert isinstance(v, int) or isinstance(v, str)
+        if isinstance(v, str):
+            return v
+        return str(v)
 
-    format: Optional[str] = None
-    count: Optional[Union[int, str]] = None
-    start: Optional[Union[int, str]] = None
-    end: Optional[Union[int, str]] = None
+    @validator("start", pre=True)
+    def start_to_str(cls, v):
+        if v is None:
+            return v
 
-    def __post_init__(self) -> None:
-        if self.count is not None and self.end is not None:
-            raise ValueError("Cannot use both `count` and `end`")
-        if self.count is not None and isinstance(self.count, int):
-            self.count = str(self.count)
-        if self.start is not None and isinstance(self.start, int):
-            self.start = str(self.start)
-        if self.end is not None and isinstance(self.end, int):
-            self.end = str(self.end)
+        assert isinstance(v, int) or isinstance(v, str)
+        if isinstance(v, str):
+            return v
+        return str(v)
 
-    def build(self) -> IoArgoprojWorkflowV1alpha1Sequence:
-        """Builds the Argo representation of the sequence.
+    @validator("start", pre=True)
+    def end_to_str(cls, v):
+        if v is None:
+            return v
 
-        Returns
-        -------
-        IoArgoprojWorkflowV1alpha1Sequence
-            The sequence to use for numeric range generation.
-        """
-        sequence = IoArgoprojWorkflowV1alpha1Sequence()
-        if self.format is not None:
-            setattr(sequence, "format", self.format)
-        if self.count is not None:
-            setattr(sequence, "count", self.count)
-        if self.start is not None and self.end is not None:
-            setattr(sequence, "start", self.start)
-            setattr(sequence, "end", self.end)
-        return sequence
+        assert isinstance(v, int) or isinstance(v, str)
+        if isinstance(v, str):
+            return v
+        return str(v)

@@ -2,8 +2,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Union
 
-from argo_workflows.models import ResourceRequirements
-
+from hera.models import ResourceRequirements
 from hera.validators import validate_storage_units
 
 

@@ -4,10 +4,10 @@ from enum import Enum
 class VolumeClaimGCStrategy(str, Enum):
     """A representation of the strategy to use when deleting volumes from completed workflows"""
 
-    OnWorkflowCompletion = "OnWorkflowCompletion"
+    on_workflow_completion = "OnWorkflowCompletion"
     """delete volume claim when workflow is completed"""
 
-    OnWorkflowSuccess = "OnWorkflowSuccess"
+    on_workflow_success = "OnWorkflowSuccess"
     """delete volume claim when workflow is successful"""
 
     def __str__(self):

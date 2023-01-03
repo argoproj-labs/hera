@@ -27,7 +27,7 @@ class RetryStrategy:
     backoff: Optional[Backoff] = None
     expression: Optional[str] = None
     limit: Optional[Union[int, str]] = None
-    retry_policy: RetryPolicy = RetryPolicy.Always
+    retry_policy: RetryPolicy = RetryPolicy.always
 
     def __post_init__(self):
         if self.limit is not None and isinstance(self.limit, int):
