@@ -29,12 +29,6 @@ The general format is:
 
 ```
 
-# 4.3.1 - DATE (02/01/2023)
-
-### Fixed
-
-- verify SSL option passing via GlobalConfig vs. service
-
 # 4.3.0 - DATE (16/12/2022)
 
 ### Added
