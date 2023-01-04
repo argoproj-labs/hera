@@ -1,4 +1,3 @@
-
 - name: semver:major
   description: A change requiring a major version bump
   color: f9d0c4
