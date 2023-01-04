@@ -31,6 +31,8 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
         raise ValueError(f"Name is too long. Max length: {max_length}, found: {len(name)}")
     if "_" in name:
         raise ValueError("Name cannot include an underscore")
+    if not generate_name and name.endswith((".", "-")):
+        raise ValueError("Name cannot end with '.' nor '-', unless it is used as a prefix for name generation")
 
     pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
     if generate_name:

@@ -24,6 +24,12 @@ def test_validate_name():
     validate_name("test-", generate_name=True)
     validate_name("test.", generate_name=True)
     with pytest.raises(ValueError) as e:
+        validate_name("test-")
+    assert str(e.value) == "Name cannot end with '.' nor '-', unless it is used as a prefix for name generation"
+    with pytest.raises(ValueError) as e:
+        validate_name("test.")
+    assert str(e.value) == "Name cannot end with '.' nor '-', unless it is used as a prefix for name generation"
+    with pytest.raises(ValueError) as e:
         validate_name("test.-", generate_name=True)
     assert (
         str(e.value) == "Name is invalid: 'test.-'. Regex used for validation is "
