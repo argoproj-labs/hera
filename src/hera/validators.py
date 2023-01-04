@@ -10,11 +10,22 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
     ----------
     name: str
         The name which should be validated.
+    max_length: Optional[int] = None
+        Specify a maximum length of the name.
+        Example: Kubernetes labels have a maximum length of 63 characters.
+    generate_name: bool = False
+        Whether the provided name is to be used as a prefix for name generation.
+        If set, name is allowed to end in a single dot (.) or any number of hyphens (-).
 
     Raises
     ------
     ValueError
         When the name is invalid according to specifications.
+
+    Notes
+    -----
+    Official doc on object names in Kubernetes:
+    https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
     """
     if max_length and len(name) > max_length:
         raise ValueError(f"Name is too long. Max length: {max_length}, found: {len(name)}")
