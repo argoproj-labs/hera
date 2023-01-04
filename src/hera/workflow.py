@@ -127,8 +127,8 @@ class Workflow:
         active_deadline_seconds: Optional[int] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
     ):
-        self.name = validate_name(name)
-        dag_name = self.name if dag_name is None else dag_name
+        self.name = validate_name(name, generate_name=generate_name)
+        dag_name = self.name.rstrip("-.") if dag_name is None else dag_name
         self.dag = DAG(dag_name) if dag is None else dag
         self._service = service
         self.parallelism = parallelism
