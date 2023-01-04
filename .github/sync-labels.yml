@@ -1,8 +1,4 @@
 name: Sync labels
-on:
-  - pull_request:
-      types:
-        - opened
 jobs:
   sync-labels:
     name: sync
