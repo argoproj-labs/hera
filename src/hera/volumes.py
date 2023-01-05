@@ -95,7 +95,7 @@ class _BaseVolume(ModelVolumeMount):
             return str(uuid.uuid4())
         return v
 
-    def claim(self) -> ModelPersistentVolumeClaim:
+    def claim(self) -> ModelPersistentVolumeClaimTemplate:
         raise NotImplementedError
 
     def volume(self) -> ModelVolume:
@@ -257,7 +257,7 @@ class ExistingVolume(_BaseVolume, ModelPersistentVolumeClaimVolumeSource):
         return ModelVolume(name=self.name, persistent_volume_claim=self)
 
 
-class VolumeVolume(_BaseVolume, ModelPersistentVolumeClaimSpec):
+class Volume(_BaseVolume, ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None
     name: Optional[str] = None
     resources: Optional[ResourceRequirements] = None

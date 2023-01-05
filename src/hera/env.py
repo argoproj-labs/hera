@@ -6,6 +6,7 @@ from typing import Any, Optional, Union
 
 from pydantic import root_validator, validator
 
+from hera._base_model import BaseModel
 from hera.global_config import GlobalConfig
 from hera.models import ConfigMapKeySelector as ModelConfigMapKeySelector
 from hera.models import EnvVar as ModelEnvVar
@@ -17,7 +18,7 @@ from hera.models import SecretKeySelector as ModelSecretKeySelector
 from hera.parameter import Parameter
 
 
-class _BaseEnv:
+class _BaseEnv(BaseModel):
     name: str
 
     def build(self) -> ModelEnvVar:
