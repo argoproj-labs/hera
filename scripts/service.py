@@ -269,10 +269,10 @@ from typing import Optional
 class Service:
     def __init__(
         self,
-        host: Optional[str] = None,
-        verify_ssl: bool = True,
-        token: Optional[str] = None,
-        namespace: Optional[str] = None,
+        host: Optional[str] = GlobalConfig.host,
+        verify_ssl: bool = GlobalConfig.verify_ssl,
+        token: Optional[str] = GlobalConfig.token,
+        namespace: Optional[str] = GlobalConfig.namespace,
     ):
         self.host = host or GlobalConfig.host
         self.verify_ssl = verify_ssl or GlobalConfig.verify_ssl

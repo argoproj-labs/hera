@@ -3,30 +3,49 @@ import json
 from types import ModuleType
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
-from argo_workflows.model_utils import model_to_dict
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Arguments,
-    IoArgoprojWorkflowV1alpha1VolumeClaimGC,
-    IoArgoprojWorkflowV1alpha1Workflow,
-    IoArgoprojWorkflowV1alpha1WorkflowSpec,
-    LocalObjectReference,
-    ObjectMeta,
-)
-
 import hera
-from hera.affinity import Affinity
 from hera.dag import DAG
 from hera.global_config import GlobalConfig
-from hera.host_alias import HostAlias
-from hera.metric import Metric, Metrics
+from hera.models import Affinity
+from hera.models import Arguments as ModelArguments
+from hera.models import (
+    Artifact,
+    ArtifactGC,
+    ArtifactRepositoryRef,
+    ExecutorConfig,
+    HostAlias,
+    LifecycleHook,
+    LocalObjectReference,
+    Metadata,
+    Metrics,
+    ObjectMeta,
+    Parameter,
+    PersistentVolumeClaim,
+    PodDisruptionBudgetSpec,
+    PodDNSConfig,
+    PodGC,
+    PodSecurityContext,
+    Prometheus,
+    RetryStrategy,
+    Synchronization,
+    Template,
+    Toleration,
+    TTLStrategy,
+)
+from hera.models import Volume as ModelVolume
+from hera.models import VolumeClaimGC
+from hera.models import VolumeClaimGC as ModelVolumeClaimGC
+from hera.models import Workflow as ModelWorkflow
+from hera.models import WorkflowMetadata
+from hera.models import WorkflowSpec as ModelWorkflowSpec
+from hera.models import WorkflowTemplateRef
 from hera.parameter import Parameter
-from hera.security_context import WorkflowSecurityContext
+from hera.service import Service
 from hera.task import Task
 from hera.toleration import Toleration
-from hera.ttl_strategy import TTLStrategy
 from hera.validators import validate_name
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_service import WorkflowService
+from hera.volumes import _BaseVolume
 
 # PyYAML is an optional dependency
 _yaml: Optional[ModuleType] = None
@@ -41,142 +60,171 @@ WorkflowType = TypeVar("WorkflowType", bound="Workflow")
 
 
 class Workflow:
-    """A workflow representation.
-
-    The workflow is used as a functional representation for a collection of tasks and
-    steps. The workflow context controls the overall behaviour of tasks, such as whether to notify completion, whether
-    to execute retires, overall parallelism, etc. The workflow can be constructed and submitted to multiple Argo
-    endpoints as long as a token can be associated with the endpoint at the given domain.
-
-    Parameters
-    ----------
-    name: str
-        The workflow name. Note that the workflow initiation will replace underscores with dashes.
-    dag_name: Optional[str] = None
-        Name of the underlying dag template. This will default to the name of the workflow.
-    service: Optional[WorkflowService] = None
-        A workflow service to use for submissions. See `hera.v1.workflow_service.WorkflowService`.
-    parallelism: Optional[int] = None
-        The number of parallel tasks to run in case a task group is executed for multiple tasks.
-    service_account_name: Optional[str] = None,
-        The name of the service account to use in all workflow tasks.
-    labels: Optional[Dict[str, str]] = None
-        A dictionary of labels to attach to the Workflow object metadata.
-    annotations: Optional[Dict[str, str]] = None
-        A dictionary of annotations to attach to the Workflow object metadata.
-    security_context: Optional[WorkflowSecurityContext] = None
-        Define security settings for all containers in the workflow.
-    image_pull_secrets: Optional[List[str]] = None
-        A list of image pull secrets. This is used to authenticate with the private image registry of the images
-        used by tasks.
-    workflow_template_ref: Optional[str] = None
-        The name of the workflowTemplate reference. WorkflowTemplateRef is a reference to a WorkflowTemplate resource.
-        If you create a WorkflowTemplate resource either clusterWorkflowTemplate or not (clusterScope attribute bool)
-        you can reference it again and again when you create a new Workflow without specifying the same tasks and
-        dependencies. Official doc: https://argoproj.github.io/argo-workflows/fields/#workflowtemplateref
-    ttl_strategy: Optional[TTLStrategy] = None
-        The time to live strategy of the workflow.
-    volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None
-        Define how to delete volumes from completed Workflows.
-    host_aliases: Optional[List[HostAlias]] = None
-        Mappings between IP and hostnames.
-    node_selectors: Optional[Dict[str, str]] = None
-        A collection of key value pairs that denote node selectors. This is used for scheduling purposes. If the task
-        requires GPU resources, clients are encouraged to add a node selector for a node that can satisfy the
-        requested resources. In addition, clients are encouraged to specify a GPU toleration, depending on the platform
-        they submit the workflow to.
-    affinity: Optional[Affinity] = None
-        The task affinity. This dictates the scheduling protocol of the pods running the tasks of the workflow.
-    dag: Optional[DAG] = None
-        The DAG to execute as part of the workflow.
-    parameters: Optional[List[Parameter]] = None
-        Any global parameters for the workflow.
-    tolerations: Optional[List[Toleration]] = None
-        List of tolerations for the pod executing the task. This is used for scheduling purposes.
-    generate_name: bool = False
-        Whether to use the provided name as a prefix for workflow name generation.
-        If set and the workflow is created, the field `generated_name` will be populated.
-    active_deadline_seconds: Optional[int] = None
-        Optional duration in seconds relative to the workflow start time which the workflow
-        is allowed to run.
-    metrics: Optional[Union[Metric, List[Metric], Metrics]] = None
-        Any built-in/custom Prometheus metrics to track.
-    """
-
     def __init__(
         self: WorkflowType,
         name: str,
+        api_version: Optional[str] = GlobalConfig.api_version,
         dag_name: Optional[str] = None,
-        service: Optional[WorkflowService] = None,
-        parallelism: Optional[int] = None,
-        service_account_name: Optional[str] = None,
-        labels: Optional[Dict[str, str]] = None,
-        annotations: Optional[Dict[str, str]] = None,
-        security_context: Optional[WorkflowSecurityContext] = None,
-        image_pull_secrets: Optional[List[str]] = None,
-        workflow_template_ref: Optional[str] = None,
-        ttl_strategy: Optional[TTLStrategy] = None,
-        volume_claim_gc_strategy: Optional[VolumeClaimGCStrategy] = None,
-        host_aliases: Optional[List[HostAlias]] = None,
-        node_selectors: Optional[Dict[str, str]] = None,
-        affinity: Optional[Affinity] = None,
         dag: Optional[DAG] = None,
-        parameters: Optional[List[Parameter]] = None,
-        tolerations: Optional[List[Toleration]] = None,
         generate_name: bool = False,
+        service: Optional[Service] = None,
         active_deadline_seconds: Optional[int] = None,
-        metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
+        affinity: Optional[Affinity] = None,
+        acrhive_logs: Optional[bool] = None,
+        inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+        ] = None,
+        outputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        artifact_gc: Optional[ArtifactGC] = None,
+        artifact_repository_ref: Optional[ArtifactRepositoryRef] = None,
+        automount_service_account_token: Optional[bool] = None,
+        dns_config: Optional[PodDNSConfig] = None,
+        dns_policy: Optional[str] = None,
+        executor: Optional[ExecutorConfig] = None,
+        hooks: Optional[Dict[str, LifecycleHook]] = None,
+        host_aliases: Optional[HostAlias] = Npone,
+        host_network: Optional[bool] = None,
+        image_pull_secrets: Optional[List[str]] = None,
+        metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]] = None,
+        node_selector: Optional[Dict[str, str]] = None,
+        parallelism: Optional[int] = None,
+        pod_disruption_budget: Optional[PodDisruptionBudgetSpec] = None,
+        pod_gc: Optional[PodGC] = None,
+        pod_metadata: Optional[Metadata] = None,
+        pod_priority: Optional[int] = None,
+        pod_priority_class_name: Optional[str] = None,
+        pod_spec_patch: Optional[str] = None,
+        priority: Optional[int] = None,
+        retry_strategy: Optional[RetryStrategy] = None,
+        scheduler_name: Optional[str] = None,
+        security_context: Optional[PodSecurityContext] = None,
+        service_account_name: Optional[str] = GlobalConfig.service_account_name,
+        shutdown: Optional[str] = None,
+        suspend: Optional[bool] = None,
+        synchronization: Optional[Synchronization] = None,
+        template_defaults: Optional[Template] = None,
+        tolerations: Optional[List[Toleration]] = None,
+        ttl_strategy: Optional[TTLStrategy] = None,
+        volume_claim_gc: Optional[VolumeClaimGC] = None,
+        volumes: Optional[List[_BaseVolume]] = None,
+        workflow_metadata: Optional[WorkflowMetadata] = None,
+        workflow_template_ref: Optional[WorkflowTemplateRef] = None,
     ):
         self.name = validate_name(name, generate_name=generate_name)
         dag_name = self.name.rstrip("-.") if dag_name is None else dag_name
+        self.api_version = api_version
         self.dag = DAG(dag_name) if dag is None else dag
-        self._service = service
-        self.parallelism = parallelism
-        self.security_context = security_context
-        self.service_account_name = (
-            GlobalConfig.service_account_name if service_account_name is None else service_account_name
-        )
-        self.labels = labels
-        self.annotations = annotations
-        self.image_pull_secrets = image_pull_secrets
-        self.workflow_template_ref = workflow_template_ref
-        self.node_selector = node_selectors
-        self.ttl_strategy = ttl_strategy
-        self.affinity = affinity
-        self.parameters = parameters
-        self.tolerations = tolerations
-        self.in_context = False
-        self.volume_claim_gc_strategy = volume_claim_gc_strategy
-        self.host_aliases = host_aliases
         self.generate_name = generate_name
+        self._service = service
         self.active_deadline_seconds = active_deadline_seconds
-        self.exit_task: Optional[str] = None
-        self.generated_name: Optional[str] = None
-        self.metrics: Optional[Metrics] = None
-        if metrics:
-            if isinstance(metrics, Metric):
-                self.metrics = Metrics([metrics])
-            elif isinstance(metrics, list):
-                assert all([isinstance(m, Metric) for m in metrics])
-                self.metrics = Metrics(metrics)
-            elif isinstance(metrics, Metrics):
-                self.metrics = metrics
-            else:
-                raise ValueError(
-                    "Unknown type provided for `metrics`, expected type is "
-                    "`Optional[Union[Metric, List[Metric], Metrics]]`"
-                )
+        self.affinity = affinity
+        self.acrhive_logs = acrhive_logs
+        self.inputs = self._parse_inputs(inputs)
+        self.outputs = outputs
+        self.artifact_gc = artifact_gc
+        self.artifact_repository_ref = artifact_repository_ref
+        self.automount_service_account_token = automount_service_account_token
+        self.dns_config = dns_config
+        self.dns_policy = dns_policy
+        self.executor = executor
+        self.hooks = hooks
+        self.host_aliases = host_aliases
+        self.host_network = host_network
+        self.image_pull_secrets = image_pull_secrets
+        self.metrics = self._parse_metrics(metrics)
+        self.node_selector = node_selector
+        self.parallelism = parallelism
+        self.pod_disruption_budget = pod_disruption_budget
+        self.pod_gc = pod_gc
+        self.pod_metadata = pod_metadata
+        self.pod_priority = pod_priority
+        self.pod_priority_class_name = pod_priority_class_name
+        self.pod_spec_patch = pod_spec_patch
+        self.priority = priority
+        self.retry_strategy = retry_strategy
+        self.scheduler_name = scheduler_name
+        self.security_context = security_context
+        self.service_account_name = service_account_name
+        self.shutdown = shutdown
+        self.suspend = suspend
+        self.synchronization = synchronization
+        self.template_defaults = template_defaults
+        self.tolerations = tolerations
+        self.ttl_strategy = ttl_strategy
+        self.volume_claim_gc = volume_claim_gc
+        self.volumes = volumes
+        self.workflow_metadata = workflow_metadata
+        self.workflow_template_ref = workflow_template_ref
+
         for hook in GlobalConfig.workflow_post_init_hooks:
             hook(self)
 
+    def _parse_metrics(self, metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]]) -> Optional[Metrics]:
+        if metrics is None:
+            return None
+
+        if isinstance(metrics, Prometheus):
+            return Metrics(prometheus=[metrics])
+        elif isinstance(metrics, list):
+            assert all([isinstance(m, Prometheus) for m in metrics])
+            return Metrics(prometheus=metrics)
+        elif isinstance(metrics, Metrics):
+            return metrics
+        else:
+            raise ValueError(
+                "Unknown type provided for `metrics`, expected type is "
+                "`Optional[Union[Metric, List[Metric], Metrics]]`"
+            )
+
+    def _parse_inputs(
+        self,
+        inputs: Optional[
+            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
+        ],
+    ) -> List[Union[Parameter, Artifact]]:
+        """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
+
+        Parameters
+        ----------
+        inputs: Union[Dict[str, Any], List[Union[Parameter, Artifact, Dict[str, Any]]]]
+            The list of inputs specified on the task. The `Dict` aspect is treated as a mapped collection of
+            Parameters. If a single dictionary is specified, all the fields are transformed into `Parameter`s. The key
+            is the `name` of the `Parameter` and the `value` is the `value` field of the `Parameter.
+
+        Returns
+        -------
+        List[Union[Parameter, Artifact]]
+            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
+            independent parameters.
+        """
+        if inputs is None:
+            return []
+
+        result: List[Union[Parameter, Artifact]] = []
+        if isinstance(inputs, dict):
+            for k, v in inputs.items():
+                result.append(Parameter(name=k, value=v))
+        else:
+            for i in inputs:
+                if isinstance(i, Parameter) or isinstance(i, Artifact):
+                    result.append(i)
+                elif isinstance(i, dict):
+                    for k, v in i.items():
+                        result.append(Parameter(name=k, value=v))
+        return result
+
     @property
-    def service(self: WorkflowType) -> WorkflowService:
+    def service(self: WorkflowType) -> Service:
         if self._service is None:
-            self._service = WorkflowService()
+            self._service = Service()
         return self._service
 
     @service.setter
-    def service(self: WorkflowType, value: WorkflowService):
+    def service(self: WorkflowType, value: Service):
         self._service = value
 
     def get_name(self: WorkflowType) -> str:
@@ -192,90 +240,64 @@ class Workflow:
         if use_name:
             if self.generate_name:
                 setattr(metadata, "generate_name", self.name)
+                metadata.generate_name = self.name
             else:
-                setattr(metadata, "name", self.name)
-        if self.labels:
-            setattr(metadata, "labels", self.labels)
-        if self.annotations:
-            setattr(metadata, "annotations", self.annotations)
+                metadata.name = self.name
         return metadata
 
-    def _build_spec(self: WorkflowType) -> IoArgoprojWorkflowV1alpha1WorkflowSpec:
+    def _build_spec(self: WorkflowType) -> ModelWorkflowSpec:
         """Assembles the spec of the workflow"""
-        spec = IoArgoprojWorkflowV1alpha1WorkflowSpec()
-        setattr(spec, "entrypoint", self.dag.name)  # This will be ignored for `WorkflowTemplate`
+        return ModelWorkflowSpec(
+            active_deadline_seconds=self.active_deadline_seconds,
+            affinity=self.affinity,
+            archive_logs=self.acrhive_logs,
+            arguments=ModelArguments(
+                artifacts=[a for a in self.inputs if isinstance(a, Artifact)],
+                parameters=[p for p in self.inputs if isinstance(p, Parameter)],
+            ),
+            artifact_gc=self.artifact_gc,
+            automount_service_account_token=self.automount_service_account_token,
+            dns_config=self.dns_config,
+            dns_policy=self.dns_policy,
+            entrypoint=self.dag.name,
+            executor=self.executor,
+            hooks=self.hooks,
+            host_aliases=self.host_aliases,
+            host_network=self.host_networks,
+            image_pull_secrets=[LocalObjectReference(name=name) for name in self.image_pull_secrets],
+            metrics=self.metrics,
+            node_selector=self.node_selector,
+            on_exit=self.exit_task,
+            parallelism=self.parallelism,
+            pod_disruption_budget=self.pod_disruption_budget,
+            pod_gc=self.pod_gc,
+            pod_metadata=self.pod_metadata,
+            pod_priority=self.pod_priority,
+            pod_priority_class_name=self.pod_priority_class_name,
+            pod_spec_patch=self.pod_spec_patch,
+            priority=self.priority,
+            retry_strategy=self.retry_strategy,
+            scheduler_name=self.scheduler_name,
+            security_context=self.security_context,
+            service_account_name=self.service_account_name,
+            shutdown=self.shutdown,
+            suspend=self.suspend,
+            synchronization=self.synchronization,
+            templates=self.dag._build_templates() + self.dag.build(),
+            template_defaults=self.template_defaults,
+            tolerations=self.tolerations,
+            ttl_strategy=self.ttl_strategy,
+            volume_claim_gc=self.volume_claim_gc,
+            volume_claim_templates=self.dag._build_volume_claim_templates(),
+            volumes=self.dag._build_persistent_volume_claims(),
+            workflow_metadata=self.workflow_metadata,
+            workflow_template_ref=self.workflow_template_ref,
+        )
 
-        templates = self.dag._build_templates() + self.dag.build()
-        setattr(spec, "templates", templates)
-
-        if self.parallelism is not None:
-            setattr(spec, "parallelism", self.parallelism)
-
-        if self.ttl_strategy is not None:
-            setattr(spec, "ttl_strategy", self.ttl_strategy.build())
-
-        if self.volume_claim_gc_strategy is not None:
-            setattr(
-                spec,
-                "volume_claim_gc",
-                IoArgoprojWorkflowV1alpha1VolumeClaimGC(strategy=self.volume_claim_gc_strategy.value),
-            )
-
-        if self.host_aliases is not None:
-            setattr(spec, "host_aliases", [h.argo_host_alias for h in self.host_aliases])
-
-        if self.security_context is not None:
-            security_context = self.security_context.get_security_context()
-            setattr(spec, "security_context", security_context)
-
-        if self.service_account_name is not None:
-            # setattr(main_template, "service_account_name", self.service_account_name) #TODO Is this needed?
-            setattr(spec, "service_account_name", self.service_account_name)
-
-        if self.image_pull_secrets is not None:
-            secret_refs = [LocalObjectReference(name=name) for name in self.image_pull_secrets]
-            setattr(spec, "image_pull_secrets", secret_refs)
-
-        if self.parameters is not None:
-            setattr(
-                spec,
-                "arguments",
-                IoArgoprojWorkflowV1alpha1Arguments(parameters=[p.as_argument() for p in self.parameters]),
-            )
-
-        if self.affinity is not None:
-            setattr(spec, "affinity", self.affinity.build())
-
-        if self.node_selector is not None:
-            setattr(spec, "node_selector", self.node_selector)
-
-        if self.tolerations is not None:
-            ts = [t.build() for t in self.tolerations]
-            setattr(spec, "tolerations", ts)
-
-        if self.active_deadline_seconds is not None:
-            setattr(spec, "active_deadline_seconds", self.active_deadline_seconds)
-
-        vct = self.dag._build_volume_claim_templates()
-        if vct:
-            setattr(spec, "volume_claim_templates", vct)
-
-        pcvs = self.dag._build_persistent_volume_claims()
-        if pcvs:
-            setattr(spec, "volumes", pcvs)
-
-        if self.exit_task is not None:
-            setattr(spec, "on_exit", self.exit_task)
-
-        if self.metrics is not None:
-            setattr(spec, "metrics", self.metrics.build())
-
-        return spec
-
-    def build(self: WorkflowType) -> IoArgoprojWorkflowV1alpha1Workflow:
+    def build(self: WorkflowType) -> ModelWorkflow:
         """Builds the workflow core representation"""
-        return IoArgoprojWorkflowV1alpha1Workflow(
-            api_version=GlobalConfig.api_version,
+        return ModelWorkflow(
+            api_version=self.api_version,
             kind=self.__class__.__name__,
             metadata=self._build_metadata(),
             spec=self._build_spec(),
@@ -348,18 +370,11 @@ class Workflow:
         """Assembles the specified parameter name into a parameter specification"""
         if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
-        return Parameter(name, value=f"{{{{workflow.parameters.{name}}}}}")
+        return Parameter(name=name, value=f"{{{{workflow.parameters.{name}}}}}")
 
-    def to_dict(self: WorkflowType, serialize: bool = True) -> dict:
-        """Returns the dictionary representation of the workflow.
-
-        Parameters
-        ----------
-        serialize: bool = True
-            Whether to serialize extra fields from the `Workflow` model into the returned dictionary. When this is set
-            to `False` extra fields, such as `node_selectors`, are not included in the returned payload.
-        """
-        return model_to_dict(self.build(), serialize=serialize)
+    def to_dict(self: WorkflowType) -> dict:
+        """Returns the dictionary representation of the workflow"""
+        return self.build().dict(exclude_none=True, by_alias=True)
 
     def to_json(self: WorkflowType) -> str:
         """Returns the JSON representation of the workflow"""
@@ -372,4 +387,4 @@ class Workflow:
                 "Attempted to use `to_yaml` but PyYAML is not available. "
                 "Install `hera-workflows[yaml]` to install the extra dependency"
             )
-        return _yaml.dump(self.to_dict(), **yaml_kwargs)
+        return self.build().to_yaml(**yaml_kwargs)

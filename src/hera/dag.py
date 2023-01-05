@@ -19,7 +19,7 @@ from hera.parameter import Parameter
 from hera.validators import validate_name
 
 
-class DAG(BaseModel):
+class DAG:
     """A directed acyclic graph representation (workflow) representation.
 
     The DAG/workflow is used as a functional representation for a collection of tasks and
@@ -45,29 +45,27 @@ class DAG(BaseModel):
         Any outputs to set on the DAG at a global level.
     """
 
-    name: str
-    inputs: Optional[
-        Union[
-            List[Union[Parameter, Artifact]],
-            List[Union[Parameter, Artifact, Dict[str, Any]]],
-            Dict[str, Any],
-        ]
-    ] = None
-    outputs: Optional[List[Union[Parameter, Artifact]]] = None
-    tasks: Optional[List[Task]] = None
+    def __init__(
+        self,
+        name: str,
+        inputs: Optional[
+            Union[
+                List[Union[Parameter, Artifact]],
+                List[Union[Parameter, Artifact, Dict[str, Any]]],
+                Dict[str, Any],
+            ]
+        ] = None,
+        outputs: Optional[List[Union[Parameter, Artifact]]] = None,
+        tasks: Optional[List[Task]] = None,
+    ):
+        validate_name(name)
+        self.name: str = name
+        self.inputs: List[Union[Parameter, Artifact]] = self._parse_inputs(inputs)
+        self.outputs: Optional[List[Union[Parameter, Artifact]]] = outputs
+        self.tasks: Optional[List[Tasks]] = tasks
 
-    @validator("inputs", pre=True)
-    def _check_inputs(cls, v):
-        return cls._parse_inputs(v)
-
-    @validator("name", pre=True)
-    def _check_name(cls, v):
-        validate_name(v)
-        return v
-
-    @classmethod
     def _parse_inputs(
-        cls,
+        self,
         inputs: Optional[
             Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
         ],
