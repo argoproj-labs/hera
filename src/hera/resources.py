@@ -4,7 +4,7 @@ from typing import Dict, Optional, Union
 
 from hera.models import ResourceRequirements
 from hera.validators import validate_storage_units
-
+from pydantic import root_validator
 
 # TODO: Move function?
 def _merge_dicts(a: Dict, b: Dict, path=None):
@@ -23,7 +23,6 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
     return a
 
 
-@dataclass
 class Resources:
     """A representation of a collection of resources that are requested to be consumed by a task for execution.
 
@@ -55,24 +54,30 @@ class Resources:
     gpu_flag: Optional[str] = "nvidia.com/gpu"
     custom_resources: Optional[Dict] = None
 
-    def __post_init__(self):
-        if self.memory_request:
-            validate_storage_units(self.memory_request)
-        if self.memory_limit:
-            validate_storage_units(self.memory_limit)
+    @root_validator(pre=True)
+    def _check_specs(cls, values):
+        cpu_request: Optional[Union[float, int, str]] = values.get('cpu_request')
+        cpu_limit: Optional[Union[float, int, str]] = values.get('cpu_limit')
+        memory_request: Optional[str] = values.get('memory_request')
+        memory_limit: Optional[str] = values.get('memory_limit')
+
+        if memory_request is not None:
+            validate_storage_units(memory_request)
+        if memory_limit is not None:
+            validate_storage_units(memory_limit)
+
         # TODO: add validation for CPU units if str
+        if cpu_limit is not None and isinstance(cpu_limit, int):
+            assert cpu_limit >= 0, "CPU limit must be positive"
+        if cpu_request is not None and isinstance(cpu_request, int):
+            assert cpu_request >= 0, "CPU request must be positive"
+            if cpu_limit is not None and isinstance(cpu_limit, int):
+                assert cpu_request <= cpu_limit, "CPU request must be smaller or equal to limit"
 
-        if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
-            assert self.cpu_limit >= 0, "CPU limit must be positive"
-        if self.cpu_request is not None and isinstance(self.cpu_request, int):
-            assert self.cpu_request >= 0, "CPU request must be positive"
-            if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
-                assert self.cpu_request <= self.cpu_limit, "CPU request must be smaller or equal to limit"
-
-        if self.cpu_request is None and self.cpu_limit is not None:
-            self.cpu_request = self.cpu_limit
-        if self.memory_request is None and self.memory_limit is not None:
-            self.memory_request = self.memory_limit
+        if cpu_request is None and cpu_limit is not None:
+            values['cpu_request'] = cpu_limit
+        if memory_request is None and memory_limit is not None:
+            values['memory_request'] = memory_limit
 
     def build(self) -> ResourceRequirements:
         """Builds the resource requirements of the pod"""

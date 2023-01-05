@@ -4,23 +4,68 @@ import copy
 import inspect
 import json
 import textwrap
-from typing import Callable, Dict, List, Optional, Union,Any
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import hera
 from hera.dag import DAG
-from hera.env import Env
+from hera.env import Env, _BaseEnv
+from hera.env_from import _BaseEnvFrom
 from hera.global_config import GlobalConfig
-from hera.models import Template, EnvVar, EnvVarSource, Lifecycle, Probe, ContainerPort, EnvFromSource, SecurityContext,\
-    VolumeDevice,VolumeMount,Parameter,Artifact,ContinueOn,LifecycleHandler,LifecycleHook,TemplateRef,Item,Sequence,\
-    ArtifactLocation,ContainerSetTemplate,Data,ExecAction,ExecutorConfig,HostAlias,HTTP,UserContainer,Affinity,\
-    Container,Memoize,Prometheus,Metrics,Plugin,ResourceTemplate,RetryStrategy,SuspendTemplate,Synchronization,Toleration,\
-    ImagePullPolicy,Metadata,DAGTemplate,Arguments,Inputs,Outputs,PersistentVolumeClaim,Volume as ModelVolume,ScriptTemplate
+from hera.models import (
+    HTTP,
+    Affinity,
+    Arguments,
+    Artifact,
+    ArtifactLocation,
+    Container,
+    ContainerPort,
+    ContainerSetTemplate,
+    ContinueOn,
+    DAGTask,
+    DAGTemplate,
+    Data,
+    EnvFromSource,
+    EnvVar,
+    EnvVarSource,
+    ExecAction,
+    ExecutorConfig,
+    HostAlias,
+    ImagePullPolicy,
+    Inputs,
+    Item,
+    Lifecycle,
+    LifecycleHandler,
+    LifecycleHook,
+    Memoize,
+    Metadata,
+    Metrics,
+    Outputs,
+    Parameter,
+    PersistentVolumeClaim,
+    PersistentVolumeClaimTemplate,
+    Plugin,
+    Probe,
+    Prometheus,
+    ResourceTemplate,
+    RetryStrategy,
+    ScriptTemplate,
+    SecurityContext,
+    Sequence,
+    SuspendTemplate,
+    Synchronization,
+    Template,
+    TemplateRef,
+    Toleration,
+    UserContainer,
+)
+from hera.models import Volume as ModelVolume
+from hera.models import VolumeDevice, VolumeMount
 from hera.operator import Operator
-from hera.validators import validate_name
-from hera.volumes import _BaseVolume
-from hera.volumes import *
-from hera.workflow_status import WorkflowStatus
 from hera.resources import Resources
+from hera.validators import validate_name
+from hera.volumes import *
+from hera.volumes import _BaseVolume
+from hera.workflow_status import WorkflowStatus
 
 
 class TaskResult(str, Enum):
@@ -43,8 +88,8 @@ class Task:
         name: str,
         args: Optional[List[str]] = None,
         command: Optional[List[str]] = None,
-        env: Optional[List[EnvVar]] = None,
-        env_from: Optional[List[EnvFromSource]] = None,
+        env: Optional[List[_BaseEnv]] = None,
+        env_from: Optional[List[_BaseEnvFrom]] = None,
         image: Optional[str] = None,
         image_pull_policy: Optional[str] = None,
         lifecycle: Optional[Lifecycle] = None,
@@ -61,7 +106,6 @@ class Task:
         termination_message_policy: Optional[str] = None,
         tty: Optional[bool] = None,
         volume_devices: Optional[List[VolumeDevice]] = None,
-        volume_mounts: Optional[List[VolumeMount]] = None,
         working_dir: Optional[str] = None,
         arguments: Optional[List[Union[Parameter, Artifact]]] = None,
         continue_on: Optional[ContinueOn] = None,
@@ -133,15 +177,15 @@ class Task:
         self.name: str = validate_name(name)
         self.args: Optional[List[str]] = args
         self.command: Optional[List[str]] = command
-        self.env: Optional[List[EnvVar]] = env
-        self.env_from: Optional[List[EnvFromSource]] = env_from
+        self.env: Optional[List[_BaseEnv]] = env
+        self.env_from: Optional[List[_BaseEnvFrom]] = env_from
         self.image: Optional[str] = image or GlobalConfig.image
         self.image_pull_policy: Optional[str] = image_pull_policy or ImagePullPolicy.always
         self.lifecycle: Optional[Lifecycle] = lifecycle
         self.liveness_probe: Optional[Probe] = liveness_probe
         self.ports: Optional[List[ContainerPort]] = ports
         self.readiness_probe: Optional[Probe] = readiness_probe
-        self.resources: Optional[ResourceRequirements] = resources
+        self.resources: Optional[Resources] = resources
         self.security_context: Optional[SecurityContext] = security_context
         self.source: Optional[Union[Callable, str]] = source
         self.startup_probe: Optional[Probe] = startup_probe
@@ -151,7 +195,6 @@ class Task:
         self.termination_message_policy: Optional[str] = termination_message_policy
         self.tty: Optional[bool] = tty
         self.volume_devices: Optional[List[VolumeDevice]] = volume_devices
-        self.volume_mounts: Optional[List[VolumeMount]] = volume_mounts
         self.working_dir: Optional[str] = working_dir
         self.arguments: Optional[List[Artifact, Parameter]] = arguments
         self.continue_on: Optional[ContinueOn] = continue_on
@@ -191,7 +234,7 @@ class Task:
         self.exit_code: Optional[str] = exit_code
         self.result: Optional[str] = result
         self.memoize: Optional[Memoize] = memoize
-        self.metadata: Optional[Metadata] = Metadata(annotations=annotations,labels=labels)
+        self.metadata: Optional[Metadata] = Metadata(annotations=annotations, labels=labels)
         self.metrics: Optional[Metrics] = self._parse_metrics(metrics)
         self.node_selector: Optional[Dict[str, str]] = node_selector
         self.annotations: Optional[Dict[str, str]] = annotations
@@ -215,9 +258,9 @@ class Task:
         self.source = source
         self.memoize = memoize
         self.volumes = volumes or []
-        self.inputs = [] if inputs is None else self._parse_inputs(inputs)
-        self.outputs = outputs or []
-        self.env = env or []
+        self.inputs = self._parse_inputs(inputs)
+        self.outputs = outputs
+        self.env = env
         self.with_param = with_param
         self.with_sequence = with_sequence
         self.pod_spec_patch = pod_spec_patch
@@ -925,37 +968,15 @@ class Task:
         List[VolumeMount]
             The list of volume mounts to be added to the task specification.
         """
-        return [v._build_mount() for v in self.volumes]
+        return [v.mount() for v in self.volumes]
 
-    def _build_volume_claim_templates(self) -> List[PersistentVolumeClaim]:
+    def _build_volume_claim_templates(self) -> List[PersistentVolumeClaimTemplate]:
         """Assembles the list of volume claim templates to be created for the task."""
         return [v.claim() for v in self.volumes if isinstance(v, Volume)]
 
     def _build_persistent_volume_claims(self) -> List[ModelVolume]:
         """Assembles the list of Argo volume specifications"""
-        return [
-            v.volume() for v in self.volumes if not isinstance(v, Volume)
-        ]
-
-    def _build_container_kwargs(self) -> Dict:
-        """Assemble the kwargs which will be used as a base for both script and container"""
-        pull_policy = None
-        if self.image_pull_policy:
-            pull_policy = self.image_pull_policy
-
-        kwargs = dict(
-            image=self.image,
-            image_pull_policy=pull_policy,
-            command=self.get_command(),
-            resources=self.resources,
-            args=self.get_args(),
-            env=self.env,
-            env_from=self.env_from,
-            working_dir=self.working_dir,
-            volume_mounts=self._build_volume_mounts(),
-            security_context=self.security_context,
-        )
-        return {k: v for k, v in kwargs.items() if v}  # treats empty lists/None as false
+        return [v.volume() for v in self.volumes if not isinstance(v, Volume)]
 
     def _build_script(self) -> ScriptTemplate:
         """Assembles and returns the script template that contains the definition of the script to run in a task.
@@ -965,7 +986,31 @@ class Task:
         ScriptTemplate
             The script template representation of the task.
         """
-        return ScriptTemplate(**self._build_container_kwargs(), source=self._get_script())
+        return ScriptTemplate(
+            args=self.get_args(),
+            command=self.get_command(),
+            env=[e.build() for e in self.env],
+            env_from=[ef.build() for ef in self.env_from],
+            image=self.image,
+            image_pull_policy=self.image_pull_policy,
+            lifecycle=self.lifecycle,
+            liveness_probe=self.liveness_probe,
+            name=self.name,
+            ports=self.ports,
+            readiness_probe=self.readiness_probe,
+            resources=self.resources.build(),
+            security_context=self.security_context,
+            source=self._get_script(),
+            startup_probe=self.startup_probe,
+            stdin=self.stdin,
+            stdin_once=self.stdin_once,
+            termination_message_path=self.termination_message_path,
+            termination_message_policy=self.termination_message_policy,
+            tty=self.tty,
+            volume_devices=self.volume_devices,
+            volume_mounts=self._build_volume_mounts(),
+            working_dir=self.working_dir,
+        )
 
     def _build_container(self) -> Container:
         """Assembles and returns the container for the task to run in.
@@ -975,8 +1020,30 @@ class Task:
         Container
             The container template representation of the task.
         """
-        container_args = self._build_container_kwargs()
-        container = Container(**container_args)
+        container = Container(
+            args=self.get_args(),
+            command=self.get_command(),
+            env=[e.build() for e in self.env],
+            env_from=[ef.build() for ef in self.env_from],
+            image=self.image,
+            image_pull_policy=self.image_pull_policy,
+            lifecycle=self.lifecycle,
+            liveness_probe=self.liveness_probe,
+            name=self.name,
+            ports=self.ports,
+            readiness_probe=self.readiness_probe,
+            resources=self.resources.build(),
+            security_context=self.security_context,
+            startup_probe=self.startup_probe,
+            stdin=self.stdin,
+            stdin_once=self.stdin_once,
+            termination_message_path=self.termination_message_path,
+            termination_message_policy=self.termination_message_policy,
+            tty=self.tty,
+            volume_devices=self.volume_devices,
+            volume_mounts=self._build_volume_mounts(),
+            working_dir=self.working_dir,
+        )
         return container
 
     def _build_template(self) -> Optional[Template]:
@@ -1034,7 +1101,7 @@ class Task:
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
-            volumes=self._build_persistent_volume_claims(),
+            volumes=[v.volume() for v in self.volumes],
         )
 
         if self.source is not None:

@@ -23,7 +23,6 @@ from hera.models import FlockerVolumeSource as ModelFlockerVolumeSource
 from hera.models import (
     GCEPersistentDiskVolumeSource as ModelGCEPersistentDiskVolumeSource,
 )
-from hera.models import Volume as ModelVolume
 from hera.models import GitRepoVolumeSource as ModelGitRepoVolumeSource
 from hera.models import GlusterfsVolumeSource as ModelGlusterfsVolumeSource
 from hera.models import HostPathVolumeSource as ModelHostPathVolumeSource
@@ -34,6 +33,9 @@ from hera.models import ObjectMeta
 from hera.models import PersistentVolumeClaim as ModelPersistentVolumeClaim
 from hera.models import PersistentVolumeClaimSpec as ModelPersistentVolumeClaimSpec
 from hera.models import PersistentVolumeClaimStatus
+from hera.models import (
+    PersistentVolumeClaimTemplate as ModelPersistentVolumeClaimTemplate,
+)
 from hera.models import (
     PersistentVolumeClaimVolumeSource as ModelPersistentVolumeClaimVolumeSource,
 )
@@ -49,6 +51,8 @@ from hera.models import ScaleIOVolumeSource as ModelScaleIOVolumeSource
 from hera.models import SecretVolumeSource as ModelSecretVolumeSource
 from hera.models import StorageOSVolumeSource as ModelStorageOSVolumeSource
 from hera.models import TypedLocalObjectReference
+from hera.models import Volume as ModelVolume
+from hera.models import VolumeMount as ModelVolumeMount
 from hera.models import (
     VsphereVirtualDiskVolumeSource as ModelVsphereVirtualDiskVolumeSource,
 )
@@ -89,7 +93,7 @@ class AccessMode(Enum):
 VolumeType = TypeVar("VolumeType", bound="_BaseVolume")
 
 
-class _BaseVolume(BaseModel):
+class _BaseVolume(ModelVolumeMount):
     name: Optional[str]
 
     @validator("name", pre=True)
@@ -98,11 +102,21 @@ class _BaseVolume(BaseModel):
             return str(uuid.uuid4())
         return v
 
-    def claim(self)->ModelPersistentVolumeClaim:
+    def claim(self) -> ModelPersistentVolumeClaim:
         raise NotImplementedError
 
-    def volume(self) ->ModelVolume:
+    def volume(self) -> ModelVolume:
         raise NotImplementedError
+
+    def mount(self) -> ModelVolumeMount:
+        return ModelVolumeMount(
+            name=self.name,
+            mount_path=self.mount_path,
+            mount_propagation=self.mount_propagation,
+            read_only=self.read_only,
+            sub_path=self.sub_path,
+            sub_path_expr=self.sub_path_expr,
+        )
 
 
 class AWSElasticBlockStore(_BaseVolume, ModelAWSElasticBlockStoreVolumeSource):
@@ -251,20 +265,12 @@ class Existing(_BaseVolume, ModelPersistentVolumeClaimVolumeSource):
 
 
 class Volume(_BaseVolume, ModelPersistentVolumeClaimSpec):
-    api_version: Optional[str] = None
-    kind: Optional[str]
     size: Optional[str] = None
     name: Optional[str] = None
     resources: Optional[ResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[str]] = None
-    data_source: Optional[TypedLocalObjectReference] = None
-    data_source_ref: Optional[TypedLocalObjectReference] = None
-    selector: Optional[LabelSelector] = None
+    access_modes: Optional[List[AccessMode]] = None
     storage_class_name: Optional[str] = "standard"
-    volume_mode: Optional[str] = None
-    volume_name: Optional[str] = None
-    status: Optional[PersistentVolumeClaimStatus] = None
 
     @root_validator(pre=True)
     def _merge_reqs(cls, values):
@@ -286,13 +292,11 @@ class Volume(_BaseVolume, ModelPersistentVolumeClaimSpec):
             validate_storage_units(storage)
         return values
 
-    def claim(self) -> ModelPersistentVolumeClaim:
-        return ModelPersistentVolumeClaim(
-            api_version=self.api_version,
-            kind=self.kind,
+    def claim(self) -> ModelPersistentVolumeClaimTemplate:
+        return ModelPersistentVolumeClaimTemplate(
             metadata=self.metadata,
             spec=ModelPersistentVolumeClaimSpec(
-                access_modes=self.access_modes,
+                access_modes=[str(am.value) for am in self.access_modes],
                 data_source=self.data_source,
                 data_source_ref=self.data_source_ref,
                 resources=self.resources,
@@ -301,5 +305,14 @@ class Volume(_BaseVolume, ModelPersistentVolumeClaimSpec):
                 volume_mode=self.volume_mode,
                 volume_name=self.volume_name,
             ),
-            status=self.status,
+        )
+
+    def volume(self) -> ModelVolume:
+        claim = self.claim()
+        return ModelVolume(
+            name=self.name,
+            persistent_volume_claim=ModelPersistentVolumeClaimVolumeSource(
+                claim_name=claim.metadata.name,
+                read_only=self.read_only,
+            ),
         )
