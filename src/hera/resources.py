@@ -1,10 +1,11 @@
 """Holds the resource specification"""
-from dataclasses import dataclass
 from typing import Dict, Optional, Union
+
+from pydantic import root_validator
 
 from hera.models import ResourceRequirements
 from hera.validators import validate_storage_units
-from pydantic import root_validator
+
 
 # TODO: Move function?
 def _merge_dicts(a: Dict, b: Dict, path=None):
@@ -56,10 +57,10 @@ class Resources:
 
     @root_validator(pre=True)
     def _check_specs(cls, values):
-        cpu_request: Optional[Union[float, int, str]] = values.get('cpu_request')
-        cpu_limit: Optional[Union[float, int, str]] = values.get('cpu_limit')
-        memory_request: Optional[str] = values.get('memory_request')
-        memory_limit: Optional[str] = values.get('memory_limit')
+        cpu_request: Optional[Union[float, int, str]] = values.get("cpu_request")
+        cpu_limit: Optional[Union[float, int, str]] = values.get("cpu_limit")
+        memory_request: Optional[str] = values.get("memory_request")
+        memory_limit: Optional[str] = values.get("memory_limit")
 
         if memory_request is not None:
             validate_storage_units(memory_request)
@@ -75,9 +76,9 @@ class Resources:
                 assert cpu_request <= cpu_limit, "CPU request must be smaller or equal to limit"
 
         if cpu_request is None and cpu_limit is not None:
-            values['cpu_request'] = cpu_limit
+            values["cpu_request"] = cpu_limit
         if memory_request is None and memory_limit is not None:
-            values['memory_request'] = memory_limit
+            values["memory_request"] = memory_limit
 
     def build(self) -> ResourceRequirements:
         """Builds the resource requirements of the pod"""

@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Callable, Optional, Tuple, Union
-
-from typing_extensions import Protocol
 
 if TYPE_CHECKING:
     from hera.task import Task

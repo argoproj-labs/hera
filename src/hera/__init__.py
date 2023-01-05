@@ -36,16 +36,6 @@ from hera.sequence import Sequence
 from hera.task import Task, TaskResult
 from hera.toleration import GPUToleration, Toleration
 from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.volumes import (
-    AccessMode,
-    ConfigMapVolume,
-    EmptyDirVolume,
-    ExistingVolume,
-    SecretVolume,
-    Volume,
-    VolumeDevice,
-    VolumeMount,
-)
 from hera.workflow import Workflow
 from hera.workflow_status import WorkflowStatus
 from hera.workflow_template import WorkflowTemplate

@@ -1,10 +1,9 @@
 import uuid
 from enum import Enum
-from typing import List, Optional, TypeVar, cast
+from typing import List, Optional, cast
 
 from pydantic import root_validator, validator
 
-from hera._base_model import BaseModel
 from hera.models import (
     AWSElasticBlockStoreVolumeSource as ModelAWSElasticBlockStoreVolumeSource,
 )
@@ -27,12 +26,10 @@ from hera.models import GitRepoVolumeSource as ModelGitRepoVolumeSource
 from hera.models import GlusterfsVolumeSource as ModelGlusterfsVolumeSource
 from hera.models import HostPathVolumeSource as ModelHostPathVolumeSource
 from hera.models import ISCSIVolumeSource as ModelISCSIVolumeSource
-from hera.models import LabelSelector
 from hera.models import NFSVolumeSource as ModelNFSVolumeSource
 from hera.models import ObjectMeta
 from hera.models import PersistentVolumeClaim as ModelPersistentVolumeClaim
 from hera.models import PersistentVolumeClaimSpec as ModelPersistentVolumeClaimSpec
-from hera.models import PersistentVolumeClaimStatus
 from hera.models import (
     PersistentVolumeClaimTemplate as ModelPersistentVolumeClaimTemplate,
 )
@@ -50,7 +47,6 @@ from hera.models import ResourceRequirements
 from hera.models import ScaleIOVolumeSource as ModelScaleIOVolumeSource
 from hera.models import SecretVolumeSource as ModelSecretVolumeSource
 from hera.models import StorageOSVolumeSource as ModelStorageOSVolumeSource
-from hera.models import TypedLocalObjectReference
 from hera.models import Volume as ModelVolume
 from hera.models import VolumeMount as ModelVolumeMount
 from hera.models import (
@@ -59,7 +55,7 @@ from hera.models import (
 from hera.validators import validate_storage_units
 
 
-class AccessMode(Enum):
+class AccessModeVolume(Enum):
     """A representations of the volume access modes for Kubernetes.
 
     Notes
@@ -90,9 +86,6 @@ class AccessMode(Enum):
         return str(self.value)
 
 
-VolumeType = TypeVar("VolumeType", bound="_BaseVolume")
-
-
 class _BaseVolume(ModelVolumeMount):
     name: Optional[str]
 
@@ -119,152 +112,152 @@ class _BaseVolume(ModelVolumeMount):
         )
 
 
-class AWSElasticBlockStore(_BaseVolume, ModelAWSElasticBlockStoreVolumeSource):
+class AWSElasticBlockStoreVolumeVolume(_BaseVolume, ModelAWSElasticBlockStoreVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, aws_elastic_block_store=self)
 
 
-class AzureDisk(_BaseVolume, ModelAzureDiskVolumeSource):
+class AzureDiskVolumeVolume(_BaseVolume, ModelAzureDiskVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, azure_disk=self)
 
 
-class AzureFile(_BaseVolume, ModelAzureFileVolumeSource):
+class AzureFileVolumeVolume(_BaseVolume, ModelAzureFileVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, azure_file=self)
 
 
-class CephFS(_BaseVolume, ModelCephFSVolumeSource):
+class CephFSVolumeVolume(_BaseVolume, ModelCephFSVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, cephfs=self)
 
 
-class Cinder(_BaseVolume, ModelCinderVolumeSource):
+class CinderVolume(_BaseVolume, ModelCinderVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, cinder=self)
 
 
-class ConfigMap(_BaseVolume, ModelConfigMapVolumeSource):
+class ConfigMapVolume(_BaseVolume, ModelConfigMapVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, config_map=self)
 
 
-class CSI(_BaseVolume, ModelCSIVolumeSource):
+class CSIVolume(_BaseVolume, ModelCSIVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, csi=self)
 
 
-class DownwardAPI(_BaseVolume, ModelDownwardAPIVolumeSource):
+class DownwardAPIVolume(_BaseVolume, ModelDownwardAPIVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, downward_api=self)
 
 
-class EmptyDir(_BaseVolume, ModelEmptyDirVolumeSource):
+class EmptyDirVolume(_BaseVolume, ModelEmptyDirVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, empty_dir=self)
 
 
-class Ephemeral(_BaseVolume, ModelEphemeralVolumeSource):
+class EphemeralVolume(_BaseVolume, ModelEphemeralVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, ephemeral=self)
 
 
-class FC(_BaseVolume, ModelFCVolumeSource):
+class FCVolume(_BaseVolume, ModelFCVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, fc=self)
 
 
-class Flex(_BaseVolume, ModelFlexVolumeSource):
+class FlexVolume(_BaseVolume, ModelFlexVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, flex_volume=self)
 
 
-class Flocker(_BaseVolume, ModelFlockerVolumeSource):
+class FlockerVolume(_BaseVolume, ModelFlockerVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, flocker=self)
 
 
-class GCEPersistentDisk(_BaseVolume, ModelGCEPersistentDiskVolumeSource):
+class GCEPersistentDiskVolume(_BaseVolume, ModelGCEPersistentDiskVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, gce_persistent_disk=self)
 
 
-class GitRepo(_BaseVolume, ModelGitRepoVolumeSource):
+class GitRepoVolume(_BaseVolume, ModelGitRepoVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, git_repo=self)
 
 
-class Glusterfs(_BaseVolume, ModelGlusterfsVolumeSource):
+class GlusterfsVolume(_BaseVolume, ModelGlusterfsVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, glusterfs=self)
 
 
-class HostPath(_BaseVolume, ModelHostPathVolumeSource):
+class HostPathVolume(_BaseVolume, ModelHostPathVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, host_path=self)
 
 
-class ISCSI(_BaseVolume, ModelISCSIVolumeSource):
+class ISCSIVolume(_BaseVolume, ModelISCSIVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, iscsi=self)
 
 
-class NFS(_BaseVolume, ModelNFSVolumeSource):
+class NFSVolume(_BaseVolume, ModelNFSVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, nfs=self)
 
 
-class PhotonPersistentDisk(_BaseVolume, ModelPhotonPersistentDiskVolumeSource):
+class PhotonPersistentDiskVolume(_BaseVolume, ModelPhotonPersistentDiskVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, photon_persistent_disk=self)
 
 
-class Portworx(_BaseVolume, ModelPortworxVolumeSource):
+class PortworxVolume(_BaseVolume, ModelPortworxVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, portworx_volume=self)
 
 
-class Projected(_BaseVolume, ModelProjectedVolumeSource):
+class ProjectedVolume(_BaseVolume, ModelProjectedVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, projected=self)
 
 
-class Quobyte(_BaseVolume, ModelQuobyteVolumeSource):
+class QuobyteVolume(_BaseVolume, ModelQuobyteVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, quobyte=self)
 
 
-class RBD(_BaseVolume, ModelRBDVolumeSource):
+class RBDVolume(_BaseVolume, ModelRBDVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, rbd=self)
 
 
-class ScaleIO(_BaseVolume, ModelScaleIOVolumeSource):
+class ScaleIOVolume(_BaseVolume, ModelScaleIOVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, scale_io=self)
 
 
-class Secret(_BaseVolume, ModelSecretVolumeSource):
+class SecretVolume(_BaseVolume, ModelSecretVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, secret=self)
 
 
-class StorageOS(_BaseVolume, ModelStorageOSVolumeSource):
+class StorageOSVolume(_BaseVolume, ModelStorageOSVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, storageos=self)
 
 
-class VsphereVirtualDisk(_BaseVolume, ModelVsphereVirtualDiskVolumeSource):
+class VsphereVirtualDiskVolume(_BaseVolume, ModelVsphereVirtualDiskVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, vsphere_volume=self)
 
 
-class Existing(_BaseVolume, ModelPersistentVolumeClaimVolumeSource):
+class ExistingVolume(_BaseVolume, ModelPersistentVolumeClaimVolumeSource):
     def volume(self) -> ModelVolume:
         return ModelVolume(name=self.name, persistent_volume_claim=self)
 
 
-class Volume(_BaseVolume, ModelPersistentVolumeClaimSpec):
+class VolumeVolume(_BaseVolume, ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None
     name: Optional[str] = None
     resources: Optional[ResourceRequirements] = None

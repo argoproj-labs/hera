@@ -24,24 +24,18 @@ from hera.models import (
     DAGTask,
     DAGTemplate,
     Data,
-    EnvFromSource,
-    EnvVar,
-    EnvVarSource,
-    ExecAction,
     ExecutorConfig,
     HostAlias,
     ImagePullPolicy,
     Inputs,
     Item,
     Lifecycle,
-    LifecycleHandler,
     LifecycleHook,
     Memoize,
     Metadata,
     Metrics,
     Outputs,
     Parameter,
-    PersistentVolumeClaim,
     PersistentVolumeClaimTemplate,
     Plugin,
     Probe,
@@ -57,9 +51,9 @@ from hera.models import (
     TemplateRef,
     Toleration,
     UserContainer,
+    VolumeDevice,
+    VolumeMount,
 )
-from hera.models import Volume as ModelVolume
-from hera.models import VolumeDevice, VolumeMount
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.validators import validate_name

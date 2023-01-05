@@ -1,5 +1,3 @@
-from enum import Enum
-
 from hera.models import Operator as ModelOperator
 
 
