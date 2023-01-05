@@ -12,6 +12,7 @@ from hera.models import (
     Artifact,
     ArtifactGC,
     ArtifactRepositoryRef,
+    CreateOptions,
     ExecutorConfig,
     HostAlias,
     LifecycleHook,
@@ -32,9 +33,23 @@ from hera.models import (
     VolumeClaimGC,
 )
 from hera.models import Workflow as ModelWorkflow
-from hera.models import WorkflowCreateRequest, WorkflowMetadata
+from hera.models import (
+    WorkflowCreateRequest,
+    WorkflowLintRequest,
+    WorkflowMetadata,
+    WorkflowResubmitRequest,
+    WorkflowResumeRequest,
+    WorkflowRetryRequest,
+    WorkflowSetRequest,
+)
 from hera.models import WorkflowSpec as ModelWorkflowSpec
-from hera.models import WorkflowTemplateRef
+from hera.models import (
+    WorkflowStopRequest,
+    WorkflowSubmitRequest,
+    WorkflowSuspendRequest,
+    WorkflowTemplateRef,
+    WorkflowTerminateRequest,
+)
 from hera.parameter import Parameter
 from hera.service import Service
 from hera.task import Task
@@ -325,21 +340,111 @@ class Workflow:
         self.dag.add_tasks(*ts)
         return self
 
-    def create(self: WorkflowType) -> WorkflowType:
+    def create(
+        self: WorkflowType,
+        namespace: str = GlobalConfig.namespace,
+        create_options: Optional[CreateOptions] = None,
+        instance_id: Optional[str] = None,
+        server_dry_run: Optional[bool] = None,
+    ) -> WorkflowType:
         """Creates the workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
 
-        resulting_argo_wf = self.service.create_workflow(self.build())
-        if self.generate_name:
-            self.generated_name = resulting_argo_wf.metadata.get("name")
+        return self.service.create_workflow(
+            namespace,
+            WorkflowCreateRequest(
+                create_options=create_options,
+                instance_id=instance_id,
+                namespace=namespace,
+                server_dry_run=server_dry_run,
+                workflow=self.build(),
+            ),
+        )
 
-        return self
-
-    def lint(self: WorkflowType) -> WorkflowType:
+    def lint(self: WorkflowType, namespace: str = GlobalConfig.namespace) -> WorkflowType:
         """Lint the workflow"""
-        self.service.lint_workflow(self.build())
-        return self
+        return self.service.lint_workflow(namespace, WorkflowLintRequest(namespace=namespace, workflow=self.build()))
+
+    def resubmit(
+        self: WorkflowType,
+        namespace: str = GlobalConfig.namespace,
+        memoized: Optional[bool] = None,
+        parameters: Optional[List[str]] = None,
+    ) -> WorkflowType:
+        return self.service.resubmit_workflow(
+            namespace,
+            self.name,
+            WorkflowResubmitRequest(
+                memoized=memoized,
+                name=self.name,
+                namespace=namespace,
+                parameters=parameters,
+            ),
+        )
+
+    def resume(
+        self: WorkflowType, namespace: str = GlobalConfig.namespace, node_field_selector: Optional[str] = None
+    ) -> WorkflowType:
+        return self.service.resume_workflow(
+            namespace,
+            self.name,
+            WorkflowResumeRequest(name=self.name, namespace=namespace, node_field_selector=node_field_selector),
+        )
+
+    def retry(
+        self: WorkflowType,
+        namespace: str = GlobalConfig.namespace,
+        node_field_selector: Optional[List[str]] = None,
+        parameters: Optional[List[str]] = None,
+        restart_successful: Optional[bool] = None,
+    ) -> WorkflowType:
+        return self.service.retry_workflow(
+            namespace,
+            self.name,
+            WorkflowRetryRequest(
+                name=self.name,
+                namespace=namespace,
+                node_field_selector=node_field_selector,
+                parameters=parameters,
+                restart_successful=restart_successful,
+            ),
+        )
+
+    def set(
+        self: WorkflowType,
+        namespace: GlobalConfig.namespace,
+        message: Optional[str] = None,
+        node_field_selector: Optional[str] = None,
+        output_parameters: Optional[str] = None,
+        phase: Optional[str] = None,
+    ) -> WorkflowType:
+        return self.service.set_workflow(
+            namespace,
+            self.name,
+            WorkflowSetRequest(
+                message=message,
+                name=self.name,
+                namespace=namespace,
+                node_field_selector=node_field_selector,
+                output_parameters=output_parameters,
+                phase=phase,
+            ),
+        )
+
+    def stop(
+        self,
+        namespace: str = GlobalConfig.namespace,
+        message: Optional[str] = None,
+        node_field_selector: Optional[str] = None,
+    ) -> WorkflowType:
+        return self.service.stop_workflow(
+            namespace,
+            self.name,
+            WorkflowStopRequest(
+                message=message, name=self.name, namespace=namespace, node_field_selector=node_field_selector
+            ),
+        )
 
     def on_exit(self: WorkflowType, other: Union[Task, DAG]) -> None:
         """Add a task or a DAG to execute upon workflow exit"""
