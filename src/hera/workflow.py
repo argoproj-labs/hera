@@ -20,7 +20,6 @@ from hera.models import (
     Metrics,
     ObjectMeta,
     Parameter,
-    PersistentVolumeClaim,
     PodDisruptionBudgetSpec,
     PodDNSConfig,
     PodGC,
@@ -29,14 +28,11 @@ from hera.models import (
     RetryStrategy,
     Synchronization,
     Template,
-    Toleration,
     TTLStrategy,
+    VolumeClaimGC,
 )
-from hera.models import Volume as ModelVolume
-from hera.models import VolumeClaimGC
-from hera.models import VolumeClaimGC as ModelVolumeClaimGC
 from hera.models import Workflow as ModelWorkflow
-from hera.models import WorkflowMetadata
+from hera.models import WorkflowCreateRequest, WorkflowMetadata
 from hera.models import WorkflowSpec as ModelWorkflowSpec
 from hera.models import WorkflowTemplateRef
 from hera.parameter import Parameter
@@ -44,7 +40,6 @@ from hera.service import Service
 from hera.task import Task
 from hera.toleration import Toleration
 from hera.validators import validate_name
-from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import _BaseVolume
 
 # PyYAML is an optional dependency

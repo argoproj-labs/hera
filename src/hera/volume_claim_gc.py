@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class VolumeClaimGCStrategy(str, Enum):
+class VolumeClaimGCStrategy(Enum):
     """A representation of the strategy to use when deleting volumes from completed workflows"""
 
     on_workflow_completion = "OnWorkflowCompletion"
