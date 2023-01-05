@@ -8,17 +8,17 @@ from typing import Optional
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 from .io.argoproj.events import v1alpha1
 from .io.k8s.apimachinery.pkg.apis.meta import v1
 
 
-class EventSourceDeletedResponse(ArgoBaseModel):
+class EventSourceDeletedResponse(BaseModel):
     pass
 
 
-class LogEntry(ArgoBaseModel):
+class LogEntry(BaseModel):
     event_name: Optional[str] = Field(None, alias="eventName", title="optional - the event name (e.g. `example`)")
     event_source_name: Optional[str] = Field(None, alias="eventSourceName")
     event_source_type: Optional[str] = Field(
@@ -30,17 +30,17 @@ class LogEntry(ArgoBaseModel):
     time: Optional[v1.Time] = None
 
 
-class CreateEventSourceRequest(ArgoBaseModel):
+class CreateEventSourceRequest(BaseModel):
     event_source: Optional[v1alpha1.EventSource] = Field(None, alias="eventSource")
     namespace: Optional[str] = None
 
 
-class EventSourceWatchEvent(ArgoBaseModel):
+class EventSourceWatchEvent(BaseModel):
     object: Optional[v1alpha1.EventSource] = None
     type: Optional[str] = None
 
 
-class UpdateEventSourceRequest(ArgoBaseModel):
+class UpdateEventSourceRequest(BaseModel):
     event_source: Optional[v1alpha1.EventSource] = Field(None, alias="eventSource")
     name: Optional[str] = None
     namespace: Optional[str] = None

@@ -9,14 +9,14 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 from ...apimachinery.pkg.api import resource
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr
 
 
-class AWSElasticBlockStoreVolumeSource(ArgoBaseModel):
+class AWSElasticBlockStoreVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -52,7 +52,7 @@ class AWSElasticBlockStoreVolumeSource(ArgoBaseModel):
     )
 
 
-class AzureDiskVolumeSource(ArgoBaseModel):
+class AzureDiskVolumeSource(BaseModel):
     caching_mode: Optional[str] = Field(
         None, alias="cachingMode", description="Host Caching mode: None, Read Only, Read Write."
     )
@@ -80,7 +80,7 @@ class AzureDiskVolumeSource(ArgoBaseModel):
     )
 
 
-class AzureFileVolumeSource(ArgoBaseModel):
+class AzureFileVolumeSource(BaseModel):
     read_only: Optional[bool] = Field(
         None,
         alias="readOnly",
@@ -92,12 +92,12 @@ class AzureFileVolumeSource(ArgoBaseModel):
     share_name: str = Field(..., alias="shareName", description="Share Name")
 
 
-class Capabilities(ArgoBaseModel):
+class Capabilities(BaseModel):
     add: Optional[List[str]] = Field(None, description="Added capabilities")
     drop: Optional[List[str]] = Field(None, description="Removed capabilities")
 
 
-class ConfigMapEnvSource(ArgoBaseModel):
+class ConfigMapEnvSource(BaseModel):
     name: Optional[str] = Field(
         None,
         description=(
@@ -108,7 +108,7 @@ class ConfigMapEnvSource(ArgoBaseModel):
     optional: Optional[bool] = Field(None, description="Specify whether the ConfigMap must be defined")
 
 
-class ConfigMapKeySelector(ArgoBaseModel):
+class ConfigMapKeySelector(BaseModel):
     key: str = Field(..., description="The key to select.")
     name: Optional[str] = Field(
         None,
@@ -137,7 +137,7 @@ class Protocol(Enum):
     udp = "UDP"
 
 
-class ContainerPort(ArgoBaseModel):
+class ContainerPort(BaseModel):
     container_port: int = Field(
         ...,
         alias="containerPort",
@@ -170,12 +170,12 @@ class ContainerPort(ArgoBaseModel):
     )
 
 
-class EventSource(ArgoBaseModel):
+class EventSource(BaseModel):
     component: Optional[str] = Field(None, description="Component from which the event is generated.")
     host: Optional[str] = Field(None, description="Node name on which the event is generated.")
 
 
-class ExecAction(ArgoBaseModel):
+class ExecAction(BaseModel):
     command: Optional[List[str]] = Field(
         None,
         description=(
@@ -187,7 +187,7 @@ class ExecAction(ArgoBaseModel):
     )
 
 
-class FCVolumeSource(ArgoBaseModel):
+class FCVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -216,7 +216,7 @@ class FCVolumeSource(ArgoBaseModel):
     )
 
 
-class FlockerVolumeSource(ArgoBaseModel):
+class FlockerVolumeSource(BaseModel):
     dataset_name: Optional[str] = Field(
         None,
         alias="datasetName",
@@ -230,7 +230,7 @@ class FlockerVolumeSource(ArgoBaseModel):
     )
 
 
-class GCEPersistentDiskVolumeSource(ArgoBaseModel):
+class GCEPersistentDiskVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -267,7 +267,7 @@ class GCEPersistentDiskVolumeSource(ArgoBaseModel):
     )
 
 
-class GRPCAction(ArgoBaseModel):
+class GRPCAction(BaseModel):
     port: int = Field(..., description="Port number of the gRPC service. Number must be in the range 1 to 65535.")
     service: Optional[str] = Field(
         None,
@@ -279,7 +279,7 @@ class GRPCAction(ArgoBaseModel):
     )
 
 
-class GitRepoVolumeSource(ArgoBaseModel):
+class GitRepoVolumeSource(BaseModel):
     directory: Optional[str] = Field(
         None,
         description=(
@@ -292,7 +292,7 @@ class GitRepoVolumeSource(ArgoBaseModel):
     revision: Optional[str] = Field(None, description="Commit hash for the specified revision.")
 
 
-class GlusterfsVolumeSource(ArgoBaseModel):
+class GlusterfsVolumeSource(BaseModel):
     endpoints: str = Field(
         ...,
         description=(
@@ -322,17 +322,17 @@ class Scheme(Enum):
     https = "HTTPS"
 
 
-class HTTPHeader(ArgoBaseModel):
+class HTTPHeader(BaseModel):
     name: str = Field(..., description="The header field name")
     value: str = Field(..., description="The header field value")
 
 
-class HostAlias(ArgoBaseModel):
+class HostAlias(BaseModel):
     hostnames: Optional[List[str]] = Field(None, description="Hostnames for the above IP address.")
     ip: Optional[str] = Field(None, description="IP address of the host file entry.")
 
 
-class HostPathVolumeSource(ArgoBaseModel):
+class HostPathVolumeSource(BaseModel):
     path: str = Field(
         ...,
         description=(
@@ -349,7 +349,7 @@ class HostPathVolumeSource(ArgoBaseModel):
     )
 
 
-class KeyToPath(ArgoBaseModel):
+class KeyToPath(BaseModel):
     key: str = Field(..., description="The key to project.")
     mode: Optional[int] = Field(
         None,
@@ -369,7 +369,7 @@ class KeyToPath(ArgoBaseModel):
     )
 
 
-class LocalObjectReference(ArgoBaseModel):
+class LocalObjectReference(BaseModel):
     name: Optional[str] = Field(
         None,
         description=(
@@ -379,7 +379,7 @@ class LocalObjectReference(ArgoBaseModel):
     )
 
 
-class NFSVolumeSource(ArgoBaseModel):
+class NFSVolumeSource(BaseModel):
     path: str = Field(
         ...,
         description=(
@@ -413,7 +413,7 @@ class Operator(Enum):
     not_in = "NotIn"
 
 
-class NodeSelectorRequirement(ArgoBaseModel):
+class NodeSelectorRequirement(BaseModel):
     key: str = Field(..., description="The label key that the selector applies to.")
     operator: Operator = Field(
         ...,
@@ -434,7 +434,7 @@ class NodeSelectorRequirement(ArgoBaseModel):
     )
 
 
-class NodeSelectorTerm(ArgoBaseModel):
+class NodeSelectorTerm(BaseModel):
     match_expressions: Optional[List[NodeSelectorRequirement]] = Field(
         None, alias="matchExpressions", description="A list of node selector requirements by node's labels."
     )
@@ -443,7 +443,7 @@ class NodeSelectorTerm(ArgoBaseModel):
     )
 
 
-class ObjectFieldSelector(ArgoBaseModel):
+class ObjectFieldSelector(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -454,7 +454,7 @@ class ObjectFieldSelector(ArgoBaseModel):
     )
 
 
-class ObjectReference(ArgoBaseModel):
+class ObjectReference(BaseModel):
     api_version: Optional[str] = Field(None, alias="apiVersion", description="API version of the referent.")
     field_path: Optional[str] = Field(
         None,
@@ -517,7 +517,7 @@ class Phase(Enum):
     pending = "Pending"
 
 
-class PersistentVolumeClaimVolumeSource(ArgoBaseModel):
+class PersistentVolumeClaimVolumeSource(BaseModel):
     claim_name: str = Field(
         ...,
         alias="claimName",
@@ -531,7 +531,7 @@ class PersistentVolumeClaimVolumeSource(ArgoBaseModel):
     )
 
 
-class PhotonPersistentDiskVolumeSource(ArgoBaseModel):
+class PhotonPersistentDiskVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -543,12 +543,12 @@ class PhotonPersistentDiskVolumeSource(ArgoBaseModel):
     pd_id: str = Field(..., alias="pdID", description="ID that identifies Photon Controller persistent disk")
 
 
-class PodDNSConfigOption(ArgoBaseModel):
+class PodDNSConfigOption(BaseModel):
     name: Optional[str] = Field(None, description="Required.")
     value: Optional[str] = None
 
 
-class PortworxVolumeSource(ArgoBaseModel):
+class PortworxVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -565,7 +565,7 @@ class PortworxVolumeSource(ArgoBaseModel):
     volume_id: str = Field(..., alias="volumeID", description="VolumeID uniquely identifies a Portworx volume")
 
 
-class PreferredSchedulingTerm(ArgoBaseModel):
+class PreferredSchedulingTerm(BaseModel):
     preference: NodeSelectorTerm = Field(
         ..., description="A node selector term, associated with the corresponding weight."
     )
@@ -574,7 +574,7 @@ class PreferredSchedulingTerm(ArgoBaseModel):
     )
 
 
-class QuobyteVolumeSource(ArgoBaseModel):
+class QuobyteVolumeSource(BaseModel):
     group: Optional[str] = Field(None, description="Group to map volume access to Default is no group")
     read_only: Optional[bool] = Field(
         None,
@@ -603,7 +603,7 @@ class QuobyteVolumeSource(ArgoBaseModel):
     )
 
 
-class RBDVolumeSource(ArgoBaseModel):
+class RBDVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -661,14 +661,14 @@ class RBDVolumeSource(ArgoBaseModel):
     )
 
 
-class SELinuxOptions(ArgoBaseModel):
+class SELinuxOptions(BaseModel):
     level: Optional[str] = Field(None, description="Level is SELinux level label that applies to the container.")
     role: Optional[str] = Field(None, description="Role is a SELinux role label that applies to the container.")
     type: Optional[str] = Field(None, description="Type is a SELinux type label that applies to the container.")
     user: Optional[str] = Field(None, description="User is a SELinux user label that applies to the container.")
 
 
-class ScaleIOVolumeSource(ArgoBaseModel):
+class ScaleIOVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -726,7 +726,7 @@ class TypeModel(Enum):
     unconfined = "Unconfined"
 
 
-class SeccompProfile(ArgoBaseModel):
+class SeccompProfile(BaseModel):
     localhost_profile: Optional[str] = Field(
         None,
         alias="localhostProfile",
@@ -749,7 +749,7 @@ class SeccompProfile(ArgoBaseModel):
     )
 
 
-class SecretEnvSource(ArgoBaseModel):
+class SecretEnvSource(BaseModel):
     name: Optional[str] = Field(
         None,
         description=(
@@ -760,7 +760,7 @@ class SecretEnvSource(ArgoBaseModel):
     optional: Optional[bool] = Field(None, description="Specify whether the Secret must be defined")
 
 
-class SecretKeySelector(ArgoBaseModel):
+class SecretKeySelector(BaseModel):
     key: str = Field(..., description="The key of the secret to select from.  Must be a valid secret key.")
     name: Optional[str] = Field(
         None,
@@ -772,7 +772,7 @@ class SecretKeySelector(ArgoBaseModel):
     optional: Optional[bool] = Field(None, description="Specify whether the Secret or its key must be defined")
 
 
-class SecretProjection(ArgoBaseModel):
+class SecretProjection(BaseModel):
     items: Optional[List[KeyToPath]] = Field(
         None,
         description=(
@@ -793,7 +793,7 @@ class SecretProjection(ArgoBaseModel):
     optional: Optional[bool] = Field(None, description="Specify whether the Secret or its key must be defined")
 
 
-class SecretVolumeSource(ArgoBaseModel):
+class SecretVolumeSource(BaseModel):
     default_mode: Optional[int] = Field(
         None,
         alias="defaultMode",
@@ -826,7 +826,7 @@ class SecretVolumeSource(ArgoBaseModel):
     )
 
 
-class ServiceAccountTokenProjection(ArgoBaseModel):
+class ServiceAccountTokenProjection(BaseModel):
     audience: Optional[str] = Field(
         None,
         description=(
@@ -856,7 +856,7 @@ class ProtocolModel(Enum):
     udp = "UDP"
 
 
-class StorageOSVolumeSource(ArgoBaseModel):
+class StorageOSVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -899,7 +899,7 @@ class StorageOSVolumeSource(ArgoBaseModel):
     )
 
 
-class Sysctl(ArgoBaseModel):
+class Sysctl(BaseModel):
     name: str = Field(..., description="Name of a property to set")
     value: str = Field(..., description="Value of a property to set")
 
@@ -915,7 +915,7 @@ class OperatorModel(Enum):
     exists = "Exists"
 
 
-class Toleration(ArgoBaseModel):
+class Toleration(BaseModel):
     effect: Optional[Effect] = Field(
         None,
         description=(
@@ -963,7 +963,7 @@ class Toleration(ArgoBaseModel):
     )
 
 
-class TypedLocalObjectReference(ArgoBaseModel):
+class TypedLocalObjectReference(BaseModel):
     api_group: Optional[str] = Field(
         None,
         alias="apiGroup",
@@ -976,7 +976,7 @@ class TypedLocalObjectReference(ArgoBaseModel):
     name: str = Field(..., description="Name is the name of resource being referenced")
 
 
-class VolumeDevice(ArgoBaseModel):
+class VolumeDevice(BaseModel):
     device_path: str = Field(
         ...,
         alias="devicePath",
@@ -985,7 +985,7 @@ class VolumeDevice(ArgoBaseModel):
     name: str = Field(..., description="name must match the name of a persistentVolumeClaim in the pod")
 
 
-class VolumeMount(ArgoBaseModel):
+class VolumeMount(BaseModel):
     mount_path: str = Field(
         ...,
         alias="mountPath",
@@ -1024,7 +1024,7 @@ class VolumeMount(ArgoBaseModel):
     )
 
 
-class VsphereVirtualDiskVolumeSource(ArgoBaseModel):
+class VsphereVirtualDiskVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -1044,7 +1044,7 @@ class VsphereVirtualDiskVolumeSource(ArgoBaseModel):
     volume_path: str = Field(..., alias="volumePath", description="Path that identifies vSphere volume vmdk")
 
 
-class WindowsSecurityContextOptions(ArgoBaseModel):
+class WindowsSecurityContextOptions(BaseModel):
     gmsa_credential_spec: Optional[str] = Field(
         None,
         alias="gmsaCredentialSpec",
@@ -1081,7 +1081,7 @@ class WindowsSecurityContextOptions(ArgoBaseModel):
     )
 
 
-class CSIVolumeSource(ArgoBaseModel):
+class CSIVolumeSource(BaseModel):
     driver: str = Field(
         ...,
         description=(
@@ -1122,7 +1122,7 @@ class CSIVolumeSource(ArgoBaseModel):
     )
 
 
-class CephFSVolumeSource(ArgoBaseModel):
+class CephFSVolumeSource(BaseModel):
     monitors: List[str] = Field(
         ...,
         description=(
@@ -1166,7 +1166,7 @@ class CephFSVolumeSource(ArgoBaseModel):
     )
 
 
-class CinderVolumeSource(ArgoBaseModel):
+class CinderVolumeSource(BaseModel):
     fs_type: Optional[str] = Field(
         None,
         alias="fsType",
@@ -1199,7 +1199,7 @@ class CinderVolumeSource(ArgoBaseModel):
     )
 
 
-class ConfigMapProjection(ArgoBaseModel):
+class ConfigMapProjection(BaseModel):
     items: Optional[List[KeyToPath]] = Field(
         None,
         description=(
@@ -1220,7 +1220,7 @@ class ConfigMapProjection(ArgoBaseModel):
     optional: Optional[bool] = Field(None, description="Specify whether the ConfigMap or its keys must be defined")
 
 
-class ConfigMapVolumeSource(ArgoBaseModel):
+class ConfigMapVolumeSource(BaseModel):
     default_mode: Optional[int] = Field(
         None,
         alias="defaultMode",
@@ -1252,7 +1252,7 @@ class ConfigMapVolumeSource(ArgoBaseModel):
     optional: Optional[bool] = Field(None, description="Specify whether the ConfigMap or its keys must be defined")
 
 
-class EmptyDirVolumeSource(ArgoBaseModel):
+class EmptyDirVolumeSource(BaseModel):
     medium: Optional[str] = Field(
         None,
         description=(
@@ -1274,7 +1274,7 @@ class EmptyDirVolumeSource(ArgoBaseModel):
     )
 
 
-class EnvFromSource(ArgoBaseModel):
+class EnvFromSource(BaseModel):
     config_map_ref: Optional[ConfigMapEnvSource] = Field(
         None, alias="configMapRef", description="The ConfigMap to select from"
     )
@@ -1284,7 +1284,7 @@ class EnvFromSource(ArgoBaseModel):
     secret_ref: Optional[SecretEnvSource] = Field(None, alias="secretRef", description="The Secret to select from")
 
 
-class EventSeries(ArgoBaseModel):
+class EventSeries(BaseModel):
     count: Optional[int] = Field(
         None, description="Number of occurrences in this series up to the last heartbeat time"
     )
@@ -1293,7 +1293,7 @@ class EventSeries(ArgoBaseModel):
     )
 
 
-class FlexVolumeSource(ArgoBaseModel):
+class FlexVolumeSource(BaseModel):
     driver: str = Field(..., description="Driver is the name of the driver to use for this volume.")
     fs_type: Optional[str] = Field(
         None,
@@ -1322,7 +1322,7 @@ class FlexVolumeSource(ArgoBaseModel):
     )
 
 
-class HTTPGetAction(ArgoBaseModel):
+class HTTPGetAction(BaseModel):
     host: Optional[str] = Field(
         None,
         description=(
@@ -1349,7 +1349,7 @@ class HTTPGetAction(ArgoBaseModel):
     )
 
 
-class ISCSIVolumeSource(ArgoBaseModel):
+class ISCSIVolumeSource(BaseModel):
     chap_auth_discovery: Optional[bool] = Field(
         None, alias="chapAuthDiscovery", description="whether support iSCSI Discovery CHAP authentication"
     )
@@ -1405,13 +1405,13 @@ class ISCSIVolumeSource(ArgoBaseModel):
     )
 
 
-class NodeSelector(ArgoBaseModel):
+class NodeSelector(BaseModel):
     node_selector_terms: List[NodeSelectorTerm] = Field(
         ..., alias="nodeSelectorTerms", description="Required. A list of node selector terms. The terms are ORed."
     )
 
 
-class PersistentVolumeClaimCondition(ArgoBaseModel):
+class PersistentVolumeClaimCondition(BaseModel):
     last_probe_time: Optional[v1.Time] = Field(
         None, alias="lastProbeTime", description="Last time we probed the condition."
     )
@@ -1440,7 +1440,7 @@ class PersistentVolumeClaimCondition(ArgoBaseModel):
     )
 
 
-class PersistentVolumeClaimStatus(ArgoBaseModel):
+class PersistentVolumeClaimStatus(BaseModel):
     access_modes: Optional[List[str]] = Field(
         None,
         alias="accessModes",
@@ -1493,7 +1493,7 @@ class PersistentVolumeClaimStatus(ArgoBaseModel):
     )
 
 
-class PodDNSConfig(ArgoBaseModel):
+class PodDNSConfig(BaseModel):
     nameservers: Optional[List[str]] = Field(
         None,
         description=(
@@ -1518,7 +1518,7 @@ class PodDNSConfig(ArgoBaseModel):
     )
 
 
-class PodSecurityContext(ArgoBaseModel):
+class PodSecurityContext(BaseModel):
     fs_group: Optional[int] = Field(
         None,
         alias="fsGroup",
@@ -1617,7 +1617,7 @@ class PodSecurityContext(ArgoBaseModel):
     )
 
 
-class ResourceFieldSelector(ArgoBaseModel):
+class ResourceFieldSelector(BaseModel):
     container_name: Optional[str] = Field(
         None, alias="containerName", description="Container name: required for volumes, optional for env vars"
     )
@@ -1627,7 +1627,7 @@ class ResourceFieldSelector(ArgoBaseModel):
     resource: str = Field(..., description="Required: resource to select")
 
 
-class ResourceRequirements(ArgoBaseModel):
+class ResourceRequirements(BaseModel):
     limits: Optional[Dict[str, resource.Quantity]] = Field(
         None,
         description=(
@@ -1645,7 +1645,7 @@ class ResourceRequirements(ArgoBaseModel):
     )
 
 
-class SecurityContext(ArgoBaseModel):
+class SecurityContext(BaseModel):
     allow_privilege_escalation: Optional[bool] = Field(
         None,
         alias="allowPrivilegeEscalation",
@@ -1747,7 +1747,7 @@ class SecurityContext(ArgoBaseModel):
     )
 
 
-class ServicePort(ArgoBaseModel):
+class ServicePort(BaseModel):
     app_protocol: Optional[str] = Field(
         None,
         alias="appProtocol",
@@ -1801,7 +1801,7 @@ class ServicePort(ArgoBaseModel):
     )
 
 
-class TCPSocketAction(ArgoBaseModel):
+class TCPSocketAction(BaseModel):
     host: Optional[str] = Field(None, description="Optional: Host name to connect to, defaults to the pod IP.")
     port: intstr.IntOrString = Field(
         ...,
@@ -1812,7 +1812,7 @@ class TCPSocketAction(ArgoBaseModel):
     )
 
 
-class DownwardAPIVolumeFile(ArgoBaseModel):
+class DownwardAPIVolumeFile(BaseModel):
     field_ref: Optional[ObjectFieldSelector] = Field(
         None,
         alias="fieldRef",
@@ -1846,7 +1846,7 @@ class DownwardAPIVolumeFile(ArgoBaseModel):
     )
 
 
-class DownwardAPIVolumeSource(ArgoBaseModel):
+class DownwardAPIVolumeSource(BaseModel):
     default_mode: Optional[int] = Field(
         None,
         alias="defaultMode",
@@ -1864,7 +1864,7 @@ class DownwardAPIVolumeSource(ArgoBaseModel):
     )
 
 
-class EnvVarSource(ArgoBaseModel):
+class EnvVarSource(BaseModel):
     config_map_key_ref: Optional[ConfigMapKeySelector] = Field(
         None, alias="configMapKeyRef", description="Selects a key of a ConfigMap."
     )
@@ -1891,7 +1891,7 @@ class EnvVarSource(ArgoBaseModel):
     )
 
 
-class Event(ArgoBaseModel):
+class Event(BaseModel):
     action: Optional[str] = Field(None, description="What action was taken/failed regarding to the Regarding object.")
     api_version: Optional[str] = Field(
         None,
@@ -1962,7 +1962,7 @@ class Event(ArgoBaseModel):
     )
 
 
-class LifecycleHandler(ArgoBaseModel):
+class LifecycleHandler(BaseModel):
     exec: Optional[ExecAction] = Field(None, description="Exec specifies the action to take.")
     http_get: Optional[HTTPGetAction] = Field(
         None, alias="httpGet", description="HTTPGet specifies the http request to perform."
@@ -1978,7 +1978,7 @@ class LifecycleHandler(ArgoBaseModel):
     )
 
 
-class NodeAffinity(ArgoBaseModel):
+class NodeAffinity(BaseModel):
     preferred_during_scheduling_ignored_during_execution: Optional[List[PreferredSchedulingTerm]] = Field(
         None,
         alias="preferredDuringSchedulingIgnoredDuringExecution",
@@ -2003,7 +2003,7 @@ class NodeAffinity(ArgoBaseModel):
     )
 
 
-class PersistentVolumeClaimSpec(ArgoBaseModel):
+class PersistentVolumeClaimSpec(BaseModel):
     access_modes: Optional[List[str]] = Field(
         None,
         alias="accessModes",
@@ -2076,7 +2076,7 @@ class PersistentVolumeClaimSpec(ArgoBaseModel):
     )
 
 
-class PersistentVolumeClaimTemplate(ArgoBaseModel):
+class PersistentVolumeClaimTemplate(BaseModel):
     metadata: Optional[v1.ObjectMeta] = Field(
         None,
         description=(
@@ -2093,7 +2093,7 @@ class PersistentVolumeClaimTemplate(ArgoBaseModel):
     )
 
 
-class PodAffinityTerm(ArgoBaseModel):
+class PodAffinityTerm(BaseModel):
     label_selector: Optional[v1.LabelSelector] = Field(
         None, alias="labelSelector", description="A label query over a set of resources, in this case pods."
     )
@@ -2128,7 +2128,7 @@ class PodAffinityTerm(ArgoBaseModel):
     )
 
 
-class Probe(ArgoBaseModel):
+class Probe(BaseModel):
     exec: Optional[ExecAction] = Field(None, description="Exec specifies the action to take.")
     failure_threshold: Optional[int] = Field(
         None,
@@ -2196,7 +2196,7 @@ class Probe(ArgoBaseModel):
     )
 
 
-class WeightedPodAffinityTerm(ArgoBaseModel):
+class WeightedPodAffinityTerm(BaseModel):
     pod_affinity_term: PodAffinityTerm = Field(
         ...,
         alias="podAffinityTerm",
@@ -2207,11 +2207,11 @@ class WeightedPodAffinityTerm(ArgoBaseModel):
     )
 
 
-class DownwardAPIProjection(ArgoBaseModel):
+class DownwardAPIProjection(BaseModel):
     items: Optional[List[DownwardAPIVolumeFile]] = Field(None, description="Items is a list of DownwardAPIVolume file")
 
 
-class EnvVar(ArgoBaseModel):
+class EnvVar(BaseModel):
     name: str = Field(..., description="Name of the environment variable. Must be a C_IDENTIFIER.")
     value: Optional[str] = Field(
         None,
@@ -2230,7 +2230,7 @@ class EnvVar(ArgoBaseModel):
     )
 
 
-class EphemeralVolumeSource(ArgoBaseModel):
+class EphemeralVolumeSource(BaseModel):
     volume_claim_template: Optional[PersistentVolumeClaimTemplate] = Field(
         None,
         alias="volumeClaimTemplate",
@@ -2250,7 +2250,7 @@ class EphemeralVolumeSource(ArgoBaseModel):
     )
 
 
-class Lifecycle(ArgoBaseModel):
+class Lifecycle(BaseModel):
     post_start: Optional[LifecycleHandler] = Field(
         None,
         alias="postStart",
@@ -2276,7 +2276,7 @@ class Lifecycle(ArgoBaseModel):
     )
 
 
-class PersistentVolumeClaim(ArgoBaseModel):
+class PersistentVolumeClaim(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2317,7 +2317,7 @@ class PersistentVolumeClaim(ArgoBaseModel):
     )
 
 
-class PodAffinity(ArgoBaseModel):
+class PodAffinity(BaseModel):
     preferred_during_scheduling_ignored_during_execution: Optional[List[WeightedPodAffinityTerm]] = Field(
         None,
         alias="preferredDuringSchedulingIgnoredDuringExecution",
@@ -2344,7 +2344,7 @@ class PodAffinity(ArgoBaseModel):
     )
 
 
-class PodAntiAffinity(ArgoBaseModel):
+class PodAntiAffinity(BaseModel):
     preferred_during_scheduling_ignored_during_execution: Optional[List[WeightedPodAffinityTerm]] = Field(
         None,
         alias="preferredDuringSchedulingIgnoredDuringExecution",
@@ -2371,7 +2371,7 @@ class PodAntiAffinity(ArgoBaseModel):
     )
 
 
-class VolumeProjection(ArgoBaseModel):
+class VolumeProjection(BaseModel):
     config_map: Optional[ConfigMapProjection] = Field(
         None, alias="configMap", description="information about the configMap data to project"
     )
@@ -2384,7 +2384,7 @@ class VolumeProjection(ArgoBaseModel):
     )
 
 
-class Affinity(ArgoBaseModel):
+class Affinity(BaseModel):
     node_affinity: Optional[NodeAffinity] = Field(
         None, alias="nodeAffinity", description="Describes node affinity scheduling rules for the pod."
     )
@@ -2406,7 +2406,7 @@ class Affinity(ArgoBaseModel):
     )
 
 
-class Container(ArgoBaseModel):
+class Container(BaseModel):
     args: Optional[List[str]] = Field(
         None,
         description=(
@@ -2605,7 +2605,7 @@ class Container(ArgoBaseModel):
     )
 
 
-class ProjectedVolumeSource(ArgoBaseModel):
+class ProjectedVolumeSource(BaseModel):
     default_mode: Optional[int] = Field(
         None,
         alias="defaultMode",
@@ -2620,7 +2620,7 @@ class ProjectedVolumeSource(ArgoBaseModel):
     sources: Optional[List[VolumeProjection]] = Field(None, description="list of volume projections")
 
 
-class Volume(ArgoBaseModel):
+class Volume(BaseModel):
     aws_elastic_block_store: Optional[AWSElasticBlockStoreVolumeSource] = Field(
         None,
         alias="awsElasticBlockStore",

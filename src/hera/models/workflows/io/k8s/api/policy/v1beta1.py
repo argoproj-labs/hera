@@ -8,13 +8,13 @@ from typing import Optional
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr
 
 
-class PodDisruptionBudgetSpec(ArgoBaseModel):
+class PodDisruptionBudgetSpec(BaseModel):
     max_unavailable: Optional[intstr.IntOrString] = Field(
         None,
         alias="maxUnavailable",

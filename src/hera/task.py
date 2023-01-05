@@ -4,17 +4,23 @@ import copy
 import inspect
 import json
 import textwrap
-from typing import Callable, Dict, List, Optional, Union, cast
+from typing import Callable, Dict, List, Optional, Union,Any
 
 import hera
 from hera.dag import DAG
 from hera.env import Env
 from hera.global_config import GlobalConfig
-from hera.image import ImagePullPolicy
-from hera.models import *
+from hera.models import Template, EnvVar, EnvVarSource, Lifecycle, Probe, ContainerPort, EnvFromSource, SecurityContext,\
+    VolumeDevice,VolumeMount,Parameter,Artifact,ContinueOn,LifecycleHandler,LifecycleHook,TemplateRef,Item,Sequence,\
+    ArtifactLocation,ContainerSetTemplate,Data,ExecAction,ExecutorConfig,HostAlias,HTTP,UserContainer,Affinity,\
+    Container,Memoize,Prometheus,Metrics,Plugin,ResourceTemplate,RetryStrategy,SuspendTemplate,Synchronization,Toleration,\
+    ImagePullPolicy,Metadata,DAGTemplate,Arguments,Inputs,Outputs,PersistentVolumeClaim,Volume as ModelVolume,ScriptTemplate
 from hera.operator import Operator
 from hera.validators import validate_name
+from hera.volumes import _BaseVolume
+from hera.volumes import *
 from hera.workflow_status import WorkflowStatus
+from hera.resources import Resources
 
 
 class TaskResult(str, Enum):
@@ -37,25 +43,25 @@ class Task:
         name: str,
         args: Optional[List[str]] = None,
         command: Optional[List[str]] = None,
-        env: Optional[List[v1.EnvVar]] = None,
-        env_from: Optional[List[v1.EnvFromSource]] = None,
+        env: Optional[List[EnvVar]] = None,
+        env_from: Optional[List[EnvFromSource]] = None,
         image: Optional[str] = None,
         image_pull_policy: Optional[str] = None,
-        lifecycle: Optional[v1.Lifecycle] = None,
-        liveness_probe: Optional[v1.Probe] = None,
-        ports: Optional[List[v1.ContainerPort]] = None,
-        readiness_probe: Optional[v1.Probe] = None,
-        resources: Optional[v1.ResourceRequirements] = None,
-        security_context: Optional[v1.SecurityContext] = None,
+        lifecycle: Optional[Lifecycle] = None,
+        liveness_probe: Optional[Probe] = None,
+        ports: Optional[List[ContainerPort]] = None,
+        readiness_probe: Optional[Probe] = None,
+        resources: Optional[Resources] = None,
+        security_context: Optional[SecurityContext] = None,
         source: Optional[Union[Callable, str]] = None,
-        startup_probe: Optional[v1.Probe] = None,
+        startup_probe: Optional[Probe] = None,
         stdin: Optional[bool] = None,
         stdin_once: Optional[bool] = None,
         termination_message_path: Optional[str] = None,
         termination_message_policy: Optional[str] = None,
         tty: Optional[bool] = None,
-        volume_devices: Optional[List[v1.VolumeDevice]] = None,
-        volume_mounts: Optional[List[v1.VolumeMount]] = None,
+        volume_devices: Optional[List[VolumeDevice]] = None,
+        volume_mounts: Optional[List[VolumeMount]] = None,
         working_dir: Optional[str] = None,
         arguments: Optional[List[Union[Parameter, Artifact]]] = None,
         continue_on: Optional[ContinueOn] = None,
@@ -70,18 +76,18 @@ class Task:
         with_items: Optional[List[Item]] = None,
         with_param: Optional[str] = None,
         with_sequence: Optional[Sequence] = None,
-        active_deadline_seconds: Optional[intstr.IntOrString] = None,
-        affinity: Optional[v1.Affinity] = None,
+        active_deadline_seconds: Optional[str] = None,
+        affinity: Optional[Affinity] = None,
         archive_location: Optional[ArtifactLocation] = None,
         automount_service_account_token: Optional[bool] = None,
-        container: Optional[v1.Container] = None,
+        container: Optional[Container] = None,
         container_set: Optional[ContainerSetTemplate] = None,
         daemon: Optional[bool] = None,
         dag: Optional[DAG] = None,
         data: Optional[Data] = None,
         executor: Optional[ExecutorConfig] = None,
         fail_fast: Optional[bool] = None,
-        host_aliases: Optional[List[v1.HostAlias]] = None,
+        host_aliases: Optional[List[HostAlias]] = None,
         http: Optional[HTTP] = None,
         init_containers: Optional[List[UserContainer]] = None,
         inputs: Optional[
@@ -95,7 +101,6 @@ class Task:
         exit_code: Optional[str] = None,
         result: Optional[str] = None,
         memoize: Optional[Memoize] = None,
-        metadata: Optional[Metadata] = None,
         metrics: Optional[Union[Prometheus, Metrics]] = None,
         node_selector: Optional[Dict[str, str]] = None,
         annotations: Optional[Dict[str, str]] = None,
@@ -113,8 +118,8 @@ class Task:
         suspend: Optional[SuspendTemplate] = None,
         synchronization: Optional[Synchronization] = None,
         timeout: Optional[str] = None,
-        tolerations: Optional[List[v1.Toleration]] = None,
-        volumes: Optional[List[v1.Volume]] = None,
+        tolerations: Optional[List[Toleration]] = None,
+        volumes: Optional[List[_BaseVolume]] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -128,25 +133,25 @@ class Task:
         self.name: str = validate_name(name)
         self.args: Optional[List[str]] = args
         self.command: Optional[List[str]] = command
-        self.env: Optional[List[v1.EnvVar]] = env
-        self.env_from: Optional[List[v1.EnvFromSource]] = env_from
+        self.env: Optional[List[EnvVar]] = env
+        self.env_from: Optional[List[EnvFromSource]] = env_from
         self.image: Optional[str] = image or GlobalConfig.image
-        self.image_pull_policy: Optional[str] = image_pull_policy or ImagePullPolicy.always.value
-        self.lifecycle: Optional[v1.Lifecycle] = lifecycle
-        self.liveness_probe: Optional[v1.Probe] = liveness_probe
-        self.ports: Optional[List[v1.ContainerPort]] = ports
-        self.readiness_probe: Optional[v1.Probe] = readiness_probe
-        self.resources: Optional[v1.ResourceRequirements] = resources
-        self.security_context: Optional[v1.SecurityContext] = security_context
+        self.image_pull_policy: Optional[str] = image_pull_policy or ImagePullPolicy.always
+        self.lifecycle: Optional[Lifecycle] = lifecycle
+        self.liveness_probe: Optional[Probe] = liveness_probe
+        self.ports: Optional[List[ContainerPort]] = ports
+        self.readiness_probe: Optional[Probe] = readiness_probe
+        self.resources: Optional[ResourceRequirements] = resources
+        self.security_context: Optional[SecurityContext] = security_context
         self.source: Optional[Union[Callable, str]] = source
-        self.startup_probe: Optional[v1.Probe] = startup_probe
+        self.startup_probe: Optional[Probe] = startup_probe
         self.stdin: Optional[bool] = stdin
         self.stdin_once: Optional[bool] = stdin_once
         self.termination_message_path: Optional[str] = termination_message_path
         self.termination_message_policy: Optional[str] = termination_message_policy
         self.tty: Optional[bool] = tty
-        self.volume_devices: Optional[List[v1.VolumeDevice]] = volume_devices
-        self.volume_mounts: Optional[List[v1.VolumeMount]] = volume_mounts
+        self.volume_devices: Optional[List[VolumeDevice]] = volume_devices
+        self.volume_mounts: Optional[List[VolumeMount]] = volume_mounts
         self.working_dir: Optional[str] = working_dir
         self.arguments: Optional[List[Artifact, Parameter]] = arguments
         self.continue_on: Optional[ContinueOn] = continue_on
@@ -161,18 +166,18 @@ class Task:
         self.with_items: Optional[List[Item]] = with_items
         self.with_param: Optional[str] = with_param
         self.with_sequence: Optional[Sequence] = with_sequence
-        self.active_deadline_seconds: Optional[intstr.IntOrString] = active_deadline_seconds
-        self.affinity: Optional[v1.Affinity] = affinity
+        self.active_deadline_seconds: Optional[str] = active_deadline_seconds
+        self.affinity: Optional[Affinity] = affinity
         self.archive_location: Optional[ArtifactLocation] = archive_location
         self.automount_service_account_token: Optional[bool] = automount_service_account_token
-        self.container: Optional[v1.Container] = container
+        self.container: Optional[Container] = container
         self.container_set: Optional[ContainerSetTemplate] = container_set
         self.daemon: Optional[bool] = daemon
         self.dag: Optional[DAGTemplate] = dag
         self.data: Optional[Data] = data
         self.executor: Optional[ExecutorConfig] = executor
         self.fail_fast: Optional[bool] = fail_fast
-        self.host_aliases: Optional[List[v1.HostAlias]] = host_aliases
+        self.host_aliases: Optional[List[HostAlias]] = host_aliases
         self.http: Optional[HTTP] = http
         self.init_containers: Optional[List[UserContainer]] = init_containers
         self.inputs: Optional[
@@ -186,7 +191,7 @@ class Task:
         self.exit_code: Optional[str] = exit_code
         self.result: Optional[str] = result
         self.memoize: Optional[Memoize] = memoize
-        self.metadata: Optional[Metadata] = metadata
+        self.metadata: Optional[Metadata] = Metadata(annotations=annotations,labels=labels)
         self.metrics: Optional[Metrics] = self._parse_metrics(metrics)
         self.node_selector: Optional[Dict[str, str]] = node_selector
         self.annotations: Optional[Dict[str, str]] = annotations
@@ -204,8 +209,7 @@ class Task:
         self.suspend: Optional[SuspendTemplate] = suspend
         self.synchronization: Optional[Synchronization] = synchronization
         self.timeout: Optional[str] = timeout
-        self.tolerations: Optional[List[v1.Toleration]] = tolerations
-        self.volumes: Optional[List[v1.Volume]] = volumes
+        self.tolerations: Optional[List[Toleration]] = tolerations
 
         self.dag = dag
         self.source = source
@@ -925,17 +929,12 @@ class Task:
 
     def _build_volume_claim_templates(self) -> List[PersistentVolumeClaim]:
         """Assembles the list of volume claim templates to be created for the task."""
-        return [v._build_claim_spec() for v in self.volumes if isinstance(v, Volume)]
+        return [v.claim() for v in self.volumes if isinstance(v, Volume)]
 
-    def _build_persistent_volume_claims(self) -> List[ArgoVolume]:
+    def _build_persistent_volume_claims(self) -> List[ModelVolume]:
         """Assembles the list of Argo volume specifications"""
         return [
-            v._build_claim_spec()
-            for v in self.volumes
-            if isinstance(v, ExistingVolume)
-            or isinstance(v, SecretVolume)
-            or isinstance(v, EmptyDirVolume)
-            or isinstance(v, ConfigMapVolume)
+            v.volume() for v in self.volumes if not isinstance(v, Volume)
         ]
 
     def _build_container_kwargs(self) -> Dict:
@@ -1035,14 +1034,13 @@ class Task:
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
-            volumes=self.volumes,
+            volumes=self._build_persistent_volume_claims(),
         )
 
         if self.source is not None:
-            setattr(template, "script", self._build_script())
             template.script = self._build_script()
-        elif self.resource_template is not None:
-            template.resource = self.resource
+        elif self.suspend is not None:
+            template.suspend = self.suspend
         else:
             template.container = self._build_container()
         return template

@@ -6,9 +6,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 
-class Any(ArgoBaseModel):
+class Any(BaseModel):
     type_url: Optional[str] = None
     value: Optional[str] = None

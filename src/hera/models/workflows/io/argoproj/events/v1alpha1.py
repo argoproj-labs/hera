@@ -8,13 +8,13 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 from ...k8s.api.core import v1
 from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1
 
 
-class AMQPConsumeConfig(ArgoBaseModel):
+class AMQPConsumeConfig(BaseModel):
     auto_ack: Optional[bool] = Field(
         None,
         alias="autoAck",
@@ -45,7 +45,7 @@ class AMQPConsumeConfig(ArgoBaseModel):
     )
 
 
-class AMQPExchangeDeclareConfig(ArgoBaseModel):
+class AMQPExchangeDeclareConfig(BaseModel):
     auto_delete: Optional[bool] = Field(
         None, alias="autoDelete", title="AutoDelete removes the exchange when no bindings are active\n+optional"
     )
@@ -56,7 +56,7 @@ class AMQPExchangeDeclareConfig(ArgoBaseModel):
     )
 
 
-class AMQPQueueBindConfig(ArgoBaseModel):
+class AMQPQueueBindConfig(BaseModel):
     no_wait: Optional[bool] = Field(
         None,
         alias="noWait",
@@ -64,7 +64,7 @@ class AMQPQueueBindConfig(ArgoBaseModel):
     )
 
 
-class AMQPQueueDeclareConfig(ArgoBaseModel):
+class AMQPQueueDeclareConfig(BaseModel):
     arguments: Optional[str] = Field(
         None,
         title='Arguments of a queue (also known as "x-arguments") used for optional features and plugins\n+optional',
@@ -88,11 +88,11 @@ class AMQPQueueDeclareConfig(ArgoBaseModel):
     )
 
 
-class Amount(ArgoBaseModel):
+class Amount(BaseModel):
     value: Optional[str] = None
 
 
-class BitbucketRepository(ArgoBaseModel):
+class BitbucketRepository(BaseModel):
     owner: Optional[str] = Field(None, title="Owner is the owner of the repository")
     repository_slug: Optional[str] = Field(
         None,
@@ -104,7 +104,7 @@ class BitbucketRepository(ArgoBaseModel):
     )
 
 
-class BitbucketServerRepository(ArgoBaseModel):
+class BitbucketServerRepository(BaseModel):
     project_key: Optional[str] = Field(
         None, alias="projectKey", title="ProjectKey is the key of project for which integration needs to set up"
     )
@@ -115,21 +115,21 @@ class BitbucketServerRepository(ArgoBaseModel):
     )
 
 
-class CatchupConfiguration(ArgoBaseModel):
+class CatchupConfiguration(BaseModel):
     enabled: Optional[bool] = Field(
         None, title="Enabled enables to triggered the missed schedule when eventsource restarts"
     )
     max_duration: Optional[str] = Field(None, alias="maxDuration", title="MaxDuration holds max catchup duration")
 
 
-class ConditionsResetByTime(ArgoBaseModel):
+class ConditionsResetByTime(BaseModel):
     cron: Optional[str] = Field(
         None, title="Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron"
     )
     timezone: Optional[str] = Field(None, title="+optional")
 
 
-class ConditionsResetCriteria(ArgoBaseModel):
+class ConditionsResetCriteria(BaseModel):
     by_time: Optional[ConditionsResetByTime] = Field(
         None,
         alias="byTime",
@@ -137,14 +137,14 @@ class ConditionsResetCriteria(ArgoBaseModel):
     )
 
 
-class ConfigMapPersistence(ArgoBaseModel):
+class ConfigMapPersistence(BaseModel):
     create_if_not_exist: Optional[bool] = Field(
         None, alias="createIfNotExist", title="CreateIfNotExist will create configmap if it doesn't exists"
     )
     name: Optional[str] = Field(None, title="Name of the configmap")
 
 
-class DataFilter(ArgoBaseModel):
+class DataFilter(BaseModel):
     comparator: Optional[str] = Field(
         None,
         description=(
@@ -180,12 +180,12 @@ class DataFilter(ArgoBaseModel):
     )
 
 
-class EventDependencyTransformer(ArgoBaseModel):
+class EventDependencyTransformer(BaseModel):
     jq: Optional[str] = Field(None, title="JQ holds the jq command applied for transformation\n+optional")
     script: Optional[str] = Field(None, title="Script refers to a Lua script used to transform the event\n+optional")
 
 
-class EventPersistence(ArgoBaseModel):
+class EventPersistence(BaseModel):
     catchup: Optional[CatchupConfiguration] = Field(
         None, title="Catchup enables to triggered the missed schedule when eventsource restarts"
     )
@@ -194,15 +194,15 @@ class EventPersistence(ArgoBaseModel):
     )
 
 
-class EventSourceFilter(ArgoBaseModel):
+class EventSourceFilter(BaseModel):
     expression: Optional[str] = None
 
 
-class FileArtifact(ArgoBaseModel):
+class FileArtifact(BaseModel):
     path: Optional[str] = None
 
 
-class GitRemoteConfig(ArgoBaseModel):
+class GitRemoteConfig(BaseModel):
     name: Optional[str] = Field(None, description="Name of the remote to fetch from.")
     urls: Optional[List[str]] = Field(
         None,
@@ -213,13 +213,13 @@ class GitRemoteConfig(ArgoBaseModel):
     )
 
 
-class Int64OrString(ArgoBaseModel):
+class Int64OrString(BaseModel):
     int64_val: Optional[str] = Field(None, alias="int64Val")
     str_val: Optional[str] = Field(None, alias="strVal")
     type: Optional[str] = None
 
 
-class KafkaConsumerGroup(ArgoBaseModel):
+class KafkaConsumerGroup(BaseModel):
     group_name: Optional[str] = Field(None, alias="groupName", title="The name for the consumer group to use")
     oldest: Optional[bool] = Field(
         None,
@@ -235,7 +235,7 @@ class KafkaConsumerGroup(ArgoBaseModel):
     )
 
 
-class LogTrigger(ArgoBaseModel):
+class LogTrigger(BaseModel):
     interval_seconds: Optional[str] = Field(
         None,
         alias="intervalSeconds",
@@ -245,17 +245,17 @@ class LogTrigger(ArgoBaseModel):
     )
 
 
-class Metadata(ArgoBaseModel):
+class Metadata(BaseModel):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
 
 
-class OwnedRepositories(ArgoBaseModel):
+class OwnedRepositories(BaseModel):
     names: Optional[List[str]] = Field(None, title="Repository names")
     owner: Optional[str] = Field(None, title="Organization or user name")
 
 
-class PayloadField(ArgoBaseModel):
+class PayloadField(BaseModel):
     name: Optional[str] = Field(None, description="Name acts as key that holds the value at the path.")
     path: Optional[str] = Field(
         None,
@@ -268,26 +268,26 @@ class PayloadField(ArgoBaseModel):
     )
 
 
-class RateLimit(ArgoBaseModel):
+class RateLimit(BaseModel):
     requests_per_unit: Optional[int] = Field(None, alias="requestsPerUnit")
     unit: Optional[str] = Field(None, title="Defaults to Second")
 
 
-class Resource(ArgoBaseModel):
+class Resource(BaseModel):
     value: Optional[str] = None
 
 
-class S3Bucket(ArgoBaseModel):
+class S3Bucket(BaseModel):
     key: Optional[str] = None
     name: Optional[str] = None
 
 
-class S3Filter(ArgoBaseModel):
+class S3Filter(BaseModel):
     prefix: Optional[str] = None
     suffix: Optional[str] = None
 
 
-class Selector(ArgoBaseModel):
+class Selector(BaseModel):
     key: Optional[str] = Field(None, title="Key name")
     operation: Optional[str] = Field(
         None,
@@ -300,16 +300,16 @@ class Selector(ArgoBaseModel):
     value: Optional[str] = Field(None, title="Value")
 
 
-class StatusPolicy(ArgoBaseModel):
+class StatusPolicy(BaseModel):
     allow: Optional[List[int]] = None
 
 
-class StorageGridFilter(ArgoBaseModel):
+class StorageGridFilter(BaseModel):
     prefix: Optional[str] = None
     suffix: Optional[str] = None
 
 
-class TimeFilter(ArgoBaseModel):
+class TimeFilter(BaseModel):
     start: Optional[str] = Field(
         None,
         description=(
@@ -327,7 +327,7 @@ class TimeFilter(ArgoBaseModel):
     )
 
 
-class TriggerParameterSource(ArgoBaseModel):
+class TriggerParameterSource(BaseModel):
     context_key: Optional[str] = Field(
         None,
         alias="contextKey",
@@ -386,14 +386,14 @@ class TriggerParameterSource(ArgoBaseModel):
     )
 
 
-class URLArtifact(ArgoBaseModel):
+class URLArtifact(BaseModel):
     path: Optional[str] = Field(None, title="Path is the complete URL")
     verify_cert: Optional[bool] = Field(
         None, alias="verifyCert", title="VerifyCert decides whether the connection is secure or not"
     )
 
 
-class WatchPathConfig(ArgoBaseModel):
+class WatchPathConfig(BaseModel):
     directory: Optional[str] = Field(None, title="Directory to watch for events")
     path: Optional[str] = Field(None, title="Path is relative path of object to watch with respect to the directory")
     path_regexp: Optional[str] = Field(
@@ -403,7 +403,7 @@ class WatchPathConfig(ArgoBaseModel):
     )
 
 
-class AzureEventsHubEventSource(ArgoBaseModel):
+class AzureEventsHubEventSource(BaseModel):
     filter: Optional[EventSourceFilter] = Field(None, title="Filter\n+optional")
     fqdn: Optional[str] = Field(
         None,
@@ -426,7 +426,7 @@ class AzureEventsHubEventSource(ArgoBaseModel):
     )
 
 
-class Backoff(ArgoBaseModel):
+class Backoff(BaseModel):
     duration: Optional[Int64OrString] = Field(
         None, title='The initial duration in nanoseconds or strings like "1s", "3m"\n+optional'
     )
@@ -435,7 +435,7 @@ class Backoff(ArgoBaseModel):
     steps: Optional[int] = Field(None, title="Exit with error after this many steps\n+optional")
 
 
-class BasicAuth(ArgoBaseModel):
+class BasicAuth(BaseModel):
     password: Optional[v1.SecretKeySelector] = Field(
         None, description="Password refers to the Kubernetes secret that holds the password required for basic auth."
     )
@@ -444,7 +444,7 @@ class BasicAuth(ArgoBaseModel):
     )
 
 
-class BitbucketBasicAuth(ArgoBaseModel):
+class BitbucketBasicAuth(BaseModel):
     password: Optional[v1.SecretKeySelector] = Field(
         None, description="Password refers to the K8s secret that holds the password."
     )
@@ -453,7 +453,7 @@ class BitbucketBasicAuth(ArgoBaseModel):
     )
 
 
-class CalendarEventSource(ArgoBaseModel):
+class CalendarEventSource(BaseModel):
     exclusion_dates: Optional[List[str]] = Field(
         None,
         alias="exclusionDates",
@@ -476,7 +476,7 @@ class CalendarEventSource(ArgoBaseModel):
     timezone: Optional[str] = Field(None, title="Timezone in which to run the schedule\n+optional")
 
 
-class Condition(ArgoBaseModel):
+class Condition(BaseModel):
     last_transition_time: Optional[v1_1.Time] = Field(
         None,
         alias="lastTransitionTime",
@@ -496,7 +496,7 @@ class Condition(ArgoBaseModel):
     type: Optional[str] = Field(None, title="Condition type.\n+required")
 
 
-class EventContext(ArgoBaseModel):
+class EventContext(BaseModel):
     datacontenttype: Optional[str] = Field(
         None, description="DataContentType - A MIME (RFC2046) string describing the media type of `data`."
     )
@@ -517,7 +517,7 @@ class EventContext(ArgoBaseModel):
     type: Optional[str] = Field(None, description="Type - The type of the occurrence which has happened.")
 
 
-class ExprFilter(ArgoBaseModel):
+class ExprFilter(BaseModel):
     expr: Optional[str] = Field(
         None, description="Expr refers to the expression that determines the outcome of the filter."
     )
@@ -526,7 +526,7 @@ class ExprFilter(ArgoBaseModel):
     )
 
 
-class FileEventSource(ArgoBaseModel):
+class FileEventSource(BaseModel):
     event_type: Optional[str] = Field(
         None,
         alias="eventType",
@@ -545,7 +545,7 @@ class FileEventSource(ArgoBaseModel):
     )
 
 
-class GenericEventSource(ArgoBaseModel):
+class GenericEventSource(BaseModel):
     auth_secret: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="authSecret",
@@ -565,12 +565,12 @@ class GenericEventSource(ArgoBaseModel):
     url: Optional[str] = Field(None, description="URL of the gRPC server that implements the event source.")
 
 
-class GitCreds(ArgoBaseModel):
+class GitCreds(BaseModel):
     password: Optional[v1.SecretKeySelector] = None
     username: Optional[v1.SecretKeySelector] = None
 
 
-class GithubAppCreds(ArgoBaseModel):
+class GithubAppCreds(BaseModel):
     app_id: Optional[str] = Field(
         None, alias="appID", title="AppID refers to the GitHub App ID for the application you created"
     )
@@ -584,7 +584,7 @@ class GithubAppCreds(ArgoBaseModel):
     )
 
 
-class HDFSEventSource(ArgoBaseModel):
+class HDFSEventSource(BaseModel):
     addresses: Optional[List[str]] = None
     check_interval: Optional[str] = Field(
         None,
@@ -653,7 +653,7 @@ class HDFSEventSource(ArgoBaseModel):
     watch_path_config: Optional[WatchPathConfig] = Field(None, alias="watchPathConfig")
 
 
-class K8SResourcePolicy(ArgoBaseModel):
+class K8SResourcePolicy(BaseModel):
     backoff: Optional[Backoff] = Field(None, title="Backoff before checking resource state")
     error_on_backoff_timeout: Optional[bool] = Field(
         None,
@@ -668,14 +668,14 @@ class K8SResourcePolicy(ArgoBaseModel):
     )
 
 
-class NATSAuth(ArgoBaseModel):
+class NATSAuth(BaseModel):
     basic: Optional[BasicAuth] = Field(None, title="Baisc auth with username and password\n+optional")
     credential: Optional[v1.SecretKeySelector] = Field(None, title="credential used to connect\n+optional")
     nkey: Optional[v1.SecretKeySelector] = Field(None, title="NKey used to connect\n+optional")
     token: Optional[v1.SecretKeySelector] = Field(None, title="Token used to connect\n+optional")
 
 
-class PubSubEventSource(ArgoBaseModel):
+class PubSubEventSource(BaseModel):
     credential_secret: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="credentialSecret",
@@ -734,7 +734,7 @@ class PubSubEventSource(ArgoBaseModel):
     )
 
 
-class ResourceFilter(ArgoBaseModel):
+class ResourceFilter(BaseModel):
     after_start: Optional[bool] = Field(
         None,
         alias="afterStart",
@@ -765,7 +765,7 @@ class ResourceFilter(ArgoBaseModel):
     prefix: Optional[str] = Field(None, title="Prefix filter is applied on the resource name.\n+optional")
 
 
-class S3Artifact(ArgoBaseModel):
+class S3Artifact(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(None, alias="accessKey")
     bucket: Optional[S3Bucket] = None
     endpoint: Optional[str] = None
@@ -777,7 +777,7 @@ class S3Artifact(ArgoBaseModel):
     secret_key: Optional[v1.SecretKeySelector] = Field(None, alias="secretKey")
 
 
-class SASLConfig(ArgoBaseModel):
+class SASLConfig(BaseModel):
     mechanism: Optional[str] = Field(
         None,
         title=(
@@ -792,7 +792,7 @@ class SASLConfig(ArgoBaseModel):
     )
 
 
-class SQSEventSource(ArgoBaseModel):
+class SQSEventSource(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKey", title="AccessKey refers K8s secret containing aws access key"
     )
@@ -844,7 +844,7 @@ class SQSEventSource(ArgoBaseModel):
     )
 
 
-class Status(ArgoBaseModel):
+class Status(BaseModel):
     conditions: Optional[List[Condition]] = Field(
         None,
         title=(
@@ -854,7 +854,7 @@ class Status(ArgoBaseModel):
     )
 
 
-class TLSConfig(ArgoBaseModel):
+class TLSConfig(BaseModel):
     ca_cert_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="caCertSecret", title="CACertSecret refers to the secret that contains the CA cert"
     )
@@ -874,7 +874,7 @@ class TLSConfig(ArgoBaseModel):
     )
 
 
-class TriggerParameter(ArgoBaseModel):
+class TriggerParameter(BaseModel):
     dest: Optional[str] = Field(
         None,
         description=(
@@ -895,7 +895,7 @@ class TriggerParameter(ArgoBaseModel):
     )
 
 
-class TriggerPolicy(ArgoBaseModel):
+class TriggerPolicy(BaseModel):
     k8s: Optional[K8SResourcePolicy] = Field(
         None,
         title=(
@@ -907,12 +907,12 @@ class TriggerPolicy(ArgoBaseModel):
     )
 
 
-class ValueFromSource(ArgoBaseModel):
+class ValueFromSource(BaseModel):
     config_map_key_ref: Optional[v1.ConfigMapKeySelector] = Field(None, alias="configMapKeyRef")
     secret_key_ref: Optional[v1.SecretKeySelector] = Field(None, alias="secretKeyRef")
 
 
-class WebhookContext(ArgoBaseModel):
+class WebhookContext(BaseModel):
     auth_secret: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="authSecret",
@@ -947,12 +947,12 @@ class WebhookContext(ArgoBaseModel):
     url: Optional[str] = Field(None, description="URL is the url of the server.")
 
 
-class WebhookEventSource(ArgoBaseModel):
+class WebhookEventSource(BaseModel):
     filter: Optional[EventSourceFilter] = Field(None, title="Filter\n+optional")
     webhook_context: Optional[WebhookContext] = Field(None, alias="webhookContext")
 
 
-class AMQPEventSource(ArgoBaseModel):
+class AMQPEventSource(BaseModel):
     auth: Optional[BasicAuth] = Field(None, title="Auth hosts secret selectors for username and password\n+optional")
     connection_backoff: Optional[Backoff] = Field(
         None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
@@ -1017,7 +1017,7 @@ class AMQPEventSource(ArgoBaseModel):
     )
 
 
-class AWSLambdaTrigger(ArgoBaseModel):
+class AWSLambdaTrigger(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKey", title="AccessKey refers K8s secret containing aws access key\n+optional"
     )
@@ -1058,7 +1058,7 @@ class AWSLambdaTrigger(ArgoBaseModel):
     )
 
 
-class AzureEventHubsTrigger(ArgoBaseModel):
+class AzureEventHubsTrigger(BaseModel):
     fqdn: Optional[str] = Field(
         None,
         title=(
@@ -1091,7 +1091,7 @@ class AzureEventHubsTrigger(ArgoBaseModel):
     )
 
 
-class BitbucketAuth(ArgoBaseModel):
+class BitbucketAuth(BaseModel):
     basic: Optional[BitbucketBasicAuth] = Field(None, title="Basic is BasicAuth auth strategy.\n+optional")
     oauth_token: Optional[v1.SecretKeySelector] = Field(
         None,
@@ -1100,7 +1100,7 @@ class BitbucketAuth(ArgoBaseModel):
     )
 
 
-class BitbucketEventSource(ArgoBaseModel):
+class BitbucketEventSource(BaseModel):
     auth: Optional[BitbucketAuth] = Field(None, description="Auth information required to connect to Bitbucket.")
     delete_hook_on_finish: Optional[bool] = Field(
         None,
@@ -1147,7 +1147,7 @@ class BitbucketEventSource(ArgoBaseModel):
     )
 
 
-class BitbucketServerEventSource(ArgoBaseModel):
+class BitbucketServerEventSource(BaseModel):
     access_token: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="accessToken",
@@ -1206,7 +1206,7 @@ class BitbucketServerEventSource(ArgoBaseModel):
     )
 
 
-class CustomTrigger(ArgoBaseModel):
+class CustomTrigger(BaseModel):
     cert_secret: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="certSecret",
@@ -1244,7 +1244,7 @@ class CustomTrigger(ArgoBaseModel):
     )
 
 
-class EmitterEventSource(ArgoBaseModel):
+class EmitterEventSource(BaseModel):
     broker: Optional[str] = Field(None, description="Broker URI to connect to.")
     channel_key: Optional[str] = Field(None, alias="channelKey", title="ChannelKey refers to the channel key")
     channel_name: Optional[str] = Field(None, alias="channelName", title="ChannelName refers to the channel name")
@@ -1265,7 +1265,7 @@ class EmitterEventSource(ArgoBaseModel):
     username: Optional[v1.SecretKeySelector] = Field(None, title="Username to use to connect to broker\n+optional")
 
 
-class EventDependencyFilter(ArgoBaseModel):
+class EventDependencyFilter(BaseModel):
     context: Optional[EventContext] = Field(None, title="Context filter constraints")
     data: Optional[List[DataFilter]] = Field(None, title="Data filter constraints with escalation")
     data_logical_operator: Optional[str] = Field(
@@ -1296,11 +1296,11 @@ class EventDependencyFilter(ArgoBaseModel):
     time: Optional[TimeFilter] = Field(None, title="Time filter on the event with escalation")
 
 
-class EventSourceStatus(ArgoBaseModel):
+class EventSourceStatus(BaseModel):
     status: Optional[Status] = None
 
 
-class GitArtifact(ArgoBaseModel):
+class GitArtifact(BaseModel):
     branch: Optional[str] = Field(None, title="Branch to use to pull trigger resource\n+optional")
     clone_directory: Optional[str] = Field(
         None,
@@ -1334,7 +1334,7 @@ class GitArtifact(ArgoBaseModel):
     url: Optional[str] = Field(None, title="Git URL")
 
 
-class GithubEventSource(ArgoBaseModel):
+class GithubEventSource(BaseModel):
     active: Optional[bool] = Field(
         None,
         title=(
@@ -1415,7 +1415,7 @@ class GithubEventSource(ArgoBaseModel):
     )
 
 
-class GitlabEventSource(ArgoBaseModel):
+class GitlabEventSource(BaseModel):
     access_token: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="accessToken",
@@ -1465,7 +1465,7 @@ class GitlabEventSource(ArgoBaseModel):
     webhook: Optional[WebhookContext] = Field(None, title="Webhook holds configuration to run a http server")
 
 
-class KafkaEventSource(ArgoBaseModel):
+class KafkaEventSource(BaseModel):
     config: Optional[str] = Field(
         None,
         description=(
@@ -1508,7 +1508,7 @@ class KafkaEventSource(ArgoBaseModel):
     )
 
 
-class KafkaTrigger(ArgoBaseModel):
+class KafkaTrigger(BaseModel):
     compress: Optional[bool] = Field(
         None,
         title=(
@@ -1564,7 +1564,7 @@ class KafkaTrigger(ArgoBaseModel):
     )
 
 
-class MQTTEventSource(ArgoBaseModel):
+class MQTTEventSource(BaseModel):
     client_id: Optional[str] = Field(None, alias="clientId", title="ClientID is the id of the client")
     connection_backoff: Optional[Backoff] = Field(
         None, alias="connectionBackoff", description="ConnectionBackoff holds backoff applied to connection."
@@ -1583,7 +1583,7 @@ class MQTTEventSource(ArgoBaseModel):
     url: Optional[str] = Field(None, title="URL to connect to broker")
 
 
-class NATSEventsSource(ArgoBaseModel):
+class NATSEventsSource(BaseModel):
     auth: Optional[NATSAuth] = Field(None, title="Auth information\n+optional")
     connection_backoff: Optional[Backoff] = Field(
         None, alias="connectionBackoff", description="ConnectionBackoff holds backoff applied to connection."
@@ -1604,7 +1604,7 @@ class NATSEventsSource(ArgoBaseModel):
     url: Optional[str] = Field(None, title="URL to connect to NATS cluster")
 
 
-class NATSTrigger(ArgoBaseModel):
+class NATSTrigger(BaseModel):
     parameters: Optional[List[TriggerParameter]] = None
     payload: Optional[List[TriggerParameter]] = None
     subject: Optional[str] = Field(None, description="Name of the subject to put message on.")
@@ -1612,7 +1612,7 @@ class NATSTrigger(ArgoBaseModel):
     url: Optional[str] = Field(None, description="URL of the NATS cluster.")
 
 
-class NSQEventSource(ArgoBaseModel):
+class NSQEventSource(BaseModel):
     channel: Optional[str] = Field(None, title="Channel used for subscription")
     connection_backoff: Optional[Backoff] = Field(
         None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
@@ -1633,7 +1633,7 @@ class NSQEventSource(ArgoBaseModel):
     topic: Optional[str] = Field(None, description="Topic to subscribe to.")
 
 
-class OpenWhiskTrigger(ArgoBaseModel):
+class OpenWhiskTrigger(BaseModel):
     action_name: Optional[str] = Field(None, alias="actionName", description="Name of the action/function.")
     auth_token: Optional[v1.SecretKeySelector] = Field(
         None, alias="authToken", title="AuthToken for authentication.\n+optional"
@@ -1656,7 +1656,7 @@ class OpenWhiskTrigger(ArgoBaseModel):
     version: Optional[str] = Field(None, title="Version for the API.\nDefaults to v1.\n+optional")
 
 
-class PulsarEventSource(ArgoBaseModel):
+class PulsarEventSource(BaseModel):
     auth_token_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="authTokenSecret", title="Authentication token for the pulsar client.\n+optional"
     )
@@ -1696,7 +1696,7 @@ class PulsarEventSource(ArgoBaseModel):
     url: Optional[str] = Field(None, title="Configure the service URL for the Pulsar service.\n+required")
 
 
-class PulsarTrigger(ArgoBaseModel):
+class PulsarTrigger(BaseModel):
     auth_token_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="authTokenSecret", title="Authentication token for the pulsar client.\n+optional"
     )
@@ -1732,7 +1732,7 @@ class PulsarTrigger(ArgoBaseModel):
     url: Optional[str] = Field(None, title="Configure the service URL for the Pulsar service.\n+required")
 
 
-class RedisEventSource(ArgoBaseModel):
+class RedisEventSource(BaseModel):
     channels: Optional[List[str]] = None
     db: Optional[int] = Field(None, title="DB to use. If not specified, default DB 0 will be used.\n+optional")
     filter: Optional[EventSourceFilter] = Field(None, title="Filter\n+optional")
@@ -1761,7 +1761,7 @@ class RedisEventSource(ArgoBaseModel):
     username: Optional[str] = Field(None, title="Username required for ACL style authentication if any.\n+optional")
 
 
-class RedisStreamEventSource(ArgoBaseModel):
+class RedisStreamEventSource(BaseModel):
     consumer_group: Optional[str] = Field(
         None,
         alias="consumerGroup",
@@ -1799,7 +1799,7 @@ class RedisStreamEventSource(ArgoBaseModel):
     username: Optional[str] = Field(None, title="Username required for ACL style authentication if any.\n+optional")
 
 
-class ResourceEventSource(ArgoBaseModel):
+class ResourceEventSource(BaseModel):
     event_types: Optional[List[str]] = Field(
         None,
         alias="eventTypes",
@@ -1821,7 +1821,7 @@ class ResourceEventSource(ArgoBaseModel):
     namespace: Optional[str] = Field(None, title="Namespace where resource is deployed")
 
 
-class SNSEventSource(ArgoBaseModel):
+class SNSEventSource(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKey", title="AccessKey refers K8s secret containing aws access key"
     )
@@ -1848,18 +1848,18 @@ class SNSEventSource(ArgoBaseModel):
     webhook: Optional[WebhookContext] = Field(None, title="Webhook configuration for http server")
 
 
-class SecureHeader(ArgoBaseModel):
+class SecureHeader(BaseModel):
     name: Optional[str] = None
     value_from: Optional[ValueFromSource] = Field(
         None, alias="valueFrom", title="Values can be read from either secrets or configmaps"
     )
 
 
-class SensorStatus(ArgoBaseModel):
+class SensorStatus(BaseModel):
     status: Optional[Status] = None
 
 
-class Service(ArgoBaseModel):
+class Service(BaseModel):
     cluster_ip: Optional[str] = Field(
         None,
         alias="clusterIP",
@@ -1881,7 +1881,7 @@ class Service(ArgoBaseModel):
     )
 
 
-class SlackEventSource(ArgoBaseModel):
+class SlackEventSource(BaseModel):
     filter: Optional[EventSourceFilter] = Field(None, title="Filter\n+optional")
     metadata: Optional[Dict[str, str]] = Field(
         None, title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional"
@@ -1893,7 +1893,7 @@ class SlackEventSource(ArgoBaseModel):
     webhook: Optional[WebhookContext] = Field(None, title="Webhook holds configuration for a REST endpoint")
 
 
-class SlackTrigger(ArgoBaseModel):
+class SlackTrigger(BaseModel):
     channel: Optional[str] = Field(
         None, title="Channel refers to which Slack channel to send slack message.\n+optional"
     )
@@ -1914,7 +1914,7 @@ class SlackTrigger(ArgoBaseModel):
     )
 
 
-class StorageGridEventSource(ArgoBaseModel):
+class StorageGridEventSource(BaseModel):
     api_url: Optional[str] = Field(None, alias="apiURL", description="APIURL is the url of the storagegrid api.")
     auth_token: Optional[v1.SecretKeySelector] = Field(None, alias="authToken", title="Auth token for storagegrid api")
     bucket: Optional[str] = Field(None, description="Name of the bucket to register notifications for.")
@@ -1930,7 +1930,7 @@ class StorageGridEventSource(ArgoBaseModel):
     webhook: Optional[WebhookContext] = Field(None, title="Webhook holds configuration for a REST endpoint")
 
 
-class StripeEventSource(ArgoBaseModel):
+class StripeEventSource(BaseModel):
     api_key: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="apiKey",
@@ -1957,7 +1957,7 @@ class StripeEventSource(ArgoBaseModel):
     webhook: Optional[WebhookContext] = Field(None, title="Webhook holds configuration for a REST endpoint")
 
 
-class ArtifactLocation(ArgoBaseModel):
+class ArtifactLocation(BaseModel):
     configmap: Optional[v1.ConfigMapKeySelector] = Field(None, title="Configmap that stores the artifact")
     file: Optional[FileArtifact] = Field(None, title="File artifact is artifact stored in a file")
     git: Optional[GitArtifact] = Field(None, title="Git repository hosting the artifact")
@@ -1967,7 +1967,7 @@ class ArtifactLocation(ArgoBaseModel):
     url: Optional[URLArtifact] = Field(None, title="URL to fetch the artifact from")
 
 
-class EventDependency(ArgoBaseModel):
+class EventDependency(BaseModel):
     event_name: Optional[str] = Field(None, alias="eventName", title="EventName is the name of the event")
     event_source_name: Optional[str] = Field(
         None, alias="eventSourceName", title="EventSourceName is the name of EventSource that Sensor depends on"
@@ -1988,7 +1988,7 @@ class EventDependency(ArgoBaseModel):
     transform: Optional[EventDependencyTransformer] = Field(None, title="Transform transforms the event data")
 
 
-class HTTPTrigger(ArgoBaseModel):
+class HTTPTrigger(BaseModel):
     basic_auth: Optional[BasicAuth] = Field(
         None, alias="basicAuth", title="BasicAuth configuration for the http request.\n+optional"
     )
@@ -2020,7 +2020,7 @@ class HTTPTrigger(ArgoBaseModel):
     url: Optional[str] = Field(None, description="URL refers to the URL to send HTTP request to.")
 
 
-class StandardK8STrigger(ArgoBaseModel):
+class StandardK8STrigger(BaseModel):
     live_object: Optional[bool] = Field(
         None,
         alias="liveObject",
@@ -2054,7 +2054,7 @@ class StandardK8STrigger(ArgoBaseModel):
     source: Optional[ArtifactLocation] = Field(None, title="Source of the K8s resource file(s)")
 
 
-class ArgoWorkflowTrigger(ArgoBaseModel):
+class ArgoWorkflowTrigger(BaseModel):
     args: Optional[List[str]] = Field(None, title="Args is the list of arguments to pass to the argo CLI")
     operation: Optional[str] = Field(
         None,
@@ -2069,7 +2069,7 @@ class ArgoWorkflowTrigger(ArgoBaseModel):
     source: Optional[ArtifactLocation] = Field(None, title="Source of the K8s resource file(s)")
 
 
-class TriggerTemplate(ArgoBaseModel):
+class TriggerTemplate(BaseModel):
     argo_workflow: Optional[ArgoWorkflowTrigger] = Field(
         None,
         alias="argoWorkflow",
@@ -2144,7 +2144,7 @@ class TriggerTemplate(ArgoBaseModel):
     )
 
 
-class Template(ArgoBaseModel):
+class Template(BaseModel):
     affinity: Optional[v1.Affinity] = Field(None, title="If specified, the pod's scheduling constraints\n+optional")
     container: Optional[v1.Container] = Field(
         None, title="Container is the main container image to run in the sensor pod\n+optional"
@@ -2218,7 +2218,7 @@ class Template(ArgoBaseModel):
     )
 
 
-class Trigger(ArgoBaseModel):
+class Trigger(BaseModel):
     parameters: Optional[List[TriggerParameter]] = Field(
         None, title="Parameters is the list of parameters applied to the trigger template definition"
     )
@@ -2234,7 +2234,7 @@ class Trigger(ArgoBaseModel):
     template: Optional[TriggerTemplate] = Field(None, description="Template describes the trigger specification.")
 
 
-class EventSourceSpec(ArgoBaseModel):
+class EventSourceSpec(BaseModel):
     amqp: Optional[Dict[str, AMQPEventSource]] = Field(None, title="AMQP event sources")
     azure_events_hub: Optional[Dict[str, AzureEventsHubEventSource]] = Field(
         None, alias="azureEventsHub", title="AzureEventsHub event sources"
@@ -2284,7 +2284,7 @@ class EventSourceSpec(ArgoBaseModel):
     webhook: Optional[Dict[str, WebhookEventSource]] = Field(None, title="Webhook event sources")
 
 
-class SensorSpec(ArgoBaseModel):
+class SensorSpec(BaseModel):
     dependencies: Optional[List[EventDependency]] = Field(
         None, description="Dependencies is a list of the events that this sensor is dependent on."
     )
@@ -2311,23 +2311,23 @@ class SensorSpec(ArgoBaseModel):
     )
 
 
-class EventSource(ArgoBaseModel):
+class EventSource(BaseModel):
     metadata: Optional[v1_1.ObjectMeta] = None
     spec: Optional[EventSourceSpec] = None
     status: Optional[EventSourceStatus] = Field(None, title="+optional")
 
 
-class EventSourceList(ArgoBaseModel):
+class EventSourceList(BaseModel):
     items: Optional[List[EventSource]] = None
     metadata: Optional[v1_1.ListMeta] = None
 
 
-class Sensor(ArgoBaseModel):
+class Sensor(BaseModel):
     metadata: Optional[v1_1.ObjectMeta] = None
     spec: Optional[SensorSpec] = None
     status: Optional[SensorStatus] = Field(None, title="+optional")
 
 
-class SensorList(ArgoBaseModel):
+class SensorList(BaseModel):
     items: Optional[List[Sensor]] = None
     metadata: Optional[v1_1.ListMeta] = None

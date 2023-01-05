@@ -9,10 +9,10 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 
-class CreateOptions(ArgoBaseModel):
+class CreateOptions(BaseModel):
     dry_run: Optional[List[str]] = Field(
         None,
         alias="dryRun",
@@ -51,17 +51,17 @@ class CreateOptions(ArgoBaseModel):
     )
 
 
-class FieldsV1(ArgoBaseModel):
+class FieldsV1(BaseModel):
     pass
 
 
-class GroupVersionResource(ArgoBaseModel):
+class GroupVersionResource(BaseModel):
     group: Optional[str] = None
     resource: Optional[str] = None
     version: Optional[str] = None
 
 
-class LabelSelectorRequirement(ArgoBaseModel):
+class LabelSelectorRequirement(BaseModel):
     key: str = Field(..., description="key is the label key that the selector applies to.")
     operator: str = Field(
         ...,
@@ -80,7 +80,7 @@ class LabelSelectorRequirement(ArgoBaseModel):
     )
 
 
-class ListMeta(ArgoBaseModel):
+class ListMeta(BaseModel):
     continue_: Optional[str] = Field(
         None,
         alias="continue",
@@ -126,11 +126,11 @@ class ListMeta(ArgoBaseModel):
     )
 
 
-class MicroTime(ArgoBaseModel):
+class MicroTime(BaseModel):
     __root__: datetime = Field(..., description="MicroTime is version of Time with microsecond level precision.")
 
 
-class OwnerReference(ArgoBaseModel):
+class OwnerReference(BaseModel):
     api_version: str = Field(..., alias="apiVersion", description="API version of the referent.")
     block_owner_deletion: Optional[bool] = Field(
         None,
@@ -157,7 +157,7 @@ class OwnerReference(ArgoBaseModel):
     )
 
 
-class StatusCause(ArgoBaseModel):
+class StatusCause(BaseModel):
     field: Optional[str] = Field(
         None,
         description=(
@@ -182,7 +182,7 @@ class StatusCause(ArgoBaseModel):
     )
 
 
-class Time(ArgoBaseModel):
+class Time(BaseModel):
     __root__: datetime = Field(
         ...,
         description=(
@@ -192,7 +192,7 @@ class Time(ArgoBaseModel):
     )
 
 
-class LabelSelector(ArgoBaseModel):
+class LabelSelector(BaseModel):
     match_expressions: Optional[List[LabelSelectorRequirement]] = Field(
         None,
         alias="matchExpressions",
@@ -209,7 +209,7 @@ class LabelSelector(ArgoBaseModel):
     )
 
 
-class ManagedFieldsEntry(ArgoBaseModel):
+class ManagedFieldsEntry(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -258,7 +258,7 @@ class ManagedFieldsEntry(ArgoBaseModel):
     )
 
 
-class ObjectMeta(ArgoBaseModel):
+class ObjectMeta(BaseModel):
     annotations: Optional[Dict[str, str]] = Field(
         None,
         description=(

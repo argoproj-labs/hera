@@ -6,19 +6,19 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 from ...google import protobuf
 
 
-class Error(ArgoBaseModel):
+class Error(BaseModel):
     code: Optional[int] = None
     details: Optional[List[protobuf.Any]] = None
     error: Optional[str] = None
     message: Optional[str] = None
 
 
-class StreamError(ArgoBaseModel):
+class StreamError(BaseModel):
     details: Optional[List[protobuf.Any]] = None
     grpc_code: Optional[int] = None
     http_code: Optional[int] = None

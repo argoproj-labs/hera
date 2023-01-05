@@ -29,7 +29,7 @@ models: ## Generate all the Argo Workflows models
 		--snake-case-field \
 		--target-python-version 3.7 \
 		--output src/hera/models/workflows \
-		--base-class hera.ArgoBaseModel \
+		--base-class hera.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix
 	@$(MAKE) format

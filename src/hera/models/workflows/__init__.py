@@ -6,8 +6,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 
-class Model(ArgoBaseModel):
+class Model(BaseModel):
     __root__: Any

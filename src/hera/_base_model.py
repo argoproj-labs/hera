@@ -1,7 +1,8 @@
 from types import ModuleType
 from typing import Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel as PyBaseModel
+from pydantic import Extra
 
 _yaml: Optional[ModuleType] = None
 try:
@@ -12,7 +13,7 @@ except ImportError:
     _yaml = None
 
 
-class ArgoBaseModel(BaseModel):
+class BaseModel(PyBaseModel):
     class Config:
         allow_population_by_field_name = True
         extra = Extra.forbid

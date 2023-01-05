@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 from ...k8s.api.core import v1
 from ...k8s.api.policy import v1beta1
@@ -16,15 +16,15 @@ from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1
 from ...k8s.apimachinery.pkg.util import intstr
 
 
-class Amount(ArgoBaseModel):
+class Amount(BaseModel):
     __root__: float = Field(..., description="Amount represent a numeric amount.")
 
 
-class ArchivedWorkflowDeletedResponse(ArgoBaseModel):
+class ArchivedWorkflowDeletedResponse(BaseModel):
     pass
 
 
-class ArtGCStatus(ArgoBaseModel):
+class ArtGCStatus(BaseModel):
     not_specified: Optional[bool] = Field(
         None,
         alias="notSpecified",
@@ -47,7 +47,7 @@ class ArtGCStatus(ArgoBaseModel):
     )
 
 
-class ArtifactRepositoryRef(ArgoBaseModel):
+class ArtifactRepositoryRef(BaseModel):
     config_map: Optional[str] = Field(
         None, alias="configMap", description='The name of the config map. Defaults to "artifact-repositories".'
     )
@@ -60,7 +60,7 @@ class ArtifactRepositoryRef(ArgoBaseModel):
     )
 
 
-class ArtifactResult(ArgoBaseModel):
+class ArtifactResult(BaseModel):
     error: Optional[str] = Field(
         None, description="Error is an optional error message which should be set if Success==false"
     )
@@ -68,60 +68,60 @@ class ArtifactResult(ArgoBaseModel):
     success: Optional[bool] = Field(None, description="Success describes whether the deletion succeeded")
 
 
-class ArtifactResultNodeStatus(ArgoBaseModel):
+class ArtifactResultNodeStatus(BaseModel):
     artifact_results: Optional[Dict[str, ArtifactResult]] = Field(
         None, alias="artifactResults", description="ArtifactResults maps Artifact name to result of the deletion"
     )
 
 
-class ClusterWorkflowTemplateDeleteResponse(ArgoBaseModel):
+class ClusterWorkflowTemplateDeleteResponse(BaseModel):
     pass
 
 
-class CollectEventRequest(ArgoBaseModel):
+class CollectEventRequest(BaseModel):
     name: Optional[str] = None
 
 
-class CollectEventResponse(ArgoBaseModel):
+class CollectEventResponse(BaseModel):
     pass
 
 
-class Condition(ArgoBaseModel):
+class Condition(BaseModel):
     message: Optional[str] = Field(None, description="Message is the condition message")
     status: Optional[str] = Field(None, description="Status is the status of the condition")
     type: Optional[str] = Field(None, description="Type is the type of condition")
 
 
-class ContinueOn(ArgoBaseModel):
+class ContinueOn(BaseModel):
     error: Optional[bool] = None
     failed: Optional[bool] = None
 
 
-class Counter(ArgoBaseModel):
+class Counter(BaseModel):
     value: str = Field(..., description="Value is the value of the metric")
 
 
-class CreateS3BucketOptions(ArgoBaseModel):
+class CreateS3BucketOptions(BaseModel):
     object_locking: Optional[bool] = Field(
         None, alias="objectLocking", description="ObjectLocking Enable object locking"
     )
 
 
-class CronWorkflowDeletedResponse(ArgoBaseModel):
+class CronWorkflowDeletedResponse(BaseModel):
     pass
 
 
-class CronWorkflowResumeRequest(ArgoBaseModel):
+class CronWorkflowResumeRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
 
 
-class CronWorkflowSuspendRequest(ArgoBaseModel):
+class CronWorkflowSuspendRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
 
 
-class Event(ArgoBaseModel):
+class Event(BaseModel):
     selector: str = Field(
         ...,
         description=(
@@ -131,11 +131,11 @@ class Event(ArgoBaseModel):
     )
 
 
-class EventResponse(ArgoBaseModel):
+class EventResponse(BaseModel):
     pass
 
 
-class ExecutorConfig(ArgoBaseModel):
+class ExecutorConfig(BaseModel):
     service_account_name: Optional[str] = Field(
         None,
         alias="serviceAccountName",
@@ -143,12 +143,12 @@ class ExecutorConfig(ArgoBaseModel):
     )
 
 
-class Gauge(ArgoBaseModel):
+class Gauge(BaseModel):
     realtime: bool = Field(..., description="Realtime emits this metric in real time if applicable")
     value: str = Field(..., description="Value is the value of the metric")
 
 
-class GetUserInfoResponse(ArgoBaseModel):
+class GetUserInfoResponse(BaseModel):
     email: Optional[str] = None
     email_verified: Optional[bool] = Field(None, alias="emailVerified")
     groups: Optional[List[str]] = None
@@ -158,21 +158,21 @@ class GetUserInfoResponse(ArgoBaseModel):
     subject: Optional[str] = None
 
 
-class HTTPBodySource(ArgoBaseModel):
+class HTTPBodySource(BaseModel):
     bytes: Optional[str] = None
 
 
-class Header(ArgoBaseModel):
+class Header(BaseModel):
     name: str = Field(..., description="Name is the header name")
     value: str = Field(..., description="Value is the literal value to use for the header")
 
 
-class Histogram(ArgoBaseModel):
+class Histogram(BaseModel):
     buckets: List[Amount] = Field(..., description="Buckets is a list of bucket divisors for the histogram")
     value: str = Field(..., description="Value is the value of the metric")
 
 
-class Item(ArgoBaseModel):
+class Item(BaseModel):
     __root__: Any = Field(
         ...,
         description=(
@@ -182,19 +182,19 @@ class Item(ArgoBaseModel):
     )
 
 
-class LabelKeys(ArgoBaseModel):
+class LabelKeys(BaseModel):
     items: Optional[List[str]] = None
 
 
-class LabelValueFrom(ArgoBaseModel):
+class LabelValueFrom(BaseModel):
     expression: str
 
 
-class LabelValues(ArgoBaseModel):
+class LabelValues(BaseModel):
     items: Optional[List[str]] = None
 
 
-class Link(ArgoBaseModel):
+class Link(BaseModel):
     name: str = Field(..., description='The name of the link, E.g. "Workflow Logs" or "Pod Logs"')
     scope: str = Field(..., description='"workflow", "pod", "pod-logs", "event-source-logs", "sensor-logs" or "chat"')
     url: str = Field(
@@ -207,32 +207,32 @@ class Link(ArgoBaseModel):
     )
 
 
-class LogEntry(ArgoBaseModel):
+class LogEntry(BaseModel):
     content: Optional[str] = None
     pod_name: Optional[str] = Field(None, alias="podName")
 
 
-class MemoizationStatus(ArgoBaseModel):
+class MemoizationStatus(BaseModel):
     cache_name: str = Field(..., alias="cacheName", description="Cache is the name of the cache that was used")
     hit: bool = Field(..., description="Hit indicates whether this node was created from a cache entry")
     key: str = Field(..., description="Key is the name of the key used for this node's cache")
 
 
-class Metadata(ArgoBaseModel):
+class Metadata(BaseModel):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
 
 
-class MetricLabel(ArgoBaseModel):
+class MetricLabel(BaseModel):
     key: str
     value: str
 
 
-class Mutex(ArgoBaseModel):
+class Mutex(BaseModel):
     name: Optional[str] = Field(None, description="name of the mutex")
 
 
-class MutexHolding(ArgoBaseModel):
+class MutexHolding(BaseModel):
     holder: Optional[str] = Field(
         None,
         description=(
@@ -244,7 +244,7 @@ class MutexHolding(ArgoBaseModel):
     mutex: Optional[str] = Field(None, description="Reference for the mutex e.g: ${namespace}/mutex/${mutexName}")
 
 
-class MutexStatus(ArgoBaseModel):
+class MutexStatus(BaseModel):
     holding: Optional[List[MutexHolding]] = Field(
         None,
         description=(
@@ -257,20 +257,20 @@ class MutexStatus(ArgoBaseModel):
     )
 
 
-class NodeSynchronizationStatus(ArgoBaseModel):
+class NodeSynchronizationStatus(BaseModel):
     waiting: Optional[str] = Field(None, description="Waiting is the name of the lock that this node is waiting for")
 
 
-class NoneStrategy(ArgoBaseModel):
+class NoneStrategy(BaseModel):
     pass
 
 
-class OAuth2EndpointParam(ArgoBaseModel):
+class OAuth2EndpointParam(BaseModel):
     key: str = Field(..., description="Name is the header name")
     value: Optional[str] = Field(None, description="Value is the literal value to use for the header")
 
 
-class OSSLifecycleRule(ArgoBaseModel):
+class OSSLifecycleRule(BaseModel):
     mark_deletion_after_days: Optional[int] = Field(
         None,
         alias="markDeletionAfterDays",
@@ -286,11 +286,11 @@ class OSSLifecycleRule(ArgoBaseModel):
     )
 
 
-class Plugin(ArgoBaseModel):
+class Plugin(BaseModel):
     pass
 
 
-class Prometheus(ArgoBaseModel):
+class Prometheus(BaseModel):
     counter: Optional[Counter] = Field(None, description="Counter is a counter metric")
     gauge: Optional[Gauge] = Field(None, description="Gauge is a gauge metric")
     help: str = Field(..., description="Help is a string that describes the metric")
@@ -302,11 +302,11 @@ class Prometheus(ArgoBaseModel):
     )
 
 
-class RawArtifact(ArgoBaseModel):
+class RawArtifact(BaseModel):
     data: str = Field(..., description="Data is the string contents of the artifact")
 
 
-class ResubmitArchivedWorkflowRequest(ArgoBaseModel):
+class ResubmitArchivedWorkflowRequest(BaseModel):
     memoized: Optional[bool] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
@@ -314,7 +314,7 @@ class ResubmitArchivedWorkflowRequest(ArgoBaseModel):
     uid: Optional[str] = None
 
 
-class RetryArchivedWorkflowRequest(ArgoBaseModel):
+class RetryArchivedWorkflowRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
     node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
@@ -323,18 +323,18 @@ class RetryArchivedWorkflowRequest(ArgoBaseModel):
     uid: Optional[str] = None
 
 
-class RetryNodeAntiAffinity(ArgoBaseModel):
+class RetryNodeAntiAffinity(BaseModel):
     pass
 
 
-class SemaphoreHolding(ArgoBaseModel):
+class SemaphoreHolding(BaseModel):
     holders: Optional[List[str]] = Field(
         None, description="Holders stores the list of current holder names in the io.argoproj.workflow.v1alpha1."
     )
     semaphore: Optional[str] = Field(None, description="Semaphore stores the semaphore name.")
 
 
-class SemaphoreStatus(ArgoBaseModel):
+class SemaphoreStatus(BaseModel):
     holding: Optional[List[SemaphoreHolding]] = Field(
         None, description="Holding stores the list of resource acquired synchronization lock for workflows."
     )
@@ -343,11 +343,11 @@ class SemaphoreStatus(ArgoBaseModel):
     )
 
 
-class SuppliedValueFrom(ArgoBaseModel):
+class SuppliedValueFrom(BaseModel):
     pass
 
 
-class SuspendTemplate(ArgoBaseModel):
+class SuspendTemplate(BaseModel):
     duration: Optional[str] = Field(
         None,
         description=(
@@ -357,14 +357,14 @@ class SuspendTemplate(ArgoBaseModel):
     )
 
 
-class SynchronizationStatus(ArgoBaseModel):
+class SynchronizationStatus(BaseModel):
     mutex: Optional[MutexStatus] = Field(None, description="Mutex stores this workflow's mutex holder details")
     semaphore: Optional[SemaphoreStatus] = Field(
         None, description="Semaphore stores this workflow's Semaphore holder details"
     )
 
 
-class TTLStrategy(ArgoBaseModel):
+class TTLStrategy(BaseModel):
     seconds_after_completion: Optional[int] = Field(
         None,
         alias="secondsAfterCompletion",
@@ -382,7 +382,7 @@ class TTLStrategy(ArgoBaseModel):
     )
 
 
-class TarStrategy(ArgoBaseModel):
+class TarStrategy(BaseModel):
     compression_level: Optional[int] = Field(
         None,
         alias="compressionLevel",
@@ -393,7 +393,7 @@ class TarStrategy(ArgoBaseModel):
     )
 
 
-class TemplateRef(ArgoBaseModel):
+class TemplateRef(BaseModel):
     cluster_scope: Optional[bool] = Field(
         None,
         alias="clusterScope",
@@ -403,11 +403,11 @@ class TemplateRef(ArgoBaseModel):
     template: Optional[str] = Field(None, description="Template is the name of referred template in the resource.")
 
 
-class TransformationStep(ArgoBaseModel):
+class TransformationStep(BaseModel):
     expression: str = Field(..., description="Expression defines an expr expression to apply")
 
 
-class Version(ArgoBaseModel):
+class Version(BaseModel):
     build_date: str = Field(..., alias="buildDate")
     compiler: str
     git_commit: str = Field(..., alias="gitCommit")
@@ -418,36 +418,36 @@ class Version(ArgoBaseModel):
     version: str
 
 
-class VolumeClaimGC(ArgoBaseModel):
+class VolumeClaimGC(BaseModel):
     strategy: Optional[str] = Field(
         None, description='Strategy is the strategy to use. One of "OnWorkflowCompletion", "OnWorkflowSuccess"'
     )
 
 
-class WorkflowDeleteResponse(ArgoBaseModel):
+class WorkflowDeleteResponse(BaseModel):
     pass
 
 
-class WorkflowMetadata(ArgoBaseModel):
+class WorkflowMetadata(BaseModel):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
     labels_from: Optional[Dict[str, LabelValueFrom]] = Field(None, alias="labelsFrom")
 
 
-class WorkflowResubmitRequest(ArgoBaseModel):
+class WorkflowResubmitRequest(BaseModel):
     memoized: Optional[bool] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
     parameters: Optional[List[str]] = None
 
 
-class WorkflowResumeRequest(ArgoBaseModel):
+class WorkflowResumeRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
     node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
 
 
-class WorkflowRetryRequest(ArgoBaseModel):
+class WorkflowRetryRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
     node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
@@ -455,7 +455,7 @@ class WorkflowRetryRequest(ArgoBaseModel):
     restart_successful: Optional[bool] = Field(None, alias="restartSuccessful")
 
 
-class WorkflowSetRequest(ArgoBaseModel):
+class WorkflowSetRequest(BaseModel):
     message: Optional[str] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
@@ -464,23 +464,23 @@ class WorkflowSetRequest(ArgoBaseModel):
     phase: Optional[str] = None
 
 
-class WorkflowStopRequest(ArgoBaseModel):
+class WorkflowStopRequest(BaseModel):
     message: Optional[str] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
     node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
 
 
-class WorkflowSuspendRequest(ArgoBaseModel):
+class WorkflowSuspendRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
 
 
-class WorkflowTemplateDeleteResponse(ArgoBaseModel):
+class WorkflowTemplateDeleteResponse(BaseModel):
     pass
 
 
-class WorkflowTemplateRef(ArgoBaseModel):
+class WorkflowTemplateRef(BaseModel):
     cluster_scope: Optional[bool] = Field(
         None,
         alias="clusterScope",
@@ -489,22 +489,22 @@ class WorkflowTemplateRef(ArgoBaseModel):
     name: Optional[str] = Field(None, description="Name is the resource name of the workflow template.")
 
 
-class WorkflowTerminateRequest(ArgoBaseModel):
+class WorkflowTerminateRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
 
 
-class ZipStrategy(ArgoBaseModel):
+class ZipStrategy(BaseModel):
     pass
 
 
-class ArchiveStrategy(ArgoBaseModel):
+class ArchiveStrategy(BaseModel):
     none: Optional[NoneStrategy] = None
     tar: Optional[TarStrategy] = None
     zip: Optional[ZipStrategy] = None
 
 
-class ArtifactGC(ArgoBaseModel):
+class ArtifactGC(BaseModel):
     pod_metadata: Optional[Metadata] = Field(
         None,
         alias="podMetadata",
@@ -524,13 +524,13 @@ class ArtifactGC(ArgoBaseModel):
     strategy: Optional[str] = Field(None, description="Strategy is the strategy to use.")
 
 
-class ArtifactGCStatus(ArgoBaseModel):
+class ArtifactGCStatus(BaseModel):
     artifact_results_by_node: Optional[Dict[str, ArtifactResultNodeStatus]] = Field(
         None, alias="artifactResultsByNode", description="ArtifactResultsByNode maps Node name to result"
     )
 
 
-class ArtifactoryArtifact(ArgoBaseModel):
+class ArtifactoryArtifact(BaseModel):
     password_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
     )
@@ -540,7 +540,7 @@ class ArtifactoryArtifact(ArgoBaseModel):
     )
 
 
-class ArtifactoryArtifactRepository(ArgoBaseModel):
+class ArtifactoryArtifactRepository(BaseModel):
     password_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
     )
@@ -550,7 +550,7 @@ class ArtifactoryArtifactRepository(ArgoBaseModel):
     )
 
 
-class AzureArtifact(ArgoBaseModel):
+class AzureArtifact(BaseModel):
     account_key_secret: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="accountKeySecret",
@@ -574,7 +574,7 @@ class AzureArtifact(ArgoBaseModel):
     )
 
 
-class AzureArtifactRepository(ArgoBaseModel):
+class AzureArtifactRepository(BaseModel):
     account_key_secret: Optional[v1.SecretKeySelector] = Field(
         None,
         alias="accountKeySecret",
@@ -602,7 +602,7 @@ class AzureArtifactRepository(ArgoBaseModel):
     )
 
 
-class Backoff(ArgoBaseModel):
+class Backoff(BaseModel):
     duration: Optional[str] = Field(
         None,
         description=(
@@ -620,7 +620,7 @@ class Backoff(ArgoBaseModel):
     )
 
 
-class BasicAuth(ArgoBaseModel):
+class BasicAuth(BaseModel):
     password_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
     )
@@ -629,18 +629,18 @@ class BasicAuth(ArgoBaseModel):
     )
 
 
-class Cache(ArgoBaseModel):
+class Cache(BaseModel):
     config_map: v1.ConfigMapKeySelector = Field(
         ..., alias="configMap", description="ConfigMap sets a ConfigMap-based cache"
     )
 
 
-class ClientCertAuth(ArgoBaseModel):
+class ClientCertAuth(BaseModel):
     client_cert_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientCertSecret")
     client_key_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientKeySecret")
 
 
-class ContainerSetRetryStrategy(ArgoBaseModel):
+class ContainerSetRetryStrategy(BaseModel):
     duration: Optional[str] = Field(
         None,
         description=(
@@ -651,7 +651,7 @@ class ContainerSetRetryStrategy(ArgoBaseModel):
     retries: intstr.IntOrString = Field(..., description="Nbr of retries")
 
 
-class CronWorkflowStatus(ArgoBaseModel):
+class CronWorkflowStatus(BaseModel):
     active: List[v1.ObjectReference] = Field(
         ..., description="Active is a list of active workflows stemming from this CronWorkflow"
     )
@@ -663,7 +663,7 @@ class CronWorkflowStatus(ArgoBaseModel):
     )
 
 
-class GCSArtifact(ArgoBaseModel):
+class GCSArtifact(BaseModel):
     bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
     key: str = Field(..., description="Key is the path in the bucket where the artifact resides")
     service_account_key_secret: Optional[v1.SecretKeySelector] = Field(
@@ -673,7 +673,7 @@ class GCSArtifact(ArgoBaseModel):
     )
 
 
-class GCSArtifactRepository(ArgoBaseModel):
+class GCSArtifactRepository(BaseModel):
     bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
     key_format: Optional[str] = Field(
         None,
@@ -687,7 +687,7 @@ class GCSArtifactRepository(ArgoBaseModel):
     )
 
 
-class GitArtifact(ArgoBaseModel):
+class GitArtifact(BaseModel):
     branch: Optional[str] = Field(None, description="Branch is the branch to fetch when `SingleBranch` is enabled")
     depth: Optional[int] = Field(
         None,
@@ -727,7 +727,7 @@ class GitArtifact(ArgoBaseModel):
     )
 
 
-class HDFSArtifact(ArgoBaseModel):
+class HDFSArtifact(BaseModel):
     addresses: Optional[List[str]] = Field(None, description="Addresses is accessible addresses of HDFS name nodes")
     force: Optional[bool] = Field(None, description="Force copies a file forcibly even if it exists")
     hdfs_user: Optional[str] = Field(
@@ -782,7 +782,7 @@ class HDFSArtifact(ArgoBaseModel):
     path: str = Field(..., description="Path is a file path in HDFS")
 
 
-class HDFSArtifactRepository(ArgoBaseModel):
+class HDFSArtifactRepository(BaseModel):
     addresses: Optional[List[str]] = Field(None, description="Addresses is accessible addresses of HDFS name nodes")
     force: Optional[bool] = Field(None, description="Force copies a file forcibly even if it exists")
     hdfs_user: Optional[str] = Field(
@@ -841,18 +841,18 @@ class HDFSArtifactRepository(ArgoBaseModel):
     )
 
 
-class HTTPHeaderSource(ArgoBaseModel):
+class HTTPHeaderSource(BaseModel):
     secret_key_ref: Optional[v1.SecretKeySelector] = Field(None, alias="secretKeyRef")
 
 
-class InfoResponse(ArgoBaseModel):
+class InfoResponse(BaseModel):
     links: Optional[List[Link]] = None
     managed_namespace: Optional[str] = Field(None, alias="managedNamespace")
     modals: Optional[Dict[str, bool]] = Field(None, title="which modals to show")
     nav_color: Optional[str] = Field(None, alias="navColor")
 
 
-class Memoize(ArgoBaseModel):
+class Memoize(BaseModel):
     cache: Cache = Field(..., description="Cache sets and configures the kind of cache")
     key: str = Field(..., description="Key is the key to use as the caching key")
     max_age: str = Field(
@@ -865,11 +865,11 @@ class Memoize(ArgoBaseModel):
     )
 
 
-class Metrics(ArgoBaseModel):
+class Metrics(BaseModel):
     prometheus: List[Prometheus] = Field(..., description="Prometheus is a list of prometheus metrics to be emitted")
 
 
-class OAuth2Auth(ArgoBaseModel):
+class OAuth2Auth(BaseModel):
     client_id_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientIDSecret")
     client_secret_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientSecretSecret")
     endpoint_params: Optional[List[OAuth2EndpointParam]] = Field(None, alias="endpointParams")
@@ -877,7 +877,7 @@ class OAuth2Auth(ArgoBaseModel):
     token_url_secret: Optional[v1.SecretKeySelector] = Field(None, alias="tokenURLSecret")
 
 
-class OSSArtifact(ArgoBaseModel):
+class OSSArtifact(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
     )
@@ -908,7 +908,7 @@ class OSSArtifact(ArgoBaseModel):
     )
 
 
-class OSSArtifactRepository(ArgoBaseModel):
+class OSSArtifactRepository(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
     )
@@ -943,11 +943,11 @@ class OSSArtifactRepository(ArgoBaseModel):
     )
 
 
-class RetryAffinity(ArgoBaseModel):
+class RetryAffinity(BaseModel):
     node_anti_affinity: Optional[RetryNodeAntiAffinity] = Field(None, alias="nodeAntiAffinity")
 
 
-class RetryStrategy(ArgoBaseModel):
+class RetryStrategy(BaseModel):
     affinity: Optional[RetryAffinity] = Field(
         None, description="Affinity prevents running workflow's step on the same host"
     )
@@ -971,7 +971,7 @@ class RetryStrategy(ArgoBaseModel):
     )
 
 
-class S3EncryptionOptions(ArgoBaseModel):
+class S3EncryptionOptions(BaseModel):
     enable_encryption: Optional[bool] = Field(
         None,
         alias="enableEncryption",
@@ -1003,13 +1003,13 @@ class S3EncryptionOptions(ArgoBaseModel):
     )
 
 
-class SemaphoreRef(ArgoBaseModel):
+class SemaphoreRef(BaseModel):
     config_map_key_ref: Optional[v1.ConfigMapKeySelector] = Field(
         None, alias="configMapKeyRef", description="ConfigMapKeyRef is configmap selector for Semaphore configuration"
     )
 
 
-class Sequence(ArgoBaseModel):
+class Sequence(BaseModel):
     count: Optional[intstr.IntOrString] = Field(
         None, description="Count is number of elements in the sequence (default: 0). Not to be used with end"
     )
@@ -1022,7 +1022,7 @@ class Sequence(ArgoBaseModel):
     start: Optional[intstr.IntOrString] = Field(None, description="Number at which to start the sequence (default: 0)")
 
 
-class SubmitOpts(ArgoBaseModel):
+class SubmitOpts(BaseModel):
     annotations: Optional[str] = Field(None, description="Annotations adds to metadata.labels")
     dry_run: Optional[bool] = Field(
         None,
@@ -1063,12 +1063,12 @@ class SubmitOpts(ArgoBaseModel):
     )
 
 
-class Synchronization(ArgoBaseModel):
+class Synchronization(BaseModel):
     mutex: Optional[Mutex] = Field(None, description="Mutex holds the Mutex lock details")
     semaphore: Optional[SemaphoreRef] = Field(None, description="Semaphore holds the Semaphore configuration")
 
 
-class ValueFrom(ArgoBaseModel):
+class ValueFrom(BaseModel):
     config_map_key_ref: Optional[v1.ConfigMapKeySelector] = Field(
         None,
         alias="configMapKeyRef",
@@ -1111,26 +1111,26 @@ class ValueFrom(ArgoBaseModel):
     )
 
 
-class WorkflowSubmitRequest(ArgoBaseModel):
+class WorkflowSubmitRequest(BaseModel):
     namespace: Optional[str] = None
     resource_kind: Optional[str] = Field(None, alias="resourceKind")
     resource_name: Optional[str] = Field(None, alias="resourceName")
     submit_options: Optional[SubmitOpts] = Field(None, alias="submitOptions")
 
 
-class HTTPAuth(ArgoBaseModel):
+class HTTPAuth(BaseModel):
     basic_auth: Optional[BasicAuth] = Field(None, alias="basicAuth")
     client_cert: Optional[ClientCertAuth] = Field(None, alias="clientCert")
     oauth2: Optional[OAuth2Auth] = None
 
 
-class HTTPHeader(ArgoBaseModel):
+class HTTPHeader(BaseModel):
     name: str
     value: Optional[str] = None
     value_from: Optional[HTTPHeaderSource] = Field(None, alias="valueFrom")
 
 
-class Parameter(ArgoBaseModel):
+class Parameter(BaseModel):
     default: Optional[str] = Field(
         None, description="Default is the default value to use for an input parameter if a value was not supplied"
     )
@@ -1159,7 +1159,7 @@ class Parameter(ArgoBaseModel):
     )
 
 
-class PodGC(ArgoBaseModel):
+class PodGC(BaseModel):
     label_selector: Optional[v1_1.LabelSelector] = Field(
         None,
         alias="labelSelector",
@@ -1177,7 +1177,7 @@ class PodGC(ArgoBaseModel):
     )
 
 
-class S3Artifact(ArgoBaseModel):
+class S3Artifact(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
     )
@@ -1209,7 +1209,7 @@ class S3Artifact(ArgoBaseModel):
     )
 
 
-class S3ArtifactRepository(ArgoBaseModel):
+class S3ArtifactRepository(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
         None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
     )
@@ -1253,7 +1253,7 @@ class S3ArtifactRepository(ArgoBaseModel):
     )
 
 
-class ArtifactRepository(ArgoBaseModel):
+class ArtifactRepository(BaseModel):
     archive_logs: Optional[bool] = Field(None, alias="archiveLogs", description="ArchiveLogs enables log archiving")
     artifactory: Optional[ArtifactoryArtifactRepository] = Field(
         None, description="Artifactory stores artifacts to JFrog Artifactory"
@@ -1269,7 +1269,7 @@ class ArtifactRepository(ArgoBaseModel):
     s3: Optional[S3ArtifactRepository] = Field(None, description="S3 stores artifact in a S3-compliant object store")
 
 
-class ArtifactRepositoryRefStatus(ArgoBaseModel):
+class ArtifactRepositoryRefStatus(BaseModel):
     artifact_repository: Optional[ArtifactRepository] = Field(
         None,
         alias="artifactRepository",
@@ -1297,7 +1297,7 @@ class ArtifactRepositoryRefStatus(ArgoBaseModel):
     )
 
 
-class HTTP(ArgoBaseModel):
+class HTTP(BaseModel):
     body: Optional[str] = Field(None, description="Body is content of the HTTP Request")
     body_from: Optional[HTTPBodySource] = Field(
         None, alias="bodyFrom", description="BodyFrom is  content of the HTTP Request as Bytes"
@@ -1324,7 +1324,7 @@ class HTTP(ArgoBaseModel):
     url: str = Field(..., description="URL of the HTTP Request")
 
 
-class HTTPArtifact(ArgoBaseModel):
+class HTTPArtifact(BaseModel):
     auth: Optional[HTTPAuth] = Field(None, description="Auth contains information for client authentication")
     headers: Optional[List[Header]] = Field(
         None, description="Headers are an optional list of headers to send with HTTP requests for artifacts"
@@ -1332,7 +1332,7 @@ class HTTPArtifact(ArgoBaseModel):
     url: str = Field(..., description="URL of the artifact")
 
 
-class Artifact(ArgoBaseModel):
+class Artifact(BaseModel):
     archive: Optional[ArchiveStrategy] = Field(
         None, description="Archive controls how the artifact will be saved to the artifact repository."
     )
@@ -1397,7 +1397,7 @@ class Artifact(ArgoBaseModel):
     )
 
 
-class ArtifactLocation(ArgoBaseModel):
+class ArtifactLocation(BaseModel):
     archive_logs: Optional[bool] = Field(
         None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
     )
@@ -1414,7 +1414,7 @@ class ArtifactLocation(ArgoBaseModel):
     s3: Optional[S3Artifact] = Field(None, description="S3 contains S3 artifact location details")
 
 
-class ArtifactNodeSpec(ArgoBaseModel):
+class ArtifactNodeSpec(BaseModel):
     archive_location: Optional[ArtifactLocation] = Field(
         None,
         alias="archiveLocation",
@@ -1425,7 +1425,7 @@ class ArtifactNodeSpec(ArgoBaseModel):
     )
 
 
-class ArtifactPaths(ArgoBaseModel):
+class ArtifactPaths(BaseModel):
     archive: Optional[ArchiveStrategy] = Field(
         None, description="Archive controls how the artifact will be saved to the artifact repository."
     )
@@ -1490,7 +1490,7 @@ class ArtifactPaths(ArgoBaseModel):
     )
 
 
-class ContainerNode(ArgoBaseModel):
+class ContainerNode(BaseModel):
     args: Optional[List[str]] = Field(
         None,
         description=(
@@ -1682,7 +1682,7 @@ class ContainerNode(ArgoBaseModel):
     )
 
 
-class ContainerSetTemplate(ArgoBaseModel):
+class ContainerSetTemplate(BaseModel):
     containers: List[ContainerNode]
     retry_strategy: Optional[ContainerSetRetryStrategy] = Field(
         None,
@@ -1695,7 +1695,7 @@ class ContainerSetTemplate(ArgoBaseModel):
     volume_mounts: Optional[List[v1.VolumeMount]] = Field(None, alias="volumeMounts")
 
 
-class DataSource(ArgoBaseModel):
+class DataSource(BaseModel):
     artifact_paths: Optional[ArtifactPaths] = Field(
         None,
         alias="artifactPaths",
@@ -1703,18 +1703,18 @@ class DataSource(ArgoBaseModel):
     )
 
 
-class Inputs(ArgoBaseModel):
+class Inputs(BaseModel):
     artifacts: Optional[List[Artifact]] = Field(None, description="Artifact are a list of artifacts passed as inputs")
     parameters: Optional[List[Parameter]] = Field(
         None, description="Parameters are a list of parameters passed as inputs"
     )
 
 
-class ManifestFrom(ArgoBaseModel):
+class ManifestFrom(BaseModel):
     artifact: Artifact = Field(..., description="Artifact contains the artifact to use")
 
 
-class Outputs(ArgoBaseModel):
+class Outputs(BaseModel):
     artifacts: Optional[List[Artifact]] = Field(
         None, description="Artifacts holds the list of output artifacts produced by a step"
     )
@@ -1727,7 +1727,7 @@ class Outputs(ArgoBaseModel):
     result: Optional[str] = Field(None, description="Result holds the result (stdout) of a script template")
 
 
-class ResourceTemplate(ArgoBaseModel):
+class ResourceTemplate(BaseModel):
     action: str = Field(
         ...,
         description=(
@@ -1779,7 +1779,7 @@ class ResourceTemplate(ArgoBaseModel):
     )
 
 
-class ScriptTemplate(ArgoBaseModel):
+class ScriptTemplate(BaseModel):
     args: Optional[List[str]] = Field(
         None,
         description=(
@@ -1971,7 +1971,7 @@ class ScriptTemplate(ArgoBaseModel):
     )
 
 
-class UserContainer(ArgoBaseModel):
+class UserContainer(BaseModel):
     args: Optional[List[str]] = Field(
         None,
         description=(
@@ -2171,7 +2171,7 @@ class UserContainer(ArgoBaseModel):
     )
 
 
-class Arguments(ArgoBaseModel):
+class Arguments(BaseModel):
     artifacts: Optional[List[Artifact]] = Field(
         None, description="Artifacts is the list of artifacts to pass to the template or workflow"
     )
@@ -2180,7 +2180,7 @@ class Arguments(ArgoBaseModel):
     )
 
 
-class ArtifactGCSpec(ArgoBaseModel):
+class ArtifactGCSpec(BaseModel):
     artifacts_by_node: Optional[Dict[str, ArtifactNodeSpec]] = Field(
         None,
         alias="artifactsByNode",
@@ -2188,14 +2188,14 @@ class ArtifactGCSpec(ArgoBaseModel):
     )
 
 
-class Data(ArgoBaseModel):
+class Data(BaseModel):
     source: DataSource = Field(..., description="Source sources external data into a data template")
     transformation: List[TransformationStep] = Field(
         ..., description="Transformation applies a set of transformations"
     )
 
 
-class LifecycleHook(ArgoBaseModel):
+class LifecycleHook(BaseModel):
     arguments: Optional[Arguments] = Field(None, description="Arguments hold arguments to the template")
     expression: Optional[str] = Field(
         None,
@@ -2212,14 +2212,14 @@ class LifecycleHook(ArgoBaseModel):
     )
 
 
-class NodeResult(ArgoBaseModel):
+class NodeResult(BaseModel):
     message: Optional[str] = None
     outputs: Optional[Outputs] = None
     phase: Optional[str] = None
     progress: Optional[str] = None
 
 
-class NodeStatus(ArgoBaseModel):
+class NodeStatus(BaseModel):
     boundary_id: Optional[str] = Field(
         None,
         alias="boundaryID",
@@ -2335,7 +2335,7 @@ class NodeStatus(ArgoBaseModel):
     type: str = Field(..., description="Type indicates type of node")
 
 
-class Submit(ArgoBaseModel):
+class Submit(BaseModel):
     arguments: Optional[Arguments] = Field(
         None, description="Arguments extracted from the event and then set as arguments to the workflow created."
     )
@@ -2347,16 +2347,16 @@ class Submit(ArgoBaseModel):
     )
 
 
-class WorkflowEventBindingSpec(ArgoBaseModel):
+class WorkflowEventBindingSpec(BaseModel):
     event: Event = Field(..., description="Event is the event to bind to")
     submit: Optional[Submit] = Field(None, description="Submit is the workflow template to submit")
 
 
-class WorkflowTaskSetStatus(ArgoBaseModel):
+class WorkflowTaskSetStatus(BaseModel):
     nodes: Optional[Dict[str, NodeResult]] = None
 
 
-class WorkflowEventBinding(ArgoBaseModel):
+class WorkflowEventBinding(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2378,7 +2378,7 @@ class WorkflowEventBinding(ArgoBaseModel):
     spec: WorkflowEventBindingSpec
 
 
-class WorkflowEventBindingList(ArgoBaseModel):
+class WorkflowEventBindingList(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2400,7 +2400,7 @@ class WorkflowEventBindingList(ArgoBaseModel):
     metadata: v1_1.ListMeta
 
 
-class ClusterWorkflowTemplate(ArgoBaseModel):
+class ClusterWorkflowTemplate(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2422,17 +2422,17 @@ class ClusterWorkflowTemplate(ArgoBaseModel):
     spec: WorkflowSpec
 
 
-class ClusterWorkflowTemplateCreateRequest(ArgoBaseModel):
+class ClusterWorkflowTemplateCreateRequest(BaseModel):
     create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
     template: Optional[ClusterWorkflowTemplate] = None
 
 
-class ClusterWorkflowTemplateLintRequest(ArgoBaseModel):
+class ClusterWorkflowTemplateLintRequest(BaseModel):
     create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
     template: Optional[ClusterWorkflowTemplate] = None
 
 
-class ClusterWorkflowTemplateList(ArgoBaseModel):
+class ClusterWorkflowTemplateList(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2454,18 +2454,18 @@ class ClusterWorkflowTemplateList(ArgoBaseModel):
     metadata: v1_1.ListMeta
 
 
-class ClusterWorkflowTemplateUpdateRequest(ArgoBaseModel):
+class ClusterWorkflowTemplateUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, description="DEPRECATED: This field is ignored.")
     template: Optional[ClusterWorkflowTemplate] = None
 
 
-class CreateCronWorkflowRequest(ArgoBaseModel):
+class CreateCronWorkflowRequest(BaseModel):
     create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
     cron_workflow: Optional[CronWorkflow] = Field(None, alias="cronWorkflow")
     namespace: Optional[str] = None
 
 
-class CronWorkflow(ArgoBaseModel):
+class CronWorkflow(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2488,7 +2488,7 @@ class CronWorkflow(ArgoBaseModel):
     status: Optional[CronWorkflowStatus] = None
 
 
-class CronWorkflowList(ArgoBaseModel):
+class CronWorkflowList(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2510,7 +2510,7 @@ class CronWorkflowList(ArgoBaseModel):
     metadata: v1_1.ListMeta
 
 
-class CronWorkflowSpec(ArgoBaseModel):
+class CronWorkflowSpec(BaseModel):
     concurrency_policy: Optional[str] = Field(
         None,
         alias="concurrencyPolicy",
@@ -2553,7 +2553,7 @@ class CronWorkflowSpec(ArgoBaseModel):
     )
 
 
-class DAGTask(ArgoBaseModel):
+class DAGTask(BaseModel):
     arguments: Optional[Arguments] = Field(
         None, description="Arguments are the parameter and artifact arguments to the template"
     )
@@ -2613,7 +2613,7 @@ class DAGTask(ArgoBaseModel):
     )
 
 
-class DAGTemplate(ArgoBaseModel):
+class DAGTemplate(BaseModel):
     fail_fast: Optional[bool] = Field(
         None,
         alias="failFast",
@@ -2630,16 +2630,16 @@ class DAGTemplate(ArgoBaseModel):
     tasks: List[DAGTask] = Field(..., description="Tasks are a list of DAG tasks")
 
 
-class LintCronWorkflowRequest(ArgoBaseModel):
+class LintCronWorkflowRequest(BaseModel):
     cron_workflow: Optional[CronWorkflow] = Field(None, alias="cronWorkflow")
     namespace: Optional[str] = None
 
 
-class ParallelSteps(ArgoBaseModel):
+class ParallelSteps(BaseModel):
     __root__: List[WorkflowStep]
 
 
-class Template(ArgoBaseModel):
+class Template(BaseModel):
     active_deadline_seconds: Optional[intstr.IntOrString] = Field(
         None,
         alias="activeDeadlineSeconds",
@@ -2807,13 +2807,13 @@ class Template(ArgoBaseModel):
     )
 
 
-class UpdateCronWorkflowRequest(ArgoBaseModel):
+class UpdateCronWorkflowRequest(BaseModel):
     cron_workflow: Optional[CronWorkflow] = Field(None, alias="cronWorkflow")
     name: Optional[str] = Field(None, description="DEPRECATED: This field is ignored.")
     namespace: Optional[str] = None
 
 
-class Workflow(ArgoBaseModel):
+class Workflow(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2836,7 +2836,7 @@ class Workflow(ArgoBaseModel):
     status: Optional[WorkflowStatus] = None
 
 
-class WorkflowCreateRequest(ArgoBaseModel):
+class WorkflowCreateRequest(BaseModel):
     create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
     instance_id: Optional[str] = Field(None, alias="instanceID", description="This field is no longer used.")
     namespace: Optional[str] = None
@@ -2844,12 +2844,12 @@ class WorkflowCreateRequest(ArgoBaseModel):
     workflow: Optional[Workflow] = None
 
 
-class WorkflowLintRequest(ArgoBaseModel):
+class WorkflowLintRequest(BaseModel):
     namespace: Optional[str] = None
     workflow: Optional[Workflow] = None
 
 
-class WorkflowList(ArgoBaseModel):
+class WorkflowList(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -2871,7 +2871,7 @@ class WorkflowList(ArgoBaseModel):
     metadata: v1_1.ListMeta
 
 
-class WorkflowSpec(ArgoBaseModel):
+class WorkflowSpec(BaseModel):
     active_deadline_seconds: Optional[int] = Field(
         None,
         alias="activeDeadlineSeconds",
@@ -3114,7 +3114,7 @@ class WorkflowSpec(ArgoBaseModel):
     )
 
 
-class WorkflowStatus(ArgoBaseModel):
+class WorkflowStatus(BaseModel):
     artifact_gc_status: Optional[ArtGCStatus] = Field(
         None,
         alias="artifactGCStatus",
@@ -3191,7 +3191,7 @@ class WorkflowStatus(ArgoBaseModel):
     )
 
 
-class WorkflowStep(ArgoBaseModel):
+class WorkflowStep(BaseModel):
     arguments: Optional[Arguments] = Field(None, description="Arguments hold arguments to the template")
     continue_on: Optional[ContinueOn] = Field(
         None,
@@ -3247,11 +3247,11 @@ class WorkflowStep(ArgoBaseModel):
     )
 
 
-class WorkflowTaskSetSpec(ArgoBaseModel):
+class WorkflowTaskSetSpec(BaseModel):
     tasks: Optional[Dict[str, Template]] = None
 
 
-class WorkflowTemplate(ArgoBaseModel):
+class WorkflowTemplate(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -3273,19 +3273,19 @@ class WorkflowTemplate(ArgoBaseModel):
     spec: WorkflowSpec
 
 
-class WorkflowTemplateCreateRequest(ArgoBaseModel):
+class WorkflowTemplateCreateRequest(BaseModel):
     create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
     namespace: Optional[str] = None
     template: Optional[WorkflowTemplate] = None
 
 
-class WorkflowTemplateLintRequest(ArgoBaseModel):
+class WorkflowTemplateLintRequest(BaseModel):
     create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
     namespace: Optional[str] = None
     template: Optional[WorkflowTemplate] = None
 
 
-class WorkflowTemplateList(ArgoBaseModel):
+class WorkflowTemplateList(BaseModel):
     api_version: Optional[str] = Field(
         None,
         alias="apiVersion",
@@ -3307,13 +3307,13 @@ class WorkflowTemplateList(ArgoBaseModel):
     metadata: v1_1.ListMeta
 
 
-class WorkflowTemplateUpdateRequest(ArgoBaseModel):
+class WorkflowTemplateUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, description="DEPRECATED: This field is ignored.")
     namespace: Optional[str] = None
     template: Optional[WorkflowTemplate] = None
 
 
-class WorkflowWatchEvent(ArgoBaseModel):
+class WorkflowWatchEvent(BaseModel):
     object: Optional[Workflow] = Field(None, title="the workflow")
     type: Optional[str] = Field(None, title="the type of change")
 

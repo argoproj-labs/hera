@@ -6,10 +6,10 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 
-class Quantity(ArgoBaseModel):
+class Quantity(BaseModel):
     __root__: str = Field(
         ...,
         description=(

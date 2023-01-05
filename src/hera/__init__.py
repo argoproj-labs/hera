@@ -1,4 +1,4 @@
-from hera._base_model import ArgoBaseModel
+from hera._base_model import BaseModel
 from hera._context import dag_context
 from hera._version import version
 from hera.client import Client
@@ -47,7 +47,6 @@ from hera.volumes import (
     VolumeMount,
 )
 from hera.workflow import Workflow
-from hera.workflow_service import WorkflowService
 from hera.workflow_status import WorkflowStatus
 from hera.workflow_template import WorkflowTemplate
 

@@ -4,8 +4,8 @@
 
 from __future__ import annotations
 
-from hera import ArgoBaseModel
+from hera import BaseModel
 
 
-class IntOrString(ArgoBaseModel):
+class IntOrString(BaseModel):
     __root__: str
