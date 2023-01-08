@@ -80,6 +80,8 @@ class Resources:
         if memory_request is None and memory_limit is not None:
             values["memory_request"] = memory_limit
 
+        return values
+
     def build(self) -> ResourceRequirements:
         """Builds the resource requirements of the pod"""
         resources: Dict = dict()
@@ -104,3 +106,6 @@ class Resources:
             resources = _merge_dicts(resources, self.custom_resources)
 
         return ResourceRequirements(**resources)
+
+
+__all__ = ["Resources"]

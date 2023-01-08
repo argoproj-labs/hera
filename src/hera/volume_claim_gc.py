@@ -12,3 +12,6 @@ class VolumeClaimGCStrategy(Enum):
 
     def __str__(self):
         return str(self.value)
+
+
+__all__ = ["VolumeClaimGCStrategy"]

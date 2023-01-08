@@ -555,21 +555,21 @@ print(42)
         o = Task("o")
 
         t.on_success(o)
-        assert o.depends == f"t.{TaskResult.Succeeded}"
+        assert o.depends == f"t.{TaskResult.succeeded}"
 
     def test_task_adds_other_task_on_failure(self):
         t = Task("t")
         o = Task("o")
 
         t.on_failure(o)
-        assert o.depends == f"t.{TaskResult.Failed}"
+        assert o.depends == f"t.{TaskResult.failed}"
 
     def test_task_adds_other_task_on_error(self):
         t = Task("t")
         o = Task("o")
 
         t.on_error(o)
-        assert o.depends == f"t.{TaskResult.Errored}"
+        assert o.depends == f"t.{TaskResult.errored}"
 
     def test_task_has_expected_retry_limit(self):
         t = Task("t", retry_strategy=RetryStrategy(limit=5))
@@ -599,7 +599,7 @@ print(42)
 
     def test_task_adds_exit_condition(self, no_op):
         t = Task("t", no_op)
-        t.on_workflow_status(WorkflowStatus.Succeeded)
+        t.on_workflow_status(WorkflowStatus.succeeded)
         assert t.when == "{{workflow.status}} == Succeeded"
 
     def test_all_failed_adds_dependency(self, no_op, multi_op):
@@ -774,7 +774,7 @@ print(42)
     def test_on_workflow_status(self):
         t = Task("t")
         t.when = "42"
-        t.on_workflow_status(WorkflowStatus.Succeeded)
+        t.on_workflow_status(WorkflowStatus.succeeded)
         assert t.when == "42 && {{workflow.status}} == Succeeded"
 
     def test_on_other_result(self):

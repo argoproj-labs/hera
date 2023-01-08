@@ -48,3 +48,5 @@ class _GlobalConfig:
 
 
 GlobalConfig = _GlobalConfig()
+
+__all__ = ["GlobalConfig"]

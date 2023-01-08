@@ -28,3 +28,6 @@ class BaseModel(PyBaseModel):
                 "Install `hera-workflows[yaml]` to install the extra dependency"
             )
         return _yaml.dump(self.dict(exclude_none=True, by_alias=True), **yaml_kwargs)
+
+
+__all__ = ["BaseModel"]

@@ -62,15 +62,15 @@ from hera.volumes import _BaseVolume
 from hera.workflow_status import WorkflowStatus
 
 
-class TaskResult(str, Enum):
-    Failed = "Failed"
-    Succeeded = "Succeeded"
-    Errored = "Errored"
-    Skipped = "Skipped"
-    Omitted = "Omitted"
-    Daemoned = "Daemoned"
-    AnySucceeded = "AnySucceeded"
-    AllFailed = "AllFailed"
+class TaskResult(Enum):
+    failed = "Failed"
+    succeeded = "Succeeded"
+    errored = "Errored"
+    skipped = "Skipped"
+    omitted = "Omitted"
+    daemoned = "Daemoned"
+    any_succeeded = "AnySucceeded"
+    all_failed = "AllFailed"
 
     def __str__(self):
         return str(self.value)
@@ -513,15 +513,15 @@ class Task:
 
     def on_success(self, other: "Task") -> "Task":
         """Execute `other` when this task succeeds"""
-        return self.next(other, on=TaskResult.Succeeded)
+        return self.next(other, on=TaskResult.succeeded)
 
     def on_failure(self, other: "Task") -> "Task":
         """Execute `other` when this task fails"""
-        return self.next(other, on=TaskResult.Failed)
+        return self.next(other, on=TaskResult.failed)
 
     def on_error(self, other: "Task") -> "Task":
         """Execute `other` when this task errors."""
-        return self.next(other, on=TaskResult.Errored)
+        return self.next(other, on=TaskResult.errored)
 
     def on_exit(self, other: Union["Task", DAG]) -> "Task":
         """Execute `other` on completion (exit) of this Task."""
@@ -586,7 +586,7 @@ class Task:
             self.with_sequence is not None
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
 
-        return self.next(other, on=TaskResult.AnySucceeded)
+        return self.next(other, on=TaskResult.any_succeeded)
 
     def when_all_failed(self, other: "Task") -> "Task":
         """Sets the other task to execute when all the tasks of this task group have failed
@@ -616,7 +616,7 @@ class Task:
             self.with_sequence is not None
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
 
-        return self.next(other, on=TaskResult.AllFailed)
+        return self.next(other, on=TaskResult.all_failed)
 
     def _validate_io(self):
         """
@@ -1144,3 +1144,6 @@ class Task:
                 with_param = json.dumps(self.with_param)
             t.with_param = with_param
         return t
+
+
+__all__ = ["Task", "TaskResult"]

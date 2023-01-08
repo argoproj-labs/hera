@@ -1,19 +1,19 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import pytz
 
 from hera.global_config import GlobalConfig
-from hera.models import CreateCronWorkflowRequest, CreateOptions
-from hera.models import CronWorkflow as ModelCronWorkflow
-from hera.models import CronWorkflowDeletedResponse, CronWorkflowResumeRequest
-from hera.models import CronWorkflowSpec as ModelCronWorkflowSpec
-from hera.models import (
-    CronWorkflowSuspendRequest,
-    LintCronWorkflowRequest,
-    UpdateCronWorkflowRequest,
-)
+from hera.models import CreateCronWorkflowRequest as _ModelCreateCronWorkflowRequest
+from hera.models import CreateOptions
+from hera.models import CronWorkflow as _ModelCronWorkflow
+from hera.models import CronWorkflowDeletedResponse as _ModelCronWorkflowDeletedResponse
+from hera.models import CronWorkflowResumeRequest as _ModelCronWorkflowResumeRequest
+from hera.models import CronWorkflowSpec as _ModelCronWorkflowSpec
+from hera.models import CronWorkflowSuspendRequest as _ModelCronWorkflowSuspendRequest
+from hera.models import LintCronWorkflowRequest as _ModelLintCronWorkflowRequest
+from hera.models import UpdateCronWorkflowRequest as _ModelUpdateCronWorkflowRequest
 from hera.workflow import Workflow
 
 
@@ -45,30 +45,6 @@ class ConcurrencyPolicy(Enum):
 
 
 class CronWorkflow(Workflow):
-    """A cron workflow representation.
-
-    CronWorkflow are workflows that run on a preset schedule.
-    In essence, CronWorkflow = Workflow + some specific cron options.
-
-    See https://argoproj.github.io/argo-workflows/cron-workflows/
-
-    Parameters
-    ----------
-    name: str
-        Name of the workflow.
-    schedule: str
-        Schedule at which the Workflow will be run in Cron format e.g. 5 4 * * *.
-    concurrency_policy: Optional[ConcurrencyPolicy] = None
-        Concurrency policy that dictates the concurrency behavior of multiple cron jobs of the same kind.
-        See `hera.cron_workflow.ConcurrencyPolicy`
-    starting_deadline_seconds: Optional[int] = None
-        The number of seconds the workflow has as a starting deadline.
-    timezone: Optional[str] = None
-        Timezone during which the Workflow will be run from the IANA timezone standard, e.g. America/Los_Angeles.
-    **workflow_kwargs
-        Any kwargs to set on the workflow. See `hera.workflow.Workflow`.
-    """
-
     def __init__(
         self,
         name: str,
@@ -92,14 +68,14 @@ class CronWorkflow(Workflow):
         self.starting_deadline_seconds = starting_deadline_seconds
         self.timezone = timezone
 
-    def build(self) -> ModelCronWorkflow:
+    def build(self) -> _ModelCronWorkflow:
         """Builds the workflow representation"""
         workflow = super().build()
-        return ModelCronWorkflow(
+        return _ModelCronWorkflow(
             api_version=self.api_version,
             kind=self.__class__.__name__,
             metadata=workflow.metadata,
-            spec=ModelCronWorkflowSpec(
+            spec=_ModelCronWorkflowSpec(
                 concurrency_policy=str(self.concurrency_policy),
                 failed_jobs_history_limit=self.failed_jobs_history_limit,
                 schedule=self.schedule,
@@ -120,7 +96,7 @@ class CronWorkflow(Workflow):
             raise ValueError("Cannot invoke `create` when using a Hera context")
         return self.service.create_cron_workflow(
             namespace,
-            CreateCronWorkflowRequest(
+            _ModelCreateCronWorkflowRequest(
                 create_options=create_options,
                 cron_workflow=self.build(),
                 namespace=namespace,
@@ -130,7 +106,7 @@ class CronWorkflow(Workflow):
     def lint(self, namespace: Optional[str] = GlobalConfig.namespace) -> "CronWorkflow":
         """Lint the workflow"""
         return self.service.lint_cron_workflow(
-            namespace, LintCronWorkflowRequest(cron_workflow=self.build(), namespace=namespace)
+            namespace, _ModelLintCronWorkflowRequest(cron_workflow=self.build(), namespace=namespace)
         )
 
     def delete(
@@ -143,7 +119,7 @@ class CronWorkflow(Workflow):
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
-    ) -> CronWorkflowDeletedResponse:
+    ) -> _ModelCronWorkflowDeletedResponse:
         """Deletes the cron workflow"""
         return self.service.delete_cron_workflow(
             namespace,
@@ -165,19 +141,19 @@ class CronWorkflow(Workflow):
         curr.metadata.resource_version = old.metadata.resource_version
         curr.metadata.uid = old.metadata.uid
         return self.service.update_cron_workflow(
-            namespace, self.name, UpdateCronWorkflowRequest(cron_workflow=curr, namespace=namespace)
+            namespace, self.name, _ModelUpdateCronWorkflowRequest(cron_workflow=curr, namespace=namespace)
         )
 
     def suspend(self, namespace: str = GlobalConfig.namespace) -> "CronWorkflow":
         """Suspends the cron workflow"""
         return self.service.suspend_cron_workflow(
-            namespace, self.name, CronWorkflowSuspendRequest(name=self.name, namespace=namespace)
+            namespace, self.name, _ModelCronWorkflowSuspendRequest(name=self.name, namespace=namespace)
         )
 
     def resume(self, namespace: str = GlobalConfig.namespace) -> "CronWorkflow":
         """Resumes execution of the cron workflow"""
         return self.service.resume_cron_workflow(
-            namespace, self.name, CronWorkflowResumeRequest(name=self.name, namespace=namespace)
+            namespace, self.name, _ModelCronWorkflowResumeRequest(name=self.name, namespace=namespace)
         )
 
     # the following are inherited but are not actually available so reimplementing to raise an error
@@ -218,3 +194,6 @@ class CronWorkflow(Workflow):
 
     def terminate(self, namespace: str = GlobalConfig.namespace) -> "CronWorkflow":
         raise NotImplementedError("Not available for `CronWorkflow`")
+
+
+__all__ = ["ConcurrencyPolicy", "CronWorkflow"]

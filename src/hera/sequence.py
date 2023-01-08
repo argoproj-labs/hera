@@ -1,12 +1,9 @@
-from dataclasses import dataclass
-
 from pydantic import validator
 
-from hera.models import Sequence as ModelSequence
+from hera.models import Sequence as _ModelSequence
 
 
-@dataclass
-class Sequence(ModelSequence):
+class Sequence(_ModelSequence):
     @validator("count", pre=True)
     def count_to_str(cls, v):
         if v is None:
@@ -36,3 +33,6 @@ class Sequence(ModelSequence):
         if isinstance(v, str):
             return v
         return str(v)
+
+
+__all__ = ["Sequence"]

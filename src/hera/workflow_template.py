@@ -90,3 +90,6 @@ class WorkflowTemplate(Workflow):
             propagation_policy=propagation_policy,
             dry_run=dry_run,
         )
+
+
+__all__ = ["WorkflowTemplate"]

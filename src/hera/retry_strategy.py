@@ -1,47 +1,56 @@
-from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, Union
 
-from argo_workflows.models import IoArgoprojWorkflowV1alpha1RetryStrategy
+from pydantic import root_validator
 
-from hera.backoff import Backoff
-from hera.retry_policy import RetryPolicy
+from hera.models import Backoff, RetryAffinity
+from hera.models import RetryStrategy as _ModelRetryStrategy
 
 
-@dataclass
-class RetryStrategy:
-    """Retry holds the duration values for retrying tasks.
+class RetryPolicy(Enum):
+    """A representation of the retry policy for a task.
 
-    Attributes
-    ----------
-    backoff: Optional[Backoff] = None
-        Backoff strategy. See `hera.backoff.Backoff` or https://argoproj.github.io/argo-workflows/fields/#backoff.
-    expression: Optional[str] = None
-        Expression is a condition expression for when a node will be retried.
-        If it evaluates to false, the node will not be retried and the retry strategy will be ignored
-    limit: Optional[Union[int, str]] = None
-        The number of retries to attempt.
-    retry_policy: RetryPolicy
-        The strategy for performing retries, for example OnError vs OnFailure vs Always
+    Use retryPolicy to choose which failures to retry:
+
+      * Always: Retry all failed steps
+      * OnFailure: Retry steps whose main container is marked as failed in Kubernetes
+      * OnError: Retry steps that encounter Argo controller errors, or whose init or wait containers fail
+      * OnTransientError: Retry steps that encounter errors defined as transient, or errors matching the
+        TRANSIENT_ERROR_PATTERN environment variable. Available in version 3.0 and later.
     """
 
+    always = "Always"
+    """Retry all failed steps"""
+
+    on_failure = "OnFailure"
+    """Retry steps whose main container is marked as failed in Kubernetes"""
+
+    on_error = "OnError"
+    """Retry steps that encounter Argo controller errors, or whose init or wait containers fail"""
+
+    on_transient_error = "OnTransientError"
+    """Retry steps that encounter errors defined as transient, or errors matching the `TRANSIENT_ERROR_PATTERN`
+    environment variable.
+
+    Available in version 3.0 and later.
+    """
+
+    def __str__(self):
+        return str(self.value)
+
+
+class RetryStrategy(_ModelRetryStrategy):
+    affinity: Optional[RetryAffinity] = None
     backoff: Optional[Backoff] = None
     expression: Optional[str] = None
     limit: Optional[Union[int, str]] = None
-    retry_policy: RetryPolicy = RetryPolicy.always
+    retry_policy: Optional[Union[str, RetryPolicy]] = None
 
-    def __post_init__(self):
-        if self.limit is not None and isinstance(self.limit, int):
-            self.limit = str(self.limit)
+    @root_validator(pre=True)
+    def _check_values(cls, values):
+        if values.get("retry_policy") and isinstance(values.get("retry_policy"), RetryPolicy):
+            values["retry_policy"] = str(values.get("retry_policy"))
+        return values
 
-    def build(self) -> IoArgoprojWorkflowV1alpha1RetryStrategy:
-        strategy = IoArgoprojWorkflowV1alpha1RetryStrategy()
-        if self.backoff is not None:
-            setattr(strategy, "backoff", self.backoff.build())
-        if self.expression is not None:
-            setattr(strategy, "expression", self.expression)
-        if self.limit is not None:
-            setattr(strategy, "limit", self.limit)
-        if self.retry_policy is not None:
-            setattr(strategy, "retry_policy", str(self.retry_policy.value))
 
-        return strategy
+__all__ = ["RetryPolicy", "RetryStrategy"]

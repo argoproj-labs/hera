@@ -1,9 +1,9 @@
 from typing import Optional
 
-from hera.models import Artifact as ModelArtifact
+from hera.models import Artifact as _ModelArtifact
 
 
-class Artifact(ModelArtifact):
+class Artifact(_ModelArtifact):
     def as_name(self, name: str):
         """Changes the name of the artifact."""
         self.name = name
@@ -27,3 +27,6 @@ class Artifact(ModelArtifact):
             return True
 
         return False
+
+
+__all__ = ["Artifact"]

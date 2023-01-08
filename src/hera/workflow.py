@@ -29,6 +29,7 @@ from hera.models import (
     RetryStrategy,
     Synchronization,
     Template,
+    Toleration,
     TTLStrategy,
     VolumeClaimGC,
 )
@@ -53,8 +54,8 @@ from hera.models import (
 from hera.parameter import Parameter
 from hera.service import Service
 from hera.task import Task
-from hera.toleration import Toleration
 from hera.validators import validate_name
+from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import _BaseVolume
 
 # PyYAML is an optional dependency
@@ -119,7 +120,7 @@ class Workflow:
         template_defaults: Optional[Template] = None,
         tolerations: Optional[List[Toleration]] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
-        volume_claim_gc: Optional[VolumeClaimGC] = None,
+        volume_claim_gc: Optional[Union[VolumeClaimGC, VolumeClaimGCStrategy]] = None,
         volumes: Optional[List[_BaseVolume]] = None,
         workflow_metadata: Optional[WorkflowMetadata] = None,
         workflow_template_ref: Optional[WorkflowTemplateRef] = None,
@@ -165,7 +166,7 @@ class Workflow:
         self.template_defaults = template_defaults
         self.tolerations = tolerations
         self.ttl_strategy = ttl_strategy
-        self.volume_claim_gc = volume_claim_gc
+        self.volume_claim_gc = self._parse_volume_claim_gc(volume_claim_gc)
         self.volumes = volumes
         self.workflow_metadata = workflow_metadata
         self.workflow_template_ref = workflow_template_ref
@@ -174,6 +175,20 @@ class Workflow:
 
         for hook in GlobalConfig.workflow_post_init_hooks:
             hook(self)
+
+    def _parse_volume_claim_gc(
+        self, volume_claim_gc: Optional[Union[VolumeClaimGC, VolumeClaimGCStrategy]]
+    ) -> Optional[VolumeClaimGC]:
+        if volume_claim_gc is None:
+            return None
+
+        if isinstance(volume_claim_gc, VolumeClaimGC):
+            return volume_claim_gc
+
+        if isinstance(volume_claim_gc, VolumeClaimGCStrategy):
+            return VolumeClaimGC(strategy=volume_claim_gc.value)
+
+        return None
 
     def _parse_metrics(self, metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]]) -> Optional[Metrics]:
         if metrics is None:
@@ -198,21 +213,6 @@ class Workflow:
             Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
         ],
     ) -> List[Union[Parameter, Artifact]]:
-        """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
-
-        Parameters
-        ----------
-        inputs: Union[Dict[str, Any], List[Union[Parameter, Artifact, Dict[str, Any]]]]
-            The list of inputs specified on the task. The `Dict` aspect is treated as a mapped collection of
-            Parameters. If a single dictionary is specified, all the fields are transformed into `Parameter`s. The key
-            is the `name` of the `Parameter` and the `value` is the `value` field of the `Parameter.
-
-        Returns
-        -------
-        List[Union[Parameter, Artifact]]
-            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
-            independent parameters.
-        """
         if inputs is None:
             return []
 
@@ -530,3 +530,6 @@ class Workflow:
             dry_run=dry_run,
             force=force,
         )
+
+
+__all__ = ["Workflow"]

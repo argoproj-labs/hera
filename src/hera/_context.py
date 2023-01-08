@@ -34,3 +34,5 @@ class _DAG_context(threading.local):
 
 
 dag_context = _DAG_context()
+
+__all__ = ["dag_context"]

@@ -3,3 +3,5 @@ import pkg_resources  # type: ignore
 
 version = pkg_resources.get_distribution("hera-workflows").version
 """`version` defines the Hera version that is currently installed in the calling environment"""
+
+__all__ = ["version"]

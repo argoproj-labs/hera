@@ -1,7 +1,7 @@
-from hera.models import Operator as ModelOperator
+from hera.models import Operator as _ModelOperator
 
 
-class Operator(ModelOperator):
+class Operator(_ModelOperator):
     """Operator is a representation of mathematical comparison symbols.
 
      This can be used on tasks that execute conditionally based on the output of another task.
@@ -23,3 +23,6 @@ class Operator(ModelOperator):
 
     def __str__(self):
         return str(self.value)
+
+
+__all__ = ["Operator"]

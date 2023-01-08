@@ -8,7 +8,7 @@ def test_workflow_status_instantiates_as_expected():
     hera_status = WorkflowStatus.from_argo_status(argo_status)
 
     assert isinstance(hera_status, WorkflowStatus)
-    assert hera_status == WorkflowStatus.Running
+    assert hera_status == WorkflowStatus.running
 
 
 def test_workflow_status_raises_key_error_on_unrecognized_status():
