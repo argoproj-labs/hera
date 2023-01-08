@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from hera import BaseModel
+from hera._base_model import BaseModel
 
 
 class Model(BaseModel):

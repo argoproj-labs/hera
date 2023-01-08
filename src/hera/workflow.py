@@ -5,7 +5,9 @@ from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 import hera
 from hera.dag import DAG
+from hera.gc_strategy import GCStrategy
 from hera.global_config import GlobalConfig
+from hera.heraservice import HeraService
 from hera.models import Affinity
 from hera.models import Arguments as ModelArguments
 from hera.models import (
@@ -52,10 +54,8 @@ from hera.models import (
     WorkflowTerminateRequest,
 )
 from hera.parameter import Parameter
-from hera.service import Service
 from hera.task import Task
 from hera.validators import validate_name
-from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import _BaseVolume
 
 # PyYAML is an optional dependency
@@ -73,12 +73,12 @@ WorkflowType = TypeVar("WorkflowType", bound="Workflow")
 class Workflow:
     def __init__(
         self: WorkflowType,
-        name: str,
+        name: Optional[str] = None,
         api_version: Optional[str] = GlobalConfig.api_version,
         dag_name: Optional[str] = None,
         dag: Optional[DAG] = None,
-        generate_name: bool = False,
-        service: Optional[Service] = None,
+        generate_name: Optional[str] = False,
+        service: Optional[HeraService] = None,
         active_deadline_seconds: Optional[int] = None,
         affinity: Optional[Affinity] = None,
         acrhive_logs: Optional[bool] = None,
@@ -97,7 +97,7 @@ class Workflow:
         dns_policy: Optional[str] = None,
         executor: Optional[ExecutorConfig] = None,
         hooks: Optional[Dict[str, LifecycleHook]] = None,
-        host_aliases: Optional[HostAlias] = Npone,
+        host_aliases: Optional[HostAlias] = None,
         host_network: Optional[bool] = None,
         image_pull_secrets: Optional[List[str]] = None,
         metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]] = None,
@@ -120,12 +120,13 @@ class Workflow:
         template_defaults: Optional[Template] = None,
         tolerations: Optional[List[Toleration]] = None,
         ttl_strategy: Optional[TTLStrategy] = None,
-        volume_claim_gc: Optional[Union[VolumeClaimGC, VolumeClaimGCStrategy]] = None,
+        volume_claim_gc: Optional[Union[VolumeClaimGC, GCStrategy]] = None,
         volumes: Optional[List[_BaseVolume]] = None,
         workflow_metadata: Optional[WorkflowMetadata] = None,
         workflow_template_ref: Optional[WorkflowTemplateRef] = None,
     ):
-        self.name = validate_name(name, generate_name=generate_name)
+        validate_name(name=name, generate_name=generate_name)
+        self.name = name
         dag_name = self.name.rstrip("-.") if dag_name is None else dag_name
         self.api_version = api_version
         self.dag = DAG(dag_name) if dag is None else dag
@@ -177,7 +178,7 @@ class Workflow:
             hook(self)
 
     def _parse_volume_claim_gc(
-        self, volume_claim_gc: Optional[Union[VolumeClaimGC, VolumeClaimGCStrategy]]
+        self, volume_claim_gc: Optional[Union[VolumeClaimGC, GCStrategy]]
     ) -> Optional[VolumeClaimGC]:
         if volume_claim_gc is None:
             return None
@@ -185,7 +186,7 @@ class Workflow:
         if isinstance(volume_claim_gc, VolumeClaimGC):
             return volume_claim_gc
 
-        if isinstance(volume_claim_gc, VolumeClaimGCStrategy):
+        if isinstance(volume_claim_gc, GCStrategy):
             return VolumeClaimGC(strategy=volume_claim_gc.value)
 
         return None
@@ -230,13 +231,13 @@ class Workflow:
         return result
 
     @property
-    def service(self: WorkflowType) -> Service:
+    def service(self: WorkflowType) -> HeraService:
         if self._service is None:
-            self._service = Service()
+            self._service = HeraService()
         return self._service
 
     @service.setter
-    def service(self: WorkflowType, value: Service) -> None:
+    def service(self: WorkflowType, value: HeraService) -> None:
         self._service = value
 
     def get_name(self: WorkflowType) -> str:
@@ -246,15 +247,12 @@ class Workflow:
         """
         return "{{workflow.name}}"
 
-    def _build_metadata(self: WorkflowType, use_name=True) -> ObjectMeta:
+    def _build_metadata(self: WorkflowType, use_name: bool = True) -> ObjectMeta:
         """Assembles the metadata of the workflow"""
         metadata = ObjectMeta()
         if use_name:
-            if self.generate_name:
-                setattr(metadata, "generate_name", self.name)
-                metadata.generate_name = self.name
-            else:
-                metadata.name = self.name
+            metadata.generate_name = self.generate_name
+            metadata.name = self.name
         return metadata
 
     def _build_spec(self: WorkflowType) -> ModelWorkflowSpec:
@@ -310,7 +308,7 @@ class Workflow:
         """Builds the workflow core representation"""
         return ModelWorkflow(
             api_version=self.api_version,
-            kind=self.__class__.__name__,
+            kind=self.__name__,
             metadata=self._build_metadata(),
             spec=self._build_spec(),
         )

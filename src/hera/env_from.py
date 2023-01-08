@@ -37,4 +37,4 @@ class ConfigMapEnvFrom(_BaseEnvFrom, _ModelConfigMapEnvSource):
         )
 
 
-__all__ = [*[c.__class__.__name__ for c in _BaseEnvFrom.__subclasses__()]]
+__all__ = [*[c.__name__ for c in _BaseEnvFrom.__subclasses__()]]

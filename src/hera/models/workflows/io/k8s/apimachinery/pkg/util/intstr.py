@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from hera import BaseModel
+from hera._base_model import BaseModel
 
 
 class IntOrString(BaseModel):

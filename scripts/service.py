@@ -266,7 +266,7 @@ from hera.models import *
 from hera.new.config import GlobalConfig
 from typing import Optional    
 
-class Service:
+class HeraService:
     def __init__(
         self,
         host: Optional[str] = GlobalConfig.host,

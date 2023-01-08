@@ -3,7 +3,7 @@ import re
 from typing import Optional
 
 
-def validate_name(name: str, max_length: Optional[int] = None, generate_name: bool = False) -> str:
+def validate_name(name: Optional[str] = None, max_length: Optional[int] = None, generate_name: str = None):
     """Validates a name according to standard argo/kubernetes limitations
 
     Parameters
@@ -13,7 +13,7 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
     max_length: Optional[int] = None
         Specify a maximum length of the name.
         Example: Kubernetes labels have a maximum length of 63 characters.
-    generate_name: bool = False
+    generate_name: str = False
         Whether the provided name is to be used as a prefix for name generation.
         If set, name is allowed to end in a single dot (.) or any number of hyphens (-).
 
@@ -27,20 +27,24 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
     Official doc on object names in Kubernetes:
     https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
     """
-    if max_length and len(name) > max_length:
+    if name is None and generate_name is None:
+        raise ValueError("At least one of `name` or `generate_name` must be specified")
+
+    if max_length and name is not None and len(name) > max_length:
         raise ValueError(f"Name is too long. Max length: {max_length}, found: {len(name)}")
-    if "_" in name:
+    if name is not None and "_" in name:
         raise ValueError("Name cannot include an underscore")
-    if not generate_name and name.endswith((".", "-")):
+    if generate_name is None and name is not None and name.endswith((".", "-")):
         raise ValueError("Name cannot end with '.' nor '-', unless it is used as a prefix for name generation")
 
     pattern = r"[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*"
-    if generate_name:
+    if generate_name is not None:
         pattern += r"(\.?|-*)"
-    match_obj = re.fullmatch(pattern, name)
-    if not match_obj:
-        raise ValueError(f"Name is invalid: '{name}'. Regex used for validation is {pattern}")
-    return name
+
+    if name is not None:
+        match_obj = re.fullmatch(pattern, name)
+        if not match_obj:
+            raise ValueError(f"Name is invalid: '{name}'. Regex used for validation is {pattern}")
 
 
 def validate_storage_units(value: str) -> None:

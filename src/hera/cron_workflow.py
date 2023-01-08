@@ -73,7 +73,7 @@ class CronWorkflow(Workflow):
         workflow = super().build()
         return _ModelCronWorkflow(
             api_version=self.api_version,
-            kind=self.__class__.__name__,
+            kind=self.__name__,
             metadata=workflow.metadata,
             spec=_ModelCronWorkflowSpec(
                 concurrency_policy=str(self.concurrency_policy),

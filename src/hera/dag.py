@@ -28,7 +28,7 @@ class DAG:
             ]
         ] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
-        tasks: Optional[List[Task]] = None,
+        tasks: Optional[List["Task"]] = None,
     ):
         validate_name(name)
         self.name: str = name

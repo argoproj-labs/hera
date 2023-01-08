@@ -28,7 +28,7 @@ class WorkflowTemplate(Workflow):
         spec = super()._build_spec()
         return _ModelWorkflowTemplate(
             api_version=GlobalConfig.api_version,
-            kind=self.__class__.__name__,
+            kind=self.__name__,
             metadata=self._build_metadata(),
             spec=spec,
         )

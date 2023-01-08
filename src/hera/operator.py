@@ -1,7 +1,6 @@
-from hera.models import Operator as _ModelOperator
 
 
-class Operator(_ModelOperator):
+class Operator:
     """Operator is a representation of mathematical comparison symbols.
 
      This can be used on tasks that execute conditionally based on the output of another task.
@@ -10,6 +9,13 @@ class Operator(_ModelOperator):
     -----
     The task that outputs its result needs to do so using stdout. See `examples` for a sample workflow.
     """
+
+    does_not_exist = "DoesNotExist"
+    exists = "Exists"
+    gt = "Gt"
+    in_ = "In"
+    lt = "Lt"
+    not_in = "NotIn"
 
     equals = "=="
     greater = ">"

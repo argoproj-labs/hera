@@ -32,4 +32,5 @@ models: ## Generate all the Argo Workflows models
 		--base-class hera.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix
+	@find src/hera/models -type f -exec sed -i 's+from hera import BaseModel+from hera._base_model import BaseModel+g' {} +
 	@$(MAKE) format

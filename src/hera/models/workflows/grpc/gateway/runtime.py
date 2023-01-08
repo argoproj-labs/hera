@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from hera import BaseModel
+from hera._base_model import BaseModel
 
 from ...google import protobuf
 

@@ -9,10 +9,10 @@ from hera.models import (
 )
 from hera.models import AzureDiskVolumeSource as _ModelAzureDiskVolumeSource
 from hera.models import AzureFileVolumeSource as _ModelAzureFileVolumeSource
+from hera.models import CSIVolumeSource as _ModelCSIVolumeSource
 from hera.models import CephFSVolumeSource as _ModelCephFSVolumeSource
 from hera.models import CinderVolumeSource as _ModelCinderVolumeSource
 from hera.models import ConfigMapVolumeSource as _ModelConfigMapVolumeSource
-from hera.models import CSIVolumeSource as _ModelCSIVolumeSource
 from hera.models import DownwardAPIVolumeSource as _ModelDownwardAPIVolumeSource
 from hera.models import EmptyDirVolumeSource as _ModelEmptyDirVolumeSource
 from hera.models import EphemeralVolumeSource as _ModelEphemeralVolumeSource
@@ -28,7 +28,6 @@ from hera.models import HostPathVolumeSource as _ModelHostPathVolumeSource
 from hera.models import ISCSIVolumeSource as _ModelISCSIVolumeSource
 from hera.models import NFSVolumeSource as _ModelNFSVolumeSource
 from hera.models import ObjectMeta
-from hera.models import PersistentVolumeClaim as _ModelPersistentVolumeClaim
 from hera.models import PersistentVolumeClaimSpec as _ModelPersistentVolumeClaimSpec
 from hera.models import (
     PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate,
@@ -313,5 +312,5 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
 
 __all__ = [
     "AccessMode",
-    *[c.__class__.__name__ for c in _BaseVolume.__subclasses__()],
+    *[c.__name__ for c in _BaseVolume.__subclasses__()],
 ]

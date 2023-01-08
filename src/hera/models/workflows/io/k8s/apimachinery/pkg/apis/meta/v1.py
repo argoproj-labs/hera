@@ -9,7 +9,7 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera import BaseModel
+from hera._base_model import BaseModel
 
 
 class CreateOptions(BaseModel):

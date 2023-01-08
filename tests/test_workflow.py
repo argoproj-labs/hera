@@ -10,6 +10,7 @@ from argo_workflows.models import (
 )
 
 from hera.dag import DAG
+from hera.gc_strategy import GCStrategy
 from hera.host_alias import HostAlias
 from hera.host_config import set_global_service_account_name
 from hera.metric import Metric, Metrics
@@ -18,7 +19,6 @@ from hera.task import Task
 from hera.template_ref import TemplateRef
 from hera.toleration import GPUToleration
 from hera.ttl_strategy import TTLStrategy
-from hera.volume_claim_gc import VolumeClaimGCStrategy
 from hera.volumes import (
     ConfigMapVolume,
     EmptyDirVolume,
@@ -185,12 +185,12 @@ class TestWorkflow:
             assert w.build().spec.ttl_strategy._data_store == expected_ttl_strategy
 
     def test_wf_adds_volume_claim_gc_strategy_on_workflow_completion(self):
-        with Workflow("w", volume_claim_gc_strategy=VolumeClaimGCStrategy.OnWorkflowCompletion) as w:
+        with Workflow("w", volume_claim_gc_strategy=GCStrategy.OnWorkflowCompletion) as w:
             expected_volume_claim_gc = {"strategy": "OnWorkflowCompletion"}
             assert w.build().spec.volume_claim_gc._data_store == expected_volume_claim_gc
 
     def test_wf_adds_volume_claim_gc_strategy_on_workflow_success(self):
-        with Workflow("w", volume_claim_gc_strategy=VolumeClaimGCStrategy.OnWorkflowSuccess) as w:
+        with Workflow("w", volume_claim_gc_strategy=GCStrategy.OnWorkflowSuccess) as w:
             expected_volume_claim_gc = {"strategy": "OnWorkflowSuccess"}
             assert w.build().spec.volume_claim_gc._data_store == expected_volume_claim_gc
 

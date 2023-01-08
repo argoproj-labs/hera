@@ -6,7 +6,7 @@ from hera.models import *
 from hera.new.config import GlobalConfig
 
 
-class Service:
+class HeraService:
     def __init__(
         self,
         host: Optional[str] = GlobalConfig.host,

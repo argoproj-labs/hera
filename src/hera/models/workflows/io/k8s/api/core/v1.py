@@ -9,7 +9,7 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera import BaseModel
+from hera._base_model import BaseModel
 
 from ...apimachinery.pkg.api import resource
 from ...apimachinery.pkg.apis.meta import v1

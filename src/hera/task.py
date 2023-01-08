@@ -54,13 +54,14 @@ from hera.models import (
     VolumeDevice,
     VolumeMount,
 )
+from hera.models import Volume as _ModelVolume
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.validators import validate_name
 from hera.volumes import *
 from hera.volumes import _BaseVolume
 from hera.workflow_status import WorkflowStatus
-
+from enum import Enum
 
 class TaskResult(Enum):
     failed = "Failed"
@@ -954,7 +955,7 @@ class Task:
         """Assembles the list of volume claim templates to be created for the task."""
         return [v.claim() for v in self.volumes if isinstance(v, Volume)]
 
-    def _build_persistent_volume_claims(self) -> List[ModelVolume]:
+    def _build_persistent_volume_claims(self) -> List[_ModelVolume]:
         """Assembles the list of Argo volume specifications"""
         return [v.volume() for v in self.volumes if not isinstance(v, Volume)]
 
