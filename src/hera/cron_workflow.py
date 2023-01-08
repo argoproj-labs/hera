@@ -1,6 +1,6 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
 from enum import Enum
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pytz
 
@@ -179,3 +179,42 @@ class CronWorkflow(Workflow):
         return self.service.resume_cron_workflow(
             namespace, self.name, CronWorkflowResumeRequest(name=self.name, namespace=namespace)
         )
+
+    # the following are inherited but are not actually available so reimplementing to raise an error
+    def resubmit(
+        self: "CronWorkflow",
+        namespace: str = GlobalConfig.namespace,
+        memoized: Optional[bool] = None,
+        parameters: Optional[List[str]] = None,
+    ) -> "CronWorkflow":
+        raise NotImplementedError("Not available for `CronWorkflow`")
+
+    def retry(
+        self: "CronWorkflow",
+        namespace: str = GlobalConfig.namespace,
+        node_field_selector: Optional[List[str]] = None,
+        parameters: Optional[List[str]] = None,
+        restart_successful: Optional[bool] = None,
+    ) -> "CronWorkflow":
+        raise NotImplementedError("Not available for `CronWorkflow`")
+
+    def set(
+        self: "CronWorkflow",
+        namespace: GlobalConfig.namespace,
+        message: Optional[str] = None,
+        node_field_selector: Optional[str] = None,
+        output_parameters: Optional[str] = None,
+        phase: Optional[str] = None,
+    ) -> "CronWorkflow":
+        raise NotImplementedError("Not available for `CronWorkflow`")
+
+    def stop(
+        self,
+        namespace: str = GlobalConfig.namespace,
+        message: Optional[str] = None,
+        node_field_selector: Optional[str] = None,
+    ) -> "CronWorkflow":
+        raise NotImplementedError("Not available for `CronWorkflow`")
+
+    def terminate(self, namespace: str = GlobalConfig.namespace) -> "CronWorkflow":
+        raise NotImplementedError("Not available for `CronWorkflow`")
