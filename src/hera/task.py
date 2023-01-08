@@ -80,6 +80,10 @@ class Task:
     def __init__(
         self,
         name: str,
+        source: Optional[Union[Callable, str]] = None,
+        with_param: Optional[Any] = None,
+        with_items: Optional[List[Item]] = None,
+        with_sequence: Optional[Sequence] = None,
         args: Optional[List[str]] = None,
         command: Optional[List[str]] = None,
         env: Optional[List[_BaseEnv]] = None,
@@ -92,7 +96,6 @@ class Task:
         readiness_probe: Optional[Probe] = None,
         resources: Optional[Resources] = None,
         security_context: Optional[SecurityContext] = None,
-        source: Optional[Union[Callable, str]] = None,
         startup_probe: Optional[Probe] = None,
         stdin: Optional[bool] = None,
         stdin_once: Optional[bool] = None,
@@ -111,9 +114,6 @@ class Task:
         template: Optional[str] = None,
         template_ref: Optional[TemplateRef] = None,
         when: Optional[str] = None,
-        with_items: Optional[List[Item]] = None,
-        with_param: Optional[str] = None,
-        with_sequence: Optional[Sequence] = None,
         active_deadline_seconds: Optional[str] = None,
         affinity: Optional[Affinity] = None,
         archive_location: Optional[ArtifactLocation] = None,
@@ -201,7 +201,7 @@ class Task:
         self.template_ref: Optional[TemplateRef] = template_ref
         self.when: Optional[str] = when
         self.with_items: Optional[List[Item]] = with_items
-        self.with_param: Optional[str] = with_param
+        self.with_param: Optional[Any] = with_param
         self.with_sequence: Optional[Sequence] = with_sequence
         self.active_deadline_seconds: Optional[str] = active_deadline_seconds
         self.affinity: Optional[Affinity] = affinity
@@ -248,21 +248,7 @@ class Task:
         self.timeout: Optional[str] = timeout
         self.tolerations: Optional[List[Toleration]] = tolerations
 
-        self.dag = dag
-        self.source = source
-        self.memoize = memoize
-        self.volumes = volumes or []
-        self.inputs = self._parse_inputs(inputs)
-        self.outputs = outputs
-        self.env = env
-        self.with_param = with_param
-        self.with_sequence = with_sequence
-        self.pod_spec_patch = pod_spec_patch
-        self.resource_template: Optional[ResourceTemplate] = resource
-        self.active_deadline_seconds: Optional[int] = active_deadline_seconds
-        self.timeout: Optional[str] = timeout
-        self.resources = resources
-
+        self.dag: DAG = dag
         self.exit_task: Optional[str] = None
         self.is_exit_task: bool = False
 
