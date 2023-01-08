@@ -35,6 +35,7 @@ from hera.models import (
 from hera.models import Workflow as ModelWorkflow
 from hera.models import (
     WorkflowCreateRequest,
+    WorkflowDeleteResponse,
     WorkflowLintRequest,
     WorkflowMetadata,
     WorkflowResubmitRequest,
@@ -45,7 +46,6 @@ from hera.models import (
 from hera.models import WorkflowSpec as ModelWorkflowSpec
 from hera.models import (
     WorkflowStopRequest,
-    WorkflowSubmitRequest,
     WorkflowSuspendRequest,
     WorkflowTemplateRef,
     WorkflowTerminateRequest,
@@ -170,6 +170,8 @@ class Workflow:
         self.workflow_metadata = workflow_metadata
         self.workflow_template_ref = workflow_template_ref
 
+        self.exit_task: Optional[str] = None
+
         for hook in GlobalConfig.workflow_post_init_hooks:
             hook(self)
 
@@ -234,7 +236,7 @@ class Workflow:
         return self._service
 
     @service.setter
-    def service(self: WorkflowType, value: Service):
+    def service(self: WorkflowType, value: Service) -> None:
         self._service = value
 
     def get_name(self: WorkflowType) -> str:
@@ -339,6 +341,45 @@ class Workflow:
         """Add a collection of tasks to the workflow"""
         self.dag.add_tasks(*ts)
         return self
+
+    def on_exit(self: WorkflowType, other: Union[Task, DAG]) -> None:
+        """Add a task or a DAG to execute upon workflow exit"""
+        if isinstance(other, Task):
+            self.exit_task = other.name
+            other.is_exit_task = True
+        elif isinstance(other, DAG):
+            # If the exit task is a DAG, we need to propagate the DAG and its
+            # templates by instantiating a task within the current context.
+            # The name will never be used; it's only present because the
+            # field is mandatory.
+            t = Task("temp-name-for-hera-exit-dag", dag=other)
+            t.is_exit_task = True
+            self.exit_task = other.name
+        else:
+            raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
+
+    def get_parameter(self: WorkflowType, name: str) -> Parameter:
+        """Assembles the specified parameter name into a parameter specification"""
+        if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
+            raise KeyError(f"`{name}` is not a valid workflow parameter")
+        return Parameter(name=name, value=f"{{{{workflow.parameters.{name}}}}}")
+
+    def to_dict(self: WorkflowType) -> dict:
+        """Returns the dictionary representation of the workflow"""
+        return self.build().dict(exclude_none=True, by_alias=True)
+
+    def to_json(self: WorkflowType) -> str:
+        """Returns the JSON representation of the workflow"""
+        return json.dumps(self.to_dict())
+
+    def to_yaml(self: WorkflowType, **yaml_kwargs: Any) -> str:
+        """Returns a YAML representation of the workflow"""
+        if _yaml is None:
+            raise ImportError(
+                "Attempted to use `to_yaml` but PyYAML is not available. "
+                "Install `hera-workflows[yaml]` to install the extra dependency"
+            )
+        return self.build().to_yaml(**yaml_kwargs)
 
     def create(
         self: WorkflowType,
@@ -446,45 +487,46 @@ class Workflow:
             ),
         )
 
-    def on_exit(self: WorkflowType, other: Union[Task, DAG]) -> None:
-        """Add a task or a DAG to execute upon workflow exit"""
-        if isinstance(other, Task):
-            self.exit_task = other.name
-            other.is_exit_task = True
-        elif isinstance(other, DAG):
-            # If the exit task is a DAG, we need to propagate the DAG and its
-            # templates by instantiating a task within the current context.
-            # The name will never be used; it's only present because the
-            # field is mandatory.
-            t = Task("temp-name-for-hera-exit-dag", dag=other)
-            t.is_exit_task = True
-            self.exit_task = other.name
-        else:
-            raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
+    def suspend(self, namespace: str = GlobalConfig.namespace) -> WorkflowType:
+        return self.service.suspend_workflow(
+            namespace,
+            self.name,
+            WorkflowSuspendRequest(
+                name=self.name,
+                namespace=namespace,
+            ),
+        )
 
-    def delete(self: WorkflowType) -> Tuple[object, int, dict]:
+    def terminate(self, namespace: str = GlobalConfig.namespace) -> WorkflowType:
+        return self.service.terminate_workflow(
+            namespace,
+            self.name,
+            WorkflowTerminateRequest(
+                name=self.name,
+                namespace=namespace,
+            ),
+        )
+
+    def delete(
+        self: WorkflowType,
+        namespace: str = GlobalConfig.namespace,
+        grace_period_seconds: Optional[str] = None,
+        uid: Optional[str] = None,
+        resource_version: Optional[str] = None,
+        orphan_dependents: Optional[bool] = None,
+        propagation_policy: Optional[str] = None,
+        dry_run: Optional[list] = None,
+        force: Optional[bool] = None,
+    ) -> WorkflowDeleteResponse:
         """Deletes the workflow"""
-        return self.service.delete_workflow(self.name)
-
-    def get_parameter(self: WorkflowType, name: str) -> Parameter:
-        """Assembles the specified parameter name into a parameter specification"""
-        if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
-            raise KeyError(f"`{name}` is not a valid workflow parameter")
-        return Parameter(name=name, value=f"{{{{workflow.parameters.{name}}}}}")
-
-    def to_dict(self: WorkflowType) -> dict:
-        """Returns the dictionary representation of the workflow"""
-        return self.build().dict(exclude_none=True, by_alias=True)
-
-    def to_json(self: WorkflowType) -> str:
-        """Returns the JSON representation of the workflow"""
-        return json.dumps(self.to_dict())
-
-    def to_yaml(self: WorkflowType, **yaml_kwargs: Any) -> str:
-        """Returns a YAML representation of the workflow"""
-        if _yaml is None:
-            raise ImportError(
-                "Attempted to use `to_yaml` but PyYAML is not available. "
-                "Install `hera-workflows[yaml]` to install the extra dependency"
-            )
-        return self.build().to_yaml(**yaml_kwargs)
+        return self.service.delete_workflow(
+            namespace,
+            self.name,
+            grace_period_seconds=grace_period_seconds,
+            uid=uid,
+            resource_version=resource_version,
+            orphan_dependents=orphan_dependents,
+            propagation_policy=propagation_policy,
+            dry_run=dry_run,
+            force=force,
+        )
