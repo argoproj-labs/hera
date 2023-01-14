@@ -1,5 +1,5 @@
+import datetime
 import os
-import re
 from pathlib import Path
 
 core_modules = ["sys", "os", "inspect", "pathlib"]
@@ -28,6 +28,9 @@ with open(Path(os.getcwd()) / "scripts" / "init_helper.py", "w+") as init_helper
     init_helper.write(f"diff = models_members.difference(set(all_hera_modules))\n")
     init_helper.write(f"models_final_imports.extend(list(diff))\n")
     init_helper.write(f"with open(pathlib.Path(os.getcwd()) / 'src' / 'hera' / '__init__.py', 'w+') as init_file:\n")
+    init_helper.write(
+        f"    init_file.write('# [DO NOT EDIT] generated via `make init` on: {datetime.datetime.now()}\\n')\n"
+    )
     init_helper.write(f"    str_imports = ', '.join(models_final_imports)\n")
     init_helper.write(f"    init_file.write(f'from hera.models import {{str_imports}}\\n')\n")
     init_helper.write(f"    for str_hera_module in str_hera_modules:\n")

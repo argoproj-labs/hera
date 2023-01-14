@@ -1,3 +1,4 @@
+# [DO NOT EDIT] generated via `make init` on: 2023-01-14 17:13:49.818752
 from hera._base_model import *
 from hera._context import *
 from hera._version import *
