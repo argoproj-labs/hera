@@ -45,7 +45,7 @@ class ServiceEndpoint:
         consumes: str = "application/json",
         produces: str = "application/json",
     ) -> None:
-        self.url = url
+        self.url = self.parse_url(url)
         self.method = method
         self.name = name
         self.params = params
@@ -53,6 +53,11 @@ class ServiceEndpoint:
         self.summary = summary
         self.consumes = consumes
         self.produces = produces
+
+    def parse_url(self, url) -> str:
+        if url[0] == '/':
+            return url[1:]
+        return url
 
     def __str__(self) -> str:
         # signature

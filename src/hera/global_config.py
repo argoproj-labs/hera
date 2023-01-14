@@ -21,12 +21,12 @@ class _GlobalConfig:
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
     _token: Union[Optional[str], Callable[[], Optional[str]]] = None
 
-    host: Optional[str] = None
+    host: str = "localhost:2746"
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
     namespace: str = "default"
     image: str = "python:3.7"
-    service_account_name: Optional[str] = None
+    service_account_name: Optional[str] = "default"
     task_post_init_hooks: Tuple[Callable[[Task], []], ...] = ()
     workflow_post_init_hooks: Tuple[Callable[[Workflow], []], ...] = ()
 

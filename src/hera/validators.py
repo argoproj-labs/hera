@@ -3,7 +3,7 @@ import re
 from typing import Optional
 
 
-def validate_name(name: Optional[str] = None, max_length: Optional[int] = None, generate_name: str = None):
+def validate_name(name: Optional[str] = None, max_length: Optional[int] = None, generate_name: str = None) -> Optional[str]:
     """Validates a name according to standard argo/kubernetes limitations
 
     Parameters
@@ -45,6 +45,8 @@ def validate_name(name: Optional[str] = None, max_length: Optional[int] = None, 
         match_obj = re.fullmatch(pattern, name)
         if not match_obj:
             raise ValueError(f"Name is invalid: '{name}'. Regex used for validation is {pattern}")
+
+    return name
 
 
 def validate_storage_units(value: str) -> None:

@@ -3,16 +3,16 @@ import os
 import requests
 
 from hera.models import *
-from hera.new.config import GlobalConfig
+from hera.global_config import GlobalConfig
 
 
 class Service:
     def __init__(
         self,
-        host: Optional[str] = GlobalConfig.host,
-        verify_ssl: bool = GlobalConfig.verify_ssl,
-        token: Optional[str] = GlobalConfig.token,
-        namespace: Optional[str] = GlobalConfig.namespace,
+        host: Optional[str] = None,
+        verify_ssl: Optional[bool] = None,
+        token: Optional[str] = None,
+        namespace: Optional[str] = None,
     ):
         self.host = host or GlobalConfig.host
         self.verify_ssl = verify_ssl or GlobalConfig.verify_ssl
@@ -33,7 +33,7 @@ class Service:
         name_prefix: Optional[str] = None,
     ) -> WorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/archived-workflows"),
+            url=os.path.join(self.host, "api/v1/archived-workflows"),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -58,7 +58,7 @@ class Service:
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/archived-workflows-label-keys"),
+            url=os.path.join(self.host, "api/v1/archived-workflows-label-keys"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -83,7 +83,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> LabelValues:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/archived-workflows-label-values"),
+            url=os.path.join(self.host, "api/v1/archived-workflows-label-values"),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -107,7 +107,7 @@ class Service:
 
     def get_archived_workflow(self, uid: str) -> Workflow:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/archived-workflows/{uid}").format(uid=uid),
+            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -121,7 +121,7 @@ class Service:
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/archived-workflows/{uid}").format(uid=uid),
+            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -135,7 +135,7 @@ class Service:
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
+            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -149,7 +149,7 @@ class Service:
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/archived-workflows/{uid}/retry").format(uid=uid),
+            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -174,7 +174,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> ClusterWorkflowTemplateList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/cluster-workflow-templates"),
+            url=os.path.join(self.host, "api/v1/cluster-workflow-templates"),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -198,7 +198,7 @@ class Service:
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/cluster-workflow-templates"),
+            url=os.path.join(self.host, "api/v1/cluster-workflow-templates"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -212,7 +212,7 @@ class Service:
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/cluster-workflow-templates/lint"),
+            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/lint"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -228,7 +228,7 @@ class Service:
         self, name: str, resource_version: Optional[str] = None
     ) -> ClusterWorkflowTemplate:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/cluster-workflow-templates/{name}").format(name=name),
+            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={"getOptions.resourceVersion": resource_version},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -244,7 +244,7 @@ class Service:
         self, name: str, req: ClusterWorkflowTemplateUpdateRequest
     ) -> ClusterWorkflowTemplate:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/cluster-workflow-templates/{name}").format(name=name),
+            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -267,7 +267,7 @@ class Service:
         dry_run: Optional[list] = None,
     ) -> ClusterWorkflowTemplateDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/cluster-workflow-templates/{name}").format(name=name),
+            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
                 "deleteOptions.preconditions.uid": uid,
@@ -300,7 +300,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> CronWorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -324,7 +324,7 @@ class Service:
 
     def create_cron_workflow(self, namespace: str, req: CreateCronWorkflowRequest) -> CronWorkflow:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -338,7 +338,7 @@ class Service:
 
     def lint_cron_workflow(self, namespace: str, req: LintCronWorkflowRequest) -> CronWorkflow:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/lint").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -352,7 +352,7 @@ class Service:
 
     def get_cron_workflow(self, namespace: str, name: str, resource_version: Optional[str] = None) -> CronWorkflow:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params={"getOptions.resourceVersion": resource_version},
@@ -368,7 +368,7 @@ class Service:
 
     def update_cron_workflow(self, namespace: str, name: str, req: UpdateCronWorkflowRequest) -> CronWorkflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -394,7 +394,7 @@ class Service:
         dry_run: Optional[list] = None,
     ) -> CronWorkflowDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params={
@@ -417,7 +417,7 @@ class Service:
 
     def resume_cron_workflow(self, namespace: str, name: str, req: CronWorkflowResumeRequest) -> CronWorkflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/{name}/resume").format(
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}/resume").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -433,7 +433,7 @@ class Service:
 
     def suspend_cron_workflow(self, namespace: str, name: str, req: CronWorkflowSuspendRequest) -> CronWorkflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/cron-workflows/{namespace}/{name}/suspend").format(
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}/suspend").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -461,7 +461,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> EventSourceList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/event-sources/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -485,7 +485,7 @@ class Service:
 
     def create_event_source(self, namespace: str, req: CreateEventSourceRequest) -> EventSource:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/event-sources/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -499,7 +499,7 @@ class Service:
 
     def get_event_source(self, namespace: str, name: str) -> EventSource:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/event-sources/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -515,7 +515,7 @@ class Service:
 
     def update_event_source(self, namespace: str, name: str, req: UpdateEventSourceRequest) -> EventSource:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/event-sources/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -541,7 +541,7 @@ class Service:
         dry_run: Optional[list] = None,
     ) -> EventSourceDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/event-sources/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params={
@@ -564,7 +564,7 @@ class Service:
 
     def receive_event(self, namespace: str, discriminator: str, req: Item) -> EventResponse:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/events/{namespace}/{discriminator}").format(
+            url=os.path.join(self.host, "api/v1/events/{namespace}/{discriminator}").format(
                 namespace=namespace, discriminator=discriminator
             ),
             params=None,
@@ -580,7 +580,7 @@ class Service:
 
     def get_info(self) -> InfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/info"),
+            url=os.path.join(self.host, "api/v1/info"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -606,7 +606,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> SensorList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/sensors/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -630,7 +630,7 @@ class Service:
 
     def create_sensor(self, namespace: str, req: CreateSensorRequest) -> Sensor:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/sensors/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -644,7 +644,7 @@ class Service:
 
     def get_sensor(self, namespace: str, name: str, resource_version: Optional[str] = None) -> Sensor:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params={"getOptions.resourceVersion": resource_version},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -658,7 +658,7 @@ class Service:
 
     def update_sensor(self, namespace: str, name: str, req: UpdateSensorRequest) -> Sensor:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -682,7 +682,7 @@ class Service:
         dry_run: Optional[list] = None,
     ) -> DeleteSensorResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
                 "deleteOptions.preconditions.uid": uid,
@@ -715,7 +715,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> EventSourceWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/stream/event-sources/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -756,7 +756,7 @@ class Service:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> LogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/stream/event-sources/{namespace}/logs").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(namespace=namespace),
             params={
                 "name": name,
                 "eventSourceType": event_source_type,
@@ -797,7 +797,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> Event:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/stream/events/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/events/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -833,7 +833,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> SensorWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/stream/sensors/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -873,7 +873,7 @@ class Service:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> LogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/stream/sensors/{namespace}/logs").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}/logs").format(namespace=namespace),
             params={
                 "name": name,
                 "triggerName": trigger_name,
@@ -901,7 +901,7 @@ class Service:
 
     def collect_event(self, req: CollectEventRequest) -> CollectEventResponse:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/tracking/event"),
+            url=os.path.join(self.host, "api/v1/tracking/event"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -915,7 +915,7 @@ class Service:
 
     def get_user_info(self) -> GetUserInfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/userinfo"),
+            url=os.path.join(self.host, "api/v1/userinfo"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -929,7 +929,7 @@ class Service:
 
     def get_version(self) -> Version:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/version"),
+            url=os.path.join(self.host, "api/v1/version"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -955,7 +955,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> WorkflowEventBindingList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflow-event-bindings/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-event-bindings/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -992,7 +992,7 @@ class Service:
         fields: Optional[str] = None,
     ) -> WorkflowWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflow-events/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-events/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -1029,7 +1029,7 @@ class Service:
         continue_: Optional[str] = None,
     ) -> WorkflowTemplateList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -1053,7 +1053,7 @@ class Service:
 
     def create_workflow_template(self, namespace: str, req: WorkflowTemplateCreateRequest) -> WorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -1067,7 +1067,7 @@ class Service:
 
     def lint_workflow_template(self, namespace: str, req: WorkflowTemplateLintRequest) -> WorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}/lint").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -1083,7 +1083,7 @@ class Service:
         self, namespace: str, name: str, resource_version: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params={"getOptions.resourceVersion": resource_version},
@@ -1101,7 +1101,7 @@ class Service:
         self, namespace: str, name: str, req: WorkflowTemplateUpdateRequest
     ) -> WorkflowTemplate:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1127,7 +1127,7 @@ class Service:
         dry_run: Optional[list] = None,
     ) -> WorkflowTemplateDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/workflow-templates/{namespace}/{name}").format(
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params={
@@ -1163,7 +1163,7 @@ class Service:
         fields: Optional[str] = None,
     ) -> WorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(namespace=namespace),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -1188,7 +1188,7 @@ class Service:
 
     def create_workflow(self, namespace: str, req: WorkflowCreateRequest) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -1202,7 +1202,7 @@ class Service:
 
     def lint_workflow(self, namespace: str, req: WorkflowLintRequest) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/lint").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -1216,7 +1216,7 @@ class Service:
 
     def submit_workflow(self, namespace: str, req: WorkflowSubmitRequest) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/submit").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/submit").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(),
@@ -1232,7 +1232,7 @@ class Service:
         self, namespace: str, name: str, resource_version: Optional[str] = None, fields: Optional[str] = None
     ) -> Workflow:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
             params={"getOptions.resourceVersion": resource_version, "fields": fields},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -1257,7 +1257,7 @@ class Service:
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
                 "deleteOptions.preconditions.uid": uid,
@@ -1296,7 +1296,7 @@ class Service:
         selector: Optional[str] = None,
     ) -> LogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/log").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/log").format(
                 namespace=namespace, name=name
             ),
             params={
@@ -1326,7 +1326,7 @@ class Service:
 
     def resubmit_workflow(self, namespace: str, name: str, req: WorkflowResubmitRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/resubmit").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/resubmit").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1342,7 +1342,7 @@ class Service:
 
     def resume_workflow(self, namespace: str, name: str, req: WorkflowResumeRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/resume").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/resume").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1358,7 +1358,7 @@ class Service:
 
     def retry_workflow(self, namespace: str, name: str, req: WorkflowRetryRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/retry").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/retry").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1374,7 +1374,7 @@ class Service:
 
     def set_workflow(self, namespace: str, name: str, req: WorkflowSetRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/set").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/set").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1390,7 +1390,7 @@ class Service:
 
     def stop_workflow(self, namespace: str, name: str, req: WorkflowStopRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/stop").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/stop").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1406,7 +1406,7 @@ class Service:
 
     def suspend_workflow(self, namespace: str, name: str, req: WorkflowSuspendRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/suspend").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/suspend").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1422,7 +1422,7 @@ class Service:
 
     def terminate_workflow(self, namespace: str, name: str, req: WorkflowTerminateRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/terminate").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/terminate").format(
                 namespace=namespace, name=name
             ),
             params=None,
@@ -1456,7 +1456,7 @@ class Service:
     ) -> LogEntry:
         """DEPRECATED: Cannot work via HTTP if podName is an empty string. Use WorkflowLogs."""
         resp = requests.get(
-            url=os.path.join(self.host, "/api/v1/workflows/{namespace}/{name}/{podName}/log").format(
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/{podName}/log").format(
                 namespace=namespace, name=name, podName=pod_name
             ),
             params={

@@ -33,8 +33,8 @@ class DAG:
         validate_name(name)
         self.name: str = name
         self.inputs: List[Union[Parameter, Artifact]] = self._parse_inputs(inputs)
-        self.outputs: Optional[List[Union[Parameter, Artifact]]] = outputs
-        self.tasks: Optional[List[Tasks]] = tasks
+        self.outputs: Optional[List[Union[Parameter, Artifact]]] = outputs or []
+        self.tasks: Optional[List[Task]] = tasks or []
 
     def _parse_inputs(
         self,

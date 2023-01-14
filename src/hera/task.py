@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import hera
 from hera.dag import DAG
@@ -36,7 +36,6 @@ from hera.models import (
     Metadata,
     Metrics,
     Outputs,
-    Parameter,
     PersistentVolumeClaimTemplate,
     Plugin,
     Probe,
@@ -58,6 +57,7 @@ from hera.models import VolumeDevice, VolumeMount
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.validators import validate_name
+from hera.parameter import Parameter
 from hera.volumes import *
 from hera.volumes import _BaseVolume
 from hera.workflow_status import WorkflowStatus
@@ -172,8 +172,8 @@ class Task:
         self.name: str = validate_name(name)
         self.args: Optional[List[str]] = args
         self.command: Optional[List[str]] = command
-        self.env: Optional[List[_BaseEnv]] = env
-        self.env_from: Optional[List[_BaseEnvFrom]] = env_from
+        self.env: Optional[List[_BaseEnv]] = env or []
+        self.env_from: Optional[List[_BaseEnvFrom]] = env_from or []
         self.image: Optional[str] = image or GlobalConfig.image
         self.image_pull_policy: Optional[str] = image_pull_policy or ImagePullPolicy.always
         self.lifecycle: Optional[Lifecycle] = lifecycle
@@ -191,7 +191,7 @@ class Task:
         self.tty: Optional[bool] = tty
         self.volume_devices: Optional[List[VolumeDevice]] = volume_devices
         self.working_dir: Optional[str] = working_dir
-        self.arguments: Optional[List[Artifact, Parameter]] = arguments
+        self.arguments: Optional[List[Artifact, Parameter]] = arguments or []
         self.continue_on: Optional[ContinueOn] = continue_on
         self.dependencies: Optional[List[str]] = dependencies
         self.depends: Optional[str] = depends
@@ -226,7 +226,7 @@ class Task:
             ]
         ] = self._parse_inputs(inputs)
         self.outputs: Optional[List[Union[Parameter, Artifact]]] = outputs or []
-        self.exit_code: Optional[str] = exit_code
+        self.exit_code_: Optional[str] = exit_code
         self.result: Optional[str] = result
         self.memoize: Optional[Memoize] = memoize
         self.metadata: Optional[Metadata] = Metadata(annotations=annotations, labels=labels)
@@ -248,6 +248,7 @@ class Task:
         self.synchronization: Optional[Synchronization] = synchronization
         self.timeout: Optional[str] = timeout
         self.tolerations: Optional[List[Toleration]] = tolerations
+        self.volumes: Optional[List[Volume]] = volumes or []
 
         self.dag: DAG = dag
         self.exit_task: Optional[str] = None
@@ -979,7 +980,7 @@ class Task:
             name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
-            resources=self.resources.build(),
+            resources=self.resources.build() if self.resources is not None else None,
             security_context=self.security_context,
             source=self._get_script(),
             startup_probe=self.startup_probe,
@@ -1013,7 +1014,7 @@ class Task:
             name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
-            resources=self.resources.build(),
+            resources=self.resources.build() if self.resources is not None else None,
             security_context=self.security_context,
             startup_probe=self.startup_probe,
             stdin=self.stdin,
@@ -1066,7 +1067,7 @@ class Task:
             outputs=Outputs(
                 artifacts=list(filter(lambda o: isinstance(o, Artifact), self.outputs)),
                 parameters=list(filter(lambda o: isinstance(o, Parameter), self.outputs)),
-                exit_code=self.exit_code,
+                exit_code=self.exit_code_,
                 result=self.result,
             ),
             plugin=self.plugin,

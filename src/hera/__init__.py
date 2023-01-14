@@ -1,4 +1,4 @@
-# [DO NOT EDIT] generated via `make init` on: 2023-01-14 17:13:49.818752
+# [DO NOT EDIT] generated via `make init` on: 2023-01-14 17:14:32.368352
 from hera._base_model import *
 from hera._context import *
 from hera._version import *
@@ -406,3 +406,8 @@ from hera.workflow_template import *
 
 __version__ = version
 __version_info__ = version.split(".")
+
+GlobalConfig.host = "https://argo.dynet.ai"
+GlobalConfig.token = "abc"
+GlobalConfig.verify_ssl = True
+GlobalConfig.image = "python:3.7"

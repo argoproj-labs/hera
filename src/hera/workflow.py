@@ -75,13 +75,13 @@ class Workflow:
         self: WorkflowType,
         name: Optional[str] = None,
         api_version: Optional[str] = GlobalConfig.api_version,
-        dag_name: Optional[str] = None,
+        dag_name: Optional[str] = "hera-dag",
         dag: Optional[DAG] = None,
         generate_name: Optional[str] = False,
         service: Optional[Service] = None,
         active_deadline_seconds: Optional[int] = None,
         affinity: Optional[Affinity] = None,
-        acrhive_logs: Optional[bool] = None,
+        archive_logs: Optional[bool] = None,
         inputs: Optional[
             Union[
                 List[Union[Parameter, Artifact]],
@@ -125,8 +125,7 @@ class Workflow:
         workflow_metadata: Optional[WorkflowMetadata] = None,
         workflow_template_ref: Optional[WorkflowTemplateRef] = None,
     ):
-        validate_name(name=name, generate_name=generate_name)
-        self.name = name
+        self.name = validate_name(name=name, generate_name=generate_name)
         dag_name = self.name.rstrip("-.") if dag_name is None else dag_name
         self.api_version = api_version
         self.dag = DAG(dag_name) if dag is None else dag
@@ -134,9 +133,9 @@ class Workflow:
         self._service = service
         self.active_deadline_seconds = active_deadline_seconds
         self.affinity = affinity
-        self.acrhive_logs = acrhive_logs
+        self.acrhive_logs = archive_logs
         self.inputs = self._parse_inputs(inputs)
-        self.outputs = outputs
+        self.outputs = outputs or []
         self.artifact_gc = artifact_gc
         self.artifact_repository_ref = artifact_repository_ref
         self.automount_service_account_token = automount_service_account_token
@@ -146,7 +145,7 @@ class Workflow:
         self.hooks = hooks
         self.host_aliases = host_aliases
         self.host_network = host_network
-        self.image_pull_secrets = image_pull_secrets
+        self.image_pull_secrets = image_pull_secrets or []
         self.metrics = self._parse_metrics(metrics)
         self.node_selector = node_selector
         self.parallelism = parallelism
@@ -273,7 +272,7 @@ class Workflow:
             executor=self.executor,
             hooks=self.hooks,
             host_aliases=self.host_aliases,
-            host_network=self.host_networks,
+            host_network=self.host_network,
             image_pull_secrets=[LocalObjectReference(name=name) for name in self.image_pull_secrets],
             metrics=self.metrics,
             node_selector=self.node_selector,
@@ -308,7 +307,7 @@ class Workflow:
         """Builds the workflow core representation"""
         return ModelWorkflow(
             api_version=self.api_version,
-            kind=self.__name__,
+            kind=self.__class__.__name__,
             metadata=self._build_metadata(),
             spec=self._build_spec(),
         )
