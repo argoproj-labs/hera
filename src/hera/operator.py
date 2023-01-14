@@ -1,5 +1,3 @@
-
-
 class Operator:
     """Operator is a representation of mathematical comparison symbols.
 

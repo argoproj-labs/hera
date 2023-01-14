@@ -6,7 +6,7 @@ from hera.models import *
 from hera.new.config import GlobalConfig
 
 
-class HeraService:
+class Service:
     def __init__(
         self,
         host: Optional[str] = GlobalConfig.host,
@@ -1583,3 +1583,6 @@ class HeraService:
             return str(resp.content)
         else:
             resp.raise_for_status()
+
+
+__all__ = ["Service"]

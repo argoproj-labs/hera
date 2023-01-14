@@ -262,11 +262,11 @@ def get_service_def() -> str:
     return """
 import requests
 import os
-from hera.models import *
+{imports}
 from hera.new.config import GlobalConfig
 from typing import Optional    
 
-class HeraService:
+class Service:
     def __init__(
         self,
         host: Optional[str] = GlobalConfig.host,
@@ -285,12 +285,22 @@ def make_service(service_def: str, endpoints: List[ServiceEndpoint]) -> str:
     result = service_def
     for endpoint in endpoints:
         result = result + f"{endpoint}\n"
+    result = result + "\n\n__all__ = ['Service']"
     return result
 
 
 def write_service(service: str, path: Path) -> None:
     with open(str(path), "w+") as f:
         f.write(service)
+
+
+def get_imports(endpoints: List[ServiceEndpoint]) -> List[str]:
+    result = []
+    for endpoint in endpoints:
+        for param in endpoint.params:
+            result.append(param.type_)
+        result.append(endpoint.response.ref)
+    return result
 
 
 def create_service() -> None:
@@ -300,7 +310,9 @@ def create_service() -> None:
     produces = get_produces(payload)
     paths = get_paths(payload)
     endpoints = get_endpoints(paths, consumes=consumes, produces=produces)
+    imports = get_imports(endpoints)
     service_def = get_service_def()
+    service_def = service_def.format(imports=imports)
     result = make_service(service_def, endpoints)
     path = Path(__name__).parent / "src/hera/service.py"
     write_service(result, path)

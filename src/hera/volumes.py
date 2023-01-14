@@ -9,10 +9,10 @@ from hera.models import (
 )
 from hera.models import AzureDiskVolumeSource as _ModelAzureDiskVolumeSource
 from hera.models import AzureFileVolumeSource as _ModelAzureFileVolumeSource
-from hera.models import CSIVolumeSource as _ModelCSIVolumeSource
 from hera.models import CephFSVolumeSource as _ModelCephFSVolumeSource
 from hera.models import CinderVolumeSource as _ModelCinderVolumeSource
 from hera.models import ConfigMapVolumeSource as _ModelConfigMapVolumeSource
+from hera.models import CSIVolumeSource as _ModelCSIVolumeSource
 from hera.models import DownwardAPIVolumeSource as _ModelDownwardAPIVolumeSource
 from hera.models import EmptyDirVolumeSource as _ModelEmptyDirVolumeSource
 from hera.models import EphemeralVolumeSource as _ModelEphemeralVolumeSource

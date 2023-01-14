@@ -4,6 +4,7 @@ import copy
 import inspect
 import json
 import textwrap
+from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import hera
@@ -51,17 +52,16 @@ from hera.models import (
     TemplateRef,
     Toleration,
     UserContainer,
-    VolumeDevice,
-    VolumeMount,
 )
 from hera.models import Volume as _ModelVolume
+from hera.models import VolumeDevice, VolumeMount
 from hera.operator import Operator
 from hera.resources import Resources
 from hera.validators import validate_name
 from hera.volumes import *
 from hera.volumes import _BaseVolume
 from hera.workflow_status import WorkflowStatus
-from enum import Enum
+
 
 class TaskResult(Enum):
     failed = "Failed"

@@ -23,6 +23,12 @@ service: ## Generate the Hera service based on Argo OpenAPI specifications
 	@python scripts/service.py $(OPENAPI_SPEC_URL)
 	@$(MAKE) format
 
+init: ## Generate the Hera init based on the intersection of auto-generated models and Hera models
+	@python scripts/init.py
+	@python scripts/init_helper.py
+	@rm scripts/init_helper.py
+	@$(MAKE) format
+
 models: ## Generate all the Argo Workflows models
 	@datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \

@@ -7,7 +7,6 @@ import hera
 from hera.dag import DAG
 from hera.gc_strategy import GCStrategy
 from hera.global_config import GlobalConfig
-from hera.heraservice import HeraService
 from hera.models import Affinity
 from hera.models import Arguments as ModelArguments
 from hera.models import (
@@ -54,6 +53,7 @@ from hera.models import (
     WorkflowTerminateRequest,
 )
 from hera.parameter import Parameter
+from hera.service import Service
 from hera.task import Task
 from hera.validators import validate_name
 from hera.volumes import _BaseVolume
@@ -78,7 +78,7 @@ class Workflow:
         dag_name: Optional[str] = None,
         dag: Optional[DAG] = None,
         generate_name: Optional[str] = False,
-        service: Optional[HeraService] = None,
+        service: Optional[Service] = None,
         active_deadline_seconds: Optional[int] = None,
         affinity: Optional[Affinity] = None,
         acrhive_logs: Optional[bool] = None,
@@ -231,13 +231,13 @@ class Workflow:
         return result
 
     @property
-    def service(self: WorkflowType) -> HeraService:
+    def service(self: WorkflowType) -> Service:
         if self._service is None:
-            self._service = HeraService()
+            self._service = Service()
         return self._service
 
     @service.setter
-    def service(self: WorkflowType, value: HeraService) -> None:
+    def service(self: WorkflowType, value: Service) -> None:
         self._service = value
 
     def get_name(self: WorkflowType) -> str:
