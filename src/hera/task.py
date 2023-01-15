@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import hera
 from hera.artifact import Artifact
@@ -90,7 +90,7 @@ class Task:
         env: Optional[List[_BaseEnv]] = None,
         env_from: Optional[List[_BaseEnvFrom]] = None,
         image: Optional[str] = None,
-        image_pull_policy: Optional[str] = None,
+        image_pull_policy: Optional[ImagePullPolicy] = None,
         lifecycle: Optional[Lifecycle] = None,
         liveness_probe: Optional[Probe] = None,
         ports: Optional[List[ContainerPort]] = None,
@@ -175,7 +175,7 @@ class Task:
         self.env: Optional[List[_BaseEnv]] = env or []
         self.env_from: Optional[List[_BaseEnvFrom]] = env_from or []
         self.image: Optional[str] = image or GlobalConfig.image
-        self.image_pull_policy: Optional[str] = image_pull_policy or ImagePullPolicy.always
+        self.image_pull_policy: Optional[str] = None if image_pull_policy is None else image_pull_policy.value
         self.lifecycle: Optional[Lifecycle] = lifecycle
         self.liveness_probe: Optional[Probe] = liveness_probe
         self.ports: Optional[List[ContainerPort]] = ports
@@ -197,7 +197,7 @@ class Task:
         self.depends: Optional[str] = depends
         self.hooks: Optional[Dict[str, LifecycleHook]] = hooks
         self.inline: Optional[Template] = inline
-        self.on_exit: Optional[str] = on_exit
+        self.on_exit_: Optional[str] = on_exit
         self.template: Optional[str] = template
         self.template_ref: Optional[TemplateRef] = template_ref
         self.when: Optional[str] = when
@@ -251,7 +251,6 @@ class Task:
         self.volumes: Optional[List[Volume]] = volumes or []
 
         self.dag: DAG = dag
-        self.exit_task: Optional[str] = None
         self.is_exit_task: bool = False
 
         self.validate()
@@ -522,7 +521,7 @@ class Task:
             )
 
         if isinstance(other, Task):
-            self.exit_task = other.name
+            self.on_exit_ = other.name
             other.is_exit_task = True
         elif isinstance(other, DAG):
             # If the exit task is a DAG, we need to propagate the DAG and its
@@ -531,7 +530,7 @@ class Task:
             # field is mandatory.
             t = Task("temp-name-for-hera-exit-dag", dag=other)
             t.is_exit_task = True
-            self.exit_task = other.name
+            self.on_exit_ = other.name
         else:
             raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
         return self
@@ -1113,7 +1112,7 @@ class Task:
             hooks=self.hooks,
             inline=self.inline,
             name=self.name,
-            on_exit=self.exit_task,
+            on_exit=self.on_exit_,
             when=self.when,
             with_items=self.with_items,
             with_sequence=self.with_sequence,

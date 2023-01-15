@@ -1,16 +1,79 @@
 import os
+from typing import Optional
 
 import requests
 
-from hera.models import *
 from hera.global_config import GlobalConfig
+from hera.models import (
+    ArchivedWorkflowDeletedResponse,
+    ClusterWorkflowTemplate,
+    ClusterWorkflowTemplateCreateRequest,
+    ClusterWorkflowTemplateDeleteResponse,
+    ClusterWorkflowTemplateLintRequest,
+    ClusterWorkflowTemplateList,
+    ClusterWorkflowTemplateUpdateRequest,
+    CollectEventRequest,
+    CollectEventResponse,
+    CreateCronWorkflowRequest,
+    CreateEventSourceRequest,
+    CreateSensorRequest,
+    CronWorkflow,
+    CronWorkflowDeletedResponse,
+    CronWorkflowList,
+    CronWorkflowResumeRequest,
+    CronWorkflowSuspendRequest,
+    DeleteSensorResponse,
+    Event,
+    EventResponse,
+    EventSource,
+    EventSourceDeletedResponse,
+    EventSourceList,
+    EventSourceWatchEvent,
+    GetUserInfoResponse,
+    InfoResponse,
+    Item,
+    LabelKeys,
+    LabelValues,
+    LintCronWorkflowRequest,
+    LogEntry,
+    ResubmitArchivedWorkflowRequest,
+    RetryArchivedWorkflowRequest,
+    Sensor,
+    SensorList,
+    SensorWatchEvent,
+    UpdateCronWorkflowRequest,
+    UpdateEventSourceRequest,
+    UpdateSensorRequest,
+    Version,
+    Workflow,
+    WorkflowCreateRequest,
+    WorkflowDeleteResponse,
+    WorkflowEventBindingList,
+    WorkflowLintRequest,
+    WorkflowList,
+    WorkflowResubmitRequest,
+    WorkflowResumeRequest,
+    WorkflowRetryRequest,
+    WorkflowSetRequest,
+    WorkflowStopRequest,
+    WorkflowSubmitRequest,
+    WorkflowSuspendRequest,
+    WorkflowTemplate,
+    WorkflowTemplateCreateRequest,
+    WorkflowTemplateDeleteResponse,
+    WorkflowTemplateLintRequest,
+    WorkflowTemplateList,
+    WorkflowTemplateUpdateRequest,
+    WorkflowTerminateRequest,
+    WorkflowWatchEvent,
+)
 
 
 class Service:
     def __init__(
         self,
         host: Optional[str] = None,
-        verify_ssl: Optional[bool] = None,
+        verify_ssl: bool = None,
         token: Optional[str] = None,
         namespace: Optional[str] = None,
     ):
@@ -1496,7 +1559,7 @@ class Service:
         resp = requests.get(
             url=os.path.join(
                 self.host,
-                "/artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
+                "artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
                 namespace=namespace,
                 idDiscriminator=id_discriminator,
@@ -1519,7 +1582,7 @@ class Service:
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, "/artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
+            url=os.path.join(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -1536,7 +1599,7 @@ class Service:
     def get_output_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, "/artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
+            url=os.path.join(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -1553,7 +1616,7 @@ class Service:
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, "/input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
+            url=os.path.join(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -1570,7 +1633,7 @@ class Service:
     def get_input_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, "/input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
+            url=os.path.join(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,

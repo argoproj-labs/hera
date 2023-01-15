@@ -1,5 +1,5 @@
 """Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd"""
-from hera import ArchiveStrategy, Artifact, GCSArtifact, Task, Workflow
+from hera import Artifact, GCSArtifact, Task, Workflow
 
 
 def generate():

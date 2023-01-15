@@ -1,7 +1,7 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 import json
 from types import ModuleType
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar, Union
 
 import hera
 from hera.dag import DAG
@@ -21,7 +21,6 @@ from hera.models import (
     Metadata,
     Metrics,
     ObjectMeta,
-    Parameter,
     PodDisruptionBudgetSpec,
     PodDNSConfig,
     PodGC,
@@ -171,7 +170,7 @@ class Workflow:
         self.workflow_metadata = workflow_metadata
         self.workflow_template_ref = workflow_template_ref
 
-        self.exit_task: Optional[str] = None
+        self.on_exit_: Optional[str] = None
 
         for hook in GlobalConfig.workflow_post_init_hooks:
             hook(self)
@@ -276,7 +275,7 @@ class Workflow:
             image_pull_secrets=[LocalObjectReference(name=name) for name in self.image_pull_secrets],
             metrics=self.metrics,
             node_selector=self.node_selector,
-            on_exit=self.exit_task,
+            on_exit=self.on_exit_,
             parallelism=self.parallelism,
             pod_disruption_budget=self.pod_disruption_budget,
             pod_gc=self.pod_gc,
@@ -342,7 +341,7 @@ class Workflow:
     def on_exit(self: WorkflowType, other: Union[Task, DAG]) -> None:
         """Add a task or a DAG to execute upon workflow exit"""
         if isinstance(other, Task):
-            self.exit_task = other.name
+            self.on_exit_ = other.name
             other.is_exit_task = True
         elif isinstance(other, DAG):
             # If the exit task is a DAG, we need to propagate the DAG and its
@@ -351,7 +350,7 @@ class Workflow:
             # field is mandatory.
             t = Task("temp-name-for-hera-exit-dag", dag=other)
             t.is_exit_task = True
-            self.exit_task = other.name
+            self.on_exit_ = other.name
         else:
             raise ValueError(f"Unrecognized exit type {type(other)}, supported types are `Task` and `DAG`")
 

@@ -966,11 +966,11 @@ print(42)
         o = Task("e", source=no_op)
         t = Task("t", source=no_op).on_exit(o)
         assert o.is_exit_task
-        assert t.exit_task == "e"
+        assert t.on_exit_ == "e"
 
         d = DAG("d")
         t = Task("t", source=no_op).on_exit(d)
-        assert t.exit_task == "d"
+        assert t.on_exit_ == "d"
 
         o = 42
         with pytest.raises(ValueError) as e:

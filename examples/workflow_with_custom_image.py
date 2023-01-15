@@ -8,7 +8,7 @@ with Workflow("pipeline-image-testing") as w:
     Task(
         "workflow-with-custom-image",
         image="my-custom-image-name:latest",
-        image_pull_policy=ImagePullPolicy.Never,
+        image_pull_policy=ImagePullPolicy.never,
         command=["python", "-m", "src.pipeline_example"],
     )
 

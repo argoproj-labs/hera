@@ -6,7 +6,7 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 lint: ## Lint the source and example directories
-	@pflake8 src scripts docs examples
+	@pflake8 src scripts docs examples --exclude docs/conf.py
 
 format: ## Format and sort imports for source, tests, etc.
 	@black src scripts docs tests examples conftest.py

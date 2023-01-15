@@ -326,12 +326,12 @@ class TestWorkflow:
         with Workflow("w") as w1:
             x = Task("x")
             w1.on_exit(x)
-            assert w1.exit_task == "x"
+            assert w1.on_exit_ == "x"
             assert x.is_exit_task
 
         with Workflow("w") as w2:
             w2.on_exit(DAG("d"))
-            assert w2.exit_task == "d"
+            assert w2.on_exit_ == "d"
 
         with Workflow("w") as w3:
             with pytest.raises(ValueError) as e:

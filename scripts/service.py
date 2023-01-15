@@ -112,13 +112,13 @@ class ServiceEndpoint:
         return f"""
     {signature}
         resp = requests.{self.method}(
-            url={req_url}, 
-            params={params}, 
-            headers={headers}, 
-            data={body}, 
+            url={req_url},
+            params={params},
+            headers={headers},
+            data={body},
             verify=self.verify_ssl
         )
-        
+
         if resp.ok:
             return {ret_val}
         else:
