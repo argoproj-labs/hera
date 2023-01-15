@@ -68,7 +68,7 @@ verbose = true
 
 [tool.flake8]
 # do not look here for things to lint
-exclude = [".git", "__init__.py", "src/hera/models"]
+exclude = [".git", "__init__.py", "src/hera/models", "docs/conf.py"]
 docstring-convention = "numpy"
 max-line-length = 119
 
