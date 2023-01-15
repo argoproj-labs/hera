@@ -19,6 +19,7 @@ class BaseModel(PyBaseModel):
         extra = Extra.forbid
         allow_mutation = True
         use_enum_values = True
+        arbitrary_types_allowed = True
 
     def to_yaml(self, **yaml_kwargs) -> str:
         """Returns a YAML representation of the object"""

@@ -3,20 +3,30 @@
 https://github.com/argoproj/argo-workflows/blob/master/examples/arguments-parameters-from-configmap.yaml
 """
 
-from hera import ConfigMapKeySelector, Container, Parameter, Task, ValueFrom, Workflow
+from hera import (
+    ConfigMapKeySelector,
+    Container,
+    Parameter,
+    Task,
+    ValueFrom,
+    Workflow,
+    WorkflowMetadata,
+)
 
 with Workflow(
     generate_name="arguments-parameters-from-configmap-",
-    labels={
-        "workflows.argoproj.io/test": "true",
-    },
-    annotations={
-        "workflows.argoproj.io/description": "This example demonstrates loading parameter values from configmap. "
-        "Note that the `simple-parameters` ConfigMap "
-        "(defined in examples/configmaps/simple-parameters-configmap.yaml) needs "
-        "to be created first before submitting this workflow.",
-        "workflows.argoproj.io/verify.": 'assert status["phase"] == "Succeeded"',
-    },
+    workflow_metadata=WorkflowMetadata(
+        labels={
+            "workflows.argoproj.io/test": "true",
+        },
+        annotations={
+            "workflows.argoproj.io/description": "This example demonstrates loading parameter values from configmap. "
+            "Note that the `simple-parameters` ConfigMap "
+            "(defined in examples/configmaps/simple-parameters-configmap.yaml) needs "
+            "to be created first before submitting this workflow.",
+            "workflows.argoproj.io/verify.": 'assert status["phase"] == "Succeeded"',
+        },
+    ),
     service_account_name="argo",
 ) as w:
     Task(

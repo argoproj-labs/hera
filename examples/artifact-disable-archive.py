@@ -3,7 +3,7 @@
 https://github.com/argoproj/argo-workflows/blob/master/examples/artifact-disable-archive.yaml
 """
 
-from hera import HeraService
+from hera import Service
 from hera.models import (
     ArchiveStrategy,
     Arguments,
@@ -83,4 +83,4 @@ workflow = Workflow(
     ),
 )
 
-HeraService().create_workflow("argo", WorkflowCreateRequest(workflow=workflow))
+Service().create_workflow("argo", WorkflowCreateRequest(workflow=workflow))

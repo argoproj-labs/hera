@@ -20,6 +20,9 @@ from hera.parameter import Parameter
 class _BaseEnv:
     name: str
 
+    def __init__(self, name: str):
+        self.name = name
+
     def build(self) -> _ModelEnvVar:
         raise NotImplementedError
 
@@ -27,6 +30,13 @@ class _BaseEnv:
 class Env(_BaseEnv):
     value: Optional[Any] = None
     value_from_input: Optional[Union[str, Parameter]] = None
+
+    def __init__(
+        self, name: str, value: Optional[Any] = None, value_from_input: Optional[Union[str, Parameter]] = None
+    ):
+        self.value = value
+        self.value_from_input = value_from_input
+        super().__init__(name)
 
     @staticmethod
     def _sanitise_param_for_argo(v: str) -> str:
@@ -68,6 +78,12 @@ class SecretEnv(_BaseEnv):
     secret_name: Optional[str] = None
     optional: Optional[bool] = None
 
+    def __init__(self, name: str, secret_key: str, secret_name: Optional[str] = None, optional: Optional[bool] = None):
+        self.secret_key = secret_key
+        self.secret_name = secret_name
+        self.optional = optional
+        super().__init__(name)
+
     def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification"""
         return _ModelEnvVar(
@@ -85,6 +101,14 @@ class ConfigMapEnv(_BaseEnv):
     config_map_name: Optional[str]
     optional: Optional[bool] = None
 
+    def __init__(
+        self, name: str, config_map_key: str, config_map_name: Optional[str] = None, optional: Optional[bool] = None
+    ):
+        self.config_map_key = config_map_key
+        self.config_map_name = config_map_name
+        self.optional = optional
+        super().__init__(name)
+
     def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification"""
         return _ModelEnvVar(
@@ -98,8 +122,13 @@ class ConfigMapEnv(_BaseEnv):
 
 
 class FieldEnv(_BaseEnv):
-    api_version: Optional[str] = None
     field_path: str
+    api_version: Optional[str] = None
+
+    def __init__(self, name: str, field_path: str, api_version: Optional[str] = None):
+        self.field_path = field_path
+        self.api_version = api_version
+        super().__init__(name)
 
     @validator("api_version")
     def _check_api_version(cls, v):
@@ -124,6 +153,14 @@ class ResourceEnv(_BaseEnv):
     resource: str
     container_name: Optional[str] = None
     divisor: Optional[Quantity] = None
+
+    def __init__(
+        self, name: str, resource: str, container_name: Optional[str] = None, divisor: Optional[Quantity] = None
+    ):
+        self.resource = resource
+        self.container_name = container_name
+        self.divisor = divisor
+        super().__init__(name)
 
     def build(self) -> _ModelEnvVar:
         return _ModelEnvVar(

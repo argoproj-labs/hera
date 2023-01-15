@@ -3,6 +3,7 @@ from typing import Dict, Optional, Union
 
 from pydantic import root_validator
 
+from hera._base_model import BaseModel
 from hera.models import ResourceRequirements
 from hera.validators import validate_storage_units
 
@@ -24,7 +25,7 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
     return a
 
 
-class Resources:
+class Resources(BaseModel):
     """A representation of a collection of resources that are requested to be consumed by a task for execution.
 
     This follow the K8S definition for resources.

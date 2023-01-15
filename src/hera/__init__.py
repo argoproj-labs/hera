@@ -1,4 +1,4 @@
-# [DO NOT EDIT] generated via `make init` on: 2023-01-14 17:14:32.368352
+# [DO NOT EDIT] generated via `make init` on: 2023-01-14 19:43:00.347467
 from hera._base_model import *
 from hera._context import *
 from hera._version import *
@@ -347,7 +347,6 @@ from hera.models import (
     UpdateEventSourceRequest,
     UpdateSensorRequest,
     URLArtifact,
-    UserContainer,
     ValueFrom,
     ValueFromSource,
     Version,
@@ -398,6 +397,7 @@ from hera.retry_strategy import *
 from hera.sequence import *
 from hera.service import *
 from hera.task import *
+from hera.user_container import *
 from hera.validators import *
 from hera.volumes import *
 from hera.workflow import *
@@ -406,8 +406,3 @@ from hera.workflow_template import *
 
 __version__ = version
 __version_info__ = version.split(".")
-
-GlobalConfig.host = "https://argo.dynet.ai"
-GlobalConfig.token = "abc"
-GlobalConfig.verify_ssl = True
-GlobalConfig.image = "python:3.7"

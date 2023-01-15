@@ -17,7 +17,7 @@ def gather(products: str):
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow("parallel-dag") as wf:
-    with DAG("pipeline", inputs=[Parameter("instruction")], outputs=[Parameter("instruction")]) as pipeline:
+    with DAG("pipeline", inputs=[Parameter(name="instruction")], outputs=[Parameter(name="instruction")]) as pipeline:
         t1 = Task("create", produce, inputs=[pipeline.get_parameter("instruction")])
         t2 = Task("wrap", wrap, inputs=[t1.get_result_as("product")])
         t1 >> t2

@@ -2,7 +2,7 @@
 This task showcases how clients can request a particular number of GPUs to be available for a task and the specific
 type of GPU to request. The task uses the Horovod image as it provides Python and NVIDIA SMI.
 """
-from hera import GPUToleration, Resources, Task, Workflow
+from hera import Resources, Task, Toleration, Workflow
 
 
 def do():
@@ -43,8 +43,7 @@ with Workflow("gpu") as w:
         do,
         image="horovod/horovod:0.22.1",
         resources=Resources(gpus=1),
-        tolerations=[GPUToleration],
-        node_selectors=gke_t4_gpu,
+        node_selector=gke_t4_gpu,
     )
 
 w.create()

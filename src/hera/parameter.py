@@ -1,6 +1,6 @@
 """Holds input model specifications"""
 import json
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import root_validator
 
@@ -8,6 +8,8 @@ from hera.models import Parameter as _ModelParameter
 
 
 class Parameter(_ModelParameter):
+    value: Optional[Any]
+
     @root_validator(pre=True)
     def _check_values(cls, values):
         if values.get("value") is not None and values.get("value_from") is not None:

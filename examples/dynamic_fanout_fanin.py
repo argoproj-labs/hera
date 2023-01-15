@@ -29,7 +29,7 @@ with Workflow("dynamic-fanout-fanin") as w:
         "fanout",
         fanout,
         with_param=generate_task.get_result(),
-        outputs=[Parameter("value", value_from=ValueFrom(path="/tmp/value"))],
+        outputs=[Parameter(name="value", value_from=ValueFrom(path="/tmp/value"))],
     )
     fanin_task = Task("fanin", fanin, inputs=[fanout_task.get_parameters_as("values")])
 

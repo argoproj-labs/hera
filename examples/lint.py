@@ -1,6 +1,6 @@
 """This example showcases how to lint workflows supported by Hera"""
 
-from hera import CronWorkflow, Task, Workflow, WorkflowTemplate
+from hera import CronWorkflow, Task, Workflow, WorkflowMetadata, WorkflowTemplate
 
 
 def say(msg: str) -> None:
@@ -17,7 +17,7 @@ with CronWorkflow("cron-test-w", "* * * * *") as cw:
 
 cw.lint()
 
-with WorkflowTemplate("test-wt", labels={"a": "b"}) as wt:
+with WorkflowTemplate("test-wt", workflow_metadata=WorkflowMetadata(labels={"a": "b"})) as wt:
     Task("say", say, with_param=["Hello, world!"])
 
 wt.lint()

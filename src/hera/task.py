@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import hera
+from hera.artifact import Artifact
 from hera.dag import DAG
 from hera.env import Env, _BaseEnv
 from hera.env_from import _BaseEnvFrom
@@ -16,7 +17,6 @@ from hera.models import (
     HTTP,
     Affinity,
     Arguments,
-    Artifact,
     ArtifactLocation,
     Container,
     ContainerPort,
@@ -50,14 +50,14 @@ from hera.models import (
     Template,
     TemplateRef,
     Toleration,
-    UserContainer,
 )
 from hera.models import Volume as _ModelVolume
 from hera.models import VolumeDevice, VolumeMount
 from hera.operator import Operator
-from hera.resources import Resources
-from hera.validators import validate_name
 from hera.parameter import Parameter
+from hera.resources import Resources
+from hera.user_container import UserContainer
+from hera.validators import validate_name
 from hera.volumes import *
 from hera.volumes import _BaseVolume
 from hera.workflow_status import WorkflowStatus
@@ -140,7 +140,7 @@ class Task:
         exit_code: Optional[str] = None,
         result: Optional[str] = None,
         memoize: Optional[Memoize] = None,
-        metrics: Optional[Union[Prometheus, Metrics]] = None,
+        metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]] = None,
         node_selector: Optional[Dict[str, str]] = None,
         annotations: Optional[Dict[str, str]] = None,
         labels: Optional[Dict[str, str]] = None,
@@ -267,7 +267,7 @@ class Task:
         for hook in GlobalConfig.task_post_init_hooks:
             hook(self)
 
-    def _parse_metrics(self, metrics: Optional[Union[Prometheus, Metrics]]) -> Optional[Metrics]:
+    def _parse_metrics(self, metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]]) -> Optional[Metrics]:
         """Parses provided combination of metrics into a single `Metrics` object.
 
         Parameters
@@ -980,7 +980,7 @@ class Task:
             name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
-            resources=self.resources.build() if self.resources is not None else None,
+            resources=None if self.resources is None else self.resources.build(),
             security_context=self.security_context,
             source=self._get_script(),
             startup_probe=self.startup_probe,
@@ -1014,7 +1014,7 @@ class Task:
             name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
-            resources=self.resources.build() if self.resources is not None else None,
+            resources=None if self.resources is None else self.resources.build(),
             security_context=self.security_context,
             startup_probe=self.startup_probe,
             stdin=self.stdin,

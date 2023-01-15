@@ -3,7 +3,7 @@
 from hera import Sidecar, Task, Workflow
 
 # this assumes you have set a global token and a global host
-with Workflow("sidecar-", generate_name=True) as w:
+with Workflow(generate_name="sidecar-") as w:
     Task(
         "sidecar-example",
         image="alpine:latest",

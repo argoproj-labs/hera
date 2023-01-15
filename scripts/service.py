@@ -55,7 +55,7 @@ class ServiceEndpoint:
         self.produces = produces
 
     def parse_url(self, url) -> str:
-        if url[0] == '/':
+        if url[0] == "/":
             return url[1:]
         return url
 
@@ -267,17 +267,17 @@ def get_service_def() -> str:
     return """
 import requests
 import os
-{imports}
-from hera.new.config import GlobalConfig
-from typing import Optional    
+from hera.models import {imports}
+from hera.global_config import GlobalConfig
+from typing import Optional
 
 class Service:
     def __init__(
         self,
-        host: Optional[str] = GlobalConfig.host,
-        verify_ssl: bool = GlobalConfig.verify_ssl,
-        token: Optional[str] = GlobalConfig.token,
-        namespace: Optional[str] = GlobalConfig.namespace,
+        host: Optional[str] = None,
+        verify_ssl: bool = None,
+        token: Optional[str] = None,
+        namespace: Optional[str] = None,
     ):
         self.host = host or GlobalConfig.host
         self.verify_ssl = verify_ssl or GlobalConfig.verify_ssl
@@ -301,11 +301,17 @@ def write_service(service: str, path: Path) -> None:
 
 def get_imports(endpoints: List[ServiceEndpoint]) -> List[str]:
     result = []
+    builtins = dir(__builtins__)
     for endpoint in endpoints:
         for param in endpoint.params:
-            result.append(param.type_)
+            if param.type_.__module__ == "builtins":
+                continue
+            result.append(param.type_.__name__)
+
+        if endpoint.response.ref in builtins:
+            continue
         result.append(endpoint.response.ref)
-    return result
+    return list(set(result))
 
 
 def create_service() -> None:
@@ -317,7 +323,7 @@ def create_service() -> None:
     endpoints = get_endpoints(paths, consumes=consumes, produces=produces)
     imports = get_imports(endpoints)
     service_def = get_service_def()
-    service_def = service_def.format(imports=imports)
+    service_def = service_def.format(imports=", ".join(imports))
     result = make_service(service_def, endpoints)
     path = Path(__name__).parent / "src/hera/service.py"
     write_service(result, path)

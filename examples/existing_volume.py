@@ -17,7 +17,7 @@ with Workflow("existing-volume") as w:
         "download",
         download,
         [{"path": "/whatever/path"}],
-        volumes=[ExistingVolume(name="my-vol-claim", mount_path="/vol")],
+        volumes=[ExistingVolume(claim_name="my-vol-claim", mount_path="/vol")],
     )
 
 w.create()

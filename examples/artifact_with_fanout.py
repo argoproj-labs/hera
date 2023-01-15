@@ -26,7 +26,7 @@ def consumer(i: int):
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow("artifact-with-fanout") as w:
-    w_t = Task("writer", writer, outputs=[Artifact("test", "/file")])
+    w_t = Task("writer", writer, outputs=[Artifact(name="test", path="/file")])
     f_t = Task(
         "fanout",
         fanout,

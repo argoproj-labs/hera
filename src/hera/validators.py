@@ -3,7 +3,9 @@ import re
 from typing import Optional
 
 
-def validate_name(name: Optional[str] = None, max_length: Optional[int] = None, generate_name: str = None) -> Optional[str]:
+def validate_name(
+    name: Optional[str] = None, max_length: Optional[int] = None, generate_name: str = None
+) -> Optional[str]:
     """Validates a name according to standard argo/kubernetes limitations
 
     Parameters

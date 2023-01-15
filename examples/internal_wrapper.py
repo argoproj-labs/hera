@@ -6,13 +6,14 @@ top of Hera to support consistency in submission across users, teams, etc.
 from typing import Any, Callable, List, Optional, Union
 
 from hera import (
+    Backoff,
     ExistingVolume,
     Resources,
     RetryStrategy,
+    Service,
     Task,
     Toleration,
     Workflow,
-    WorkflowService,
 )
 
 
@@ -25,7 +26,7 @@ def generate_token() -> str:
     return "my-bearer-token"
 
 
-class MyWorkflowService(WorkflowService):
+class MyWorkflowService(Service):
     """Internal service wrapper around Hera's WorkflowService to support consistency in auth token generation"""
 
     def __init__(self, host: str = "https://my-argo-domain.com", token: str = generate_token()):
@@ -35,8 +36,8 @@ class MyWorkflowService(WorkflowService):
 class MyWorkflow(Workflow):
     """Internal Workflow wrapper around Hera's Workflow to support consistent MyWorkflowService usage"""
 
-    def __init__(self, name: str, service: WorkflowService = MyWorkflowService(), parallelism: int = 50):
-        super(MyWorkflow, self).__init__(name, service, parallelism=parallelism)
+    def __init__(self, name: str, service: Service = MyWorkflowService(), parallelism: int = 50):
+        super(MyWorkflow, self).__init__(name, service=service, parallelism=parallelism)
 
 
 class MyTask(Task):
@@ -52,12 +53,12 @@ class MyTask(Task):
         resources: Resources = Resources(),
         tolerations: Optional[List[Toleration]] = None,
     ):
-        default_retry = RetryStrategy(backoff=dict(duration="1", max_duration="20"))
+        default_retry = RetryStrategy(backoff=Backoff(duration="1", max_duration="20"))
         # note that this gke-accelerator spec is only valid for GKE GPUs. For Azure and AWS you
         # might have to use the `node_selectors` field exclusively
         default_node_selectors = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
         default_working_dir = "/my-volume"
-        resources.existing_volume = ExistingVolume(name="my-volume", mount_path="/my-volume")
+        resources.existing_volume = ExistingVolume(claim_name="my-volume", mount_path="/my-volume")
         super(MyTask, self).__init__(
             name,
             source,
@@ -68,7 +69,7 @@ class MyTask(Task):
             working_dir=default_working_dir,
             retry_strategy=default_retry,
             tolerations=tolerations,
-            node_selectors=default_node_selectors,
+            node_selector=default_node_selectors,
         )
 
 
