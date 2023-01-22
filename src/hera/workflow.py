@@ -1,7 +1,7 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
 import json
 from types import ModuleType
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Union, cast
 
 import hera
 from hera.dag import DAG
@@ -13,7 +13,6 @@ from hera.models import (
     Artifact,
     ArtifactGC,
     ArtifactRepositoryRef,
-    CreateOptions,
     ExecutorConfig,
     HostAlias,
     LifecycleHook,
@@ -33,7 +32,7 @@ from hera.models import (
     TTLStrategy,
     VolumeClaimGC,
 )
-from hera.models import Workflow as ModelWorkflow
+from hera.models import Workflow as _ModelWorkflow
 from hera.models import (
     WorkflowCreateRequest,
     WorkflowDeleteResponse,
@@ -66,17 +65,18 @@ try:
 except ImportError:
     _yaml = None
 
+BaseWorkflow = TypeVar("BaseWorkflow")
 WorkflowType = TypeVar("WorkflowType", bound="Workflow")
 
 
-class Workflow:
+class Workflow(Generic[WorkflowType]):
     def __init__(
         self: WorkflowType,
         name: Optional[str] = None,
         api_version: Optional[str] = GlobalConfig.api_version,
         dag_name: Optional[str] = "hera-dag",
         dag: Optional[DAG] = None,
-        generate_name: Optional[str] = False,
+        generate_name: Optional[str] = None,
         service: Optional[Service] = None,
         active_deadline_seconds: Optional[int] = None,
         affinity: Optional[Affinity] = None,
@@ -125,7 +125,7 @@ class Workflow:
         workflow_template_ref: Optional[WorkflowTemplateRef] = None,
     ):
         self.name = validate_name(name=name, generate_name=generate_name)
-        dag_name = self.name.rstrip("-.") if dag_name is None else dag_name
+        dag_name = cast(str, self.name).rstrip("-.") if dag_name is None else dag_name
         self.api_version = api_version
         self.dag = DAG(dag_name) if dag is None else dag
         self.generate_name = generate_name
@@ -160,7 +160,7 @@ class Workflow:
         self.security_context = security_context
         self.service_account_name = service_account_name
         self.shutdown = shutdown
-        self.suspend = suspend
+        self.suspend_ = suspend
         self.synchronization = synchronization
         self.template_defaults = template_defaults
         self.tolerations = tolerations
@@ -176,7 +176,7 @@ class Workflow:
             hook(self)
 
     def _parse_volume_claim_gc(
-        self, volume_claim_gc: Optional[Union[VolumeClaimGC, GCStrategy]]
+        self: WorkflowType, volume_claim_gc: Optional[Union[VolumeClaimGC, GCStrategy]]
     ) -> Optional[VolumeClaimGC]:
         if volume_claim_gc is None:
             return None
@@ -189,7 +189,9 @@ class Workflow:
 
         return None
 
-    def _parse_metrics(self, metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]]) -> Optional[Metrics]:
+    def _parse_metrics(
+        self: WorkflowType, metrics: Optional[Union[Prometheus, List[Prometheus], Metrics]]
+    ) -> Optional[Metrics]:
         if metrics is None:
             return None
 
@@ -207,7 +209,7 @@ class Workflow:
             )
 
     def _parse_inputs(
-        self,
+        self: WorkflowType,
         inputs: Optional[
             Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
         ],
@@ -289,7 +291,7 @@ class Workflow:
             security_context=self.security_context,
             service_account_name=self.service_account_name,
             shutdown=self.shutdown,
-            suspend=self.suspend,
+            suspend=self.suspend_,
             synchronization=self.synchronization,
             templates=self.dag._build_templates() + self.dag.build(),
             template_defaults=self.template_defaults,
@@ -302,16 +304,20 @@ class Workflow:
             workflow_template_ref=self.workflow_template_ref,
         )
 
-    def build(self: WorkflowType) -> ModelWorkflow:
+    @staticmethod
+    def from_model(m: _ModelWorkflow) -> "Workflow":
+        return Workflow(api_version=m.api_version, **m.spec.dict())
+
+    def build(self: WorkflowType) -> _ModelWorkflow:
         """Builds the workflow core representation"""
-        return ModelWorkflow(
+        return _ModelWorkflow(
             api_version=self.api_version,
             kind=self.__class__.__name__,
             metadata=self._build_metadata(),
             spec=self._build_spec(),
         )
 
-    def __enter__(self: WorkflowType) -> WorkflowType:
+    def __enter__(self: WorkflowType) -> "Workflow":
         """Enter the context of the workflow.
 
         Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
@@ -328,12 +334,12 @@ class Workflow:
         self.in_context = False
         hera.dag_context.exit()
 
-    def add_task(self: WorkflowType, t: Task) -> WorkflowType:
+    def add_task(self: WorkflowType, t: Task) -> "Workflow":
         """Add a task to the workflow"""
         self.dag.add_task(t)
         return self
 
-    def add_tasks(self: WorkflowType, *ts: Task) -> WorkflowType:
+    def add_tasks(self: WorkflowType, *ts: Task) -> "Workflow":
         """Add a collection of tasks to the workflow"""
         self.dag.add_tasks(*ts)
         return self
@@ -356,7 +362,8 @@ class Workflow:
 
     def get_parameter(self: WorkflowType, name: str) -> Parameter:
         """Assembles the specified parameter name into a parameter specification"""
-        if self.parameters is None or next((p for p in self.parameters if p.name == name), None) is None:
+        parameters = [] if self.inputs is None else [p for p in self.inputs if isinstance(p, Parameter)]
+        if next((p for p in parameters if p.name == name), None) is None:
             raise KeyError(f"`{name}` is not a valid workflow parameter")
         return Parameter(name=name, value=f"{{{{workflow.parameters.{name}}}}}")
 
@@ -380,151 +387,148 @@ class Workflow:
     def create(
         self: WorkflowType,
         namespace: str = GlobalConfig.namespace,
-        create_options: Optional[CreateOptions] = None,
-        instance_id: Optional[str] = None,
-        server_dry_run: Optional[bool] = None,
-    ) -> WorkflowType:
+        **create_kwargs,
+    ) -> "Workflow":
         """Creates the workflow"""
         if self.in_context:
             raise ValueError("Cannot invoke `create` when using a Hera context")
 
-        return self.service.create_workflow(
-            namespace,
-            WorkflowCreateRequest(
-                create_options=create_options,
-                instance_id=instance_id,
-                namespace=namespace,
-                server_dry_run=server_dry_run,
-                workflow=self.build(),
-            ),
+        return Workflow.from_model(
+            self.service.create_workflow(
+                namespace,
+                WorkflowCreateRequest(workflow=self.build(), **create_kwargs),
+            )
         )
 
-    def lint(self: WorkflowType, namespace: str = GlobalConfig.namespace) -> WorkflowType:
+    def lint(self: WorkflowType, namespace: str = GlobalConfig.namespace) -> "Workflow":
         """Lint the workflow"""
-        return self.service.lint_workflow(namespace, WorkflowLintRequest(namespace=namespace, workflow=self.build()))
+        return Workflow.from_model(
+            self.service.lint_workflow(namespace, WorkflowLintRequest(namespace=namespace, workflow=self.build()))
+        )
 
     def resubmit(
         self: WorkflowType,
         namespace: str = GlobalConfig.namespace,
-        memoized: Optional[bool] = None,
-        parameters: Optional[List[str]] = None,
-    ) -> WorkflowType:
-        return self.service.resubmit_workflow(
-            namespace,
-            self.name,
-            WorkflowResubmitRequest(
-                memoized=memoized,
-                name=self.name,
-                namespace=namespace,
-                parameters=parameters,
-            ),
+        **resubmit_kwargs,
+    ) -> "Workflow":
+        assert self.name is not None, "Cannot resubmit a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.resubmit_workflow(
+                namespace,
+                self.name,
+                WorkflowResubmitRequest(
+                    name=self.name,
+                    namespace=namespace,
+                    **resubmit_kwargs,
+                ),
+            )
         )
 
     def resume(
-        self: WorkflowType, namespace: str = GlobalConfig.namespace, node_field_selector: Optional[str] = None
-    ) -> WorkflowType:
-        return self.service.resume_workflow(
-            namespace,
-            self.name,
-            WorkflowResumeRequest(name=self.name, namespace=namespace, node_field_selector=node_field_selector),
+        self: WorkflowType,
+        namespace: str = GlobalConfig.namespace,
+        **resume_kwargs,
+    ) -> "Workflow":
+        assert self.name is not None, "Cannot resume a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.resume_workflow(
+                namespace,
+                self.name,
+                WorkflowResumeRequest(name=self.name, namespace=namespace, **resume_kwargs),
+            )
         )
 
     def retry(
         self: WorkflowType,
         namespace: str = GlobalConfig.namespace,
-        node_field_selector: Optional[List[str]] = None,
-        parameters: Optional[List[str]] = None,
-        restart_successful: Optional[bool] = None,
-    ) -> WorkflowType:
-        return self.service.retry_workflow(
-            namespace,
-            self.name,
-            WorkflowRetryRequest(
-                name=self.name,
-                namespace=namespace,
-                node_field_selector=node_field_selector,
-                parameters=parameters,
-                restart_successful=restart_successful,
-            ),
+        **retry_kwargs,
+    ) -> "Workflow":
+        assert self.name is not None, "Cannot retry a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.retry_workflow(
+                namespace,
+                self.name,
+                WorkflowRetryRequest(
+                    name=self.name,
+                    namespace=namespace,
+                    **retry_kwargs,
+                ),
+            )
         )
 
     def set(
         self: WorkflowType,
-        namespace: GlobalConfig.namespace,
-        message: Optional[str] = None,
-        node_field_selector: Optional[str] = None,
-        output_parameters: Optional[str] = None,
-        phase: Optional[str] = None,
-    ) -> WorkflowType:
-        return self.service.set_workflow(
-            namespace,
-            self.name,
-            WorkflowSetRequest(
-                message=message,
-                name=self.name,
-                namespace=namespace,
-                node_field_selector=node_field_selector,
-                output_parameters=output_parameters,
-                phase=phase,
-            ),
+        namespace: str = GlobalConfig.namespace,
+        **set_kwargs,
+    ) -> "Workflow":
+        assert self.name is not None, "Cannot set a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.set_workflow(
+                namespace,
+                self.name,
+                WorkflowSetRequest(
+                    name=self.name,
+                    namespace=namespace,
+                    **set_kwargs,
+                ),
+            )
         )
 
     def stop(
-        self,
+        self: WorkflowType,
         namespace: str = GlobalConfig.namespace,
-        message: Optional[str] = None,
-        node_field_selector: Optional[str] = None,
-    ) -> WorkflowType:
-        return self.service.stop_workflow(
-            namespace,
-            self.name,
-            WorkflowStopRequest(
-                message=message, name=self.name, namespace=namespace, node_field_selector=node_field_selector
-            ),
+        **stop_kwargs,
+    ) -> "Workflow":
+        assert self.name is not None, "Cannot stop a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.stop_workflow(
+                namespace,
+                self.name,
+                WorkflowStopRequest(
+                    name=self.name,
+                    namespace=namespace,
+                    **stop_kwargs,
+                ),
+            )
         )
 
-    def suspend(self, namespace: str = GlobalConfig.namespace) -> WorkflowType:
-        return self.service.suspend_workflow(
-            namespace,
-            self.name,
-            WorkflowSuspendRequest(
-                name=self.name,
-                namespace=namespace,
-            ),
+    def suspend(self: WorkflowType, namespace: str = GlobalConfig.namespace) -> "Workflow":
+        assert self.name is not None, "Cannot suspend a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.suspend_workflow(
+                namespace,
+                self.name,
+                WorkflowSuspendRequest(
+                    name=self.name,
+                    namespace=namespace,
+                ),
+            )
         )
 
-    def terminate(self, namespace: str = GlobalConfig.namespace) -> WorkflowType:
-        return self.service.terminate_workflow(
-            namespace,
-            self.name,
-            WorkflowTerminateRequest(
-                name=self.name,
-                namespace=namespace,
-            ),
+    def terminate(self: WorkflowType, namespace: str = GlobalConfig.namespace) -> "Workflow":
+        assert self.name is not None, "Cannot terminate a workflow without a `name`"
+        return Workflow.from_model(
+            self.service.terminate_workflow(
+                namespace,
+                self.name,
+                WorkflowTerminateRequest(
+                    name=self.name,
+                    namespace=namespace,
+                ),
+            )
         )
 
     def delete(
         self: WorkflowType,
         namespace: str = GlobalConfig.namespace,
-        grace_period_seconds: Optional[str] = None,
-        uid: Optional[str] = None,
-        resource_version: Optional[str] = None,
-        orphan_dependents: Optional[bool] = None,
-        propagation_policy: Optional[str] = None,
-        dry_run: Optional[list] = None,
-        force: Optional[bool] = None,
+        **delete_kwargs,
     ) -> WorkflowDeleteResponse:
         """Deletes the workflow"""
+        assert self.name is not None, "Cannot delete a workflow without a `name`"
         return self.service.delete_workflow(
             namespace,
             self.name,
-            grace_period_seconds=grace_period_seconds,
-            uid=uid,
-            resource_version=resource_version,
-            orphan_dependents=orphan_dependents,
-            propagation_policy=propagation_policy,
-            dry_run=dry_run,
-            force=force,
+            **delete_kwargs,
         )
 
 

@@ -4,7 +4,7 @@ from typing import Optional
 
 
 def validate_name(
-    name: Optional[str] = None, max_length: Optional[int] = None, generate_name: str = None
+    name: Optional[str] = None, max_length: Optional[int] = None, generate_name: Optional[str] = None
 ) -> Optional[str]:
     """Validates a name according to standard argo/kubernetes limitations
 

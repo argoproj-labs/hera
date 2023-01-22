@@ -54,6 +54,7 @@ jsonpath-ng = "^1.5.3"
 
 [tool.poetry.group.dev.dependencies]
 datamodel-code-generator = {extras = ["http"], version = "^0.14.1"}
+types-pytz = "^2022.7.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -85,24 +86,30 @@ profile = "black"
 skip_gitignore = true
 skip_glob = [".venv/*", ".mypy_cache/*", ".pytest_cache/*", ".github/*", ".git/*"]
 
-[tool.mypy]
+[mypy]
+check_untyped_defs = true
 show_traceback = true
 namespace_packages = true
-check_untyped_defs = true
 no_implicit_optional = true
-strict_optional = false
 explicit_package_bases = true
 show_error_codes = true
 warn_unused_ignores = true
+mypy_path = "src"
+strict_optional = true
+exclude = ["src\\/hera\\/models", "src\\/hera\\/service\\.py"]
 
 [[tool.mypy.overrides]]
 module = "mypy-urllib3.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "mypy-pytz.*"
+module = "mypy-pkg_resources.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "mypy-pkg_resources.*"
+module = "mypy-argo_workflows.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mypy-yaml.*"
 ignore_missing_imports = true

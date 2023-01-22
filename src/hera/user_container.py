@@ -9,18 +9,18 @@ from hera.volumes import _BaseVolume
 
 
 class UserContainer(_ModelUserContainer):
-    env: Optional[List[_BaseEnv]] = None
-    env_from: Optional[List[_BaseEnvFrom]] = None
-    image_pull_policy: Optional[ImagePullPolicy] = None
-    resources: Optional[Resources] = None
-    volumes: Optional[List[_BaseVolume]] = None
+    env: Optional[List[_BaseEnv]] = None  # type: ignore[assignment]
+    env_from: Optional[List[_BaseEnvFrom]] = None  # type: ignore[assignment]
+    image_pull_policy: Optional[ImagePullPolicy] = None  # type: ignore[assignment]
+    resources: Optional[Resources] = None  # type: ignore[assignment]
+    volumes: Optional[List[_BaseVolume]] = None  # type: ignore[assignment]
 
     def build(self) -> _ModelUserContainer:
         return _ModelUserContainer(
             args=self.args,
             command=self.command,
-            env=[e.build() for e in self.env],
-            env_from=[ef.build() for ef in self.env_from],
+            env=None if self.env is None else [e.build() for e in self.env],
+            env_from=None if self.env_from is None else [ef.build() for ef in self.env_from],
             image=self.image,
             image_pull_policy=self.image_pull_policy.value if self.image_pull_policy else None,
             lifecycle=self.lifecycle,
@@ -38,7 +38,7 @@ class UserContainer(_ModelUserContainer):
             termination_message_policy=self.termination_message_policy,
             tty=self.tty,
             volume_devices=self.volume_devices,
-            volume_mounts=None if self.volumes is None else [v.volume() for v in self.volumes],
+            volume_mounts=None if self.volumes is None else [v.to_volume() for v in self.volumes],
             working_dir=self.working_dir,
         )
 

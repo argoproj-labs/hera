@@ -13,7 +13,7 @@ format: ## Format and sort imports for source, tests, etc.
 	@isort src scripts docs tests examples conftest.py
 
 typecheck: ## Run typecheck on the project and report any issues
-	@mypy -p hera --exclude src/hera/models
+	@mypy -p hera --config-file pyproject.toml --exclude src/hera/models --exclude src/hera/service.py --check-untyped-defs
 
 examples: ## Generate all the example Markdown files in `/docs` based on the examples directory
 	@python scripts/examples.py

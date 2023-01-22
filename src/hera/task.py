@@ -5,7 +5,7 @@ import inspect
 import json
 import textwrap
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import hera
 from hera.artifact import Artifact
@@ -23,7 +23,6 @@ from hera.models import (
     ContainerSetTemplate,
     ContinueOn,
     DAGTask,
-    DAGTemplate,
     Data,
     ExecutorConfig,
     HostAlias,
@@ -58,8 +57,7 @@ from hera.parameter import Parameter
 from hera.resources import Resources
 from hera.user_container import UserContainer
 from hera.validators import validate_name
-from hera.volumes import *
-from hera.volumes import _BaseVolume
+from hera.volumes import Volume, _BaseVolume
 from hera.workflow_status import WorkflowStatus
 
 
@@ -169,7 +167,7 @@ class Task:
         if with_param is not None and with_sequence is not None:
             raise ValueError("Cannot use both `with_sequence` and `with_param`")
 
-        self.name: str = validate_name(name)
+        self.name: str = cast(str, validate_name(name))
         self.args: Optional[List[str]] = args
         self.command: Optional[List[str]] = command
         self.env: Optional[List[_BaseEnv]] = env or []
@@ -191,7 +189,7 @@ class Task:
         self.tty: Optional[bool] = tty
         self.volume_devices: Optional[List[VolumeDevice]] = volume_devices
         self.working_dir: Optional[str] = working_dir
-        self.arguments: Optional[List[Artifact, Parameter]] = arguments or []
+        self.arguments: Optional[List[Union[Artifact, Parameter]]] = arguments or []
         self.continue_on: Optional[ContinueOn] = continue_on
         self.dependencies: Optional[List[str]] = dependencies
         self.depends: Optional[str] = depends
@@ -211,7 +209,7 @@ class Task:
         self.container: Optional[Container] = container
         self.container_set: Optional[ContainerSetTemplate] = container_set
         self.daemon: Optional[bool] = daemon
-        self.dag: Optional[DAGTemplate] = dag
+        self.dag: Optional[DAG] = dag
         self.data: Optional[Data] = data
         self.executor: Optional[ExecutorConfig] = executor
         self.fail_fast: Optional[bool] = fail_fast
@@ -248,9 +246,8 @@ class Task:
         self.synchronization: Optional[Synchronization] = synchronization
         self.timeout: Optional[str] = timeout
         self.tolerations: Optional[List[Toleration]] = tolerations
-        self.volumes: Optional[List[Volume]] = volumes or []
+        self.volumes: Optional[List[_BaseVolume]] = volumes or []
 
-        self.dag: DAG = dag
         self.is_exit_task: bool = False
 
         self.validate()
@@ -489,7 +486,7 @@ class Task:
             return other
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
-    def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator) -> "Task":
+    def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.equals) -> "Task":
         """Execute this task conditionally on a workflow status."""
         expression = f"{{{{workflow.status}}}} {op} {status}"
         if self.when:
@@ -610,13 +607,13 @@ class Task:
         Validates that the given function and corresponding params fit one another, raises AssertionError if
         conditions are not satisfied.
         """
-        i_parameters = [obj for obj in self.inputs if isinstance(obj, Parameter)]
-        i_artifacts = [obj for obj in self.inputs if isinstance(obj, Artifact)]
+        i_parameters = [] if self.inputs is None else [obj for obj in self.inputs if isinstance(obj, Parameter)]
+        i_artifacts = [] if self.inputs is None else [obj for obj in self.inputs if isinstance(obj, Artifact)]
         assert len(set([i.name for i in i_parameters])) == len(i_parameters), "input parameters must have unique names"
         assert len(set([i.name for i in i_artifacts])) == len(i_artifacts), "input artifacts must have unique names"
 
-        o_parameters = [obj for obj in self.outputs if isinstance(obj, Parameter)]
-        o_artifacts = [obj for obj in self.outputs if isinstance(obj, Artifact)]
+        o_parameters = [] if self.outputs is None else [obj for obj in self.outputs if isinstance(obj, Parameter)]
+        o_artifacts = [] if self.outputs is None else [obj for obj in self.outputs if isinstance(obj, Artifact)]
         assert len(set([o.name for o in o_parameters])) == len(
             o_parameters
         ), "output parameters must have unique names"
@@ -649,9 +646,9 @@ class Task:
 
     def _build_arguments(self) -> Optional[Arguments]:
         """Assembles and returns the task arguments"""
-        parameters = [obj for obj in self.inputs if isinstance(obj, Parameter)]
-        parameters = [p for p in parameters if p is not None]  # Some parameters might not resolve
-        artifacts = [obj for obj in self.inputs if isinstance(obj, Artifact)]
+        parameters = [obj for obj in self.inputs if isinstance(obj, Parameter)] if self.inputs is not None else []
+        parameters = list(filter(lambda p: p is not None, parameters))
+        artifacts = [obj for obj in self.inputs if isinstance(obj, Artifact)] if self.inputs is not None else []
         if len(parameters) + len(artifacts) == 0:
             # Some inputs do not require arguments (defaults)
             return None
@@ -674,7 +671,7 @@ class Task:
             Parameter with the same name
 
         """
-        parameters = [p for p in self.outputs if isinstance(p, Parameter)]
+        parameters = [] if self.outputs is None else [p for p in self.outputs if isinstance(p, Parameter)]
         obj = next((output for output in parameters if output.name == name), None)
         if obj is not None:
             if isinstance(obj, Parameter):
@@ -697,7 +694,7 @@ class Task:
             Artifact with the same name
 
         """
-        artifacts = [p for p in self.outputs if isinstance(p, Artifact)]
+        artifacts = [p for p in self.outputs if isinstance(p, Artifact)] if self.outputs is not None else []
         obj = next((output for output in artifacts if output.name == name), None)
         if obj is not None:
             if isinstance(obj, Artifact):
@@ -752,7 +749,9 @@ class Task:
                 source_signature[p.name] = None
 
         # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
-        input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]
+        input_params_names = (
+            [p.name for p in self.inputs if isinstance(p, Parameter)] if self.inputs is not None else []
+        )
         deduced_params: List[Parameter] = [
             Parameter(name=n, default=v) for n, v in source_signature.items() if n not in input_params_names
         ]
@@ -842,8 +841,8 @@ class Task:
         """
         deduced_params: List[Parameter] = []
 
-        if self.dag:
-            if self.dag.inputs:
+        if self.dag is not None:
+            if self.dag.inputs is not None:
                 self.dag.inputs = cast(List[Union[Parameter, Artifact]], self.dag.inputs)
                 if len(self.dag.inputs) == 1:
                     deduced_params.append(Parameter(name=self.dag.inputs[0].name, value="{{item}}"))
@@ -853,15 +852,15 @@ class Task:
         else:
             deduced_params += self._deduce_input_params_from_source()
 
-        for spec in self.env:
-            if isinstance(spec, Env) and spec.value_from_input is not None:
-                value = (
-                    spec.value_from_input.value
-                    if isinstance(spec.value_from_input, Parameter)
-                    else spec.value_from_input
-                )
-                deduced_params.append(Parameter(name=spec.param_name, value=value))
-
+        if self.env is not None:
+            for spec in self.env:
+                if isinstance(spec, Env) and spec.value_from_input is not None:
+                    value = (
+                        spec.value_from_input.value
+                        if isinstance(spec.value_from_input, Parameter)
+                        else spec.value_from_input
+                    )
+                    deduced_params.append(Parameter(name=spec.param_name, value=value))
         return deduced_params
 
     def _get_param_script_portion(self) -> str:
@@ -875,7 +874,7 @@ class Task:
         str
             The string representation of the script to load.
         """
-        inputs = [i for i in self.inputs if isinstance(i, Parameter)]
+        inputs = [i for i in self.inputs if isinstance(i, Parameter)] if self.inputs is not None else []
         inputs = [a for a in inputs if a is not None]
         extract = "import json\n"
         for param in sorted(inputs, key=lambda x: x.name):
@@ -903,7 +902,9 @@ class Task:
             args = inspect.getfullargspec(self.source).args
             if signature.return_annotation == str:
                 # Resolve function by filling in templated inputs
-                input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]
+                input_params_names = (
+                    [p.name for p in self.inputs if isinstance(p, Parameter)] if self.inputs is not None else []
+                )
                 missing_args = set(args) - set(input_params_names)
                 if missing_args:
                     raise ValueError(f"Missing inputs for source args: {missing_args}")
@@ -949,17 +950,17 @@ class Task:
         List[VolumeMount]
             The list of volume mounts to be added to the task specification.
         """
-        return [v.mount() for v in self.volumes]
+        return [v.to_mount() for v in self.volumes] if self.volumes is not None else []
 
     def _build_volume_claim_templates(self) -> List[PersistentVolumeClaimTemplate]:
         """Assembles the list of volume claim templates to be created for the task."""
-        return [v.claim() for v in self.volumes if isinstance(v, Volume)]
+        return [v.to_claim() for v in self.volumes if isinstance(v, Volume)] if self.volumes is not None else []
 
     def _build_persistent_volume_claims(self) -> List[_ModelVolume]:
         """Assembles the list of Argo volume specifications"""
-        return [v.volume() for v in self.volumes if not isinstance(v, Volume)]
+        return [v.to_volume() for v in self.volumes if not isinstance(v, Volume)] if self.volumes is not None else []
 
-    def _build_script(self) -> ScriptTemplate:
+    def _build_script(self) -> Optional[ScriptTemplate]:
         """Assembles and returns the script template that contains the definition of the script to run in a task.
 
         Returns
@@ -967,11 +968,13 @@ class Task:
         ScriptTemplate
             The script template representation of the task.
         """
+        if self.source is None:
+            return None
         return ScriptTemplate(
             args=self.get_args(),
             command=self.get_command(),
-            env=[e.build() for e in self.env],
-            env_from=[ef.build() for ef in self.env_from],
+            env=[e.build() for e in self.env] if self.env is not None else None,
+            env_from=[ef.build() for ef in self.env_from] if self.env_from is not None else None,
             image=self.image,
             image_pull_policy=self.image_pull_policy,
             lifecycle=self.lifecycle,
@@ -993,7 +996,7 @@ class Task:
             working_dir=self.working_dir,
         )
 
-    def _build_container(self) -> Container:
+    def _build_container(self) -> Optional[Container]:
         """Assembles and returns the container for the task to run in.
 
         Returns
@@ -1001,11 +1004,13 @@ class Task:
         Container
             The container template representation of the task.
         """
+        if self.container is None:
+            return None
         container = Container(
             args=self.get_args(),
             command=self.get_command(),
-            env=[e.build() for e in self.env],
-            env_from=[ef.build() for ef in self.env_from],
+            env=[e.build() for e in self.env] if self.env is not None else None,
+            env_from=[ef.build() for ef in self.env_from] if self.env_from is not None else None,
             image=self.image,
             image_pull_policy=self.image_pull_policy,
             lifecycle=self.lifecycle,
@@ -1042,11 +1047,12 @@ class Task:
         if self.dag is not None:
             return None
 
-        template = Template(
+        return Template(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
+            container=self._build_container(),
             daemon=self.daemon,
             dag=self.dag,
             executor=self.executor,
@@ -1055,8 +1061,12 @@ class Task:
             http=self.http,
             init_containers=self.init_containers,
             inputs=Inputs(
-                artifacts=list(filter(lambda i: isinstance(i, Artifact), self.inputs)),
-                parameters=list(filter(lambda i: isinstance(i, Parameter), self.inputs)),
+                artifacts=list(filter(lambda i: isinstance(i, Artifact), self.inputs))
+                if self.inputs is not None
+                else None,
+                parameters=list(filter(lambda i: isinstance(i, Parameter), self.inputs))
+                if self.inputs is not None
+                else None,
             ),
             memoize=self.memoize,
             metadata=Metadata(annotations=self.annotations, labels=self.labels),
@@ -1064,8 +1074,12 @@ class Task:
             name=self.name,
             node_selector=self.node_selector,
             outputs=Outputs(
-                artifacts=list(filter(lambda o: isinstance(o, Artifact), self.outputs)),
-                parameters=list(filter(lambda o: isinstance(o, Parameter), self.outputs)),
+                artifacts=list(filter(lambda o: isinstance(o, Artifact), self.outputs))
+                if self.outputs is not None
+                else None,
+                parameters=list(filter(lambda o: isinstance(o, Parameter), self.outputs))
+                if self.outputs is not None
+                else None,
                 exit_code=self.exit_code_,
                 result=self.result,
             ),
@@ -1079,19 +1093,13 @@ class Task:
             security_context=self.security_context,
             service_account_name=self.service_account_name,
             sidecars=self.sidecars,
+            script=self._build_script(),
+            suspend=self.suspend,
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
-            volumes=[v.volume() for v in self.volumes],
+            volumes=[v.to_volume() for v in self.volumes] if self.volumes is not None else None,
         )
-
-        if self.source is not None:
-            template.script = self._build_script()
-        elif self.suspend is not None:
-            template.suspend = self.suspend
-        else:
-            template.container = self._build_container()
-        return template
 
     def _build_dag_task(self) -> DAGTask:
         """Assembles and returns the graph task specification of the task.
@@ -1102,9 +1110,15 @@ class Task:
             The graph task representation.
         """
         t = DAGTask(
-            arguments=Arguments(
-                artifacts=list(filter(lambda a: isinstance(a, Artifact), self.arguments)),
-                parameters=list(filter(lambda a: isinstance(a, Parameter), self.arguments)),
+            arguments=None
+            if self.arguments is None
+            else Arguments(
+                artifacts=[a for a in self.arguments if isinstance(a, Artifact)]
+                if self.arguments is not None
+                else None,
+                parameters=(
+                    [p for p in self.arguments if isinstance(p, Parameter)] if self.arguments is not None else None
+                ),
             ),
             continue_on=self.continue_on,
             dependencies=self.dependencies,
@@ -1121,7 +1135,7 @@ class Task:
         if self.template_ref is not None:
             t.template_ref = self.template_ref
         else:
-            t.template = self.dag.name if self.dag else self.name
+            t.template = self.dag.name if self.dag is not None else self.name
 
         if self.with_param is not None:
             with_param = self.with_param

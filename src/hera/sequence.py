@@ -7,10 +7,10 @@ from hera.models import Sequence as _ModelSequence
 
 
 class Sequence(_ModelSequence):
-    count: Optional[Union[int, str, IntOrString]] = None
-    end: Optional[Union[int, str, IntOrString]] = None
-    format: Optional[str] = None
-    start: Optional[Union[int, str, IntOrString]] = None
+    count: Optional[Union[int, str, IntOrString]] = None  # type: ignore
+    end: Optional[Union[int, str, IntOrString]] = None  # type: ignore
+    format: Optional[str] = None  # type: ignore
+    start: Optional[Union[int, str, IntOrString]] = None  # type: ignore
 
     @validator("count", pre=True)
     def count_to_str(cls, v):

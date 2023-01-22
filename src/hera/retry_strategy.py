@@ -40,11 +40,11 @@ class RetryPolicy(Enum):
 
 
 class RetryStrategy(_ModelRetryStrategy):
-    affinity: Optional[RetryAffinity] = None
-    backoff: Optional[Backoff] = None
-    expression: Optional[str] = None
-    limit: Optional[Union[int, str]] = None
-    retry_policy: Optional[Union[str, RetryPolicy]] = None
+    affinity: Optional[RetryAffinity] = None  # type: ignore
+    backoff: Optional[Backoff] = None  # type: ignore
+    expression: Optional[str] = None  # type: ignore
+    limit: Optional[Union[int, str]] = None  # type: ignore
+    retry_policy: Optional[Union[str, RetryPolicy]] = None  # type: ignore
 
     @root_validator(pre=True)
     def _check_values(cls, values):

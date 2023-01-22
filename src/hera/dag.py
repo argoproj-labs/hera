@@ -1,5 +1,5 @@
 """The implementation of a Hera workflow for Argo-based workflows"""
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 if TYPE_CHECKING:
     from hera.task import Task
@@ -9,7 +9,9 @@ from hera.models import DAGTask as _ModelDAGTask
 from hera.models import DAGTemplate as _ModelDAGTemplate
 from hera.models import Inputs as _ModelInputs
 from hera.models import Outputs as _ModelOutputs
-from hera.models import PersistentVolumeClaim as _ModelPersistentVolumeClaim
+from hera.models import (
+    PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate,
+)
 from hera.models import Template as _ModelTemplate
 from hera.models import Volume as _ModelVolume
 from hera.parameter import Parameter
@@ -30,11 +32,10 @@ class DAG:
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         tasks: Optional[List["Task"]] = None,
     ):
-        validate_name(name)
-        self.name: str = name
+        self.name: str = cast(str, validate_name(name=name))
         self.inputs: List[Union[Parameter, Artifact]] = self._parse_inputs(inputs)
         self.outputs: Optional[List[Union[Parameter, Artifact]]] = outputs or []
-        self.tasks: Optional[List[Task]] = tasks or []
+        self.tasks: List[Task] = tasks or []
 
     def _parse_inputs(
         self,
@@ -78,8 +79,7 @@ class DAG:
         if self.tasks is not None:
             templates = [t for t in [t._build_template() for t in self.tasks] if t]
             sub_templates = [t.dag._build_templates() for t in self.tasks if t.dag]
-            sub_templates = [t for sublist in sub_templates for t in sublist]  # flatten
-            return templates + sub_templates
+            return templates + [t for sublist in sub_templates for t in sublist]
         return []
 
     def _build_dag_tasks(self) -> Optional[List[_ModelDAGTask]]:
@@ -88,18 +88,19 @@ class DAG:
             return [t for t in [t._build_dag_task() for t in self.tasks if not t.is_exit_task] if t]
         return []
 
-    def _build_volume_claim_templates(self) -> List[_ModelPersistentVolumeClaim]:
+    def _build_volume_claim_templates(self) -> List[_ModelPersistentVolumeClaimTemplate]:
         """Assembles the volume claim templates"""
         # make sure we only have unique names
         vcs = dict()
         for t in self.tasks:
             for v in t._build_volume_claim_templates():
+                assert v.metadata is not None, "Metadata is required"
                 vcs[v.metadata.name] = v
 
-        # sub-claims:
         sub_volume_claims = [t.dag._build_volume_claim_templates() for t in self.tasks if t.dag]
         for volume_claims in sub_volume_claims:
             for v in volume_claims:
+                assert v.metadata is not None, "Metadata is required"
                 vcs[v.metadata.name] = v
         return list(vcs.values())
 
@@ -128,16 +129,17 @@ class DAG:
                 artifacts=[obj for obj in self.inputs if isinstance(obj, Artifact)],
             ),
             outputs=_ModelOutputs(
-                parameters=[obj for obj in self.outputs if isinstance(obj, Parameter)],
-                artifacts=[obj for obj in self.outputs if isinstance(obj, Artifact)],
+                parameters=None
+                if self.outputs is None
+                else [obj for obj in self.outputs if isinstance(obj, Parameter)],
+                artifacts=None if self.outputs is None else [obj for obj in self.outputs if isinstance(obj, Artifact)],
             ),
             dag=_ModelDAGTemplate(tasks=self._build_dag_tasks()),
         )
 
         # Assemble the sub-dags if present in task templates
         sub_dags = [t.dag.build() for t in self.tasks if t.dag]
-        sub_dags = [item for sublist in sub_dags for item in sublist]  # flatten
-        return [dag] + sub_dags
+        return [dag] + [item for sublist in sub_dags for item in sublist]
 
     def __enter__(self) -> "DAG":
         """Enter the context of the DAG. This supports the use of `with DAG(...)`"""
@@ -169,6 +171,9 @@ class DAG:
 
     def get_parameter(self, name: str) -> Parameter:
         """Returns a DAG output as a `Parameter` to use an input somewhere else"""
+        if self.outputs is None:
+            raise KeyError(f"No parameters sets as DAG's output")
+
         if next((p for p in self.outputs if p.name == name), None) is None:
             raise KeyError(f"Could not assemble a parameter as `{name}` is not a DAG output")
         return Parameter(name=name, value=f"{{{{inputs.parameters.{name}}}}}")

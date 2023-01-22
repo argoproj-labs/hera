@@ -27,8 +27,8 @@ class _GlobalConfig:
     namespace: str = "default"
     image: str = "python:3.7"
     service_account_name: Optional[str] = "default"
-    task_post_init_hooks: Tuple[Callable[[Task], []], ...] = ()
-    workflow_post_init_hooks: Tuple[Callable[[Workflow], []], ...] = ()
+    task_post_init_hooks: Tuple[Callable[["Task"], None], ...] = ()
+    workflow_post_init_hooks: Tuple[Callable[["Workflow"], None], ...] = ()
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
