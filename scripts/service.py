@@ -99,7 +99,7 @@ class ServiceEndpoint:
         else:
             bp = body_params[0]
             assert bp.name == "req", bp.name
-            body = "req.json()"
+            body = "req.json(exclude_none=True, by_alias=True)"
 
         # return value
         if self.response.ref == "str":

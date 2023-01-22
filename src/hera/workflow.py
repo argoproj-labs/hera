@@ -123,6 +123,7 @@ class Workflow(Generic[WorkflowType]):
         volumes: Optional[List[_BaseVolume]] = None,
         workflow_metadata: Optional[WorkflowMetadata] = None,
         workflow_template_ref: Optional[WorkflowTemplateRef] = None,
+        **kwargs,
     ):
         self.name = validate_name(name=name, generate_name=generate_name)
         dag_name = cast(str, self.name).rstrip("-.") if dag_name is None else dag_name
@@ -306,7 +307,9 @@ class Workflow(Generic[WorkflowType]):
 
     @staticmethod
     def from_model(m: _ModelWorkflow) -> "Workflow":
-        return Workflow(api_version=m.api_version, **m.spec.dict())
+        return Workflow(
+            name=m.metadata.name, generate_name=m.metadata.generate_name, api_version=m.api_version, **m.spec.dict()
+        )
 
     def build(self: WorkflowType) -> _ModelWorkflow:
         """Builds the workflow core representation"""

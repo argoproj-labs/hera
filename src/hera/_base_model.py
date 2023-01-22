@@ -16,7 +16,7 @@ except ImportError:
 class BaseModel(PyBaseModel):
     class Config:
         allow_population_by_field_name = True
-        extra = Extra.forbid
+        extra = Extra.ignore
         allow_mutation = True
         use_enum_values = True
         arbitrary_types_allowed = True

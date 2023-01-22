@@ -9,9 +9,7 @@ from hera.models import DAGTask as _ModelDAGTask
 from hera.models import DAGTemplate as _ModelDAGTemplate
 from hera.models import Inputs as _ModelInputs
 from hera.models import Outputs as _ModelOutputs
-from hera.models import (
-    PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate,
-)
+from hera.models import PersistentVolumeClaim as _ModelPersistentVolumeClaim
 from hera.models import Template as _ModelTemplate
 from hera.models import Volume as _ModelVolume
 from hera.parameter import Parameter
@@ -88,7 +86,7 @@ class DAG:
             return [t for t in [t._build_dag_task() for t in self.tasks if not t.is_exit_task] if t]
         return []
 
-    def _build_volume_claim_templates(self) -> List[_ModelPersistentVolumeClaimTemplate]:
+    def _build_volume_claim_templates(self) -> List[_ModelPersistentVolumeClaim]:
         """Assembles the volume claim templates"""
         # make sure we only have unique names
         vcs = dict()
