@@ -1110,9 +1110,7 @@ class Task:
             The graph task representation.
         """
         t = DAGTask(
-            arguments=None
-            if self.arguments is None
-            else self._build_arguments(),
+            arguments=None if self.arguments is None else self._build_arguments(),
             continue_on=self.continue_on,
             dependencies=self.dependencies,
             depends=self.depends,

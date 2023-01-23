@@ -201,7 +201,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -215,7 +217,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -264,7 +268,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/cluster-workflow-templates"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -278,7 +284,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/cluster-workflow-templates/lint"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -310,7 +318,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -390,7 +400,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -404,7 +416,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -436,7 +450,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -485,7 +501,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -501,7 +519,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -551,7 +571,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -583,7 +605,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -632,7 +656,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -696,7 +722,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -724,7 +752,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -967,7 +997,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/tracking/event"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1119,7 +1151,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1133,7 +1167,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1169,7 +1205,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1254,7 +1292,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1268,7 +1308,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1282,7 +1324,9 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/submit").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1394,7 +1438,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1410,7 +1456,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1426,7 +1474,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1442,7 +1492,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1458,7 +1510,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1474,7 +1528,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
@@ -1490,7 +1546,9 @@ class Service:
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(
+                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
+            ),
             verify=self.verify_ssl,
         )
 
