@@ -1254,7 +1254,7 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
         )
 
@@ -1268,7 +1268,7 @@ class Service:
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/lint").format(namespace=namespace),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
-            data=req.json(exclude_none=True, by_alias=True),
+            data=req.json(exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
         )
 

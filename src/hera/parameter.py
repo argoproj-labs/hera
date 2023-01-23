@@ -42,5 +42,13 @@ class Parameter(_ModelParameter):
             return True
         return False
 
+    def as_input(self) -> "Parameter":
+        parameter = Parameter(name=self.name)
+        if self.default is not None:
+            parameter.default = self.default
+        if self.description is not None:
+            parameter.description = self.description
+        return parameter
+
 
 __all__ = ["Parameter"]

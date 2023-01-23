@@ -1061,10 +1061,10 @@ class Task:
             http=self.http,
             init_containers=self.init_containers,
             inputs=Inputs(
-                artifacts=list(filter(lambda i: isinstance(i, Artifact), self.inputs))
+                artifacts=[i.as_input() for i in list(filter(lambda i: isinstance(i, Artifact), self.inputs))]
                 if self.inputs is not None
                 else None,
-                parameters=list(filter(lambda i: isinstance(i, Parameter), self.inputs))
+                parameters=[p.as_input() for p in list(filter(lambda i: isinstance(i, Parameter), self.inputs))]
                 if self.inputs is not None
                 else None,
             ),
@@ -1112,14 +1112,7 @@ class Task:
         t = DAGTask(
             arguments=None
             if self.arguments is None
-            else Arguments(
-                artifacts=[a for a in self.arguments if isinstance(a, Artifact)]
-                if self.arguments is not None
-                else None,
-                parameters=(
-                    [p for p in self.arguments if isinstance(p, Parameter)] if self.arguments is not None else None
-                ),
-            ),
+            else self._build_arguments(),
             continue_on=self.continue_on,
             dependencies=self.dependencies,
             depends=self.depends,

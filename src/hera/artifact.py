@@ -28,5 +28,8 @@ class Artifact(_ModelArtifact):
 
         return False
 
+    def as_input(self) -> _ModelArtifact:
+        return Artifact(name=self.name, path=self.path)
+
 
 __all__ = ["Artifact"]
