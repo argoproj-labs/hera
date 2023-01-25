@@ -101,8 +101,8 @@ class TestTask:
         script = t._get_param_script_portion()
         assert (
             script == "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
+            "except: a = r'''{{inputs.parameters.a}}'''\n"
         )
 
     def test_script_getter_returns_expected_string(self, op, typed_op):
@@ -111,8 +111,8 @@ class TestTask:
         assert (
             script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
             "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
+            "except: a = r'''{{inputs.parameters.a}}'''\n"
             "\n"
             "print(a)\n"
         )
@@ -122,8 +122,8 @@ class TestTask:
         assert (
             script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
             "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
+            "except: a = r'''{{inputs.parameters.a}}'''\n"
             "\n"
             "print(a)\n"
             'return [{"a": (a, a)}]\n'
@@ -148,16 +148,16 @@ class TestTask:
 import sys
 sys.path.append(os.getcwd())
 import json
-try: very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
-except: very_long_parameter_name = '''{{inputs.parameters.very_long_parameter_name}}'''
-try: very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
-except: very_very_long_parameter_name = '''{{inputs.parameters.very_very_long_parameter_name}}'''
-try: very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
-except: very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_long_parameter_name}}'''
-try: very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
-except: very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
-try: very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
-except: very_very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
+try: very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_long_parameter_name}}''')
+except: very_long_parameter_name = r'''{{inputs.parameters.very_long_parameter_name}}'''
+try: very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_long_parameter_name}}''')
+except: very_very_long_parameter_name = r'''{{inputs.parameters.very_very_long_parameter_name}}'''
+try: very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+except: very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_long_parameter_name}}'''
+try: very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+except: very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
+try: very_very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+except: very_very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
 
 print(42)
 """
@@ -280,8 +280,8 @@ print(42)
         assert (
             tt.script.source == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
             "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
+            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
+            "except: a = r'''{{inputs.parameters.a}}'''\n"
             "\n"
             "print(a)\n"
         )
