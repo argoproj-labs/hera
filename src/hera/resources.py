@@ -73,7 +73,6 @@ class Resources:
         if self.ephemeral_limit:
             validate_storage_units(self.ephemeral_limit)
 
-
         # TODO: add validation for CPU units if str
         if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
             assert self.cpu_limit >= 0, "CPU limit must be positive"
@@ -104,10 +103,10 @@ class Resources:
             resources = _merge_dicts(resources, dict(requests=dict(memory=self.memory_request)))
 
         if self.ephemeral_limit is not None:
-            resources = _merge_dicts(resources, dict(limits=dict(memory=self.ephemeral_limit)))
+            resources = _merge_dicts(resources, dict(limits={"ephemeral-storage": self.ephemeral_limit}))
 
         if self.ephemeral_request is not None:
-            resources = _merge_dicts(resources, dict(requests=dict(memory=self.ephemeral_request)))
+            resources = _merge_dicts(resources, dict(requests={"ephemeral-storage": self.ephemeral_request}))
 
         if self.gpus is not None:
             resources = _merge_dicts(resources, dict(requests={self.gpu_flag: str(self.gpus)}))
