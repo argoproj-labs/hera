@@ -11,7 +11,7 @@ def hello():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("hello-hera") as w:
+with Workflow(generate_name="hello-hera-") as w:
     Task("t", hello)
 
 w.create()

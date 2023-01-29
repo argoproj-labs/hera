@@ -3,7 +3,7 @@
 Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd
 
 ```python
-from hera import Archive, GCSArtifact, Task, Workflow
+from hera import Artifact, GCSArtifact, Task, Workflow
 
 
 def generate():
@@ -31,18 +31,19 @@ def fanout_print():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("artifact-test") as wf:
+with Workflow(generate_name="artifact-test-") as wf:
     t1 = Task(
         "generate",
         generate,
         outputs=[
-            GCSArtifact(
-                "artifact-files",
+            Artifact(
+                name="artifact-files",
                 path="/tmp/output-files/",
-                archive=Archive(disable_compression=True),
-                bucket="<your bucket name>",
-                key=f"fanout-{wf.get_name()}",
-            )
+                gcs=GCSArtifact(
+                    bucket="<your bucket name>",
+                    key=f"fanout-{wf.get_name()}",
+                ),
+            ),
         ],
     )
 

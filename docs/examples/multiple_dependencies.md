@@ -14,7 +14,7 @@ def hello():
     print("Hello, world!")
 
 
-with Workflow("multiple-dependencies") as w:
+with Workflow(generate_name="multiple-dependencies-") as w:
     Task("hello-world", hello) >> [Task("foo1", foo), Task("foo2", foo), Task("foo3", foo)]
 w.create()
 ```

@@ -28,13 +28,13 @@ def fanin(values: list):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("dynamic-fanout-fanin") as w:
+with Workflow(generate_name="dynamic-fanout-fanin-") as w:
     generate_task = Task("generate", generate)
     fanout_task = Task(
         "fanout",
         fanout,
         with_param=generate_task.get_result(),
-        outputs=[Parameter("value", value_from=ValueFrom(path="/tmp/value"))],
+        outputs=[Parameter(name="value", value_from=ValueFrom(path="/tmp/value"))],
     )
     fanin_task = Task("fanin", fanin, inputs=[fanout_task.get_parameters_as("values")])
 

@@ -9,7 +9,7 @@ More details can be found here: https://github.com/argoproj-labs/hera-workflows/
 from hera import Parameter, Task, Workflow
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("dynamic-fanout-container") as w:
+with Workflow(generate_name="dynamic-fanout-container-") as w:
     # this can be anything! e.g. fetch from some API, then in parallel process all entities; chunk database records
     # and process them in parallel, etc.
     generate_task = Task(

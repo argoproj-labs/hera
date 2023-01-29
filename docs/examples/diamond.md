@@ -12,7 +12,7 @@ def say(message: str):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("diamond") as w:
+with Workflow(generate_name="diamond-") as w:
     a = Task("a", say, ["This is task A!"])
     b = Task("b", say, ["This is task B!"])
     c = Task("c", say, ["This is task C!"])

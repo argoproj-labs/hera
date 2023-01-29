@@ -28,7 +28,7 @@ def generate_markdown(path: Path):
 {contents.strip()}
 ```
 """
-    (Path("examples") / path.stem).with_suffix(".md").write_text(contents)
+    (Path("docs/examples") / path.stem).with_suffix(".md").write_text(contents)
 
 
 def main():

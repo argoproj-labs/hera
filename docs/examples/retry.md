@@ -17,7 +17,7 @@ def random_fail():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("retry") as w:
+with Workflow(generate_name="retry-") as w:
     Task("fail", random_fail, retry_strategy=RetryStrategy(backoff=Backoff(duration="5", max_duration="60")))
 
 w.create()

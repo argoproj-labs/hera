@@ -20,8 +20,8 @@ def consumer():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("artifact") as w:
-    w_t = Task("writer", writer, outputs=[Artifact("test", "/file")])
+with Workflow(generate_name="artifact-") as w:
+    w_t = Task("writer", writer, outputs=[Artifact(name="test", path="/file")])
     c_t = Task(
         "consumer",
         consumer,

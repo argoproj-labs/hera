@@ -3,7 +3,15 @@
 
 
 ```python
-from hera import Memoize, Parameter, Task, ValueFrom, Workflow
+from hera import (
+    Cache,
+    ConfigMapKeySelector,
+    Memoize,
+    Parameter,
+    Task,
+    ValueFrom,
+    Workflow,
+)
 
 
 def generate():
@@ -16,9 +24,14 @@ def consume(value):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("memoize") as w:
-    g = Task("g", generate, outputs=[Parameter("value", value_from=ValueFrom(path="/out"))])
-    c = Task("c", consume, inputs=[g.get_parameter("value")], memoize=Memoize("value", "memoize", "c"))
+with Workflow(generate_name="memoize-") as w:
+    g = Task("g", generate, outputs=[Parameter(name="value", value_from=ValueFrom(path="/out"))])
+    c = Task(
+        "c",
+        consume,
+        inputs=[g.get_parameter("value")],
+        memoize=Memoize(cache=Cache(config_map=ConfigMapKeySelector(key="c", name="memoize")), key="value", max_age="1h"),
+    )
     g >> c
 
 w.create()

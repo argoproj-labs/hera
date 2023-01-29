@@ -4,7 +4,7 @@ This task showcases how clients can request a particular number of GPUs to be av
 type of GPU to request. The task uses the Horovod image as it provides Python and NVIDIA SMI.
 
 ```python
-from hera import GPUToleration, Resources, Task, Workflow
+from hera import Resources, Task, Workflow
 
 
 def do():
@@ -38,15 +38,14 @@ def do():
     print(f'This is a task that uses GPUs! CUDA info:\n{os.popen("nvidia-smi").read()}')
 
 
-with Workflow("gpu") as w:
+with Workflow(generate_name="gpu-") as w:
     gke_t4_gpu = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
     d = Task(
         "do",
         do,
         image="horovod/horovod:0.22.1",
         resources=Resources(gpus=1),
-        tolerations=[GPUToleration],
-        node_selectors=gke_t4_gpu,
+        node_selector=gke_t4_gpu,
     )
 
 w.create()

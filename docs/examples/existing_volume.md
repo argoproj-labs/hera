@@ -13,12 +13,12 @@ def download(path: str):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("existing-volume") as w:
+with Workflow(generate_name="existing-volume-") as w:
     Task(
         "download",
         download,
         [{"path": "/whatever/path"}],
-        volumes=[ExistingVolume(name="my-vol-claim", mount_path="/vol")],
+        volumes=[ExistingVolume(claim_name="my-vol-claim", mount_path="/vol")],
     )
 
 w.create()

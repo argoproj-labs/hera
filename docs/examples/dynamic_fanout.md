@@ -22,7 +22,7 @@ def consume(value: int):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("dynamic-fanout") as w:
+with Workflow(generate_name="dynamic-fanout") as w:
     generate_task = Task("generate", generate)
     consume_task = Task("consume", consume, with_param=generate_task.get_result())
 

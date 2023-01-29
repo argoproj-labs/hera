@@ -15,10 +15,10 @@ def say(msg: str):
     print(msg)
 
 
-with Workflow("hera-gitops-say", parameters=[Parameter('msg')]) as w:
-    Task("t", say, inputs=[w.get_parameter('msg')])
+with Workflow(generate_name="hera-gitops-say-", inputs=[Parameter(name="msg")]) as w:
+    Task("t", say, inputs=[w.get_parameter("msg")])
 
-with open('hello.yaml', 'w') as f:
+with open("hello.yaml", "w") as f:
     f.write(w.to_yaml())
 
 # the above is followed up by issuing `argo submit hello.yaml -p msg="hello"`

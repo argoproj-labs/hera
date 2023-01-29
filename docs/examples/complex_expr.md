@@ -37,17 +37,17 @@ def construct_weekly_temps():
     )[0]
 
 
-with Workflow("expression-reusing-verbose-snippets-", generate_name=True) as w:
+with Workflow(generate_name="expression-reusing-verbose-snippets-") as w:
     w.parameters = [Parameter(name="weather", value=encoded_data)]
     week_temps = construct_weekly_temps()
-    week_temps_jsonpath = g.inputs.parameters['week-temps'].jsonpath
+    week_temps_jsonpath = g.inputs.parameters["week-temps"].jsonpath
     Task(
         name="main",
         inputs=[Parameter(name="week-temps", value=f"{week_temps:=}")],
         source='''echo "The week's average temperature was $AVG with a minimum of $MIN and a maximum of $MAX."''',
         env=[
-            Env(name="MIN", value=f"{week_temps_jsonpath('$.min'):=}"),
-            Env(name="MAX", value=f"{week_temps_jsonpath('$.max'):=}"),
+            Env("MIN", value=f"{week_temps_jsonpath('$.min'):=}"),
+            Env("MAX", value=f"{week_temps_jsonpath('$.max'):=}"),
             Env(name="AVG", value=f"{week_temps_jsonpath('$.avg'):=}"),
         ],
         command=["bash"],

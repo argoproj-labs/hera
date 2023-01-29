@@ -16,7 +16,7 @@ def use_secret():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("secret-volume") as w:
+with Workflow(generate_name="secret-volume-") as w:
     Task("use_secret", use_secret, volumes=[SecretVolume(secret_name="secret-file", mount_path="/secret/")])
 
 w.create()
