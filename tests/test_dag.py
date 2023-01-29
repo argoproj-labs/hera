@@ -62,14 +62,14 @@ class TestDAG:
 
     def test_build_volume_claim_templates(self):
         dag = DAG("test").add_tasks(Task("a", volumes=[Volume("/m", size="1Gi")]))
-        templates = dag._build_volume_claim_templates()
+        templates = dag._build_volume_claims()
         assert len(templates) == 1
         assert isinstance(templates[0], PersistentVolumeClaim)
 
     def test_build_volume_claim_templates_with_subvolumes(self):
         subdag = DAG("test1").add_tasks(Task("a", volumes=[Volume("/m", size="1Gi")]))
         dag = DAG("test2").add_tasks(Task("b", volumes=[Volume("/m", size="1Gi")], dag=subdag))
-        templates = dag._build_volume_claim_templates()
+        templates = dag._build_volume_claims()
         assert len(templates) == 2
         assert isinstance(templates[0], PersistentVolumeClaim)
         assert isinstance(templates[1], PersistentVolumeClaim)
@@ -77,20 +77,20 @@ class TestDAG:
     def test_build_volume_unique_claim_templates_with_subvolumes(self):
         subdag = DAG("test1").add_tasks(Task("a", volumes=[Volume("/m", name="vol", size="1Gi")]))
         dag = DAG("test2").add_tasks(Task("b", volumes=[Volume("/m", name="vol", size="1Gi")], dag=subdag))
-        templates = dag._build_volume_claim_templates()
+        templates = dag._build_volume_claims()
         assert len(templates) == 1
         assert isinstance(templates[0], PersistentVolumeClaim)
 
     def test_build_persistent_volume_claims(self):
         dag = DAG("test").add_tasks(Task("a", volumes=[EmptyDirVolume()]))
-        claims = dag._build_persistent_volume_claims()
+        claims = dag._build_volumes()
         assert len(claims) == 1
         assert isinstance(claims[0], ArgoVolume)
 
     def test_build_persistent_volume_claims_with_subvolumes(self):
         subdag = DAG("test1").add_tasks(Task("a", volumes=[EmptyDirVolume()]))
         dag = DAG("test2").add_tasks(Task("b", volumes=[EmptyDirVolume()], dag=subdag))
-        claims = dag._build_persistent_volume_claims()
+        claims = dag._build_volumes()
         assert len(claims) == 2
         assert isinstance(claims[0], ArgoVolume)
         assert isinstance(claims[1], ArgoVolume)
@@ -98,7 +98,7 @@ class TestDAG:
     def test_build_persistent_volume_claims_with_unique_subvolumes(self):
         subdag = DAG("test1").add_tasks(Task("a", volumes=[EmptyDirVolume(name="vol")]))
         dag = DAG("test2").add_tasks(Task("b", volumes=[EmptyDirVolume(name="vol")], dag=subdag))
-        claims = dag._build_persistent_volume_claims()
+        claims = dag._build_volumes()
         assert len(claims) == 1
         assert isinstance(claims[0], ArgoVolume)
 

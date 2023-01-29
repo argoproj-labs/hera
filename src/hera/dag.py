@@ -10,6 +10,7 @@ from hera.models import DAGTemplate as _ModelDAGTemplate
 from hera.models import Inputs as _ModelInputs
 from hera.models import Outputs as _ModelOutputs
 from hera.models import PersistentVolumeClaim as _ModelPersistentVolumeClaim
+from hera.models import PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate
 from hera.models import Template as _ModelTemplate
 from hera.models import Volume as _ModelVolume
 from hera.parameter import Parameter
@@ -86,7 +87,7 @@ class DAG:
             return [t for t in [t._build_dag_task() for t in self.tasks if not t.is_exit_task] if t]
         return []
 
-    def _build_volume_claim_templates(self) -> List[_ModelPersistentVolumeClaim]:
+    def _build_volume_claims(self) -> List[_ModelPersistentVolumeClaim]:
         """Assembles the volume claim templates"""
         # make sure we only have unique names
         vcs = dict()
@@ -95,23 +96,23 @@ class DAG:
                 assert v.metadata is not None, "Metadata is required"
                 vcs[v.metadata.name] = v
 
-        sub_volume_claims = [t.dag._build_volume_claim_templates() for t in self.tasks if t.dag]
+        sub_volume_claims = [t.dag._build_volume_claims() for t in self.tasks if t.dag]
         for volume_claims in sub_volume_claims:
             for v in volume_claims:
                 assert v.metadata is not None, "Metadata is required"
                 vcs[v.metadata.name] = v
         return list(vcs.values())
 
-    def _build_persistent_volume_claims(self) -> List[_ModelVolume]:
+    def _build_volumes(self) -> List[_ModelVolume]:
         """Assembles the persistent volume claim templates"""
         # Make sure we only have unique names
         pvcs = dict()
         for t in self.tasks:
-            for v in t._build_persistent_volume_claims():
+            for v in t._build_volumes():
                 pvcs[v.name] = v
 
         # sub-claims:
-        sub_volume_claims = [t.dag._build_persistent_volume_claims() for t in self.tasks if t.dag]
+        sub_volume_claims = [t.dag._build_volumes() for t in self.tasks if t.dag]
         for volume_claims in sub_volume_claims:
             for v in volume_claims:
                 pvcs[v.name] = v

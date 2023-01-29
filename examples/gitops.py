@@ -13,7 +13,7 @@ def say(msg: str):
     print(msg)
 
 
-with Workflow("hera-gitops-say", inputs=[Parameter(name="msg")]) as w:
+with Workflow(generate_name="hera-gitops-say-", inputs=[Parameter(name="msg")]) as w:
     Task("t", say, inputs=[w.get_parameter("msg")])
 
 with open("hello.yaml", "w") as f:

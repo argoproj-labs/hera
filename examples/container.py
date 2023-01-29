@@ -2,7 +2,7 @@
 from hera import Task, Workflow
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("container") as w:
-    Task("cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+with Workflow(generate_name="container-") as w:
+    Task("cowsay", image="docker/whalesay", command=["cowsay"], args=["hello world"])
 
 w.create()

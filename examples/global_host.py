@@ -10,7 +10,7 @@ def p(m):
     print(m)
 
 
-with Workflow("global-host") as w:  # this uses a service with the global token and host
+with Workflow(generate_name="global-host-") as w:  # this uses a service with the global token and host
     Task("t", p, [{"m": "hello"}])
 
 w.create()

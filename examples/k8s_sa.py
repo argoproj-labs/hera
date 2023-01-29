@@ -43,7 +43,9 @@ def hello():
 namespace = "argo"
 _token = get_sa_token("argo-server", namespace=namespace)
 
-with Workflow("k8s-sa", service=Service(host="https://my-argo-server.com", token=_token, namespace=namespace)) as w:
+with Workflow(
+    generate_name="k8s-sa-", service=Service(host="https://my-argo-server.com", token=_token, namespace=namespace)
+) as w:
     Task("t", hello)
 
 w.create()

@@ -10,8 +10,8 @@ def bye():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("task-exit-handler") as w:
-    t1 = Task("t1", hello, [{"s": "from Task1"}]).on_exit(Task("running", bye))
-    t1 >> Task("t2", hello, [{"s": "from Task2"}])
+with Workflow(generate_name="task-exit-handler-") as w:
+    t1 = Task("t1", hello, inputs={"s": "from Task1"}).on_exit(Task("running", bye))
+    t1 >> Task("t2", hello, inputs={"s": "from Task2"})
 
 w.create()

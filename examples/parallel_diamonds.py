@@ -6,7 +6,7 @@ def say(message: str):
     print(message)
 
 
-with Workflow("parallel-diamonds") as w:
+with Workflow(generate_name="parallel-diamonds-") as w:
     (
         Task(
             "a",

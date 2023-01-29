@@ -20,7 +20,7 @@ def script(message: str) -> str:  # <---- '-> str:' here is important!
 #          echo ----------
 #          """
 
-with Workflow("custom-script") as wf:
+with Workflow(generate_name="custom-script-") as wf:
     Task("message", script, command=["sh"], inputs=[Parameter(name="message", value="Magic!")])
 
 wf.create()

@@ -299,8 +299,8 @@ class Workflow(Generic[WorkflowType]):
             tolerations=self.tolerations,
             ttl_strategy=self.ttl_strategy,
             volume_claim_gc=self.volume_claim_gc,
-            volume_claim_templates=self.dag._build_volume_claim_templates(),
-            volumes=self.dag._build_persistent_volume_claims(),
+            volume_claim_templates=self.dag._build_volume_claims(),
+            volumes=self.dag._build_volumes(),
             workflow_metadata=self.workflow_metadata,
             workflow_template_ref=self.workflow_template_ref,
         )

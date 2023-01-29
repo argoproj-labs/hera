@@ -27,7 +27,7 @@ def fanout_print():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("artifact-test") as wf:
+with Workflow(generate_name="artifact-test-") as wf:
     t1 = Task(
         "generate",
         generate,

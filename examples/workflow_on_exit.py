@@ -6,7 +6,7 @@ def echo(s: str):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("on-exit") as w:
+with Workflow(generate_name="on-exit-") as w:
     Task("t1", echo, [{"s": "a"}]) >> Task("t2", echo, [{"s": "b"}])
 
     with DAG("exit-procedure") as exit_procedure:

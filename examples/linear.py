@@ -19,7 +19,7 @@ def task_4():
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow("linear") as w:
+with Workflow(generate_name="linear-") as w:
     Task("t1", task_1) >> Task("t2", task_2) >> Task("t3", task_3) >> Task("t4", task_4)
 
 w.create()

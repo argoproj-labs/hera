@@ -22,7 +22,7 @@ def do():
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow(
-    "volume",
+    generate_name="volume-",
 ) as w:
     Task("do", do, volumes=[Volume(size="50Gi", mount_path="/vol")])
 

@@ -438,8 +438,12 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[ResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[AccessMode]] = None  # type: ignore
+    access_modes: Optional[List[AccessMode]] = [AccessMode.read_write_once]  # type: ignore
     storage_class_name: Optional[str] = "standard"
+
+    @validator("name", pre=True, always=True)
+    def _check_name(cls, v):
+        return v or str(uuid.uuid4())
 
     @root_validator(pre=True)
     def _merge_reqs(cls, values):
@@ -464,7 +468,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
 
     def to_claim(self) -> _ModelPersistentVolumeClaimTemplate:
         return _ModelPersistentVolumeClaimTemplate(
-            metadata=self.metadata,
+            metadata=self.metadata or ObjectMeta(name=self.name),
             spec=_ModelPersistentVolumeClaimSpec(
                 access_modes=[str(am.value) for am in self.access_modes] if self.access_modes is not None else None,
                 data_source=self.data_source,
@@ -479,7 +483,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
 
     def to_volume(self) -> _ModelVolume:
         claim = self.to_claim()
-        assert claim.metadata is not None, "claim name is required"
+        assert claim.metadata is not None, "claim metadata is required"
         return _ModelVolume(
             name=self.name,
             persistent_volume_claim=_ModelPersistentVolumeClaimVolumeSource(

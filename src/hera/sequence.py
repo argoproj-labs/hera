@@ -18,8 +18,6 @@ class Sequence(_ModelSequence):
             return v
 
         assert isinstance(v, int) or isinstance(v, str)
-        if isinstance(v, str):
-            return IntOrString(__root__=v)
         return IntOrString(__root__=str(v))
 
     @validator("start", pre=True)
@@ -28,18 +26,6 @@ class Sequence(_ModelSequence):
             return v
 
         assert isinstance(v, int) or isinstance(v, str)
-        if isinstance(v, str):
-            return IntOrString(__root__=v)
-        return IntOrString(__root__=str(v))
-
-    @validator("start", pre=True)
-    def end_to_str(cls, v):
-        if v is None:
-            return v
-
-        assert isinstance(v, int) or isinstance(v, str)
-        if isinstance(v, str):
-            return IntOrString(__root__=v)
         return IntOrString(__root__=str(v))
 
 

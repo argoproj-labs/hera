@@ -70,7 +70,7 @@ class CronWorkflow(Workflow):
         if timezone and timezone not in pytz.all_timezones:
             raise ValueError(f"{timezone} is not a valid timezone")
         self.schedule = schedule
-        self.concurrency_policy = concurrency_policy
+        self.concurrency_policy = None if concurrency_policy is None else str(concurrency_policy)
         self.failed_jobs_history_limit = failed_jobs_history_limit
         self.successful_jobs_history_limit = successful_jobs_history_limit
         self.suspend_ = suspend
@@ -102,7 +102,7 @@ class CronWorkflow(Workflow):
             kind=self.__class__.__name__,
             metadata=workflow.metadata,
             spec=_ModelCronWorkflowSpec(
-                concurrency_policy=str(self.concurrency_policy),
+                concurrency_policy=self.concurrency_policy,
                 failed_jobs_history_limit=self.failed_jobs_history_limit,
                 schedule=self.schedule,
                 starting_deadline_seconds=self.starting_deadline_seconds,

@@ -19,7 +19,7 @@ def failure():
     print("failure")
 
 
-with Workflow("conditional") as w:
+with Workflow(generate_name="conditional-") as w:
     r = Task("random", random)
     s = Task("success", success)
     f = Task("failure", failure)

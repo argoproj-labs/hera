@@ -43,12 +43,31 @@ class Parameter(_ModelParameter):
         return False
 
     def as_input(self) -> "Parameter":
-        parameter = Parameter(name=self.name)
-        if self.default is not None:
-            parameter.default = self.default
-        if self.description is not None:
-            parameter.description = self.description
-        return parameter
+        return Parameter(name=self.name, description=self.description, default=self.default)
+
+    def as_argument(self) -> Optional["Parameter"]:
+        """Assembles the parameter for use as an argument of a task"""
+        if self.value is None and self.value_from is None and self.default:
+            # Argument not necessary as default is set for the input
+            return None
+
+        return Parameter(
+            name=self.name,
+            global_name=self.global_name,
+            description=self.description,
+            value=self.value,
+            value_from=self.value_from,
+        )
+
+    def as_output(self) -> "Parameter":
+        """Assembles the parameter for use as an output of a task"""
+        return Parameter(
+            name=self.name,
+            global_name=self.global_name,
+            description=self.description,
+            enum=self.enum,
+            value_from=self.value_from,
+        )
 
 
 __all__ = ["Parameter"]

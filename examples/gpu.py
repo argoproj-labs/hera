@@ -36,7 +36,7 @@ def do():
     print(f'This is a task that uses GPUs! CUDA info:\n{os.popen("nvidia-smi").read()}')
 
 
-with Workflow("gpu") as w:
+with Workflow(generate_name="gpu-") as w:
     gke_t4_gpu = {"cloud.google.com/gke-accelerator": "nvidia-tesla-t4"}
     d = Task(
         "do",

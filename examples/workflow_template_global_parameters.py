@@ -6,7 +6,7 @@ def foo(v):
 
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with WorkflowTemplate("global-parameters", inputs=[Parameter(name="v", value=42)]) as w:
+with WorkflowTemplate(generate_name="global-parameters-", inputs=[Parameter(name="v", value=42)]) as w:
     Task("t", foo, inputs=[w.get_parameter("v")])
 
 w.create()

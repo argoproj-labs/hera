@@ -164,6 +164,10 @@ class Task:
             raise ValueError("Cannot use both `dag` and `template_ref`")
         if dag and suspend:
             raise ValueError("Cannot use both `dag` and `suspend`")
+        if source and suspend:
+            raise ValueError("Cannot use both `source` and `suspend`")
+        if suspend and container:
+            raise ValueError("Cannot use both `suspend` and `container`")
         if with_param is not None and with_sequence is not None:
             raise ValueError("Cannot use both `with_sequence` and `with_param`")
 
@@ -189,7 +193,6 @@ class Task:
         self.tty: Optional[bool] = tty
         self.volume_devices: Optional[List[VolumeDevice]] = volume_devices
         self.working_dir: Optional[str] = working_dir
-        self.arguments: Optional[List[Union[Artifact, Parameter]]] = arguments or []
         self.continue_on: Optional[ContinueOn] = continue_on
         self.dependencies: Optional[List[str]] = dependencies
         self.depends: Optional[str] = depends
@@ -646,7 +649,9 @@ class Task:
 
     def _build_arguments(self) -> Optional[Arguments]:
         """Assembles and returns the task arguments"""
-        parameters = [obj for obj in self.inputs if isinstance(obj, Parameter)] if self.inputs is not None else []
+        parameters = (
+            [obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)] if self.inputs is not None else []
+        )
         parameters = list(filter(lambda p: p is not None, parameters))
         artifacts = [obj for obj in self.inputs if isinstance(obj, Artifact)] if self.inputs is not None else []
         if len(parameters) + len(artifacts) == 0:
@@ -950,15 +955,15 @@ class Task:
         List[VolumeMount]
             The list of volume mounts to be added to the task specification.
         """
-        return [v.to_mount() for v in self.volumes] if self.volumes is not None else []
+        return [] if self.volumes is None else [v.to_mount() for v in self.volumes]
 
     def _build_volume_claim_templates(self) -> List[PersistentVolumeClaimTemplate]:
         """Assembles the list of volume claim templates to be created for the task."""
-        return [v.to_claim() for v in self.volumes if isinstance(v, Volume)] if self.volumes is not None else []
+        return [] if self.volumes is None else [v.to_claim() for v in self.volumes if isinstance(v, Volume)]
 
-    def _build_persistent_volume_claims(self) -> List[_ModelVolume]:
+    def _build_volumes(self) -> Optional[List[_ModelVolume]]:
         """Assembles the list of Argo volume specifications"""
-        return [v.to_volume() for v in self.volumes if not isinstance(v, Volume)] if self.volumes is not None else []
+        return [] if self.volumes is None else [v.to_volume() for v in self.volumes if not isinstance(v, Volume)]
 
     def _build_script(self) -> Optional[ScriptTemplate]:
         """Assembles and returns the script template that contains the definition of the script to run in a task.
@@ -970,6 +975,7 @@ class Task:
         """
         if self.source is None:
             return None
+
         return ScriptTemplate(
             args=self.get_args(),
             command=self.get_command(),
@@ -996,42 +1002,6 @@ class Task:
             working_dir=self.working_dir,
         )
 
-    def _build_container(self) -> Optional[Container]:
-        """Assembles and returns the container for the task to run in.
-
-        Returns
-        -------
-        Container
-            The container template representation of the task.
-        """
-        if self.container is None:
-            return None
-        container = Container(
-            args=self.get_args(),
-            command=self.get_command(),
-            env=[e.build() for e in self.env] if self.env is not None else None,
-            env_from=[ef.build() for ef in self.env_from] if self.env_from is not None else None,
-            image=self.image,
-            image_pull_policy=self.image_pull_policy,
-            lifecycle=self.lifecycle,
-            liveness_probe=self.liveness_probe,
-            name=self.name,
-            ports=self.ports,
-            readiness_probe=self.readiness_probe,
-            resources=None if self.resources is None else self.resources.build(),
-            security_context=self.security_context,
-            startup_probe=self.startup_probe,
-            stdin=self.stdin,
-            stdin_once=self.stdin_once,
-            termination_message_path=self.termination_message_path,
-            termination_message_policy=self.termination_message_policy,
-            tty=self.tty,
-            volume_devices=self.volume_devices,
-            volume_mounts=self._build_volume_mounts(),
-            working_dir=self.working_dir,
-        )
-        return container
-
     def _build_template(self) -> Optional[Template]:
         """Assembles and returns the template that contains the specification of the parameters, inputs, and other
         configuration required for the task be executed.
@@ -1052,7 +1022,7 @@ class Task:
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
-            container=self._build_container(),
+            container=None if self.container is None else self.container,
             daemon=self.daemon,
             dag=self.dag,
             executor=self.executor,
@@ -1092,13 +1062,13 @@ class Task:
             scheduler_name=self.scheduler_name,
             security_context=self.security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=None if self.sidecars is None else [sc.build() for sc in self.sidecars],
             script=self._build_script(),
             suspend=self.suspend,
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
-            volumes=[v.to_volume() for v in self.volumes] if self.volumes is not None else None,
+            volumes=self._build_volumes(),
         )
 
     def _build_dag_task(self) -> DAGTask:
@@ -1110,7 +1080,7 @@ class Task:
             The graph task representation.
         """
         t = DAGTask(
-            arguments=None if self.arguments is None else self._build_arguments(),
+            arguments=self._build_arguments(),
             continue_on=self.continue_on,
             dependencies=self.dependencies,
             depends=self.depends,

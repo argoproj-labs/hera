@@ -130,7 +130,7 @@ class ServiceEndpoint:
         if resp.ok:
             return {ret_val}
         else:
-            resp.raise_for_status()
+            raise Exception(f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}")
 """
 
 

@@ -1,8 +1,7 @@
 """The implementation of a Hera cron workflow for Argo-based cron workflows"""
-from typing import Optional, cast
+from typing import cast
 
 from hera.global_config import GlobalConfig
-from hera.models import CreateOptions
 from hera.models import WorkflowTemplate as _ModelWorkflowTemplate
 from hera.models import (
     WorkflowTemplateCreateRequest,
@@ -35,7 +34,7 @@ class WorkflowTemplate(Workflow):
 
     @staticmethod
     def from_model(m: _ModelWorkflowTemplate) -> "WorkflowTemplate":  # type: ignore
-        return WorkflowTemplate(api_version=m.api_version, **m.spec.dict())
+        return WorkflowTemplate(api_version=m.api_version, **m.metadata.dict(), **m.spec.dict())
 
     def create(
         self: "WorkflowTemplate",
