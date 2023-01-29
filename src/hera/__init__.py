@@ -1,6 +1,4 @@
 # [DO NOT EDIT] generated via `make init` on: 2023-01-14 18:20:19.192393
-from dyno.clients.middleware.client_factory import generate_dynet_iap_oauth_token
-
 from hera._base_model import BaseModel
 from hera._context import dag_context
 from hera._version import version
@@ -438,9 +436,6 @@ from hera.volumes import (
 from hera.workflow import Workflow
 from hera.workflow_status import WorkflowStatus
 from hera.workflow_template import WorkflowTemplate
-
-GlobalConfig.host = "https://argo.dynet.ai"
-GlobalConfig.token = generate_dynet_iap_oauth_token().token
 
 __version__ = version
 __version_info__ = version.split(".")
