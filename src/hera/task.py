@@ -53,7 +53,7 @@ from hera.volumes import (
     _BaseVolume,
 )
 from hera.workflow_status import WorkflowStatus
-
+from hera.port import ContainerPort
 
 class TaskResult(str, Enum):
     Failed = "Failed"
@@ -171,6 +171,8 @@ class Task(IO):
         Any built-in/custom Prometheus metrics to track.
     sidecars: Optional[List[Sidecar]] = None
         List of sidecars to create for the main pods of the container that runs the task.
+    ports: Optional[List[ContainerPort]] = None
+        List of ports to create for the main pods of the container that runs the task.
 
     Notes
     -----
@@ -214,6 +216,7 @@ class Task(IO):
         timeout: Optional[str] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
         sidecars: Optional[List[Sidecar]] = None,
+        ports: Optional[List[ContainerPort]] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -272,7 +275,8 @@ class Task(IO):
         self.is_exit_task: bool = False
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
-
+        self.ports = ports or []
+        
         self.validate()
 
         # here we cast for otherwise `mypy` complains that Hera adds an incompatible type with a dictionary, which is
@@ -927,6 +931,7 @@ class Task(IO):
             command=self.get_command(),
             resources=self.resources.build() if self.resources else None,
             args=self.get_args(),
+            ports=[p.build() for p in self.ports] if self.ports else None,
             env=env,
             env_from=env_from,
             working_dir=self.working_dir,
@@ -1089,7 +1094,7 @@ class Task(IO):
             setattr(task, "template_ref", self.template_ref.build())
         else:
             name = self.name if not self.dag else self.dag.name
-            setattr(task, "template", name)
+            setattr(task, "template", name) 
 
         if self.with_param:
             with_param = self.with_param

@@ -19,6 +19,7 @@ from hera import (
     Backoff,
     ConfigMapEnv,
     ConfigMapEnvFrom,
+    ContainerPort,
     ConfigMapVolume,
     EmptyDirVolume,
     Env,
@@ -199,6 +200,18 @@ print(42)
         assert vs[2].mount_path == "/dev/shm"
         assert vs[3].name
         assert vs[3].mount_path == "/v3"
+
+    def test_container_port_returns_expected_ports(self, no_op):
+        t = Task(
+            "t",
+            no_op,
+            ports=[
+                ContainerPort(8080, name="test-port")
+            ],
+        )
+        cp = t.ports
+        assert cp[0].name == "test-port"
+        assert cp[0].container_port == 8080
 
     def test_gpu_toleration_returns_expected_toleration(self):
         tn = GPUToleration
