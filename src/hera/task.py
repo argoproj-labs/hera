@@ -824,8 +824,8 @@ class Task(IO):
             # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
             # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
             # payload of the script is not necessary when regular input is set on the task via `func_params`
-            extract += f"""try: {param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
-            extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
+            extract += f"""try: {param.name} = json.loads(r'''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            extract += f"""except: {param.name} = r'''{{{{inputs.parameters.{param.name}}}}}'''\n"""
         return textwrap.dedent(extract)
 
     def _get_script(self) -> str:
