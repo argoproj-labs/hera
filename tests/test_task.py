@@ -334,12 +334,45 @@ print(42)
         tt = t._build_template()
         assert hasattr(tt, "retry_strategy") is False
 
-    def test_task_sets_kwarg(self, kwarg_op, kwarg_multi_op):
+    def test_task_sets_kwarg(self, kwarg_op, kwarg_op_bool_default, kwarg_op_none_default, kwarg_multi_op):
         t = Task("t", kwarg_op)
         deduced_input = t.inputs[0]
         assert isinstance(deduced_input, Parameter)
         assert deduced_input.name == "a"
         assert deduced_input.default == "42"
+
+        # Ensure defaults are json encoded. This ensures eg: `x=False` is not converted
+        # into `x="False"`, which is actually truth-y.
+        t = Task("t", kwarg_op_bool_default)
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == None
+        assert deduced_input_1.default == "false"
+
+        t = Task("t", kwarg_op_bool_default, [{"a": True}])
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == "{{item.a}}"
+        assert deduced_input_1.default == "false"
+
+        # Ensure function parameters with None defaults are distinguished from missing
+        # arguments in *internal* code. This ensures eg: `x=None` is not incorrectly
+        # thought to be missing an argument when creating a Task.
+        t = Task("t", kwarg_op_none_default)
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == None
+        assert deduced_input_1.default == "null"
+
+        t = Task("t", kwarg_op_none_default, [{"a": None}])
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == "{{item.a}}"
+        assert deduced_input_1.default == "null"
 
         t = Task("t", kwarg_multi_op, [{"a": 50}])
         deduced_input_1 = t.inputs[0]

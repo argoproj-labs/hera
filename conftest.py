@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 
@@ -88,6 +88,22 @@ def kwarg_op():
         print(a)
 
     yield _kwarg_op
+
+
+@pytest.fixture(scope="session")
+def kwarg_op_bool_default():
+    def _kwarg_op_bool_default(a: bool = False):
+        print(a)
+
+    yield _kwarg_op_bool_default
+
+
+@pytest.fixture(scope="session")
+def kwarg_op_none_default():
+    def _kwarg_op_none_default(a: Optional[str] = None):
+        print(a)
+
+    yield _kwarg_op_none_default
 
 
 @pytest.fixture(scope="session")
