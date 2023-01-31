@@ -877,7 +877,13 @@ class Task(IO):
 
                 s = "".join(content[token_index:])
                 script += textwrap.dedent(s)
-                return textwrap.dedent(script)
+                script = textwrap.dedent(script)
+                # Guard everything under a main check to avoid recursive issues with
+                # tasks that import the defining module (eg: multiprocessing).
+                res = "if __name__ == '__main__':"
+                for line in script.split("\n"):
+                    res += f"\n    {line}" if line else "\n"
+                return res
         else:
             assert isinstance(self.source, str)
             return self.source

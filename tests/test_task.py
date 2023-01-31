@@ -113,14 +113,15 @@ class TestTask:
         script = t._get_script()
         assert script == dedent(
             """\
-            import os
-            import sys
-            sys.path.append(os.getcwd())
-            import json
-            try: a = json.loads(r'''{{inputs.parameters.a}}''')
-            except: a = r'''{{inputs.parameters.a}}'''
+            if __name__ == '__main__':
+                import os
+                import sys
+                sys.path.append(os.getcwd())
+                import json
+                try: a = json.loads(r'''{{inputs.parameters.a}}''')
+                except: a = r'''{{inputs.parameters.a}}'''
 
-            print(a)
+                print(a)
             """
         )
 
@@ -128,15 +129,16 @@ class TestTask:
         script = t._get_script()
         assert script == dedent(
             """\
-            import os
-            import sys
-            sys.path.append(os.getcwd())
-            import json
-            try: a = json.loads(r'''{{inputs.parameters.a}}''')
-            except: a = r'''{{inputs.parameters.a}}'''
+            if __name__ == '__main__':
+                import os
+                import sys
+                sys.path.append(os.getcwd())
+                import json
+                try: a = json.loads(r'''{{inputs.parameters.a}}''')
+                except: a = r'''{{inputs.parameters.a}}'''
 
-            print(a)
-            return [{"a": (a, a)}]
+                print(a)
+                return [{"a": (a, a)}]
             """
         )
 
@@ -157,22 +159,23 @@ class TestTask:
 
         expected_script = dedent(
             """\
-            import os
-            import sys
-            sys.path.append(os.getcwd())
-            import json
-            try: very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_long_parameter_name}}''')
-            except: very_long_parameter_name = r'''{{inputs.parameters.very_long_parameter_name}}'''
-            try: very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_long_parameter_name}}''')
-            except: very_very_long_parameter_name = r'''{{inputs.parameters.very_very_long_parameter_name}}'''
-            try: very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_long_parameter_name}}''')
-            except: very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_long_parameter_name}}'''
-            try: very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
-            except: very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
-            try: very_very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
-            except: very_very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
+            if __name__ == '__main__':
+                import os
+                import sys
+                sys.path.append(os.getcwd())
+                import json
+                try: very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_long_parameter_name}}''')
+                except: very_long_parameter_name = r'''{{inputs.parameters.very_long_parameter_name}}'''
+                try: very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_long_parameter_name}}''')
+                except: very_very_long_parameter_name = r'''{{inputs.parameters.very_very_long_parameter_name}}'''
+                try: very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+                except: very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_long_parameter_name}}'''
+                try: very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+                except: very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
+                try: very_very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+                except: very_very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
 
-            print(42)
+                print(42)
             """
         )
         assert t._get_script() == expected_script
@@ -293,14 +296,15 @@ class TestTask:
         assert tt.name == "t"
         assert tt.script.source == dedent(
             """\
-            import os
-            import sys
-            sys.path.append(os.getcwd())
-            import json
-            try: a = json.loads(r'''{{inputs.parameters.a}}''')
-            except: a = r'''{{inputs.parameters.a}}'''
+            if __name__ == '__main__':
+                import os
+                import sys
+                sys.path.append(os.getcwd())
+                import json
+                try: a = json.loads(r'''{{inputs.parameters.a}}''')
+                except: a = r'''{{inputs.parameters.a}}'''
 
-            print(a)
+                print(a)
             """
         )
         assert tt.inputs.parameters[0].name == "a"

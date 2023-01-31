@@ -445,10 +445,11 @@ class TestWorkflow:
                             "image": "python:3.7",
                             "source": dedent(
                                 """\
-                                import os
-                                import sys
-                                sys.path.append(os.getcwd())
-                                print("Hello, Hera!")
+                                if __name__ == '__main__':
+                                    import os
+                                    import sys
+                                    sys.path.append(os.getcwd())
+                                    print("Hello, Hera!")
                                 """
                             ),
                             "command": ["python"],
