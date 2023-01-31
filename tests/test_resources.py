@@ -23,9 +23,9 @@ class TestResources:
             Resources(memory_limit="4")
 
     def test_init_raises_on_invalid_eph(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(AssertionError):
             Resources(ephemeral_request="3m")
-        with pytest.raises(ValueError):
+        with pytest.raises(AssertionError):
             Resources(ephemeral_limit="2m")
 
     def test_init_raises_on_invalid_cpu(self):
