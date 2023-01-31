@@ -1,3 +1,5 @@
+import json
+from textwrap import dedent
 from unittest import mock
 from unittest.mock import Mock
 
@@ -471,7 +473,14 @@ spec:
                         'name': 't',
                         'script': {
                             'image': 'python:3.7',
-                            'source': 'import os\nimport sys\nsys.path.append(os.getcwd())\nprint("Hello, Hera!")\n',
+                            'source': dedent(
+                                """\
+                                import os
+                                import sys
+                                sys.path.append(os.getcwd())
+                                print("Hello, Hera!")
+                                """
+                            ),
                             'command': ['python'],
                         },
                     },
@@ -491,16 +500,34 @@ spec:
         with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
             Task("t", hello)
 
-        expected_json = (
-            '{"metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}}, "spec": '
-            '{"entrypoint": "hello-hera", "templates": [{"name": "t", "script": {"image": '
-            '"python:3.7", "source": "import os\\nimport '
-            'sys\\nsys.path.append(os.getcwd())\\nprint(\\"Hello, Hera!\\")\\n", '
-            '"command": ["python"]}}, {"name": "hello-hera", "dag": {"tasks": [{"name": '
-            '"t", "template": "t"}]}}], "nodeSelector": {"a_b_c": "a_b_c"}}, '
-            '"apiVersion": "argoproj.io/v1alpha1", "kind": "Workflow"}'
-        )
-        assert expected_json == w.to_json()
+        expected_json = {
+            "metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}},
+            "spec": {
+                "entrypoint": "hello-hera",
+                "templates": [
+                    {
+                        "name": "t",
+                        "script": {
+                            "image": "python:3.7",
+                            "source": dedent(
+                                """\
+                                import os
+                                import sys
+                                sys.path.append(os.getcwd())
+                                print("Hello, Hera!")
+                                """
+                            ),
+                            "command": ["python"],
+                        },
+                    },
+                    {"name": "hello-hera", "dag": {"tasks": [{"name": "t", "template": "t"}]}},
+                ],
+                "nodeSelector": {"a_b_c": "a_b_c"},
+            },
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Workflow",
+        }
+        assert expected_json == json.loads(w.to_json())
 
     def test_workflow_applies_hooks(self, global_config):
         def hook1(w: Workflow) -> None:
