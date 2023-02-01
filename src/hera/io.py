@@ -17,7 +17,6 @@ class IO:
     Parameters
     ----------
     inputs: Union[
-        List[Union[Parameter, Artifact]],
         List[Union[Parameter, Artifact, Dict[str, Any]]],
         Dict[str, Any],
     ] = None,
@@ -29,7 +28,6 @@ class IO:
     """
 
     inputs: Union[
-        List[Union[Parameter, Artifact]],
         List[Union[Parameter, Artifact, Dict[str, Any]]],
         Dict[str, Any],
     ] = field(  # type: ignore

@@ -93,7 +93,6 @@ class Task(IO):
         https://argoproj.github.io/argo-workflows/fields/#sequence.
     inputs: Optional[
             Union[
-                List[Union[Parameter, Artifact]],
                 List[Union[Parameter, Artifact, Dict[str, Any]]],
                 Dict[str, Any],
             ]
@@ -186,7 +185,7 @@ class Task(IO):
         with_param: Optional[Any] = None,
         with_sequence: Optional[Sequence] = None,
         inputs: Optional[
-            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
+            Union[List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
         ] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional[DAG] = None,
