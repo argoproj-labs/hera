@@ -35,6 +35,7 @@ from hera.memoize import Memoize
 from hera.metric import Metric, Metrics
 from hera.operator import Operator
 from hera.parameter import Parameter
+from hera.port import ContainerPort
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry_strategy import RetryStrategy
@@ -53,7 +54,7 @@ from hera.volumes import (
     _BaseVolume,
 )
 from hera.workflow_status import WorkflowStatus
-from hera.port import ContainerPort
+
 
 class TaskResult(str, Enum):
     Failed = "Failed"
@@ -276,7 +277,7 @@ class Task(IO):
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
         self.ports = ports or []
-        
+
         self.validate()
 
         # here we cast for otherwise `mypy` complains that Hera adds an incompatible type with a dictionary, which is
@@ -1094,7 +1095,7 @@ class Task(IO):
             setattr(task, "template_ref", self.template_ref.build())
         else:
             name = self.name if not self.dag else self.dag.name
-            setattr(task, "template", name) 
+            setattr(task, "template", name)
 
         if self.with_param:
             with_param = self.with_param

@@ -19,8 +19,8 @@ from hera import (
     Backoff,
     ConfigMapEnv,
     ConfigMapEnvFrom,
-    ContainerPort,
     ConfigMapVolume,
+    ContainerPort,
     EmptyDirVolume,
     Env,
     ExistingVolume,
@@ -205,9 +205,7 @@ print(42)
         t = Task(
             "t",
             no_op,
-            ports=[
-                ContainerPort(8080, name="test-port")
-            ],
+            ports=[ContainerPort(8080, name="test-port")],
         )
         cp = t.ports
         assert cp[0].name == "test-port"
