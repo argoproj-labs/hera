@@ -274,9 +274,6 @@ class Task(IO):
 
         self.validate()
 
-        # here we cast for otherwise `mypy` complains that Hera adds an incompatible type with a dictionary, which is
-        # an acceptable type for the `inputs` field upon `init`
-        self.inputs = cast(List[Union[Parameter, Artifact]], self.inputs)
         self.inputs += self._deduce_input_params()
 
         if hera.dag_context.is_set():
