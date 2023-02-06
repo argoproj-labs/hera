@@ -40,6 +40,10 @@ class Resources:
         The amount of memory to request.
     memory_limit: Optional[str] = None
         The memory limit of the pod.
+    ephemeral_request: Optional[str] = None
+        The amount of ephemeral storage to request.
+    ephemeral_limit: Optional[str] = None
+        The emphemeral storage limit of the pod.
     gpus: Optional[int] = None
         The number of GPUs to request.
     gpu_flag: Optional[str] = "nvidia.com/gpu"
@@ -52,6 +56,8 @@ class Resources:
     cpu_limit: Optional[Union[float, int, str]] = None
     memory_request: Optional[str] = None
     memory_limit: Optional[str] = None
+    ephemeral_request: Optional[str] = None
+    ephemeral_limit: Optional[str] = None
     gpus: Optional[int] = None
     gpu_flag: Optional[str] = "nvidia.com/gpu"
     custom_resources: Optional[Dict] = None
@@ -61,8 +67,13 @@ class Resources:
             validate_storage_units(self.memory_request)
         if self.memory_limit:
             validate_storage_units(self.memory_limit)
-        # TODO: add validation for CPU units if str
 
+        if self.ephemeral_request:
+            validate_storage_units(self.ephemeral_request)
+        if self.ephemeral_limit:
+            validate_storage_units(self.ephemeral_limit)
+
+        # TODO: add validation for CPU units if str
         if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
             assert self.cpu_limit >= 0, "CPU limit must be positive"
         if self.cpu_request is not None and isinstance(self.cpu_request, int):
@@ -90,6 +101,12 @@ class Resources:
 
         if self.memory_request is not None:
             resources = _merge_dicts(resources, dict(requests=dict(memory=self.memory_request)))
+
+        if self.ephemeral_limit is not None:
+            resources = _merge_dicts(resources, dict(limits={"ephemeral-storage": self.ephemeral_limit}))
+
+        if self.ephemeral_request is not None:
+            resources = _merge_dicts(resources, dict(requests={"ephemeral-storage": self.ephemeral_request}))
 
         if self.gpus is not None:
             resources = _merge_dicts(resources, dict(requests={self.gpu_flag: str(self.gpus)}))
