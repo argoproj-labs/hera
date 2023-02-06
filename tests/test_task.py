@@ -1,4 +1,5 @@
 import json
+from textwrap import dedent
 from unittest import mock
 
 import pytest
@@ -99,34 +100,44 @@ class TestTask:
     def test_param_script_portion_adds_formatted_json_calls(self, op):
         t = Task("t", op, [{"a": 1}])
         script = t._get_param_script_portion()
-        assert (
-            script == "import json\n"
-            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
-            "except: a = r'''{{inputs.parameters.a}}'''\n"
+        assert script == dedent(
+            """\
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+            """
         )
 
     def test_script_getter_returns_expected_string(self, op, typed_op):
         t = Task("t", op, [{"a": 1}])
         script = t._get_script()
-        assert (
-            script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
-            "except: a = r'''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
+        assert script == dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            print(a)
+            """
         )
 
         t = Task("t", typed_op, [{"a": 1}])
         script = t._get_script()
-        assert (
-            script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
-            "except: a = r'''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
-            'return [{"a": (a, a)}]\n'
+        assert script == dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            print(a)
+            return [{"a": (a, a)}]
+            """
         )
 
     def test_script_getter_parses_multi_line_function(self, long_op):
@@ -144,23 +155,26 @@ class TestTask:
             ],
         )
 
-        expected_script = """import os
-import sys
-sys.path.append(os.getcwd())
-import json
-try: very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_long_parameter_name}}''')
-except: very_long_parameter_name = r'''{{inputs.parameters.very_long_parameter_name}}'''
-try: very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_long_parameter_name}}''')
-except: very_very_long_parameter_name = r'''{{inputs.parameters.very_very_long_parameter_name}}'''
-try: very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_long_parameter_name}}''')
-except: very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_long_parameter_name}}'''
-try: very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
-except: very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
-try: very_very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
-except: very_very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
+        expected_script = dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_long_parameter_name}}''')
+            except: very_long_parameter_name = r'''{{inputs.parameters.very_long_parameter_name}}'''
+            try: very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_long_parameter_name}}''')
+            except: very_very_long_parameter_name = r'''{{inputs.parameters.very_very_long_parameter_name}}'''
+            try: very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+            except: very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_long_parameter_name}}'''
+            try: very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+            except: very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
+            try: very_very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+            except: very_very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
 
-print(42)
-"""
+            print(42)
+            """
+        )
         assert t._get_script() == expected_script
 
     def test_resources_returned_with_appropriate_limits(self, op):
@@ -277,13 +291,17 @@ print(42)
         assert isinstance(tt.daemon, bool)
         assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
         assert tt.name == "t"
-        assert (
-            tt.script.source == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads(r'''{{inputs.parameters.a}}''')\n"
-            "except: a = r'''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
+        assert tt.script.source == dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            print(a)
+            """
         )
         assert tt.inputs.parameters[0].name == "a"
         assert len(tt.tolerations) == 1
