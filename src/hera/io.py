@@ -43,7 +43,9 @@ class IO:
     def _parse_inputs(
         self,
         inputs: Union[
-            List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]
+            List[Union[Parameter, Artifact]],
+            List[Union[Parameter, Artifact, Dict[str, Any]]],
+            Dict[str, Any],
         ],
     ) -> List[Union[Parameter, Artifact]]:
         """Parses the dictionary aspect of the specified inputs and returns a list of parameters and artifacts.
@@ -58,7 +60,7 @@ class IO:
         Returns
         -------
         List[Union[Parameter, Artifact]]
-            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well, as
+            A list of parameters and artifacts. The parameters contain the specified dictionary mapping as well as
             independent parameters.
         """
         result: List[Union[Parameter, Artifact]] = []

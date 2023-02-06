@@ -14,4 +14,4 @@ def test_version():
     except Exception:
         raise
     if len(version_info) == 4:
-        assert ("dev" in version_info[3] or "rc" in version_info[3])
+        assert "dev" in version_info[3] or "rc" in version_info[3]
