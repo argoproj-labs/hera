@@ -276,7 +276,7 @@ class Task(IO):
         self.is_exit_task: bool = False
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
-        self.ports = ports or []
+        self.ports = ports
 
         self.validate()
 
@@ -932,7 +932,7 @@ class Task(IO):
             command=self.get_command(),
             resources=self.resources.build() if self.resources else None,
             args=self.get_args(),
-            ports=[p.build() for p in self.ports] if self.ports else None,
+            ports=None if self.ports is None else [p.build() for p in self.ports],
             env=env,
             env_from=env_from,
             working_dir=self.working_dir,
