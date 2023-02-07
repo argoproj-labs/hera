@@ -67,7 +67,7 @@ include = '\.pyi?$'
 
 [tool.flake8]
 # do not look here for things to lint
-exclude = [".git", "__init__.py"]
+exclude = [".git", "__init__.py", "src/hera/workflows/models", "src/hera/events/models"]
 docstring-convention = "numpy"
 max-line-length = 119
 

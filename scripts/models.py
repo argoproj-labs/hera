@@ -81,6 +81,13 @@ def get_import_paths_from_refs(refs: list, root_path: str) -> list:
     for ref in refs:
         split = ref.split(".")
         path, obj = '.'.join(split[:-1]), split[-1]
+        # these are duplicate objects and cause collisions, so we use extra flags from the import path to denote
+        # the differences between them, which helps users avoid import errors
+        if obj in ['HTTPHeader', 'LogEntry']:
+            alias = f'{split[-2]}{obj}'
+            upper_alias = alias[0].upper() + alias[1:]
+            obj = f'{obj} as {upper_alias}'
+
         result.append(f"from {root_path}.{path} import {obj}")
     return result
 
