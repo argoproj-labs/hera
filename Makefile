@@ -9,8 +9,8 @@ format: ## Format and sort imports for source, tests, examples, etc.
 	@black src docs tests examples conftest.py
 	@isort src docs tests examples conftest.py
 
-.PHONY: workflow-models
-workflow-models: ## Generate all the Argo Workflows models
+.PHONY: workflows-models
+workflows-models: ## Generate all the Argo Workflows models
 	@datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
@@ -20,4 +20,17 @@ workflow-models: ## Generate all the Argo Workflows models
 		--wrap-string-literal \
 		--disable-appending-item-suffix
 	@python scripts/models.py $(OPENAPI_SPEC_URL) workflows
+	@$(MAKE) format
+
+.PHONY: events-models
+events-models: ## Generate all the Argo Workflows models
+	@datamodel-codegen \
+		--url $(OPENAPI_SPEC_URL) \
+		--snake-case-field \
+		--target-python-version 3.7 \
+		--output src/hera/events/models \
+		--base-class hera.events._base_model.BaseModel \
+		--wrap-string-literal \
+		--disable-appending-item-suffix
+	@python scripts/models.py $(OPENAPI_SPEC_URL) events
 	@$(MAKE) format

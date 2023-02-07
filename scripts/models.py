@@ -52,9 +52,12 @@ def filter_refs_on_models_type(refs: list, models_type: str) -> list:
     inclusions = ['events', 'event', 'eventsource', 'sensor']
 
     filtered = refs
+    events = []
     for inclusion in inclusions:
         if models_type == 'events':
-            filtered = list(filter(lambda r: inclusion in r, filtered))
+            for ref in refs:
+                if inclusion in ref:
+                    events.append(ref)
         else:
             exclusions = [
                 'io.k8s.api.core.v1.Event',
@@ -62,7 +65,9 @@ def filter_refs_on_models_type(refs: list, models_type: str) -> list:
                 'io.k8s.api.core.v1.EventSource',
             ]
             filtered = list(filter(lambda r: inclusion not in r and r not in exclusions, filtered))
-    return filtered
+    if models_type == 'events':
+        return list(set(events))
+    return list(set(filtered))
 
 
 def assemble_root_path_from_models_type(m_type: str) -> str:
