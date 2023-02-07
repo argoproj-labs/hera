@@ -10,7 +10,7 @@ format: ## Format and sort imports for source, tests, examples, etc.
 	@isort src docs tests examples conftest.py
 
 .PHONY: workflows-models
-workflows-models: ## Generate all the Argo Workflows models
+workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
@@ -23,7 +23,7 @@ workflows-models: ## Generate all the Argo Workflows models
 	@$(MAKE) format
 
 .PHONY: events-models
-events-models: ## Generate all the Argo Workflows models
+events-models: ## Generate the Events models portion of Argo Workflows
 	@datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
@@ -34,3 +34,7 @@ events-models: ## Generate all the Argo Workflows models
 		--disable-appending-item-suffix
 	@python scripts/models.py $(OPENAPI_SPEC_URL) events
 	@$(MAKE) format
+
+models: ## Generate all the Argo Workflows models
+	$(MAKE) workflows-models
+	$(MAKE) events-models
