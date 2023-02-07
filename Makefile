@@ -15,9 +15,9 @@ workflow-models: ## Generate all the Argo Workflows models
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
 		--target-python-version 3.7 \
-		--output src/hera/models/workflows \
-		--base-class hera.BaseModel \
+		--output src/hera/workflows/models \
+		--base-class hera.workflows.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix
-	@find src/hera/models -type f -exec sed -i 's+from hera import BaseModel+from hera._base_model import BaseModel+g' {} +
+	@#find src/hera/models -type f -exec sed -i 's+from hera import BaseModel+from hera.workflows._base_model import BaseModel+g' {} +
 	@$(MAKE) format

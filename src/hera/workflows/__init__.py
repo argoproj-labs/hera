@@ -34,6 +34,7 @@ from hera.workflows.artifact import (
     S3Artifact,
 )
 from hera.workflows.backoff import Backoff
+from hera.workflows._base_model import BaseModel
 from hera.workflows.client import Client
 from hera.workflows.config import Config
 from hera.workflows.cron_workflow import ConcurrencyPolicy, CronWorkflow
