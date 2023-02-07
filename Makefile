@@ -19,4 +19,5 @@ workflow-models: ## Generate all the Argo Workflows models
 		--base-class hera.workflows._base_model.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix
+	@python scripts/models.py $(OPENAPI_SPEC_URL) workflows
 	@$(MAKE) format
