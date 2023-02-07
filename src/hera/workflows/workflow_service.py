@@ -22,10 +22,10 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
 )
 
-from hera.client import Client
-from hera.config import Config
-from hera.global_config import GlobalConfig
-from hera.workflow_status import WorkflowStatus
+from hera.workflows.client import Client
+from hera.workflows.config import Config
+from hera.workflows.global_config import GlobalConfig
+from hera.workflows.workflow_status import WorkflowStatus
 
 
 class WorkflowService:

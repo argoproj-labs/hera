@@ -2,7 +2,7 @@
 This example showcases the classic diamond workflow that is used as an example by Argo documentation and
 other libraries.
 """
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def say(message: str):

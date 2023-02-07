@@ -7,7 +7,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ValueFrom,
 )
 
-from hera.value_from import ValueFrom
+from hera.workflows.value_from import ValueFrom
 
 
 class Parameter:

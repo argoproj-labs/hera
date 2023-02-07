@@ -3,7 +3,7 @@ This example creates two tasks, one of the Tasks is a deamond task and its IP ad
 The daemoned task operates as server, serving an example payload, with the second task operating as a client, making
 http requests to the server."""
 
-from hera import Env, Task, Workflow
+from hera.workflows import Env, Task, Workflow
 
 
 def server():

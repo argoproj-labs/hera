@@ -23,28 +23,28 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
-from hera.affinity import Affinity
-from hera.artifact import Artifact
-from hera.dag import DAG
-from hera.env import Env
-from hera.env_from import BaseEnvFrom
-from hera.global_config import GlobalConfig
-from hera.image import ImagePullPolicy
-from hera.io import IO
-from hera.memoize import Memoize
-from hera.metric import Metric, Metrics
-from hera.operator import Operator
-from hera.parameter import Parameter
-from hera.resource_template import ResourceTemplate
-from hera.resources import Resources
-from hera.retry_strategy import RetryStrategy
-from hera.security_context import TaskSecurityContext
-from hera.sequence import Sequence
-from hera.sidecar import Sidecar
-from hera.template_ref import TemplateRef
-from hera.toleration import Toleration
-from hera.validators import validate_name
-from hera.volumes import (
+from hera.workflows.affinity import Affinity
+from hera.workflows.artifact import Artifact
+from hera.workflows.dag import DAG
+from hera.workflows.env import Env
+from hera.workflows.env_from import BaseEnvFrom
+from hera.workflows.global_config import GlobalConfig
+from hera.workflows.image import ImagePullPolicy
+from hera.workflows.io import IO
+from hera.workflows.memoize import Memoize
+from hera.workflows.metric import Metric, Metrics
+from hera.workflows.operator import Operator
+from hera.workflows.parameter import Parameter
+from hera.workflows.resource_template import ResourceTemplate
+from hera.workflows.resources import Resources
+from hera.workflows.retry_strategy import RetryStrategy
+from hera.workflows.security_context import TaskSecurityContext
+from hera.workflows.sequence import Sequence
+from hera.workflows.sidecar import Sidecar
+from hera.workflows.template_ref import TemplateRef
+from hera.workflows.toleration import Toleration
+from hera.workflows.validators import validate_name
+from hera.workflows.volumes import (
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
@@ -52,7 +52,7 @@ from hera.volumes import (
     Volume,
     _BaseVolume,
 )
-from hera.workflow_status import WorkflowStatus
+from hera.workflows.workflow_status import WorkflowStatus
 
 
 class TaskResult(str, Enum):
@@ -184,9 +184,7 @@ class Task(IO):
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
         with_sequence: Optional[Sequence] = None,
-        inputs: Optional[
-            Union[List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
-        ] = None,
+        inputs: Optional[Union[List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional[DAG] = None,
         image: Optional[str] = None,
@@ -276,8 +274,8 @@ class Task(IO):
 
         self.inputs += self._deduce_input_params()
 
-        if hera.dag_context.is_set():
-            hera.dag_context.add_task(self)
+        if hera.workflows.dag_context.is_set():
+            hera.workflows.dag_context.add_task(self)
 
         for hook in GlobalConfig.task_post_init_hooks:
             hook(self)

@@ -47,6 +47,7 @@ from hera.workflows.host_alias import HostAlias
 from hera.workflows.image import ImagePullPolicy
 from hera.workflows.lifecycle import Lifecycle, LifecycleHandler
 from hera.workflows.memoize import Memoize
+from hera.workflows.metric import Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
 from hera.workflows.port import ContainerPort, Protocol

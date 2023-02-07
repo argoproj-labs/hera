@@ -4,7 +4,7 @@ This task showcases how clients can request a particular number of GPUs to be av
 type of GPU to request. The task uses the Horovod image as it provides Python and NVIDIA SMI.
 
 ```python
-from hera import GPUToleration, Resources, Task, Workflow
+from hera.workflows import GPUToleration, Resources, Task, Workflow
 
 
 def do():

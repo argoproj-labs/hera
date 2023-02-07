@@ -3,7 +3,7 @@
 Example derived from: https://medium.com/@corvin/dynamic-fan-out-and-fan-in-in-argo-workflows-d731e144e2fd
 
 ```python
-from hera import Archive, GCSArtifact, Task, Workflow
+from hera.workflows import Archive, GCSArtifact, Task, Workflow
 
 
 def generate():

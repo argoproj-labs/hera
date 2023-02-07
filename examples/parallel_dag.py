@@ -1,5 +1,5 @@
 """This example showcases how one can schedule a workflow with a parallel DAG task through Hera"""
-from hera import DAG, Parameter, Task, Workflow
+from hera.workflows import DAG, Parameter, Task, Workflow
 
 
 def produce(instruction: str):

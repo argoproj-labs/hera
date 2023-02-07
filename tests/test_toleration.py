@@ -1,4 +1,4 @@
-from hera import Toleration
+from hera.workflows import Toleration
 
 
 def test_toleration_translates():

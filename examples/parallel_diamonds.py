@@ -1,5 +1,5 @@
 """This example showcases how one can schedule a diamond structure with parallel processing through Hera"""
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def say(message: str):

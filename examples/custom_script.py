@@ -1,5 +1,5 @@
 """This example showcases how to run a custom script rather than a python function in Hera"""
-from hera import Parameter, Task, Workflow
+from hera.workflows import Parameter, Task, Workflow
 
 # If the source function of a task has a return type of "str" in its annotation,
 # the task will resolve the function before creation.

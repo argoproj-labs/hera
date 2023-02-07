@@ -3,7 +3,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1RetryStrategy,
 )
 
-from hera import Backoff, RetryPolicy, RetryStrategy
+from hera.workflows import Backoff, RetryPolicy, RetryStrategy
 
 
 class TestRetryStrategy:

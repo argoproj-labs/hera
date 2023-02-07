@@ -4,8 +4,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ValueFrom,
 )
 
-from hera.parameter import Parameter
-from hera.value_from import ValueFrom
+from hera.workflows.parameter import Parameter
+from hera.workflows.value_from import ValueFrom
 
 
 class TestParameter:

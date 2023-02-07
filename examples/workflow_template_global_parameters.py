@@ -1,4 +1,4 @@
-from hera import Parameter, Task, WorkflowTemplate
+from hera.workflows import Parameter, Task, WorkflowTemplate
 
 
 def foo(v):

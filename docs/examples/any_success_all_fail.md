@@ -3,7 +3,7 @@
 
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def foo(a):

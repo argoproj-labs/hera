@@ -2,7 +2,7 @@ import hashlib
 
 import pytest
 
-from hera import Env, FieldEnv
+from hera.workflows import Env, FieldEnv
 
 
 class TestEnv:

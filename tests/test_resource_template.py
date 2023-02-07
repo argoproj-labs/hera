@@ -1,7 +1,7 @@
 import pytest
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1ResourceTemplate
 
-from hera import ResourceTemplate
+from hera.workflows import ResourceTemplate
 
 
 @pytest.fixture

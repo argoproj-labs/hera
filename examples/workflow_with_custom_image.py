@@ -1,5 +1,5 @@
 """This example showcases how to run a container, rather than a Python, function, as the payload of a task in Hera"""
-from hera import ImagePullPolicy, Task, Workflow
+from hera.workflows import ImagePullPolicy, Task, Workflow
 
 with Workflow("pipeline-image-testing") as w:
     # This can be used when you have your own custom image
