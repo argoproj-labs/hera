@@ -363,10 +363,8 @@ def get_imports(endpoints: List[ServiceEndpoint]) -> List[str]:
 
 
 if __name__ == "__main__":
-    # url = get_openapi_spec_url()
-    url = "https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.4/api/openapi-spec/swagger.json"
-    # models_type = get_models_type()
-    models_type = "events"
+    url = get_openapi_spec_url()
+    models_type = get_models_type()
     payload = fetch_openapi_spec(url)
     consumes = get_consumes(payload)
     produces = get_produces(payload)

@@ -50,6 +50,6 @@ events-service:  ## Generate the events service option of Hera
 	$(MAKE) format
 
 .PHONE: service
-service:  ## Generate the services of Hera
+services:  ## Generate the services of Hera
 	$(MAKE) workflows-service
 	$(MAKE) events-service
