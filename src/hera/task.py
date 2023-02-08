@@ -35,6 +35,7 @@ from hera.memoize import Memoize
 from hera.metric import Metric, Metrics
 from hera.operator import Operator
 from hera.parameter import Parameter
+from hera.port import ContainerPort
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry_strategy import RetryStrategy
@@ -170,6 +171,8 @@ class Task(IO):
         Any built-in/custom Prometheus metrics to track.
     sidecars: Optional[List[Sidecar]] = None
         List of sidecars to create for the main pods of the container that runs the task.
+    ports: Optional[List[ContainerPort]] = None
+        List of ports to create for the main pods of the container that runs the task.
 
     Notes
     -----
@@ -213,6 +216,7 @@ class Task(IO):
         timeout: Optional[str] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
         sidecars: Optional[List[Sidecar]] = None,
+        ports: Optional[List[ContainerPort]] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -271,6 +275,7 @@ class Task(IO):
         self.is_exit_task: bool = False
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
+        self.ports = ports
 
         self.validate()
 
@@ -923,6 +928,7 @@ class Task(IO):
             command=self.get_command(),
             resources=self.resources.build() if self.resources else None,
             args=self.get_args(),
+            ports=None if self.ports is None else [p.build() for p in self.ports],
             env=env,
             env_from=env_from,
             working_dir=self.working_dir,
