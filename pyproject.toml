@@ -54,6 +54,7 @@ jsonpath-ng = "^1.5.3"
 
 [tool.poetry.group.dev.dependencies]
 datamodel-code-generator = "^0.17.1"
+types-requests = "^2.28.11.12"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

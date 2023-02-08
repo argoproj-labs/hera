@@ -2,10 +2,11 @@
 
 # we want the init of `workflows.models` to have a filtered import of Workflow models
 # we can parse out the JSON using the old code and filter on Workflow objects
-from datetime import datetime, timezone
 import sys
-import requests
+from datetime import datetime, timezone
 from pathlib import Path
+
+import requests
 
 model_types = {'workflows', 'events'}
 
@@ -105,6 +106,15 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
         )
         for imp in imports:
             f.write(f"{imp}\n")
+
+        if models_type == "events":
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Item\n")
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Event\n")
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import EventResponse\n")
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import GetUserInfoResponse\n")
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import InfoResponse\n")
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Version\n")
+            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Version\n")
 
 
 if __name__ == "__main__":

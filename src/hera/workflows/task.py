@@ -23,12 +23,12 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.affinity import Affinity
 from hera.workflows.artifact import Artifact
 from hera.workflows.dag import DAG
 from hera.workflows.env import Env
 from hera.workflows.env_from import BaseEnvFrom
-from hera.workflows.global_config import GlobalConfig
 from hera.workflows.image import ImagePullPolicy
 from hera.workflows.io import IO
 from hera.workflows.memoize import Memoize

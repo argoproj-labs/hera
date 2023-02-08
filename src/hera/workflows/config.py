@@ -4,7 +4,7 @@ from typing import Optional
 
 from argo_workflows.api_client import Configuration as ArgoConfig
 
-from hera.workflows.global_config import GlobalConfig
+from hera.shared.global_config import GlobalConfig
 
 try:
     import urllib3
