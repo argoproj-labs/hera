@@ -4,15 +4,6 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.abspath('..'))
 
-root_path = Path(__file__).parent.parent
-
-with open(root_path / 'pyproject.toml', 'r') as f:
-    for line in f.readlines():
-        if line.startswith('version'):
-            release = line.strip().split(" ")[-1].replace("\"", "")
-            version = ".".join(release.split(".")[:-1])
-            break
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
