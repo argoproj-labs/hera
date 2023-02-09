@@ -14,6 +14,22 @@ model_types = {'workflows', 'events'}
 
 
 class Parameter:
+    """A representation of a function parameter.
+
+    Parameters
+    ----------
+    name: str
+        The name of the parameter.
+    field: str
+        The body field that this parameter is used on.
+    in_: str
+        The type of request object this parameter is used in - body, query, or path.
+    type_: type
+        The proper `type` of the parameter.
+    required: bool
+        Whether the `Parameter` is required.
+    """
+
     def __init__(self, name: str, field: str, in_: str, type_: type, required: bool) -> None:
         self.name = name
         self.field = field
@@ -29,6 +45,8 @@ class Parameter:
 
 
 class Response:
+    """The response type of a request"""
+
     def __init__(self, ref: str) -> None:
         self.ref = ref
 
@@ -37,9 +55,31 @@ class Response:
 
 
 class ServiceEndpoint:
+    """A response endpoint representation for Argo service endpoints.
+
+    Parameters
+    ----------
+    url: str
+        The relative URL of the endpoint.
+    method: str
+        The method of the endpoint: put, end, post.
+    name: str
+        The name of the endpoint. Used to create the service API definitions.
+    params: List[Parameter]
+        The parameters of the endpoint. Used to create the service API definitions.
+    response: Response
+        The response of the endpoint. Used to create the service API definitions.
+    summary: Optional[str] = None
+        Summary documentation of the endpoint, if available.
+    consumes: str = "application/json"
+        The consumption payload type of the endpoint.
+    produces: str = "application/json"
+        The response payload type of the endpoint.
+    """
+
     def __init__(
         self,
-        url,
+        url: str,
         method: str,
         name: str,
         params: List[Parameter],
@@ -163,6 +203,7 @@ def fetch_openapi_spec(url: str) -> dict:
 
 
 def get_consumes(payload: dict) -> str:
+    """Gets the OpenAPI `consumes` field"""
     consumes = payload.get("consumes")
     assert isinstance(consumes, list), f"Expected `consumes` to be of list type, received {type(consumes)}"
     assert len(consumes) == 1, "Expected `consumes` payload to contain a single item e.g. 'application/json'"
@@ -170,6 +211,7 @@ def get_consumes(payload: dict) -> str:
 
 
 def get_produces(payload: dict) -> str:
+    """Gets the OpenAPI `produces` field"""
     produces = payload.get("produces")
     assert isinstance(produces, list), f"Expected `produces` to be of list type, received {type(produces)}"
     assert len(produces) == 1, "Expected `produces` payload to contain a single item e.g. 'application/json'"
@@ -177,21 +219,25 @@ def get_produces(payload: dict) -> str:
 
 
 def get_paths(payload: dict) -> dict:
+    """Gets the OpenAPI `paths` field"""
     paths = payload.get("paths")
     assert isinstance(paths, dict), f"Expected `paths` to be of dictionary type, received {type(paths)}"
     return paths
 
 
 def camel_to_snake(s: str) -> str:
+    """Converts the given string from camel case to snake cased"""
     return re.sub(r"(?<!^)(?=[A-Z])", "_", s)
 
 
 def snake_to_camel(s: str) -> str:
+    """Converts the given string from snake case to camel cased"""
     components = s.split("_")
     return components[0] + "".join(x.title() for x in components[1:])
 
 
 def parse_operation_id(operation_id: str) -> str:
+    """Parses the given operation ID into a service endpoint definition"""
     if "UID" in operation_id:
         operation_id = operation_id.replace("UID", "Uid")
     operation = operation_id.split("_")[-1]
@@ -199,7 +245,13 @@ def parse_operation_id(operation_id: str) -> str:
     return operation_snake_case.lower()
 
 
-def get_workflow_class(cls_name: str, models_type: str) -> type:
+def get_class(cls_name: str, models_type: str) -> type:
+    """Returns the Argo Workflows/Events class association based on the specified models type.
+
+    This intentionally has an empty return to catch cases when the class it not found. This will cause dep
+    code to fail so users know service generation failed.
+    """
+
     switch = {'workflows': workflows_models, 'events': events_models}
     modules = inspect.getmembers(switch.get(models_type))
     for module in modules:
@@ -209,12 +261,14 @@ def get_workflow_class(cls_name: str, models_type: str) -> type:
 
 
 def parse_builtin(f: str) -> str:
+    """Parses built in statements to dunder representations"""
     if f in dir(builtins) or f in ["continue", "pass", "in"]:
         return f"{f}_"
     return f
 
 
 def parse_parameter(parameter: dict, models_type: str) -> Parameter:
+    """Parses the given dictionary representation of a `Parameter` into a proper `Parameter` type based on model type"""
     openapi_type_switch = {
         "string": str,
         "number": float,
@@ -232,7 +286,7 @@ def parse_parameter(parameter: dict, models_type: str) -> Parameter:
     if "type" in parameter:
         type_ = openapi_type_switch.get(parameter.get("type"))
     elif "schema" in parameter:
-        type_ = get_workflow_class(parameter.get("schema").get("$ref").split(".")[-1], models_type)
+        type_ = get_class(parameter.get("schema").get("$ref").split(".")[-1], models_type)
     else:
         raise ValueError(f"Unrecognized parameter type from parameter {parameter}")
 
@@ -249,6 +303,7 @@ def parse_parameter(parameter: dict, models_type: str) -> Parameter:
 
 
 def parse_response(parameter: dict) -> Response:
+    """Parses the return parameter into a proper `Response`"""
     responses = parameter.get("responses")
     ok_resp = responses.get("200")
 
@@ -269,6 +324,7 @@ def parse_response(parameter: dict) -> Response:
 def get_endpoints(
     paths: dict, models_type: str, consumes: str = "application/json", produces: str = "application/json"
 ) -> List[ServiceEndpoint]:
+    """Assembles a series of endpoints for the service definition"""
     switch = {'workflows': ['events', 'event', 'eventsource', 'sensor'], 'events': ['workflow', 'workflows']}
     exceptions = switch.get(models_type)
     endpoints = []
@@ -309,6 +365,7 @@ def get_endpoints(
 
 
 def get_service_def() -> str:
+    """Assembles the service definition string/code representation"""
     return """
 import requests
 import os
@@ -332,6 +389,7 @@ class {models_type}Service:
 
 
 def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type: str) -> str:
+    """Makes the service definitions based on the given endpoints for the given model type"""
     result = service_def
     for endpoint in endpoints:
         result = result + f"{endpoint}\n"
@@ -340,11 +398,13 @@ def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type
 
 
 def write_service(service: str, path: Path) -> None:
+    """Writes the service code to the specified path"""
     with open(str(path), "w+") as f:
         f.write(service)
 
 
 def get_imports(endpoints: List[ServiceEndpoint]) -> List[str]:
+    """Assembles a series of imports, which are dependencies of the given endpoints"""
     result = []
     builtins = dir(__builtins__)
     for endpoint in endpoints:
