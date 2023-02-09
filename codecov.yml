@@ -1,5 +1,9 @@
 ignore:
-    - "src/hera/_task_input.py"  # ignored because it contains a custom implementation to support `with_items`
+    - "src/hera/workflows/_task_input.py"  # ignored because it contains a custom implementation to support `with_items`
+    - "src/hera/workflows/models/**"  # ignored because it contains auto-generated code
+    - "src/hera/workflows/service.py"  # ignored because it contains auto-generated code
+    - "src/hera/events/models/**"  # ignored because it contains auto-generated code
+    - "src/hera/events/service.py"  # ignored because it contains auto-generated code
 coverage:
   round: down
   precision: 1
