@@ -258,6 +258,7 @@ class Task(IO):
                 )
 
         self.suspend = suspend
+        self.image: Optional[str]
         if not self.suspend:
             self.image = image or GlobalConfig.image
         else:
