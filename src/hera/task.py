@@ -1019,13 +1019,15 @@ class Task(IO):
         if self.retry_strategy is not None:
             setattr(template, "retry_strategy", self.retry_strategy.build())
 
-        if self.source is not None:
-            setattr(template, "script", self._build_script())
-        elif self.resource_template is not None:
-            setattr(template, "resource", self.resource_template.build())
+        if self.suspend is not None:
+            setattr(template, "suspend", self.suspend.build())
         else:
-            setattr(template, "container", self._build_container())
-
+            if self.source is not None:
+                setattr(template, "script", self._build_script())
+            elif self.resource_template is not None:
+                setattr(template, "resource", self.resource_template.build())
+            else:
+                setattr(template, "container", self._build_container())
         affinity = self.affinity.build() if self.affinity else None
         if affinity is not None:
             setattr(template, "affinity", affinity)
@@ -1047,9 +1049,6 @@ class Task(IO):
 
         if self.sidecars is not None:
             setattr(template, "sidecars", [sc.build() for sc in self.sidecars])
-
-        if self.suspend is not None:
-            setattr(template, "suspend", self.suspend.build())
 
         return template
 

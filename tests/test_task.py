@@ -556,6 +556,16 @@ class TestTask:
         assert tt.container.command[0] == "cowsay"
         assert tt.container.resources["requests"]["memory"] == "4Gi"
 
+    def test_task_should_create_suspend_task(self):
+        t = Task("t", suspend=Suspend("10"))
+        tt = t._build_template()
+
+        assert tt.suspend is not None
+        assert tt.suspend.duration == "10"
+        assert not hasattr(tt, "container")
+        assert not hasattr(tt, "script")
+        assert not hasattr(tt, "script")
+
     def test_task_allow_subclassing_when_assigned_next(self, no_op):
         class SubclassTask(Task):
             pass
