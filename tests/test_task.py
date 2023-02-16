@@ -796,11 +796,11 @@ class TestTask:
         assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
 
         with pytest.raises(ValueError) as e:
-            Task("t", suspend=Suspend(), command="python")
+            Task("t", suspend=Suspend(), command=["python"])
         assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
 
         with pytest.raises(ValueError) as e:
-            Task("t", suspend=Suspend(), args="an-arg")
+            Task("t", suspend=Suspend(), args=["an-arg"])
         assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
 
         with pytest.raises(ValueError) as e:
