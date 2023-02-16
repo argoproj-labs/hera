@@ -8,12 +8,30 @@ from argo_workflows.models import (
 
 
 @dataclass
+class ConfigMapKeyRef:
+    """Holds the ConfigMap reference.
+
+    Attributes
+    ----------
+    key: str
+        The key to select.
+    name: str
+        The ConfigMap to select from.
+    optional: bool
+        Specify whether the ConfigMap or its key must be defined.
+    """
+    key: str
+    name: str
+    optional: bool = False
+
+
+@dataclass
 class ValueFrom:
     """Holds descriptions of where to obtain parameter values from.
 
     Attributes
     ----------
-    config_map_key_ref: Optional[str] = None
+    config_map_key_ref: Optional[ConfigMapKeyRef] = None
         A selector that identifies a config map to obtain the value from.
     default: Optional[str] = None
         Specifies a value to be used if retrieving the value from the specified source fails.
@@ -40,7 +58,7 @@ class ValueFrom:
     See: https://argoproj.github.io/argo-workflows/fields/#valuefrom
     """
 
-    config_map_key_ref: Optional[str] = None
+    config_map_key_ref: Optional[ConfigMapKeyRef] = None
     default: Optional[str] = None
     event: Optional[str] = None
     expression: Optional[str] = None
@@ -58,7 +76,15 @@ class ValueFrom:
     def build(self) -> IoArgoprojWorkflowV1alpha1ValueFrom:
         value_from = IoArgoprojWorkflowV1alpha1ValueFrom()
         if self.config_map_key_ref is not None:
-            setattr(value_from, "config_map_key_ref", ConfigMapKeySelector(self.config_map_key_ref))
+            setattr(
+                value_from,
+                "config_map_key_ref",
+                ConfigMapKeySelector(
+                    key=self.config_map_key_ref.key,
+                    name=self.config_map_key_ref.name,
+                    optional=self.config_map_key_ref.optional,
+                ),
+            )
         if self.default is not None:
             setattr(value_from, "default", self.default)
         if self.event is not None:
