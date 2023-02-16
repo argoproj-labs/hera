@@ -96,6 +96,8 @@ class Parameter:
             setattr(parameter, "default", self.default)
         if self.description is not None:
             setattr(parameter, "description", self.description)
+        if self.enum is not None:
+            setattr(parameter, "enum", self.enum)
         return parameter
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
