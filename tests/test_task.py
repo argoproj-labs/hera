@@ -474,6 +474,8 @@ class TestTask:
         assert hasattr(t, "suspend")
         assert t.suspend is not None
         assert t.suspend.duration == "10"
+        assert hasattr(t, "image")
+        assert t.image is None
 
     @pytest.fixture
     def task_security_context_kwargs(self):

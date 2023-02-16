@@ -260,6 +260,8 @@ class Task(IO):
         self.suspend = suspend
         if not self.suspend:
             self.image = image or GlobalConfig.image
+        else:
+            self.image = None
 
         self.sidecars = sidecars
         self.image_pull_policy = image_pull_policy
