@@ -59,6 +59,10 @@ class Parameter:
     ) -> None:
         if value is not MISSING and value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
+        if enum and value is not MISSING and value not in enum:
+            raise ValueError("`value` must be in `enum`")
+        if enum and default is not MISSING and default not in enum:
+            raise ValueError("`default` must be in `enum`")
         self.name = name
         self.value = _serialize(value)
         self.default = _serialize(default)
@@ -96,6 +100,8 @@ class Parameter:
             setattr(parameter, "default", self.default)
         if self.description is not None:
             setattr(parameter, "description", self.description)
+        if self.enum is not None:
+            setattr(parameter, "enum", self.enum)
         return parameter
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
