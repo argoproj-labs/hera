@@ -4,7 +4,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ValueFrom,
 )
 
-from hera.value_from import ValueFrom
+from hera.value_from import ConfigMapKeyRef, ValueFrom
 
 
 class TestValueFrom:
@@ -14,13 +14,14 @@ class TestValueFrom:
         assert str(e.value) == "At least one fields must be not `None` for `ValueFrom`"
 
     def test_builds_as_expected(self):
-        vf_ = ValueFrom(config_map_key_ref="abc")
+        vf_ = ValueFrom(config_map_key_ref=ConfigMapKeyRef(key="abc", name="cm"))
         vf = vf_.build()
         assert isinstance(vf, IoArgoprojWorkflowV1alpha1ValueFrom)
         assert hasattr(vf, "config_map_key_ref")
         assert isinstance(vf.config_map_key_ref, ConfigMapKeySelector)
         assert hasattr(vf.config_map_key_ref, "key")
         assert vf.config_map_key_ref.key == "abc"
+        assert vf.config_map_key_ref.name == "cm"
         assert not hasattr(vf, "default")
         assert not hasattr(vf, "event")
         assert not hasattr(vf, "expression")
