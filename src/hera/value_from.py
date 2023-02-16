@@ -74,5 +74,5 @@ class ValueFrom:
         if self.path is not None:
             setattr(value_from, "path", self.path)
         if self.supplied:
-            setattr(value_from, "supplied", self.supplied)  # placeholder, actual value comes from API, CLI, UI, etc.
+            setattr(value_from, "supplied", {})  # placeholder, actual value comes from API, CLI, UI, etc.
         return value_from
