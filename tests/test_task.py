@@ -39,6 +39,7 @@ from hera import (
     RetryStrategy,
     S3Artifact,
     Sequence,
+    Suspend,
     Task,
     TaskResult,
     TaskSecurityContext,
@@ -468,6 +469,12 @@ class TestTask:
         assert artifact.git.repo == "https://github.com/argoproj/argo-workflows.git"
         assert artifact.git.revision == "master"
 
+    def test_task_suspend_template(self):
+        t = Task('t', suspend=Suspend(duration="10"))
+        assert hasattr(t, "suspend")
+        assert t.suspend is not None
+        assert t.suspend.duration == "10"
+
     @pytest.fixture
     def task_security_context_kwargs(self):
         sc_kwargs = {
@@ -778,6 +785,27 @@ class TestTask:
         with pytest.raises(ValueError) as e:
             Task("t", with_param=["abc"], with_sequence=Sequence("abc"))
         assert str(e.value) == "Cannot use both `with_sequence` and `with_param`"
+
+        # SuspendTemplate mutually exclusive kwargs
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), dag=DAG("d"))
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), image="python:3.7")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), command="python")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), args="an-arg")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), source="print('test')")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
 
     def test_task_uses_sequences(self):
         t = Task("t", with_sequence=Sequence("abc", start=1, end=42))._build_dag_task()
