@@ -72,52 +72,40 @@ class Parameter:
         self.name = name
         return self
 
-    def as_argument(self) -> Optional[IoArgoprojWorkflowV1alpha1Parameter]:
-        """Assembles the parameter for use as an argument of a task"""
-        if self.value is None and self.value_from is None and self.default:
-            # Argument not necessary as default is set for the input.
-            return None
+    def _build(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
-        if self.global_name is not None:
-            setattr(parameter, "global_name", self.global_name)
+
+        if self.value is not MISSING:
+            setattr(parameter, "value", self.value)
+
+        if self.default is not MISSING:
+            setattr(parameter, "default", self.default)
+
+        if self.value_from is not None:
+            setattr(parameter, "value_from", self.value_from.build())
+
         if self.description is not None:
             setattr(parameter, "description", self.description)
 
-        if self.value is not None:
-            setattr(parameter, "value", self.value)
-        elif self.value_from is not None:
-            setattr(parameter, "value_from", self.value_from.build())
+        if self.enum is not None:
+            setattr(parameter, "enum", self.enum)
+
+        if self.global_name is not None:
+            setattr(parameter, "global_name", self.global_name)
+
         return parameter
+
+    def as_argument(self) -> IoArgoprojWorkflowV1alpha1Parameter:
+        """Assembles the parameter for use as an argument of a task"""
+        return self._build()
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         """Assembles the parameter for use as an input to task"""
-        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
-        if self.default:
-            setattr(parameter, "default", self.default)
-        if self.description is not None:
-            setattr(parameter, "description", self.description)
-        if self.enum is not None:
-            setattr(parameter, "enum", self.enum)
-        return parameter
+        return self._build()
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         """Assembles the parameter for use as an output of a task"""
-        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
-        if self.value_from:
-            setattr(parameter, "value_from", self.value_from.build())
-        else:
-            argo_value_from = IoArgoprojWorkflowV1alpha1ValueFrom(parameter=self.value)
-            if self.default:
-                setattr(argo_value_from, "default", self.default)
-            setattr(parameter, "value_from", argo_value_from)
-
-        if self.global_name is not None:
-            setattr(parameter, "global_name", self.global_name)
-        if self.description is not None:
-            setattr(parameter, "description", self.description)
-        if self.enum is not None:
-            setattr(parameter, "enum", self.enum)
-        return parameter
+        return self._build()
 
     def __str__(self):
         """Represent the parameter as a string by pointing to its value.
