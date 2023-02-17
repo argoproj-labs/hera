@@ -59,10 +59,6 @@ class Parameter:
     ) -> None:
         if value is not MISSING and value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
-        if enum and value is not MISSING and value not in enum:
-            raise ValueError("`value` must be in `enum`")
-        if enum and default is not MISSING and default not in enum:
-            raise ValueError("`default` must be in `enum`")
         self.name = name
         self.value = _serialize(value)
         self.default = _serialize(default)
