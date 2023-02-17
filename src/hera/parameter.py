@@ -75,10 +75,10 @@ class Parameter:
     def _build(self) -> IoArgoprojWorkflowV1alpha1Parameter:
         parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
 
-        if self.value is not MISSING:
+        if self.value is not None:
             setattr(parameter, "value", self.value)
 
-        if self.default is not MISSING:
+        if self.default is not None:
             setattr(parameter, "default", self.default)
 
         if self.value_from is not None:
@@ -96,15 +96,15 @@ class Parameter:
         return parameter
 
     def as_argument(self) -> IoArgoprojWorkflowV1alpha1Parameter:
-        """Assembles the parameter for use as an argument of a task"""
+        """Assembles the parameter for use as an argument parameter of a task within a DAG"""
         return self._build()
 
     def as_input(self) -> IoArgoprojWorkflowV1alpha1Parameter:
-        """Assembles the parameter for use as an input to task"""
+        """Assembles the parameter for use as an input parameter to task"""
         return self._build()
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
-        """Assembles the parameter for use as an output of a task"""
+        """Assembles the parameter for use as an output parameter of a task"""
         return self._build()
 
     def __str__(self):
