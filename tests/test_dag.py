@@ -10,11 +10,11 @@ from argo_workflows.models import (
 )
 from argo_workflows.models import Volume as ArgoVolume
 
-from hera.artifact import Artifact
-from hera.dag import DAG
-from hera.parameter import Parameter
-from hera.task import Task
-from hera.volumes import EmptyDirVolume, Volume
+from hera.workflows.artifact import Artifact
+from hera.workflows.dag import DAG
+from hera.workflows.parameter import Parameter
+from hera.workflows.task import Task
+from hera.workflows.volumes import EmptyDirVolume, Volume
 
 
 class TestDAG:
@@ -117,13 +117,13 @@ class TestDAG:
         assert hasattr(template, "outputs")
         assert isinstance(template.outputs, IoArgoprojWorkflowV1alpha1Outputs)
 
-    @mock.patch("hera.dag_context", return_value=mock.Mock())
+    @mock.patch("hera.workflows.dag_context", return_value=mock.Mock())
     def test_enter(self, ctx_mock: mock.Mock):
         with DAG("test") as dag:
             assert dag.in_context
             ctx_mock.enter.assert_called_once()
 
-    @mock.patch("hera.dag_context", return_value=mock.Mock())
+    @mock.patch("hera.workflows.dag_context", return_value=mock.Mock())
     def test_exit(self, ctx_mock: mock.Mock):
         with DAG("test") as dag:
             assert dag.in_context

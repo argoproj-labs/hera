@@ -3,8 +3,8 @@ from typing import Optional
 
 from argo_workflows.api_client import ApiClient as ArgoApiClient
 
-from hera.config import Config
-from hera.global_config import GlobalConfig
+from hera.workflows.config import Config
+from hera.workflows.global_config import GlobalConfig
 
 
 class Client:

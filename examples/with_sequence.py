@@ -1,7 +1,7 @@
 """
 This example showcases how to generate and parallelize generated sequences
 """
-from hera import Sequence, Task, Workflow
+from hera.workflows import Sequence, Task, Workflow
 
 
 def gen_num():

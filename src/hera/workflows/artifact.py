@@ -10,7 +10,7 @@ from argo_workflows.models import (
     SecretKeySelector,
 )
 
-from hera.archive import Archive
+from hera.workflows.archive import Archive
 
 
 class Artifact:

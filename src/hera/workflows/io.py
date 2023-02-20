@@ -6,8 +6,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Outputs,
 )
 
-from hera.artifact import Artifact
-from hera.parameter import Parameter
+from hera.workflows.artifact import Artifact
+from hera.workflows.parameter import Parameter
 
 
 @dataclass

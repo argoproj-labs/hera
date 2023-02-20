@@ -4,8 +4,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Outputs,
 )
 
-from hera import Artifact, Parameter
-from hera.io import IO
+from hera.workflows import Artifact, Parameter
+from hera.workflows.io import IO
 
 
 class TestIO:

@@ -3,7 +3,7 @@
 This example showcases how clients can schedule tasks that provision independent volumes
 
 ```python
-from hera import Task, Volume, Workflow
+from hera.workflows import Task, Volume, Workflow
 
 
 def do():

@@ -3,7 +3,7 @@
 This example showcases how clients can mount secrets inside a task
 
 ```python
-from hera import SecretVolume, Task, Workflow
+from hera.workflows import SecretVolume, Task, Workflow
 
 # Create a secret with kubectl
 # kubectl create secret generic secret-file --from-literal="config.json=SECRET_TOKEN"

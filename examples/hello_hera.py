@@ -1,5 +1,5 @@
 """This example showcases the hello world example of Hera"""
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def hello():
