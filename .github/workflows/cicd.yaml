@@ -114,6 +114,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install 'tox<4' poetry
+      
+      - name: build wheel
+        run: |
+          poetry version 0.0.0+${{ env.GITHUB_SHA }}
+          poetry build
+
+      - name: upload wheel as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: dist/*.whl
 
       - name: create coverage report
         env:
