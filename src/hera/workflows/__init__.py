@@ -1,3 +1,4 @@
+from hera.workflows._base_model import BaseModel
 from hera.workflows._context import dag_context
 from hera.workflows.action import (
     ExecAction,

@@ -52,6 +52,9 @@ types-PyYAML = "*"
 jsonpath-ng = "^1.5.3"
 
 
+[tool.poetry.group.dev.dependencies]
+datamodel-code-generator = "^0.17.1"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
@@ -64,7 +67,7 @@ include = '\.pyi?$'
 
 [tool.flake8]
 # do not look here for things to lint
-exclude = [".git", "__init__.py"]
+exclude = [".git", "__init__.py", "src/hera/workflows/models", "src/hera/events/models"]
 docstring-convention = "numpy"
 max-line-length = 119
 
