@@ -185,7 +185,6 @@ BUILTINS = (
 
 # Here we dynamically set all the binary operators on the Node class
 for method, op in BINARY_OP_MAP.items():
-
     # Note, we need a nested function here to properly bind
     # the op variable.
     # See https://eev.ee/blog/2011/04/24/gotcha-python-scoping-closures/#the-solution
@@ -201,7 +200,6 @@ for method, op in BINARY_OP_MAP.items():
 
 # Here we dynamically set all the builtin operators on the Node class
 for builtin in BUILTINS:
-
     # Note, we need a nested function here to properly bind
     # the builtin variable.
     # See https://eev.ee/blog/2011/04/24/gotcha-python-scoping-closures/#the-solution
