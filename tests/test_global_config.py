@@ -1,4 +1,4 @@
-from hera.workflows.global_config import _GlobalConfig
+from hera.shared.global_config import _GlobalConfig
 from hera.workflows.task import Task
 from hera.workflows.workflow import Workflow
 
