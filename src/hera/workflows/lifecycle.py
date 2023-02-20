@@ -5,7 +5,7 @@ from argo_workflows.model.lifecycle_handler import (
 )
 from argo_workflows.models import Lifecycle as ArgoLifecycle
 
-from hera.action import ExecAction, HTTPGetAction, TCPSocketAction
+from hera.workflows.action import ExecAction, HTTPGetAction, TCPSocketAction
 
 
 class LifecycleHandler:

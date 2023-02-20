@@ -3,7 +3,7 @@
 This example showcases the classic conditional workflow coin-flip.
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def random_code():

@@ -8,8 +8,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
 )
 
-from hera.global_config import GlobalConfig
-from hera.workflow import Workflow
+from hera.workflows.global_config import GlobalConfig
+from hera.workflows.workflow import Workflow
 
 
 class ConcurrencyPolicy(str, Enum):

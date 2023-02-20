@@ -1,4 +1,4 @@
-from hera import DAG, Task, Workflow, WorkflowStatus
+from hera.workflows import DAG, Task, Workflow, WorkflowStatus
 
 
 def echo(s: str):

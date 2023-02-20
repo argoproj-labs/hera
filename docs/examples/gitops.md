@@ -8,7 +8,7 @@ the `Task` via the global parameter `w.get_parameter('msg')`, which sets the `'{
 task parameter definition.
 
 ```python
-from hera import Parameter, Task, Workflow
+from hera.workflows import Parameter, Task, Workflow
 
 
 def say(msg: str):

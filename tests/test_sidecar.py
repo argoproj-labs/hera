@@ -1,6 +1,6 @@
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1UserContainer
 
-from hera import (
+from hera.workflows import (
     ContainerPort,
     Env,
     ImagePullPolicy,

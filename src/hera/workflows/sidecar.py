@@ -2,15 +2,15 @@ from typing import List, Optional
 
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1UserContainer
 
-from hera.env import Env
-from hera.env_from import BaseEnvFrom
-from hera.image import ImagePullPolicy
-from hera.lifecycle import Lifecycle
-from hera.port import ContainerPort
-from hera.probe import Probe
-from hera.resources import Resources
-from hera.security_context import BaseSecurityContext
-from hera.volumes import VolumeDevice, VolumeMount
+from hera.workflows.env import Env
+from hera.workflows.env_from import BaseEnvFrom
+from hera.workflows.image import ImagePullPolicy
+from hera.workflows.lifecycle import Lifecycle
+from hera.workflows.port import ContainerPort
+from hera.workflows.probe import Probe
+from hera.workflows.resources import Resources
+from hera.workflows.security_context import BaseSecurityContext
+from hera.workflows.volumes import VolumeDevice, VolumeMount
 
 
 class Sidecar:

@@ -3,7 +3,7 @@
 This example showcases how Hera can dynamically set environmental variables
 
 ```python
-from hera import ConfigMapEnvFrom, Env, Parameter, Task, Workflow
+from hera.workflows import ConfigMapEnvFrom, Env, Parameter, Task, Workflow
 
 
 def inspect_envs():

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1WorkflowTemplate
 
-from hera import WorkflowTemplate
+from hera.workflows import WorkflowTemplate
 
 
 class TestWorkflowTemplate:

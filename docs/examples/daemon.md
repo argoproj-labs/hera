@@ -6,7 +6,7 @@ The daemoned task operates as server, serving an example payload, with the secon
 http requests to the server.
 
 ```python
-from hera import Env, Task, Workflow
+from hera.workflows import Env, Task, Workflow
 
 
 def server():

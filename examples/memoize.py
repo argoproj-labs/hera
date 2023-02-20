@@ -1,4 +1,4 @@
-from hera import Memoize, Parameter, Task, ValueFrom, Workflow
+from hera.workflows import Memoize, Parameter, Task, ValueFrom, Workflow
 
 
 def generate():

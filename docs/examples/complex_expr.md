@@ -9,7 +9,7 @@ https://github.com/argoproj/argo-workflows/blob/master/examples/expression-reusi
 import base64
 import json
 
-from hera import Env, Parameter, Task, Workflow
+from hera.workflows import Env, Parameter, Task, Workflow
 from hera.expr import C, g, it, sprig
 
 

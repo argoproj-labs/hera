@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from argo_workflows.api_client import ApiClient
 
-from hera import WorkflowService
+from hera.workflows import WorkflowService
 
 
 def test_ws_has_expected_fields_upon_init():

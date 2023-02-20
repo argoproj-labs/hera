@@ -6,7 +6,7 @@ created tasks are also container only.
 More details can be found here: https://github.com/argoproj-labs/hera-workflows/issues/250
 
 ```python
-from hera import Parameter, Task, Workflow
+from hera.workflows import Parameter, Task, Workflow
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
 with Workflow("dynamic-fanout-container") as w:

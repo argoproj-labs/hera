@@ -3,7 +3,7 @@ import json
 from argo_workflows.model.object_field_selector import ObjectFieldSelector
 from argo_workflows.models import ConfigMapKeySelector, EnvVarSource, SecretKeySelector
 
-from hera import ConfigMapEnv, Env, FieldEnv, SecretEnv
+from hera.workflows import ConfigMapEnv, Env, FieldEnv, SecretEnv
 
 
 def test_env_spec_sets_primitive_types_as_expected():

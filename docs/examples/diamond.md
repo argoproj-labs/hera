@@ -4,7 +4,7 @@ This example showcases the classic diamond workflow that is used as an example b
 other libraries.
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def say(message: str):

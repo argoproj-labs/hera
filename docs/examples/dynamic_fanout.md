@@ -5,7 +5,7 @@ parallel. This is useful for batch jobs and instances where clients do not know 
 they may need to process.
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def generate():
