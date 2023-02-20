@@ -1,4 +1,4 @@
-from hera import Artifact, Task, Workflow
+from hera.workflows import Artifact, Task, Workflow
 
 
 def writer():

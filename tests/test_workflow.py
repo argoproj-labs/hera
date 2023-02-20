@@ -12,24 +12,24 @@ from argo_workflows.models import (
     PodSecurityContext,
 )
 
-from hera.dag import DAG
-from hera.host_alias import HostAlias
-from hera.host_config import set_global_service_account_name
-from hera.metric import Metric, Metrics
-from hera.parameter import Parameter
-from hera.task import Task
-from hera.template_ref import TemplateRef
-from hera.toleration import GPUToleration
-from hera.ttl_strategy import TTLStrategy
-from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.volumes import (
+from hera.workflows.config import GlobalConfig
+from hera.workflows.dag import DAG
+from hera.workflows.host_alias import HostAlias
+from hera.workflows.metric import Metric, Metrics
+from hera.workflows.parameter import Parameter
+from hera.workflows.task import Task
+from hera.workflows.template_ref import TemplateRef
+from hera.workflows.toleration import GPUToleration
+from hera.workflows.ttl_strategy import TTLStrategy
+from hera.workflows.volume_claim_gc import VolumeClaimGCStrategy
+from hera.workflows.volumes import (
     ConfigMapVolume,
     EmptyDirVolume,
     ExistingVolume,
     SecretVolume,
     Volume,
 )
-from hera.workflow import Workflow, WorkflowSecurityContext
+from hera.workflows.workflow import Workflow, WorkflowSecurityContext
 
 
 @pytest.fixture
@@ -49,12 +49,12 @@ class TestWorkflow:
             assert w.service_account_name == expected_sa
             assert w.build().spec.service_account_name == expected_sa
 
-        set_global_service_account_name("w-sa")
+        GlobalConfig.service_account_name = "w-sa"
         with Workflow("w") as w:
             expected_sa = "w-sa"
             assert w.service_account_name == expected_sa
             assert w.build().spec.service_account_name == expected_sa
-        set_global_service_account_name(None)
+        GlobalConfig.reset()
 
     def test_wf_does_not_contain_sa_if_one_is_not_specified(self, setup):
         with Workflow("w") as w:
@@ -406,10 +406,10 @@ class TestWorkflow:
     def test_raises_on_no_yaml_available(self):
         import yaml
 
-        import hera.workflow
+        import hera.workflows.workflow
 
         # TODO: is there a better way to temporarily mock/patch this value to make this test more atomic?
-        hera.workflow._yaml = None
+        hera.workflows.workflow._yaml = None
         with pytest.raises(ImportError) as e:
             Workflow('w').to_yaml()
         assert (
@@ -417,7 +417,7 @@ class TestWorkflow:
             "Install `hera-workflows[yaml]` to install the extra dependency"
         )
 
-        hera.workflow._yaml = yaml
+        hera.workflows.workflow._yaml = yaml
 
     @pytest.mark.parametrize(
         ["roundtripper"],

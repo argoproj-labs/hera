@@ -4,7 +4,7 @@ from typing import Dict, Optional, Union
 
 from argo_workflows.models import ResourceRequirements
 
-from hera.validators import validate_storage_units
+from hera.workflows.validators import validate_storage_units
 
 
 # TODO: Move function?

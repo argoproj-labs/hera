@@ -3,7 +3,7 @@
 This simple example showcases how to set a single task as a dependency of multiple other tasks
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def foo():

@@ -1,6 +1,6 @@
 import pytest
 
-from hera.resources import Resources, _merge_dicts
+from hera.workflows.resources import Resources, _merge_dicts
 
 
 def test_merge_dicts_raises_on_key_conflict():

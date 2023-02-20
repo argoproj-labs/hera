@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Optional, Tuple, Union
 from typing_extensions import Protocol
 
 if TYPE_CHECKING:
-    from hera.task import Task
-    from hera.workflow import Workflow
+    from hera.workflows.task import Task
+    from hera.workflows.workflow import Workflow
 
 
 # usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested

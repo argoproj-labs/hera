@@ -1,7 +1,7 @@
 import pytest
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Sequence
 
-from hera.sequence import Sequence
+from hera.workflows.sequence import Sequence
 
 
 class TestSequence:

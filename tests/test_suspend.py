@@ -1,4 +1,4 @@
-from hera.suspend import IoArgoprojWorkflowV1alpha1SuspendTemplate, Suspend
+from hera.workflows.suspend import IoArgoprojWorkflowV1alpha1SuspendTemplate, Suspend
 
 
 class TestSuspend:

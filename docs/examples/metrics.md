@@ -5,7 +5,7 @@ how to use metrics and what metrics are accessible out of the box with Argo see:
 https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
 
 ```python
-from hera import Metric, Task, Workflow
+from hera.workflows import Metric, Task, Workflow
 
 
 def say(message: str):

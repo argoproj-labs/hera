@@ -1,4 +1,4 @@
-from hera import VolumeClaimGCStrategy
+from hera.workflows import VolumeClaimGCStrategy
 
 
 class TestVolumeClaimGCStrategy:

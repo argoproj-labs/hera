@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
-    from hera.task import Task
+    from hera.workflows.task import Task
 
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTask,
@@ -12,10 +12,10 @@ from argo_workflows.models import (
 )
 from argo_workflows.models import Volume as ArgoVolume
 
-from hera.artifact import Artifact
-from hera.io import IO
-from hera.parameter import Parameter
-from hera.validators import validate_name
+from hera.workflows.artifact import Artifact
+from hera.workflows.io import IO
+from hera.workflows.parameter import Parameter
+from hera.workflows.validators import validate_name
 
 
 class DAG(IO):
@@ -122,7 +122,7 @@ class DAG(IO):
 
     def __enter__(self) -> "DAG":
         """Enter the context of the DAG. This supports the use of `with DAG(...)`"""
-        from hera import dag_context
+        from hera.workflows import dag_context
 
         self.in_context = True
         dag_context.enter(self)
@@ -130,7 +130,7 @@ class DAG(IO):
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit the context of the DAG. This supports the use of `with DAG(...)`"""
-        from hera import dag_context
+        from hera.workflows import dag_context
 
         self.in_context = False
         dag_context.exit()

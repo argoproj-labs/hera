@@ -13,20 +13,20 @@ from argo_workflows.models import (
     ObjectMeta,
 )
 
-import hera
-from hera.affinity import Affinity
-from hera.dag import DAG
-from hera.global_config import GlobalConfig
-from hera.host_alias import HostAlias
-from hera.metric import Metric, Metrics
-from hera.parameter import Parameter
-from hera.security_context import WorkflowSecurityContext
-from hera.task import Task
-from hera.toleration import Toleration
-from hera.ttl_strategy import TTLStrategy
-from hera.validators import validate_name
-from hera.volume_claim_gc import VolumeClaimGCStrategy
-from hera.workflow_service import WorkflowService
+import hera.workflows
+from hera.workflows.affinity import Affinity
+from hera.workflows.dag import DAG
+from hera.workflows.global_config import GlobalConfig
+from hera.workflows.host_alias import HostAlias
+from hera.workflows.metric import Metric, Metrics
+from hera.workflows.parameter import Parameter
+from hera.workflows.security_context import WorkflowSecurityContext
+from hera.workflows.task import Task
+from hera.workflows.toleration import Toleration
+from hera.workflows.ttl_strategy import TTLStrategy
+from hera.workflows.validators import validate_name
+from hera.workflows.volume_claim_gc import VolumeClaimGCStrategy
+from hera.workflows.workflow_service import WorkflowService
 
 # PyYAML is an optional dependency
 _yaml: Optional[ModuleType] = None
@@ -287,7 +287,7 @@ class Workflow:
         Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
         """
         self.in_context = True
-        hera.dag_context.enter(self.dag)
+        hera.workflows.dag_context.enter(self.dag)
         return self
 
     def __exit__(self: WorkflowType, exc_type, exc_val, exc_tb) -> None:
@@ -296,7 +296,7 @@ class Workflow:
         This supports using `with Workflow(...)`.
         """
         self.in_context = False
-        hera.dag_context.exit()
+        hera.workflows.dag_context.exit()
 
     def add_task(self: WorkflowType, t: Task) -> WorkflowType:
         """Add a task to the workflow"""

@@ -1,6 +1,6 @@
-from hera._context import _DAG_context
-from hera.dag import DAG
-from hera.task import Task
+from hera.workflows._context import _DAG_context
+from hera.workflows.dag import DAG
+from hera.workflows.task import Task
 
 
 class TestDAGContext:

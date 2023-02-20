@@ -3,7 +3,7 @@
 This example showcases how one can run Docker in Docker with a sidecar container with Hera
 
 ```python
-from hera import Env, Sidecar, Task, TaskSecurityContext, Workflow
+from hera.workflows import Env, Sidecar, Task, TaskSecurityContext, Workflow
 
 # this assumes you have set a global token and a global host
 with Workflow("sidecar-dind-", generate_name=True) as w:
