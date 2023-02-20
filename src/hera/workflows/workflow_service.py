@@ -22,9 +22,9 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1WorkflowTemplateUpdateRequest,
 )
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.client import Client
 from hera.workflows.config import Config
-from hera.workflows.global_config import GlobalConfig
 from hera.workflows.workflow_status import WorkflowStatus
 
 

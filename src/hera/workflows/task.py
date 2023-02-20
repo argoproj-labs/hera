@@ -23,20 +23,20 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeMount
 
 import hera
+from hera.shared.global_config import GlobalConfig
+from hera.workflows.port import ContainerPort
+from hera.workflows.suspend import Suspend
 from hera.workflows.affinity import Affinity
 from hera.workflows.artifact import Artifact
 from hera.workflows.dag import DAG
 from hera.workflows.env import Env
 from hera.workflows.env_from import BaseEnvFrom
-from hera.workflows.global_config import GlobalConfig
 from hera.workflows.image import ImagePullPolicy
 from hera.workflows.io import IO
 from hera.workflows.memoize import Memoize
 from hera.workflows.metric import Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
-from hera.workflows.port import ContainerPort
-from hera.workflows.suspend import Suspend
 from hera.workflows.resource_template import ResourceTemplate
 from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
