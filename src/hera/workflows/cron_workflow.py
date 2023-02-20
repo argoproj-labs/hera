@@ -8,7 +8,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1CronWorkflowSpec,
 )
 
-from hera.workflows.global_config import GlobalConfig
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.workflow import Workflow
 
 

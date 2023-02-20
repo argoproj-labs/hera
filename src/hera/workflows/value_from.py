@@ -20,6 +20,7 @@ class ConfigMapKeyRef:
     optional: bool
         Specify whether the ConfigMap or its key must be defined.
     """
+
     key: str
     name: str
     optional: bool = False

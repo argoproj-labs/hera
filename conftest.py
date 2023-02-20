@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Tuple
 
 import pytest
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.affinity import (
     Affinity,
     Expression,
@@ -20,7 +21,6 @@ from hera.workflows.affinity import (
 )
 from hera.workflows.artifact import Artifact
 from hera.workflows.cron_workflow import CronWorkflow
-from hera.workflows.global_config import GlobalConfig
 from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 
