@@ -14,9 +14,9 @@ from argo_workflows.models import (
 )
 
 import hera.workflows
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.affinity import Affinity
 from hera.workflows.dag import DAG
-from hera.workflows.global_config import GlobalConfig
 from hera.workflows.host_alias import HostAlias
 from hera.workflows.metric import Metric, Metrics
 from hera.workflows.parameter import Parameter

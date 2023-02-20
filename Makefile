@@ -6,8 +6,16 @@ help: ## Showcase the help instructions for all the available `make` commands
 
 .PHONY: format
 format: ## Format and sort imports for source, tests, examples, etc.
-	@black src docs tests examples conftest.py
-	@isort src docs tests examples conftest.py
+	@black src docs tests scripts examples conftest.py
+	@isort src docs tests scripts examples conftest.py
+
+.PHONE: lint
+lint:  ## Run a `lint` process on Hera and report problems
+	tox -e lint
+
+.PHONE: typecheck
+typecheck:  ## Run a `typecheck` process on Hera and report problems
+	tox -e typecheck
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
@@ -38,3 +46,18 @@ events-models: ## Generate the Events models portion of Argo Workflows
 models: ## Generate all the Argo Workflows models
 	$(MAKE) workflows-models
 	$(MAKE) events-models
+
+.PHONY: workflows-service
+workflows-service:  ## Generate the Workflows service option of Hera
+	@python scripts/service.py $(OPENAPI_SPEC_URL) workflows
+	$(MAKE) format
+
+.PHONY: events-service
+events-service:  ## Generate the events service option of Hera
+	@python scripts/service.py $(OPENAPI_SPEC_URL) events
+	$(MAKE) format
+
+.PHONE: service
+services:  ## Generate the services of Hera
+	$(MAKE) workflows-service
+	$(MAKE) events-service
