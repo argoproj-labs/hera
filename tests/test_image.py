@@ -1,4 +1,4 @@
-from hera import ImagePullPolicy
+from hera.workflows import ImagePullPolicy
 
 
 class TestImagePullPolicy:

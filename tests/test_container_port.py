@@ -1,6 +1,6 @@
 import pytest
 
-from hera.port import ArgoContainerPort, ContainerPort, Protocol
+from hera.workflows.port import ArgoContainerPort, ContainerPort, Protocol
 
 
 class TestPort:

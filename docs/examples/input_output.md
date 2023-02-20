@@ -3,7 +3,7 @@
 
 
 ```python
-from hera import Parameter, Task, ValueFrom, Workflow
+from hera.workflows import Parameter, Task, ValueFrom, Workflow
 
 
 def produce():

@@ -3,7 +3,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1TarStrategy,
 )
 
-from hera.archive import Archive
+from hera.workflows.archive import Archive
 
 
 class TestArchive:

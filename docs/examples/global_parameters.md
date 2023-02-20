@@ -3,7 +3,7 @@
 
 
 ```python
-from hera import Parameter, Task, Workflow
+from hera.workflows import Parameter, Task, Workflow
 
 
 def foo(v):

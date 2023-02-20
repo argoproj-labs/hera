@@ -17,7 +17,7 @@ from argo_workflows.models import Volume as ArgoVolume
 from argo_workflows.models import VolumeDevice as ArgoVolumeDevice
 from argo_workflows.models import VolumeMount as ArgoVolumeMount
 
-from hera.validators import validate_storage_units
+from hera.workflows.validators import validate_storage_units
 
 
 @dataclass

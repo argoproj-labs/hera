@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from hera.validators import validate_name, validate_storage_units
+from hera.workflows.validators import validate_name, validate_storage_units
 
 
 def test_validate_name():

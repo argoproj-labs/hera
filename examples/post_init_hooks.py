@@ -1,7 +1,7 @@
 """This example showcases how to register two global workflow hooks, which will modify the workflow post-init.
 See `hera.global_config.WorkflowHook` for the `Protocol` specification of the hook implementation/type signature"""
 
-from hera import GlobalConfig, Task, Workflow
+from hera.workflows import GlobalConfig, Task, Workflow
 
 
 # can make a custom hook that enriches the workflow by adding, for instance, labels or node selectors

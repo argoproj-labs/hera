@@ -3,7 +3,7 @@
 This example showcases how one can set parameters on Hera tasks
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def hello(a: str, b: int, c: dict):

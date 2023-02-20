@@ -1,6 +1,6 @@
 import pytest
 
-from hera import WorkflowStatus
+from hera.workflows import WorkflowStatus
 
 
 def test_workflow_status_instantiates_as_expected():

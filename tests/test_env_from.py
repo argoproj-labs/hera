@@ -1,4 +1,4 @@
-from hera import ConfigMapEnvFrom, SecretEnvFrom
+from hera.workflows import ConfigMapEnvFrom, SecretEnvFrom
 
 
 def test_config_map_env_from_sets_name():

@@ -1,6 +1,6 @@
 """This example showcases how one can run a sidecar container with Hera"""
 
-from hera import Sidecar, Task, Workflow
+from hera.workflows import Sidecar, Task, Workflow
 
 # this assumes you have set a global token and a global host
 with Workflow("sidecar-", generate_name=True) as w:

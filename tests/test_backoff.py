@@ -1,6 +1,6 @@
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1Backoff
 
-from hera.backoff import Backoff
+from hera.workflows.backoff import Backoff
 
 
 class TestBackoff:
