@@ -21,6 +21,7 @@ from hera.workflows import (
     ConfigMapEnv,
     ConfigMapEnvFrom,
     ConfigMapVolume,
+    ContainerPort,
     EmptyDirVolume,
     Env,
     ExistingVolume,
@@ -38,6 +39,7 @@ from hera.workflows import (
     RetryStrategy,
     S3Artifact,
     Sequence,
+    Suspend,
     Task,
     TaskResult,
     TaskSecurityContext,
@@ -214,6 +216,16 @@ class TestTask:
         assert vs[3].name
         assert vs[3].mount_path == "/v3"
 
+    def test_container_port_returns_expected_ports(self, no_op):
+        t = Task(
+            "t",
+            no_op,
+            ports=[ContainerPort(8080, name="test-port")],
+        )
+        cp = t.ports
+        assert cp[0].name == "test-port"
+        assert cp[0].container_port == 8080
+
     def test_gpu_toleration_returns_expected_toleration(self):
         tn = GPUToleration
         assert tn.key == "nvidia.com/gpu"
@@ -352,12 +364,45 @@ class TestTask:
         tt = t._build_template()
         assert hasattr(tt, "retry_strategy") is False
 
-    def test_task_sets_kwarg(self, kwarg_op, kwarg_multi_op):
+    def test_task_sets_kwarg(self, kwarg_op, kwarg_op_bool_default, kwarg_op_none_default, kwarg_multi_op):
         t = Task("t", kwarg_op)
         deduced_input = t.inputs[0]
         assert isinstance(deduced_input, Parameter)
         assert deduced_input.name == "a"
         assert deduced_input.default == "42"
+
+        # Ensure defaults are json encoded. This ensures eg: `x=False` is not converted
+        # into `x="False"`, which is actually truth-y.
+        t = Task("t", kwarg_op_bool_default)
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == None
+        assert deduced_input_1.default == "false"
+
+        t = Task("t", kwarg_op_bool_default, [{"a": True}])
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == "{{item.a}}"
+        assert deduced_input_1.default == "false"
+
+        # Ensure function parameters with None defaults are distinguished from missing
+        # arguments in *internal* code. This ensures eg: `x=None` is not incorrectly
+        # thought to be missing an argument when creating a Task.
+        t = Task("t", kwarg_op_none_default)
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == None
+        assert deduced_input_1.default == "null"
+
+        t = Task("t", kwarg_op_none_default, [{"a": None}])
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == "{{item.a}}"
+        assert deduced_input_1.default == "null"
 
         t = Task("t", kwarg_multi_op, [{"a": 50}])
         deduced_input_1 = t.inputs[0]
@@ -423,6 +468,14 @@ class TestTask:
         assert artifact.path == "/my-repo"
         assert artifact.git.repo == "https://github.com/argoproj/argo-workflows.git"
         assert artifact.git.revision == "master"
+
+    def test_task_suspend_template(self):
+        t = Task('t', suspend=Suspend(duration="10"))
+        assert hasattr(t, "suspend")
+        assert t.suspend is not None
+        assert t.suspend.duration == "10"
+        assert hasattr(t, "image")
+        assert t.image is None
 
     @pytest.fixture
     def task_security_context_kwargs(self):
@@ -502,6 +555,16 @@ class TestTask:
         assert tt.container.image == "python:3.7"
         assert tt.container.command[0] == "cowsay"
         assert tt.container.resources["requests"]["memory"] == "4Gi"
+
+    def test_task_should_create_suspend_task(self):
+        t = Task("t", suspend=Suspend("10"))
+        tt = t._build_template()
+
+        assert tt.suspend is not None
+        assert tt.suspend.duration == "10"
+        assert not hasattr(tt, "container")
+        assert not hasattr(tt, "script")
+        assert not hasattr(tt, "script")
 
     def test_task_allow_subclassing_when_assigned_next(self, no_op):
         class SubclassTask(Task):
@@ -734,6 +797,27 @@ class TestTask:
         with pytest.raises(ValueError) as e:
             Task("t", with_param=["abc"], with_sequence=Sequence("abc"))
         assert str(e.value) == "Cannot use both `with_sequence` and `with_param`"
+
+        # SuspendTemplate mutually exclusive kwargs
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), dag=DAG("d"))
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), image="python:3.7")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), command=["python"])
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), args=["an-arg"])
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), source="print('test')")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
 
     def test_task_uses_sequences(self):
         t = Task("t", with_sequence=Sequence("abc", start=1, end=42))._build_dag_task()

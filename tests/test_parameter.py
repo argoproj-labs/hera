@@ -9,7 +9,7 @@ from hera.workflows.value_from import ValueFrom
 
 
 class TestParameter:
-    def test_init_raises_value_error(self):
+    def test_init_raises_value_error_using_value_and_value_from(self):
         with pytest.raises(ValueError) as e:
             Parameter("a", value_from=ValueFrom(default="42"), value="42")
         assert str(e.value) == "Cannot specify both `value` and `value_from` when instantiating `Parameter`"
@@ -37,9 +37,10 @@ class TestParameter:
         assert arg.value_from.path == "abc"
 
     def test_as_input_returns_expected_parameter(self):
-        param = Parameter("a", default="42").as_input()
+        param = Parameter("a", default="42", enum=["42", "100"]).as_input()
         assert isinstance(param, IoArgoprojWorkflowV1alpha1Parameter)
         assert hasattr(param, "default")
+        assert hasattr(param, "enum") and param.enum == ["42", "100"]
         assert param.default == "42"
 
     def test_as_output_returns_expected_parameter(self):

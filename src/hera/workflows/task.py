@@ -35,6 +35,8 @@ from hera.workflows.memoize import Memoize
 from hera.workflows.metric import Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
+from hera.workflows.port import ContainerPort
+from hera.workflows.suspend import Suspend
 from hera.workflows.resource_template import ResourceTemplate
 from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
@@ -170,6 +172,10 @@ class Task(IO):
         Any built-in/custom Prometheus metrics to track.
     sidecars: Optional[List[Sidecar]] = None
         List of sidecars to create for the main pods of the container that runs the task.
+    ports: Optional[List[ContainerPort]] = None
+        List of ports to create for the main pods of the container that runs the task.
+    suspend: Optional[Suspend] = None
+        Turns this task into a SuspendTemplate, with a duration to suspend the task given in the Suspend object.
 
     Notes
     -----
@@ -211,6 +217,8 @@ class Task(IO):
         timeout: Optional[str] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
         sidecars: Optional[List[Sidecar]] = None,
+        ports: Optional[List[ContainerPort]] = None,
+        suspend: Optional[Suspend] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -218,6 +226,8 @@ class Task(IO):
             raise ValueError("Cannot use both `dag` and `template_ref`")
         if with_param is not None and with_sequence is not None:
             raise ValueError("Cannot use both `with_sequence` and `with_param`")
+        if suspend and any((dag, image, command, args, source)):
+            raise ValueError("Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`")
         self.name = validate_name(name)
         self.dag = dag
         self.source = source
@@ -247,8 +257,14 @@ class Task(IO):
                     "`Optional[Union[Metric, List[Metric], Metrics]]`"
                 )
 
+        self.suspend = suspend
+        self.image: Optional[str]
+        if not self.suspend:
+            self.image = image or GlobalConfig.image
+        else:
+            self.image = None
+
         self.sidecars = sidecars
-        self.image = image or GlobalConfig.image
         self.image_pull_policy = image_pull_policy
         self.daemon = daemon
         self.command = command
@@ -269,6 +285,7 @@ class Task(IO):
         self.is_exit_task: bool = False
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
+        self.ports = ports
 
         self.validate()
 
@@ -921,6 +938,7 @@ class Task(IO):
             command=self.get_command(),
             resources=self.resources.build() if self.resources else None,
             args=self.get_args(),
+            ports=None if self.ports is None else [p.build() for p in self.ports],
             env=env,
             env_from=env_from,
             working_dir=self.working_dir,
@@ -1002,13 +1020,15 @@ class Task(IO):
         if self.retry_strategy is not None:
             setattr(template, "retry_strategy", self.retry_strategy.build())
 
-        if self.source is not None:
-            setattr(template, "script", self._build_script())
-        elif self.resource_template is not None:
-            setattr(template, "resource", self.resource_template.build())
+        if self.suspend is not None:
+            setattr(template, "suspend", self.suspend.build())
         else:
-            setattr(template, "container", self._build_container())
-
+            if self.source is not None:
+                setattr(template, "script", self._build_script())
+            elif self.resource_template is not None:
+                setattr(template, "resource", self.resource_template.build())
+            else:
+                setattr(template, "container", self._build_container())
         affinity = self.affinity.build() if self.affinity else None
         if affinity is not None:
             setattr(template, "affinity", affinity)
