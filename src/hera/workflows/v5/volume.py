@@ -98,13 +98,13 @@ class _BaseVolume(_ModelVolumeMount):
             return str(uuid.uuid4())
         return v
 
-    def to_claim(self) -> _ModelPersistentVolumeClaimTemplate:
+    def _build_persistent_volume_claim_template(self) -> _ModelPersistentVolumeClaimTemplate:
         raise NotImplementedError
 
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         raise NotImplementedError
 
-    def to_mount(self) -> _ModelVolumeMount:
+    def _build_volume_mount(self) -> _ModelVolumeMount:
         return _ModelVolumeMount(
             name=self.name,
             mount_path=self.mount_path,
@@ -116,7 +116,7 @@ class _BaseVolume(_ModelVolumeMount):
 
 
 class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             aws_elastic_block_store=_ModelAWSElasticBlockStoreVolumeSource(
@@ -126,7 +126,7 @@ class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVo
 
 
 class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             azure_disk=_ModelAzureDiskVolumeSource(
@@ -141,7 +141,7 @@ class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
 
 
 class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             azure_file=_ModelAzureFileVolumeSource(
@@ -151,7 +151,7 @@ class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
 
 
 class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             cephfs=_ModelCephFSVolumeSource(
@@ -166,7 +166,7 @@ class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
 
 
 class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             cinder=_ModelCinderVolumeSource(
@@ -179,7 +179,7 @@ class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
 
 
 class ConfigMapVolume(_BaseVolume, _ModelConfigMapVolumeSource):  # type: ignore
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             config_map=_ModelConfigMapVolumeSource(
@@ -189,7 +189,7 @@ class ConfigMapVolume(_BaseVolume, _ModelConfigMapVolumeSource):  # type: ignore
 
 
 class CSIVolume(_BaseVolume, _ModelCSIVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             csi=_ModelCSIVolumeSource(
@@ -203,7 +203,7 @@ class CSIVolume(_BaseVolume, _ModelCSIVolumeSource):
 
 
 class DownwardAPIVolume(_BaseVolume, _ModelDownwardAPIVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             downward_api=_ModelDownwardAPIVolumeSource(default_mode=self.default_mode, items=self.items),
@@ -211,21 +211,21 @@ class DownwardAPIVolume(_BaseVolume, _ModelDownwardAPIVolumeSource):
 
 
 class EmptyDirVolume(_BaseVolume, _ModelEmptyDirVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name, empty_dir=_ModelEmptyDirVolumeSource(medium=self.medium, size_limit=self.size_limit)
         )
 
 
 class EphemeralVolume(_BaseVolume, _ModelEphemeralVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name, ephemeral=_ModelEphemeralVolumeSource(volume_claim_template=self.volume_claim_template)
         )
 
 
 class FCVolume(_BaseVolume, _ModelFCVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             fc=_ModelFCVolumeSource(
@@ -239,7 +239,7 @@ class FCVolume(_BaseVolume, _ModelFCVolumeSource):
 
 
 class FlexVolume(_BaseVolume, _ModelFlexVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             flex_volume=_ModelFlexVolumeSource(
@@ -253,7 +253,7 @@ class FlexVolume(_BaseVolume, _ModelFlexVolumeSource):
 
 
 class FlockerVolume(_BaseVolume, _ModelFlockerVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             flocker=_ModelFlockerVolumeSource(dataset_name=self.dataset_name, dataset_uuid=self.dataset_uuid),
@@ -261,7 +261,7 @@ class FlockerVolume(_BaseVolume, _ModelFlockerVolumeSource):
 
 
 class GCEPersistentDiskVolume(_BaseVolume, _ModelGCEPersistentDiskVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             gce_persistent_disk=_ModelGCEPersistentDiskVolumeSource(
@@ -271,7 +271,7 @@ class GCEPersistentDiskVolume(_BaseVolume, _ModelGCEPersistentDiskVolumeSource):
 
 
 class GitRepoVolume(_BaseVolume, _ModelGitRepoVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             git_repo=_ModelGitRepoVolumeSource(
@@ -281,7 +281,7 @@ class GitRepoVolume(_BaseVolume, _ModelGitRepoVolumeSource):
 
 
 class GlusterfsVolume(_BaseVolume, _ModelGlusterfsVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             glusterfs=_ModelGlusterfsVolumeSource(endpoints=self.endpoints, path=self.path, read_only=self.read_only),
@@ -289,12 +289,12 @@ class GlusterfsVolume(_BaseVolume, _ModelGlusterfsVolumeSource):
 
 
 class HostPathVolume(_BaseVolume, _ModelHostPathVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(name=self.name, host_path=_ModelHostPathVolumeSource(path=self.path, type=self.type))
 
 
 class ISCSIVolume(_BaseVolume, _ModelISCSIVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             iscsi=_ModelISCSIVolumeSource(
@@ -314,12 +314,12 @@ class ISCSIVolume(_BaseVolume, _ModelISCSIVolumeSource):
 
 
 class NFSVolume(_BaseVolume, _ModelNFSVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(name=self.name, nfs=_ModelNFSVolumeSource(path=self.path, read_only=self.read_only))
 
 
 class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             photon_persistent_disk=_ModelPhotonPersistentDiskVolumeSource(fs_type=self.fs_type, pd_id=self.pd_id),
@@ -327,7 +327,7 @@ class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSo
 
 
 class PortworxVolume(_BaseVolume, _ModelPortworxVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             portworx_volume=_ModelPortworxVolumeSource(
@@ -337,14 +337,14 @@ class PortworxVolume(_BaseVolume, _ModelPortworxVolumeSource):
 
 
 class ProjectedVolume(_BaseVolume, _ModelProjectedVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name, projected=_ModelProjectedVolumeSource(default_mode=self.default_mode, sources=self.sources)
         )
 
 
 class QuobyteVolume(_BaseVolume, _ModelQuobyteVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             quobyte=_ModelQuobyteVolumeSource(
@@ -359,7 +359,7 @@ class QuobyteVolume(_BaseVolume, _ModelQuobyteVolumeSource):
 
 
 class RBDVolume(_BaseVolume, _ModelRBDVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             rbd=_ModelRBDVolumeSource(
@@ -376,7 +376,7 @@ class RBDVolume(_BaseVolume, _ModelRBDVolumeSource):
 
 
 class ScaleIOVolume(_BaseVolume, _ModelScaleIOVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             scale_io=_ModelScaleIOVolumeSource(
@@ -395,7 +395,7 @@ class ScaleIOVolume(_BaseVolume, _ModelScaleIOVolumeSource):
 
 
 class SecretVolume(_BaseVolume, _ModelSecretVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             secret=_ModelSecretVolumeSource(
@@ -405,7 +405,7 @@ class SecretVolume(_BaseVolume, _ModelSecretVolumeSource):
 
 
 class StorageOSVolume(_BaseVolume, _ModelStorageOSVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             storageos=_ModelStorageOSVolumeSource(
@@ -419,7 +419,7 @@ class StorageOSVolume(_BaseVolume, _ModelStorageOSVolumeSource):
 
 
 class VsphereVirtualDiskVolume(_BaseVolume, _ModelVsphereVirtualDiskVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             vsphere_volume=_ModelVsphereVirtualDiskVolumeSource(
@@ -432,7 +432,7 @@ class VsphereVirtualDiskVolume(_BaseVolume, _ModelVsphereVirtualDiskVolumeSource
 
 
 class ExistingVolume(_BaseVolume, _ModelPersistentVolumeClaimVolumeSource):
-    def to_volume(self) -> _ModelVolume:
+    def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
             persistent_volume_claim=_ModelPersistentVolumeClaimVolumeSource(
@@ -473,7 +473,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
             validate_storage_units(cast(str, storage))
         return values
 
-    def to_claim(self) -> _ModelPersistentVolumeClaimTemplate:
+    def _build_persistent_volume_claim_template(self) -> _ModelPersistentVolumeClaimTemplate:
         return _ModelPersistentVolumeClaimTemplate(
             metadata=self.metadata or ObjectMeta(name=self.name),
             spec=_ModelPersistentVolumeClaimSpec(
@@ -488,8 +488,8 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
             ),
         )
 
-    def to_volume(self) -> _ModelVolume:
-        claim = self.to_claim()
+    def _build_volume(self) -> _ModelVolume:
+        claim = self._build_persistent_volume_claim_template()
         assert claim.metadata is not None, "claim metadata is required"
         return _ModelVolume(
             name=self.name,

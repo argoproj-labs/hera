@@ -2,18 +2,14 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Union, cast
 
-from pydantic import validator
-
 from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     HTTP,
     Affinity,
-    Arguments,
     Artifact,
     ArtifactLocation,
     ContainerPort,
     ContinueOn,
-    DAGTask,
     EnvFromSource,
     EnvVar,
     ExecutorConfig,
@@ -44,7 +40,7 @@ from hera.workflows.models import (
     Toleration,
 )
 from hera.workflows.models import UserContainer as ModelUserContainer
-from hera.workflows.models import VolumeDevice, VolumeMount
+from hera.workflows.models import Volume, VolumeDevice, VolumeMount
 from hera.workflows.v5.env import _BaseEnv
 from hera.workflows.v5.env_from import _BaseEnvFrom
 from hera.workflows.v5.operator import Operator
@@ -67,19 +63,17 @@ class _ContainerMixin(_BaseMixin):
     image: str
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
-    @validator('image_pull_policy', pre=True)
-    def _convert_image_pull_policy(cls, v):
-        if v is None or isinstance(v, ImagePullPolicy):
-            return v
-        v = cast(str, v)
-        return ImagePullPolicy[v.lower()]  # must be str
+    def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
+        if self.image_pull_policy is None or isinstance(self.image_pull_policy, ImagePullPolicy):
+            return self.image_pull_policy
+        return ImagePullPolicy[self.image_pull_policy.lower()]
 
 
 class _IOMixin(_BaseMixin):
     inputs: Optional[Union[Inputs, ModelInputs]] = None
     outputs: Optional[Union[Outputs, ModelOutputs]] = None
 
-    def build_inputs(self) -> Optional[ModelInputs]:
+    def _build_inputs(self) -> Optional[ModelInputs]:
         if self.inputs is None:
             return None
 
@@ -96,7 +90,7 @@ class _IOMixin(_BaseMixin):
                     result.parameters = [value] if result.parameters is None else result.parameters + [value]
         return cast(ModelInputs, self.inputs)
 
-    def build_outputs(self) -> Optional[ModelOutputs]:
+    def _build_outputs(self) -> Optional[ModelOutputs]:
         if self.outputs is None:
             return None
 
@@ -118,14 +112,14 @@ class _EnvMixin(_BaseMixin):
     env: Optional[List[Union[_BaseEnv, EnvVar]]] = None
     env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None
 
-    def build_end(self) -> Optional[EnvVar]:
+    def _build_env(self) -> Optional[EnvVar]:
         if self.env is None or isinstance(self.env, EnvVar):
             return self.env
 
         v = cast(_BaseEnv, self.env)
         return v.build()
 
-    def build_env_from(self) -> Optional[EnvFromSource]:
+    def _build_env_from(self) -> Optional[EnvFromSource]:
         if self.env_from is None or isinstance(self.env_from, EnvFromSource):
             return self.env_from
 
@@ -144,7 +138,8 @@ class _TemplateMixin(_BaseMixin):
     host_aliases: Optional[List[HostAlias]] = None
     init_containers: Optional[List[Union[UserContainer, ModelUserContainer]]] = None
     memoize: Optional[Memoize] = None
-    metadata: Optional[Metadata] = None
+    annotations: Optional[Dict[str, str]] = None
+    labels: Optional[Dict[str, str]] = None
     metrics: Optional[Metrics] = None
     node_selector: Optional[Dict[str, str]] = None
     http: Optional[HTTP] = None
@@ -157,7 +152,7 @@ class _TemplateMixin(_BaseMixin):
     liveness_probe: Optional[Probe] = None
     ports: Optional[List[ContainerPort]] = None
     readiness_probe: Optional[Probe] = None
-    template_security_context: Optional[PodSecurityContext] = None
+    pod_security_context: Optional[PodSecurityContext] = None
     startup_probe: Optional[Probe] = None
     stdin: Optional[bool] = None
     stdin_once: Optional[bool] = None
@@ -170,17 +165,30 @@ class _TemplateMixin(_BaseMixin):
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
 
+    def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
+        if self.active_deadline_seconds is None:
+            return None
+
+        return IntOrString(__root__=str(self.active_deadline_seconds))
+
+    def _build_metadata(self) -> Optional[Metadata]:
+        if self.annotations is None and self.labels is None:
+            return None
+
+        return Metadata(
+            annotations=self.annotations,
+            labels=self.labels,
+        )
+
 
 class _ResourceMixin(_BaseMixin):
     resources: Optional[Union[ResourceRequirements, Resources]] = None
 
-    @validator('resources', pre=True)
-    def _convert_resources(cls, v):
-        if v is None or isinstance(v, ResourceRequirements):
-            return v
+    def _build_resources(self) -> Optional[ResourceRequirements]:
+        if self.resources is None or isinstance(self.resources, ResourceRequirements):
+            return self.resources
 
-        v = cast(Resources, v)
-        return v.build()
+        return self.resources.build()
 
 
 class _VolumeMountMixin(_BaseMixin):
@@ -188,16 +196,20 @@ class _VolumeMountMixin(_BaseMixin):
     volume_mounts: Optional[List[VolumeMount]] = None
     volumes: Optional[List[_BaseVolume]] = None
 
-    @validator('volume_mounts', pre=True)
-    def _convert_volumes(cls, v, values):
-        volumes: Optional[List[_BaseVolume]] = values.get('volumes')
-        if v is None and volumes is None:
+    def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
+        if self.volume_mounts is None and self.volumes is None:
             return None
 
-        result = None if volumes is None else [vol.to_mount() for vol in volumes]
-        if v is None:
-            return result
-        return v + result
+        result = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
+        if result is None:
+            return None
+
+        return cast(List[VolumeMount], self.volume_mounts) + result
+
+    def _build_volumes(self) -> Optional[List[Volume]]:
+        if self.volumes is None:
+            return None
+        return [v._build_volume() for v in self.volumes]
 
 
 class _DAGTaskMixin(_BaseMixin):
@@ -330,4 +342,3 @@ class _DAGTaskMixin(_BaseMixin):
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
 
         return self.next(other, on=TaskResult.all_failed)
-
