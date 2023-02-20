@@ -24,8 +24,6 @@ from argo_workflows.models import VolumeMount
 
 import hera
 from hera.shared.global_config import GlobalConfig
-from hera.workflows.port import ContainerPort
-from hera.workflows.suspend import Suspend
 from hera.workflows.affinity import Affinity
 from hera.workflows.artifact import Artifact
 from hera.workflows.dag import DAG
@@ -37,12 +35,14 @@ from hera.workflows.memoize import Memoize
 from hera.workflows.metric import Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
+from hera.workflows.port import ContainerPort
 from hera.workflows.resource_template import ResourceTemplate
 from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.security_context import TaskSecurityContext
 from hera.workflows.sequence import Sequence
 from hera.workflows.sidecar import Sidecar
+from hera.workflows.suspend import Suspend
 from hera.workflows.template_ref import TemplateRef
 from hera.workflows.toleration import Toleration
 from hera.workflows.validators import validate_name
