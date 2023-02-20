@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Union, cast
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     HTTP,
@@ -60,7 +61,7 @@ class _BaseMixin(_BaseModel):
 
 
 class _ContainerMixin(_BaseMixin):
-    image: str
+    image: str = GlobalConfig.image
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
     def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
