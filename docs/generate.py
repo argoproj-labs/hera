@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+
 # This code reads the contents at the path which is a python file,
 # extracts the python docstring at the top using a regex and then
 # outputs a markdown file with the same name as a python file without the .py extension and
@@ -27,13 +28,14 @@ def generate_markdown(path: Path):
 {contents.strip()}
 ```
 """
-    (Path("examples")/ path.stem).with_suffix(".md").write_text(contents)
+    (Path("examples") / path.stem).with_suffix(".md").write_text(contents)
 
 
 def main():
     # we need to go through each path and generate its markdown
     for path in Path("../examples").glob("*.py"):
         generate_markdown(path)
+
 
 if __name__ == "__main__":
     main()
