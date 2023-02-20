@@ -1,5 +1,5 @@
 """This example showcases how to structure a linear chain of tasks"""
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def task_1():

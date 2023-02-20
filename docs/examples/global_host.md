@@ -3,7 +3,7 @@
 This example showcases how to set an Argo Workflows host and token at a global level
 
 ```python
-from hera import Task, Workflow, set_global_host, set_global_token
+from hera.workflows import Task, Workflow, set_global_host, set_global_token
 
 set_global_token("token")
 set_global_host("http://localhost:2746")

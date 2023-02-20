@@ -3,8 +3,8 @@ from typing import Optional, Union
 
 from argo_workflows.models import IoArgoprojWorkflowV1alpha1RetryStrategy
 
-from hera.backoff import Backoff
-from hera.retry_policy import RetryPolicy
+from hera.workflows.backoff import Backoff
+from hera.workflows.retry_policy import RetryPolicy
 
 
 @dataclass

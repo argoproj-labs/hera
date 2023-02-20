@@ -3,7 +3,7 @@
 This example showcases the hello world example of Hera
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import Task, Workflow
 
 
 def hello():

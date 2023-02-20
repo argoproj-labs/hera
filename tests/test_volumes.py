@@ -1,6 +1,6 @@
 import pytest
 
-from hera.volumes import AccessMode, EmptyDirVolume, Volume, _BaseVolume
+from hera.workflows.volumes import AccessMode, EmptyDirVolume, Volume, _BaseVolume
 
 
 class TestAccessMode:

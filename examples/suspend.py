@@ -1,6 +1,6 @@
 """This example showcases how to use a `suspend` template with Hera"""
 
-from hera import Suspend, Task, Workflow
+from hera.workflows import Suspend, Task, Workflow
 
 # assumes you have set a global token and host
 with Workflow("suspend-template-", generate_name=True) as w:

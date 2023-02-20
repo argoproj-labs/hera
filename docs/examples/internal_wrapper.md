@@ -6,7 +6,7 @@ top of Hera to support consistency in submission across users, teams, etc.
 ```python
 from typing import Any, Callable, List, Optional, Union
 
-from hera import (
+from hera.workflows import (
     ExistingVolume,
     Resources,
     RetryStrategy,
