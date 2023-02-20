@@ -42,8 +42,7 @@ from hera.workflows.dag import DAG
 from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, SecretEnv
 from hera.workflows.env_from import ConfigMapEnvFrom, SecretEnvFrom
 from hera.workflows.host_alias import HostAlias
-
-# the following host configurations are deprecated. See `GlobalConfig` instead
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.image import ImagePullPolicy
 from hera.workflows.lifecycle import Lifecycle, LifecycleHandler
 from hera.workflows.memoize import Memoize
