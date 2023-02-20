@@ -9,6 +9,17 @@ from argo_workflows.models import (
 
 from hera.workflows.value_from import ValueFrom
 
+MISSING = object()
+
+
+def _serialize(value: Any):
+    if value is MISSING:
+        return None
+    elif isinstance(value, str):
+        return value
+    else:
+        return json.dumps(value)  # None serialized as `null`
+
 
 class Parameter:
     """A representation of input from one task to another.
@@ -39,21 +50,18 @@ class Parameter:
     def __init__(
         self,
         name: str,
-        value: Optional[Any] = None,
-        default: Optional[str] = None,
+        value: Optional[Any] = MISSING,
+        default: Optional[str] = MISSING,  # type: ignore[assignment]
         value_from: Optional[ValueFrom] = None,
         description: Optional[str] = None,
         enum: Optional[List[str]] = None,
         global_name: Optional[str] = None,
     ) -> None:
-        if value is not None and value_from is not None:
+        if value is not MISSING and value_from is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
         self.name = name
-        if value is None or isinstance(value, str):
-            self.value = value
-        else:
-            self.value = json.dumps(value)  # None serialized as `null`
-        self.default = str(default) if default is not None else None
+        self.value = _serialize(value)
+        self.default = _serialize(default)
         self.value_from = value_from
         self.description = description
         self.enum = enum
@@ -88,6 +96,8 @@ class Parameter:
             setattr(parameter, "default", self.default)
         if self.description is not None:
             setattr(parameter, "description", self.description)
+        if self.enum is not None:
+            setattr(parameter, "enum", self.enum)
         return parameter
 
     def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
