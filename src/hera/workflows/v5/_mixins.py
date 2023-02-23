@@ -7,6 +7,7 @@ from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     HTTP,
     Affinity,
+    Arguments,
     Artifact,
     ArtifactLocation,
     ContainerPort,
@@ -36,6 +37,7 @@ from hera.workflows.models import (
     RetryStrategy,
     Sequence,
     Synchronization,
+    Template,
     TemplateRef,
     TerminationMessagePolicy,
     Toleration,
@@ -215,6 +217,7 @@ class _VolumeMountMixin(_BaseMixin):
 
 class _DAGTaskMixin(_BaseMixin):
     name: str
+    arguments: Optional[Arguments] = None
     continue_on: Optional[ContinueOn] = None
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
@@ -222,6 +225,7 @@ class _DAGTaskMixin(_BaseMixin):
     on_exit: Optional[str] = None
     template: Optional[str] = None
     template_ref: Optional[TemplateRef] = None
+    inline: Optional[Template] = None
     when: Optional[str] = None
     with_items: Optional[List[Item]] = None
     with_param: Optional[str] = None

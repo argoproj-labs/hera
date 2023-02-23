@@ -1,7 +1,8 @@
 from typing import List, Optional
 
+from hera.workflows.models import Arguments, Artifact
 from hera.workflows.models import Container as _ModelContainer
-from hera.workflows.models import Lifecycle, SecurityContext
+from hera.workflows.models import DAGTask, Lifecycle, SecurityContext
 from hera.workflows.models import Template as _ModelTemplate
 from hera.workflows.v5._mixins import (
     _ContainerMixin,
@@ -13,6 +14,7 @@ from hera.workflows.v5._mixins import (
     _VolumeMountMixin,
 )
 from hera.workflows.v5.buildable import Buildable
+from hera.workflows.v5.parameter import Parameter
 
 
 class Container(
@@ -91,4 +93,33 @@ class Container(
             timeout=self.timeout,
             tolerations=self.tolerations,
             volumes=self._build_volumes(),
+        )
+
+    def _build_arguments(self) -> Optional[Arguments]:
+        # parameters = [obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)]
+        # parameters = [p for p in parameters if p is not None]  # Some parameters might not resolve
+        if self.inputs is None:
+            return None
+
+        parameters = [p for p in self.inputs if isinstance(p, Parameter)]
+        artifacts = [a for a in self.inputs if isinstance(a, Artifact)]
+        if len(parameters) == 0 and len(artifacts) == 0:
+            return None
+        return Arguments(artifacts=artifacts, parameters=parameters)
+
+    def _build_dag_task(self) -> DAGTask:
+        return DAGTask(
+            name=self.name,
+            arguments=self._build_arguments(),
+            continue_on=self.continue_on,
+            dependencies=self.dependencies,
+            depends=self.depends,
+            hooks=self.hooks,
+            inline=self.inline,
+            on_exit=self.on_exit,
+            template=self.name,
+            when=self.when,
+            with_items=self.with_items,
+            with_param=self.with_param,
+            with_sequence=self.with_sequence,
         )
