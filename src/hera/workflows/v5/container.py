@@ -30,8 +30,10 @@ class Container(
 
     @root_validator()
     def _add_to_ctx(cls, values):
-        from hera.workflows.v5._context import _HeraContext
-        _HeraContext.add_template(self)
+        # TODO: how might we do this in the best way???
+        # from hera.workflows.v5._context import _HeraContext
+        # _HeraContext.add_template(self)
+        pass
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(
