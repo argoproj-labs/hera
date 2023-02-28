@@ -66,6 +66,16 @@ class _ContainerMixin(_BaseMixin):
     image: str = GlobalConfig.image
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
+    liveness_probe: Optional[Probe] = None
+    ports: Optional[List[ContainerPort]] = None
+    readiness_probe: Optional[Probe] = None
+    startup_probe: Optional[Probe] = None
+    stdin: Optional[bool] = None
+    stdin_once: Optional[bool] = None
+    termination_message_path: Optional[str] = None
+    termination_message_policy: Optional[TerminationMessagePolicy] = None
+    tty: Optional[bool] = None
+
     def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
         if self.image_pull_policy is None or isinstance(self.image_pull_policy, ImagePullPolicy):
             return self.image_pull_policy
@@ -152,16 +162,7 @@ class _TemplateMixin(_BaseMixin):
     priority_class_name: Optional[str] = None
     retry_strategy: Optional[RetryStrategy] = None
     scheduler_name: Optional[str] = None
-    liveness_probe: Optional[Probe] = None
-    ports: Optional[List[ContainerPort]] = None
-    readiness_probe: Optional[Probe] = None
     pod_security_context: Optional[PodSecurityContext] = None
-    startup_probe: Optional[Probe] = None
-    stdin: Optional[bool] = None
-    stdin_once: Optional[bool] = None
-    termination_message_path: Optional[str] = None
-    termination_message_policy: Optional[TerminationMessagePolicy] = None
-    tty: Optional[bool] = None
     service_account_name: Optional[str] = None
     sidecars: Optional[List[UserContainer]] = None
     synchronization: Optional[Synchronization] = None

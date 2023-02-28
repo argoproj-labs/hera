@@ -15,6 +15,7 @@ from hera.workflows.v5._mixins import (
 )
 from hera.workflows.v5.buildable import Buildable
 from hera.workflows.v5.parameter import Parameter
+from pydantic import root_validator
 
 
 class Container(
@@ -26,6 +27,11 @@ class Container(
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
+
+    @root_validator()
+    def _add_to_ctx(cls, values):
+        from hera.workflows.v5._context import _HeraContext
+        _HeraContext.add_template(self)
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(
@@ -44,6 +50,7 @@ class Container(
             security_context=self.security_context,
             startup_probe=self.startup_probe,
             stdin=self.stdin,
+            stdin_once=self.stdin_once,
             termination_message_path=self.termination_message_path,
             termination_message_policy=self.termination_message_policy,
             tty=self.tty,
