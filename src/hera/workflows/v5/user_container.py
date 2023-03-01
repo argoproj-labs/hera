@@ -7,14 +7,13 @@ from hera.workflows.models import (
     ResourceRequirements,
 )
 from hera.workflows.models import UserContainer as _ModelUserContainer
-from hera.workflows.v5.buildable import Buildable
 from hera.workflows.v5.env import _BaseEnv
 from hera.workflows.v5.env_from import _BaseEnvFrom
 from hera.workflows.v5.resources import Resources
 from hera.workflows.v5.volume import _BaseVolume
 
 
-class UserContainer(Buildable, _ModelUserContainer):
+class UserContainer(_ModelUserContainer):
     env: Optional[List[Union[_BaseEnv, EnvVar]]] = None  # type: ignore[assignment]
     env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None  # type: ignore[assignment]
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None  # type: ignore[assignment]

@@ -6,7 +6,6 @@ from pydantic import validator
 from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import Backoff, IntOrString, RetryAffinity
 from hera.workflows.models import RetryStrategy as _ModelRetryStrategy
-from hera.workflows.v5.buildable import Buildable
 
 
 class RetryPolicy(Enum):
@@ -29,7 +28,7 @@ class RetryPolicy(Enum):
         return str(self.value)
 
 
-class RetryStrategy(Buildable, _BaseModel):
+class RetryStrategy(_BaseModel):
     affinity: Optional[RetryAffinity] = None
     backoff: Optional[Backoff] = None
     expression: Optional[str] = None

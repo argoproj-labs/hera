@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List, Optional
 
 from hera.workflows.models import Arguments, Artifact
@@ -13,13 +14,12 @@ from hera.workflows.v5._mixins import (
     _TemplateMixin,
     _VolumeMountMixin,
 )
-from hera.workflows.v5.buildable import Buildable
 from hera.workflows.v5.parameter import Parameter
-from pydantic import root_validator
+from hera.workflows.v5._meta import ModelMetaclass
 
 
 class Container(
-    Buildable, _IOMixin, _DAGTaskMixin, _ContainerMixin, _EnvMixin, _TemplateMixin, _ResourceMixin, _VolumeMountMixin
+    _IOMixin, _DAGTaskMixin, _ContainerMixin, _EnvMixin, _TemplateMixin, _ResourceMixin, _VolumeMountMixin, metaclass=ModelMetaclass
 ):
     name: str
     args: Optional[List[str]] = None
@@ -28,12 +28,10 @@ class Container(
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
 
-    @root_validator()
-    def _add_to_ctx(cls, values):
-        # TODO: how might we do this in the best way???
-        # from hera.workflows.v5._context import _HeraContext
-        # _HeraContext.add_template(self)
-        pass
+    def __post_init__(self) -> Container:
+        from hera.workflows.v5._context import _context
+        _context.add_template(self)
+        return self
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(

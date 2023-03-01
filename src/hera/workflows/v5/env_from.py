@@ -4,10 +4,9 @@ from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import ConfigMapEnvSource as _ModelConfigMapEnvSource
 from hera.workflows.models import EnvFromSource as _ModelEnvFromSource
 from hera.workflows.models import SecretEnvSource as _ModelSecretEnvSource
-from hera.workflows.v5.buildable import Buildable
 
 
-class _BaseEnvFrom(Buildable, _BaseModel):
+class _BaseEnvFrom(_BaseModel):
     def __init__(self, prefix: Optional[str] = None) -> None:
         self.prefix = prefix
         super().__init__()

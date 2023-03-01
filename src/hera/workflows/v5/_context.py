@@ -1,5 +1,6 @@
 import threading
 from typing import List, Union
+
 from hera.workflows.v5.container import Container
 from hera.workflows.v5.workflow import Workflow
 
@@ -17,10 +18,13 @@ class _HeraContext(threading.local):
         self._pieces.append(p)
 
     def exit(self) -> None:
-        self._templates.pop()
+        self._pieces.pop()
 
     def add_template(self, t: AcceptedTemplates) -> None:
         if self._pieces[-1].templates is None:
             self._pieces[-1].templates = [t._build_template()]
         else:
             self._pieces[-1].templates.append(t._build_template())
+
+
+_context = _HeraContext()

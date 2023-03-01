@@ -5,7 +5,6 @@ from pydantic import root_validator
 
 from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import ResourceRequirements as _ModelResourceRequirements
-from hera.workflows.v5.buildable import Buildable
 from hera.workflows.validators import validate_storage_units
 
 
@@ -26,7 +25,7 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
     return a
 
 
-class Resources(Buildable, _BaseModel):
+class Resources(_BaseModel):
     """A representation of a collection of resources that are requested to be consumed by a task for execution.
 
     This follow the K8S definition for resources.

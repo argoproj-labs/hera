@@ -15,11 +15,10 @@ from hera.workflows.models import ObjectFieldSelector as _ModelObjectFieldSelect
 from hera.workflows.models import Quantity
 from hera.workflows.models import ResourceFieldSelector as _ModelResourceFieldSelector
 from hera.workflows.models import SecretKeySelector as _ModelSecretKeySelector
-from hera.workflows.v5.buildable import Buildable
 from hera.workflows.v5.parameter import Parameter
 
 
-class _BaseEnv(Buildable, _BaseModel):
+class _BaseEnv(_BaseModel):
     name: str
 
     def __init__(self, name: str):

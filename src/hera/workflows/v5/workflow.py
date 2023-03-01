@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseModel
@@ -18,6 +18,10 @@ from hera.workflows.models import (
     ObjectMeta,
     PersistentVolumeClaim,
     PodDisruptionBudgetSpec,
+    WorkflowCreateRequest,
+    Time,
+    ManagedFieldsEntry,
+    OwnerReference,
     PodDNSConfig,
     PodGC,
     PodSecurityContext,
@@ -39,7 +43,22 @@ from hera.workflows.service import WorkflowsService
 class Workflow(BaseModel):
     api_version: Optional[str] = GlobalConfig.api_version
     kind: Optional[str] = None
-    metadata: Optional[ObjectMeta] = None
+    annotations: Optional[Dict[str, str]] = None
+    cluster_name: Optional[str] = None
+    creation_timestamp: Optional[Time] = None
+    deletion_grace_period_seconds: Optional[int] = None
+    deletion_timestamp: Optional[Time] = None
+    finalizers: Optional[List[str]] = None
+    generate_name: Optional[str] = None
+    generation: Optional[int] = None
+    labels: Optional[Dict[str, str]] = None
+    managed_fields: Optional[List[ManagedFieldsEntry]] = None
+    name: Optional[str] = None
+    namespace: Optional[str] = None
+    owner_references: Optional[List[OwnerReference]] = None
+    resource_version: Optional[str] = None
+    self_link: Optional[str] = None
+    uid: Optional[str] = None
     active_deadline_seconds: Optional[int] = None
     affinity: Optional[Affinity] = None
     archive_logs: Optional[bool] = None
@@ -85,17 +104,29 @@ class Workflow(BaseModel):
     status: Optional[WorkflowStatus] = None
     workflow_service: Optional[WorkflowsService] = None
 
-    _in_context: bool = False
-
-    @property
-    def name(self) -> str:
-        return "{{workflow.name}}"
 
     def build(self) -> _ModelWorkflow:
         return _ModelWorkflow(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.metadata,
+            metadata=ObjectMeta(
+                annotations=self.annotations,
+                cluster_name=self.cluster_name,
+                creation_timestamp=self.creation_timestamp,
+                deletion_grace_period_seconds=self.deletion_grace_period_seconds,
+                deletion_timestamp=self.deletion_timestamp,
+                finalizers=self.finalizers,
+                generate_name=self.generate_name,
+                generation=self.generation,
+                labels=self.labels,
+                managed_fields=self.managed_fields,
+                name=self.name,
+                namespace=self.namespace,
+                owner_references=self.owner_references,
+                resource_version=self.resource_version,
+                self_link=self.self_link,
+                uid=self.uid,
+            ),
             spec=_ModelWorkflowSpec(
                 active_deadline_seconds=self.active_deadline_seconds,
                 affinity=self.affinity,
@@ -148,8 +179,8 @@ class Workflow(BaseModel):
 
         Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
         """
-        self._in_context = True
-        # hera.workflows.dag_context.enter(self.dag)
+        from hera.workflows.v5._context import _context
+        _context.enter(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -157,5 +188,8 @@ class Workflow(BaseModel):
 
         This supports using `with Workflow(...)`.
         """
-        self._in_context = False
-        # hera.workflows.dag_context.exit()
+        from hera.workflows.v5._context import _context
+        _context.exit()
+
+    def create(self) -> _ModelWorkflow:
+        return self.workflow_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
