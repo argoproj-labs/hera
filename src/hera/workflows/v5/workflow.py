@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseModel
@@ -13,31 +15,32 @@ from hera.workflows.models import (
     HostAlias,
     LifecycleHook,
     LocalObjectReference,
+    ManagedFieldsEntry,
     Metadata,
     Metrics,
     ObjectMeta,
+    OwnerReference,
     PersistentVolumeClaim,
     PodDisruptionBudgetSpec,
-    WorkflowCreateRequest,
-    Time,
-    ManagedFieldsEntry,
-    OwnerReference,
     PodDNSConfig,
     PodGC,
     PodSecurityContext,
     RetryStrategy,
     Synchronization,
     Template,
+    Time,
     Toleration,
     TTLStrategy,
     Volume,
     VolumeClaimGC,
 )
 from hera.workflows.models import Workflow as _ModelWorkflow
-from hera.workflows.models import WorkflowMetadata
+from hera.workflows.models import WorkflowCreateRequest, WorkflowMetadata
 from hera.workflows.models import WorkflowSpec as _ModelWorkflowSpec
 from hera.workflows.models import WorkflowStatus, WorkflowTemplateRef
 from hera.workflows.service import WorkflowsService
+from hera.workflows.v5.exceptions import InvalidType
+from hera.workflows.v5.protocol import Templatable, TTemplate
 
 
 class Workflow(BaseModel):
@@ -93,7 +96,7 @@ class Workflow(BaseModel):
     suspend: Optional[bool] = None
     synchronization: Optional[Synchronization] = None
     template_defaults: Optional[Template] = None
-    templates: Optional[List[Template]] = None
+    templates: Optional[List[TTemplate]] = None
     tolerations: Optional[List[Toleration]] = None
     ttl_strategy: Optional[TTLStrategy] = None
     volume_claim_gc: Optional[VolumeClaimGC] = None
@@ -103,7 +106,6 @@ class Workflow(BaseModel):
     workflow_template_ref: Optional[WorkflowTemplateRef] = None
     status: Optional[WorkflowStatus] = None
     workflow_service: Optional[WorkflowsService] = None
-
 
     def build(self) -> _ModelWorkflow:
         return _ModelWorkflow(
@@ -180,6 +182,7 @@ class Workflow(BaseModel):
         Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
         """
         from hera.workflows.v5._context import _context
+
         _context.enter(self)
         return self
 
@@ -189,7 +192,22 @@ class Workflow(BaseModel):
         This supports using `with Workflow(...)`.
         """
         from hera.workflows.v5._context import _context
+
         _context.exit()
 
     def create(self) -> _ModelWorkflow:
+        assert self.workflow_service, "workflow service not initialized"
+        assert self.namespace, "workflow service not initialized"
         return self.workflow_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
+
+    def _add_sub(self, node: Any):
+        self.add_template(node)
+
+    def add_template(self, template: Union[TTemplate, Templatable]):
+        self.templates = self.templates or []
+        if isinstance(template, Templatable):
+            self.templates.append(template._build_template())
+        elif isinstance(template, get_args(TTemplate)):
+            self.templates.append(template)
+        else:
+            raise InvalidType

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseModel as _BaseModel
@@ -56,10 +56,21 @@ from hera.workflows.v5.workflow_status import WorkflowStatus
 
 Inputs = List[Union[Artifact, Parameter, ModelParameter]]
 Outputs = List[Union[Artifact, Parameter, ModelParameter]]
+TSub = TypeVar("TSub", bound="_SubNodeMixin")
 
 
 class _BaseMixin(_BaseModel):
     pass
+
+
+class _SubNodeMixin(_BaseModel):
+    """_SubMixin ensures that the class gets added to the Hera context on initialization."""
+
+    def __post_init__(self: TSub) -> TSub:
+        from hera.workflows.v5._context import _context
+
+        _context.add_sub_node(self)
+        return self
 
 
 class _ContainerMixin(_BaseMixin):

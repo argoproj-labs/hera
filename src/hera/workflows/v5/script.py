@@ -3,7 +3,6 @@ import inspect
 import textwrap
 from typing import Callable, List, Optional, Union
 
-
 from hera.workflows.models import Lifecycle
 from hera.workflows.models import ScriptTemplate as _ModelScriptTemplate
 from hera.workflows.models import SecurityContext
@@ -47,9 +46,10 @@ class Script(
         str
             The string representation of the script to load.
         """
-        inputs = self._build_inputs().parameters
+        inputs = self._build_inputs()
+        assert inputs
         extract = "import json\n"
-        for param in sorted(inputs, key=lambda x: x.name):
+        for param in sorted(inputs.parameters or [], key=lambda x: x.name):
             # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
             # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
             # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
@@ -74,7 +74,7 @@ class Script(
             args = inspect.getfullargspec(self.source).args
             if signature.return_annotation == str:
                 # Resolve function by filling in templated inputs
-                input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]
+                input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]  # type: ignore
                 missing_args = set(args) - set(input_params_names)
                 if missing_args:
                     raise ValueError(f"Missing inputs for source args: {missing_args}")
@@ -112,7 +112,7 @@ class Script(
             assert isinstance(self.source, str)
             return self.source
 
-    def _build_script_template(self) -> _ModelScriptTemplate:
+    def _build_template(self) -> _ModelScriptTemplate:
         return _ModelScriptTemplate(
             args=self.args,
             command=self.command,

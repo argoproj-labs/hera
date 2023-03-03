@@ -9,10 +9,10 @@ from hera.workflows.models import (
 )
 from hera.workflows.models import AzureDiskVolumeSource as _ModelAzureDiskVolumeSource
 from hera.workflows.models import AzureFileVolumeSource as _ModelAzureFileVolumeSource
-from hera.workflows.models import CSIVolumeSource as _ModelCSIVolumeSource
 from hera.workflows.models import CephFSVolumeSource as _ModelCephFSVolumeSource
 from hera.workflows.models import CinderVolumeSource as _ModelCinderVolumeSource
 from hera.workflows.models import ConfigMapVolumeSource as _ModelConfigMapVolumeSource
+from hera.workflows.models import CSIVolumeSource as _ModelCSIVolumeSource
 from hera.workflows.models import (
     DownwardAPIVolumeSource as _ModelDownwardAPIVolumeSource,
 )

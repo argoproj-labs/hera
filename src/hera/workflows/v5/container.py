@@ -1,25 +1,35 @@
 from __future__ import annotations
+
 from typing import List, Optional
 
 from hera.workflows.models import Arguments, Artifact
 from hera.workflows.models import Container as _ModelContainer
 from hera.workflows.models import DAGTask, Lifecycle, SecurityContext
 from hera.workflows.models import Template as _ModelTemplate
+from hera.workflows.v5._meta import ModelMetaclass
 from hera.workflows.v5._mixins import (
     _ContainerMixin,
     _DAGTaskMixin,
     _EnvMixin,
     _IOMixin,
     _ResourceMixin,
+    _SubNodeMixin,
     _TemplateMixin,
     _VolumeMountMixin,
 )
 from hera.workflows.v5.parameter import Parameter
-from hera.workflows.v5._meta import ModelMetaclass
 
 
 class Container(
-    _IOMixin, _DAGTaskMixin, _ContainerMixin, _EnvMixin, _TemplateMixin, _ResourceMixin, _VolumeMountMixin, metaclass=ModelMetaclass
+    _IOMixin,
+    _DAGTaskMixin,
+    _ContainerMixin,
+    _EnvMixin,
+    _TemplateMixin,
+    _ResourceMixin,
+    _SubNodeMixin,
+    _VolumeMountMixin,
+    metaclass=ModelMetaclass,
 ):
     name: str
     args: Optional[List[str]] = None
@@ -27,11 +37,6 @@ class Container(
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
-
-    def __post_init__(self) -> Container:
-        from hera.workflows.v5._context import _context
-        _context.add_template(self)
-        return self
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(
@@ -43,7 +48,6 @@ class Container(
             image_pull_policy=self._build_image_pull_policy(),
             lifecycle=self.lifecycle,
             liveness_probe=self.liveness_probe,
-            name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
             resources=self._build_resources(),
