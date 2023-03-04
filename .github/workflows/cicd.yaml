@@ -8,9 +8,6 @@ on:
     paths:
       - "src/**"
   pull_request:
-    branches:
-      - main
-      - hera/v5
     paths:
       - "src/**"
 
@@ -34,9 +31,6 @@ jobs:
           - os: ubuntu-latest
             python-version: '3.11'
             toxenv: 'py311'
-          - os: macos-latest
-            python-version: '3.7'
-            toxenv: 'py37'
           - os: macos-latest
             python-version: '3.8'
             toxenv: 'py38'
