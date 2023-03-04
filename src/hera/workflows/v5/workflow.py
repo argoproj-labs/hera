@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
 
+from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
@@ -34,7 +35,6 @@ from hera.workflows.models import (
     Volume,
     VolumeClaimGC,
 )
-from pydantic import validator
 from hera.workflows.models import Workflow as _ModelWorkflow
 from hera.workflows.models import WorkflowCreateRequest, WorkflowMetadata
 from hera.workflows.models import WorkflowSpec as _ModelWorkflowSpec
