@@ -1,4 +1,6 @@
-from typing import Any, Protocol, Union, runtime_checkable
+from typing import Any, Union
+
+from typing_extensions import Protocol, runtime_checkable
 
 from hera.workflows.models import (
     ContainerSetTemplate,
