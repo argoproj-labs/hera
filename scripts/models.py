@@ -115,6 +115,20 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
             f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import InfoResponse\n")
             f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Version\n")
             f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Version\n")
+        enums = [
+            "ImagePullPolicy",
+            "TerminationMessagePolicy",
+            "Protocol",
+            "Scheme",
+            "Operator",
+            "Type",
+            "Phase",
+            "TypeModel",
+            "Effect",
+            "OperatorModel",
+        ]
+        for enum in enums:
+            f.write(f"from hera.{models_type}.models.io.k8s.api.core.v1 import {enum}\n")
 
 
 if __name__ == "__main__":

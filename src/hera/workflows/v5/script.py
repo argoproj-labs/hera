@@ -1,0 +1,140 @@
+import copy
+import inspect
+import textwrap
+from typing import Callable, List, Optional, Union
+
+from hera.workflows.models import Lifecycle
+from hera.workflows.models import ScriptTemplate as _ModelScriptTemplate
+from hera.workflows.models import SecurityContext
+from hera.workflows.parameter import Parameter
+from hera.workflows.v5._mixins import (
+    _ContainerMixin,
+    _DAGTaskMixin,
+    _EnvMixin,
+    _IOMixin,
+    _ResourceMixin,
+    _TemplateMixin,
+    _VolumeMountMixin,
+)
+
+
+class Script(
+    _IOMixin,
+    _DAGTaskMixin,
+    _ContainerMixin,
+    _EnvMixin,
+    _TemplateMixin,
+    _ResourceMixin,
+    _VolumeMountMixin,
+):
+    name: str
+    args: Optional[List[str]] = None
+    command: Optional[List[str]] = None
+    lifecycle: Optional[Lifecycle] = None
+    security_context: Optional[SecurityContext] = None
+    source: Optional[Union[Callable, str]] = None
+    working_dir: Optional[str] = None
+
+    def _get_param_script_portion(self) -> str:
+        """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
+        parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
+        script that automatically imports json and loads/adds code to interpret each independent argument into the
+        script.
+
+        Returns
+        -------
+        str
+            The string representation of the script to load.
+        """
+        inputs = self._build_inputs()
+        assert inputs
+        extract = "import json\n"
+        for param in sorted(inputs.parameters or [], key=lambda x: x.name):
+            # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
+            # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
+            # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
+            # payload of the script is not necessary when regular input is set on the task via `func_params`
+            extract += f"""try: {param.name} = json.loads(r'''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            extract += f"""except: {param.name} = r'''{{{{inputs.parameters.{param.name}}}}}'''\n"""
+        return textwrap.dedent(extract)
+
+    def _build_source(self) -> str:
+        """Assembles and returns a script representation of the given function, along with the extra script material
+        prefixed to the string. The script is expected to be a callable function the client is interested in submitting
+        for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
+        through get_param_script_portion.
+
+        Returns
+        -------
+        str
+            Final formatted script.
+        """
+        if callable(self.source):
+            signature = inspect.signature(self.source)
+            args = inspect.getfullargspec(self.source).args
+            if signature.return_annotation == str:
+                # Resolve function by filling in templated inputs
+                input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]  # type: ignore
+                missing_args = set(args) - set(input_params_names)
+                if missing_args:
+                    raise ValueError(f"Missing inputs for source args: {missing_args}")
+                kwargs = {name: f"{{{{inputs.parameters.{name}}}}}" for name in args}
+                # Resolve the function to a string
+                return self.source(**kwargs)
+            else:
+                # Argo will save the script as a file and run it with cmd:
+                # - python /argo/staging/script
+                # However, this prevents the script from importing modules in its cwd,
+                # since it's looking for files relative to the script path.
+                # We fix this by appending the cwd path to sys:
+                script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
+
+                script_extra = self._get_param_script_portion() if args else None
+                if script_extra:
+                    script += copy.deepcopy(script_extra)
+                    script += "\n"
+
+                # content represents the function components, separated by new lines
+                # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
+                content = inspect.getsourcelines(self.source)[0]
+                token_index, start_token = 1, ":\n"
+                for curr_index, curr_token in enumerate(content):
+                    if start_token in curr_token:
+                        # when we find the curr token we find the end of the function header. The next index is the
+                        # starting point of the function body
+                        token_index = curr_index + 1
+                        break
+
+                s = "".join(content[token_index:])
+                script += textwrap.dedent(s)
+                return textwrap.dedent(script)
+        else:
+            assert isinstance(self.source, str)
+            return self.source
+
+    def _build_template(self) -> _ModelScriptTemplate:
+        return _ModelScriptTemplate(
+            args=self.args,
+            command=self.command,
+            env=self._build_env(),
+            env_from=self._build_env_from(),
+            image=self.image,
+            image_pull_policy=self._build_image_pull_policy(),
+            lifecycle=self.lifecycle,
+            liveness_probe=self.liveness_probe,
+            name=self.name,
+            ports=self.ports,
+            readiness_probe=self.readiness_probe,
+            resources=self._build_resources(),
+            security_context=self.security_context,
+            source=self._build_source(),
+            startup_probe=self.startup_probe,
+            stdin=self.stdin,
+            stdin_once=self.stdin_once,
+            termination_message_path=self.termination_message_path,
+            termination_message_policy=self.termination_message_policy,
+            tty=self.tty,
+            volume_devices=self.volume_devices,
+            volume_mounts=self._build_volume_mounts(),
+            working_dir=self.working_dir,
+        )

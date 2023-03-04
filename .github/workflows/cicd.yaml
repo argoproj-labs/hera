@@ -8,9 +8,6 @@ on:
     paths:
       - "src/**"
   pull_request:
-    branches:
-      - main
-      - hera/v5
     paths:
       - "src/**"
 
@@ -23,9 +20,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: '3.7'
-            toxenv: 'py37'
-          - os: ubuntu-latest
             python-version: '3.8'
             toxenv: 'py38'
           - os: ubuntu-latest
@@ -34,9 +28,9 @@ jobs:
           - os: ubuntu-latest
             python-version: '3.10'
             toxenv: 'py310'
-          - os: macos-latest
-            python-version: '3.7'
-            toxenv: 'py37'
+          - os: ubuntu-latest
+            python-version: '3.11'
+            toxenv: 'py311'
           - os: macos-latest
             python-version: '3.8'
             toxenv: 'py38'
@@ -46,6 +40,9 @@ jobs:
           - os: macos-latest
             python-version: '3.10'
             toxenv: 'py310'
+          - os: macos-latest
+            python-version: '3.11'
+            toxenv: 'py311'
 
     runs-on: ${{ matrix.os }}
 
@@ -117,7 +114,7 @@ jobs:
       
       - name: build wheel
         run: |
-          poetry version 0.0.0+${{ env.GITHUB_SHA }}
+          poetry version 0.0.0+${{ github.sha }}
           poetry build
 
       - name: upload wheel as artifact
