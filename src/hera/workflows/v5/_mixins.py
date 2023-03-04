@@ -12,6 +12,9 @@ from hera.workflows.models import (
     ArtifactLocation,
     ContainerPort,
     ContinueOn,
+)
+from hera.workflows.models import DAGTask as _ModelDAGTask
+from hera.workflows.models import (
     EnvFromSource,
     EnvVar,
     ExecutorConfig,
@@ -54,7 +57,6 @@ from hera.workflows.v5.user_container import UserContainer
 from hera.workflows.v5.volume import _BaseVolume
 from hera.workflows.v5.workflow_status import WorkflowStatus
 
-Inputs = List[Union[Artifact, Parameter, ModelParameter]]
 Outputs = List[Union[Artifact, Parameter, ModelParameter]]
 TSub = TypeVar("TSub", bound="_SubNodeMixin")
 
@@ -94,7 +96,7 @@ class _ContainerMixin(_BaseMixin):
 
 
 class _IOMixin(_BaseMixin):
-    inputs: Optional[Union[Inputs, ModelInputs]] = None
+    inputs: Optional[Union[List[Union[Parameter]], ModelInputs]] = None
     outputs: Optional[Union[Outputs, ModelOutputs]] = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
@@ -112,7 +114,7 @@ class _IOMixin(_BaseMixin):
                     )
                 else:
                     result.parameters = [value] if result.parameters is None else result.parameters + [value]
-        return cast(ModelInputs, self.inputs)
+        return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
         if self.outputs is None:
@@ -129,7 +131,7 @@ class _IOMixin(_BaseMixin):
                     )
                 else:
                     result.parameters = [value] if result.parameters is None else result.parameters + [value]
-        return cast(ModelOutputs, self.outputs)
+        return result
 
 
 class _EnvMixin(_BaseMixin):
@@ -359,3 +361,21 @@ class _DAGTaskMixin(_BaseMixin):
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
 
         return self.next(other, on=TaskResult.all_failed)
+
+    def _build_dag_task(self) -> _ModelDAGTask:
+        return _ModelDAGTask(
+            arguments=self.arguments,
+            continue_on=self.continue_on,
+            dependencies=self.dependencies,
+            depends=self.depends,
+            hooks=self.hooks,
+            inline=self.inline,
+            name=self.name,
+            on_exit=self.on_exit,
+            template=self.template,
+            template_ref=self.template_ref,
+            when=self.when,
+            with_items=self.with_items,
+            with_param=self.with_param,
+            with_sequence=self.with_sequence,
+        )

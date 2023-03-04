@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel as PyBaseModel
 from pydantic import Extra
+from pydantic.main import ModelMetaclass as _PyModelMetaclass
 
 _yaml: Optional[ModuleType] = None
 try:
@@ -13,7 +14,15 @@ except ImportError:
     _yaml = None
 
 
-class BaseModel(PyBaseModel):
+class ModelMetaclass(_PyModelMetaclass):
+    def __call__(cls, *args, **kwargs):
+        obj = type.__call__(cls, *args, **kwargs)
+        if hasattr(obj, "__post_init__"):
+            return obj.__post_init__()
+        return obj
+
+
+class BaseModel(PyBaseModel, metaclass=ModelMetaclass):
     class Config:
         allow_population_by_field_name = True
         extra = Extra.ignore
