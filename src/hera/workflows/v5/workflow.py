@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
 
+from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
@@ -57,7 +58,7 @@ class Workflow(BaseModel):
     labels: Optional[Dict[str, str]] = None
     managed_fields: Optional[List[ManagedFieldsEntry]] = None
     name: Optional[str] = None
-    namespace: Optional[str] = None
+    namespace: Optional[str] = GlobalConfig.namespace
     owner_references: Optional[List[OwnerReference]] = None
     resource_version: Optional[str] = None
     self_link: Optional[str] = None
@@ -105,7 +106,13 @@ class Workflow(BaseModel):
     workflow_metadata: Optional[WorkflowMetadata] = None
     workflow_template_ref: Optional[WorkflowTemplateRef] = None
     status: Optional[WorkflowStatus] = None
-    workflow_service: Optional[WorkflowsService] = None
+    workflows_service: Optional[WorkflowsService] = None
+
+    @validator('workflows_service', pre=True, always=True)
+    def _set_workflows_service(cls, v):
+        if v is None:
+            return WorkflowsService()
+        return v
 
     def build(self) -> _ModelWorkflow:
         return _ModelWorkflow(
@@ -196,9 +203,9 @@ class Workflow(BaseModel):
         _context.exit()
 
     def create(self) -> _ModelWorkflow:
-        assert self.workflow_service, "workflow service not initialized"
+        assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow service not initialized"
-        return self.workflow_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
+        return self.workflows_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
 
     def _add_sub(self, node: Any):
         self.add_template(node)
