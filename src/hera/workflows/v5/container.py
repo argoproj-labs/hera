@@ -2,10 +2,15 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from hera.workflows.models import Arguments, Artifact
-from hera.workflows.models import Container as _ModelContainer
-from hera.workflows.models import DAGTask, Lifecycle, SecurityContext
-from hera.workflows.models import Template as _ModelTemplate
+from hera.workflows.models import (
+    Arguments,
+    Artifact,
+    Container as _ModelContainer,
+    DAGTask,
+    Lifecycle,
+    SecurityContext,
+    Template as _ModelTemplate,
+)
 from hera.workflows.v5._meta import ModelMetaclass
 from hera.workflows.v5._mixins import (
     _ContainerMixin,

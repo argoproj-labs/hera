@@ -5,8 +5,8 @@ from unittest.mock import Mock
 
 import pytest
 import yaml
-from argo_workflows.models import HostAlias as ArgoHostAlias
 from argo_workflows.models import (
+    HostAlias as ArgoHostAlias,
     IoArgoprojWorkflowV1alpha1Workflow,
     IoArgoprojWorkflowV1alpha1WorkflowSpec,
     PodSecurityContext,
@@ -81,7 +81,7 @@ class TestWorkflow:
     def test_wf_adds_specified_tasks(self, no_op):
         n = 3
         ts = [Task(f"t{i}", no_op) for i in range(n)]
-        w = Workflow('w')
+        w = Workflow("w")
         w.add_tasks(*ts)
 
         assert len(w.dag.tasks) == n
@@ -89,7 +89,11 @@ class TestWorkflow:
             assert ts[i].name == t.name
 
     def test_wf_adds_task_volume(self, w, no_op):
-        t = Task("t", no_op, volumes=[Volume(name="v", size="1Gi", mount_path="/", storage_class_name="custom")])
+        t = Task(
+            "t",
+            no_op,
+            volumes=[Volume(name="v", size="1Gi", mount_path="/", storage_class_name="custom")],
+        )
         w.add_task(t)
 
         claim = w.build().spec.volume_claim_templates[0]
@@ -99,7 +103,11 @@ class TestWorkflow:
         assert claim.metadata.name == "v"
 
     def test_wf_adds_task_secret_volume(self, w, no_op):
-        t = Task("t", no_op, volumes=[SecretVolume(name="s", secret_name="sn", mount_path="/")])
+        t = Task(
+            "t",
+            no_op,
+            volumes=[SecretVolume(name="s", secret_name="sn", mount_path="/")],
+        )
         w.add_task(t)
 
         vol = w.build().spec.volumes[0]
@@ -108,7 +116,11 @@ class TestWorkflow:
 
     def test_wf_adds_task_config_map_volume(self, w):
         with Workflow("w") as w:
-            Task("t", "print(42)", volumes=[ConfigMapVolume(config_map_name="cmn", mount_path="/")])
+            Task(
+                "t",
+                "print(42)",
+                volumes=[ConfigMapVolume(config_map_name="cmn", mount_path="/")],
+            )
         wb = w.build()
         assert wb.spec["volumes"][0].name
         assert wb.spec["volumes"][0].config_map.name == "cmn"
@@ -177,7 +189,11 @@ class TestWorkflow:
     def test_wf_adds_ttl_strategy(self):
         with Workflow(
             "w",
-            ttl_strategy=TTLStrategy(seconds_after_completion=5, seconds_after_failure=10, seconds_after_success=15),
+            ttl_strategy=TTLStrategy(
+                seconds_after_completion=5,
+                seconds_after_failure=10,
+                seconds_after_success=15,
+            ),
         ) as w:
             expected_ttl_strategy = {
                 "seconds_after_completion": 5,
@@ -278,12 +294,12 @@ class TestWorkflow:
             metrics=Metrics(
                 [
                     Metric(
-                        'a',
-                        'b',
+                        "a",
+                        "b",
                     ),
                     Metric(
-                        'c',
-                        'd',
+                        "c",
+                        "d",
                     ),
                 ]
             ),
@@ -323,7 +339,7 @@ class TestWorkflow:
     def test_enter_sets_expected_fields(self):
         w = Workflow("w", dag=DAG("d"))
         assert not w.in_context
-        assert w.dag.name == 'd'
+        assert w.dag.name == "d"
 
     def test_on_exit(self):
         with Workflow("w") as w1:
@@ -375,13 +391,13 @@ class TestWorkflow:
         assert Workflow("w").get_name() == "{{workflow.name}}"
 
     def test_workflow_adjusts_input_metrics(self):
-        with Workflow('w', metrics=Metric('a', 'b')) as w:
+        with Workflow("w", metrics=Metric("a", "b")) as w:
             assert isinstance(w.metrics, Metrics)
 
-        with Workflow('w', metrics=[Metric('a', 'b')]) as w:
+        with Workflow("w", metrics=[Metric("a", "b")]) as w:
             assert isinstance(w.metrics, Metrics)
 
-        with Workflow('w', metrics=Metrics([Metric('a', 'b')])) as w:
+        with Workflow("w", metrics=Metrics([Metric("a", "b")])) as w:
             assert isinstance(w.metrics, Metrics)
 
     def test_workflow_sets_dag_name(self):
@@ -411,7 +427,7 @@ class TestWorkflow:
         # TODO: is there a better way to temporarily mock/patch this value to make this test more atomic?
         hera.workflows.workflow._yaml = None
         with pytest.raises(ImportError) as e:
-            Workflow('w').to_yaml()
+            Workflow("w").to_yaml()
         assert (
             str(e.value) == "Attempted to use `to_yaml` but PyYAML is not available. "
             "Install `hera-workflows[yaml]` to install the extra dependency"
@@ -431,7 +447,7 @@ class TestWorkflow:
         def hello():
             print("Hello, Hera!")
 
-        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
+        with Workflow("hello-hera", node_selectors={"a_b_c": "a_b_c"}, labels={"a_b_c": "a_b_c"}) as w:
             Task("t", hello)
 
         expected = {
@@ -454,7 +470,10 @@ class TestWorkflow:
                             "command": ["python"],
                         },
                     },
-                    {"name": "hello-hera", "dag": {"tasks": [{"name": "t", "template": "t"}]}},
+                    {
+                        "name": "hello-hera",
+                        "dag": {"tasks": [{"name": "t", "template": "t"}]},
+                    },
                 ],
                 "nodeSelector": {"a_b_c": "a_b_c"},
             },
@@ -468,9 +487,9 @@ class TestWorkflow:
             w.service_account_name = "abc"
 
         def hook2(w: Workflow) -> None:
-            w.labels = {'abc': '123'}
+            w.labels = {"abc": "123"}
 
         global_config.workflow_post_init_hooks = [hook1, hook2]
-        w = Workflow('w')
+        w = Workflow("w")
         assert w.service_account_name == "abc"
-        assert w.labels == {'abc': '123'}
+        assert w.labels == {"abc": "123"}

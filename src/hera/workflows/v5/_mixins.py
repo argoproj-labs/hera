@@ -17,19 +17,15 @@ from hera.workflows.models import (
     ExecutorConfig,
     HostAlias,
     ImagePullPolicy,
-)
-from hera.workflows.models import Inputs as ModelInputs
-from hera.workflows.models import (
+    Inputs as ModelInputs,
     IntOrString,
     Item,
     LifecycleHook,
     Memoize,
     Metadata,
     Metrics,
-)
-from hera.workflows.models import Outputs as ModelOutputs
-from hera.workflows.models import Parameter as ModelParameter
-from hera.workflows.models import (
+    Outputs as ModelOutputs,
+    Parameter as ModelParameter,
     Plugin,
     PodSecurityContext,
     Probe,
@@ -41,9 +37,11 @@ from hera.workflows.models import (
     TemplateRef,
     TerminationMessagePolicy,
     Toleration,
+    UserContainer as ModelUserContainer,
+    Volume,
+    VolumeDevice,
+    VolumeMount,
 )
-from hera.workflows.models import UserContainer as ModelUserContainer
-from hera.workflows.models import Volume, VolumeDevice, VolumeMount
 from hera.workflows.v5.env import _BaseEnv
 from hera.workflows.v5.env_from import _BaseEnvFrom
 from hera.workflows.v5.operator import Operator

@@ -1,6 +1,5 @@
 import json
 from textwrap import dedent
-from unittest import mock
 
 import pytest
 from argo_workflows.models import (
@@ -11,8 +10,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Sequence,
     IoArgoprojWorkflowV1alpha1Template,
     SecurityContext,
+    Toleration as _ArgoToleration,
 )
-from argo_workflows.models import Toleration as _ArgoToleration
 
 from hera.workflows import (
     DAG,
@@ -377,7 +376,7 @@ class TestTask:
         deduced_input_1 = t.inputs[0]
         assert isinstance(deduced_input_1, Parameter)
         assert deduced_input_1.name == "a"
-        assert deduced_input_1.value == None
+        assert deduced_input_1.value is None
         assert deduced_input_1.default == "false"
 
         t = Task("t", kwarg_op_bool_default, [{"a": True}])
@@ -394,7 +393,7 @@ class TestTask:
         deduced_input_1 = t.inputs[0]
         assert isinstance(deduced_input_1, Parameter)
         assert deduced_input_1.name == "a"
-        assert deduced_input_1.value == None
+        assert deduced_input_1.value is None
         assert deduced_input_1.default == "null"
 
         t = Task("t", kwarg_op_none_default, [{"a": None}])
@@ -459,7 +458,14 @@ class TestTask:
     def test_task_adds_git_input_artifact(self):
         t = Task(
             "t",
-            inputs=[GitArtifact("r", "/my-repo", "https://github.com/argoproj/argo-workflows.git", "master")],
+            inputs=[
+                GitArtifact(
+                    "r",
+                    "/my-repo",
+                    "https://github.com/argoproj/argo-workflows.git",
+                    "master",
+                )
+            ],
         )
 
         artifact = t.inputs[0].as_input()
@@ -470,7 +476,7 @@ class TestTask:
         assert artifact.git.revision == "master"
 
     def test_task_suspend_template(self):
-        t = Task('t', suspend=Suspend(duration="10"))
+        t = Task("t", suspend=Suspend(duration="10"))
         assert hasattr(t, "suspend")
         assert t.suspend is not None
         assert t.suspend.duration == "10"
@@ -501,7 +507,10 @@ class TestTask:
         assert script_def
         assert script_def.security_context == expected_security_context
 
-    @pytest.mark.parametrize("set_only", ["run_as_user", "run_as_group", "run_as_non_root", "additional_capabilities"])
+    @pytest.mark.parametrize(
+        "set_only",
+        ["run_as_user", "run_as_group", "run_as_non_root", "additional_capabilities"],
+    )
     def test_task_specified_partial_security_context(self, no_op, set_only, task_security_context_kwargs):
         one_param_kwargs = {set_only: task_security_context_kwargs[set_only]}
         tsc = TaskSecurityContext(**one_param_kwargs)
@@ -537,7 +546,11 @@ class TestTask:
         assert tt.metadata.annotations == expected_annotations
 
     def test_task_with_config_map_env_variable(self, no_op):
-        t = Task("t", no_op, env=[ConfigMapEnv(name="n", config_map_name="cn", config_map_key="k")])
+        t = Task(
+            "t",
+            no_op,
+            env=[ConfigMapEnv(name="n", config_map_name="cn", config_map_key="k")],
+        )
         tt = t._build_template()
         assert tt.script.env[0].value_from.config_map_key_ref.name == "cn"
         assert tt.script.env[0].value_from.config_map_key_ref.key == "k"
@@ -961,7 +974,7 @@ class TestTask:
         param = Task("t", outputs=[Parameter("a", value="42", default="43")]).get_parameter("a")
         assert isinstance(param, Parameter)
         assert param.name == "a"
-        assert param.value == f"{{{{tasks.t.outputs.parameters.a}}}}"
+        assert param.value == "{{tasks.t.outputs.parameters.a}}"
         assert param.default == "43"
 
         with pytest.raises(KeyError) as e:
@@ -1007,7 +1020,8 @@ class TestTask:
         assert params[0].value == "{{item}}"
 
         params = Task(
-            "t", dag=DAG("d", inputs=[Parameter("a", value="42"), Parameter("b", value="43")])
+            "t",
+            dag=DAG("d", inputs=[Parameter("a", value="42"), Parameter("b", value="43")]),
         )._deduce_input_params()
         assert len(params) == 2
         assert params[0].name == "a"
@@ -1021,27 +1035,27 @@ class TestTask:
             metrics=Metrics(
                 [
                     Metric(
-                        'a',
-                        'b',
+                        "a",
+                        "b",
                     ),
                     Metric(
-                        'c',
-                        'd',
+                        "c",
+                        "d",
                     ),
                 ]
             ),
         )._build_template()
         assert isinstance(t, IoArgoprojWorkflowV1alpha1Template)
-        assert hasattr(t, 'metrics')
+        assert hasattr(t, "metrics")
 
     def test_task_adjusts_input_metrics(self):
-        t = Task('t', metrics=Metric('a', 'b'))
+        t = Task("t", metrics=Metric("a", "b"))
         assert isinstance(t.metrics, Metrics)
 
-        t = Task('t', metrics=[Metric('a', 'b')])
+        t = Task("t", metrics=[Metric("a", "b")])
         assert isinstance(t.metrics, Metrics)
 
-        t = Task('t', metrics=Metrics([Metric('a', 'b')]))
+        t = Task("t", metrics=Metrics([Metric("a", "b")]))
         assert isinstance(t.metrics, Metrics)
 
     def test_task_applies_hooks(self, global_config):
@@ -1049,38 +1063,38 @@ class TestTask:
             t.when = "test123"
 
         def hook2(t: Task) -> None:
-            t.labels = {'abc': '123'}
+            t.labels = {"abc": "123"}
 
         global_config.task_post_init_hooks = [hook1, hook2]
-        t = Task('test')
+        t = Task("test")
         assert t.when == "test123"
-        assert t.labels == {'abc': '123'}
+        assert t.labels == {"abc": "123"}
 
     def test_task_applies_exit(self, no_op):
         with pytest.raises(ValueError) as e:
-            Task('t', source=no_op).on_exit(Task('e', dag=DAG('d')))
+            Task("t", source=no_op).on_exit(Task("e", dag=DAG("d")))
         assert (
             str(e.value)
             == "Provided `Task` contains a `DAG` set. Only `Task`s with `source` are supported or pure `DAG`s. "
             "Try passing in `Task.dag` or set `source` on `Task` if you have a single task to run on exit."
         )
 
-        o = Task('e', source=no_op)
-        t = Task('t', source=no_op).on_exit(o)
+        o = Task("e", source=no_op)
+        t = Task("t", source=no_op).on_exit(o)
         assert o.is_exit_task
         assert t.exit_task == "e"
 
-        d = DAG('d')
-        t = Task('t', source=no_op).on_exit(d)
+        d = DAG("d")
+        t = Task("t", source=no_op).on_exit(d)
         assert t.exit_task == "d"
 
         o = 42
         with pytest.raises(ValueError) as e:
-            Task('t', source=no_op).on_exit(o)  # type: ignore
+            Task("t", source=no_op).on_exit(o)  # type: ignore
         assert str(e.value) == f"Unrecognized exit type {type(o)}, supported types are `Task` and `DAG`"
 
     def test_task_properties(self):
-        t = Task('t')
+        t = Task("t")
         assert t.id == "{{tasks.t.id}}"
         assert t.ip == "{{tasks.t.ip}}"
         assert t.status == "{{tasks.t.status}}"

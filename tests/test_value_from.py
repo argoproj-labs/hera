@@ -31,7 +31,16 @@ class TestValueFrom:
         assert not hasattr(vf, "path")
         assert not hasattr(vf, "supplied")
 
-        fields_to_test = ["default", "event", "expression", "jq_filter", "json_path", "parameter", "path", "supplied"]
+        fields_to_test = [
+            "default",
+            "event",
+            "expression",
+            "jq_filter",
+            "json_path",
+            "parameter",
+            "path",
+            "supplied",
+        ]
         # ensure this captures added fields in the future
         assert set(list(vars(vf_).keys())) == set(fields_to_test + ["config_map_key_ref"])
 

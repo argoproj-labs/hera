@@ -63,7 +63,11 @@ class TestAction:
         assert not hasattr(a, "scheme")
 
         a = HTTPGetAction(
-            "443", host="abc", http_headers=[HTTPHeader("a", "1")], path="/test", scheme=Scheme.https
+            "443",
+            host="abc",
+            http_headers=[HTTPHeader("a", "1")],
+            path="/test",
+            scheme=Scheme.https,
         ).build()
         assert isinstance(a, ArgoHTTPGetAction)
         assert hasattr(a, "port")

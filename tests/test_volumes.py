@@ -43,7 +43,10 @@ def test_volume_created_with_defaults():
 
 def test_volume_created_with_multiple_access_modes():
     v = Volume(
-        name="v", size="1Gi", mount_path="/test", access_modes=[AccessMode.ReadWriteOnce, AccessMode.ReadWriteOncePod]
+        name="v",
+        size="1Gi",
+        mount_path="/test",
+        access_modes=[AccessMode.ReadWriteOnce, AccessMode.ReadWriteOncePod],
     )
     spec = v._build_claim_spec().spec
 
