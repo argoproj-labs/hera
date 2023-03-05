@@ -170,6 +170,7 @@ class _EnvMixin(_BaseMixin):
 
 
 class _TemplateMixin(_BaseMixin):
+    name: str
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
