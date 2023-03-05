@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from hera.workflows.models import (
     Arguments,
     Artifact,
     Container as _ModelContainer,
-    DAGTask,
+    ContinueOn,
+    Item,
     Lifecycle,
+    LifecycleHook,
     SecurityContext,
+    Sequence,
     Template as _ModelTemplate,
+    TemplateRef,
 )
-from hera.workflows.v5._meta import ModelMetaclass
 from hera.workflows.v5._mixins import (
     _ContainerMixin,
     _DAGTaskMixin,
@@ -27,14 +30,12 @@ from hera.workflows.v5.parameter import Parameter
 
 class Container(
     _IOMixin,
-    _DAGTaskMixin,
     _ContainerMixin,
     _EnvMixin,
     _TemplateMixin,
     _ResourceMixin,
     _SubNodeMixin,
     _VolumeMountMixin,
-    metaclass=ModelMetaclass,
 ):
     name: str
     args: Optional[List[str]] = None
@@ -42,6 +43,42 @@ class Container(
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
+
+    def __call__(
+        self,
+        name: str,
+        arguments: Optional[Arguments] = None,
+        continue_on: Optional[ContinueOn] = None,
+        dependencies: Optional[List[str]] = None,
+        depends: Optional[str] = None,
+        hooks: Optional[Dict[str, LifecycleHook]] = None,
+        on_exit: Optional[str] = None,
+        template: Optional[str] = None,
+        template_ref: Optional[TemplateRef] = None,
+        when: Optional[str] = None,
+        with_items: Optional[List[Item]] = None,
+        with_param: Optional[str] = None,
+        with_sequence: Optional[Sequence] = None,
+    ) -> _DAGTaskMixin:
+        from hera.workflows.v5._context import _context
+
+        dag_task = _DAGTaskMixin(
+            name=name,
+            arguments=arguments,
+            continue_on=continue_on,
+            dependencies=dependencies,
+            depends=depends,
+            hooks=hooks,
+            on_exit=on_exit,
+            template=self.name,
+            template_ref=template_ref,
+            when=when,
+            with_items=with_items,
+            with_param=with_param,
+            with_sequence=with_sequence,
+        )
+        _context.add_sub_node(dag_task)
+        return dag_task
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(
@@ -121,21 +158,7 @@ class Container(
         artifacts = [a for a in self.inputs if isinstance(a, Artifact)]
         if len(parameters) == 0 and len(artifacts) == 0:
             return None
-        return Arguments(artifacts=artifacts, parameters=parameters)
-
-    def _build_dag_task(self) -> DAGTask:
-        return DAGTask(
-            name=self.name,
-            arguments=self._build_arguments(),
-            continue_on=self.continue_on,
-            dependencies=self.dependencies,
-            depends=self.depends,
-            hooks=self.hooks,
-            inline=self.inline,
-            on_exit=self.on_exit,
-            template=self.name,
-            when=self.when,
-            with_items=self.with_items,
-            with_param=self.with_param,
-            with_sequence=self.with_sequence,
+        return Arguments(
+            artifacts=None if len(artifacts) == 0 else artifacts,
+            parameters=None if len(parameters) == 0 else parameters,
         )

@@ -43,7 +43,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
 		--disable-timestamp
-	@python scripts/models.py $(OPENAPI_SPEC_URL) workflows
+	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
 	@$(MAKE) format
 
 .PHONY: events-models
@@ -57,7 +57,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
 		--disable-timestamp
-	@python scripts/models.py $(OPENAPI_SPEC_URL) events
+	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
 	@$(MAKE) format
 
 .PHONY: models
@@ -66,12 +66,12 @@ models: workflows-models events-models
 
 .PHONY: workflows-service
 workflows-service:  ## Generate the Workflows service option of Hera
-	@python scripts/service.py $(OPENAPI_SPEC_URL) workflows
+	@poetry run python scripts/service.py $(OPENAPI_SPEC_URL) workflows
 	$(MAKE) format
 
 .PHONY: events-service
 events-service:  ## Generate the events service option of Hera
-	@python scripts/service.py $(OPENAPI_SPEC_URL) events
+	@poetry run python scripts/service.py $(OPENAPI_SPEC_URL) events
 	$(MAKE) format
 
 .PHONY: service
@@ -80,4 +80,4 @@ services: workflows-service events-service
 
 .PHONY: examples
 examples:  ## Generate all the examples
-	@(cd docs && python generate.py)
+	@(cd docs && poetry run python generate.py)

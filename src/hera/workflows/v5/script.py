@@ -15,6 +15,7 @@ from hera.workflows.v5._mixins import (
     _EnvMixin,
     _IOMixin,
     _ResourceMixin,
+    _SubNodeMixin,
     _TemplateMixin,
     _VolumeMountMixin,
 )
@@ -28,6 +29,7 @@ class Script(
     _TemplateMixin,
     _ResourceMixin,
     _VolumeMountMixin,
+    _SubNodeMixin,
 ):
     name: str
     args: Optional[List[str]] = None

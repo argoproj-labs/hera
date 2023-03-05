@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import ModuleType
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import validator
@@ -44,6 +45,14 @@ from hera.workflows.models import (
 from hera.workflows.service import WorkflowsService
 from hera.workflows.v5.exceptions import InvalidType
 from hera.workflows.v5.protocol import Templatable, TTemplate
+
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
 
 
 class Workflow(BaseModel):
@@ -186,10 +195,7 @@ class Workflow(BaseModel):
         )
 
     def __enter__(self) -> Workflow:
-        """Enter the context of the workflow.
-
-        Note that this creates a DAG if one is not specified. This supports using `with Workflow(...)`.
-        """
+        """Enter the context of the workflow"""
         from hera.workflows.v5._context import _context
 
         _context.enter(self)
@@ -203,6 +209,9 @@ class Workflow(BaseModel):
         from hera.workflows.v5._context import _context
 
         _context.exit()
+
+    def to_dict(self) -> Any:
+        return self.build().dict(exclude_none=True, by_alias=True)
 
     def create(self) -> _ModelWorkflow:
         assert self.workflows_service, "workflow service not initialized"

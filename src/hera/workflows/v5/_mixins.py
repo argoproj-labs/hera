@@ -12,6 +12,7 @@ from hera.workflows.models import (
     ArtifactLocation,
     ContainerPort,
     ContinueOn,
+    DAGTask as _ModelDAGTask,
     EnvFromSource,
     EnvVar,
     ExecutorConfig,
@@ -52,8 +53,8 @@ from hera.workflows.v5.user_container import UserContainer
 from hera.workflows.v5.volume import _BaseVolume
 from hera.workflows.v5.workflow_status import WorkflowStatus
 
-Inputs = List[Union[Artifact, Parameter, ModelParameter]]
-Outputs = List[Union[Artifact, Parameter, ModelParameter]]
+Inputs = List[Union[ModelInputs, Parameter, ModelParameter, Artifact]]
+Outputs = List[Union[ModelOutputs, Parameter, ModelParameter, Artifact]]
 TSub = TypeVar("TSub", bound="_SubNodeMixin")
 
 
@@ -92,42 +93,50 @@ class _ContainerMixin(_BaseMixin):
 
 
 class _IOMixin(_BaseMixin):
-    inputs: Optional[Union[Inputs, ModelInputs]] = None
-    outputs: Optional[Union[Outputs, ModelOutputs]] = None
+    inputs: Optional[Inputs] = None
+    outputs: Optional[Outputs] = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         if self.inputs is None:
             return None
+        elif isinstance(self.inputs, ModelInputs):
+            return self.inputs
 
         result = ModelInputs()
-        if isinstance(self.inputs, list):
-            for value in self.inputs:
-                if isinstance(value, Artifact):
-                    result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
-                elif isinstance(value, Parameter):
-                    result.parameters = (
-                        [value.as_input()] if result.parameters is None else result.parameters + [value.as_input()]
-                    )
-                else:
-                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
-        return cast(ModelInputs, self.inputs)
+        for value in self.inputs:
+            if isinstance(value, Parameter):
+                result.parameters = (
+                    [value.as_input()] if result.parameters is None else result.parameters + [value.as_input()]
+                )
+            elif isinstance(value, ModelParameter):
+                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+            elif isinstance(value, Artifact):
+                result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
+
+        if result.parameters is None and result.artifacts is None:
+            return None
+        return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
         if self.outputs is None:
             return None
+        elif isinstance(self.outputs, ModelOutputs):
+            return self.outputs
 
         result = ModelOutputs()
-        if isinstance(self.outputs, list):
-            for value in self.outputs:
-                if isinstance(value, Artifact):
-                    result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
-                elif isinstance(value, Parameter):
-                    result.parameters = (
-                        [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
-                    )
-                else:
-                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
-        return cast(ModelOutputs, self.outputs)
+        for value in self.outputs:
+            if isinstance(value, Parameter):
+                result.parameters = (
+                    [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
+                )
+            elif isinstance(value, ModelParameter):
+                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+            elif isinstance(value, Artifact):
+                result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
+
+        if result.parameters is None and result.artifacts is None:
+            return None
+        return result
 
 
 class _EnvMixin(_BaseMixin):
@@ -357,3 +366,21 @@ class _DAGTaskMixin(_BaseMixin):
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
 
         return self.next(other, on=TaskResult.all_failed)
+
+    def _build_dag_task(self) -> _ModelDAGTask:
+        return _ModelDAGTask(
+            arguments=self.arguments,
+            continue_on=self.continue_on,
+            dependencies=self.dependencies,
+            depends=self.depends,
+            hooks=self.hooks,
+            inline=self.inline,
+            name=self.name,
+            on_exit=self.on_exit,
+            template=self.template,
+            template_ref=self.template_ref,
+            when=self.when,
+            with_items=self.with_items,
+            with_param=self.with_param,
+            with_sequence=self.with_sequence,
+        )
