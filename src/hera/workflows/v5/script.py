@@ -11,7 +11,6 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.v5._mixins import (
     _ContainerMixin,
-    _DAGTaskMixin,
     _EnvMixin,
     _IOMixin,
     _ResourceMixin,
@@ -23,7 +22,6 @@ from hera.workflows.v5._mixins import (
 
 class Script(
     _IOMixin,
-    _DAGTaskMixin,
     _ContainerMixin,
     _EnvMixin,
     _TemplateMixin,
@@ -31,7 +29,6 @@ class Script(
     _VolumeMountMixin,
     _SubNodeMixin,
 ):
-    name: str
     args: Optional[List[str]] = None
     command: Optional[List[str]] = None
     lifecycle: Optional[Lifecycle] = None

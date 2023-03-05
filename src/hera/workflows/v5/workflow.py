@@ -7,7 +7,6 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
-from hera.workflows._base_model import BaseModel
 from hera.workflows.models import (
     Affinity,
     Arguments,
@@ -43,6 +42,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.service import WorkflowsService
+from hera.workflows.v5._mixins import _ContextMixin
 from hera.workflows.v5.exceptions import InvalidType
 from hera.workflows.v5.protocol import Templatable, TTemplate
 
@@ -55,7 +55,7 @@ except ImportError:
     _yaml = None
 
 
-class Workflow(BaseModel):
+class Workflow(_ContextMixin):
     api_version: Optional[str] = GlobalConfig.api_version
     kind: Optional[str] = None
     annotations: Optional[Dict[str, str]] = None
@@ -108,7 +108,7 @@ class Workflow(BaseModel):
     suspend: Optional[bool] = None
     synchronization: Optional[Synchronization] = None
     template_defaults: Optional[Template] = None
-    templates: Optional[List[TTemplate]] = None
+    templates: List[Union[Template, Templatable]] = []
     tolerations: Optional[List[Toleration]] = None
     ttl_strategy: Optional[TTLStrategy] = None
     volume_claim_gc: Optional[VolumeClaimGC] = None
@@ -125,7 +125,22 @@ class Workflow(BaseModel):
             return WorkflowsService()
         return v
 
+    @validator('kind', pre=True, always=True)
+    def _set_kind(cls, v):
+        if v is None:
+            return cls.__name__  # type: ignore
+        return v
+
     def build(self) -> _ModelWorkflow:
+        templates = []
+        for template in self.templates or []:
+            if isinstance(template, Templatable):
+                templates.append(template._build_template())
+            elif isinstance(template, get_args(TTemplate)):
+                templates.append(template)
+            else:
+                raise InvalidType(f"{type(template)} is not a valid template type")
+
         return _ModelWorkflow(
             api_version=self.api_version,
             kind=self.kind,
@@ -182,7 +197,7 @@ class Workflow(BaseModel):
                 suspend=self.suspend,
                 synchronization=self.synchronization,
                 template_defaults=self.template_defaults,
-                templates=self.templates,
+                templates=templates or None,
                 tolerations=self.tolerations,
                 ttl_strategy=self.ttl_strategy,
                 volume_claim_gc=self.volume_claim_gc,
@@ -194,22 +209,6 @@ class Workflow(BaseModel):
             status=self.status,
         )
 
-    def __enter__(self) -> Workflow:
-        """Enter the context of the workflow"""
-        from hera.workflows.v5._context import _context
-
-        _context.enter(self)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Leave the context of the workflow.
-
-        This supports using `with Workflow(...)`.
-        """
-        from hera.workflows.v5._context import _context
-
-        _context.exit()
-
     def to_dict(self) -> Any:
         return self.build().dict(exclude_none=True, by_alias=True)
 
@@ -219,13 +218,6 @@ class Workflow(BaseModel):
         return self.workflows_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
 
     def _add_sub(self, node: Any):
-        self.add_template(node)
-
-    def add_template(self, template: Union[TTemplate, Templatable]):
-        self.templates = self.templates or []
-        if isinstance(template, Templatable):
-            self.templates.append(template._build_template())
-        elif isinstance(template, get_args(TTemplate)):
-            self.templates.append(template)
-        else:
-            raise InvalidType
+        if not isinstance(node, (Templatable, *get_args(Template))):
+            raise InvalidType()
+        self.templates.append(node)
