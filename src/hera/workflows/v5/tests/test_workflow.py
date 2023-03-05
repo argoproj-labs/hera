@@ -41,6 +41,7 @@ def test_workflow_v5():
                 "steps."
             },
             "generateName": "coinflip-",
+            "namespace": "default",
         },
         "spec": {
             "templates": [
