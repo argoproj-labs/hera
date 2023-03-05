@@ -7,7 +7,6 @@ from hera.workflows.v5._mixins import _DAGTaskMixin, _SubNodeMixin, _TemplateMix
 
 
 class Suspend(_TemplateMixin, _SubNodeMixin):
-    name: str
     duration: Optional[Union[int, str]] = None
 
     def _build_duration(self) -> str:
@@ -63,6 +62,7 @@ class Suspend(_TemplateMixin, _SubNodeMixin):
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
             sidecars=self.sidecars,
+            suspend=self._build_suspend_template(),
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
