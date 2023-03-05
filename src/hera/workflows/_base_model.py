@@ -29,6 +29,7 @@ class BaseModel(PyBaseModel, metaclass=ModelMetaclass):
         allow_mutation = True
         use_enum_values = True
         arbitrary_types_allowed = True
+        smart_union = True
 
     def to_dict(self) -> Any:
         return self.dict(exclude_none=True, by_alias=True)

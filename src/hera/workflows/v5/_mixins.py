@@ -57,7 +57,8 @@ from hera.workflows.v5.user_container import UserContainer
 from hera.workflows.v5.volume import _BaseVolume
 from hera.workflows.v5.workflow_status import WorkflowStatus
 
-Outputs = List[Union[Artifact, Parameter, ModelParameter]]
+Inputs = List[Union[ModelInputs, Parameter, ModelParameter, Artifact]]
+Outputs = List[Union[ModelOutputs, Parameter, ModelParameter, Artifact]]
 TSub = TypeVar("TSub", bound="_SubNodeMixin")
 
 
@@ -96,41 +97,49 @@ class _ContainerMixin(_BaseMixin):
 
 
 class _IOMixin(_BaseMixin):
-    inputs: Optional[Union[List[Union[Parameter]], ModelInputs]] = None
-    outputs: Optional[Union[Outputs, ModelOutputs]] = None
+    inputs: Optional[Inputs] = None
+    outputs: Optional[Outputs] = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         if self.inputs is None:
             return None
+        elif isinstance(self.inputs, ModelInputs):
+            return self.inputs
 
         result = ModelInputs()
-        if isinstance(self.inputs, list):
-            for value in self.inputs:
-                if isinstance(value, Artifact):
-                    result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
-                elif isinstance(value, Parameter):
-                    result.parameters = (
-                        [value.as_input()] if result.parameters is None else result.parameters + [value.as_input()]
-                    )
-                else:
-                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
+        for value in self.inputs:
+            if isinstance(value, Parameter):
+                result.parameters = (
+                    [value.as_input()] if result.parameters is None else result.parameters + [value.as_input()]
+                )
+            elif isinstance(value, ModelParameter):
+                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+            elif isinstance(value, Artifact):
+                result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
+
+        if result.parameters is None and result.artifacts is None:
+            return None
         return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
         if self.outputs is None:
             return None
+        elif isinstance(self.outputs, ModelOutputs):
+            return self.outputs
 
         result = ModelOutputs()
-        if isinstance(self.outputs, list):
-            for value in self.outputs:
-                if isinstance(value, Artifact):
-                    result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
-                elif isinstance(value, Parameter):
-                    result.parameters = (
-                        [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
-                    )
-                else:
-                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
+        for value in self.outputs:
+            if isinstance(value, Parameter):
+                result.parameters = (
+                    [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
+                )
+            elif isinstance(value, ModelParameter):
+                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+            elif isinstance(value, Artifact):
+                result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
+
+        if result.parameters is None and result.artifacts is None:
+            return None
         return result
 
 
