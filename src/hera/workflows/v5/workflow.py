@@ -133,7 +133,7 @@ class Workflow(_ContextMixin):
 
     def build(self) -> _ModelWorkflow:
         templates = []
-        for template in self.templates or []:
+        for template in self.templates:
             if isinstance(template, Templatable):
                 templates.append(template._build_template())
             elif isinstance(template, get_args(TTemplate)):

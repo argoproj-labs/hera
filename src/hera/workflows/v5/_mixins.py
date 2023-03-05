@@ -104,11 +104,11 @@ class _ContainerMixin(_BaseMixin):
 
 
 class _IOMixin(_BaseMixin):
-    inputs: Optional[Inputs] = None
-    outputs: Optional[Outputs] = None
+    inputs: Inputs = []
+    outputs: Outputs = []
 
     def _build_inputs(self) -> Optional[ModelInputs]:
-        if self.inputs is None:
+        if not self.inputs:
             return None
         elif isinstance(self.inputs, ModelInputs):
             return self.inputs
@@ -129,7 +129,7 @@ class _IOMixin(_BaseMixin):
         return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
-        if self.outputs is None:
+        if not self.outputs:
             return None
         elif isinstance(self.outputs, ModelOutputs):
             return self.outputs
@@ -183,7 +183,7 @@ class _TemplateMixin(_BaseMixin):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
     metrics: Optional[Metrics] = None
-    name: str
+    name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     http: Optional[HTTP] = None
     plugin: Optional[Plugin] = None

@@ -24,7 +24,7 @@ class Task(_SubNodeMixin):
     continue_on: Optional[ContinueOn] = None
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
-    hooks: Optional[Dict[str, LifecycleHook]]
+    hooks: Optional[Dict[str, LifecycleHook]] = None
     on_exit: Optional[str] = None
     template: Union[str, Template, _TemplateMixin]
     template_ref: Optional[TemplateRef] = None
@@ -125,7 +125,7 @@ class Task(_SubNodeMixin):
         return self.next(other, on=TaskResult.errored)
 
     def on_other_result(self, other: Task, value: str, operator: Operator = Operator.equals) -> Task:
-        expression = f"'{other.result}' {operator} {value}"
+        expression = f"{other.result} {operator} {value}"
         if self.when:
             self.when += f" {Operator.and_} {expression}"
         else:

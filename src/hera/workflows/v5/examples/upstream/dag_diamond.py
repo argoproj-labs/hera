@@ -20,7 +20,6 @@ echo = Container(
 with Workflow(
     generate_name="dag-diamond-",
     entrypoint="diamond",
-    namespace=None,
 ) as w:
     with DAG(name="diamond"):
         A = Task(name="A", template=echo, arguments=Arguments(parameters=[Parameter(name="message", value="A")]))
