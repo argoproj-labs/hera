@@ -186,6 +186,7 @@ class _TemplateMixin(_BaseMixin):
     metrics: Optional[Metrics] = None
     node_selector: Optional[Dict[str, str]] = None
     http: Optional[HTTP] = None
+    paralellism: Optional[int] = None
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
     priority: Optional[int] = None
