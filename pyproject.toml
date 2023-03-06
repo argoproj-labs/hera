@@ -116,7 +116,6 @@ exclude_lines = [
     "_yaml = None",
 ]
 precision = 1
-round = "down"
 skip_covered = true
 show_missing = true
 

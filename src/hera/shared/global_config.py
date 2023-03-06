@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from typing_extensions import Protocol
 
@@ -42,11 +42,12 @@ class _GlobalConfig:
     host: Optional[str] = None
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
-    namespace: str = "default"
+    namespace: Optional[str] = None
     image: str = "python:3.7"
     service_account_name: Optional[str] = None
     task_post_init_hooks: Tuple[TaskHook, ...] = ()
     workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
+    script_command: Optional[List[str]] = ["python"]
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""

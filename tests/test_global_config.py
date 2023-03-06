@@ -32,7 +32,7 @@ class TestGlobalConfig:
 
     def test_namespace(self):
         c = _GlobalConfig()
-        assert c.namespace == "default"
+        assert c.namespace is None
         c.namespace = "123"
         assert c.namespace == "123"
 

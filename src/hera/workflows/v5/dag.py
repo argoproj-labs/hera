@@ -1,51 +1,38 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from hera.workflows.models import (
     DAGTask,
     DAGTemplate as _ModelDAGTemplate,
     Template as _ModelTemplate,
 )
-from hera.workflows.v5._mixins import _DAGTaskMixin, _IOMixin, _TemplateMixin
+from hera.workflows.v5._mixins import _ContextMixin, _IOMixin, _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5.task import Task
 
 
-class DAG(_IOMixin, _TemplateMixin):
-    name: str
+class DAG(_IOMixin, _TemplateMixin, _SubNodeMixin, _ContextMixin):
     fail_fast: Optional[bool] = None
     target: Optional[str] = None
-    tasks: List[DAGTask] = []
-    _task_queue: List[_DAGTaskMixin] = []
-
-    def __enter__(self) -> DAG:
-        """Enter the context of the workflow"""
-        from hera.workflows.v5._context import _context
-
-        _context.enter(self)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        from hera.workflows.v5._context import _context
-
-        for task in self._task_queue:
-            self.tasks.append(task._build_dag_task())
-
-        _context.exit()
+    tasks: List[Union[Task, DAGTask]] = []
 
     def _add_sub(self, node: Any):
-        self.add_task(node)
-
-    def add_task(self, task: _DAGTaskMixin) -> None:
-        self._task_queue.append(task)
+        self.tasks.append(node)
 
     def _build_template(self) -> _ModelTemplate:
+        tasks = []
+        for task in self.tasks:
+            if isinstance(task, Task):
+                tasks.append(task._build_dag_task())
+            else:
+                tasks.append(task)
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
             daemon=self.daemon,
-            dag=_ModelDAGTemplate(fail_fast=self.fail_fast, target=self.target, tasks=self.tasks),
+            dag=_ModelDAGTemplate(fail_fast=self.fail_fast, target=self.target, tasks=tasks),
             executor=self.executor,
             fail_fast=self.fail_fast,
             host_aliases=self.host_aliases,
