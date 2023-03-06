@@ -16,7 +16,9 @@ class TestLifecycle:
         assert not hasattr(h, "tcp_socket")
 
         h = LifecycleHandler(
-            _exec=ExecAction(), http_get=HTTPGetAction("443"), tcp_socket=TCPSocketAction("8080")
+            _exec=ExecAction(),
+            http_get=HTTPGetAction("443"),
+            tcp_socket=TCPSocketAction("8080"),
         ).build()
         assert isinstance(h, ArgoLifecycleHandler)
         assert hasattr(h, "_exec")
@@ -31,10 +33,14 @@ class TestLifecycle:
 
         h = Lifecycle(
             pre_stop=LifecycleHandler(
-                _exec=ExecAction(), http_get=HTTPGetAction("443"), tcp_socket=TCPSocketAction("8080")
+                _exec=ExecAction(),
+                http_get=HTTPGetAction("443"),
+                tcp_socket=TCPSocketAction("8080"),
             ),
             post_start=LifecycleHandler(
-                _exec=ExecAction(), http_get=HTTPGetAction("443"), tcp_socket=TCPSocketAction("8080")
+                _exec=ExecAction(),
+                http_get=HTTPGetAction("443"),
+                tcp_socket=TCPSocketAction("8080"),
             ),
         ).build()
         assert isinstance(h, ArgoLifecycle)

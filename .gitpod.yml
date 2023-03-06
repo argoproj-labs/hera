@@ -1,7 +1,7 @@
 tasks:
   - init: |
       python -m pip install --upgrade pip
-      python -m pip install "tox<4.0" poetry
+      python -m pip install poetry
       poetry install
 vscode:
   extensions:

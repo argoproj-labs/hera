@@ -1,5 +1,3 @@
-from unittest import mock
-
 import pytest
 
 from hera.workflows.validators import validate_name, validate_storage_units

@@ -3,9 +3,11 @@ import inspect
 import textwrap
 from typing import Callable, List, Optional, Union
 
-from hera.workflows.models import Lifecycle
-from hera.workflows.models import ScriptTemplate as _ModelScriptTemplate
-from hera.workflows.models import SecurityContext
+from hera.workflows.models import (
+    Lifecycle,
+    ScriptTemplate as _ModelScriptTemplate,
+    SecurityContext,
+)
 from hera.workflows.parameter import Parameter
 from hera.workflows.v5._mixins import (
     _ContainerMixin,

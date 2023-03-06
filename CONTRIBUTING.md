@@ -9,16 +9,13 @@ Please keep in mind the following guidelines and practices when contributing to 
    Certificate of Origin (DCO). Currently, a Contributor License Agreement 
    ([CLA](https://github.com/cla-assistant/cla-assistant)) check also appears on submitted pull requests. This can be
    safely ignored and is **not** a requirement for contributions to hera-workflows. This is an artifact as the Argo Project is slowly migrating projects from CLA to DCO. 
-1. Use `tox -e format` to format the repository code. `tox -e format` maps to a usage of
+1. Use `make format` to format the repository code. `make format` maps to a usage of
    [black](https://github.com/psf/black), and the repository adheres to whatever `black` uses as its strict pep8 format.
    No questions asked
-1. Use `tox` to lint, run tests, and typecheck on the project
+1. Use `make lint test` to lint, run tests, and typecheck on the project
 1. Add unit tests for any new code you write
-1. Add an example, or extend an existing example, with any new features you may add. Use `tox -e generate-examples` to ensure that the documentation and examples are in sync.
-1. Increment the version of Hera. Hera adheres to [semantic versioning](https://semver.org/). This increment can be
-   performed in the [pyproject.toml](https://github.com/argoproj-labs/hera-workflows/blob/main/pyproject.toml) file. A
-   [CHANGELOG](https://github.com/argoproj-labs/hera-workflows/blob/main/CHANGELOG.md) entry is expected along with
-   version increases!
+1. Add an example, or extend an existing example, with any new features you may add. Use `make examples` to ensure that the documentation and examples are in sync.
+
 
 ### Code of Conduct
 

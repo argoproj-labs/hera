@@ -29,7 +29,12 @@ from hera.expr import C, P, g, it, sprig
         (C({"test": 1}), """{'test': 1}"""),
         (C({"test": None}), """{'test': nil}"""),
         (
-            C({"test": 'None is "None"', None: {None: {False: {True: [None, {True: [False, None]}]}}}}),
+            C(
+                {
+                    "test": 'None is "None"',
+                    None: {None: {False: {True: [None, {True: [False, None]}]}}},
+                }
+            ),
             """{'test': 'None is "None"', nil: {nil: {false: {true: [nil, {true: [false, nil]}]}}}}""",
         ),
         (C(1) + C(2) * C(3) / C(4), "1 + 2 * 3 / 4"),
@@ -46,20 +51,32 @@ from hera.expr import C, P, g, it, sprig
         (P(C(1) >= C(2)) | P(C(2) < C(3)), "(1 >= 2) || (2 < 3)"),
         (C([1, 2, 3])[2], "[1, 2, 3][2]"),
         (g.test[2], "test[2]"),
-        (g.test['as'], "test['as']"),
+        (g.test["as"], "test['as']"),
         (g.test.attr, "test.attr"),
         (g.test.length(), "len(test)"),
         (g.test.length() > 2, "len(test) > 2"),
         (g.test.to_json(), "toJson(test)"),
         (g.test[g.test.length() - 1], "test[len(test) - 1]"),
         (g.test.string(), "string(test)"),
-        (g.test.jsonpath(Fields("foo").child("test").child(Slice("*"))), "jsonpath(test, 'foo.test.[*]')"),
+        (
+            g.test.jsonpath(Fields("foo").child("test").child(Slice("*"))),
+            "jsonpath(test, 'foo.test.[*]')",
+        ),
         (g.test.jsonpath("test").test.length(), """len(jsonpath(test, 'test').test)"""),
-        (g.test.jsonpath("test").test.as_float(), """asFloat(jsonpath(test, 'test').test)"""),
-        (g.test.jsonpath("test").test.as_int(), """asInt(jsonpath(test, 'test').test)"""),
+        (
+            g.test.jsonpath("test").test.as_float(),
+            """asFloat(jsonpath(test, 'test').test)""",
+        ),
+        (
+            g.test.jsonpath("test").test.as_int(),
+            """asInt(jsonpath(test, 'test').test)""",
+        ),
         (g.test.map(it + 2), "map(test, {# + 2})"),
         (g.test.map(it.Size + 2), "map(test, {#.Size + 2})"),
-        (g.test.filter(P(it["items"].length() + 1) > 0), "filter(test, {(len(#['items']) + 1) > 0})"),
+        (
+            g.test.filter(P(it["items"].length() + 1) > 0),
+            "filter(test, {(len(#['items']) + 1) > 0})",
+        ),
     ],
 )
 def test_expr(expr, value):

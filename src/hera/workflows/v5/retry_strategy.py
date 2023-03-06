@@ -4,8 +4,12 @@ from typing import Optional, Union, cast
 from pydantic import validator
 
 from hera.workflows._base_model import BaseModel as _BaseModel
-from hera.workflows.models import Backoff, IntOrString, RetryAffinity
-from hera.workflows.models import RetryStrategy as _ModelRetryStrategy
+from hera.workflows.models import (
+    Backoff,
+    IntOrString,
+    RetryAffinity,
+    RetryStrategy as _ModelRetryStrategy,
+)
 
 
 class RetryPolicy(Enum):

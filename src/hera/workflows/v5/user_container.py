@@ -5,8 +5,8 @@ from hera.workflows.models import (
     EnvVar,
     ImagePullPolicy,
     ResourceRequirements,
+    UserContainer as _ModelUserContainer,
 )
-from hera.workflows.models import UserContainer as _ModelUserContainer
 from hera.workflows.v5.env import _BaseEnv
 from hera.workflows.v5.env_from import _BaseEnvFrom
 from hera.workflows.v5.resources import Resources
