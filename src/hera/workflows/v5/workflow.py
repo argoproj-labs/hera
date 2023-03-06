@@ -35,11 +35,13 @@ from hera.workflows.models import (
     TTLStrategy,
     Volume,
     VolumeClaimGC,
+    Workflow as _ModelWorkflow,
+    WorkflowCreateRequest,
+    WorkflowMetadata,
+    WorkflowSpec as _ModelWorkflowSpec,
+    WorkflowStatus,
+    WorkflowTemplateRef,
 )
-from hera.workflows.models import Workflow as _ModelWorkflow
-from hera.workflows.models import WorkflowCreateRequest, WorkflowMetadata
-from hera.workflows.models import WorkflowSpec as _ModelWorkflowSpec
-from hera.workflows.models import WorkflowStatus, WorkflowTemplateRef
 from hera.workflows.service import WorkflowsService
 from hera.workflows.v5.exceptions import InvalidType
 from hera.workflows.v5.protocol import Templatable, TTemplate

@@ -10,7 +10,7 @@ import requests
 from hera.events import models as events_models
 from hera.workflows import models as workflows_models
 
-model_types = {'workflows', 'events'}
+model_types = {"workflows", "events"}
 
 
 class Parameter:
@@ -109,7 +109,12 @@ class ServiceEndpoint:
         else:
             signature = "def {name}(self, {params}) -> {ret}:"
             params = ", ".join([str(p) for p in self.params])
-            signature = signature.format(name=self.name, params=params, ret=str(self.response), summary=self.summary)
+            signature = signature.format(
+                name=self.name,
+                params=params,
+                ret=str(self.response),
+                summary=self.summary,
+            )
 
         # docstring
         if self.summary is not None:
@@ -252,7 +257,7 @@ def get_class(cls_name: str, models_type: str) -> type:
     code to fail so users know service generation failed.
     """
 
-    switch = {'workflows': workflows_models, 'events': events_models}
+    switch = {"workflows": workflows_models, "events": events_models}
     modules = inspect.getmembers(switch.get(models_type))
     for module in modules:
         curr_cls = module[1]
@@ -322,10 +327,16 @@ def parse_response(parameter: dict) -> Response:
 
 
 def get_endpoints(
-    paths: dict, models_type: str, consumes: str = "application/json", produces: str = "application/json"
+    paths: dict,
+    models_type: str,
+    consumes: str = "application/json",
+    produces: str = "application/json",
 ) -> List[ServiceEndpoint]:
     """Assembles a series of endpoints for the service definition"""
-    switch = {'workflows': ['events', 'event', 'eventsource', 'sensor'], 'events': ['workflow', 'workflows']}
+    switch = {
+        "workflows": ["events", "event", "eventsource", "sensor"],
+        "events": ["workflow", "workflows"],
+    }
     exceptions = switch.get(models_type)
     endpoints = []
     for url, config in paths.items():
@@ -358,7 +369,14 @@ def get_endpoints(
 
             endpoints.append(
                 ServiceEndpoint(
-                    url, method, operation_id, endpoint_params, response, summary, consumes=consumes, produces=produces
+                    url,
+                    method,
+                    operation_id,
+                    endpoint_params,
+                    response,
+                    summary,
+                    consumes=consumes,
+                    produces=produces,
                 )
             )
     return endpoints
@@ -433,7 +451,9 @@ if __name__ == "__main__":
     imports = get_imports(endpoints)
     service_def = get_service_def()
     service_def = service_def.format(
-        imports=", ".join(imports), module=models_type, models_type=models_type.capitalize()
+        imports=", ".join(imports),
+        module=models_type,
+        models_type=models_type.capitalize(),
     )
     result = make_service(service_def, endpoints, models_type)
 

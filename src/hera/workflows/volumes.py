@@ -12,10 +12,10 @@ from argo_workflows.models import (
     PersistentVolumeClaimVolumeSource,
     ResourceRequirements,
     SecretVolumeSource,
+    Volume as ArgoVolume,
+    VolumeDevice as ArgoVolumeDevice,
+    VolumeMount as ArgoVolumeMount,
 )
-from argo_workflows.models import Volume as ArgoVolume
-from argo_workflows.models import VolumeDevice as ArgoVolumeDevice
-from argo_workflows.models import VolumeMount as ArgoVolumeMount
 
 from hera.workflows.validators import validate_storage_units
 

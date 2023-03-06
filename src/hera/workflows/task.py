@@ -17,10 +17,10 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1ScriptTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     PersistentVolumeClaim,
+    Toleration as ArgoToleration,
+    Volume as ArgoVolume,
+    VolumeMount,
 )
-from argo_workflows.models import Toleration as ArgoToleration
-from argo_workflows.models import Volume as ArgoVolume
-from argo_workflows.models import VolumeMount
 
 import hera
 from hera.shared.global_config import GlobalConfig
