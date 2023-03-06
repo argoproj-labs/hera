@@ -53,7 +53,11 @@ class TestArtifact:
         path = "/input/path"
         from_task = "produce-artifact"
 
-        expected = Artifact(name=name, path=path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
+        expected = Artifact(
+            name=name,
+            path=path,
+            from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}",
+        )
         t1 = Task("produce-artifact", outputs=[Artifact(name, path)])
         actual = t1.get_artifact(name)
 
@@ -63,7 +67,11 @@ class TestArtifact:
         assert actual.path == expected.path
 
         new_path = "/input/alternative_path"
-        expected = Artifact(name=name, path=new_path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}")
+        expected = Artifact(
+            name=name,
+            path=new_path,
+            from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}",
+        )
         actual = t1.get_artifact(name).to_path(new_path)
         assert isinstance(actual, Artifact)
         assert actual.from_task == expected.from_task
@@ -72,7 +80,9 @@ class TestArtifact:
 
         new_name = "test-artifact2"
         expected = Artifact(
-            name=new_name, path=new_path, from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}"
+            name=new_name,
+            path=new_path,
+            from_task=f"{{{{tasks.{from_task}.outputs.artifacts.{name}}}}}",
         )
         actual = t1.get_artifact(name).to_path(new_path).as_name(new_name)
         assert isinstance(actual, Artifact)

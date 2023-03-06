@@ -94,29 +94,25 @@ If you plan to submit contributions to Hera you can install Hera in a virtual en
 poetry install
 ```
 
-In your activated `poetry shell`, you can utilize the tasks found in `tox.ini`, e.g.:
+Once the dependencies are installed, you can use the various `make` targets to replicate the `CI` jobs.
 
-To run tests on all supported python versions with coverage run [tox](https://tox.wiki/en/latest/):
-
-```shell
-tox
+```bash
+make help
+check-codegen                  Check if the code is up to date
+ci                             Run all the CI checks
+codegen                        Generate all the code
+events-models                  Generate the Events models portion of Argo Workflows
+events-service                 Generate the events service option of Hera
+examples                       Generate all the examples
+format                         Format and sort imports for source, tests, examples, etc.
+help                           Showcase the help instructions for all the available `make` commands
+lint                           Run a `lint` process on Hera and report problems
+models                         Generate all the Argo Workflows models
+services                       Generate the services of Hera
+test                           Run tests for Hera
+workflows-models               Generate the Workflows models portion of Argo Workflows
+workflows-service              Generate the Workflows service option of Hera
 ```
-
-To list all available `tox` envs run:
-
-```shell
-tox -a
-```
-
-To run selected tox envs, e.g. for a specific python version with coverage run:
-
-```shell
-tox -e py37,coverage
-```
-
-As `coverage` *depends* on `py37`, it will run *after* `py37`
-
-See project `tox.ini` for more details
 
 Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
 

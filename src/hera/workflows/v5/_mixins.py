@@ -1,69 +1,76 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, TypeVar, Union, cast
+from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     HTTP,
     Affinity,
-    Arguments,
     Artifact,
     ArtifactLocation,
     ContainerPort,
-    ContinueOn,
-)
-from hera.workflows.models import DAGTask as _ModelDAGTask
-from hera.workflows.models import (
     EnvFromSource,
     EnvVar,
     ExecutorConfig,
     HostAlias,
     ImagePullPolicy,
-)
-from hera.workflows.models import Inputs as ModelInputs
-from hera.workflows.models import (
+    Inputs as ModelInputs,
     IntOrString,
-    Item,
-    LifecycleHook,
     Memoize,
     Metadata,
     Metrics,
-)
-from hera.workflows.models import Outputs as ModelOutputs
-from hera.workflows.models import Parameter as ModelParameter
-from hera.workflows.models import (
+    Outputs as ModelOutputs,
+    Parameter as ModelParameter,
     Plugin,
     PodSecurityContext,
     Probe,
     ResourceRequirements,
     RetryStrategy,
-    Sequence,
     Synchronization,
-    Template,
-    TemplateRef,
     TerminationMessagePolicy,
     Toleration,
+    UserContainer as ModelUserContainer,
+    Volume,
+    VolumeDevice,
+    VolumeMount,
 )
-from hera.workflows.models import UserContainer as ModelUserContainer
-from hera.workflows.models import Volume, VolumeDevice, VolumeMount
 from hera.workflows.v5.env import _BaseEnv
 from hera.workflows.v5.env_from import _BaseEnvFrom
-from hera.workflows.v5.operator import Operator
 from hera.workflows.v5.parameter import Parameter
 from hera.workflows.v5.resources import Resources
-from hera.workflows.v5.task_result import TaskResult
 from hera.workflows.v5.user_container import UserContainer
 from hera.workflows.v5.volume import _BaseVolume
-from hera.workflows.v5.workflow_status import WorkflowStatus
 
 Inputs = List[Union[ModelInputs, Parameter, ModelParameter, Artifact]]
 Outputs = List[Union[ModelOutputs, Parameter, ModelParameter, Artifact]]
 TSub = TypeVar("TSub", bound="_SubNodeMixin")
+TContext = TypeVar("TContext", bound="_ContextMixin")
 
 
 class _BaseMixin(_BaseModel):
     pass
+
+
+class _ContextMixin(_BaseModel):
+    def __enter__(self: TContext) -> TContext:
+        """Enter the context of the workflow"""
+        from hera.workflows.v5._context import _context
+
+        _context.enter(self)
+        return self
+
+    def __exit__(self: TContext, exc_type, exc_val, exc_tb) -> None:
+        """Leave the context of the workflow.
+
+        This supports using `with Workflow(...)`.
+        """
+        from hera.workflows.v5._context import _context
+
+        _context.exit()
+
+    def _add_sub(self, node: Any) -> Any:
+        raise NotImplementedError()
 
 
 class _SubNodeMixin(_BaseModel):
@@ -97,11 +104,11 @@ class _ContainerMixin(_BaseMixin):
 
 
 class _IOMixin(_BaseMixin):
-    inputs: Optional[Inputs] = None
-    outputs: Optional[Outputs] = None
+    inputs: Inputs = []
+    outputs: Outputs = []
 
     def _build_inputs(self) -> Optional[ModelInputs]:
-        if self.inputs is None:
+        if not self.inputs:
             return None
         elif isinstance(self.inputs, ModelInputs):
             return self.inputs
@@ -122,7 +129,7 @@ class _IOMixin(_BaseMixin):
         return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
-        if self.outputs is None:
+        if not self.outputs:
             return None
         elif isinstance(self.outputs, ModelOutputs):
             return self.outputs
@@ -177,6 +184,7 @@ class _TemplateMixin(_BaseMixin):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
     metrics: Optional[Metrics] = None
+    name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     http: Optional[HTTP] = None
     plugin: Optional[Plugin] = None
@@ -237,155 +245,3 @@ class _VolumeMountMixin(_BaseMixin):
         if self.volumes is None:
             return None
         return [v._build_volume() for v in self.volumes]
-
-
-class _DAGTaskMixin(_BaseMixin):
-    name: str
-    arguments: Optional[Arguments] = None
-    continue_on: Optional[ContinueOn] = None
-    dependencies: Optional[List[str]] = None
-    depends: Optional[str] = None
-    hooks: Optional[Dict[str, LifecycleHook]]
-    on_exit: Optional[str] = None
-    template: Optional[str] = None
-    template_ref: Optional[TemplateRef] = None
-    inline: Optional[Template] = None
-    when: Optional[str] = None
-    with_items: Optional[List[Item]] = None
-    with_param: Optional[str] = None
-    with_sequence: Optional[Sequence] = None
-
-    def _get_dependency_tasks(self) -> List[str]:
-        if self.depends is None:
-            return []
-
-        # filter out operators
-        all_operators = [o for o in Operator]
-        tasks = [t for t in self.depends.split() if t not in all_operators]
-
-        # remove dot suffixes
-        task_names = [t.split(".")[0] for t in tasks]
-        return task_names
-
-    @property
-    def id(self) -> str:
-        return f"{{{{tasks.{self.name}.id}}}}"
-
-    @property
-    def ip(self) -> str:
-        return f"{{{{tasks.{self.name}.ip}}}}"
-
-    @property
-    def status(self) -> str:
-        return f"{{{{tasks.{self.name}.status}}}}"
-
-    @property
-    def exit_code(self) -> str:
-        return f"{{{{tasks.{self.name}.exitCode}}}}"
-
-    @property
-    def started_at(self) -> str:
-        return f"{{{{tasks.{self.name}.startedAt}}}}"
-
-    @property
-    def finished_at(self) -> str:
-        return f"{{{{tasks.{self.name}.finishedAt}}}}"
-
-    @property
-    def result(self) -> str:
-        return f"{{{{tasks.{self.name}.outputs.result}}}}"
-
-    def next(
-        self, other: _DAGTaskMixin, operator: Operator = Operator.and_, on: Optional[TaskResult] = None
-    ) -> _DAGTaskMixin:
-        assert issubclass(other.__class__, _DAGTaskMixin)
-
-        condition = f".{on}" if on else ""
-
-        if other.depends is None:
-            # First dependency
-            other.depends = self.name + condition
-        elif self.name in other._get_dependency_tasks():
-            raise ValueError(f"{self.name} already in {other.name}'s depends: {other.depends}")
-        else:
-            # Add follow-up dependency
-            other.depends += f" {operator} {self.name + condition}"
-        return other
-
-    def __rrshift__(self, other: List[_DAGTaskMixin]) -> _DAGTaskMixin:
-        assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
-        for o in other:
-            o.next(self)
-        return self
-
-    def __rshift__(
-        self, other: Union["_DAGTaskMixin", List["_DAGTaskMixin"]]
-    ) -> Union[_DAGTaskMixin, List[_DAGTaskMixin]]:
-        if isinstance(other, _DAGTaskMixin):
-            return self.next(other)
-        elif isinstance(other, list):
-            for o in other:
-                assert isinstance(
-                    o, _DAGTaskMixin
-                ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
-                self.next(o)
-            return other
-        raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
-
-    def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.equals) -> _DAGTaskMixin:
-        expression = f"{{{{workflow.status}}}} {op} {status}"
-        if self.when:
-            self.when += f" {Operator.and_} {expression}"
-        else:
-            self.when = expression
-        return self
-
-    def on_success(self, other: _DAGTaskMixin) -> _DAGTaskMixin:
-        return self.next(other, on=TaskResult.succeeded)
-
-    def on_failure(self, other: _DAGTaskMixin) -> _DAGTaskMixin:
-        return self.next(other, on=TaskResult.failed)
-
-    def on_error(self, other: _DAGTaskMixin) -> _DAGTaskMixin:
-        return self.next(other, on=TaskResult.errored)
-
-    def on_other_result(self, other: _DAGTaskMixin, value: str, operator: Operator = Operator.equals) -> _DAGTaskMixin:
-        expression = f"'{other.result}' {operator} {value}"
-        if self.when:
-            self.when += f" {Operator.and_} {expression}"
-        else:
-            self.when = expression
-        other.next(self)
-        return self
-
-    def when_any_succeeded(self, other: _DAGTaskMixin) -> _DAGTaskMixin:
-        assert (self.with_param is not None) or (
-            self.with_sequence is not None
-        ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
-
-        return self.next(other, on=TaskResult.any_succeeded)
-
-    def when_all_failed(self, other: _DAGTaskMixin) -> _DAGTaskMixin:
-        assert (self.with_param is not None) or (
-            self.with_sequence is not None
-        ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
-
-        return self.next(other, on=TaskResult.all_failed)
-
-    def _build_dag_task(self) -> _ModelDAGTask:
-        return _ModelDAGTask(
-            arguments=self.arguments,
-            continue_on=self.continue_on,
-            dependencies=self.dependencies,
-            depends=self.depends,
-            hooks=self.hooks,
-            inline=self.inline,
-            name=self.name,
-            on_exit=self.on_exit,
-            template=self.template,
-            template_ref=self.template_ref,
-            when=self.when,
-            with_items=self.with_items,
-            with_param=self.with_param,
-            with_sequence=self.with_sequence,
-        )

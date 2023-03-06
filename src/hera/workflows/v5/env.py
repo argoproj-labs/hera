@@ -8,13 +8,15 @@ from pydantic import root_validator, validator
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseModel as _BaseModel
-from hera.workflows.models import ConfigMapKeySelector as _ModelConfigMapKeySelector
-from hera.workflows.models import EnvVar as _ModelEnvVar
-from hera.workflows.models import EnvVarSource as _ModelEnvVarSource
-from hera.workflows.models import ObjectFieldSelector as _ModelObjectFieldSelector
-from hera.workflows.models import Quantity
-from hera.workflows.models import ResourceFieldSelector as _ModelResourceFieldSelector
-from hera.workflows.models import SecretKeySelector as _ModelSecretKeySelector
+from hera.workflows.models import (
+    ConfigMapKeySelector as _ModelConfigMapKeySelector,
+    EnvVar as _ModelEnvVar,
+    EnvVarSource as _ModelEnvVarSource,
+    ObjectFieldSelector as _ModelObjectFieldSelector,
+    Quantity,
+    ResourceFieldSelector as _ModelResourceFieldSelector,
+    SecretKeySelector as _ModelSecretKeySelector,
+)
 from hera.workflows.v5.parameter import Parameter
 
 

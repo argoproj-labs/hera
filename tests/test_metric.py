@@ -13,27 +13,27 @@ from hera.workflows.metric import Counter, Gauge, Histogram, Label, Metric, Metr
 
 class TestCounter:
     def test_builds_as_expected(self):
-        c = Counter('abc').build()
+        c = Counter("abc").build()
         assert isinstance(c, IoArgoprojWorkflowV1alpha1Counter)
-        assert hasattr(c, 'value')
-        assert c.value == 'abc'
+        assert hasattr(c, "value")
+        assert c.value == "abc"
 
 
 class TestGauge:
     def test_builds_as_expected(self):
-        g = Gauge(True, 'abc').build()
+        g = Gauge(True, "abc").build()
         assert isinstance(g, IoArgoprojWorkflowV1alpha1Gauge)
-        assert hasattr(g, 'realtime')
+        assert hasattr(g, "realtime")
         assert g.realtime
-        assert hasattr(g, 'value')
-        assert g.value == 'abc'
+        assert hasattr(g, "value")
+        assert g.value == "abc"
 
-        g = Gauge(False, 'abc').build()
+        g = Gauge(False, "abc").build()
         assert isinstance(g, IoArgoprojWorkflowV1alpha1Gauge)
-        assert hasattr(g, 'realtime')
+        assert hasattr(g, "realtime")
         assert not g.realtime
-        assert hasattr(g, 'value')
-        assert g.value == 'abc'
+        assert hasattr(g, "value")
+        assert g.value == "abc"
 
 
 class TestHistogram:
@@ -45,62 +45,62 @@ class TestHistogram:
     def test_builds_as_expected(self):
         h = Histogram([1.0, 2.0], "abc").build()
         assert isinstance(h, IoArgoprojWorkflowV1alpha1Histogram)
-        assert hasattr(h, 'buckets')
+        assert hasattr(h, "buckets")
         assert h.buckets == [1.0, 2.0]
-        assert hasattr(h, 'value')
-        assert h.value == 'abc'
+        assert hasattr(h, "value")
+        assert h.value == "abc"
 
 
 class TestLabel:
     def test_builds_as_expected(self):
-        l = Label('k', 'v').build()
-        assert isinstance(l, IoArgoprojWorkflowV1alpha1MetricLabel)
-        assert hasattr(l, 'key')
-        assert l.key == 'k'
-        assert hasattr(l, 'value')
-        assert l.value == 'v'
+        label = Label("k", "v").build()
+        assert isinstance(label, IoArgoprojWorkflowV1alpha1MetricLabel)
+        assert hasattr(label, "key")
+        assert label.key == "k"
+        assert hasattr(label, "value")
+        assert label.value == "v"
 
 
 class TestMetric:
     def test_builds_as_expected(self):
-        m = Metric('a', 'b').build()
+        m = Metric("a", "b").build()
         assert isinstance(m, IoArgoprojWorkflowV1alpha1Prometheus)
-        assert hasattr(m, 'name')
-        assert m.name == 'a'
-        assert hasattr(m, 'help')
-        assert m.help == 'b'
-        assert not hasattr(m, 'counter')
-        assert not hasattr(m, 'gauge')
-        assert not hasattr(m, 'histogram')
-        assert not hasattr(m, 'labels')
-        assert not hasattr(m, 'when')
+        assert hasattr(m, "name")
+        assert m.name == "a"
+        assert hasattr(m, "help")
+        assert m.help == "b"
+        assert not hasattr(m, "counter")
+        assert not hasattr(m, "gauge")
+        assert not hasattr(m, "histogram")
+        assert not hasattr(m, "labels")
+        assert not hasattr(m, "when")
 
         m = Metric(
-            'a',
-            'b',
-            counter=Counter('c'),
-            gauge=Gauge(True, 'g'),
-            histogram=Histogram([1.0, 2.0], 'h'),
-            labels=[Label('lk', 'lv')],
-            when='whenever',
+            "a",
+            "b",
+            counter=Counter("c"),
+            gauge=Gauge(True, "g"),
+            histogram=Histogram([1.0, 2.0], "h"),
+            labels=[Label("lk", "lv")],
+            when="whenever",
         ).build()
         assert isinstance(m, IoArgoprojWorkflowV1alpha1Prometheus)
-        assert hasattr(m, 'name')
-        assert m.name == 'a'
-        assert hasattr(m, 'help')
-        assert m.help == 'b'
-        assert hasattr(m, 'counter')
+        assert hasattr(m, "name")
+        assert m.name == "a"
+        assert hasattr(m, "help")
+        assert m.help == "b"
+        assert hasattr(m, "counter")
         assert isinstance(m.counter, IoArgoprojWorkflowV1alpha1Counter)
-        assert hasattr(m, 'gauge')
+        assert hasattr(m, "gauge")
         assert isinstance(m.gauge, IoArgoprojWorkflowV1alpha1Gauge)
-        assert hasattr(m, 'histogram')
+        assert hasattr(m, "histogram")
         assert isinstance(m.histogram, IoArgoprojWorkflowV1alpha1Histogram)
-        assert hasattr(m, 'labels')
+        assert hasattr(m, "labels")
         assert isinstance(m.labels, list)
         assert len(m.labels) == 1
         assert isinstance(m.labels[0], IoArgoprojWorkflowV1alpha1MetricLabel)
-        assert hasattr(m, 'when')
-        assert m.when == 'whenever'
+        assert hasattr(m, "when")
+        assert m.when == "whenever"
 
 
 class TestMetrics:
@@ -109,22 +109,22 @@ class TestMetrics:
             Metrics(
                 [
                     Metric(
-                        'a',
-                        'b',
-                        counter=Counter('c'),
-                        gauge=Gauge(True, 'g'),
-                        histogram=Histogram([1.0, 2.0], 'h'),
-                        labels=[Label('lk', 'lv')],
-                        when='whenever',
+                        "a",
+                        "b",
+                        counter=Counter("c"),
+                        gauge=Gauge(True, "g"),
+                        histogram=Histogram([1.0, 2.0], "h"),
+                        labels=[Label("lk", "lv")],
+                        when="whenever",
                     ),
                     Metric(
-                        'a',
-                        'c',
-                        counter=Counter('c'),
-                        gauge=Gauge(True, 'g'),
-                        histogram=Histogram([1.0, 2.0], 'h'),
-                        labels=[Label('lk', 'lv')],
-                        when='whenever',
+                        "a",
+                        "c",
+                        counter=Counter("c"),
+                        gauge=Gauge(True, "g"),
+                        histogram=Histogram([1.0, 2.0], "h"),
+                        labels=[Label("lk", "lv")],
+                        when="whenever",
                     ),
                 ]
             )
@@ -137,51 +137,51 @@ class TestMetrics:
         ms = Metrics(
             [
                 Metric(
-                    'a',
-                    'b',
-                    counter=Counter('c'),
-                    gauge=Gauge(True, 'g'),
-                    histogram=Histogram([1.0, 2.0], 'h'),
-                    labels=[Label('lk', 'lv')],
-                    when='whenever',
+                    "a",
+                    "b",
+                    counter=Counter("c"),
+                    gauge=Gauge(True, "g"),
+                    histogram=Histogram([1.0, 2.0], "h"),
+                    labels=[Label("lk", "lv")],
+                    when="whenever",
                 ),
                 Metric(
-                    'c',
-                    'd',
-                    counter=Counter('c'),
-                    gauge=Gauge(True, 'g'),
-                    histogram=Histogram([1.0, 2.0], 'h'),
-                    labels=[Label('lk', 'lv')],
-                    when='whenever',
+                    "c",
+                    "d",
+                    counter=Counter("c"),
+                    gauge=Gauge(True, "g"),
+                    histogram=Histogram([1.0, 2.0], "h"),
+                    labels=[Label("lk", "lv")],
+                    when="whenever",
                 ),
             ]
         ).build()
         assert isinstance(ms, IoArgoprojWorkflowV1alpha1Metrics)
-        assert hasattr(ms, 'prometheus')
+        assert hasattr(ms, "prometheus")
         assert len(ms.prometheus) == 2
 
         ms = Metrics(
             [
                 Metric(
-                    'a',
-                    'b',
-                    counter=Counter('c'),
-                    gauge=Gauge(True, 'g'),
-                    histogram=Histogram([1.0, 2.0], 'h'),
-                    labels=[Label('lk', 'lv')],
-                    when='whenever',
+                    "a",
+                    "b",
+                    counter=Counter("c"),
+                    gauge=Gauge(True, "g"),
+                    histogram=Histogram([1.0, 2.0], "h"),
+                    labels=[Label("lk", "lv")],
+                    when="whenever",
                 ),
                 Metric(
-                    'a',
-                    'b',
-                    counter=Counter('c'),
-                    gauge=Gauge(True, 'g'),
-                    histogram=Histogram([1.0, 2.0], 'h'),
-                    labels=[Label('lk', 'lv')],
-                    when='whenever',
+                    "a",
+                    "b",
+                    counter=Counter("c"),
+                    gauge=Gauge(True, "g"),
+                    histogram=Histogram([1.0, 2.0], "h"),
+                    labels=[Label("lk", "lv")],
+                    when="whenever",
                 ),
             ]
         ).build()
         assert isinstance(ms, IoArgoprojWorkflowV1alpha1Metrics)
-        assert hasattr(ms, 'prometheus')
+        assert hasattr(ms, "prometheus")
         assert len(ms.prometheus) == 2
