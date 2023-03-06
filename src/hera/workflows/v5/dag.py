@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Any, List, Optional
 
-from hera.workflows.models import DAGTask
-from hera.workflows.models import DAGTemplate as _ModelDAGTemplate
-from hera.workflows.models import Template as _ModelTemplate
+from hera.workflows.models import (
+    DAGTask,
+    DAGTemplate as _ModelDAGTemplate,
+    Template as _ModelTemplate,
+)
 from hera.workflows.v5._mixins import _DAGTaskMixin, _IOMixin, _TemplateMixin
 
 

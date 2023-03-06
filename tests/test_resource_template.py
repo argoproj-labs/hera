@@ -52,7 +52,12 @@ def set_owner_reference():
 
 
 def test_resource_template_init(
-    action, manifest, failure_condition, success_condition, merge_strategy, set_owner_reference
+    action,
+    manifest,
+    failure_condition,
+    success_condition,
+    merge_strategy,
+    set_owner_reference,
 ):
     resource_template = ResourceTemplate(
         action=action,
@@ -73,7 +78,12 @@ def test_resource_template_init(
 
 
 def test_get_resource_template(
-    action, manifest, failure_condition, success_condition, merge_strategy, set_owner_reference
+    action,
+    manifest,
+    failure_condition,
+    success_condition,
+    merge_strategy,
+    set_owner_reference,
 ):
     resource_template = ResourceTemplate(
         action=action,

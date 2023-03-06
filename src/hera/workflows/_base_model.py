@@ -1,8 +1,10 @@
 from types import ModuleType
 from typing import Any, Optional
 
-from pydantic import BaseModel as PyBaseModel
-from pydantic import Extra
+from pydantic import (
+    BaseModel as PyBaseModel,
+    Extra,
+)
 from pydantic.main import ModelMetaclass as _PyModelMetaclass
 
 _yaml: Optional[ModuleType] = None
