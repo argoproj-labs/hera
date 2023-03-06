@@ -3,13 +3,16 @@ import inspect
 import textwrap
 from typing import Callable, List, Optional, Union
 
-from hera.workflows.models import Lifecycle
-from hera.workflows.models import ScriptTemplate as _ModelScriptTemplate
-from hera.workflows.models import SecurityContext
+from hera.shared.global_config import GlobalConfig
+from hera.workflows.models import (
+    Lifecycle,
+    ScriptTemplate as _ModelScriptTemplate,
+    SecurityContext,
+    Template as _ModelTemplate,
+)
 from hera.workflows.parameter import Parameter
 from hera.workflows.v5._mixins import (
     _ContainerMixin,
-    _DAGTaskMixin,
     _EnvMixin,
     _IOMixin,
     _ResourceMixin,
@@ -21,7 +24,6 @@ from hera.workflows.v5._mixins import (
 
 class Script(
     _IOMixin,
-    _DAGTaskMixin,
     _ContainerMixin,
     _EnvMixin,
     _TemplateMixin,
@@ -29,13 +31,14 @@ class Script(
     _VolumeMountMixin,
     _SubNodeMixin,
 ):
-    name: str
+    container_name: Optional[str] = None
     args: Optional[List[str]] = None
-    command: Optional[List[str]] = None
+    command: Optional[List[str]] = GlobalConfig.script_command
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
+    add_cwd_to_sys_path: bool = True
 
     def _get_param_script_portion(self) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
@@ -84,12 +87,14 @@ class Script(
                 # Resolve the function to a string
                 return self.source(**kwargs)
             else:
+                script = ""
                 # Argo will save the script as a file and run it with cmd:
                 # - python /argo/staging/script
                 # However, this prevents the script from importing modules in its cwd,
                 # since it's looking for files relative to the script path.
                 # We fix this by appending the cwd path to sys:
-                script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
+                if self.add_cwd_to_sys_path:
+                    script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
 
                 script_extra = self._get_param_script_portion() if args else None
                 if script_extra:
@@ -114,7 +119,51 @@ class Script(
             assert isinstance(self.source, str)
             return self.source
 
-    def _build_template(self) -> _ModelScriptTemplate:
+    def _build_template(self) -> _ModelTemplate:
+        return _ModelTemplate(
+            active_deadline_seconds=self.active_deadline_seconds,
+            affinity=self.affinity,
+            archive_location=self.archive_location,
+            automount_service_account_token=self.automount_service_account_token,
+            container=None,
+            container_set=None,
+            daemon=self.daemon,
+            dag=None,
+            data=None,
+            executor=self.executor,
+            fail_fast=self.fail_fast,
+            host_aliases=self.host_aliases,
+            http=None,
+            init_containers=self.init_containers,
+            inputs=self._build_inputs(),
+            memoize=self.memoize,
+            metadata=self._build_metadata(),
+            metrics=self.metrics,
+            name=self.name,
+            node_selector=self.node_selector,
+            outputs=self._build_outputs(),
+            parallelism=None,
+            plugin=self.plugin,
+            pod_spec_patch=self.pod_spec_patch,
+            priority=self.priority,
+            priority_class_name=self.priority_class_name,
+            resource=self._build_resources(),
+            retry_strategy=self.retry_strategy,
+            scheduler_name=self.scheduler_name,
+            script=self._build_script(),
+            security_context=self.pod_security_context,
+            service_account_name=self.service_account_name,
+            sidecars=self.sidecars,
+            steps=None,
+            suspend=None,
+            synchronization=self.synchronization,
+            timeout=self.timeout,
+            tolerations=self.tolerations,
+            volumes=self._build_volumes(),
+        )
+
+    def _build_script(self) -> _ModelScriptTemplate:
+        source = self._build_source()
         return _ModelScriptTemplate(
             args=self.args,
             command=self.command,
@@ -124,12 +173,12 @@ class Script(
             image_pull_policy=self._build_image_pull_policy(),
             lifecycle=self.lifecycle,
             liveness_probe=self.liveness_probe,
-            name=self.name,
+            name=self.container_name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
             resources=self._build_resources(),
             security_context=self.security_context,
-            source=self._build_source(),
+            source=source,
             startup_probe=self.startup_probe,
             stdin=self.stdin,
             stdin_once=self.stdin_once,

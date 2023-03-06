@@ -7,7 +7,9 @@ from hera.workflows import Env, FieldEnv
 
 class TestEnv:
     def test_param_name_sanitization(self):
-        suffix_hash = lambda v: hashlib.md5(v.encode("utf-8")).hexdigest()
+        def suffix_hash(v):
+            return hashlib.md5(v.encode("utf-8")).hexdigest()
+
         no_change = "no-change-42"
         no_change_expected = f"{no_change}-{suffix_hash(no_change)}"
         assert no_change_expected == Env._sanitise_param_for_argo(no_change)
@@ -30,7 +32,7 @@ class TestEnv:
 
     def test_param_name_raises_on_no_value_input(self):
         with pytest.raises(ValueError) as e:
-            _ = FieldEnv('test', 'test').param_name
+            _ = FieldEnv("test", "test").param_name
         assert (
             str(e.value) == "unexpected use of `param_name` -- without value_from_input, no param should be generated"
         )

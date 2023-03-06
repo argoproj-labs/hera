@@ -72,7 +72,14 @@ class TestWorkflowSecurityContext:
 
 
 class TestTaskSecurityContext:
-    def test_task_init_passes(self, privileged, run_as_user, run_as_group, run_as_non_root, additional_capabilities):
+    def test_task_init_passes(
+        self,
+        privileged,
+        run_as_user,
+        run_as_group,
+        run_as_non_root,
+        additional_capabilities,
+    ):
         sc = TaskSecurityContext(
             privileged=privileged,
             run_as_user=run_as_user,
@@ -88,7 +95,12 @@ class TestTaskSecurityContext:
         assert sc.additional_capabilities == additional_capabilities
 
     def test_task_get_security_context(
-        self, privileged, run_as_user, run_as_group, run_as_non_root, additional_capabilities
+        self,
+        privileged,
+        run_as_user,
+        run_as_group,
+        run_as_non_root,
+        additional_capabilities,
     ):
         tsc = TaskSecurityContext(
             privileged=privileged,

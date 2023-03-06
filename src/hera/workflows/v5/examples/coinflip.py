@@ -9,17 +9,15 @@ with Workflow(
         ),
     },
 ) as w:
-    heads = Container(
+    Container(
         name="heads",
         image="alpine:3.6",
         command=["sh", "-c"],
-        args=['echo "it was heads"'],
+        args=["echo 'it was heads'"],
     )
-    tails = Container(
+    Container(
         name="tails",
         image="alpine:3.6",
         command=["sh", "-c"],
-        args=['echo "it was tails"'],
+        args=["echo 'it was tails'"],
     )
-
-w.create()
