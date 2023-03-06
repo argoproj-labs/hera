@@ -6,53 +6,39 @@ from pydantic import root_validator, validator
 
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
-)
-from hera.workflows.models import AzureDiskVolumeSource as _ModelAzureDiskVolumeSource
-from hera.workflows.models import AzureFileVolumeSource as _ModelAzureFileVolumeSource
-from hera.workflows.models import CephFSVolumeSource as _ModelCephFSVolumeSource
-from hera.workflows.models import CinderVolumeSource as _ModelCinderVolumeSource
-from hera.workflows.models import ConfigMapVolumeSource as _ModelConfigMapVolumeSource
-from hera.workflows.models import CSIVolumeSource as _ModelCSIVolumeSource
-from hera.workflows.models import (
+    AzureDiskVolumeSource as _ModelAzureDiskVolumeSource,
+    AzureFileVolumeSource as _ModelAzureFileVolumeSource,
+    CephFSVolumeSource as _ModelCephFSVolumeSource,
+    CinderVolumeSource as _ModelCinderVolumeSource,
+    ConfigMapVolumeSource as _ModelConfigMapVolumeSource,
+    CSIVolumeSource as _ModelCSIVolumeSource,
     DownwardAPIVolumeSource as _ModelDownwardAPIVolumeSource,
-)
-from hera.workflows.models import EmptyDirVolumeSource as _ModelEmptyDirVolumeSource
-from hera.workflows.models import EphemeralVolumeSource as _ModelEphemeralVolumeSource
-from hera.workflows.models import FCVolumeSource as _ModelFCVolumeSource
-from hera.workflows.models import FlexVolumeSource as _ModelFlexVolumeSource
-from hera.workflows.models import FlockerVolumeSource as _ModelFlockerVolumeSource
-from hera.workflows.models import (
+    EmptyDirVolumeSource as _ModelEmptyDirVolumeSource,
+    EphemeralVolumeSource as _ModelEphemeralVolumeSource,
+    FCVolumeSource as _ModelFCVolumeSource,
+    FlexVolumeSource as _ModelFlexVolumeSource,
+    FlockerVolumeSource as _ModelFlockerVolumeSource,
     GCEPersistentDiskVolumeSource as _ModelGCEPersistentDiskVolumeSource,
-)
-from hera.workflows.models import GitRepoVolumeSource as _ModelGitRepoVolumeSource
-from hera.workflows.models import GlusterfsVolumeSource as _ModelGlusterfsVolumeSource
-from hera.workflows.models import HostPathVolumeSource as _ModelHostPathVolumeSource
-from hera.workflows.models import ISCSIVolumeSource as _ModelISCSIVolumeSource
-from hera.workflows.models import NFSVolumeSource as _ModelNFSVolumeSource
-from hera.workflows.models import ObjectMeta
-from hera.workflows.models import (
+    GitRepoVolumeSource as _ModelGitRepoVolumeSource,
+    GlusterfsVolumeSource as _ModelGlusterfsVolumeSource,
+    HostPathVolumeSource as _ModelHostPathVolumeSource,
+    ISCSIVolumeSource as _ModelISCSIVolumeSource,
+    NFSVolumeSource as _ModelNFSVolumeSource,
+    ObjectMeta,
     PersistentVolumeClaimSpec as _ModelPersistentVolumeClaimSpec,
-)
-from hera.workflows.models import (
     PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate,
-)
-from hera.workflows.models import (
     PersistentVolumeClaimVolumeSource as _ModelPersistentVolumeClaimVolumeSource,
-)
-from hera.workflows.models import (
     PhotonPersistentDiskVolumeSource as _ModelPhotonPersistentDiskVolumeSource,
-)
-from hera.workflows.models import PortworxVolumeSource as _ModelPortworxVolumeSource
-from hera.workflows.models import ProjectedVolumeSource as _ModelProjectedVolumeSource
-from hera.workflows.models import QuobyteVolumeSource as _ModelQuobyteVolumeSource
-from hera.workflows.models import RBDVolumeSource as _ModelRBDVolumeSource
-from hera.workflows.models import ResourceRequirements
-from hera.workflows.models import ScaleIOVolumeSource as _ModelScaleIOVolumeSource
-from hera.workflows.models import SecretVolumeSource as _ModelSecretVolumeSource
-from hera.workflows.models import StorageOSVolumeSource as _ModelStorageOSVolumeSource
-from hera.workflows.models import Volume as _ModelVolume
-from hera.workflows.models import VolumeMount as _ModelVolumeMount
-from hera.workflows.models import (
+    PortworxVolumeSource as _ModelPortworxVolumeSource,
+    ProjectedVolumeSource as _ModelProjectedVolumeSource,
+    QuobyteVolumeSource as _ModelQuobyteVolumeSource,
+    RBDVolumeSource as _ModelRBDVolumeSource,
+    ResourceRequirements,
+    ScaleIOVolumeSource as _ModelScaleIOVolumeSource,
+    SecretVolumeSource as _ModelSecretVolumeSource,
+    StorageOSVolumeSource as _ModelStorageOSVolumeSource,
+    Volume as _ModelVolume,
+    VolumeMount as _ModelVolumeMount,
     VsphereVirtualDiskVolumeSource as _ModelVsphereVirtualDiskVolumeSource,
 )
 from hera.workflows.validators import validate_storage_units

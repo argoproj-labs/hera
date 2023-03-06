@@ -18,100 +18,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: '3.8'
-            toxenv: 'py38'
-          - os: ubuntu-latest
-            python-version: '3.9'
-            toxenv: 'py39'
-          - os: ubuntu-latest
-            python-version: '3.10'
-            toxenv: 'py310'
-          - os: ubuntu-latest
-            python-version: '3.11'
-            toxenv: 'py311'
-          - os: macos-latest
-            python-version: '3.8'
-            toxenv: 'py38'
-          - os: macos-latest
-            python-version: '3.9'
-            toxenv: 'py39'
-          - os: macos-latest
-            python-version: '3.10'
-            toxenv: 'py310'
-          - os: macos-latest
-            python-version: '3.11'
-            toxenv: 'py311'
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
       - name: setup python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "poetry"
 
-      - name: checkout
-        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: poetry install
+    
+      - name: run ci checks
+        run: make ci
 
-      - name: install base dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install "tox<4.0" poetry
-
-      - name: lint
-        env:
-          TOXENV: lint
-        run: |
-          tox
-
-      - name: typecheck
-        env:
-          TOXENV: typecheck
-        run: |
-          tox
-
-      - name: tests
-        env:
-          TOXENV: ${{ matrix.toxenv }}
-        run: |
-          tox
-
-      - name: upload coverage files
-        uses: actions/upload-artifact@v2
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
         with:
-          name: coverage-data
-          path: ".tox/.coverage.*"
+          file: ./coverage.xml
 
-  coverage:
-    needs: [ test ]
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: setup python 3.7
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-
-      - name: download coverage files
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-data
-          path: .tox
-
-      - name: list coverage files
-        run: |
-          find .tox -name ".coverage.*"
-
-      - name: install tox
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install 'tox<4' poetry
-      
       - name: build wheel
         run: |
           poetry version 0.0.0+${{ github.sha }}
@@ -122,25 +57,6 @@ jobs:
         with:
           path: dist/*.whl
 
-      - name: create coverage report
-        env:
-          TOXENV: coverage
-        run: |
-          tox
-
-      - name: upload coverage HTML report
-        uses: actions/upload-artifact@v2
-        with:
-          name: html-report
-          path: .tox/htmlcov
-
-      - name: upload coverage to CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: .tox/
-          fail_ci_if_error: true
-        if: ${{ always() }}
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

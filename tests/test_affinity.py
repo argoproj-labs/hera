@@ -1,16 +1,16 @@
-from argo_workflows.models import LabelSelector as ArgoLabelSelector
 from argo_workflows.models import (
+    LabelSelector as ArgoLabelSelector,
     LabelSelectorRequirement as ArgoLabelSelectorRequirement,
+    NodeAffinity as ArgoNodeAffinity,
+    NodeSelector as ArgoNodeSelector,
+    NodeSelectorRequirement as ArgoNodeSelectorRequirement,
+    NodeSelectorTerm as ArgoNodeSelectorTerm,
+    PodAffinity as ArgoPodAffinity,
+    PodAffinityTerm as ArgoPodAffinityTerm,
+    PodAntiAffinity as ArgoPodAntiAffinity,
+    PreferredSchedulingTerm as ArgoPreferredSchedulingTerm,
+    WeightedPodAffinityTerm as ArgoWeightedPodAffinityTerm,
 )
-from argo_workflows.models import NodeAffinity as ArgoNodeAffinity
-from argo_workflows.models import NodeSelector as ArgoNodeSelector
-from argo_workflows.models import NodeSelectorRequirement as ArgoNodeSelectorRequirement
-from argo_workflows.models import NodeSelectorTerm as ArgoNodeSelectorTerm
-from argo_workflows.models import PodAffinity as ArgoPodAffinity
-from argo_workflows.models import PodAffinityTerm as ArgoPodAffinityTerm
-from argo_workflows.models import PodAntiAffinity as ArgoPodAntiAffinity
-from argo_workflows.models import PreferredSchedulingTerm as ArgoPreferredSchedulingTerm
-from argo_workflows.models import WeightedPodAffinityTerm as ArgoWeightedPodAffinityTerm
 
 from hera.workflows import (
     Affinity,
@@ -132,7 +132,8 @@ def test_label_selector():
     assert spec.match_labels == {"a": "b"}
 
     label_selector = LabelSelector(
-        label_selector_requirements=[LabelSelectorRequirement("a", LabelOperator.In)], match_labels={"a": "b"}
+        label_selector_requirements=[LabelSelectorRequirement("a", LabelOperator.In)],
+        match_labels={"a": "b"},
     )
 
     spec = label_selector.build()

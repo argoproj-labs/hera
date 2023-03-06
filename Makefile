@@ -4,60 +4,80 @@ OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4
 help: ## Showcase the help instructions for all the available `make` commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: ci
+ci: ## Run all the CI checks
+ci: lint test check-codegen
+
+.PHONY: codegen
+codegen: ## Generate all the code
+codegen: models service examples
+
+.PHONY: check-codegen
+check-codegen: ## Check if the code is up to date
+check-codegen: models service examples
+	git diff --exit-code -- src/hera
+
 .PHONY: format
 format: ## Format and sort imports for source, tests, examples, etc.
-	@black src docs tests scripts examples conftest.py
-	@isort src docs tests scripts examples conftest.py
+	@poetry run black .
+	@poetry run ruff . --fix
 
-.PHONE: lint
+.PHONY: lint
 lint:  ## Run a `lint` process on Hera and report problems
-	tox -e lint
+	@poetry run black . --check
+	@poetry run ruff .
+	@poetry run mypy -p hera
 
-.PHONE: typecheck
-typecheck:  ## Run a `typecheck` process on Hera and report problems
-	tox -e typecheck
+.PHONY: test
+test:  ## Run tests for Hera
+	@poetry run pytest -v
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
-	@datamodel-codegen \
+	@poetry run datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
 		--target-python-version 3.7 \
 		--output src/hera/workflows/models \
 		--base-class hera.workflows._base_model.BaseModel \
 		--wrap-string-literal \
-		--disable-appending-item-suffix
-	@python scripts/models.py $(OPENAPI_SPEC_URL) workflows
+		--disable-appending-item-suffix \
+		--disable-timestamp
+	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
 	@$(MAKE) format
 
 .PHONY: events-models
 events-models: ## Generate the Events models portion of Argo Workflows
-	@datamodel-codegen \
+	@poetry run datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
 		--target-python-version 3.7 \
 		--output src/hera/events/models \
 		--base-class hera.events._base_model.BaseModel \
 		--wrap-string-literal \
-		--disable-appending-item-suffix
-	@python scripts/models.py $(OPENAPI_SPEC_URL) events
+		--disable-appending-item-suffix \
+		--disable-timestamp
+	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
 	@$(MAKE) format
 
+.PHONY: models
 models: ## Generate all the Argo Workflows models
-	$(MAKE) workflows-models
-	$(MAKE) events-models
+models: workflows-models events-models
 
 .PHONY: workflows-service
 workflows-service:  ## Generate the Workflows service option of Hera
-	@python scripts/service.py $(OPENAPI_SPEC_URL) workflows
+	@poetry run python scripts/service.py $(OPENAPI_SPEC_URL) workflows
 	$(MAKE) format
 
 .PHONY: events-service
 events-service:  ## Generate the events service option of Hera
-	@python scripts/service.py $(OPENAPI_SPEC_URL) events
+	@poetry run python scripts/service.py $(OPENAPI_SPEC_URL) events
 	$(MAKE) format
 
-.PHONE: service
+.PHONY: service
 services:  ## Generate the services of Hera
-	$(MAKE) workflows-service
-	$(MAKE) events-service
+services: workflows-service events-service
+
+.PHONY: examples
+examples:  ## Generate all the examples
+	@(cd docs && poetry run python generate.py)

@@ -3,7 +3,7 @@ from typing import List, Union
 
 from hera.workflows.v5._mixins import _SubNodeMixin
 from hera.workflows.v5.exceptions import InvalidType
-from hera.workflows.v5.protocol import Subbable, TTemplate, _DAGTaskMixin
+from hera.workflows.v5.protocol import Subbable, TTemplate
 
 
 class _HeraContext(threading.local):
@@ -17,15 +17,11 @@ class _HeraContext(threading.local):
         self._pieces.append(p)
 
     def exit(self) -> None:
-        if len(self._pieces) == 1:
-            return  # only the workflow is in the context
+        self._pieces.pop()
 
-        popped = self._pieces.pop()
-        main = self._pieces[0]
-        main._add_sub(popped)
-
-    def add_sub_node(self, node: Union[_SubNodeMixin, TTemplate, _DAGTaskMixin]) -> None:
-        self._pieces[-1]._add_sub(node)
+    def add_sub_node(self, node: Union[_SubNodeMixin, TTemplate]) -> None:
+        if self._pieces:
+            self._pieces[-1]._add_sub(node)
 
 
 _context = _HeraContext()

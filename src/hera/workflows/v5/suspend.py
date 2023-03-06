@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
-from hera.workflows.models import ContinueOn, LifecycleHook
 from hera.workflows.models import SuspendTemplate as _ModelSuspendTemplate
 from hera.workflows.models import Template as _ModelTemplate
-from hera.workflows.v5._mixins import _DAGTaskMixin, _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
 
 
 class Suspend(_TemplateMixin, _SubNodeMixin):
@@ -11,29 +10,6 @@ class Suspend(_TemplateMixin, _SubNodeMixin):
 
     def _build_duration(self) -> str:
         return str(self.duration)
-
-    def __call__(
-        self,
-        name: str,
-        continue_on: Optional[ContinueOn] = None,
-        dependencies: Optional[List[str]] = None,
-        depends: Optional[str] = None,
-        hooks: Optional[Dict[str, LifecycleHook]] = None,
-        on_exit: Optional[str] = None,
-    ) -> _DAGTaskMixin:
-        from hera.workflows.v5._context import _context
-
-        dag_task = _DAGTaskMixin(
-            name=name,
-            continue_on=continue_on,
-            dependencies=dependencies,
-            depends=depends,
-            hooks=hooks,
-            on_exit=on_exit,
-            template=self.name,
-        )
-        _context.add_sub_node(dag_task)
-        return dag_task
 
     def _build_suspend_template(self) -> _ModelSuspendTemplate:
         return _ModelSuspendTemplate(

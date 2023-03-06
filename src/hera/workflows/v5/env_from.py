@@ -1,9 +1,11 @@
 from typing import Optional
 
 from hera.workflows._base_model import BaseModel as _BaseModel
-from hera.workflows.models import ConfigMapEnvSource as _ModelConfigMapEnvSource
-from hera.workflows.models import EnvFromSource as _ModelEnvFromSource
-from hera.workflows.models import SecretEnvSource as _ModelSecretEnvSource
+from hera.workflows.models import (
+    ConfigMapEnvSource as _ModelConfigMapEnvSource,
+    EnvFromSource as _ModelEnvFromSource,
+    SecretEnvSource as _ModelSecretEnvSource,
+)
 
 
 class _BaseEnvFrom(_BaseModel):
