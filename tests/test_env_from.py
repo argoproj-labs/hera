@@ -6,7 +6,7 @@ def test_config_map_env_from_sets_name():
     env_spec = env_from.build()
     assert env_spec.prefix == ""
     assert env_spec.config_map_ref.name == "str"
-    assert env_spec.config_map_ref.optional == False
+    assert env_spec.config_map_ref.optional is False
 
 
 def test_secret_map_env_from_sets_name():
@@ -14,4 +14,4 @@ def test_secret_map_env_from_sets_name():
     env_spec = env_from.build()
     assert env_spec.prefix == "p"
     assert env_spec.secret_ref.name == "str"
-    assert env_spec.secret_ref.optional == True
+    assert env_spec.secret_ref.optional is True

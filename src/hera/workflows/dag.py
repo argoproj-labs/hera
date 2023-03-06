@@ -9,8 +9,8 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1DAGTemplate,
     IoArgoprojWorkflowV1alpha1Template,
     PersistentVolumeClaim,
+    Volume as ArgoVolume,
 )
-from argo_workflows.models import Volume as ArgoVolume
 
 from hera.workflows.artifact import Artifact
 from hera.workflows.io import IO

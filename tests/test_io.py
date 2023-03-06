@@ -103,7 +103,10 @@ class TestIO:
             IO(inputs=[Artifact("a", "/a"), Artifact("a", "/a")], outputs=[])._validate_io()
         assert str(e.value) == "input artifacts must have unique names"
         with pytest.raises(AssertionError) as e:
-            IO(inputs=[], outputs=[Parameter("a", value="42"), Parameter("a", value="42")])._validate_io()
+            IO(
+                inputs=[],
+                outputs=[Parameter("a", value="42"), Parameter("a", value="42")],
+            )._validate_io()
         assert str(e.value) == "output parameters must have unique names"
         with pytest.raises(AssertionError) as e:
             IO(inputs=[], outputs=[Artifact("a", path="/a"), Artifact("a", path="/a")])._validate_io()
