@@ -56,6 +56,7 @@ class WorkflowService:
         namespace: Optional[str] = None,
     ):
         self._namespace = GlobalConfig.namespace if namespace is None else namespace
+        self._namespace = self._namespace or "default"
         # verify SSL passed through `GlobalConfig`
         self._config = Config(host=host, verify_ssl=verify_ssl)
         self._api_client = Client(self._config, token=token).api_client
