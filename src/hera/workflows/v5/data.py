@@ -1,48 +1,15 @@
-from typing import Dict, List, Optional
+from typing import List
 
-from hera.workflows.models import Arguments, ContinueOn
 from hera.workflows.models import Data as _ModelData
-from hera.workflows.models import DataSource, Item, LifecycleHook, Sequence
+from hera.workflows.models import DataSource
 from hera.workflows.models import Template as _ModelTemplate
 from hera.workflows.models import TransformationStep
-from hera.workflows.v5._mixins import _DAGTaskMixin, _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
 
 
 class Data(_TemplateMixin, _SubNodeMixin):
     source: DataSource
     transformation: List[TransformationStep]
-
-    def __call__(
-        self,
-        name: str,
-        arguments: Optional[Arguments] = None,
-        continue_on: Optional[ContinueOn] = None,
-        dependencies: Optional[List[str]] = None,
-        depends: Optional[str] = None,
-        hooks: Optional[Dict[str, LifecycleHook]] = None,
-        on_exit: Optional[str] = None,
-        when: Optional[str] = None,
-        with_items: Optional[List[Item]] = None,
-        with_param: Optional[str] = None,
-        with_sequence: Optional[Sequence] = None,
-    ) -> _DAGTaskMixin:
-        from hera.workflows.v5._context import _context
-
-        dag_task = _DAGTaskMixin(
-            name=self.name,
-            arguments=arguments,
-            continue_on=continue_on,
-            dependencies=dependencies,
-            depends=depends,
-            hooks=hooks,
-            on_exit=on_exit,
-            when=when,
-            with_items=with_items,
-            with_param=with_param,
-            with_sequence=with_sequence,
-        )
-        _context.add_sub_node(dag_task)
-        return dag_task
 
     def _build_data(self) -> _ModelData:
         return _ModelData(
