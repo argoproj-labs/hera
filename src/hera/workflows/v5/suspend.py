@@ -1,7 +1,9 @@
 from typing import Optional, Union
 
-from hera.workflows.models import SuspendTemplate as _ModelSuspendTemplate
-from hera.workflows.models import Template as _ModelTemplate
+from hera.workflows.models import (
+    SuspendTemplate as _ModelSuspendTemplate,
+    Template as _ModelTemplate,
+)
 from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
 
 
