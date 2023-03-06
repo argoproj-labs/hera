@@ -1,11 +1,11 @@
 from typing import List, Optional
 
-from hera.workflows.models import HTTP as _ModelHTTP
 from hera.workflows.models import (
+    HTTP as _ModelHTTP,
     HTTPBodySource,
+    Template as _ModelTemplate,
+    V1HTTPHeader as HTTPHeader,
 )
-from hera.workflows.models import Template as _ModelTemplate
-from hera.workflows.models import V1HTTPHeader as HTTPHeader
 from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
 
 

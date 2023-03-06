@@ -1,9 +1,11 @@
 from typing import List
 
-from hera.workflows.models import Data as _ModelData
-from hera.workflows.models import DataSource
-from hera.workflows.models import Template as _ModelTemplate
-from hera.workflows.models import TransformationStep
+from hera.workflows.models import (
+    Data as _ModelData,
+    DataSource,
+    Template as _ModelTemplate,
+    TransformationStep,
+)
 from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
 
 
