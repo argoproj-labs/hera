@@ -51,7 +51,7 @@ class DAG(_IOMixin, _TemplateMixin, _SubNodeMixin, _ContextMixin):
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
-            parallelism=self.paralellism,
+            paralellism=self.paralellism,
             plugin=self.plugin,
             pod_spec_patch=self.pod_spec_patch,
             priority=self.priority,
