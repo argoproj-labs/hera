@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: http-
+spec:
+  templates:
+  - http:
+      body: test body
+      headers:
+      - name: x-header-name
+        value: test-value
+      method: GET
+      successCondition: response.body contains 'google'
+      timeoutSeconds: 20
+      url: '{{inputs.parameters.url}}'
+    inputs:
+      parameters:
+      - name: url
+    name: http
