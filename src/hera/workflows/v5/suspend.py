@@ -1,22 +1,37 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from hera.workflows.models import (
+    Inputs,
+    Outputs,
     SuspendTemplate as _ModelSuspendTemplate,
     Template as _ModelTemplate,
 )
 from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5.parameter import Parameter
 
 
 class Suspend(_TemplateMixin, _SubNodeMixin):
     duration: Optional[Union[int, str]] = None
-
-    def _build_duration(self) -> str:
-        return str(self.duration)
+    intermediate_parameters: List[Parameter] = []
 
     def _build_suspend_template(self) -> _ModelSuspendTemplate:
         return _ModelSuspendTemplate(
-            duration=self._build_duration(),
+            duration=self.duration,
         )
+
+    def _build_outputs(self) -> Optional[Outputs]:
+        outputs = []
+        for param in self.intermediate_parameters:
+            outputs.append(
+                Parameter(name=param.name, value_from={"supplied": {}}, description=param.description).as_output()
+            )
+        return Outputs(parameters=outputs) if outputs else None
+
+    def _build_inputs(self) -> Optional[Inputs]:
+        inputs = []
+        for param in self.intermediate_parameters:
+            inputs.append(param.as_input())
+        return Inputs(parameters=inputs) if inputs else None
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
@@ -28,18 +43,21 @@ class Suspend(_TemplateMixin, _SubNodeMixin):
             fail_fast=self.fail_fast,
             host_aliases=self.host_aliases,
             init_containers=self.init_containers,
+            inputs=self._build_inputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),
             name=self.name,
             node_selector=self.node_selector,
+            outputs=self._build_outputs(),
             plugin=self.plugin,
-            priority=self.priority,
             priority_class_name=self.priority_class_name,
+            priority=self.priority,
             retry_strategy=self.retry_strategy,
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
             sidecars=self.sidecars,
+            suspend=self._build_suspend_template(),
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
