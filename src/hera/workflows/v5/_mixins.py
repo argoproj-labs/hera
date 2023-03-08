@@ -170,6 +170,7 @@ class _EnvMixin(_BaseMixin):
 
 
 class _TemplateMixin(_BaseMixin):
+    name: Optional[str] = None
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
@@ -183,7 +184,6 @@ class _TemplateMixin(_BaseMixin):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
     metrics: Optional[Metrics] = None
-    name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     http: Optional[HTTP] = None
     plugin: Optional[Plugin] = None
