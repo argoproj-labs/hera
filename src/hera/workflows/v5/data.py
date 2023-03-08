@@ -1,26 +1,22 @@
-from typing import List
+from typing import List, Union
 
-from hera.workflows.models import (
-    Data as _ModelData,
-    DataSource,
-    Template as _ModelTemplate,
-    TransformationStep,
-)
-from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
+from hera.expr._node import Node
+from hera.workflows import models as m
+from hera.workflows.v5._mixins import _IOMixin, _SubNodeMixin, _TemplateMixin
 
 
-class Data(_TemplateMixin, _SubNodeMixin):
-    source: DataSource
-    transformation: List[TransformationStep]
+class Data(_TemplateMixin, _SubNodeMixin, _IOMixin):
+    artifact_paths: m.ArtifactPaths
+    transformations: List[Union[str, Node]] = []
 
-    def _build_data(self) -> _ModelData:
-        return _ModelData(
-            source=self.source,
-            transformation=self.transformation,
+    def _build_data(self) -> m.Data:
+        return m.Data(
+            source=m.DataSource(artifact_paths=self.artifact_paths),
+            transformation=list(map(lambda expr: m.TransformationStep(expression=str(expr)), self.transformations)),
         )
 
-    def _build_template(self) -> _ModelTemplate:
-        return _ModelTemplate(
+    def _build_template(self) -> m.Template:
+        return m.Template(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
             archive_location=self.archive_location,
@@ -30,6 +26,8 @@ class Data(_TemplateMixin, _SubNodeMixin):
             fail_fast=self.fail_fast,
             host_aliases=self.host_aliases,
             init_containers=self.init_containers,
+            inputs=self._build_inputs(),
+            outputs=self._build_outputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),
             name=self.name,
