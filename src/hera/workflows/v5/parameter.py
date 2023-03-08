@@ -44,40 +44,37 @@ class Parameter(_ModelParameter):
             raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
         return self.value
 
-    @property
-    def contains_item(self) -> bool:
-        """Check whether the parameter contains an argo item reference"""
-        if self.value is None:
-            return False
-        elif "{{item" in self.value:
-            return True
-        return False
+    def as_input(self) -> _ModelParameter:
+        return _ModelParameter(
+            name=self.name,
+            description=self.description,
+            default=self.default,
+            enum=self.enum,
+            value=self.value,
+            value_from=self.value_from,
+        )
 
-    def as_input(self) -> "Parameter":
-        return Parameter(name=self.name, description=self.description, default=self.default)
-
-    def as_argument(self) -> Optional["Parameter"]:
+    def as_argument(self) -> Optional[_ModelParameter]:
         """Assembles the parameter for use as an argument of a task"""
-        if self.value is None and self.value_from is None and self.default:
-            # Argument not necessary as default is set for the input
-            return None
-
-        return Parameter(
+        return _ModelParameter(
             name=self.name,
             global_name=self.global_name,
             description=self.description,
             value=self.value,
             value_from=self.value_from,
+            enum=self.enum,
         )
 
-    def as_output(self) -> "Parameter":
+    def as_output(self) -> _ModelParameter:
         """Assembles the parameter for use as an output of a task"""
-        return Parameter(
+        # Only value and value_from are valid here
+        # see https://github.com/argoproj/argo-workflows/blob/e3254eca115c9dd358e55d16c6a3d41403c29cae/workflow/validate/validate.go#L1067
+        return _ModelParameter(
             name=self.name,
             global_name=self.global_name,
             description=self.description,
-            enum=self.enum,
             value_from=self.value_from,
+            value=self.value,
         )
 
 
