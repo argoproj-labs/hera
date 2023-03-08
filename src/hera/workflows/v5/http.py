@@ -6,10 +6,10 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
     V1HTTPHeader as HTTPHeader,
 )
-from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import _IOMixin, _SubNodeMixin, _TemplateMixin
 
 
-class HTTP(_TemplateMixin, _SubNodeMixin):
+class HTTP(_TemplateMixin, _SubNodeMixin, _IOMixin):
     url: str
     body: Optional[str] = None
     body_from: Optional[HTTPBodySource] = None
@@ -44,6 +44,8 @@ class HTTP(_TemplateMixin, _SubNodeMixin):
             init_containers=self.init_containers,
             memoize=self.memoize,
             metadata=self._build_metadata(),
+            inputs=self._build_inputs(),
+            outputs=self._build_outputs(),
             name=self.name,
             node_selector=self.node_selector,
             plugin=self.plugin,
