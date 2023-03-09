@@ -40,13 +40,13 @@ class Step(
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         # Convert the unified list of Artifacts and Parameters in self.arguments to a
         # model-class Arguments to pass to WorkflowStep
-        _arguments = _ModelArguments(
+        model_arguments = _ModelArguments(
             artifacts=list(filter(lambda arg: isinstance(arg, _ModelArtifact), self.arguments or [])) or None,
             parameters=list(filter(lambda arg: isinstance(arg, _ModelParameter), self.arguments or [])) or None,
         )
 
         return _ModelWorkflowStep(
-            arguments=_arguments,
+            arguments=model_arguments,
             continue_on=self.continue_on,
             hooks=self.hooks,
             inline=self.inline,
