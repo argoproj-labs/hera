@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -9,7 +9,6 @@ from hera.workflows.models import (
     ScriptTemplate,
     SuspendTemplate,
     Template,
-    WorkflowStep,
 )
 
 TTemplate = Union[
@@ -31,10 +30,4 @@ class Templatable(Protocol):
 @runtime_checkable
 class Subbable(Protocol):
     def _add_sub(self, node: Any) -> Any:
-        ...
-
-
-@runtime_checkable
-class Steppable(Protocol):
-    def _build_steps(self) -> List[WorkflowStep]:
         ...
