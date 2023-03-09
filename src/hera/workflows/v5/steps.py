@@ -1,6 +1,7 @@
-from typing import Any, List
+from typing import Any, List, Optional, Union
 
 from hera.workflows.models import (
+    ParallelSteps as _ModelParallelSteps,
     Template as _ModelTemplate,
     WorkflowStep as _ModelWorkflowStep,
 )
@@ -11,6 +12,30 @@ from hera.workflows.v5._mixins import (
     _TemplateMixin,
 )
 from hera.workflows.v5.exceptions import InvalidType
+from hera.workflows.v5.protocol import Steppable
+
+
+class Step(
+    _ModelWorkflowStep,
+    _SubNodeMixin,
+):
+    def _build_step(
+        self,
+    ) -> _ModelWorkflowStep:
+        return _ModelWorkflowStep(
+            arguments=self.arguments,
+            continue_on=self.continue_on,
+            hooks=self.hooks,
+            inline=self.inline,
+            name=self.name,
+            on_exit=self.on_exit,
+            template=self.template,
+            template_ref=self.template_ref,
+            when=self.when,
+            with_items=self.with_items,
+            with_param=self.with_param,
+            with_sequence=self.with_sequence,
+        )
 
 
 class Steps(
@@ -19,13 +44,20 @@ class Steps(
     _SubNodeMixin,
     _TemplateMixin,
 ):
-    workflow_steps: List[_ModelWorkflowStep] = []
+    workflow_steps: List[Union[_ModelParallelSteps, _ModelWorkflowStep]] = []
 
-    def _build_steps(self) -> List[_ModelWorkflowStep]:
-        return self.workflow_steps
+    def _build_steps(self) -> Optional[List[_ModelParallelSteps]]:
+        steps = []
+        for steppable in self.workflow_steps:
+            if isinstance(steppable, _ModelParallelSteps):
+                steps.append(steppable)
+            elif isinstance(steppable, _ModelWorkflowStep):
+                steps.append([steppable])
+
+        return steps or None
 
     def _add_sub(self, node: Any):
-        if not isinstance(node, _ModelWorkflowStep):
+        if not isinstance(node, Steppable):
             raise InvalidType()
         self.workflow_steps.append(node)
 

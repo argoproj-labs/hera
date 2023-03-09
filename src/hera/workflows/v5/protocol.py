@@ -9,6 +9,7 @@ from hera.workflows.models import (
     ScriptTemplate,
     SuspendTemplate,
     Template,
+    WorkflowStep,
 )
 
 TTemplate = Union[
@@ -30,4 +31,10 @@ class Templatable(Protocol):
 @runtime_checkable
 class Subbable(Protocol):
     def _add_sub(self, node: Any) -> Any:
+        ...
+
+
+@runtime_checkable
+class Steppable(Protocol):
+    def _build_step(self) -> WorkflowStep:
         ...

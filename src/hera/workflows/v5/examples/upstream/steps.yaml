@@ -6,7 +6,13 @@ spec:
   entrypoint: hello-hello-hello
   templates:
   - name: hello-hello-hello
-    steps: []
+    steps:
+    - - arguments:
+          parameters:
+          - name: message
+            value: hello1
+        name: hello1
+        template: whalesay
   - container:
       args:
       - '{{inputs.parameters.message}}'
