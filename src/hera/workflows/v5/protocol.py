@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, List, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -36,5 +36,5 @@ class Subbable(Protocol):
 
 @runtime_checkable
 class Steppable(Protocol):
-    def _build_step(self) -> WorkflowStep:
+    def _build_steps(self) -> List[WorkflowStep]:
         ...

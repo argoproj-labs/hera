@@ -13,6 +13,18 @@ spec:
             value: hello1
         name: hello1
         template: whalesay
+    - - arguments:
+          parameters:
+          - name: message
+            value: hello2a
+        name: hello2a
+        template: whalesay
+      - arguments:
+          parameters:
+          - name: message
+            value: hello2b
+        name: hello2b
+        template: whalesay
   - container:
       args:
       - '{{inputs.parameters.message}}'
