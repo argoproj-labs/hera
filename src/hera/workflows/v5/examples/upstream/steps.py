@@ -1,4 +1,4 @@
-from hera.workflows.models import Arguments, Parameter
+from hera.workflows.models import Parameter
 from hera.workflows.v5.container import Container
 from hera.workflows.v5.steps import ParallelSteps, Step, Steps
 from hera.workflows.v5.workflow import Workflow
@@ -19,19 +19,19 @@ with Workflow(
         Step(
             name="hello1",
             template="whalesay",
-            arguments=Arguments(parameters=[Parameter(name="message", value="hello1")]),
+            arguments=[Parameter(name="message", value="hello1")],
         )
 
         with ParallelSteps():
             Step(
                 name="hello2a",
                 template="whalesay",
-                arguments=Arguments(parameters=[Parameter(name="message", value="hello2a")]),
+                arguments=[Parameter(name="message", value="hello2a")],
             )
             Step(
                 name="hello2b",
                 template="whalesay",
-                arguments=Arguments(parameters=[Parameter(name="message", value="hello2b")]),
+                arguments=[Parameter(name="message", value="hello2b")],
             )
 
     w.templates.append(whalesay)

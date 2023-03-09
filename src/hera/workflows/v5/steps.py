@@ -1,7 +1,15 @@
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from hera.workflows.models import (
+    Arguments as _ModelArguments,
+    Artifact as _ModelArtifact,
+    ContinueOn as _ModelContinueOn,
+    Item as _ModelItem,
+    LifecycleHook as _ModelLifecycleHook,
+    Parameter as _ModelParameter,
+    Sequence as _ModelSequence,
     Template as _ModelTemplate,
+    TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
 from hera.workflows.v5._mixins import (
@@ -14,28 +22,63 @@ from hera.workflows.v5.exceptions import InvalidType
 
 
 class Step(
-    _ModelWorkflowStep,
     _SubNodeMixin,
 ):
+    arguments: Optional[List[Union[_ModelArtifact, _ModelParameter]]] = None
+    continue_on: Optional[_ModelContinueOn]
+    hooks: Optional[Dict[str, _ModelLifecycleHook]]
+    inline: Optional[_ModelTemplate]
+    name: Optional[str]
+    on_exit: Optional[str]
+    template: Optional[str]
+    template_ref: Optional[_ModelTemplateRef]
+    when: Optional[str]
+    with_items: Optional[List[_ModelItem]]
+    with_param: Optional[str]
+    with_sequence: Optional[_ModelSequence]
+
+    def _build_as_workflow_step(self) -> _ModelWorkflowStep:
+        # Convert the unified list of Artifacts and Parameters in self.arguments to a
+        # model-class Arguments to pass to WorkflowStep
+        _arguments = _ModelArguments(
+            artifacts=list(filter(lambda arg: isinstance(arg, _ModelArtifact), self.arguments or [])) or None,
+            parameters=list(filter(lambda arg: isinstance(arg, _ModelParameter), self.arguments or [])) or None,
+        )
+
+        return _ModelWorkflowStep(
+            arguments=_arguments,
+            continue_on=self.continue_on,
+            hooks=self.hooks,
+            inline=self.inline,
+            name=self.name,
+            on_exit=self.on_exit,
+            template=self.template,
+            template_ref=self.template_ref,
+            when=self.when,
+            with_items=self.with_items,
+            with_param=self.with_param,
+            with_sequence=self.with_sequence,
+        )
+
     def _build_as_parallel_steps(
         self,
     ) -> List[_ModelWorkflowStep]:
-        return [self]
+        return [self._build_as_workflow_step()]
 
 
 class ParallelSteps(
     _ContextMixin,
     _SubNodeMixin,
 ):
-    parallel_steps: List[_ModelWorkflowStep] = []
+    parallel_steps: List[Step] = []
 
     def _add_sub(self, node: Any):
-        if not isinstance(node, _ModelWorkflowStep):
+        if not isinstance(node, Step):
             raise InvalidType()
         self.parallel_steps.append(node)
 
     def _build_as_parallel_steps(self) -> List[_ModelWorkflowStep]:
-        return self.parallel_steps
+        return [step._build_as_workflow_step() for step in self.parallel_steps]
 
 
 class Steps(
