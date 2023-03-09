@@ -125,7 +125,7 @@ class Steps(
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
-            parallelism=self.paralellism,
+            parallelism=self.parallelism,
             plugin=self.plugin,
             pod_spec_patch=self.pod_spec_patch,
             priority=self.priority,
