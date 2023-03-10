@@ -19,6 +19,7 @@ from hera.workflows.v5._mixins import (
     _TemplateMixin,
 )
 from hera.workflows.v5.exceptions import InvalidType
+from hera.workflows.v5.protocol import Steppable
 
 
 class Step(
@@ -39,7 +40,7 @@ class Step(
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         # Convert the unified list of Artifacts and Parameters in self.arguments to a
-        # model-class Arguments to pass to WorkflowStep
+        # model-class `Arguments`` to pass to WorkflowStep
         model_arguments = _ModelArguments(
             artifacts=list(filter(lambda arg: isinstance(arg, _ModelArtifact), self.arguments or [])) or None,
             parameters=list(filter(lambda arg: isinstance(arg, _ModelParameter), self.arguments or [])) or None,
@@ -60,7 +61,7 @@ class Step(
             with_sequence=self.with_sequence,
         )
 
-    def _build_as_parallel_steps(
+    def _build_step(
         self,
     ) -> List[_ModelWorkflowStep]:
         return [self._build_as_workflow_step()]
@@ -70,15 +71,23 @@ class ParallelSteps(
     _ContextMixin,
     _SubNodeMixin,
 ):
-    parallel_steps: List[Step] = []
+    parallel_steps: List[Union[Step, _ModelWorkflowStep]] = []
 
     def _add_sub(self, node: Any):
         if not isinstance(node, Step):
             raise InvalidType()
         self.parallel_steps.append(node)
 
-    def _build_as_parallel_steps(self) -> List[_ModelWorkflowStep]:
-        return [step._build_as_workflow_step() for step in self.parallel_steps]
+    def _build_step(self) -> List[_ModelWorkflowStep]:
+        steps = []
+        for step in self.parallel_steps:
+            if isinstance(step, Step):
+                steps.append(step._build_as_workflow_step())
+            elif isinstance(step, _ModelWorkflowStep):
+                steps.append(step)
+            else:
+                raise InvalidType()
+        return steps
 
 
 class Steps(
@@ -87,13 +96,36 @@ class Steps(
     _SubNodeMixin,
     _TemplateMixin,
 ):
-    workflow_steps: List[Union[Step, ParallelSteps]] = []
+    workflow_steps: List[
+        Union[
+            Step,
+            ParallelSteps,
+            List[Step],
+            _ModelWorkflowStep,
+            List[_ModelWorkflowStep],
+        ]
+    ] = []
     parallelism: Optional[int] = None
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
         steps = []
         for workflow_step in self.workflow_steps:
-            steps.append(workflow_step._build_as_parallel_steps())
+            if isinstance(workflow_step, Steppable):
+                steps.append(workflow_step._build_step())
+            elif isinstance(workflow_step, _ModelWorkflowStep):
+                steps.append([workflow_step])
+            elif isinstance(workflow_step, List):
+                substeps = []
+                for s in workflow_step:
+                    if isinstance(s, Step):
+                        substeps.append(s._build_as_workflow_step())
+                    elif isinstance(s, _ModelWorkflowStep):
+                        substeps.append(s)
+                    else:
+                        raise InvalidType()
+                steps.append(substeps)
+            else:
+                raise InvalidType()
 
         return steps or None
 
