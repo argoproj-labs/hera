@@ -88,6 +88,7 @@ class Steps(
     _TemplateMixin,
 ):
     workflow_steps: List[Union[Step, ParallelSteps]] = []
+    parallelism: Optional[int] = None
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
         steps = []
