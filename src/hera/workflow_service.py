@@ -14,6 +14,7 @@ from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1LintCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1UpdateCronWorkflowRequest,
     IoArgoprojWorkflowV1alpha1Workflow,
+    IoArgoprojWorkflowV1alpha1WorkflowList,
     IoArgoprojWorkflowV1alpha1WorkflowCreateRequest,
     IoArgoprojWorkflowV1alpha1WorkflowLintRequest,
     IoArgoprojWorkflowV1alpha1WorkflowTemplate,
@@ -151,6 +152,20 @@ class WorkflowService:
         The returned path works only for Argo.
         """
         return f"{self._config.host}/workflows/{self._namespace}/{name}?tab=workflow"
+    
+    def list_workflows(self):
+        """Returns the list of active workflows.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        list[IoArgoprojWorkflowV1alpha1Workflow]
+            The list of workflows
+
+        """
+        return WorkflowServiceApi(api_client=self._api_client).list_workflows(self._namespace, _check_return_type=False)
 
     def delete_workflow(self, name: str) -> Tuple[object, int, dict]:
         """Deletes a workflow from the given namespace based on the specified name.
