@@ -12,24 +12,22 @@ from hera.workflows.models import (
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.v5._mixins import (
-    _ContainerMixin,
-    _EnvMixin,
-    _IOMixin,
-    _ResourceMixin,
-    _SubNodeMixin,
-    _TemplateMixin,
-    _VolumeMountMixin,
+    ContainerMixin,
+    EnvMixin,
+    IOMixin,
+    ResourceMixin,
+    TemplateMixin,
+    VolumeMountMixin,
 )
 
 
 class Script(
-    _IOMixin,
-    _ContainerMixin,
-    _EnvMixin,
-    _TemplateMixin,
-    _ResourceMixin,
-    _VolumeMountMixin,
-    _SubNodeMixin,
+    IOMixin,
+    ContainerMixin,
+    EnvMixin,
+    TemplateMixin,
+    ResourceMixin,
+    VolumeMountMixin,
 ):
     container_name: Optional[str] = None
     args: Optional[List[str]] = None

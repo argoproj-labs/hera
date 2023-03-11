@@ -6,11 +6,11 @@ from hera.workflows.models import (
     SuspendTemplate as _ModelSuspendTemplate,
     Template as _ModelTemplate,
 )
-from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import TemplateMixin
 from hera.workflows.v5.parameter import Parameter
 
 
-class Suspend(_TemplateMixin, _SubNodeMixin):
+class Suspend(TemplateMixin):
     duration: Optional[Union[int, str]] = None
     intermediate_parameters: List[Parameter] = []
 
