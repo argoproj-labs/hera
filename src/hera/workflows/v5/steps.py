@@ -67,20 +67,20 @@ class Step(
         return [self._build_as_workflow_step()]
 
 
-class ParallelSteps(
+class Parallel(
     _ContextMixin,
     _SubNodeMixin,
 ):
-    parallel_steps: List[Union[Step, _ModelWorkflowStep]] = []
+    sub_steps: List[Union[Step, _ModelWorkflowStep]] = []
 
     def _add_sub(self, node: Any):
         if not isinstance(node, Step):
             raise InvalidType()
-        self.parallel_steps.append(node)
+        self.sub_steps.append(node)
 
     def _build_step(self) -> List[_ModelWorkflowStep]:
         steps = []
-        for step in self.parallel_steps:
+        for step in self.sub_steps:
             if isinstance(step, Step):
                 steps.append(step._build_as_workflow_step())
             elif isinstance(step, _ModelWorkflowStep):
@@ -96,10 +96,10 @@ class Steps(
     _SubNodeMixin,
     _TemplateMixin,
 ):
-    workflow_steps: List[
+    sub_steps: List[
         Union[
             Step,
-            ParallelSteps,
+            Parallel,
             List[Step],
             _ModelWorkflowStep,
             List[_ModelWorkflowStep],
@@ -109,7 +109,7 @@ class Steps(
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
         steps = []
-        for workflow_step in self.workflow_steps:
+        for workflow_step in self.sub_steps:
             if isinstance(workflow_step, Steppable):
                 steps.append(workflow_step._build_step())
             elif isinstance(workflow_step, _ModelWorkflowStep):
@@ -130,10 +130,13 @@ class Steps(
         return steps or None
 
     def _add_sub(self, node: Any):
-        if not isinstance(node, (Step, ParallelSteps)):
+        if not isinstance(node, (Step, Parallel)):
             raise InvalidType()
 
-        self.workflow_steps.append(node)
+        self.sub_steps.append(node)
+
+    def parallel(self) -> Parallel:
+        return Parallel()
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(

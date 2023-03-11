@@ -1,6 +1,6 @@
 from hera.workflows.models import Parameter
 from hera.workflows.v5.container import Container
-from hera.workflows.v5.steps import ParallelSteps, Step, Steps
+from hera.workflows.v5.steps import Step, Steps
 from hera.workflows.v5.workflow import Workflow
 
 whalesay = Container(
@@ -15,14 +15,14 @@ with Workflow(
     generate_name="steps-",
     entrypoint="hello-hello-hello",
 ) as w:
-    with Steps(name="hello-hello-hello"):
+    with Steps(name="hello-hello-hello") as s:
         Step(
             name="hello1",
             template="whalesay",
             arguments=[Parameter(name="message", value="hello1")],
         )
 
-        with ParallelSteps():
+        with s.parallel():
             Step(
                 name="hello2a",
                 template="whalesay",

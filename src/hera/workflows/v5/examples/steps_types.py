@@ -1,6 +1,6 @@
 from hera.workflows.models import Arguments, Parameter, Template, WorkflowStep
 from hera.workflows.v5.container import Container
-from hera.workflows.v5.steps import ParallelSteps, Step, Steps
+from hera.workflows.v5.steps import Step, Steps
 from hera.workflows.v5.workflow import Workflow
 
 my_step = Step(
@@ -37,13 +37,13 @@ with Workflow(
 
     with Steps(name="hello-hello-hello") as s:
         # Manually add a step defined elsewhere
-        s.workflow_steps.append(my_step)
+        s.sub_steps.append(my_step)
 
         # Manually add a list of steps defined elsewhere as sequential steps
-        s.workflow_steps.extend(my_steps)
+        s.sub_steps.extend(my_steps)
 
         # Manually add a list of steps defined elsewhere as parallel steps
-        s.workflow_steps.append(my_steps)
+        s.sub_steps.append(my_steps)
 
         # Add a step to s implicitly through init
         Step(
@@ -53,7 +53,7 @@ with Workflow(
         )
 
         # Manually add a model WorkflowStep to s
-        s.workflow_steps.append(
+        s.sub_steps.append(
             WorkflowStep(
                 name="model-workflow-step",
                 template="whalesay",
@@ -61,7 +61,7 @@ with Workflow(
             )
         )
 
-        with ParallelSteps() as ps:
+        with s.parallel() as ps:
             # Add a step to ps implicitly through init
             Step(
                 name="parallel-step-1",
@@ -70,7 +70,7 @@ with Workflow(
             )
 
             # Manually add a model WorkflowStep to ps
-            ps.parallel_steps.append(
+            ps.sub_steps.append(
                 WorkflowStep(
                     name="parallel-step-2-model-workflow-step",
                     template="whalesay",
