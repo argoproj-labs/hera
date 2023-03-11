@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: resource-delete-with-flags-
+spec:
+  entrypoint: main
+  templates:
+  - name: create-configmap
+    resource:
+      action: create
+      manifest: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: resource-delete-with-flags\n\
+        \  labels:\n    cleanup: \"true\"\ndata:\n  key: value\n"
+  - inputs:
+      parameters:
+      - name: selector
+    name: delete-resource
+    resource:
+      action: delete
+      flags:
+      - configmap
+      - --selector
+      - '{{inputs.parameters.selector}}'
+  - name: main
+    steps:
+    - - name: submit-resource
+        template: create-configmap
+    - - arguments:
+          parameters:
+          - name: selector
+            value: cleanup=true
+        name: delete-resource
+        template: delete-resource
