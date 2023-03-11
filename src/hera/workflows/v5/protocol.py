@@ -31,3 +31,9 @@ class Templatable(Protocol):
 class Subbable(Protocol):
     def _add_sub(self, node: Any) -> Any:
         ...
+
+
+@runtime_checkable
+class Steppable(Protocol):
+    def _build_step(self) -> Any:
+        ...
