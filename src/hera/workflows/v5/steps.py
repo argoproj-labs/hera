@@ -13,17 +13,17 @@ from hera.workflows.models import (
     WorkflowStep as _ModelWorkflowStep,
 )
 from hera.workflows.v5._mixins import (
-    _ContextMixin,
-    _IOMixin,
-    _SubNodeMixin,
-    _TemplateMixin,
+    ContextMixin,
+    IOMixin,
+    SubNodeMixin,
+    TemplateMixin,
 )
 from hera.workflows.v5.exceptions import InvalidType
 from hera.workflows.v5.protocol import Steppable
 
 
 class Step(
-    _SubNodeMixin,
+    SubNodeMixin,
 ):
     arguments: Optional[List[Union[_ModelArtifact, _ModelParameter]]] = None
     continue_on: Optional[_ModelContinueOn]
@@ -68,8 +68,8 @@ class Step(
 
 
 class Parallel(
-    _ContextMixin,
-    _SubNodeMixin,
+    ContextMixin,
+    SubNodeMixin,
 ):
     sub_steps: List[Union[Step, _ModelWorkflowStep]] = []
 
@@ -91,10 +91,9 @@ class Parallel(
 
 
 class Steps(
-    _ContextMixin,
-    _IOMixin,
-    _SubNodeMixin,
-    _TemplateMixin,
+    ContextMixin,
+    IOMixin,
+    TemplateMixin,
 ):
     sub_steps: List[
         Union[
@@ -105,7 +104,6 @@ class Steps(
             List[_ModelWorkflowStep],
         ]
     ] = []
-    parallelism: Optional[int] = None
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
         steps = []
