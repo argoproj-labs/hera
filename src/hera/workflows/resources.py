@@ -1,9 +1,10 @@
 """Holds the resource specification"""
-from dataclasses import dataclass
 from typing import Dict, Optional, Union
 
-from argo_workflows.models import ResourceRequirements
+from pydantic import root_validator
 
+from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.workflows.models import ResourceRequirements as _ModelResourceRequirements
 from hera.workflows.validators import validate_storage_units
 
 
@@ -24,8 +25,7 @@ def _merge_dicts(a: Dict, b: Dict, path=None):
     return a
 
 
-@dataclass
-class Resources:
+class Resources(_BaseModel):
     """A representation of a collection of resources that are requested to be consumed by a task for execution.
 
     This follow the K8S definition for resources.
@@ -62,31 +62,36 @@ class Resources:
     gpu_flag: Optional[str] = "nvidia.com/gpu"
     custom_resources: Optional[Dict] = None
 
-    def __post_init__(self):
-        if self.memory_request:
-            validate_storage_units(self.memory_request)
-        if self.memory_limit:
-            validate_storage_units(self.memory_limit)
+    @root_validator(pre=True)
+    def _check_specs(cls, values):
+        cpu_request: Optional[Union[float, int, str]] = values.get("cpu_request")
+        cpu_limit: Optional[Union[float, int, str]] = values.get("cpu_limit")
+        memory_request: Optional[str] = values.get("memory_request")
+        memory_limit: Optional[str] = values.get("memory_limit")
+        ephemeral_request: Optional[str] = values.get("ephemeral_request")
+        ephemeral_limit: Optional[str] = values.get("ephemeral_limit")
 
-        if self.ephemeral_request:
-            validate_storage_units(self.ephemeral_request)
-        if self.ephemeral_limit:
-            validate_storage_units(self.ephemeral_limit)
+        if memory_request is not None:
+            validate_storage_units(memory_request)
+        if memory_limit is not None:
+            validate_storage_units(memory_limit)
+
+        if ephemeral_request is not None:
+            validate_storage_units(ephemeral_request)
+        if ephemeral_limit:
+            validate_storage_units(ephemeral_limit)
 
         # TODO: add validation for CPU units if str
-        if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
-            assert self.cpu_limit >= 0, "CPU limit must be positive"
-        if self.cpu_request is not None and isinstance(self.cpu_request, int):
-            assert self.cpu_request >= 0, "CPU request must be positive"
-            if self.cpu_limit is not None and isinstance(self.cpu_limit, int):
-                assert self.cpu_request <= self.cpu_limit, "CPU request must be smaller or equal to limit"
+        if cpu_limit is not None and isinstance(cpu_limit, int):
+            assert cpu_limit >= 0, "CPU limit must be positive"
+        if cpu_request is not None and isinstance(cpu_request, int):
+            assert cpu_request >= 0, "CPU request must be positive"
+            if cpu_limit is not None and isinstance(cpu_limit, int):
+                assert cpu_request <= cpu_limit, "CPU request must be smaller or equal to limit"
 
-        if self.cpu_request is None and self.cpu_limit is not None:
-            self.cpu_request = self.cpu_limit
-        if self.memory_request is None and self.memory_limit is not None:
-            self.memory_request = self.memory_limit
+        return values
 
-    def build(self) -> ResourceRequirements:
+    def build(self) -> _ModelResourceRequirements:
         """Builds the resource requirements of the pod"""
         resources: Dict = dict()
 
@@ -115,4 +120,7 @@ class Resources:
         if self.custom_resources:
             resources = _merge_dicts(resources, self.custom_resources)
 
-        return ResourceRequirements(**resources)
+        return _ModelResourceRequirements(**resources)
+
+
+__all__ = ["Resources"]

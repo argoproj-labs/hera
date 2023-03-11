@@ -1,13 +1,10 @@
 """Holds input model specifications"""
 import json
-from typing import Any, List, Optional
+from typing import Any, Optional
 
-from argo_workflows.models import (
-    IoArgoprojWorkflowV1alpha1Parameter,
-    IoArgoprojWorkflowV1alpha1ValueFrom,
-)
+from pydantic import root_validator
 
-from hera.workflows.value_from import ValueFrom
+from hera.workflows.models import Parameter as _ModelParameter
 
 MISSING = object()
 
@@ -21,103 +18,21 @@ def _serialize(value: Any):
         return json.dumps(value)  # None serialized as `null`
 
 
-class Parameter:
-    """A representation of input from one task to another.
+class Parameter(_ModelParameter):
+    value: Optional[Any]
 
-    Parameters
-    ----------
-    name: str
-        The name of the task to take input from. The task's results are expected via stdout. Specifically, the task is
-        expected to perform the script illustrated in Examples.
-    value: Optional[Any] = None
-        Value of the parameter, as an index into some field of the task. If this is left as `None`, along with
-        `value_from` being left as `None`, as is the case in GitOps patterns, the submitter has to likely supply the
-        parameter value via the Argo CLI. Note that if a value is supplied a `json.dumps` will be applied to it.
-    default: Optional[str] = None
-        Default value of the parameter in case the `value` cannot be obtained based on the specification.
-    value_from: Optional[ValueFrom] = None
-        Describes a location in which to obtain the value to a parameter. See `hera.value_from.ValueFrom` or
-        https://argoproj.github.io/argo-workflows/fields/#valuefrom.
-    description: Optional[str] = None
-        An optional parameter description.
-    enum: Optional[List[str]] = None
-        Holds a list of string values to choose from, for the actual value of the parameter.
-    global_name: Optional[str] = None
-        Exports an output parameter to the global scope, making it available as
-        '{{workflow.outputs.parameters.XXXX}} and in workflow.status.outputs.parameters.
-    """
-
-    def __init__(
-        self,
-        name: str,
-        value: Optional[Any] = MISSING,
-        default: Optional[str] = MISSING,  # type: ignore[assignment]
-        value_from: Optional[ValueFrom] = None,
-        description: Optional[str] = None,
-        enum: Optional[List[str]] = None,
-        global_name: Optional[str] = None,
-    ) -> None:
-        if value is not MISSING and value_from is not None:
+    @root_validator(pre=True)
+    def _check_values(cls, values):
+        if values.get("value") is not None and values.get("value_from") is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
-        self.name = name
-        self.value = _serialize(value)
-        self.default = _serialize(default)
-        self.value_from = value_from
-        self.description = description
-        self.enum = enum
-        self.global_name = global_name
 
-    def as_name(self, name: str) -> "Parameter":
-        """Changes the name of the parameter."""
-        self.name = name
-        return self
+        if values.get("value") is not None and not isinstance(values.get("value"), str):
+            values["value"] = _serialize(values.get("value"))
 
-    def as_argument(self) -> Optional[IoArgoprojWorkflowV1alpha1Parameter]:
-        """Assembles the parameter for use as an argument of a task"""
-        if self.value is None and self.value_from is None and self.default:
-            # Argument not necessary as default is set for the input.
-            return None
-        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
-        if self.global_name is not None:
-            setattr(parameter, "global_name", self.global_name)
-        if self.description is not None:
-            setattr(parameter, "description", self.description)
+        if values.get("default") is not None and not isinstance(values.get("value"), str):
+            values["default"] = _serialize(values.get("default"))
 
-        if self.value is not None:
-            setattr(parameter, "value", self.value)
-        elif self.value_from is not None:
-            setattr(parameter, "value_from", self.value_from.build())
-        return parameter
-
-    def as_input(self) -> IoArgoprojWorkflowV1alpha1Parameter:
-        """Assembles the parameter for use as an input to task"""
-        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
-        if self.default:
-            setattr(parameter, "default", self.default)
-        if self.description is not None:
-            setattr(parameter, "description", self.description)
-        if self.enum is not None:
-            setattr(parameter, "enum", self.enum)
-        return parameter
-
-    def as_output(self) -> IoArgoprojWorkflowV1alpha1Parameter:
-        """Assembles the parameter for use as an output of a task"""
-        parameter = IoArgoprojWorkflowV1alpha1Parameter(name=self.name)
-        if self.value_from:
-            setattr(parameter, "value_from", self.value_from.build())
-        else:
-            argo_value_from = IoArgoprojWorkflowV1alpha1ValueFrom(parameter=self.value)
-            if self.default:
-                setattr(argo_value_from, "default", self.default)
-            setattr(parameter, "value_from", argo_value_from)
-
-        if self.global_name is not None:
-            setattr(parameter, "global_name", self.global_name)
-        if self.description is not None:
-            setattr(parameter, "description", self.description)
-        if self.enum is not None:
-            setattr(parameter, "enum", self.enum)
-        return parameter
+        return values
 
     def __str__(self):
         """Represent the parameter as a string by pointing to its value.
@@ -129,11 +44,38 @@ class Parameter:
             raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
         return self.value
 
-    @property
-    def contains_item(self) -> bool:
-        """Check whether the parameter contains an argo item reference"""
-        if self.value is None:
-            return False
-        elif "{{item" in self.value:
-            return True
-        return False
+    def as_input(self) -> _ModelParameter:
+        return _ModelParameter(
+            name=self.name,
+            description=self.description,
+            default=self.default,
+            enum=self.enum,
+            value=self.value,
+            value_from=self.value_from,
+        )
+
+    def as_argument(self) -> Optional[_ModelParameter]:
+        """Assembles the parameter for use as an argument of a task"""
+        return _ModelParameter(
+            name=self.name,
+            global_name=self.global_name,
+            description=self.description,
+            value=self.value,
+            value_from=self.value_from,
+            enum=self.enum,
+        )
+
+    def as_output(self) -> _ModelParameter:
+        """Assembles the parameter for use as an output of a task"""
+        # Only value and value_from are valid here
+        # see https://github.com/argoproj/argo-workflows/blob/e3254eca115c9dd358e55d16c6a3d41403c29cae/workflow/validate/validate.go#L1067
+        return _ModelParameter(
+            name=self.name,
+            global_name=self.global_name,
+            description=self.description,
+            value_from=self.value_from,
+            value=self.value,
+        )
+
+
+__all__ = ["Parameter"]
