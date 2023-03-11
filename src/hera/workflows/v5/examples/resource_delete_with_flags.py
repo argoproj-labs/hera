@@ -1,4 +1,4 @@
-from hera.workflows.models import Arguments, Inputs, Parameter
+from hera.workflows.models import Inputs, Parameter
 from hera.workflows.v5.resource import Resource
 from hera.workflows.v5.steps import Step, Steps
 from hera.workflows.v5.workflow import Workflow
@@ -19,12 +19,10 @@ data:
 delete_resource = Resource(
     name="delete-resource",
     action="delete",
-    flags=[
-        "configmap", "--selector", "{{inputs.parameters.selector}}"
-    ],
+    flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
     inputs=Inputs(
         parameters=[Parameter(name="selector")],
-    )
+    ),
 )
 
 with Workflow(

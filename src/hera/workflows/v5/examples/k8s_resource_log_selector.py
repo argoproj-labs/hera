@@ -31,7 +31,7 @@ spec:
          spec:
            containers:
              - name: tensorflow
-               image: "Placeholder for TensorFlow distributed training image\""""
+               image: "Placeholder for TensorFlow distributed training image\"""",
 )
 
 w = Workflow(generate_name="k8s-jobs-log-selector-", entrypoint="tf-jobtmpl", templates=[tf_jobtmpl])
