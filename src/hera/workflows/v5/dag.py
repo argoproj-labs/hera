@@ -7,11 +7,11 @@ from hera.workflows.models import (
     DAGTemplate as _ModelDAGTemplate,
     Template as _ModelTemplate,
 )
-from hera.workflows.v5._mixins import _ContextMixin, _IOMixin, _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import ContextMixin, IOMixin, TemplateMixin
 from hera.workflows.v5.task import Task
 
 
-class DAG(_IOMixin, _TemplateMixin, _SubNodeMixin, _ContextMixin):
+class DAG(IOMixin, TemplateMixin, ContextMixin):
     fail_fast: Optional[bool] = None
     target: Optional[str] = None
     tasks: List[Union[Task, DAGTask]] = []

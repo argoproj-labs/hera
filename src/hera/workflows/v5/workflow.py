@@ -42,7 +42,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.service import WorkflowsService
-from hera.workflows.v5._mixins import _ContextMixin
+from hera.workflows.v5._mixins import ContextMixin
 from hera.workflows.v5.exceptions import InvalidType
 from hera.workflows.v5.protocol import Templatable, TTemplate
 
@@ -55,7 +55,7 @@ except ImportError:
     _yaml = None
 
 
-class Workflow(_ContextMixin):
+class Workflow(ContextMixin):
     api_version: Optional[str] = GlobalConfig.api_version
     kind: Optional[str] = None
     annotations: Optional[Dict[str, str]] = None

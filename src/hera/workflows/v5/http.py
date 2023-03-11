@@ -6,10 +6,10 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
     V1HTTPHeader as HTTPHeader,
 )
-from hera.workflows.v5._mixins import _IOMixin, _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import IOMixin, TemplateMixin
 
 
-class HTTP(_TemplateMixin, _SubNodeMixin, _IOMixin):
+class HTTP(TemplateMixin, IOMixin):
     url: str
     body: Optional[str] = None
     body_from: Optional[HTTPBodySource] = None
