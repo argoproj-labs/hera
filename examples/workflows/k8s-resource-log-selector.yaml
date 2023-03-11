@@ -26,5 +26,5 @@ spec:
         \ to see the first worker pod's logs.\n           labels:\n             workflows.argoproj.io/workflow:\
         \ {{workflow.name}}\n         spec:\n           containers:\n            \
         \ - name: tensorflow\n               image: \"Placeholder for TensorFlow distributed\
-        \ training image\""
+        \ training image\"\n"
       successCondition: status.replicaStatuses.Worker.succeeded = 2

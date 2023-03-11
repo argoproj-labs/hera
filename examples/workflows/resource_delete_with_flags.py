@@ -3,10 +3,14 @@ from hera.workflows.resource import Resource
 from hera.workflows.steps import Step, Steps
 from hera.workflows.workflow import Workflow
 
-create_configmap = Resource(
-    name="create-configmap",
-    action="create",
-    manifest="""apiVersion: v1
+with Workflow(
+    generate_name="resource-delete-with-flags-",
+    entrypoint="main",
+) as w:
+    create_configmap = Resource(
+        name="create-configmap",
+        action="create",
+        manifest="""apiVersion: v1
 kind: ConfigMap
 metadata:
   name: resource-delete-with-flags
@@ -15,21 +19,17 @@ metadata:
 data:
   key: value
 """,
-)
-delete_resource = Resource(
-    name="delete-resource",
-    action="delete",
-    flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
-    inputs=Inputs(
-        parameters=[Parameter(name="selector")],
-    ),
-)
+    )
 
-with Workflow(
-    generate_name="resource-delete-with-flags-",
-    templates=[create_configmap, delete_resource],
-    entrypoint="main",
-) as w:
+    delete_resource = Resource(
+        name="delete-resource",
+        action="delete",
+        flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
+        inputs=Inputs(
+            parameters=[Parameter(name="selector")],
+        ),
+    )
+
     with Steps(name="main") as s:
         Step(name="submit-resource", template=create_configmap.name)
         Step(
