@@ -1,74 +1,45 @@
-from dataclasses import dataclass
+from typing import Optional
 
-from argo_workflows.models import ConfigMapEnvSource, EnvFromSource, SecretEnvSource
-
-# TODO Generalize from classes in volumes.py
-
-
-@dataclass
-class _NamedConfigMap:
-    config_map_name: str
+from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.workflows.models import (
+    ConfigMapEnvSource as _ModelConfigMapEnvSource,
+    EnvFromSource as _ModelEnvFromSource,
+    SecretEnvSource as _ModelSecretEnvSource,
+)
 
 
-@dataclass
-class _NamedSecret:
-    secret_name: str
+class _BaseEnvFrom(_BaseModel):
+    def __init__(self, prefix: Optional[str] = None) -> None:
+        self.prefix = prefix
+        super().__init__()
 
-
-@dataclass
-class BaseEnvFrom:
-    """Environment variable specification from K8S resources.
-
-    Attributes
-    ----------
-    prefix: str = ''
-        An optional identifier to prepend to each key in the specified resources.
-    """
-
-    prefix: str = ""
-
-    def build(self) -> EnvFromSource:
+    def build(self) -> _ModelEnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
         raise NotImplementedError()
 
 
-@dataclass
-class SecretEnvFrom(BaseEnvFrom, _NamedSecret):
-    """Environment variable specification from K8S secrets.
-
-    Attributes
-    ----------
-    secret_name: str
-        The name of the secret to load environments.
-    optional: bool = False
-        Specify whether the K8S secret must be defined
-    """
-
-    optional: bool = False
-
-    def build(self) -> EnvFromSource:
+class SecretEnvFrom(_BaseEnvFrom, _ModelSecretEnvSource):
+    def build(self) -> _ModelEnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
-        return EnvFromSource(
-            prefix=self.prefix, secret_ref=SecretEnvSource(name=self.secret_name, optional=self.optional)
+        return _ModelEnvFromSource(
+            prefix=self.prefix,
+            secret_ref=_ModelSecretEnvSource(
+                name=self.name,
+                optional=self.optional,
+            ),
         )
 
 
-@dataclass
-class ConfigMapEnvFrom(BaseEnvFrom, _NamedConfigMap):
-    """Environment variable specification from K8S config map.
-
-    Attributes
-    ----------
-    config_map_name: str
-        The name of the config map to load environments.
-    optional: bool = False
-        Specify whether the K8S config map must be defined
-    """
-
-    optional: bool = False
-
-    def build(self) -> EnvFromSource:
+class ConfigMapEnvFrom(_BaseEnvFrom, _ModelConfigMapEnvSource):
+    def build(self) -> _ModelEnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
-        return EnvFromSource(
-            prefix=self.prefix, config_map_ref=ConfigMapEnvSource(name=self.config_map_name, optional=self.optional)
+        return _ModelEnvFromSource(
+            prefix=self.prefix,
+            config_map_ref=_ModelConfigMapEnvSource(
+                name=self.name,
+                optional=self.optional,
+            ),
         )
+
+
+__all__ = [*[c.__name__ for c in _BaseEnvFrom.__subclasses__()]]
