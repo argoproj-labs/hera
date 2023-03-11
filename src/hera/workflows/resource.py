@@ -1,11 +1,11 @@
 from typing import List, Optional
 
+from hera.workflows._mixins import IOMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
     ManifestFrom,
     ResourceTemplate as _ModelResourceTemplate,
     Template as _ModelTemplate,
 )
-from hera.workflows.v5._mixins import IOMixin, SubNodeMixin, TemplateMixin
 
 
 class Resource(TemplateMixin, SubNodeMixin, IOMixin):

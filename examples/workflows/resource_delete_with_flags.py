@@ -1,7 +1,7 @@
 from hera.workflows.models import Inputs, Parameter
-from hera.workflows.v5.resource import Resource
-from hera.workflows.v5.steps import Step, Steps
-from hera.workflows.v5.workflow import Workflow
+from hera.workflows.resource import Resource
+from hera.workflows.steps import Step, Steps
+from hera.workflows.workflow import Workflow
 
 create_configmap = Resource(
     name="create-configmap",

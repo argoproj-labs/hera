@@ -1,5 +1,5 @@
-from hera.workflows.v5.resource import Resource
-from hera.workflows.v5.workflow import Workflow
+from hera.workflows.resource import Resource
+from hera.workflows.workflow import Workflow
 
 tf_jobtmpl = Resource(
     name="tf-jobtmpl",
