@@ -2,10 +2,10 @@ from typing import List, Union
 
 from hera.expr._node import Node
 from hera.workflows import models as m
-from hera.workflows.v5._mixins import _IOMixin, _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import IOMixin, TemplateMixin
 
 
-class Data(_TemplateMixin, _SubNodeMixin, _IOMixin):
+class Data(TemplateMixin, IOMixin):
     artifact_paths: m.ArtifactPaths
     transformations: List[Union[str, Node]] = []
 

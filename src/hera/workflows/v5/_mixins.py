@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
-from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.workflows._base_model import BaseMixin
 from hera.workflows.models import (
     HTTP,
     Affinity,
@@ -35,6 +35,7 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
+from hera.workflows.v5._context import SubNodeMixin, _context
 from hera.workflows.v5.env import _BaseEnv
 from hera.workflows.v5.env_from import _BaseEnvFrom
 from hera.workflows.v5.parameter import Parameter
@@ -44,46 +45,28 @@ from hera.workflows.v5.volume import _BaseVolume
 
 Inputs = List[Union[ModelInputs, Parameter, ModelParameter, Artifact]]
 Outputs = List[Union[ModelOutputs, Parameter, ModelParameter, Artifact]]
-TSub = TypeVar("TSub", bound="_SubNodeMixin")
-TContext = TypeVar("TContext", bound="_ContextMixin")
+TContext = TypeVar("TContext", bound="ContextMixin")
 
 
-class _BaseMixin(_BaseModel):
-    pass
-
-
-class _ContextMixin(_BaseModel):
+class ContextMixin(BaseMixin):
     def __enter__(self: TContext) -> TContext:
         """Enter the context of the workflow"""
-        from hera.workflows.v5._context import _context
 
         _context.enter(self)
         return self
 
-    def __exit__(self: TContext, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, *_) -> None:
         """Leave the context of the workflow.
 
         This supports using `with Workflow(...)`.
         """
-        from hera.workflows.v5._context import _context
-
         _context.exit()
 
     def _add_sub(self, node: Any) -> Any:
         raise NotImplementedError()
 
 
-class _SubNodeMixin(_BaseModel):
-    """_SubMixin ensures that the class gets added to the Hera context on initialization."""
-
-    def __post_init__(self: TSub) -> TSub:
-        from hera.workflows.v5._context import _context
-
-        _context.add_sub_node(self)
-        return self
-
-
-class _ContainerMixin(_BaseMixin):
+class ContainerMixin(BaseMixin):
     image: str = GlobalConfig.image
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
@@ -103,7 +86,7 @@ class _ContainerMixin(_BaseMixin):
         return ImagePullPolicy[self.image_pull_policy.lower()]
 
 
-class _IOMixin(_BaseMixin):
+class IOMixin(BaseMixin):
     inputs: Inputs = []
     outputs: Outputs = []
 
@@ -150,7 +133,7 @@ class _IOMixin(_BaseMixin):
         return result
 
 
-class _EnvMixin(_BaseMixin):
+class EnvMixin(BaseMixin):
     env: Optional[List[Union[_BaseEnv, EnvVar]]] = None
     env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None
 
@@ -169,8 +152,7 @@ class _EnvMixin(_BaseMixin):
         return v.build()
 
 
-class _TemplateMixin(_BaseMixin):
-    name: Optional[str] = None
+class TemplateMixin(SubNodeMixin):
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
@@ -184,7 +166,9 @@ class _TemplateMixin(_BaseMixin):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
     metrics: Optional[Metrics] = None
+    name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
+    parallelism: Optional[int] = None
     http: Optional[HTTP] = None
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
@@ -215,7 +199,7 @@ class _TemplateMixin(_BaseMixin):
         )
 
 
-class _ResourceMixin(_BaseMixin):
+class ResourceMixin(BaseMixin):
     resources: Optional[Union[ResourceRequirements, Resources]] = None
 
     def _build_resources(self) -> Optional[ResourceRequirements]:
@@ -225,7 +209,7 @@ class _ResourceMixin(_BaseMixin):
         return self.resources.build()
 
 
-class _VolumeMountMixin(_BaseMixin):
+class VolumeMountMixin(BaseMixin):
     volume_devices: Optional[List[VolumeDevice]] = None
     volume_mounts: Optional[List[VolumeMount]] = None
     volumes: Optional[List[_BaseVolume]] = None

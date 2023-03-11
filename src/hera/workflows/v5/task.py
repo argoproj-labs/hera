@@ -12,13 +12,13 @@ from hera.workflows.models import (
     Template,
     TemplateRef,
 )
-from hera.workflows.v5._mixins import _SubNodeMixin, _TemplateMixin
+from hera.workflows.v5._mixins import SubNodeMixin, TemplateMixin
 from hera.workflows.v5.operator import Operator
 from hera.workflows.v5.task_result import TaskResult
 from hera.workflows.v5.workflow_status import WorkflowStatus
 
 
-class Task(_SubNodeMixin):
+class Task(SubNodeMixin):
     name: str
     arguments: Optional[Arguments] = None
     continue_on: Optional[ContinueOn] = None
@@ -26,7 +26,7 @@ class Task(_SubNodeMixin):
     depends: Optional[str] = None
     hooks: Optional[Dict[str, LifecycleHook]] = None
     on_exit: Optional[str] = None
-    template: Union[str, Template, _TemplateMixin]
+    template: Union[str, Template, TemplateMixin]
     template_ref: Optional[TemplateRef] = None
     inline: Optional[Template] = None
     when: Optional[str] = None

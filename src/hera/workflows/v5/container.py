@@ -11,25 +11,23 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
 )
 from hera.workflows.v5._mixins import (
-    _ContainerMixin,
-    _EnvMixin,
-    _IOMixin,
-    _ResourceMixin,
-    _SubNodeMixin,
-    _TemplateMixin,
-    _VolumeMountMixin,
+    ContainerMixin,
+    EnvMixin,
+    IOMixin,
+    ResourceMixin,
+    TemplateMixin,
+    VolumeMountMixin,
 )
 from hera.workflows.v5.parameter import Parameter
 
 
 class Container(
-    _IOMixin,
-    _ContainerMixin,
-    _EnvMixin,
-    _TemplateMixin,
-    _ResourceMixin,
-    _SubNodeMixin,
-    _VolumeMountMixin,
+    IOMixin,
+    ContainerMixin,
+    EnvMixin,
+    TemplateMixin,
+    ResourceMixin,
+    VolumeMountMixin,
 ):
     args: Optional[List[str]] = None
     command: Optional[List[str]] = None
