@@ -2,14 +2,6 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from hera.workflows.models import (
-    Arguments,
-    Artifact,
-    Container as _ModelContainer,
-    Lifecycle,
-    SecurityContext,
-    Template as _ModelTemplate,
-)
 from hera.workflows._mixins import (
     ContainerMixin,
     EnvMixin,
@@ -17,6 +9,14 @@ from hera.workflows._mixins import (
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
+)
+from hera.workflows.models import (
+    Arguments,
+    Artifact,
+    Container as _ModelContainer,
+    Lifecycle,
+    SecurityContext,
+    Template as _ModelTemplate,
 )
 from hera.workflows.parameter import Parameter
 

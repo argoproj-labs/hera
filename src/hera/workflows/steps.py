@@ -1,5 +1,12 @@
 from typing import Any, Dict, List, Optional, Union
 
+from hera.workflows._mixins import (
+    ContextMixin,
+    IOMixin,
+    SubNodeMixin,
+    TemplateMixin,
+)
+from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Arguments as _ModelArguments,
     Artifact as _ModelArtifact,
@@ -12,13 +19,6 @@ from hera.workflows.models import (
     TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
-from hera.workflows._mixins import (
-    ContextMixin,
-    IOMixin,
-    SubNodeMixin,
-    TemplateMixin,
-)
-from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Steppable
 
 

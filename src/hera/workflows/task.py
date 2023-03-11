@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Union
 
+from hera.workflows._mixins import SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
     Arguments,
     ContinueOn,
@@ -12,7 +13,6 @@ from hera.workflows.models import (
     Template,
     TemplateRef,
 )
-from hera.workflows._mixins import SubNodeMixin, TemplateMixin
 from hera.workflows.operator import Operator
 from hera.workflows.task_result import TaskResult
 from hera.workflows.workflow_status import WorkflowStatus

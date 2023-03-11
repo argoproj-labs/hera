@@ -30,7 +30,7 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run pytest -v
+	@poetry run python -m pytest -v
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
@@ -81,3 +81,7 @@ services: workflows-service events-service
 .PHONY: examples
 examples:  ## Generate all the examples
 	@(cd docs && poetry run python generate.py)
+
+.PHONY: regenerate-test-data
+regenerate-test-data:  ## Generate all the examples
+	HERA_REGENEARE=1 make test

@@ -4,6 +4,9 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseMixin
+from hera.workflows._context import SubNodeMixin, _context
+from hera.workflows.env import _BaseEnv
+from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.models import (
     HTTP,
     Affinity,
@@ -35,9 +38,6 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
-from hera.workflows._context import SubNodeMixin, _context
-from hera.workflows.env import _BaseEnv
-from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.parameter import Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer

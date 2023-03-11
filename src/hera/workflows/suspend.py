@@ -1,12 +1,12 @@
 from typing import List, Optional, Union
 
+from hera.workflows._mixins import TemplateMixin
 from hera.workflows.models import (
     Inputs,
     Outputs,
     SuspendTemplate as _ModelSuspendTemplate,
     Template as _ModelTemplate,
 )
-from hera.workflows._mixins import TemplateMixin
 from hera.workflows.parameter import Parameter
 
 

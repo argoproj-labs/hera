@@ -4,13 +4,6 @@ import textwrap
 from typing import Callable, List, Optional, Union
 
 from hera.shared.global_config import GlobalConfig
-from hera.workflows.models import (
-    Lifecycle,
-    ScriptTemplate as _ModelScriptTemplate,
-    SecurityContext,
-    Template as _ModelTemplate,
-)
-from hera.workflows.parameter import Parameter
 from hera.workflows._mixins import (
     ContainerMixin,
     EnvMixin,
@@ -19,6 +12,13 @@ from hera.workflows._mixins import (
     TemplateMixin,
     VolumeMountMixin,
 )
+from hera.workflows.models import (
+    Lifecycle,
+    ScriptTemplate as _ModelScriptTemplate,
+    SecurityContext,
+    Template as _ModelTemplate,
+)
+from hera.workflows.parameter import Parameter
 
 
 class Script(

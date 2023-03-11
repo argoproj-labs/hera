@@ -1,12 +1,12 @@
 from typing import List, Optional
 
+from hera.workflows._mixins import IOMixin, TemplateMixin
 from hera.workflows.models import (
     HTTP as _ModelHTTP,
     HTTPBodySource,
     Template as _ModelTemplate,
     V1HTTPHeader as HTTPHeader,
 )
-from hera.workflows._mixins import IOMixin, TemplateMixin
 
 
 class HTTP(TemplateMixin, IOMixin):

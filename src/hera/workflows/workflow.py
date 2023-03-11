@@ -7,6 +7,8 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
+from hera.workflows._mixins import ContextMixin
+from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
     Arguments,
@@ -42,10 +44,8 @@ from hera.workflows.models import (
     WorkflowStatus,
     WorkflowTemplateRef,
 )
-from hera.workflows.service import WorkflowsService
-from hera.workflows._mixins import ContextMixin
-from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Templatable, TTemplate
+from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
 try:

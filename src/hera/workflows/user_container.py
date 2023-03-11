@@ -1,5 +1,7 @@
 from typing import List, Optional, Union
 
+from hera.workflows.env import _BaseEnv
+from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.models import (
     EnvFromSource,
     EnvVar,
@@ -7,8 +9,6 @@ from hera.workflows.models import (
     ResourceRequirements,
     UserContainer as _ModelUserContainer,
 )
-from hera.workflows.env import _BaseEnv
-from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.resources import Resources
 from hera.workflows.volume import _BaseVolume
 
