@@ -12,6 +12,15 @@ import examples.workflows.upstream as hera_upstream_examples
 
 ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
+CI_MODE = os.environ.get("CI")
+
+
+def _generate_yaml(path: Path) -> bool:
+    if CI_MODE:
+        return False
+    if HERA_REGENERATE:
+        return True
+    return not path.exists()
 
 
 @pytest.mark.parametrize(
@@ -24,8 +33,9 @@ def test_hera_output(module_name):
     # WHEN
     output = workflow.to_dict()
     # THEN
-    if not yaml_path.exists() or HERA_REGENERATE:
+    if _generate_yaml(yaml_path):
         yaml_path.write_text(yaml.dump(output))
+    assert yaml_path.exists()
     assert output == yaml.safe_load(yaml_path.read_text())
 
 
@@ -40,9 +50,11 @@ def test_hera_output_upstream(module_name):
     # WHEN
     output = workflow.to_dict()
     # THEN
-    if not yaml_path.exists() or HERA_REGENERATE:
+    if _generate_yaml(yaml_path):
         yaml_path.write_text(yaml.dump(output))
-    if not upstream_yaml_path.exists() or HERA_REGENERATE:
+    if _generate_yaml(upstream_yaml_path):
         upstream_yaml_path.write_text(requests.get(f"{ARGO_EXAMPLES_URL}/{module_name.replace('_', '-')}.yaml").text)
+    assert yaml_path.exists()
     assert output == yaml.safe_load(yaml_path.read_text())
+    assert upstream_yaml_path.exists()
     assert output == yaml.safe_load(upstream_yaml_path.read_text())
