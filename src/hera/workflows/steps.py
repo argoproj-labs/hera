@@ -31,7 +31,7 @@ class Step(
     inline: Optional[_ModelTemplate]
     name: Optional[str]
     on_exit: Optional[str]
-    template: Optional[str]
+    template: Union[str, _ModelTemplate, TemplateMixin]
     template_ref: Optional[_ModelTemplateRef]
     when: Optional[str]
     with_items: Optional[List[_ModelItem]]
@@ -57,7 +57,7 @@ class Step(
             inline=self.inline,
             name=self.name,
             on_exit=self.on_exit,
-            template=self.template,
+            template=self.template if isinstance(self.template, str) else self.template.name,
             template_ref=self.template_ref,
             when=self.when,
             with_items=self.with_items,
