@@ -4,11 +4,11 @@ from enum import Enum
 class WorkflowStatus(str, Enum):
     """Placeholder for workflow statuses"""
 
-    Running = "Running"
-    Succeeded = "Succeeded"
-    Failed = "Failed"
-    Error = "Error"
-    Terminated = "Terminated"
+    running = "Running"
+    succeeded = "Succeeded"
+    failed = "Failed"
+    error = "Error"
+    terminated = "Terminated"
 
     def __str__(self):
         return str(self.value)
@@ -17,11 +17,11 @@ class WorkflowStatus(str, Enum):
     def from_argo_status(cls, s: str) -> "WorkflowStatus":
         """Turns an Argo status into a Hera workflow status representation"""
         switch = {
-            "Running": WorkflowStatus.Running,
-            "Succeeded": WorkflowStatus.Succeeded,
-            "Failed": WorkflowStatus.Failed,
-            "Error": WorkflowStatus.Error,
-            "Terminated": WorkflowStatus.Terminated,
+            "Running": WorkflowStatus.running,
+            "Succeeded": WorkflowStatus.succeeded,
+            "Failed": WorkflowStatus.failed,
+            "Error": WorkflowStatus.error,
+            "Terminated": WorkflowStatus.terminated,
         }
 
         ss = switch.get(s)

@@ -1,36 +1,38 @@
 import threading
-from typing import List
+from typing import List, TypeVar, Union
 
-from hera.workflows.dag import DAG
-from hera.workflows.task import Task
+from hera.workflows._base_model import BaseMixin
+from hera.workflows.exceptions import InvalidType
+from hera.workflows.protocol import Subbable, TTemplate
 
 
-class _DAG_context(threading.local):
-    """Holds the directed acyclic graph context of a Hera workflow"""
-
+class _HeraContext(threading.local):
     def __init__(self) -> None:
         super().__init__()
-        self._dags: List[DAG] = []
+        self._pieces: List[Subbable] = []
 
-    def enter(self, d: DAG) -> None:
-        """Inject a DAG into the overall Hera DAG context"""
-        self._dags.append(d)
+    def enter(self, p: Subbable) -> None:
+        if not isinstance(p, Subbable):
+            raise InvalidType()
+        self._pieces.append(p)
 
     def exit(self) -> None:
-        """Eject a DAG off the overall Hera DAG context"""
-        self._dags.pop()
+        self._pieces.pop()
 
-    def is_set(self) -> bool:
-        """Return whether there are any DAGs set on the Hera DAG context"""
-        return self._dags != []
-
-    def add_task(self, t: Task) -> None:
-        """Add a task to the DAG that was added last to the context"""
-        self._dags[-1].add_task(t)
-
-    def add_tasks(self, *ts: Task) -> None:
-        """Adds a collection of tasks to the DAG that was added last to the context"""
-        self._dags[-1].add_tasks(*ts)
+    def add_sub_node(self, node: Union["SubNodeMixin", TTemplate]) -> None:
+        if self._pieces:
+            self._pieces[-1]._add_sub(node)
 
 
-dag_context = _DAG_context()
+TNode = TypeVar("TNode", bound="SubNodeMixin")
+
+
+class SubNodeMixin(BaseMixin):
+    """SubNodeMixin ensures that the class gets added to the Hera context on initialization."""
+
+    def __hera_init__(self: TNode) -> TNode:
+        _context.add_sub_node(self)
+        return self
+
+
+_context = _HeraContext()

@@ -20,9 +20,16 @@ Welcome to Hera's documentation!
 .. toctree::
    :glob:
    :maxdepth: 2
-   :caption: Examples
+   :caption: Hera Workflow Examples
 
-   examples/*
+   examples/workflows/*
+
+.. toctree::
+   :glob:
+   :maxdepth: 2
+   :caption: Hera - Argo Workflow Examples Replication
+
+   examples/workflows/upstream/*
 
 Indices and tables
 ==================
