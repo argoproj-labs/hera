@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Hera"
-copyright = "2022, Flaviu Vadan, Asgeir Berland"
-author = "Flaviu Vadan, Asgeir Berland"
+copyright = "2023, Flaviu Vadan, Asgeir Berland, Sambhav Kothari, Elliot Gunton"
+author = "Flaviu Vadan, Asgeir Berland, Sambhav Kothari, Elliot Gunton"
 language = "en"
 
 # -- General configuration ---------------------------------------------------

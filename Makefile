@@ -84,4 +84,4 @@ examples:  ## Generate all the examples
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Generate all the examples
-	HERA_REGENEARE=1 make test
+	HERA_REGENERATE=1 make test

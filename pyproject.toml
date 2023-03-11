@@ -3,7 +3,7 @@ name = "hera-workflows"
 # The version is automatically substituted by the CI
 version = "0.0.0-dev"
 description = "Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo Workflows more accessible by abstracting away some setup that is typically necessary for constructing Argo workflows."
-authors = ["Flaviu Vadan <flaviu.vadan@dynotx.com>", "Asgeir Berland <asgeir.berland@oda.com>"]
+authors = ["Flaviu Vadan <flaviu.vadan@dynotx.com>", "Asgeir Berland <asgeir.berland@oda.com>", "Sambhav Kothari <sambhavs.email@gmail.com>", "Elliot Gunton <elliotgunton@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/argoproj-labs/hera-workflows"
@@ -29,17 +29,14 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
-python-dateutil = ">=2.8.2"
-urllib3 = ">=1.26.8"
-certifi = ">=2021.10.8"
-pytz = ">=2021.3"
 pyyaml = { version = ">=6.0", optional = true }
-argo-workflows = { version = "6.3.5", allow-prereleases = true }
+requests = "*"
+pydantic = {extras = ["email"], version = ">=1.7,<2.0"}
 
 [tool.poetry.extras]
 yaml = ["PyYAML"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-cov = "*"
 black = "*"
@@ -48,10 +45,6 @@ build = "*"
 ruff = "*"
 types-PyYAML = "*"
 jsonpath-ng = "^1.5.3"
-requests = "*"
-
-
-[tool.poetry.group.dev.dependencies]
 datamodel-code-generator = {extras = ["http"], version = "^0.17.1"}
 types-requests = "^2.28.11.12"
 
