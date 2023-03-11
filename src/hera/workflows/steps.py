@@ -31,7 +31,7 @@ class Step(
     inline: Optional[_ModelTemplate]
     name: Optional[str]
     on_exit: Optional[str]
-    template: Optional[str]
+    template: Union[str, _ModelTemplate, TemplateMixin]
     template_ref: Optional[_ModelTemplateRef]
     when: Optional[str]
     with_items: Optional[List[_ModelItem]]
@@ -41,19 +41,23 @@ class Step(
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         # Convert the unified list of Artifacts and Parameters in self.arguments to a
         # model-class `Arguments`` to pass to WorkflowStep
+        artifacts = list(filter(lambda arg: isinstance(arg, _ModelArtifact), self.arguments or []))
+        parameters = list(filter(lambda arg: isinstance(arg, _ModelParameter), self.arguments or []))
         model_arguments = _ModelArguments(
-            artifacts=list(filter(lambda arg: isinstance(arg, _ModelArtifact), self.arguments or [])) or None,
-            parameters=list(filter(lambda arg: isinstance(arg, _ModelParameter), self.arguments or [])) or None,
+            artifacts=None if len(artifacts) == 0 else artifacts,
+            parameters=None if len(parameters) == 0 else parameters,
         )
-
+        arguments = (
+            None if model_arguments.artifacts is None and model_arguments.parameters is None else model_arguments
+        )
         return _ModelWorkflowStep(
-            arguments=model_arguments,
+            arguments=arguments,
             continue_on=self.continue_on,
             hooks=self.hooks,
             inline=self.inline,
             name=self.name,
             on_exit=self.on_exit,
-            template=self.template,
+            template=self.template if isinstance(self.template, str) else self.template.name,
             template_ref=self.template_ref,
             when=self.when,
             with_items=self.with_items,
