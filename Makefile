@@ -6,6 +6,7 @@ help: ## Showcase the help instructions for all the available `make` commands
 
 .PHONY: ci
 ci: ## Run all the CI checks
+ci: CI=1
 ci: lint test check-codegen
 
 .PHONY: codegen
@@ -84,4 +85,4 @@ examples:  ## Generate all the examples
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests
-	HERA_REGENERATE=1 make test
+	HERA_REGENERATE=1 make test examples
