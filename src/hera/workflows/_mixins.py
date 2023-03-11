@@ -43,8 +43,8 @@ from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import _BaseVolume
 
-Inputs = List[Union[ModelInputs, Parameter, ModelParameter, Artifact]]
-Outputs = List[Union[ModelOutputs, Parameter, ModelParameter, Artifact]]
+Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact]]]
+Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 
 
