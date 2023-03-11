@@ -1,73 +1,62 @@
 import hashlib
 import json
 import string
-from dataclasses import dataclass
 from itertools import islice
 from typing import Any, Optional, Union
 
-from argo_workflows.models import (
-    ConfigMapKeySelector,
-    EnvVar,
-    EnvVarSource,
-    ObjectFieldSelector,
-    SecretKeySelector,
-)
+from pydantic import root_validator, validator
 
+from hera.shared.global_config import GlobalConfig
+from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.workflows.models import (
+    ConfigMapKeySelector as _ModelConfigMapKeySelector,
+    EnvVar as _ModelEnvVar,
+    EnvVarSource as _ModelEnvVarSource,
+    ObjectFieldSelector as _ModelObjectFieldSelector,
+    Quantity,
+    ResourceFieldSelector as _ModelResourceFieldSelector,
+    SecretKeySelector as _ModelSecretKeySelector,
+)
 from hera.workflows.parameter import Parameter
 
 
-@dataclass
-class ConfigMapNamedKey:
-    """Config map representation. Supports the specification of a name/key string pair to identify a value"""
-
-    config_map_name: str
-    config_map_key: str
-
-
-@dataclass
-class SecretNamedKey:
-    """Secret map representation. Supports the specification of a name/key string pair to identify a value"""
-
-    secret_name: str
-    secret_key: str
-
-
-@dataclass
-class Env:
-    """Environment variable specification for tasks.
-
-    Attributes
-    ----------
+class _BaseEnv(_BaseModel):
     name: str
-        The name of the variable.
-    value: Optional[Any] = None
-        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the
-        value in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
-        performed.
-    value_from_input: Optional[Union[str, Parameter]] = None
-        An external reference which will resolve the env-value, E.g. another task's output parameter.
-        An input parameter will be auto-generated for the task the `Env` is instantiated in.
 
-    Raises
-    ------
-    AssertionError
-        When the specified value is not JSON serializable.
-    """
+    def __init__(self, name: str):
+        self.name = name
+        super().__init__()
 
-    name: str
+    def build(self) -> _ModelEnvVar:
+        raise NotImplementedError
+
+
+class Env(_BaseEnv):
     value: Optional[Any] = None
     value_from_input: Optional[Union[str, Parameter]] = None
+
+    def __init__(
+        self, name: str, value: Optional[Any] = None, value_from_input: Optional[Union[str, Parameter]] = None
+    ):
+        self.value = value
+        self.value_from_input = value_from_input
+        super().__init__(name)
 
     @staticmethod
     def _sanitise_param_for_argo(v: str) -> str:
         """Argo has some strict parameter validation. To satisfy, we replace all ._ with a dash,
         take only first 32 characters from a-zA-Z0-9-, and append md5 digest of the original string."""
         # NOTE move this to some general purpose utils?
-        replaced_dashes = v.translate(str.maketrans({e: '-' for e in "_."}))  # type: ignore
-        legit_set = string.ascii_letters + string.digits + '-'
+        replaced_dashes = v.translate(str.maketrans({e: "-" for e in "_."}))  # type: ignore
+        legit_set = string.ascii_letters + string.digits + "-"
         legit_prefix = "".join(islice((c for c in replaced_dashes if c in legit_set), 32))
         hash_suffix = hashlib.md5(v.encode("utf-8")).hexdigest()
         return f"{legit_prefix}-{hash_suffix}"
+
+    @root_validator(pre=True)
+    def _check_values(cls, values):
+        if values.get("value") is not None and values.get("value_from_input") is not None:
+            raise ValueError("cannot specify both `value` and `value_from_input`")
 
     @property
     def param_name(self) -> str:
@@ -77,105 +66,117 @@ class Env:
             )
         return Env._sanitise_param_for_argo(self.name)
 
-    def __post_init__(self):
-        if self.value is not None and self.value_from_input is not None:
-            raise ValueError("cannot specify both value and value_from_input")
-
-    def build(self) -> EnvVar:
+    def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification"""
         if self.value_from_input is not None:
-            value = f"{{{{inputs.parameters.{self.param_name}}}}}"
+            self.value = f"{{{{inputs.parameters.{self.param_name}}}}}"
         elif isinstance(self.value, str):
-            value = self.value
+            self.value = self.value
         else:
-            value = json.dumps(self.value)
-        return EnvVar(name=self.name, value=value)
+            self.value = json.dumps(self.value)
+        return _ModelEnvVar(name=self.name, value=self.value)
 
 
-@dataclass
-class SecretEnv(Env, SecretNamedKey):
-    """Environment variable specification from K8S secrets.
-
-    Attributes
-    ----------
-    secret_name: str
-        The name of the secret to load values from.
+class SecretEnv(_BaseEnv):
     secret_key: str
-        The key of the value within the secret.
-    """
+    secret_name: Optional[str] = None
+    optional: Optional[bool] = None
 
-    def build(self) -> EnvVar:
+    def __init__(self, name: str, secret_key: str, secret_name: Optional[str] = None, optional: Optional[bool] = None):
+        self.secret_key = secret_key
+        self.secret_name = secret_name
+        self.optional = optional
+        super().__init__(name)
+
+    def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification"""
-        return EnvVar(
+        return _ModelEnvVar(
             name=self.name,
-            value_from=EnvVarSource(secret_key_ref=SecretKeySelector(name=self.secret_name, key=self.secret_key)),
+            value_from=_ModelEnvVarSource(
+                secret_key_ref=_ModelSecretKeySelector(
+                    name=self.secret_name, key=self.secret_key, optional=self.optional
+                )
+            ),
         )
 
 
-@dataclass
-class ConfigMapEnv(Env, ConfigMapNamedKey):
-    """Environment variable specification from K8S config map.
-
-    Attributes
-    ----------
-    config_map_name: str
-        The name of the config map to load values from.
+class ConfigMapEnv(_BaseEnv):
     config_map_key: str
-        The key of the value within the config map.
-    """
+    config_map_name: Optional[str]
+    optional: Optional[bool] = None
 
-    def build(self) -> EnvVar:
+    def __init__(
+        self, name: str, config_map_key: str, config_map_name: Optional[str] = None, optional: Optional[bool] = None
+    ):
+        self.config_map_key = config_map_key
+        self.config_map_name = config_map_name
+        self.optional = optional
+        super().__init__(name)
+
+    def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification"""
-        return EnvVar(
+        return _ModelEnvVar(
             name=self.name,
-            value_from=EnvVarSource(
-                config_map_key_ref=ConfigMapKeySelector(name=self.config_map_name, key=self.config_map_key)
+            value_from=_ModelEnvVarSource(
+                config_map_key_ref=_ModelConfigMapKeySelector(
+                    name=self.config_map_name, key=self.config_map_key, optional=self.optional
+                )
             ),
         )
 
 
-@dataclass
-class FieldPath:
-    """Field path representation.
-
-    This allows obtaining K8S values via indexing into specific fields of the K8S definition.
-
-    Attributes
-    ----------
+class FieldEnv(_BaseEnv):
     field_path: str
-        Path to the field to obtain the value from.
-    """
+    api_version: Optional[str] = None
 
-    field_path: str
+    def __init__(self, name: str, field_path: str, api_version: Optional[str] = None):
+        self.field_path = field_path
+        self.api_version = api_version
+        super().__init__(name)
 
+    @validator("api_version")
+    def _check_api_version(cls, v):
+        if v is None:
+            return GlobalConfig.api_version
+        return v
 
-@dataclass
-class FieldEnv(Env, FieldPath):
-    """Environment variable specification from K8S object field.
-
-    Attributes
-    ----------
-    name: str
-        The name of the variable.
-    value: Optional[Any] = None
-        The value of the variable. This value is serialized for the client. It is up to the client to deserialize the
-        value in the task. In addition, if another type is passed, covered by `Any`, an attempt at `json.dumps` will be
-        performed.
-    value_from_input: Optional[str] = None
-        A reference to an input parameter which will resolve to the value. The input parameter will be auto-generated.
-    field_path: str
-        Path to the field to obtain the value from.
-    api_version: Optional[str] = 'v1'
-        The version of the schema the FieldPath is written in terms of. Defaults to 'v1'.
-    """
-
-    api_version: Optional[str] = "v1"
-
-    def build(self) -> EnvVar:
+    def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification"""
-        return EnvVar(
+        return _ModelEnvVar(
             name=self.name,
-            value_from=EnvVarSource(
-                field_ref=ObjectFieldSelector(field_path=self.field_path, api_version=self.api_version)
+            value_from=_ModelEnvVarSource(
+                field_ref=_ModelObjectFieldSelector(
+                    field_path=self.field_path,
+                    api_version=self.api_version,
+                )
             ),
         )
+
+
+class ResourceEnv(_BaseEnv):
+    resource: str
+    container_name: Optional[str] = None
+    divisor: Optional[Quantity] = None
+
+    def __init__(
+        self, name: str, resource: str, container_name: Optional[str] = None, divisor: Optional[Quantity] = None
+    ):
+        self.resource = resource
+        self.container_name = container_name
+        self.divisor = divisor
+        super().__init__(name)
+
+    def build(self) -> _ModelEnvVar:
+        return _ModelEnvVar(
+            name=self.name,
+            value_from=_ModelEnvVarSource(
+                resource_field_ref=_ModelResourceFieldSelector(
+                    container_name=self.container_name,
+                    divisor=self.divisor,
+                    resource=self.resource,
+                )
+            ),
+        )
+
+
+__all__ = [*[c.__name__ for c in _BaseEnv.__subclasses__()]]

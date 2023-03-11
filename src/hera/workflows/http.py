@@ -1,51 +1,54 @@
-from __future__ import annotations
-
-from typing import Any, List, Optional, Union
+from typing import List, Optional
 
 from hera.workflows.models import (
-    DAGTask,
-    DAGTemplate as _ModelDAGTemplate,
+    HTTP as _ModelHTTP,
+    HTTPBodySource,
     Template as _ModelTemplate,
+    V1HTTPHeader as HTTPHeader,
 )
-from hera.workflows._mixins import ContextMixin, IOMixin, TemplateMixin
-from hera.workflows.task import Task
+from hera.workflows._mixins import IOMixin, TemplateMixin
 
 
-class DAG(IOMixin, TemplateMixin, ContextMixin):
-    fail_fast: Optional[bool] = None
-    target: Optional[str] = None
-    tasks: List[Union[Task, DAGTask]] = []
+class HTTP(TemplateMixin, IOMixin):
+    url: str
+    body: Optional[str] = None
+    body_from: Optional[HTTPBodySource] = None
+    headers: Optional[List[HTTPHeader]] = None
+    insecure_skip_verify: Optional[bool] = None
+    method: Optional[str] = None
+    success_condition: Optional[str] = None
+    timeout_seconds: Optional[int] = None
 
-    def _add_sub(self, node: Any):
-        self.tasks.append(node)
+    def _build_http_template(self) -> _ModelHTTP:
+        return _ModelHTTP(
+            url=self.url,
+            body=self.body,
+            body_from=self.body_from,
+            headers=self.headers,
+            insecure_skip_verify=self.insecure_skip_verify,
+            method=self.method,
+            success_condition=self.success_condition,
+            timeout_seconds=self.timeout_seconds,
+        )
 
     def _build_template(self) -> _ModelTemplate:
-        tasks = []
-        for task in self.tasks:
-            if isinstance(task, Task):
-                tasks.append(task._build_dag_task())
-            else:
-                tasks.append(task)
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
-            daemon=self.daemon,
-            dag=_ModelDAGTemplate(fail_fast=self.fail_fast, target=self.target, tasks=tasks),
             executor=self.executor,
             fail_fast=self.fail_fast,
             host_aliases=self.host_aliases,
+            http=self._build_http_template(),
             init_containers=self.init_containers,
-            inputs=self._build_inputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),
-            metrics=self.metrics,
+            inputs=self._build_inputs(),
+            outputs=self._build_outputs(),
             name=self.name,
             node_selector=self.node_selector,
-            outputs=self._build_outputs(),
             plugin=self.plugin,
-            pod_spec_patch=self.pod_spec_patch,
             priority=self.priority,
             priority_class_name=self.priority_class_name,
             retry_strategy=self.retry_strategy,
