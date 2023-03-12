@@ -5,6 +5,15 @@ metadata:
 spec:
   entrypoint: diamond
   templates:
+  - container:
+      command:
+      - echo
+      - '{{inputs.parameters.message}}'
+      image: alpine:3.7
+    inputs:
+      parameters:
+      - name: message
+    name: echo
   - dag:
       tasks:
       - arguments:
@@ -35,12 +44,3 @@ spec:
         name: D
         template: echo
     name: diamond
-  - container:
-      command:
-      - echo
-      - '{{inputs.parameters.message}}'
-      image: alpine:3.7
-    inputs:
-      parameters:
-      - name: message
-    name: echo

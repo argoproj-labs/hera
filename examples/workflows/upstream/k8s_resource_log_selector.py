@@ -6,7 +6,7 @@ with Workflow(generate_name="k8s-jobs-log-selector-", entrypoint="tf-jobtmpl") a
         action="create",
         success_condition="status.replicaStatuses.Worker.succeeded = 2",
         failure_condition="status.replicaStatuses.Worker.failed > 0",
-        manifest="""apiVersion: kubeflow.org/v1
+        manifest=r"""apiVersion: kubeflow.org/v1
 kind: TFJob
 metadata:
   name: tfjob-examples

@@ -7,10 +7,14 @@
 ## Hera
 
 ```python
-from hera.workflows.container import Container
-from hera.workflows.models import Arguments, Parameter, Template, WorkflowStep
-from hera.workflows.steps import Step, Steps
-from hera.workflows.workflow import Workflow
+from hera.workflows import (
+    Container,
+    Parameter,
+    Step,
+    Steps,
+    Workflow,
+    models as m,
+)
 
 my_step = Step(
     name="manually-adding-my-step",
@@ -63,10 +67,10 @@ with Workflow(
 
         # Manually add a model WorkflowStep to s
         s.sub_steps.append(
-            WorkflowStep(
+            m.WorkflowStep(
                 name="model-workflow-step",
                 template="whalesay",
-                arguments=Arguments(parameters=[Parameter(name="message", value="hello-model1")]),
+                arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model1")]),
             )
         )
 
@@ -80,23 +84,23 @@ with Workflow(
 
             # Manually add a model WorkflowStep to ps
             ps.sub_steps.append(
-                WorkflowStep(
+                m.WorkflowStep(
                     name="parallel-step-2-model-workflow-step",
                     template="whalesay",
-                    arguments=Arguments(parameters=[Parameter(name="message", value="hello-model2b")]),
+                    arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model2b")]),
                 )
             )
 
     # Fully falling back to add a model Template containing a model WorkflowStep
     w.templates.append(
-        Template(
+        m.Template(
             name="my-model-template",
             steps=[
                 [
-                    WorkflowStep(
+                    m.WorkflowStep(
                         name="model-template-workflow-step",
                         template="whalesay",
-                        arguments=Arguments(parameters=[Parameter(name="message", value="hello-model-template")]),
+                        arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model-template")]),
                     )
                 ]
             ],

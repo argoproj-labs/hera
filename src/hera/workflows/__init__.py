@@ -4,6 +4,7 @@
 # add them to the __all__ list in the relevant module.
 
 from hera.workflows.container import Container
+from hera.workflows.container_set import ContainerNode, ContainerSet
 from hera.workflows.dag import DAG
 from hera.workflows.data import Data
 from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretEnv
@@ -69,6 +70,8 @@ __all__ = [
     "ConfigMapEnvFrom",
     "ConfigMapVolume",
     "Container",
+    "ContainerNode",
+    "ContainerSet",
     "DAG",
     "Data",
     "DownwardAPIVolume",

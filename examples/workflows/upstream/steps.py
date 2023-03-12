@@ -1,17 +1,17 @@
 from hera.workflows import Container, Parameter, Step, Steps, Workflow
 
-whalesay = Container(
-    name="whalesay",
-    inputs=[Parameter(name="message")],
-    image="docker/whalesay",
-    command=["cowsay"],
-    args=["{{inputs.parameters.message}}"],
-)
-
 with Workflow(
     generate_name="steps-",
     entrypoint="hello-hello-hello",
 ) as w:
+    whalesay = Container(
+        name="whalesay",
+        inputs=[Parameter(name="message")],
+        image="docker/whalesay",
+        command=["cowsay"],
+        args=["{{inputs.parameters.message}}"],
+    )
+
     with Steps(name="hello-hello-hello") as s:
         Step(
             name="hello1",
@@ -30,5 +30,3 @@ with Workflow(
                 template="whalesay",
                 arguments=[Parameter(name="message", value="hello2b")],
             )
-
-    w.templates.append(whalesay)

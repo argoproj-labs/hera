@@ -1,6 +1,6 @@
-# Graph Workflow
+# Container Set Template  Graph Workflow
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/container-set-template/graph-workflow.yaml).
 
 
 
@@ -13,11 +13,6 @@ from hera.workflows.workflow import Workflow
 with Workflow(
     generate_name="graph-",
     entrypoint="main",
-    labels={"workflows.argoproj.io/test": "true"},
-    annotations={
-        "workflows.argoproj.io/description": "This workflow demonstrates running a graph of tasks within containers in a single pod.",
-        "workflows.argoproj.io/version": ">= 3.1.0",
-    },
 ) as w:
     with ContainerSet(name="main"):
         a = ContainerNode(name="a", image="argoproj/argosay:v2")
@@ -33,13 +28,7 @@ with Workflow(
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  annotations:
-    workflows.argoproj.io/description: This workflow demonstrates running a graph
-      of tasks within containers in a single pod.
-    workflows.argoproj.io/version: '>= 3.1.0'
   generateName: graph-
-  labels:
-    workflows.argoproj.io/test: 'true'
 spec:
   entrypoint: main
   templates:
