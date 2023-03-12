@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from hera.workflows._mixins import (
     ContainerMixin,
@@ -10,15 +10,17 @@ from hera.workflows._mixins import (
     TemplateMixin,
     VolumeMountMixin,
 )
+from hera.workflows.container import Container
 from hera.workflows.models import (
-    Container as _ModelContainer,
-    Lifecycle,
-    SecurityContext,
+    ContainerNode,
+    ContainerSetRetryStrategy,
+    ContainerSetTemplate as _ModelContainerSetTemplate,
     Template as _ModelTemplate,
 )
+from hera.workflows.volume import Volume
 
 
-class Container(
+class ContainerSet(
     IOMixin,
     ContainerMixin,
     EnvMixin,
@@ -26,35 +28,15 @@ class Container(
     ResourceMixin,
     VolumeMountMixin,
 ):
-    args: Optional[List[str]] = None
-    command: Optional[List[str]] = None
-    lifecycle: Optional[Lifecycle] = None
-    security_context: Optional[SecurityContext] = None
-    working_dir: Optional[str] = None
+    containers: List[Union[Container, ContainerNode]]
+    retry_strategy: Optional[ContainerSetRetryStrategy] = None
+    volume_mounts: Optional[List[Volume]] = None
 
-    def _build_container(self) -> _ModelContainer:
-        return _ModelContainer(
-            args=self.args,
-            command=self.command,
-            env=self._build_env(),
-            env_from=self._build_env_from(),
-            image=self.image,
-            image_pull_policy=self._build_image_pull_policy(),
-            lifecycle=self.lifecycle,
-            liveness_probe=self.liveness_probe,
-            ports=self.ports,
-            readiness_probe=self.readiness_probe,
-            resources=self._build_resources(),
-            security_context=self.security_context,
-            startup_probe=self.startup_probe,
-            stdin=self.stdin,
-            stdin_once=self.stdin_once,
-            termination_message_path=self.termination_message_path,
-            termination_message_policy=self.termination_message_policy,
-            tty=self.tty,
-            volume_devices=self.volume_devices,
-            volume_mounts=self._build_volume_mounts(),
-            working_dir=self.working_dir,
+    def _build_container_set(self) -> _ModelContainerSetTemplate:
+        return _ModelContainerSetTemplate(
+            containers=self.containers,
+            retry_strategy=self.retry_strategy,
+            volume_mounts=[v._build_volume_mount() for v in self.volume_mounts],
         )
 
     def _build_template(self) -> _ModelTemplate:
@@ -63,7 +45,7 @@ class Container(
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
-            container=self._build_container(),
+            container_set=self._build_container_set(),
             daemon=self.daemon,
             executor=self.executor,
             fail_fast=self.fail_fast,
