@@ -28,7 +28,7 @@ def _generate_yaml(path: Path) -> bool:
 )
 def test_hera_output(module_name):
     # GIVEN
-    workflow = importlib.import_module(f'examples.workflows.{module_name}').w
+    workflow = importlib.import_module(f"examples.workflows.{module_name}").w
     yaml_path = Path(hera_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
     # WHEN
     output = workflow.to_dict()
@@ -42,7 +42,7 @@ def test_hera_output(module_name):
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
 def test_hera_output_upstream(module_name):
     # GIVEN
-    workflow = importlib.import_module(f'examples.workflows.upstream.{module_name}').w
+    workflow = importlib.import_module(f"examples.workflows.upstream.{module_name}").w
     yaml_path = Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
     upstream_yaml_path = (
         Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.upstream.yaml"

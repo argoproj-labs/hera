@@ -55,19 +55,19 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> EventSourceList:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/event-sources/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
             params={
-                'listOptions.labelSelector': label_selector,
-                'listOptions.fieldSelector': field_selector,
-                'listOptions.watch': watch,
-                'listOptions.allowWatchBookmarks': allow_watch_bookmarks,
-                'listOptions.resourceVersion': resource_version,
-                'listOptions.resourceVersionMatch': resource_version_match,
-                'listOptions.timeoutSeconds': timeout_seconds,
-                'listOptions.limit': limit,
-                'listOptions.continue': continue_,
+                "listOptions.labelSelector": label_selector,
+                "listOptions.fieldSelector": field_selector,
+                "listOptions.watch": watch,
+                "listOptions.allowWatchBookmarks": allow_watch_bookmarks,
+                "listOptions.resourceVersion": resource_version,
+                "listOptions.resourceVersionMatch": resource_version_match,
+                "listOptions.timeoutSeconds": timeout_seconds,
+                "listOptions.limit": limit,
+                "listOptions.continue": continue_,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -79,9 +79,9 @@ class EventsService:
 
     def create_event_source(self, namespace: str, req: CreateEventSourceRequest) -> EventSource:
         resp = requests.post(
-            url=os.path.join(self.host, 'api/v1/event-sources/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -95,11 +95,11 @@ class EventsService:
 
     def get_event_source(self, namespace: str, name: str) -> EventSource:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/event-sources/{namespace}/{name}').format(
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -111,11 +111,11 @@ class EventsService:
 
     def update_event_source(self, namespace: str, name: str, req: UpdateEventSourceRequest) -> EventSource:
         resp = requests.put(
-            url=os.path.join(self.host, 'api/v1/event-sources/{namespace}/{name}').format(
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -139,18 +139,18 @@ class EventsService:
         dry_run: Optional[list] = None,
     ) -> EventSourceDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, 'api/v1/event-sources/{namespace}/{name}').format(
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 namespace=namespace, name=name
             ),
             params={
-                'deleteOptions.gracePeriodSeconds': grace_period_seconds,
-                'deleteOptions.preconditions.uid': uid,
-                'deleteOptions.preconditions.resourceVersion': resource_version,
-                'deleteOptions.orphanDependents': orphan_dependents,
-                'deleteOptions.propagationPolicy': propagation_policy,
-                'deleteOptions.dryRun': dry_run,
+                "deleteOptions.gracePeriodSeconds": grace_period_seconds,
+                "deleteOptions.preconditions.uid": uid,
+                "deleteOptions.preconditions.resourceVersion": resource_version,
+                "deleteOptions.orphanDependents": orphan_dependents,
+                "deleteOptions.propagationPolicy": propagation_policy,
+                "deleteOptions.dryRun": dry_run,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -162,11 +162,11 @@ class EventsService:
 
     def receive_event(self, namespace: str, discriminator: str, req: Item) -> EventResponse:
         resp = requests.post(
-            url=os.path.join(self.host, 'api/v1/events/{namespace}/{discriminator}').format(
+            url=os.path.join(self.host, "api/v1/events/{namespace}/{discriminator}").format(
                 namespace=namespace, discriminator=discriminator
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -180,9 +180,9 @@ class EventsService:
 
     def get_info(self) -> InfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/info'),
+            url=os.path.join(self.host, "api/v1/info"),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -206,19 +206,19 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> SensorList:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/sensors/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
             params={
-                'listOptions.labelSelector': label_selector,
-                'listOptions.fieldSelector': field_selector,
-                'listOptions.watch': watch,
-                'listOptions.allowWatchBookmarks': allow_watch_bookmarks,
-                'listOptions.resourceVersion': resource_version,
-                'listOptions.resourceVersionMatch': resource_version_match,
-                'listOptions.timeoutSeconds': timeout_seconds,
-                'listOptions.limit': limit,
-                'listOptions.continue': continue_,
+                "listOptions.labelSelector": label_selector,
+                "listOptions.fieldSelector": field_selector,
+                "listOptions.watch": watch,
+                "listOptions.allowWatchBookmarks": allow_watch_bookmarks,
+                "listOptions.resourceVersion": resource_version,
+                "listOptions.resourceVersionMatch": resource_version_match,
+                "listOptions.timeoutSeconds": timeout_seconds,
+                "listOptions.limit": limit,
+                "listOptions.continue": continue_,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -230,9 +230,9 @@ class EventsService:
 
     def create_sensor(self, namespace: str, req: CreateSensorRequest) -> Sensor:
         resp = requests.post(
-            url=os.path.join(self.host, 'api/v1/sensors/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -246,9 +246,9 @@ class EventsService:
 
     def get_sensor(self, namespace: str, name: str, resource_version: Optional[str] = None) -> Sensor:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/sensors/{namespace}/{name}').format(namespace=namespace, name=name),
-            params={'getOptions.resourceVersion': resource_version},
-            headers={'Authorization': f'Bearer {self.token}'},
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            params={"getOptions.resourceVersion": resource_version},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -260,9 +260,9 @@ class EventsService:
 
     def update_sensor(self, namespace: str, name: str, req: UpdateSensorRequest) -> Sensor:
         resp = requests.put(
-            url=os.path.join(self.host, 'api/v1/sensors/{namespace}/{name}').format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -286,16 +286,16 @@ class EventsService:
         dry_run: Optional[list] = None,
     ) -> DeleteSensorResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, 'api/v1/sensors/{namespace}/{name}').format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
             params={
-                'deleteOptions.gracePeriodSeconds': grace_period_seconds,
-                'deleteOptions.preconditions.uid': uid,
-                'deleteOptions.preconditions.resourceVersion': resource_version,
-                'deleteOptions.orphanDependents': orphan_dependents,
-                'deleteOptions.propagationPolicy': propagation_policy,
-                'deleteOptions.dryRun': dry_run,
+                "deleteOptions.gracePeriodSeconds": grace_period_seconds,
+                "deleteOptions.preconditions.uid": uid,
+                "deleteOptions.preconditions.resourceVersion": resource_version,
+                "deleteOptions.orphanDependents": orphan_dependents,
+                "deleteOptions.propagationPolicy": propagation_policy,
+                "deleteOptions.dryRun": dry_run,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -319,19 +319,19 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> EventSourceWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/stream/event-sources/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}").format(namespace=namespace),
             params={
-                'listOptions.labelSelector': label_selector,
-                'listOptions.fieldSelector': field_selector,
-                'listOptions.watch': watch,
-                'listOptions.allowWatchBookmarks': allow_watch_bookmarks,
-                'listOptions.resourceVersion': resource_version,
-                'listOptions.resourceVersionMatch': resource_version_match,
-                'listOptions.timeoutSeconds': timeout_seconds,
-                'listOptions.limit': limit,
-                'listOptions.continue': continue_,
+                "listOptions.labelSelector": label_selector,
+                "listOptions.fieldSelector": field_selector,
+                "listOptions.watch": watch,
+                "listOptions.allowWatchBookmarks": allow_watch_bookmarks,
+                "listOptions.resourceVersion": resource_version,
+                "listOptions.resourceVersionMatch": resource_version_match,
+                "listOptions.timeoutSeconds": timeout_seconds,
+                "listOptions.limit": limit,
+                "listOptions.continue": continue_,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -360,24 +360,24 @@ class EventsService:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> EventsourceLogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/stream/event-sources/{namespace}/logs').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(namespace=namespace),
             params={
-                'name': name,
-                'eventSourceType': event_source_type,
-                'eventName': event_name,
-                'grep': grep,
-                'podLogOptions.container': container,
-                'podLogOptions.follow': follow,
-                'podLogOptions.previous': previous,
-                'podLogOptions.sinceSeconds': since_seconds,
-                'podLogOptions.sinceTime.seconds': seconds,
-                'podLogOptions.sinceTime.nanos': nanos,
-                'podLogOptions.timestamps': timestamps,
-                'podLogOptions.tailLines': tail_lines,
-                'podLogOptions.limitBytes': limit_bytes,
-                'podLogOptions.insecureSkipTLSVerifyBackend': insecure_skip_tls_verify_backend,
+                "name": name,
+                "eventSourceType": event_source_type,
+                "eventName": event_name,
+                "grep": grep,
+                "podLogOptions.container": container,
+                "podLogOptions.follow": follow,
+                "podLogOptions.previous": previous,
+                "podLogOptions.sinceSeconds": since_seconds,
+                "podLogOptions.sinceTime.seconds": seconds,
+                "podLogOptions.sinceTime.nanos": nanos,
+                "podLogOptions.timestamps": timestamps,
+                "podLogOptions.tailLines": tail_lines,
+                "podLogOptions.limitBytes": limit_bytes,
+                "podLogOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -401,19 +401,19 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> Event:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/stream/events/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/events/{namespace}").format(namespace=namespace),
             params={
-                'listOptions.labelSelector': label_selector,
-                'listOptions.fieldSelector': field_selector,
-                'listOptions.watch': watch,
-                'listOptions.allowWatchBookmarks': allow_watch_bookmarks,
-                'listOptions.resourceVersion': resource_version,
-                'listOptions.resourceVersionMatch': resource_version_match,
-                'listOptions.timeoutSeconds': timeout_seconds,
-                'listOptions.limit': limit,
-                'listOptions.continue': continue_,
+                "listOptions.labelSelector": label_selector,
+                "listOptions.fieldSelector": field_selector,
+                "listOptions.watch": watch,
+                "listOptions.allowWatchBookmarks": allow_watch_bookmarks,
+                "listOptions.resourceVersion": resource_version,
+                "listOptions.resourceVersionMatch": resource_version_match,
+                "listOptions.timeoutSeconds": timeout_seconds,
+                "listOptions.limit": limit,
+                "listOptions.continue": continue_,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -437,19 +437,19 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> SensorWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/stream/sensors/{namespace}').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}").format(namespace=namespace),
             params={
-                'listOptions.labelSelector': label_selector,
-                'listOptions.fieldSelector': field_selector,
-                'listOptions.watch': watch,
-                'listOptions.allowWatchBookmarks': allow_watch_bookmarks,
-                'listOptions.resourceVersion': resource_version,
-                'listOptions.resourceVersionMatch': resource_version_match,
-                'listOptions.timeoutSeconds': timeout_seconds,
-                'listOptions.limit': limit,
-                'listOptions.continue': continue_,
+                "listOptions.labelSelector": label_selector,
+                "listOptions.fieldSelector": field_selector,
+                "listOptions.watch": watch,
+                "listOptions.allowWatchBookmarks": allow_watch_bookmarks,
+                "listOptions.resourceVersion": resource_version,
+                "listOptions.resourceVersionMatch": resource_version_match,
+                "listOptions.timeoutSeconds": timeout_seconds,
+                "listOptions.limit": limit,
+                "listOptions.continue": continue_,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -477,23 +477,23 @@ class EventsService:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> SensorLogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/stream/sensors/{namespace}/logs').format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}/logs").format(namespace=namespace),
             params={
-                'name': name,
-                'triggerName': trigger_name,
-                'grep': grep,
-                'podLogOptions.container': container,
-                'podLogOptions.follow': follow,
-                'podLogOptions.previous': previous,
-                'podLogOptions.sinceSeconds': since_seconds,
-                'podLogOptions.sinceTime.seconds': seconds,
-                'podLogOptions.sinceTime.nanos': nanos,
-                'podLogOptions.timestamps': timestamps,
-                'podLogOptions.tailLines': tail_lines,
-                'podLogOptions.limitBytes': limit_bytes,
-                'podLogOptions.insecureSkipTLSVerifyBackend': insecure_skip_tls_verify_backend,
+                "name": name,
+                "triggerName": trigger_name,
+                "grep": grep,
+                "podLogOptions.container": container,
+                "podLogOptions.follow": follow,
+                "podLogOptions.previous": previous,
+                "podLogOptions.sinceSeconds": since_seconds,
+                "podLogOptions.sinceTime.seconds": seconds,
+                "podLogOptions.sinceTime.nanos": nanos,
+                "podLogOptions.timestamps": timestamps,
+                "podLogOptions.tailLines": tail_lines,
+                "podLogOptions.limitBytes": limit_bytes,
+                "podLogOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
             },
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -505,9 +505,9 @@ class EventsService:
 
     def get_user_info(self) -> GetUserInfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/userinfo'),
+            url=os.path.join(self.host, "api/v1/userinfo"),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -519,9 +519,9 @@ class EventsService:
 
     def get_version(self) -> Version:
         resp = requests.get(
-            url=os.path.join(self.host, 'api/v1/version'),
+            url=os.path.join(self.host, "api/v1/version"),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -544,7 +544,7 @@ class EventsService:
         resp = requests.get(
             url=os.path.join(
                 self.host,
-                'artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}',
+                "artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
                 namespace=namespace,
                 idDiscriminator=id_discriminator,
@@ -554,7 +554,7 @@ class EventsService:
                 artifactDiscriminator=artifact_discriminator,
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -567,11 +567,11 @@ class EventsService:
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, 'artifacts-by-uid/{uid}/{nodeId}/{artifactName}').format(
+            url=os.path.join(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -584,11 +584,11 @@ class EventsService:
     def get_output_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, 'artifacts/{namespace}/{name}/{nodeId}/{artifactName}').format(
+            url=os.path.join(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -601,11 +601,11 @@ class EventsService:
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, 'input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}').format(
+            url=os.path.join(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -618,11 +618,11 @@ class EventsService:
     def get_input_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, 'input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}').format(
+            url=os.path.join(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
-            headers={'Authorization': f'Bearer {self.token}'},
+            headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -633,4 +633,4 @@ class EventsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
 
-__all__ = ['EventsService']
+__all__ = ["EventsService"]
