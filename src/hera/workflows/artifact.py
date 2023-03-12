@@ -6,6 +6,7 @@ from hera.workflows.models import (
     Artifact as _ModelArtifact,
     ArtifactGC,
     ArtifactoryArtifact as _ModelArtifactoryArtifact,
+    ArtifactPaths as _ModelArtifactPaths,
     AzureArtifact as _ModelAzureArtifact,
     GCSArtifact as _ModelGCSArtifact,
     GitArtifact as _ModelGitArtifact,
@@ -46,6 +47,10 @@ class _BaseArtifact(BaseModel):
             recurse_mode=self.recurse_mode,
             sub_path=self.sub_path,
         )
+
+    def _build_artifact_paths(self) -> _ModelArtifactPaths:
+        artifact = self._build_artifact()
+        return _ModelArtifactPaths(**artifact.dict())
 
     def as_name(self, name: str) -> _ModelArtifact:
         artifact = self._build_artifact()

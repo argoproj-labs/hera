@@ -1695,7 +1695,7 @@ class ContainerSetTemplate(BaseModel):
 
 
 class DataSource(BaseModel):
-    artifact_paths: Optional[ArtifactPaths] = Field(
+    source: Optional[ArtifactPaths] = Field(
         None,
         alias="artifactPaths",
         description="ArtifactPaths is a data transformation that collects a list of artifact paths",
