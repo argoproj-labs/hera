@@ -1,8 +1,11 @@
-from hera.workflows.container import Container
-from hera.workflows.dag import DAG
-from hera.workflows.models import Arguments, Parameter
-from hera.workflows.task import Task
-from hera.workflows.workflow import Workflow
+from hera.workflows import (
+    DAG,
+    Container,
+    Parameter,
+    Task,
+    Workflow,
+    models as m,
+)
 
 # Showing the flexibility of hera v5
 # here we defined the echo container ealier
@@ -22,10 +25,10 @@ with Workflow(
     entrypoint="diamond",
 ) as w:
     with DAG(name="diamond"):
-        A = Task(name="A", template=echo, arguments=Arguments(parameters=[Parameter(name="message", value="A")]))
-        B = Task(name="B", template=echo, arguments=Arguments(parameters=[Parameter(name="message", value="B")]))
-        C = Task(name="C", template=echo, arguments=Arguments(parameters=[Parameter(name="message", value="C")]))
-        D = Task(name="D", template=echo, arguments=Arguments(parameters=[Parameter(name="message", value="D")]))
+        A = Task(name="A", template=echo, arguments=m.Arguments(parameters=[Parameter(name="message", value="A")]))
+        B = Task(name="B", template=echo, arguments=m.Arguments(parameters=[Parameter(name="message", value="B")]))
+        C = Task(name="C", template=echo, arguments=m.Arguments(parameters=[Parameter(name="message", value="C")]))
+        D = Task(name="D", template=echo, arguments=m.Arguments(parameters=[Parameter(name="message", value="D")]))
         A >> [B, C] >> D
 
     w.templates.append(echo)

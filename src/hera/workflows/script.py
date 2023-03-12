@@ -187,3 +187,6 @@ class Script(
             volume_mounts=self._build_volume_mounts(),
             working_dir=self.working_dir,
         )
+
+
+__all__ = ["Script"]

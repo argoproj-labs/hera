@@ -63,3 +63,6 @@ class Resource(TemplateMixin, SubNodeMixin, IOMixin):
             timeout=self.timeout,
             tolerations=self.tolerations,
         )
+
+
+__all__ = ["Resource"]
