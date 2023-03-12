@@ -1,5 +1,4 @@
-from hera.workflows.container import Container
-from hera.workflows.workflow import Workflow
+from hera.workflows import Container, Workflow
 
 with Workflow(
     generate_name="coinflip-",

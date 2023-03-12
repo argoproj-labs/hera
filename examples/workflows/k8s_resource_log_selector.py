@@ -1,5 +1,4 @@
-from hera.workflows.resource import Resource
-from hera.workflows.workflow import Workflow
+from hera.workflows import Resource, Workflow
 
 with Workflow(generate_name="k8s-jobs-log-selector-", entrypoint="tf-jobtmpl") as w:
     tf_jobtmpl = Resource(

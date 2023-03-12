@@ -1,6 +1,4 @@
-from hera.workflows.parameter import Parameter
-from hera.workflows.suspend import Suspend
-from hera.workflows.workflow import Workflow
+from hera.workflows import Parameter, Suspend, Workflow
 
 with Workflow(generate_name="suspend-") as w:
     Suspend(name="suspend-without-duration")

@@ -1,11 +1,7 @@
 from typing import cast
 
 from hera.expr import g
-from hera.workflows.dag import DAG
-from hera.workflows.parameter import Parameter
-from hera.workflows.script import Script
-from hera.workflows.task import Task
-from hera.workflows.workflow import Workflow
+from hera.workflows import DAG, Parameter, Script, Task, Workflow
 
 
 def heads():

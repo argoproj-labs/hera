@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
 from hera.workflows._mixins import SubNodeMixin, TemplateMixin
@@ -14,8 +15,18 @@ from hera.workflows.models import (
     TemplateRef,
 )
 from hera.workflows.operator import Operator
-from hera.workflows.task_result import TaskResult
 from hera.workflows.workflow_status import WorkflowStatus
+
+
+class TaskResult(Enum):
+    failed = "Failed"
+    succeeded = "Succeeded"
+    errored = "Errored"
+    skipped = "Skipped"
+    omitted = "Omitted"
+    daemoned = "Daemoned"
+    any_succeeded = "AnySucceeded"
+    all_failed = "AllFailed"
 
 
 class Task(SubNodeMixin):
@@ -164,3 +175,6 @@ class Task(SubNodeMixin):
             with_param=self.with_param,
             with_sequence=self.with_sequence,
         )
+
+
+__all__ = ["Task", "TaskResult"]
