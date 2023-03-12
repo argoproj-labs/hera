@@ -16,7 +16,7 @@ codegen: models services examples init-files
 .PHONY: check-codegen
 check-codegen: ## Check if the code is up to date
 check-codegen: codegen
-	git diff --exit-code -- src/hera
+	git diff --exit-code -- src/hera docs || "Code is not up-to-date. Please run 'make codegen'"
 
 .PHONY: format
 format: ## Format and sort imports for source, tests, examples, etc.
@@ -91,4 +91,5 @@ examples:  ## Generate all the examples
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests
+	find examples -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 make test examples

@@ -7,23 +7,20 @@
 ## Hera
 
 ```python
-from hera.workflows.container import Container
-from hera.workflows.models import Parameter
-from hera.workflows.steps import Step, Steps
-from hera.workflows.workflow import Workflow
-
-whalesay = Container(
-    name="whalesay",
-    inputs=[Parameter(name="message")],
-    image="docker/whalesay",
-    command=["cowsay"],
-    args=["{{inputs.parameters.message}}"],
-)
+from hera.workflows import Container, Parameter, Step, Steps, Workflow
 
 with Workflow(
     generate_name="steps-",
     entrypoint="hello-hello-hello",
 ) as w:
+    whalesay = Container(
+        name="whalesay",
+        inputs=[Parameter(name="message")],
+        image="docker/whalesay",
+        command=["cowsay"],
+        args=["{{inputs.parameters.message}}"],
+    )
+
     with Steps(name="hello-hello-hello") as s:
         Step(
             name="hello1",
@@ -42,8 +39,6 @@ with Workflow(
                 template="whalesay",
                 arguments=[Parameter(name="message", value="hello2b")],
             )
-
-    w.templates.append(whalesay)
 ```
 
 ## YAML
@@ -56,6 +51,16 @@ metadata:
 spec:
   entrypoint: hello-hello-hello
   templates:
+  - container:
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - cowsay
+      image: docker/whalesay
+    inputs:
+      parameters:
+      - name: message
+    name: whalesay
   - name: hello-hello-hello
     steps:
     - - arguments:
@@ -76,14 +81,4 @@ spec:
             value: hello2b
         name: hello2b
         template: whalesay
-  - container:
-      args:
-      - '{{inputs.parameters.message}}'
-      command:
-      - cowsay
-      image: docker/whalesay
-    inputs:
-      parameters:
-      - name: message
-    name: whalesay
 ```

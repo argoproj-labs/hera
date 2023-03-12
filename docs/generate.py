@@ -25,7 +25,7 @@ def generate_markdown(path: Path, sub_folder: str):
     upstream_example = Path(str(path).replace(".py", ".upstream.yaml").replace("_", "-")).exists()
     upstream_link = ""
     if upstream_example:
-        upstream_link = f"> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/{path.stem.replace('_', '-') + '.yaml'})."
+        upstream_link = f"> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/{path.stem.replace('__', '/').replace('_', '-') + '.yaml'})."
     contents = f"""# {title}
 
 {upstream_link}

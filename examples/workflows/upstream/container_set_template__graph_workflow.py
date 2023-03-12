@@ -4,11 +4,6 @@ from hera.workflows.workflow import Workflow
 with Workflow(
     generate_name="graph-",
     entrypoint="main",
-    labels={"workflows.argoproj.io/test": "true"},
-    annotations={
-        "workflows.argoproj.io/description": "This workflow demonstrates running a graph of tasks within containers in a single pod.",
-        "workflows.argoproj.io/version": ">= 3.1.0",
-    },
 ) as w:
     with ContainerSet(name="main"):
         a = ContainerNode(name="a", image="argoproj/argosay:v2")

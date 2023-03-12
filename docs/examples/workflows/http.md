@@ -8,9 +8,7 @@
 
 ```python
 from hera.expr import g
-from hera.workflows.http import HTTP
-from hera.workflows.parameter import Parameter
-from hera.workflows.workflow import Workflow
+from hera.workflows import HTTP, Parameter, Workflow
 
 with Workflow(generate_name="http-") as w:
     HTTP(

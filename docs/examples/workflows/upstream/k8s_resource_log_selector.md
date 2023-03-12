@@ -1,14 +1,13 @@
 # K8S Resource Log Selector
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-resource-log-selector.yaml).
 
 
 
 ## Hera
 
 ```python
-from hera.workflows.resource import Resource
-from hera.workflows.workflow import Workflow
+from hera.workflows import Resource, Workflow
 
 with Workflow(generate_name="k8s-jobs-log-selector-", entrypoint="tf-jobtmpl") as w:
     tf_jobtmpl = Resource(
@@ -16,7 +15,7 @@ with Workflow(generate_name="k8s-jobs-log-selector-", entrypoint="tf-jobtmpl") a
         action="create",
         success_condition="status.replicaStatuses.Worker.succeeded = 2",
         failure_condition="status.replicaStatuses.Worker.failed > 0",
-        manifest="""apiVersion: kubeflow.org/v1
+        manifest=r"""apiVersion: kubeflow.org/v1
 kind: TFJob
 metadata:
   name: tfjob-examples
