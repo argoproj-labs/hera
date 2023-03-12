@@ -29,7 +29,7 @@ class ContainerNode(_ModelContainerNode, SubNodeMixin):
             other.dependencies = [self.name]
         else:
             other.dependencies.append(self.name)
-        other.dependencies = list(set(other.dependencies))
+        other.dependencies = sorted(list(set(other.dependencies)))
         return other
 
     def __rrshift__(self, other: List[ContainerNode]) -> ContainerNode:
