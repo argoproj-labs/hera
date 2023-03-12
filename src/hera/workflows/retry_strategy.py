@@ -39,7 +39,7 @@ class RetryStrategy(_BaseModel):
     limit: Optional[Union[int, str]] = None
     retry_policy: Optional[Union[str, RetryPolicy]] = None
 
-    @validator('retry_policy', pre=True)
+    @validator("retry_policy", pre=True)
     def _convert_retry_policy(cls, v):
         if v is None or isinstance(v, str):
             return v
@@ -47,7 +47,7 @@ class RetryStrategy(_BaseModel):
         v = cast(RetryPolicy, v)
         return v.value
 
-    @validator('limit', pre=True)
+    @validator("limit", pre=True)
     def _convert_limit(cls, v):
         if v is None or isinstance(v, IntOrString):
             return v

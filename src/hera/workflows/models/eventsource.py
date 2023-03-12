@@ -18,10 +18,10 @@ class EventSourceDeletedResponse(BaseModel):
 
 
 class LogEntry(BaseModel):
-    event_name: Optional[str] = Field(None, alias='eventName', title='optional - the event name (e.g. `example`)')
-    event_source_name: Optional[str] = Field(None, alias='eventSourceName')
+    event_name: Optional[str] = Field(None, alias="eventName", title="optional - the event name (e.g. `example`)")
+    event_source_name: Optional[str] = Field(None, alias="eventSourceName")
     event_source_type: Optional[str] = Field(
-        None, alias='eventSourceType', title='optional - the event source type (e.g. `webhook`)'
+        None, alias="eventSourceType", title="optional - the event source type (e.g. `webhook`)"
     )
     level: Optional[str] = None
     msg: Optional[str] = None
@@ -30,7 +30,7 @@ class LogEntry(BaseModel):
 
 
 class CreateEventSourceRequest(BaseModel):
-    event_source: Optional[v1alpha1.EventSource] = Field(None, alias='eventSource')
+    event_source: Optional[v1alpha1.EventSource] = Field(None, alias="eventSource")
     namespace: Optional[str] = None
 
 
@@ -40,6 +40,6 @@ class EventSourceWatchEvent(BaseModel):
 
 
 class UpdateEventSourceRequest(BaseModel):
-    event_source: Optional[v1alpha1.EventSource] = Field(None, alias='eventSource')
+    event_source: Optional[v1alpha1.EventSource] = Field(None, alias="eventSource")
     name: Optional[str] = None
     namespace: Optional[str] = None
