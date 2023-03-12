@@ -16,8 +16,8 @@ from hera.workflows.models import (
     ContainerSetRetryStrategy,
     ContainerSetTemplate as _ModelContainerSetTemplate,
     Template as _ModelTemplate,
+    VolumeMount,
 )
-from hera.workflows.volume import Volume
 
 
 class ContainerSet(
@@ -29,14 +29,14 @@ class ContainerSet(
     VolumeMountMixin,
 ):
     containers: List[Union[Container, ContainerNode]]
-    retry_strategy: Optional[ContainerSetRetryStrategy] = None
-    volume_mounts: Optional[List[Volume]] = None
+    container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
+    volume_mounts: Optional[List[VolumeMount]] = None
 
     def _build_container_set(self) -> _ModelContainerSetTemplate:
         return _ModelContainerSetTemplate(
             containers=self.containers,
-            retry_strategy=self.retry_strategy,
-            volume_mounts=None if self.volume_mounts is None else [v._build_volume_mount() for v in self.volume_mounts],
+            retry_strategy=self.container_set_retry_strategy,
+            volume_mounts=self.volume_mounts,
         )
 
     def _build_template(self) -> _ModelTemplate:
