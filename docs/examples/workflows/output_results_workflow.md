@@ -1,3 +1,12 @@
+# Output Results Workflow
+
+
+
+
+
+## Hera
+
+```python
 from hera.expr import g
 from hera.workflows.container_set import ContainerNode, ContainerSet
 from hera.workflows.dag import DAG
@@ -39,3 +48,53 @@ with Workflow(
             arguments=Arguments(parameters=[Parameter(name="x", value=f"{g.tasks.a.outputs.result:$}")]),
             template=verify,
         )
+```
+
+## YAML
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  annotations:
+    workflows.argoproj.io/description: This workflow demonstrates collecting outputs
+      (specifically the stdout result) from a pod. Specifically, you must have a container
+      named "main".
+    workflows.argoproj.io/version: '>= 3.1.0'
+  generateName: graph-
+  labels:
+    workflows.argoproj.io/test: 'true'
+spec:
+  entrypoint: main
+  templates:
+  - containerSet:
+      containers:
+      - args:
+        - print('hi')
+        command:
+        - python
+        - -c
+        image: python:alpine:3.6
+        name: main
+    name: group
+  - inputs:
+      parameters:
+      - name: x
+    script:
+      command:
+      - python
+      image: python:alpine3.6
+      source: 'assert "{{inputs.parameters.x}}" == "hi"
+
+        '
+  - dag:
+      tasks:
+      - name: a
+        template: group
+      - arguments:
+          parameters:
+          - name: x
+            value: '{{tasks.a.outputs.result}}'
+        name: b
+    name: main
+```

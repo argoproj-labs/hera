@@ -1,23 +1,56 @@
 from __future__ import annotations
 
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
     ContainerMixin,
+    ContextMixin,
     EnvMixin,
     IOMixin,
     ResourceMixin,
+    SubNodeMixin,
     TemplateMixin,
     VolumeMountMixin,
 )
-from hera.workflows.container import Container
+from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
-    ContainerNode,
+    ContainerNode as _ModelContainerNode,
     ContainerSetRetryStrategy,
     ContainerSetTemplate as _ModelContainerSetTemplate,
     Template as _ModelTemplate,
     VolumeMount,
 )
+
+
+class ContainerNode(_ModelContainerNode, SubNodeMixin):
+    def next(self, other: ContainerNode) -> ContainerNode:
+        assert issubclass(other.__class__, ContainerNode)
+        if other.dependencies is None:
+            other.dependencies = [self.name]
+        else:
+            other.dependencies.append(self.name)
+        other.dependencies = list(set(other.dependencies))
+        return other
+
+    def __rrshift__(self, other: List[ContainerNode]) -> ContainerNode:
+        assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
+        for o in other:
+            o.next(self)
+        return self
+
+    def __rshift__(
+        self, other: Union[ContainerNode, List[ContainerNode]]
+    ) -> Union[ContainerNode, List[ContainerNode]]:
+        if isinstance(other, ContainerNode):
+            return self.next(other)
+        elif isinstance(other, list):
+            for o in other:
+                assert isinstance(
+                    o, ContainerNode
+                ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                self.next(o)
+            return other
+        raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
 
 class ContainerSet(
@@ -27,10 +60,17 @@ class ContainerSet(
     TemplateMixin,
     ResourceMixin,
     VolumeMountMixin,
+    ContextMixin,
 ):
-    containers: List[Union[Container, ContainerNode]]
+    containers: List[ContainerNode] = []
     container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
     volume_mounts: Optional[List[VolumeMount]] = None
+
+    def _add_sub(self, node: Any):
+        if not isinstance(node, ContainerNode):
+            raise InvalidType()
+
+        self.containers.append(node)
 
     def _build_container_set(self) -> _ModelContainerSetTemplate:
         return _ModelContainerSetTemplate(
