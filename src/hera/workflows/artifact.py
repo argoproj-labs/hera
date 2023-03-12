@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Optional
 
 from hera.workflows._base_model import BaseModel
@@ -52,15 +51,6 @@ class _BaseArtifact(BaseModel):
         artifact = self._build_artifact()
         artifact.name = name
         return artifact
-
-    def as_argument(self) -> _ModelArtifact:
-        pass
-
-    def as_input(self) -> _ModelArtifact:
-        pass
-
-    def as_output(self) -> _ModelArtifact:
-        pass
 
 
 class ArtifactoryArtifact(_ModelArtifactoryArtifact, _BaseArtifact):
