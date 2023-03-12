@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
-from hera.workflows.artifact import _BaseArtifact
+from hera.workflows.artifact import Artifact
 from hera.workflows.env import _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.models import (
@@ -44,8 +44,8 @@ from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import _BaseVolume
 
-Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, _BaseArtifact, ModelArtifact]]]
-Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, _BaseArtifact, ModelArtifact]]]
+Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
+Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
 Env = Optional[List[Union[_BaseEnv, EnvVar]]]
 EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
@@ -107,7 +107,7 @@ class IOMixin(BaseMixin):
                 )
             elif isinstance(value, ModelParameter):
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
-            elif isinstance(value, _BaseArtifact):
+            elif isinstance(value, Artifact):
                 result.artifacts = (
                     [value] if result.artifacts is None else result.artifacts + [value._build_artifact()]
                 )
@@ -132,7 +132,7 @@ class IOMixin(BaseMixin):
                 )
             elif isinstance(value, ModelParameter):
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
-            elif isinstance(value, _BaseArtifact):
+            elif isinstance(value, Artifact):
                 result.artifacts = (
                     [value] if result.artifacts is None else result.artifacts + [value._build_artifact()]
                 )

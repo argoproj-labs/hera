@@ -3,11 +3,11 @@ from typing import List, Union
 from hera.expr._node import Node
 from hera.workflows import models as m
 from hera.workflows._mixins import IOMixin, TemplateMixin
-from hera.workflows.artifact import _BaseArtifact
+from hera.workflows.artifact import Artifact
 
 
 class Data(TemplateMixin, IOMixin):
-    source: Union[m.DataSource, m.ArtifactPaths, _BaseArtifact]
+    source: Union[m.DataSource, m.ArtifactPaths, Artifact]
     transformations: List[Union[str, Node]] = []
 
     def _build_source(self) -> m.DataSource:

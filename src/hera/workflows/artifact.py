@@ -18,7 +18,7 @@ from hera.workflows.models import (
 )
 
 
-class _BaseArtifact(BaseModel):
+class Artifact(BaseModel):
     name: str
     archive: Optional[ArchiveStrategy] = None
     archive_logs: Optional[bool] = None
@@ -58,7 +58,7 @@ class _BaseArtifact(BaseModel):
         return artifact
 
 
-class ArtifactoryArtifact(_ModelArtifactoryArtifact, _BaseArtifact):
+class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.artifactory = _ModelArtifactoryArtifact(
@@ -67,7 +67,7 @@ class ArtifactoryArtifact(_ModelArtifactoryArtifact, _BaseArtifact):
         return artifact
 
 
-class AzureArtifact(_ModelAzureArtifact, _BaseArtifact):
+class AzureArtifact(_ModelAzureArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.azure = _ModelAzureArtifact(
@@ -80,7 +80,7 @@ class AzureArtifact(_ModelAzureArtifact, _BaseArtifact):
         return artifact
 
 
-class GCSArtifact(_ModelGCSArtifact, _BaseArtifact):
+class GCSArtifact(_ModelGCSArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.gcs = _ModelGCSArtifact(
@@ -91,7 +91,7 @@ class GCSArtifact(_ModelGCSArtifact, _BaseArtifact):
         return artifact
 
 
-class GitArtifact(_ModelGitArtifact, _BaseArtifact):
+class GitArtifact(_ModelGitArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.git = _ModelGitArtifact(
@@ -110,7 +110,7 @@ class GitArtifact(_ModelGitArtifact, _BaseArtifact):
         return artifact
 
 
-class HDFSArtifact(_ModelHDFSArtifact, _BaseArtifact):
+class HDFSArtifact(_ModelHDFSArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.hdfs = _ModelHDFSArtifact(
@@ -128,7 +128,7 @@ class HDFSArtifact(_ModelHDFSArtifact, _BaseArtifact):
         return artifact
 
 
-class HTTPArtifact(_ModelHTTPArtifact, _BaseArtifact):
+class HTTPArtifact(_ModelHTTPArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.http = _ModelHTTPArtifact(
@@ -139,7 +139,7 @@ class HTTPArtifact(_ModelHTTPArtifact, _BaseArtifact):
         return artifact
 
 
-class OSSArtifact(_ModelOSSArtifact, _BaseArtifact):
+class OSSArtifact(_ModelOSSArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.oss = _ModelOSSArtifact(
@@ -155,14 +155,14 @@ class OSSArtifact(_ModelOSSArtifact, _BaseArtifact):
         return artifact
 
 
-class RawArtifact(_ModelRawArtifact, _BaseArtifact):
+class RawArtifact(_ModelRawArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.raw = _ModelRawArtifact(data=self.data)
         return artifact
 
 
-class S3Artifact(_ModelS3Artifact, _BaseArtifact):
+class S3Artifact(_ModelS3Artifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.s3 = _ModelS3Artifact(
@@ -179,3 +179,9 @@ class S3Artifact(_ModelS3Artifact, _BaseArtifact):
             use_sdk_creds=self.use_sdk_creds,
         )
         return artifact
+
+
+__all__ = [
+    "Artifact",
+    *[c.__name__ for c in Artifact.__subclasses__()],
+]
