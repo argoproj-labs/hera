@@ -56,8 +56,8 @@ spec:
         image: argoproj/argosay:v2
         name: c
       - dependencies:
-        - b
         - c
+        - b
         image: argoproj/argosay:v2
         name: d
     name: main
