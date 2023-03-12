@@ -46,7 +46,7 @@ from hera.expr import C, P, g, it, sprig
         (P(C(1) >= C(2)) | P(C(2) < C(3)), "(1 >= 2) || (2 < 3)"),
         (C([1, 2, 3])[2], "[1, 2, 3][2]"),
         (g.test[2], "test[2]"),
-        (g.test['as'], "test['as']"),
+        (g.test["as"], "test['as']"),
         (g.test.attr, "test.attr"),
         (g.test.length(), "len(test)"),
         (g.test.length() > 2, "len(test) > 2"),

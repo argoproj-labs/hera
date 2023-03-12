@@ -16,6 +16,31 @@ Please keep in mind the following guidelines and practices when contributing to 
 1. Add unit tests for any new code you write
 1. Add an example, or extend an existing example, with any new features you may add. Use `make examples` to ensure that the documentation and examples are in sync.
 
+### Adding new Workflow tests
+
+Hera has an automated-test harness that is coupled with our documentation. In order to add new tests, please follow these steps - 
+
+#### Local Hera examples
+
+Tests that do not correspond to any upstream Argo Workflow examples should live in `examples/workflows/*.py`
+
+In order to add a new workflow test to test Hera functionality, do the following - 
+- Create a new file under `examples/workflows`, for example - `my_test.py`
+- Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
+- Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name `my-test.yaml` if it does not exist already.
+- If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`.
+- The golden copies must be checked in to ensure that regressions may be catched in the future.
+
+#### Upstream Hera examples
+
+Tests that correspond to any [upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/master/examples) should live in `examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and also to catch any regressions that might happen.
+
+In order to add a new workflow test to test Hera functionality, do the following - 
+- Create a new file under `examples/workflows/upstream` that corresponds with the name of the upstream example yaml file. If the yaml file has a hyphen, your python file name should replace those with an underscore. For eg. if you are trying to replicate [archive-location.yaml](https://github.com/argoproj/argo-workflows/blob/master/examples/archive-location.yaml) your python file should be called `archive_location.py`
+- Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
+- Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name `archive-location.yaml` and also generate a local copy of the upstream yaml file with the name `archive-location.upstream.yaml` 
+- If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`.
+- The golden copies must be checked in to ensure that regressions may be catched in the future.
 
 ### Code of Conduct
 
