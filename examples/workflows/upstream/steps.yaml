@@ -5,6 +5,16 @@ metadata:
 spec:
   entrypoint: hello-hello-hello
   templates:
+  - container:
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - cowsay
+      image: docker/whalesay
+    inputs:
+      parameters:
+      - name: message
+    name: whalesay
   - name: hello-hello-hello
     steps:
     - - arguments:
@@ -25,13 +35,3 @@ spec:
             value: hello2b
         name: hello2b
         template: whalesay
-  - container:
-      args:
-      - '{{inputs.parameters.message}}'
-      command:
-      - cowsay
-      image: docker/whalesay
-    inputs:
-      parameters:
-      - name: message
-    name: whalesay

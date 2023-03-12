@@ -8,9 +8,11 @@
 
 ```python
 from hera.expr import g, it
-from hera.workflows import models as m
-from hera.workflows.data import Data
-from hera.workflows.workflow import Workflow
+from hera.workflows import (
+    Data,
+    Workflow,
+    models as m,
+)
 
 with Workflow(generate_name="data-") as w:
     Data(

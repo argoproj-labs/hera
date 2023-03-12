@@ -113,3 +113,6 @@ class ContainerSet(
             tolerations=self.tolerations,
             volumes=self._build_volumes(),
         )
+
+
+__all__ = ["ContainerNode", "ContainerSet"]

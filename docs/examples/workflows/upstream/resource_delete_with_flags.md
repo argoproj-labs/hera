@@ -1,16 +1,20 @@
 # Resource Delete With Flags
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/resource-delete-with-flags.yaml).
 
 
 
 ## Hera
 
 ```python
-from hera.workflows.models import Inputs, Parameter
-from hera.workflows.resource import Resource
-from hera.workflows.steps import Step, Steps
-from hera.workflows.workflow import Workflow
+from hera.workflows import (
+    Parameter,
+    Resource,
+    Step,
+    Steps,
+    Workflow,
+    models as m,
+)
 
 with Workflow(
     generate_name="resource-delete-with-flags-",
@@ -34,7 +38,7 @@ data:
         name="delete-resource",
         action="delete",
         flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
-        inputs=Inputs(
+        inputs=m.Inputs(
             parameters=[Parameter(name="selector")],
         ),
     )

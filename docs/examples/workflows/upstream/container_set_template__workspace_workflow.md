@@ -1,26 +1,18 @@
-# Workspace Workflow
+# Container Set Template  Workspace Workflow
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/container-set-template/workspace-workflow.yaml).
 
 
 
 ## Hera
 
 ```python
-from hera.workflows.container_set import ContainerNode, ContainerSet
+from hera.workflows import ContainerNode, ContainerSet, EmptyDirVolume, Parameter, Workflow
 from hera.workflows.models import Artifact, ValueFrom, VolumeMount
-from hera.workflows.parameter import Parameter
-from hera.workflows.volume import EmptyDirVolume
-from hera.workflows.workflow import Workflow
 
 with Workflow(
     generate_name="workspace-",
-    labels={"workflows.argoproj.io/test": "true"},
-    annotations={
-        "workflows.argoproj.io/description": "This workflow demonstrates using a workspace to share files between containers. "
-        'This also allows containers not called "main" to create output artifacts.',
-        "workflows.argoproj.io/version": ">= 3.1.0",
-    },
+    entrypoint="main",
 ) as w:
     with ContainerSet(
         name="main",
@@ -48,15 +40,9 @@ with Workflow(
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  annotations:
-    workflows.argoproj.io/description: This workflow demonstrates using a workspace
-      to share files between containers. This also allows containers not called "main"
-      to create output artifacts.
-    workflows.argoproj.io/version: '>= 3.1.0'
   generateName: workspace-
-  labels:
-    workflows.argoproj.io/test: 'true'
 spec:
+  entrypoint: main
   templates:
   - containerSet:
       containers:
