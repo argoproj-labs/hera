@@ -11,11 +11,11 @@ ci: lint test check-codegen
 
 .PHONY: codegen
 codegen: ## Generate all the code
-codegen: models service examples
+codegen: models services examples init-files
 
 .PHONY: check-codegen
 check-codegen: ## Check if the code is up to date
-check-codegen: models service examples
+check-codegen: codegen
 	git diff --exit-code -- src/hera
 
 .PHONY: format
@@ -75,9 +75,15 @@ events-service:  ## Generate the events service option of Hera
 	@poetry run python scripts/service.py $(OPENAPI_SPEC_URL) events
 	$(MAKE) format
 
-.PHONY: service
+.PHONY: services
 services:  ## Generate the services of Hera
 services: workflows-service events-service
+
+.PHONY: init-files
+init-files:  ## Generate the init-files of Hera
+init-files:
+	@poetry run python scripts/init_files.py
+	$(MAKE) format
 
 .PHONY: examples
 examples:  ## Generate all the examples

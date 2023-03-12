@@ -232,3 +232,6 @@ class Workflow(ContextMixin):
         if not isinstance(node, (Templatable, *get_args(Template))):
             raise InvalidType()
         self.templates.append(node)
+
+
+__all__ = ["Workflow"]

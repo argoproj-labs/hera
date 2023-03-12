@@ -1,7 +1,4 @@
-from hera.workflows.container import Container
-from hera.workflows.models import Parameter
-from hera.workflows.steps import Step, Steps
-from hera.workflows.workflow import Workflow
+from hera.workflows import Container, Parameter, Step, Steps, Workflow
 
 whalesay = Container(
     name="whalesay",

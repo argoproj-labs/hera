@@ -1,7 +1,11 @@
-from hera.workflows.models import Inputs, Parameter
-from hera.workflows.resource import Resource
-from hera.workflows.steps import Step, Steps
-from hera.workflows.workflow import Workflow
+from hera.workflows import (
+    Parameter,
+    Resource,
+    Step,
+    Steps,
+    Workflow,
+    models as m,
+)
 
 with Workflow(
     generate_name="resource-delete-with-flags-",
@@ -25,7 +29,7 @@ data:
         name="delete-resource",
         action="delete",
         flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
-        inputs=Inputs(
+        inputs=m.Inputs(
             parameters=[Parameter(name="selector")],
         ),
     )

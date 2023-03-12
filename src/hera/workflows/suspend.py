@@ -62,3 +62,6 @@ class Suspend(TemplateMixin):
             timeout=self.timeout,
             tolerations=self.tolerations,
         )
+
+
+__all__ = ["Suspend"]

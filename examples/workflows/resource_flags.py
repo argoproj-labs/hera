@@ -1,7 +1,10 @@
-from hera.workflows.models import ContinueOn
-from hera.workflows.resource import Resource
-from hera.workflows.steps import Step, Steps
-from hera.workflows.workflow import Workflow
+from hera.workflows import (
+    Resource,
+    Step,
+    Steps,
+    Workflow,
+    models as m,
+)
 
 with Workflow(
     generate_name="resource-validate-",
@@ -25,7 +28,7 @@ with Workflow(
     )
 
     with Steps(name="resource-validate-example") as s:
-        Step(name="submit-resource", template=create_route.name, continue_on=ContinueOn(failed=True))
+        Step(name="submit-resource", template=create_route.name, continue_on=m.ContinueOn(failed=True))
         Step(
             name="submit-resource-without-validation",
             template=create_route_without_validation.name,

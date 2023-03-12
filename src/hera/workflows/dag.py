@@ -57,3 +57,6 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
             timeout=self.timeout,
             tolerations=self.tolerations,
         )
+
+
+__all__ = ["DAG"]
