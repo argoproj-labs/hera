@@ -58,7 +58,7 @@ with Workflow(
         heads_task.on_other_result(flip_coin_task, "heads")
         tails_task.on_other_result(flip_coin_task, "tails")
 
-    expression = g.tasks['flip-coin'].outputs.result == "heads"
+    expression = g.tasks["flip-coin"].outputs.result == "heads"
     expression = expression.check(g.tasks.heads.outputs.result, g.tasks.tails.outputs.result)  # type: ignore
     cast(list, main_dag.outputs).append(Parameter(name="stepresult", value_from={"expression": str(expression)}))
     w.templates.extend((flip_coin_template, heads_template, tails_template))

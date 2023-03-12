@@ -120,13 +120,13 @@ class Workflow(ContextMixin):
     status: Optional[WorkflowStatus] = None
     workflows_service: Optional[WorkflowsService] = None
 
-    @validator('workflows_service', pre=True, always=True)
+    @validator("workflows_service", pre=True, always=True)
     def _set_workflows_service(cls, v):
         if v is None:
             return WorkflowsService()
         return v
 
-    @validator('kind', pre=True, always=True)
+    @validator("kind", pre=True, always=True)
     def _set_kind(cls, v):
         if v is None:
             return cls.__name__  # type: ignore

@@ -55,7 +55,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 119
 max-line-length = 119
-skip-string-normalization = true
 target-version = ['py38']
 
 [tool.pytest.ini_options]
