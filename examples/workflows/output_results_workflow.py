@@ -18,7 +18,7 @@ with Workflow(
     labels={"workflows.argoproj.io/test": "true"},
     annotations={
         "workflows.argoproj.io/description": "This workflow demonstrates collecting outputs (specifically the stdout result) from a pod."
-        "Specifically, you must have a container named \"main\".",
+        'Specifically, you must have a container named "main".',
         "workflows.argoproj.io/version": ">= 3.1.0",
     },
 ) as w:

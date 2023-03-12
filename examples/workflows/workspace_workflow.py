@@ -9,7 +9,7 @@ with Workflow(
     labels={"workflows.argoproj.io/test": "true"},
     annotations={
         "workflows.argoproj.io/description": "This workflow demonstrates using a workspace to share files between containers. "
-        "This also allows containers not called \"main\" to create output artifacts.",
+        'This also allows containers not called "main" to create output artifacts.',
         "workflows.argoproj.io/version": ">= 3.1.0",
     },
 ) as w:
