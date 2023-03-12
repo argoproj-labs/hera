@@ -36,7 +36,7 @@ class ContainerSet(
         return _ModelContainerSetTemplate(
             containers=self.containers,
             retry_strategy=self.retry_strategy,
-            volume_mounts=[v._build_volume_mount() for v in self.volume_mounts],
+            volume_mounts=None if self.volume_mounts is None else [v._build_volume_mount() for v in self.volume_mounts],
         )
 
     def _build_template(self) -> _ModelTemplate:
