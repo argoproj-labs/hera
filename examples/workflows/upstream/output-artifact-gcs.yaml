@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: output-artifact-gcs-
+spec:
+  entrypoint: whalesay
+  templates:
+  - container:
+      args:
+      - cowsay hello world | tee /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+    name: whalesay
+    outputs:
+      artifacts:
+      - gcs:
+          bucket: my-bucket
+          key: path/in/bucket/hello_world.txt.tgz
+          serviceAccountKeySecret:
+            key: serviceAccountKey
+            name: my-gcs-credentials
+        name: message
+        path: /tmp

@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: output-artifact-s3-
+spec:
+  entrypoint: whalesay
+  templates:
+  - container:
+      args:
+      - cowsay hello world | tee /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+    name: whalesay
+    outputs:
+      artifacts:
+      - name: message
+        path: /tmp
+        s3:
+          accessKeySecret:
+            key: accessKey
+            name: my-s3-credentials
+          bucket: my-bucket
+          endpoint: s3.amazonaws.com
+          key: path/in/bucket/hello_world.txt.tgz
+          region: us-west-2
+          secretKeySecret:
+            key: secretKey
+            name: my-s3-credentials

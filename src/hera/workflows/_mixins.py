@@ -234,10 +234,12 @@ class VolumeMountMixin(BaseMixin):
             return None
 
         result = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
-        if result is None:
-            return None
 
-        return cast(List[VolumeMount], self.volume_mounts) + result
+        if result is None and self.volume_mounts is None:
+            return None
+        elif result is None and self.volume_mounts is not None:
+            return self.volume_mounts
+        return cast(List[VolumeMount], self.volume_mounts) + cast(List[VolumeMount], result)
 
     def _build_volumes(self) -> Optional[List[Volume]]:
         if self.volumes is None:
