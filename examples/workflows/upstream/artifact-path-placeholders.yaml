@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: artifact-path-placeholders-
+spec:
+  arguments:
+    artifacts:
+    - name: text
+      raw:
+        data: '1
+
+          2
+
+          3
+
+          4
+
+          5
+
+          '
+    parameters:
+    - name: lines-count
+      value: '3'
+  entrypoint: head-lines
+  templates:
+  - container:
+      command:
+      - sh
+      - -c
+      - mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" "$(dirname "{{outputs.parameters.actual-lines-count.path}}")"
+        ; head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}"
+        | tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"
+      image: busybox
+    inputs:
+      artifacts:
+      - name: text
+        path: /inputs/text/data
+      parameters:
+      - name: lines-count
+    name: head-lines
+    outputs:
+      artifacts:
+      - name: text
+        path: /outputs/text/data
+      parameters:
+      - name: actual-lines-count
+        valueFrom:
+          path: /outputs/actual-lines-count/data

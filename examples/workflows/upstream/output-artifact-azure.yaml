@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: output-artifact-s3-
+spec:
+  entrypoint: whalesay
+  templates:
+  - container:
+      args:
+      - cowsay hello world | tee /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+    name: whalesay
+    outputs:
+      artifacts:
+      - azure:
+          accountKeySecret:
+            key: accountKey
+            name: my-azure-credentials
+          blob: path/in/container/hello_world.txt.tgz
+          container: my-container
+          endpoint: https://myazurestorageaccountname.blob.core.windows.net
+        name: message
+        path: /tmp
