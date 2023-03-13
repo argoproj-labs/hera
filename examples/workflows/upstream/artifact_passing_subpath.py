@@ -1,10 +1,10 @@
 from hera.workflows import (
     Artifact,
     Container,
+    NoneArchiveStrategy,
     Step,
     Steps,
     Workflow,
-    models as m,
 )
 
 with Workflow(generate_name="artifact-passing-subpath-", entrypoint="artifact-example") as w:
@@ -13,7 +13,7 @@ with Workflow(generate_name="artifact-passing-subpath-", entrypoint="artifact-ex
         image="docker/whalesay:latest",
         command=["sh", "-c"],
         args=["sleep 1; cowsay hello world | tee /tmp/hello_world.txt"],
-        outputs=[Artifact(name="hello-art", path="/tmp/", archive=m.ArchiveStrategy(none=m.NoneStrategy()))],
+        outputs=[Artifact(name="hello-art", path="/tmp/", archive=NoneArchiveStrategy())],
     )
     print_message_dir = Container(
         name="print-message-dir",
