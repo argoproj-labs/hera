@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Union, cast
 
 from hera.workflows._base_model import BaseModel
+from hera.workflows.archive import ArchiveStrategy
 from hera.workflows.models import (
-    ArchiveStrategy,
+    ArchiveStrategy as _ModelArchiveStrategy,
     Artifact as _ModelArtifact,
     ArtifactGC,
     ArtifactoryArtifact as _ModelArtifactoryArtifact,
@@ -21,7 +22,7 @@ from hera.workflows.models import (
 
 class Artifact(BaseModel):
     name: str
-    archive: Optional[ArchiveStrategy] = None
+    archive: Optional[Union[_ModelArchiveStrategy, ArchiveStrategy]] = None
     archive_logs: Optional[bool] = None
     artifact_gc: Optional[ArtifactGC] = None
     deleted: Optional[bool] = None
@@ -33,10 +34,18 @@ class Artifact(BaseModel):
     recurse_mode: Optional[str] = None
     sub_path: Optional[str] = None
 
+    def _build_archive(self) -> Optional[_ModelArchiveStrategy]:
+        if self.archive is None:
+            return None
+
+        if isinstance(self.archive, _ModelArchiveStrategy):
+            return self.archive
+        return cast(ArchiveStrategy, self.archive)._build_archive_strategy()
+
     def _build_artifact(self) -> _ModelArtifact:
         return _ModelArtifact(
             name=self.name,
-            archive=self.archive,
+            archive=self._build_archive(),
             archive_logs=self.archive_logs,
             artifact_gc=self.artifact_gc,
             deleted=self.deleted,

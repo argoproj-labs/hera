@@ -3,6 +3,7 @@
 # In order to add objects to the hera.workflows namespace
 # add them to the __all__ list in the relevant module.
 
+from hera.workflows.archive import ArchiveStrategy, NoneArchiveStrategy, TarArchiveStrategy, ZipArchiveStrategy
 from hera.workflows.artifact import (
     Artifact,
     ArtifactoryArtifact,
@@ -73,6 +74,7 @@ from hera.workflows.workflow_status import WorkflowStatus
 __all__ = [
     "AWSElasticBlockStoreVolumeVolume",
     "AccessMode",
+    "ArchiveStrategy",
     "Artifact",
     "ArtifactoryArtifact",
     "AzureArtifact",
@@ -110,6 +112,7 @@ __all__ = [
     "ISCSIVolume",
     "InvalidType",
     "NFSVolume",
+    "NoneArchiveStrategy",
     "OSSArtifact",
     "Operator",
     "Parallel",
@@ -135,6 +138,7 @@ __all__ = [
     "Steps",
     "StorageOSVolume",
     "Suspend",
+    "TarArchiveStrategy",
     "Task",
     "TaskResult",
     "UserContainer",
@@ -143,4 +147,5 @@ __all__ = [
     "Workflow",
     "WorkflowStatus",
     "WorkflowsService",
+    "ZipArchiveStrategy",
 ]

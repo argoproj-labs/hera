@@ -1,10 +1,11 @@
 from hera.workflows import (
     Artifact,
     Container,
+    NoneArchiveStrategy,
     Step,
     Steps,
+    TarArchiveStrategy,
     Workflow,
-    models as m,
 )
 
 with Workflow(generate_name="artifact-disable-archive-", entrypoint="artifact-disable-archive") as w:
@@ -14,12 +15,12 @@ with Workflow(generate_name="artifact-disable-archive-", entrypoint="artifact-di
         command=["sh", "-c"],
         args=["cowsay hello world | tee /tmp/hello_world.txt | tee /tmp/hello_world_nc.txt ; sleep 1"],
         outputs=[
-            Artifact(name="etc", path="/etc", archive=m.ArchiveStrategy(none=m.NoneStrategy())),
-            Artifact(name="hello-txt", path="/tmp/hello_world.txt", archive=m.ArchiveStrategy(none=m.NoneStrategy())),
+            Artifact(name="etc", path="/etc", archive=NoneArchiveStrategy()),
+            Artifact(name="hello-txt", path="/tmp/hello_world.txt", archive=NoneArchiveStrategy()),
             Artifact(
                 name="hello-txt-nc",
                 path="/tmp/hello_world_nc.txt",
-                archive=m.ArchiveStrategy(tar=m.TarStrategy(compression_level=0)),
+                archive=TarArchiveStrategy(compression_level=0),
             ),
         ],
     )
