@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: artifactory-repository-ref-
+spec:
+  artifactRepositoryRef:
+    key: my-key
+  entrypoint: main
+  templates:
+  - container:
+      args:
+      - cowsay hello world | tee /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+    name: main
+    outputs:
+      artifacts:
+      - name: hello_world
+        path: /tmp/hello_world.txt

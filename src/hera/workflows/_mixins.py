@@ -5,12 +5,13 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
+from hera.workflows.artifact import Artifact
 from hera.workflows.env import _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.models import (
     HTTP,
     Affinity,
-    Artifact,
+    Artifact as ModelArtifact,
     ArtifactLocation,
     ContainerPort,
     EnvFromSource,
@@ -43,8 +44,10 @@ from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import _BaseVolume
 
-Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact]]]
-Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact]]]
+Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
+Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
+Env = Optional[List[Union[_BaseEnv, EnvVar]]]
+EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 
 
@@ -105,6 +108,12 @@ class IOMixin(BaseMixin):
             elif isinstance(value, ModelParameter):
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(value, Artifact):
+                result.artifacts = (
+                    [value._build_artifact()]
+                    if result.artifacts is None
+                    else result.artifacts + [value._build_artifact()]
+                )
+            else:
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
 
         if result.parameters is None and result.artifacts is None:
@@ -126,6 +135,12 @@ class IOMixin(BaseMixin):
             elif isinstance(value, ModelParameter):
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(value, Artifact):
+                result.artifacts = (
+                    [value._build_artifact()]
+                    if result.artifacts is None
+                    else result.artifacts + [value._build_artifact()]
+                )
+            else:
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
 
         if result.parameters is None and result.artifacts is None:
@@ -134,8 +149,8 @@ class IOMixin(BaseMixin):
 
 
 class EnvMixin(BaseMixin):
-    env: Optional[List[Union[_BaseEnv, EnvVar]]] = None
-    env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None
+    env: Env = None
+    env_from: EnvFrom = None
 
     def _build_env(self) -> Optional[EnvVar]:
         if self.env is None or isinstance(self.env, EnvVar):
@@ -219,10 +234,12 @@ class VolumeMountMixin(BaseMixin):
             return None
 
         result = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
-        if result is None:
-            return None
 
-        return cast(List[VolumeMount], self.volume_mounts) + result
+        if result is None and self.volume_mounts is None:
+            return None
+        elif result is None and self.volume_mounts is not None:
+            return self.volume_mounts
+        return cast(List[VolumeMount], self.volume_mounts) + cast(List[VolumeMount], result)
 
     def _build_volumes(self) -> Optional[List[Volume]]:
         if self.volumes is None:
