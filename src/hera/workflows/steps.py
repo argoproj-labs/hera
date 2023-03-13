@@ -62,8 +62,8 @@ class Step(
             return None
 
         model_arguments = _ModelArguments(
-            artifacts=None if not artifacts else artifacts,
-            parameters=None if not parameters else parameters,
+            artifacts=artifacts or None,
+            parameters=parameters or None,
         )
         return model_arguments
 
