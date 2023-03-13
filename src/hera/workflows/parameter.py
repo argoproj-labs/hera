@@ -54,7 +54,7 @@ class Parameter(_ModelParameter):
             value_from=self.value_from,
         )
 
-    def as_argument(self) -> Optional[_ModelParameter]:
+    def as_argument(self) -> _ModelParameter:
         """Assembles the parameter for use as an argument of a task"""
         return _ModelParameter(
             name=self.name,

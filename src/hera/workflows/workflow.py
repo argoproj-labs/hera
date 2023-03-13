@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from types import ModuleType
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from pydantic import validator
 from typing_extensions import get_args
@@ -143,16 +143,20 @@ class Workflow(ContextMixin):
         artifacts = None
         for arg in self.arguments:
             if isinstance(arg, _ModelArtifact):
-                artifacts = [arg] if artifacts is None else [*artifacts, arg]
+                artifacts = [arg] if artifacts is None else [*cast(List[_ModelArtifact], artifacts), arg]
             elif isinstance(arg, Artifact):
                 artifacts = [arg._build_artifact()] if artifacts is None else [*artifacts, arg._build_artifact()]
 
         parameters = None
         for arg in self.arguments:
             if isinstance(arg, _ModelParameter):
-                parameters = [arg] if parameters is None else [*parameters, arg]
+                parameters = [arg] if parameters is None else [*cast(List[_ModelParameter], parameters), arg]
             elif isinstance(arg, Parameter):
-                parameters = [arg.as_argument()] if parameters is None else [*parameters, arg.as_argument()]
+                parameters = (
+                    [arg.as_argument()]
+                    if parameters is None
+                    else [*cast(List[_ModelParameter], parameters), arg.as_argument()]
+                )
 
         model_arguments = _ModelArguments(
             artifacts=None if artifacts is None else artifacts,
