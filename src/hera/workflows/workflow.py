@@ -8,10 +8,12 @@ from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import ContextMixin
+from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
-    Arguments,
+    Arguments as _ModelArguments,
+    Artifact as _ModelArtifact,
     ArtifactGC,
     ArtifactRepositoryRef,
     ExecutorConfig,
@@ -23,6 +25,7 @@ from hera.workflows.models import (
     Metrics,
     ObjectMeta,
     OwnerReference,
+    Parameter as _ModelParameter,
     PersistentVolumeClaim,
     PodDisruptionBudgetSpec,
     PodDNSConfig,
@@ -44,6 +47,7 @@ from hera.workflows.models import (
     WorkflowStatus,
     WorkflowTemplateRef,
 )
+from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TTemplate
 from hera.workflows.service import WorkflowsService
 
@@ -78,7 +82,7 @@ class Workflow(ContextMixin):
     active_deadline_seconds: Optional[int] = None
     affinity: Optional[Affinity] = None
     archive_logs: Optional[bool] = None
-    arguments: Optional[Arguments] = None
+    arguments: Optional[List[Union[Artifact, _ModelArtifact, Parameter, _ModelParameter]]] = None
     artifact_gc: Optional[ArtifactGC] = None
     artifact_repository_ref: Optional[ArtifactRepositoryRef] = None
     automount_service_account_token: Optional[bool] = None
@@ -132,6 +136,33 @@ class Workflow(ContextMixin):
             return cls.__name__  # type: ignore
         return v
 
+    def _build_arguments(self) -> Optional[_ModelArguments]:
+        if self.arguments is None:
+            return None
+
+        artifacts = []
+        for arg in self.arguments:
+            if isinstance(arg, _ModelArtifact):
+                artifacts.append(arg)
+            elif isinstance(arg, Artifact):
+                artifacts.append(arg._build_artifact())
+
+        parameters = []
+        for arg in self.arguments:
+            if isinstance(arg, _ModelParameter):
+                parameters.append(arg)
+            elif isinstance(arg, Parameter):
+                parameters.append(arg.as_argument())
+
+        if not artifacts and not parameters:
+            return None
+
+        model_arguments = _ModelArguments(
+            artifacts=artifacts or None,
+            parameters=parameters or None,
+        )
+        return model_arguments
+
     def build(self) -> _ModelWorkflow:
         templates = []
         for template in self.templates:
@@ -167,7 +198,7 @@ class Workflow(ContextMixin):
                 active_deadline_seconds=self.active_deadline_seconds,
                 affinity=self.affinity,
                 archive_logs=self.archive_logs,
-                arguments=self.arguments,
+                arguments=self._build_arguments(),
                 artifact_gc=self.artifact_gc,
                 artifact_repository_ref=self.artifact_repository_ref,
                 automount_service_account_token=self.automount_service_account_token,

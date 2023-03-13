@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: artifactory-artifact-
+spec:
+  entrypoint: artifact-example
+  templates:
+  - container:
+      args:
+      - cowsay hello world | tee /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+    name: whalesay
+    outputs:
+      artifacts:
+      - artifactory:
+          passwordSecret:
+            key: password
+            name: my-artifactory-credentials
+          url: http://artifactory:8081/artifactory/generic-local/hello_world.tgz
+          usernameSecret:
+            key: username
+            name: my-artifactory-credentials
+        name: hello-art
+        path: /tmp/hello_world.txt
+  - container:
+      args:
+      - cat /tmp/message
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+    inputs:
+      artifacts:
+      - artifactory:
+          passwordSecret:
+            key: password
+            name: my-artifactory-credentials
+          url: http://artifactory:8081/artifactory/generic-local/hello_world.tgz
+          usernameSecret:
+            key: username
+            name: my-artifactory-credentials
+        name: message
+        path: /tmp/message
+    name: print-message
+  - name: artifact-example
+    steps:
+    - - name: generate-artifact
+        template: whalesay
+    - - arguments:
+          artifacts:
+          - from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
+            name: message
+        name: consume-artifact
+        template: print-message

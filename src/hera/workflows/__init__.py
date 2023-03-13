@@ -3,6 +3,18 @@
 # In order to add objects to the hera.workflows namespace
 # add them to the __all__ list in the relevant module.
 
+from hera.workflows.artifact import (
+    Artifact,
+    ArtifactoryArtifact,
+    AzureArtifact,
+    GCSArtifact,
+    GitArtifact,
+    HDFSArtifact,
+    HTTPArtifact,
+    OSSArtifact,
+    RawArtifact,
+    S3Artifact,
+)
 from hera.workflows.container import Container
 from hera.workflows.container_set import ContainerNode, ContainerSet
 from hera.workflows.dag import DAG
@@ -61,6 +73,9 @@ from hera.workflows.workflow_status import WorkflowStatus
 __all__ = [
     "AWSElasticBlockStoreVolumeVolume",
     "AccessMode",
+    "Artifact",
+    "ArtifactoryArtifact",
+    "AzureArtifact",
     "AzureDiskVolumeVolume",
     "AzureFileVolumeVolume",
     "CSIVolume",
@@ -84,13 +99,18 @@ __all__ = [
     "FlexVolume",
     "FlockerVolume",
     "GCEPersistentDiskVolume",
+    "GCSArtifact",
+    "GitArtifact",
     "GitRepoVolume",
     "GlusterfsVolume",
+    "HDFSArtifact",
     "HTTP",
+    "HTTPArtifact",
     "HostPathVolume",
     "ISCSIVolume",
     "InvalidType",
     "NFSVolume",
+    "OSSArtifact",
     "Operator",
     "Parallel",
     "Parameter",
@@ -99,11 +119,13 @@ __all__ = [
     "ProjectedVolume",
     "QuobyteVolume",
     "RBDVolume",
+    "RawArtifact",
     "Resource",
     "ResourceEnv",
     "Resources",
     "RetryPolicy",
     "RetryStrategy",
+    "S3Artifact",
     "ScaleIOVolume",
     "Script",
     "SecretEnv",

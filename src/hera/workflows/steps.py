@@ -6,6 +6,7 @@ from hera.workflows._mixins import (
     SubNodeMixin,
     TemplateMixin,
 )
+from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Arguments as _ModelArguments,
@@ -19,13 +20,14 @@ from hera.workflows.models import (
     TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
+from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Steppable
 
 
 class Step(
     SubNodeMixin,
 ):
-    arguments: Optional[List[Union[_ModelArtifact, _ModelParameter]]] = None
+    arguments: Optional[List[Union[Artifact, _ModelArtifact, Parameter, _ModelParameter]]] = None
     continue_on: Optional[_ModelContinueOn]
     hooks: Optional[Dict[str, _ModelLifecycleHook]]
     inline: Optional[_ModelTemplate]
@@ -38,20 +40,36 @@ class Step(
     with_param: Optional[str]
     with_sequence: Optional[_ModelSequence]
 
-    def _build_as_workflow_step(self) -> _ModelWorkflowStep:
-        # Convert the unified list of Artifacts and Parameters in self.arguments to a
-        # model-class `Arguments`` to pass to WorkflowStep
-        artifacts = list(filter(lambda arg: isinstance(arg, _ModelArtifact), self.arguments or []))
-        parameters = list(filter(lambda arg: isinstance(arg, _ModelParameter), self.arguments or []))
+    def _build_arguments(self) -> Optional[_ModelArguments]:
+        if self.arguments is None:
+            return None
+
+        artifacts = []
+        for arg in self.arguments:
+            if isinstance(arg, _ModelArtifact):
+                artifacts.append(arg)
+            elif isinstance(arg, Artifact):
+                artifacts.append(arg._build_artifact())
+
+        parameters = []
+        for arg in self.arguments:
+            if isinstance(arg, _ModelParameter):
+                parameters.append(arg)
+            elif isinstance(arg, Parameter):
+                parameters.append(arg.as_argument())
+
+        if not artifacts and not parameters:
+            return None
+
         model_arguments = _ModelArguments(
-            artifacts=None if len(artifacts) == 0 else artifacts,
-            parameters=None if len(parameters) == 0 else parameters,
+            artifacts=artifacts or None,
+            parameters=parameters or None,
         )
-        arguments = (
-            None if model_arguments.artifacts is None and model_arguments.parameters is None else model_arguments
-        )
+        return model_arguments
+
+    def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         return _ModelWorkflowStep(
-            arguments=arguments,
+            arguments=self._build_arguments(),
             continue_on=self.continue_on,
             hooks=self.hooks,
             inline=self.inline,

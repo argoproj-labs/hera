@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: input-artifact-oss-
+spec:
+  entrypoint: input-artifact-oss-example
+  templates:
+  - container:
+      args:
+      - ls -l /my-artifact
+      command:
+      - sh
+      - -c
+      image: debian:latest
+    inputs:
+      artifacts:
+      - name: my-art
+        oss:
+          accessKeySecret:
+            key: accessKey
+            name: my-oss-credentials
+          bucket: test-bucket-name
+          endpoint: http://oss-cn-hangzhou-zmf.aliyuncs.com
+          key: test/mydirectory/
+          secretKeySecret:
+            key: secretKey
+            name: my-oss-credentials
+        path: /my-artifact
+    name: input-artifact-oss-example

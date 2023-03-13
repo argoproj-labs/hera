@@ -3,15 +3,23 @@ from typing import List, Union
 from hera.expr._node import Node
 from hera.workflows import models as m
 from hera.workflows._mixins import IOMixin, TemplateMixin
+from hera.workflows.artifact import Artifact
 
 
 class Data(TemplateMixin, IOMixin):
-    artifact_paths: m.ArtifactPaths
+    source: Union[m.DataSource, m.ArtifactPaths, Artifact]
     transformations: List[Union[str, Node]] = []
+
+    def _build_source(self) -> m.DataSource:
+        if isinstance(self.source, m.DataSource):
+            return self.source
+        elif isinstance(self.source, m.ArtifactPaths):
+            return m.DataSource(artifact_paths=self.source)
+        return m.DataSource(artifact_paths=self.source._build_artifact_paths())
 
     def _build_data(self) -> m.Data:
         return m.Data(
-            source=m.DataSource(artifact_paths=self.artifact_paths),
+            source=self._build_source(),
             transformation=list(map(lambda expr: m.TransformationStep(expression=str(expr)), self.transformations)),
         )
 
