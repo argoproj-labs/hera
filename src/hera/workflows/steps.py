@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 from hera.workflows._mixins import (
     ContextMixin,
@@ -44,29 +44,28 @@ class Step(
         if self.arguments is None:
             return None
 
-        artifacts = None
+        artifacts = []
         for arg in self.arguments:
             if isinstance(arg, _ModelArtifact):
-                artifacts = [arg] if artifacts is None else [*cast(List[_ModelArtifact], artifacts), arg]
+                artifacts.append(arg)
             elif isinstance(arg, Artifact):
-                artifacts = [arg._build_artifact()] if artifacts is None else [*artifacts, arg._build_artifact()]
+                artifacts.append(arg._build_artifact())
 
-        parameters = None
+        parameters = []
         for arg in self.arguments:
             if isinstance(arg, _ModelParameter):
-                parameters = [arg] if parameters is None else [*cast(List[_ModelParameter], parameters), arg]
+                parameters.append(arg)
             elif isinstance(arg, Parameter):
-                parameters = (
-                    [arg.as_argument()]
-                    if parameters is None
-                    else [*cast(List[_ModelParameter], parameters), arg.as_argument()]
-                )
+                parameters.append(arg.as_argument())
+
+        if not artifacts and not parameters:
+            return None
 
         model_arguments = _ModelArguments(
-            artifacts=None if artifacts is None else artifacts,
-            parameters=None if parameters is None else parameters,
+            artifacts=None if not artifacts else artifacts,
+            parameters=None if not parameters else parameters,
         )
-        return None if model_arguments.artifacts is None and model_arguments.parameters is None else model_arguments
+        return model_arguments
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         return _ModelWorkflowStep(
