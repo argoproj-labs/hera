@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: arguments-artifacts-
+spec:
+  arguments:
+    artifacts:
+    - http:
+        url: https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
+      name: kubectl
+  entrypoint: kubectl-input-artifact
+  templates:
+  - container:
+      args:
+      - kubectl version
+      command:
+      - sh
+      - -c
+      image: debian:9.4
+    inputs:
+      artifacts:
+      - mode: 493
+        name: kubectl
+        path: /usr/local/bin/kubectl
+    name: kubectl-input-artifact
