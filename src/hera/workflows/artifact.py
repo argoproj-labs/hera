@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from hera.workflows._base_model import BaseModel
 from hera.workflows.models import (
@@ -15,6 +15,7 @@ from hera.workflows.models import (
     OSSArtifact as _ModelOSSArtifact,
     RawArtifact as _ModelRawArtifact,
     S3Artifact as _ModelS3Artifact,
+    SecretKeySelector,
 )
 
 
@@ -110,7 +111,21 @@ class GitArtifact(_ModelGitArtifact, Artifact):
         return artifact
 
 
-class HDFSArtifact(_ModelHDFSArtifact, Artifact):
+class HDFSArtifact(Artifact):
+    # note that `HDFSArtifact` does not inherit from the auto-generated `HDFSArtifact` because there's a
+    # conflict in `path` with the base class `Artifact`. Here, we redefine the HDFS `path` to `hdfs_path` to
+    # differentiate between the parent class and the child class `path`
+    hdfs_path: str
+    addresses: Optional[List[str]] = None
+    force: Optional[bool] = None
+    hdfs_user: Optional[str]
+    krb_c_cache_secret: Optional[SecretKeySelector] = None
+    krb_config_config_map: Optional[SecretKeySelector] = None
+    krb_keytab_secret: Optional[SecretKeySelector] = None
+    krb_realm: Optional[str] = None
+    krb_service_principal_name: Optional[str] = None
+    krb_username: Optional[str] = None
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.hdfs = _ModelHDFSArtifact(
@@ -123,7 +138,7 @@ class HDFSArtifact(_ModelHDFSArtifact, Artifact):
             krb_realm=self.krb_realm,
             krb_service_principal_name=self.krb_service_principal_name,
             krb_username=self.krb_username,
-            path=self.path,
+            path=self.hdfs_path,
         )
         return artifact
 

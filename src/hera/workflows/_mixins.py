@@ -109,7 +109,9 @@ class IOMixin(BaseMixin):
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(value, Artifact):
                 result.artifacts = (
-                    [value] if result.artifacts is None else result.artifacts + [value._build_artifact()]
+                    [value._build_artifact()]
+                    if result.artifacts is None
+                    else result.artifacts + [value._build_artifact()]
                 )
             else:
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
@@ -134,7 +136,9 @@ class IOMixin(BaseMixin):
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(value, Artifact):
                 result.artifacts = (
-                    [value] if result.artifacts is None else result.artifacts + [value._build_artifact()]
+                    [value._build_artifact()]
+                    if result.artifacts is None
+                    else result.artifacts + [value._build_artifact()]
                 )
             else:
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]

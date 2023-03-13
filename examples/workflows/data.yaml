@@ -5,11 +5,7 @@ metadata:
 spec:
   templates:
   - data:
-      source:
-        artifactPaths:
-          name: test-bucket
-          s3:
-            bucket: my-bucket
+      source: {}
       transformation:
       - expression: filter(data, {# endsWith 'main.log'})
     name: list-log-files

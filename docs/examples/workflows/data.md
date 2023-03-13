@@ -9,17 +9,18 @@
 ```python
 from hera.expr import g, it
 from hera.workflows import (
+    Artifact,
     Data,
+    S3Artifact,
     Workflow,
-    models as m,
 )
 
 with Workflow(generate_name="data-") as w:
     Data(
         name="list-log-files",
-        source=m.ArtifactPaths(name="test-bucket", s3={"bucket": "my-bucket"}),
+        source=S3Artifact(name="test-bucket", bucket="my-bucket"),
         transformations=[g.data.filter(it.ends_with("main.log"))],  # type: ignore
-        outputs=[m.Artifact(name="file", path="/file")],
+        outputs=[Artifact(name="file", path="/file")],
     )
 ```
 
@@ -33,11 +34,7 @@ metadata:
 spec:
   templates:
   - data:
-      source:
-        artifactPaths:
-          name: test-bucket
-          s3:
-            bucket: my-bucket
+      source: {}
       transformation:
       - expression: filter(data, {# endsWith 'main.log'})
     name: list-log-files
