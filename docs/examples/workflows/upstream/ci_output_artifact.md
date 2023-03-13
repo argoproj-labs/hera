@@ -140,9 +140,7 @@ with Workflow(
         image="{{inputs.parameters.os-image}}",
         command=["sh", "-c"],
         args=[
-            ' uname -a ; cat '
-            '/etc/os-release ; '
-            '/go/src/github.com/golang/example/hello/hello ',
+            " uname -a ; cat " "/etc/os-release ; " "/go/src/github.com/golang/example/hello/hello ",
         ],
         volume_mounts=[
             m.VolumeMount(name="workdir", mount_path="/go"),
