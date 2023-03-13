@@ -44,7 +44,7 @@ from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import _BaseVolume
 
-Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
+Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]
 Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
 Env = Optional[List[Union[_BaseEnv, EnvVar]]]
 EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
@@ -101,7 +101,11 @@ class IOMixin(BaseMixin):
 
         result = ModelInputs()
         for value in self.inputs:
-            if isinstance(value, Parameter):
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    value = Parameter(name=k, value=v)
+                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
+            elif isinstance(value, Parameter):
                 result.parameters = (
                     [value.as_input()] if result.parameters is None else result.parameters + [value.as_input()]
                 )
