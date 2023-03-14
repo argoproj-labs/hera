@@ -9,7 +9,7 @@ and its crew were specially protected by the goddess Hera.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera-workflows)
 
-[![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera-workflows/blob/main/.github/workflows/cicd.yaml)
+[![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](./.github/workflows/cicd.yaml)
 [![Docs](https://readthedocs.org/projects/hera-workflows/badge/?version=latest)](https://hera-workflows.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/argoproj-labs/hera-workflows/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera-workflows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -83,7 +83,7 @@ with Workflow("diamond") as w:
 w.create()
 ```
 
-See the [examples](https://github.com/argoproj-labs/hera-workflows/tree/main/examples) directory for a collection of
+See the [examples](./examples/) directory for a collection of
 Argo workflow construction and submission via Hera!
 
 # Contributing
@@ -96,7 +96,7 @@ poetry install
 
 Once the dependencies are installed, you can use the various `make` targets to replicate the `CI` jobs.
 
-```bash
+```
 make help
 check-codegen                  Check if the code is up to date
 ci                             Run all the CI checks
@@ -114,7 +114,7 @@ workflows-models               Generate the Workflows models portion of Argo Wor
 workflows-service              Generate the Workflows service option of Hera
 ```
 
-Also, see the [contributing guide](https://github.com/argoproj-labs/hera-workflows/blob/main/CONTRIBUTING.md)!
+Also, see the [contributing guide](./CONTRIBUTING.md)!
 
 # Comparison
 
