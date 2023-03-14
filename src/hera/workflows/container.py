@@ -11,14 +11,11 @@ from hera.workflows._mixins import (
     VolumeMountMixin,
 )
 from hera.workflows.models import (
-    Arguments,
-    Artifact,
     Container as _ModelContainer,
     Lifecycle,
     SecurityContext,
     Template as _ModelTemplate,
 )
-from hera.workflows.parameter import Parameter
 
 
 class Container(
@@ -93,21 +90,6 @@ class Container(
             timeout=self.timeout,
             tolerations=self.tolerations,
             volumes=self._build_volumes(),
-        )
-
-    def _build_arguments(self) -> Optional[Arguments]:
-        # parameters = [obj.as_argument() for obj in self.inputs if isinstance(obj, Parameter)]
-        # parameters = [p for p in parameters if p is not None]  # Some parameters might not resolve
-        if self.inputs is None:
-            return None
-
-        parameters = [p for p in self.inputs if isinstance(p, Parameter)]
-        artifacts = [a for a in self.inputs if isinstance(a, Artifact)]
-        if len(parameters) == 0 and len(artifacts) == 0:
-            return None
-        return Arguments(
-            artifacts=None if len(artifacts) == 0 else artifacts,
-            parameters=None if len(parameters) == 0 else parameters,
         )
 
 
