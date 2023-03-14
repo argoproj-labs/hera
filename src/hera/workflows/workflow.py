@@ -7,12 +7,11 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
-from hera.workflows._mixins import ContextMixin
+from hera.workflows._mixins import ArgumentsMixin, ContextMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
-    Arguments as _ModelArguments,
     Artifact as _ModelArtifact,
     ArtifactGC,
     ArtifactRepositoryRef,
@@ -60,7 +59,10 @@ except ImportError:
     _yaml = None
 
 
-class Workflow(ContextMixin):
+class Workflow(
+    ArgumentsMixin,
+    ContextMixin,
+):
     api_version: Optional[str] = GlobalConfig.api_version
     kind: Optional[str] = None
     annotations: Optional[Dict[str, str]] = None
@@ -135,33 +137,6 @@ class Workflow(ContextMixin):
         if v is None:
             return cls.__name__  # type: ignore
         return v
-
-    def _build_arguments(self) -> Optional[_ModelArguments]:
-        if self.arguments is None:
-            return None
-
-        artifacts = []
-        for arg in self.arguments:
-            if isinstance(arg, _ModelArtifact):
-                artifacts.append(arg)
-            elif isinstance(arg, Artifact):
-                artifacts.append(arg._build_artifact())
-
-        parameters = []
-        for arg in self.arguments:
-            if isinstance(arg, _ModelParameter):
-                parameters.append(arg)
-            elif isinstance(arg, Parameter):
-                parameters.append(arg.as_argument())
-
-        if not artifacts and not parameters:
-            return None
-
-        model_arguments = _ModelArguments(
-            artifacts=artifacts or None,
-            parameters=parameters or None,
-        )
-        return model_arguments
 
     def build(self) -> _ModelWorkflow:
         templates = []
