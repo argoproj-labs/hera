@@ -13,6 +13,7 @@ from hera.workflows.models import (
     Template,
     TemplateRef,
 )
+from hera.workflows.protocol import Templatable
 from hera.workflows.operator import Operator
 from hera.workflows.workflow_status import WorkflowStatus
 
@@ -35,9 +36,9 @@ class Task(ArgumentsMixin, SubNodeMixin):
     depends: Optional[str] = None
     hooks: Optional[Dict[str, LifecycleHook]] = None
     on_exit: Optional[str] = None
-    template: Union[str, Template, TemplateMixin]
+    template: Optional[Union[str, Template, TemplateMixin]] = None
     template_ref: Optional[TemplateRef] = None
-    inline: Optional[Template] = None
+    inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None
     with_items: Optional[List[Item]] = None
     with_param: Optional[str] = None
@@ -157,16 +158,31 @@ class Task(ArgumentsMixin, SubNodeMixin):
         return self.next(other, on=TaskResult.all_failed)
 
     def _build_dag_task(self) -> _ModelDAGTask:
+        if self.template is None and self.inline is None:
+            raise ValueError("Exactly one of `template` or `inline` must be supplied")
+
+        _template = None
+        if isinstance(self.template, str):
+            _template = self.template
+        elif isinstance(self.template, (Template, TemplateMixin)):
+            _template = self.template.name
+
+        _inline = None
+        if isinstance(self.inline, Template):
+            _inline = self.inline
+        elif isinstance(self.inline, Templatable):
+            _inline = self.inline._build_template()
+
         return _ModelDAGTask(
             arguments=self._build_arguments(),
             continue_on=self.continue_on,
             dependencies=self.dependencies,
             depends=self.depends,
             hooks=self.hooks,
-            inline=self.inline,
+            inline=_inline,
             name=self.name,
             on_exit=self.on_exit,
-            template=self.template if isinstance(self.template, str) else self.template.name,
+            template=_template,
             template_ref=self.template_ref,
             when=self.when,
             with_items=self.with_items,

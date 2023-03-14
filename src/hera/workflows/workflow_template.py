@@ -1,1 +1,8 @@
-# TODO: Add WFLO template for v5
+from hera.workflows import Workflow
+
+
+class WorkflowTemplate(Workflow):
+    pass
+
+
+__all__ = ["WorkflowTemplate"]

@@ -70,6 +70,7 @@ from hera.workflows.volume import (
 )
 from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_status import WorkflowStatus
+from hera.workflows.workflow_template import WorkflowTemplate
 
 __all__ = [
     "AWSElasticBlockStoreVolumeVolume",
@@ -146,6 +147,7 @@ __all__ = [
     "VsphereVirtualDiskVolume",
     "Workflow",
     "WorkflowStatus",
+    "WorkflowTemplate",
     "WorkflowsService",
     "ZipArchiveStrategy",
 ]
