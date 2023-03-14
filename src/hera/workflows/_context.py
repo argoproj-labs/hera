@@ -1,9 +1,19 @@
 import threading
-from typing import List, Union
+from typing import List, TypeVar, Union
 
-from hera.workflows._mixins import SubNodeMixin
+from hera.workflows._base_model import BaseMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Subbable, TTemplate
+
+TNode = TypeVar("TNode", bound="SubNodeMixin")
+
+
+class SubNodeMixin(BaseMixin):
+    """SubNodeMixin ensures that the class gets added to the Hera context on initialization."""
+
+    def __hera_init__(self: TNode) -> TNode:
+        _context.add_sub_node(self)
+        return self
 
 
 class _HeraContext(threading.local):

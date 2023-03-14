@@ -3,9 +3,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from hera.workflows._mixins import SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
-    Arguments,
     ContinueOn,
     DAGTask as _ModelDAGTask,
     Item,
@@ -29,9 +28,8 @@ class TaskResult(Enum):
     all_failed = "AllFailed"
 
 
-class Task(SubNodeMixin):
+class Task(ArgumentsMixin, SubNodeMixin):
     name: str
-    arguments: Optional[Arguments] = None
     continue_on: Optional[ContinueOn] = None
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
@@ -160,7 +158,7 @@ class Task(SubNodeMixin):
 
     def _build_dag_task(self) -> _ModelDAGTask:
         return _ModelDAGTask(
-            arguments=self.arguments,
+            arguments=self._build_arguments(),
             continue_on=self.continue_on,
             dependencies=self.dependencies,
             depends=self.depends,

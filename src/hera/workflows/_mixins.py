@@ -4,13 +4,14 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseMixin
-from hera.workflows._context import _context
+from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.models import (
     HTTP,
     Affinity,
+    Arguments as ModelArguments,
     Artifact as ModelArtifact,
     ArtifactLocation,
     ContainerPort,
@@ -49,15 +50,6 @@ Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, Mo
 Env = Optional[List[Union[_BaseEnv, EnvVar]]]
 EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
-TNode = TypeVar("TNode", bound="SubNodeMixin")
-
-
-class SubNodeMixin(BaseMixin):
-    """SubNodeMixin ensures that the class gets added to the Hera context on initialization."""
-
-    def __hera_init__(self: TNode) -> TNode:
-        _context.add_sub_node(self)
-        return self
 
 
 class ContextMixin(BaseMixin):
@@ -258,3 +250,37 @@ class VolumeMountMixin(BaseMixin):
         if self.volumes is None:
             return None
         return [v._build_volume() for v in self.volumes]
+
+
+class ArgumentsMixin(BaseMixin):
+    arguments: Optional[Union[ModelArguments, List[Union[Artifact, ModelArtifact, Parameter, ModelParameter]]]] = None
+
+    def _build_arguments(self) -> Optional[ModelArguments]:
+        if self.arguments is None:
+            return None
+
+        if isinstance(self.arguments, ModelArguments):
+            return self.arguments
+
+        artifacts = []
+        for arg in self.arguments:
+            if isinstance(arg, ModelArtifact):
+                artifacts.append(arg)
+            elif isinstance(arg, Artifact):
+                artifacts.append(arg._build_artifact())
+
+        parameters = []
+        for arg in self.arguments:
+            if isinstance(arg, ModelParameter):
+                parameters.append(arg)
+            elif isinstance(arg, Parameter):
+                parameters.append(arg.as_argument())
+
+        if not artifacts and not parameters:
+            return None
+
+        model_arguments = ModelArguments(
+            artifacts=artifacts or None,
+            parameters=parameters or None,
+        )
+        return model_arguments
