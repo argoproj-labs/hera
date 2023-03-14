@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._base_model import BaseMixin
-from hera.workflows._context import SubNodeMixin, _context
+from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
@@ -49,6 +49,15 @@ Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, Mo
 Env = Optional[List[Union[_BaseEnv, EnvVar]]]
 EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
+TNode = TypeVar("TNode", bound="SubNodeMixin")
+
+
+class SubNodeMixin(BaseMixin):
+    """SubNodeMixin ensures that the class gets added to the Hera context on initialization."""
+
+    def __hera_init__(self: TNode) -> TNode:
+        _context.add_sub_node(self)
+        return self
 
 
 class ContextMixin(BaseMixin):
