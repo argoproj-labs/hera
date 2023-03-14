@@ -1,33 +1,29 @@
 from typing import Any, Dict, List, Optional, Union
 
 from hera.workflows._mixins import (
+    ArgumentsMixin,
     ContextMixin,
     IOMixin,
     SubNodeMixin,
     TemplateMixin,
 )
-from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
-    Arguments as _ModelArguments,
-    Artifact as _ModelArtifact,
     ContinueOn as _ModelContinueOn,
     Item as _ModelItem,
     LifecycleHook as _ModelLifecycleHook,
-    Parameter as _ModelParameter,
     Sequence as _ModelSequence,
     Template as _ModelTemplate,
     TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
-from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Steppable
 
 
 class Step(
+    ArgumentsMixin,
     SubNodeMixin,
 ):
-    arguments: Optional[List[Union[Artifact, _ModelArtifact, Parameter, _ModelParameter]]] = None
     continue_on: Optional[_ModelContinueOn]
     hooks: Optional[Dict[str, _ModelLifecycleHook]]
     inline: Optional[_ModelTemplate]
@@ -39,33 +35,6 @@ class Step(
     with_items: Optional[List[_ModelItem]]
     with_param: Optional[str]
     with_sequence: Optional[_ModelSequence]
-
-    def _build_arguments(self) -> Optional[_ModelArguments]:
-        if self.arguments is None:
-            return None
-
-        artifacts = []
-        for arg in self.arguments:
-            if isinstance(arg, _ModelArtifact):
-                artifacts.append(arg)
-            elif isinstance(arg, Artifact):
-                artifacts.append(arg._build_artifact())
-
-        parameters = []
-        for arg in self.arguments:
-            if isinstance(arg, _ModelParameter):
-                parameters.append(arg)
-            elif isinstance(arg, Parameter):
-                parameters.append(arg.as_argument())
-
-        if not artifacts and not parameters:
-            return None
-
-        model_arguments = _ModelArguments(
-            artifacts=artifacts or None,
-            parameters=parameters or None,
-        )
-        return model_arguments
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         return _ModelWorkflowStep(
