@@ -1,4 +1,4 @@
-from hera.workflows import Workflow
+from hera.workflows.workflow import Workflow
 
 
 class WorkflowTemplate(Workflow):

@@ -18,6 +18,7 @@ from hera.workflows.artifact import (
 )
 from hera.workflows.container import Container
 from hera.workflows.container_set import ContainerNode, ContainerSet
+from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.dag import DAG
 from hera.workflows.data import Data
 from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretEnv
@@ -90,6 +91,7 @@ __all__ = [
     "Container",
     "ContainerNode",
     "ContainerSet",
+    "CronWorkflow",
     "DAG",
     "Data",
     "DownwardAPIVolume",

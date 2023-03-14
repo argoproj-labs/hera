@@ -13,8 +13,8 @@ from hera.workflows.models import (
     Template,
     TemplateRef,
 )
-from hera.workflows.protocol import Templatable
 from hera.workflows.operator import Operator
+from hera.workflows.protocol import Templatable
 from hera.workflows.workflow_status import WorkflowStatus
 
 

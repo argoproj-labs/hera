@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  annotations:
+    workflows.argoproj.io/description: This example demonstrates running a DAG with
+      inline templates.
+    workflows.argoproj.io/version: '>= 3.2.0'
+  name: hello-world
+spec:
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 4
+  schedule: '* * * * *'
+  startingDeadlineSeconds: 0
+  successfulJobsHistoryLimit: 4
+  suspend: false
+  timezone: America/Los_Angeles
+  workflowSpec:
+    entrypoint: whalesay
+    suspend: false
+    templates:
+    - container:
+        args:
+        - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
+        command:
+        - cowsay
+        image: docker/whalesay:latest
+      name: whalesay
