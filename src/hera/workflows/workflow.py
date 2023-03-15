@@ -63,8 +63,12 @@ class Workflow(
     ArgumentsMixin,
     ContextMixin,
 ):
+    # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
     api_version: Optional[str] = GlobalConfig.api_version
     kind: Optional[str] = None
+    status: Optional[WorkflowStatus] = None
+
+    # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
     annotations: Optional[Dict[str, str]] = None
     cluster_name: Optional[str] = None
     creation_timestamp: Optional[Time] = None
@@ -81,6 +85,8 @@ class Workflow(
     resource_version: Optional[str] = None
     self_link: Optional[str] = None
     uid: Optional[str] = None
+
+    # WorkflowSpec fields - https://argoproj.github.io/argo-workflows/fields/#workflowspec
     active_deadline_seconds: Optional[int] = None
     affinity: Optional[Affinity] = None
     archive_logs: Optional[bool] = None
@@ -123,7 +129,8 @@ class Workflow(
     volumes: Optional[List[Volume]] = None
     workflow_metadata: Optional[WorkflowMetadata] = None
     workflow_template_ref: Optional[WorkflowTemplateRef] = None
-    status: Optional[WorkflowStatus] = None
+
+    # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
     @validator("workflows_service", pre=True, always=True)
