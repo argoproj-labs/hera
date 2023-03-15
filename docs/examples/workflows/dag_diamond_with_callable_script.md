@@ -7,16 +7,17 @@
 ## Hera
 
 ```python
-from hera.workflows import DAG, Parameter, Script, Workflow
 from hera.workflows import (
     DAG,
-    Container,
     Parameter,
+    Script,
     Workflow,
 )
 
+
 def my_print_script(message):
     print(message)
+
 
 def get_script(callable):
     return Script(
@@ -32,7 +33,6 @@ with Workflow(
     generate_name="dag-diamond-",
     entrypoint="diamond",
 ) as w:
-
     echo = get_script(my_print_script)
 
     with DAG(name="diamond"):
