@@ -1,22 +1,17 @@
 from __future__ import annotations
 
 from types import ModuleType
-from typing import Any, Dict, Optional
+from typing import Optional
 
-from pydantic import validator
-from typing_extensions import get_args
-
-from hera.shared.global_config import GlobalConfig
-from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
+    CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
     CronWorkflowSpec,
     CronWorkflowStatus,
+    LintCronWorkflowRequest,
     ObjectMeta,
-    Template,
+    Workflow as _ModelWorkflow,
 )
-from hera.workflows.protocol import Templatable
-from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import Workflow
 
 _yaml: Optional[ModuleType] = None
@@ -72,6 +67,20 @@ class CronWorkflow(Workflow):
                 workflow_spec=super().build().spec,
             ),
             status=self.status,
+        )
+
+    def create(self) -> _ModelWorkflow:
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        return self.workflows_service.create_cron_workflow(
+            self.namespace, CreateCronWorkflowRequest(workflow=self.build())
+        )
+
+    def lint(self) -> _ModelWorkflow:
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        return self.workflows_service.lint_cron_workflow(
+            self.namespace, LintCronWorkflowRequest(workflow=self.build())
         )
 
 
