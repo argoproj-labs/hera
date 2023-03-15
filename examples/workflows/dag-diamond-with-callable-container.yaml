@@ -1,9 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: callable-templates-
+  generateName: dag-diamond-
 spec:
-  entrypoint: hello-world
+  entrypoint: diamond
   templates:
   - container:
       command:
@@ -14,23 +14,33 @@ spec:
       parameters:
       - name: message
     name: echo
-  - name: hello-world
-    steps:
-    - - arguments:
+  - dag:
+      tasks:
+      - arguments:
           parameters:
           - name: message
-            value: hello1
-        name: hello1
-        template: echo
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello2a
-        name: hello2a
+            value: A
+        name: A
         template: echo
       - arguments:
           parameters:
           - name: message
-            value: hello2b
-        name: hello2b
+            value: B
+        depends: A
+        name: B
         template: echo
+      - arguments:
+          parameters:
+          - name: message
+            value: C
+        depends: A
+        name: C
+        template: echo
+      - arguments:
+          parameters:
+          - name: message
+            value: D
+        depends: B && C
+        name: D
+        template: echo
+    name: diamond

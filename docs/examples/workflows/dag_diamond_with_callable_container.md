@@ -1,6 +1,6 @@
-# Dag Diamond
+# Dag Diamond With Callable Container
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/dag-diamond.yaml).
+
 
 
 
@@ -11,7 +11,6 @@ from hera.workflows import (
     DAG,
     Container,
     Parameter,
-    Task,
     Workflow,
 )
 
@@ -26,10 +25,10 @@ with Workflow(
         inputs=[Parameter(name="message")],
     )
     with DAG(name="diamond"):
-        A = Task(name="A", template=echo, arguments=[Parameter(name="message", value="A")])
-        B = Task(name="B", template=echo, arguments=[Parameter(name="message", value="B")])
-        C = Task(name="C", template=echo, arguments=[Parameter(name="message", value="C")])
-        D = Task(name="D", template=echo, arguments=[Parameter(name="message", value="D")])
+        A = echo(name="A", arguments=[Parameter(name="message", value="A")])
+        B = echo(name="B", arguments=[Parameter(name="message", value="B")])
+        C = echo(name="C", arguments=[Parameter(name="message", value="C")])
+        D = echo(name="D", arguments=[Parameter(name="message", value="D")])
         A >> [B, C] >> D
 ```
 
