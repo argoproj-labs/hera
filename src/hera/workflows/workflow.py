@@ -7,12 +7,11 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
-from hera.workflows._mixins import ContextMixin
+from hera.workflows._mixins import ArgumentsMixin, ContextMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
-    Arguments as _ModelArguments,
     Artifact as _ModelArtifact,
     ArtifactGC,
     ArtifactRepositoryRef,
@@ -48,7 +47,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import Templatable, TTemplate
+from hera.workflows.protocol import Templatable, TTemplate, TWorkflow
 from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
@@ -60,9 +59,16 @@ except ImportError:
     _yaml = None
 
 
-class Workflow(ContextMixin):
+class Workflow(
+    ArgumentsMixin,
+    ContextMixin,
+):
+    # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
     api_version: Optional[str] = GlobalConfig.api_version
     kind: Optional[str] = None
+    status: Optional[WorkflowStatus] = None
+
+    # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
     annotations: Optional[Dict[str, str]] = None
     cluster_name: Optional[str] = None
     creation_timestamp: Optional[Time] = None
@@ -79,6 +85,8 @@ class Workflow(ContextMixin):
     resource_version: Optional[str] = None
     self_link: Optional[str] = None
     uid: Optional[str] = None
+
+    # WorkflowSpec fields - https://argoproj.github.io/argo-workflows/fields/#workflowspec
     active_deadline_seconds: Optional[int] = None
     affinity: Optional[Affinity] = None
     archive_logs: Optional[bool] = None
@@ -121,7 +129,8 @@ class Workflow(ContextMixin):
     volumes: Optional[List[Volume]] = None
     workflow_metadata: Optional[WorkflowMetadata] = None
     workflow_template_ref: Optional[WorkflowTemplateRef] = None
-    status: Optional[WorkflowStatus] = None
+
+    # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
     @validator("workflows_service", pre=True, always=True)
@@ -136,34 +145,7 @@ class Workflow(ContextMixin):
             return cls.__name__  # type: ignore
         return v
 
-    def _build_arguments(self) -> Optional[_ModelArguments]:
-        if self.arguments is None:
-            return None
-
-        artifacts = []
-        for arg in self.arguments:
-            if isinstance(arg, _ModelArtifact):
-                artifacts.append(arg)
-            elif isinstance(arg, Artifact):
-                artifacts.append(arg._build_artifact())
-
-        parameters = []
-        for arg in self.arguments:
-            if isinstance(arg, _ModelParameter):
-                parameters.append(arg)
-            elif isinstance(arg, Parameter):
-                parameters.append(arg.as_argument())
-
-        if not artifacts and not parameters:
-            return None
-
-        model_arguments = _ModelArguments(
-            artifacts=artifacts or None,
-            parameters=parameters or None,
-        )
-        return model_arguments
-
-    def build(self) -> _ModelWorkflow:
+    def build(self) -> TWorkflow:
         templates = []
         for template in self.templates:
             if isinstance(template, Templatable):
@@ -249,12 +231,12 @@ class Workflow(ContextMixin):
             raise ImportError("PyYAML is not installed")
         return yaml.dump(self.to_dict(), *args, **kwargs)
 
-    def create(self) -> _ModelWorkflow:
+    def create(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
 
-    def lint(self) -> _ModelWorkflow:
+    def lint(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow(self.namespace, WorkflowLintRequest(workflow=self.build()))

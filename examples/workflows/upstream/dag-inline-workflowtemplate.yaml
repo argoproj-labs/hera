@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  annotations:
+    workflows.argoproj.io/description: This example demonstrates running a DAG with
+      inline templates.
+    workflows.argoproj.io/version: '>= 3.2.0'
+  name: dag-inline
+spec:
+  entrypoint: main
+  templates:
+  - dag:
+      tasks:
+      - inline:
+          container:
+            image: argoproj/argosay:v2
+        name: a
+    name: main
