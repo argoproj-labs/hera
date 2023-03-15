@@ -18,4 +18,7 @@ with Workflow(
 
     with Steps(name="hello-world") as s:
         echo(name="hello1", arguments=[Parameter(name="message", value="hello1")])
-        echo(name="hello2", arguments=[Parameter(name="message", value="hello2")])
+
+        with s.parallel():
+            echo(name="hello2a", arguments=[Parameter(name="message", value="hello2a")])
+            echo(name="hello2b", arguments=[Parameter(name="message", value="hello2b")])

@@ -25,6 +25,12 @@ spec:
     - - arguments:
           parameters:
           - name: message
-            value: hello2
-        name: hello2
+            value: hello2a
+        name: hello2a
+        template: echo
+      - arguments:
+          parameters:
+          - name: message
+            value: hello2b
+        name: hello2b
         template: echo
