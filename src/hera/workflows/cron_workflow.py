@@ -66,7 +66,7 @@ class CronWorkflow(Workflow):
                 workflow_metadata=None,
                 workflow_spec=super().build().spec,
             ),
-            status=self.status,
+            status=self.cron_status,
         )
 
     def create(self) -> TWorkflow:
