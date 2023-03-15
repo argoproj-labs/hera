@@ -9,7 +9,7 @@ from hera.workflows.models import (
     WorkflowTemplateCreateRequest,
     WorkflowTemplateLintRequest,
 )
-from hera.workflows.protocol import Templatable, TTemplate
+from hera.workflows.protocol import Templatable, TTemplate, TWorkflow
 from hera.workflows.workflow import Workflow
 
 
@@ -22,21 +22,21 @@ class WorkflowTemplate(Workflow):
         if v is not None:
             raise ValueError("status is not a valid field on a WorkflowTemplate")
 
-    def create(self) -> _ModelWorkflowTemplate:
+    def create(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow_template(
             self.namespace, WorkflowTemplateCreateRequest(workflow=self.build())
         )
 
-    def lint(self) -> _ModelWorkflowTemplate:
+    def lint(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow_template(
             self.namespace, WorkflowTemplateLintRequest(workflow=self.build())
         )
 
-    def build(self) -> _ModelWorkflowTemplate:
+    def build(self) -> TWorkflow:
         templates = []
         for template in self.templates:
             if isinstance(template, Templatable):

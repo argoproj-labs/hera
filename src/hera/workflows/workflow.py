@@ -47,7 +47,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import Templatable, TTemplate
+from hera.workflows.protocol import Templatable, TTemplate, TWorkflow
 from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
@@ -145,7 +145,7 @@ class Workflow(
             return cls.__name__  # type: ignore
         return v
 
-    def build(self) -> _ModelWorkflow:
+    def build(self) -> TWorkflow:
         templates = []
         for template in self.templates:
             if isinstance(template, Templatable):
@@ -231,12 +231,12 @@ class Workflow(
             raise ImportError("PyYAML is not installed")
         return yaml.dump(self.to_dict(), *args, **kwargs)
 
-    def create(self) -> _ModelWorkflow:
+    def create(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
 
-    def lint(self) -> _ModelWorkflow:
+    def lint(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow(self.namespace, WorkflowLintRequest(workflow=self.build()))

@@ -11,6 +11,7 @@ from hera.workflows.models import (
     LintCronWorkflowRequest,
     ObjectMeta,
 )
+from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
 
 _yaml: Optional[ModuleType] = None
@@ -32,7 +33,7 @@ class CronWorkflow(Workflow):
     timezone: Optional[str] = None
     cron_status: Optional[CronWorkflowStatus] = None
 
-    def build(self) -> _ModelCronWorkflow:
+    def build(self) -> TWorkflow:
         return _ModelCronWorkflow(
             api_version=self.api_version,
             kind=self.kind,
@@ -68,14 +69,14 @@ class CronWorkflow(Workflow):
             status=self.status,
         )
 
-    def create(self) -> _ModelCronWorkflow:
+    def create(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_cron_workflow(
             self.namespace, CreateCronWorkflowRequest(workflow=self.build())
         )
 
-    def lint(self) -> _ModelCronWorkflow:
+    def lint(self) -> TWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cron_workflow(
