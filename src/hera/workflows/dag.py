@@ -8,6 +8,7 @@ from hera.workflows.models import (
     DAGTemplate as _ModelDAGTemplate,
     Template as _ModelTemplate,
 )
+from hera.workflows.exceptions import InvalidType
 from hera.workflows.task import Task
 
 
@@ -17,6 +18,8 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
     tasks: List[Union[Task, DAGTask]] = []
 
     def _add_sub(self, node: Any):
+        if not isinstance(node, Task):
+            raise InvalidType()
         self.tasks.append(node)
 
     def _build_template(self) -> _ModelTemplate:

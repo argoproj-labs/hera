@@ -7,6 +7,7 @@ from hera.workflows._mixins import (
     EnvMixin,
     IOMixin,
     ResourceMixin,
+    SubNodeMixin,
     TemplateMixin,
     VolumeMountMixin,
 )
@@ -16,6 +17,11 @@ from hera.workflows.models import (
     SecurityContext,
     Template as _ModelTemplate,
 )
+
+from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
+from hera.workflows._context import _context
+from hera.workflows.steps import Step, Steps, Parallel
+from hera.workflows.task import Task
 
 
 class Container(
@@ -31,6 +37,19 @@ class Container(
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
+
+    def __call__(self, *args, **kwargs) -> SubNodeMixin:
+        try:
+            return Step(*args, template=self, **kwargs)
+        except InvalidType:
+            pass
+
+        try:
+            return Task(*args, template=self, **kwargs)
+        except InvalidType:
+            pass
+
+        raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(
