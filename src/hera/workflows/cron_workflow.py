@@ -10,7 +10,6 @@ from hera.workflows.models import (
     CronWorkflowStatus,
     LintCronWorkflowRequest,
     ObjectMeta,
-    Workflow as _ModelWorkflow,
 )
 from hera.workflows.workflow import Workflow
 
@@ -69,14 +68,14 @@ class CronWorkflow(Workflow):
             status=self.status,
         )
 
-    def create(self) -> _ModelWorkflow:
+    def create(self) -> _ModelCronWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_cron_workflow(
             self.namespace, CreateCronWorkflowRequest(workflow=self.build())
         )
 
-    def lint(self) -> _ModelWorkflow:
+    def lint(self) -> _ModelCronWorkflow:
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cron_workflow(
