@@ -4,11 +4,14 @@ from typing_extensions import Protocol, runtime_checkable
 
 from hera.workflows.models import (
     ContainerSetTemplate,
+    CronWorkflow,
     DAGTemplate,
     ResourceTemplate,
     ScriptTemplate,
     SuspendTemplate,
     Template,
+    Workflow,
+    WorkflowTemplate,
 )
 
 TTemplate = Union[
@@ -18,6 +21,12 @@ TTemplate = Union[
     ScriptTemplate,
     SuspendTemplate,
     Template,
+]
+
+TWorkflow = Union[
+    CronWorkflow,
+    Workflow,
+    WorkflowTemplate,
 ]
 
 

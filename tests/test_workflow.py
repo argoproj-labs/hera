@@ -10,7 +10,14 @@ import yaml
 
 import examples.workflows as hera_examples
 import examples.workflows.upstream as hera_upstream_examples
-from hera.workflows.models import Workflow
+from hera.workflows import (
+    CronWorkflow as HeraCronWorkflow,
+    Workflow as HeraWorkflow,
+)
+from hera.workflows.models import (
+    CronWorkflow as ModelCronWorkflow,
+    Workflow as ModelWorkflow,
+)
 
 ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
@@ -25,8 +32,8 @@ def _generate_yaml(path: Path) -> bool:
     return not path.exists()
 
 
-def _transform(obj):
-    w = Workflow.parse_obj(obj)
+def _transform_workflow(obj):
+    w = ModelWorkflow.parse_obj(obj)
     w.spec.templates.sort(key=lambda t: t.name)
     w.metadata.annotations = {}
     w.metadata.labels = {}
@@ -36,6 +43,17 @@ def _transform(obj):
     return w.dict()
 
 
+def _transform_cron_workflow(obj):
+    wt = ModelCronWorkflow.parse_obj(obj)
+    wt.spec.workflow_spec.templates.sort(key=lambda t: t.name)
+    wt.metadata.annotations = {}
+    wt.metadata.labels = {}
+    for t in wt.spec.workflow_spec.templates:
+        if t.script:
+            t.script.source = ast.dump(ast.parse(t.script.source))
+    return wt.dict()
+
+
 @pytest.mark.parametrize(
     "module_name", [name for _, name, _ in pkgutil.iter_modules(hera_examples.__path__) if name != "upstream"]
 )
@@ -43,8 +61,10 @@ def test_hera_output(module_name):
     # GIVEN
     workflow = importlib.import_module(f"examples.workflows.{module_name}").w
     yaml_path = Path(hera_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
+
     # WHEN
     output = workflow.to_dict()
+
     # THEN
     if _generate_yaml(yaml_path):
         yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
@@ -60,8 +80,10 @@ def test_hera_output_upstream(module_name):
     upstream_yaml_path = (
         Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.upstream.yaml"
     )
+
     # WHEN
     output = workflow.to_dict()
+
     # THEN
     if _generate_yaml(yaml_path):
         yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
@@ -72,4 +94,12 @@ def test_hera_output_upstream(module_name):
     assert yaml_path.exists()
     assert output == yaml.safe_load(yaml_path.read_text())
     assert upstream_yaml_path.exists()
-    assert _transform(output) == _transform(yaml.safe_load(upstream_yaml_path.read_text()))
+
+    if isinstance(workflow, HeraCronWorkflow):
+        assert _transform_cron_workflow(output) == _transform_cron_workflow(
+            yaml.safe_load(upstream_yaml_path.read_text())
+        )
+    elif isinstance(workflow, HeraWorkflow):
+        assert _transform_workflow(output) == _transform_workflow(yaml.safe_load(upstream_yaml_path.read_text()))
+    else:
+        assert False, "Unsupported workflow type"
