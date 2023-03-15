@@ -14,4 +14,13 @@ spec:
   successfulJobsHistoryLimit: 4
   suspend: false
   timezone: America/Los_Angeles
-  workflowSpec: {}
+  workflowSpec:
+    entrypoint: whalesay
+    templates:
+    - container:
+        args:
+        - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
+        command:
+        - cowsay
+        image: docker/whalesay:latest
+      name: whalesay

@@ -13,7 +13,7 @@ with CronWorkflow(
     concurrency_policy="Replace",
     successful_jobs_history_limit=4,
     failed_jobs_history_limit=4,
-    suspend=False,
+    cron_suspend=False,
 ) as w:
     whalesay = Container(
         name="whalesay",
