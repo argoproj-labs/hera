@@ -12,7 +12,7 @@ def get_container(name: str, image: str, args: List[str]) -> Container:
         args=args,
         volume_mounts=[
             m.VolumeMount(name="workdir", mount_path="/mnt/vol"),
-        ]
+        ],
     )
 
 
@@ -33,17 +33,16 @@ with Workflow(
         )
     ],
 ) as w:
-    with Steps(name="volumes-pvc-example") as s:
-        Step(name="generate", template="whalesay")
-        Step(name="print", template="print-message")
-
-    get_container(
+    whalesay = get_container(
         "whalesay",
         "docker/whalesay:latest",
         ["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
     )
-    get_container(
+    print_message = get_container(
         "print-message",
         "alpine:latest",
         ["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
     )
+    with Steps(name="volumes-pvc-example") as s:
+        whalesay(name="generate")
+        print_message(name="print")

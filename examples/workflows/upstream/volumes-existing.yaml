@@ -5,12 +5,6 @@ metadata:
 spec:
   entrypoint: volumes-existing-example
   templates:
-  - name: volumes-existing-example
-    steps:
-    - - name: generate
-        template: append-to-accesslog
-    - - name: print
-        template: print-accesslog
   - container:
       args:
       - 'echo accessed at: $(date) | tee -a /mnt/vol/accesslog'
@@ -33,6 +27,12 @@ spec:
       - mountPath: /mnt/vol
         name: workdir
     name: print-accesslog
+  - name: volumes-existing-example
+    steps:
+    - - name: generate
+        template: append-to-accesslog
+    - - name: print
+        template: print-accesslog
   volumes:
   - name: workdir
     persistentVolumeClaim:
