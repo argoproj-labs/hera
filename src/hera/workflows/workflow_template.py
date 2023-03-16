@@ -1,6 +1,7 @@
 from pydantic import validator
 from typing_extensions import get_args
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     ObjectMeta,
@@ -16,6 +17,9 @@ from hera.workflows.workflow import Workflow
 class WorkflowTemplate(Workflow):
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
+
+    def __hera_hooks__(self):
+        GlobalConfig.dispatch_hooks(self)
 
     @validator("status", pre=True, always=True)
     def _set_status(cls, v):

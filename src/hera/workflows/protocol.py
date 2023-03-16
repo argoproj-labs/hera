@@ -1,4 +1,4 @@
-from typing import Any, Union, Optional, List
+from typing import Any, List, Optional, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -6,13 +6,13 @@ from hera.workflows.models import (
     ContainerSetTemplate,
     CronWorkflow,
     DAGTemplate,
+    PersistentVolumeClaim,
     ResourceTemplate,
     ScriptTemplate,
     SuspendTemplate,
     Template,
     Workflow,
     WorkflowTemplate,
-    PersistentVolumeClaim,
 )
 
 TTemplate = Union[

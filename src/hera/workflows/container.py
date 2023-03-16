@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
@@ -33,6 +34,9 @@ class Container(
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
+
+    def __hera_hooks__(self):
+        GlobalConfig.dispatch_hooks(self)
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(

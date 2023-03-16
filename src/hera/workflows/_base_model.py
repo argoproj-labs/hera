@@ -24,3 +24,6 @@ class BaseMixin(BaseModel):
 
     def __hera_init__(self):
         ...
+
+    def __hera_hooks__(self):
+        ...
