@@ -25,7 +25,7 @@ from hera.workflows.dag import DAG
 from hera.workflows.data import Data
 from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretEnv
 from hera.workflows.env_from import ConfigMapEnvFrom, SecretEnvFrom
-from hera.workflows.exceptions import InvalidType
+from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
 from hera.workflows.http import HTTP
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
@@ -115,6 +115,7 @@ __all__ = [
     "HTTPArtifact",
     "HostPathVolume",
     "ISCSIVolume",
+    "InvalidTemplateCall",
     "InvalidType",
     "NFSVolume",
     "NoneArchiveStrategy",
