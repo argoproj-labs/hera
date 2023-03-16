@@ -47,7 +47,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import Templatable, TTemplate, TWorkflow
+from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
@@ -154,6 +154,18 @@ class Workflow(
                 templates.append(template)
             else:
                 raise InvalidType(f"{type(template)} is not a valid template type")
+
+            if isinstance(template, VolumeClaimable):
+                if self.volume_claim_templates is None:
+                    self.volume_claim_templates = []
+
+                current_volume_claims_map = {claim.metadata.name: claim for claim in self.volume_claim_templates}
+                new_volume_claims_map = {
+                    claim.metadata.name: claim for claim in template._build_persistent_volume_claims()
+                }
+                for claim in new_volume_claims_map.keys():
+                    if claim not in current_volume_claims_map:
+                        self.volume_claim_templates.append(new_volume_claims_map[claim])
 
         return _ModelWorkflow(
             api_version=self.api_version,

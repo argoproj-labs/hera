@@ -37,6 +37,12 @@ class Templatable(Protocol):
 
 
 @runtime_checkable
+class VolumeClaimable(Protocol):
+    def _build_persistent_volume_claims(self) -> Any:
+        ...
+
+
+@runtime_checkable
 class Subbable(Protocol):
     def _add_sub(self, node: Any) -> Any:
         ...

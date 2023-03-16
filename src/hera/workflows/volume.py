@@ -25,8 +25,8 @@ from hera.workflows.models import (
     ISCSIVolumeSource as _ModelISCSIVolumeSource,
     NFSVolumeSource as _ModelNFSVolumeSource,
     ObjectMeta,
+    PersistentVolumeClaim as _ModelPersistentVolumeClaim,
     PersistentVolumeClaimSpec as _ModelPersistentVolumeClaimSpec,
-    PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate,
     PersistentVolumeClaimVolumeSource as _ModelPersistentVolumeClaimVolumeSource,
     PhotonPersistentDiskVolumeSource as _ModelPhotonPersistentDiskVolumeSource,
     PortworxVolumeSource as _ModelPortworxVolumeSource,
@@ -84,7 +84,7 @@ class _BaseVolume(_ModelVolumeMount):
             return str(uuid.uuid4())
         return v
 
-    def _build_persistent_volume_claim_template(self) -> _ModelPersistentVolumeClaimTemplate:
+    def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:
         raise NotImplementedError
 
     def _build_volume(self) -> _ModelVolume:
@@ -459,8 +459,8 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
             validate_storage_units(cast(str, storage))
         return values
 
-    def _build_persistent_volume_claim_template(self) -> _ModelPersistentVolumeClaimTemplate:
-        return _ModelPersistentVolumeClaimTemplate(
+    def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:
+        return _ModelPersistentVolumeClaim(
             metadata=self.metadata or ObjectMeta(name=self.name),
             spec=_ModelPersistentVolumeClaimSpec(
                 access_modes=[str(am.value) for am in self.access_modes] if self.access_modes is not None else None,
@@ -475,7 +475,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
         )
 
     def _build_volume(self) -> _ModelVolume:
-        claim = self._build_persistent_volume_claim_template()
+        claim = self._build_persistent_volume_claim()
         assert claim.metadata is not None, "claim metadata is required"
         return _ModelVolume(
             name=self.name,

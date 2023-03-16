@@ -28,6 +28,7 @@ from hera.workflows.models import (
     Metrics,
     Outputs as ModelOutputs,
     Parameter as ModelParameter,
+    PersistentVolumeClaim,
     Plugin,
     PodSecurityContext,
     Probe,
@@ -44,7 +45,7 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
-from hera.workflows.volume import _BaseVolume
+from hera.workflows.volume import Volume, _BaseVolume
 
 Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]
 Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
@@ -251,6 +252,12 @@ class VolumeMountMixin(BaseMixin):
         if self.volumes is None:
             return None
         return [v._build_volume() for v in self.volumes]
+
+    def _build_persistent_volume_claims(self) -> Optional[List[PersistentVolumeClaim]]:
+        if self.volumes is None:
+            return None
+        volumes_with_pv_claims = [v for v in self.volumes if isinstance(v, Volume)]
+        return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims]
 
 
 class ArgumentsMixin(BaseMixin):
