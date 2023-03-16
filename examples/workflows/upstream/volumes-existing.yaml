@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: volumes-existing-
+spec:
+  entrypoint: volumes-existing-example
+  templates:
+  - container:
+      args:
+      - 'echo accessed at: $(date) | tee -a /mnt/vol/accesslog'
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+      volumeMounts:
+      - mountPath: /mnt/vol
+        name: workdir
+    name: append-to-accesslog
+  - container:
+      args:
+      - echo 'Volume access log:'; cat /mnt/vol/accesslog
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+      volumeMounts:
+      - mountPath: /mnt/vol
+        name: workdir
+    name: print-accesslog
+  - name: volumes-existing-example
+    steps:
+    - - name: generate
+        template: append-to-accesslog
+    - - name: print
+        template: print-accesslog
+  volumes:
+  - name: workdir
+    persistentVolumeClaim:
+      claimName: my-existing-volume
