@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-diamond-
+spec:
+  entrypoint: diamond
+  templates:
+  - inputs:
+      parameters:
+      - name: message
+    name: my-print-script
+    script:
+      command:
+      - python
+      image: python:alpine3.6
+      source: 'import json
+
+        try: message = json.loads(r''''''{{inputs.parameters.message}}'''''')
+
+        except: message = r''''''{{inputs.parameters.message}}''''''
+
+
+        print(message)
+
+        '
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: message
+            value: A
+        name: A
+        template: my-print-script
+      - arguments:
+          parameters:
+          - name: message
+            value: B
+        depends: A
+        name: B
+        template: my-print-script
+      - arguments:
+          parameters:
+          - name: message
+            value: C
+        depends: A
+        name: C
+        template: my-print-script
+      - arguments:
+          parameters:
+          - name: message
+            value: D
+        depends: B && C
+        name: D
+        template: my-print-script
+    name: diamond

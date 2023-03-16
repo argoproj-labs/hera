@@ -2,4 +2,8 @@ class InvalidType(Exception):
     ...
 
 
-__all__ = ["InvalidType"]
+class InvalidTemplateCall(Exception):
+    ...
+
+
+__all__ = ["InvalidType", "InvalidTemplateCall"]
