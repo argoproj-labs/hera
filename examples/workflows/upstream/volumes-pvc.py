@@ -1,5 +1,20 @@
 from hera.workflows import Container, Workflow, Steps, Step
 from hera.workflows import models as m
+from typing import List
+
+
+def get_container(name: str, image: str, args: List[str]) -> Container:
+    """Creates container with a mounted volume"""
+    return Container(
+        name=name,
+        image=image,
+        command=["sh", "-c"],
+        args=args,
+        volume_mounts=[
+            m.VolumeMount(name="workdir", mount_path="/mnt/vol"),
+        ]
+    )
+
 
 with Workflow(
     generate_name="volumes-pvc-",
@@ -21,21 +36,14 @@ with Workflow(
     with Steps(name="volumes-pvc-example") as s:
         Step(name="generate", template="whalesay")
         Step(name="print", template="print-message")
-    Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["sh", "-c"],
-        args=["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
-        volume_mounts=[
-            m.VolumeMount(name="workdir", mount_path="/mnt/vol"),
-        ],
+
+    get_container(
+        "whalesay",
+        "docker/whalesay:latest",
+        ["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
     )
-    Container(
-        name="print-message",
-        image="alpine:latest",
-        command=["sh", "-c"],
-        args=["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
-        volume_mounts=[
-            m.VolumeMount(name="workdir", mount_path="/mnt/vol"),
-        ],
+    get_container(
+        "print-message",
+        "alpine:latest",
+        ["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
     )
