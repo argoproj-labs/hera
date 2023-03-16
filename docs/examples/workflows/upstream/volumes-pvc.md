@@ -1,3 +1,12 @@
+# Volumes-Pvc
+
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/volumes-pvc.yaml).
+
+
+
+## Hera
+
+```python
 from typing import List
 
 from hera.workflows import (
@@ -51,3 +60,53 @@ with Workflow(
     with Steps(name="volumes-pvc-example") as s:
         whalesay(name="generate")
         print_message(name="print")
+```
+
+## YAML
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: volumes-pvc-
+spec:
+  entrypoint: volumes-pvc-example
+  templates:
+  - container:
+      args:
+      - echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+      volumeMounts:
+      - mountPath: /mnt/vol
+        name: workdir
+    name: whalesay
+  - container:
+      args:
+      - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+      volumeMounts:
+      - mountPath: /mnt/vol
+        name: workdir
+    name: print-message
+  - name: volumes-pvc-example
+    steps:
+    - - name: generate
+        template: whalesay
+    - - name: print
+        template: print-message
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+```
