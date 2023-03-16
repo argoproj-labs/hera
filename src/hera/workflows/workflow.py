@@ -168,13 +168,21 @@ class Workflow(
                     # already existing volume claim templates under the assumption that the user has already set
                     # a claim template on the workflow intentionally, or the user is sharing the same volumes across
                     # different templates
-                    current_volume_claims_map = {claim.metadata.name: claim for claim in self.volume_claim_templates}
-                    new_volume_claims_map = {
-                        claim.metadata.name: claim for claim in template._build_persistent_volume_claims()
-                    }
-                    for claim in new_volume_claims_map.keys():
-                        if claim not in current_volume_claims_map:
-                            self.volume_claim_templates.append(new_volume_claims_map[claim])
+                    current_volume_claims_map = {}
+                    for claim in self.volume_claim_templates:
+                        assert claim.metadata is not None, "expected a workflow volume claim with metadata"
+                        assert claim.metadata.name is not None, "expected a named workflow volume claim"
+                        current_volume_claims_map[claim.metadata.name] = claim
+
+                    new_volume_claims_map = {}
+                    for claim in claims:
+                        assert claim.metadata is not None, "expected a volume claim with metadata"
+                        assert claim.metadata.name is not None, "expected a named volume claim"
+                        new_volume_claims_map[claim.metadata.name] = claim
+
+                    for claim_name in new_volume_claims_map.keys():
+                        if claim_name not in current_volume_claims_map:
+                            self.volume_claim_templates.append(new_volume_claims_map[claim_name])
 
         return _ModelWorkflow(
             api_version=self.api_version,

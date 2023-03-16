@@ -41,43 +41,49 @@ spec:
         mountPath: /mnt/vol
 """
 
-from hera.workflows import Workflow, Volume, Container, Steps, models as m
+from hera.workflows import (
+    Container,
+    Steps,
+    Volume,
+    Workflow,
+    models as m,
+)
 
 with Workflow(
     generate_name="volumes-pvc-",
     entrypoint="volumes-pvc-example",
-    volume_claim_templates=[m.PersistentVolumeClaim(
-        metadata=m.ObjectMeta(name="workdir"),
-        spec=m.PersistentVolumeClaimSpec(
-            access_modes=["ReadWriteOnce"],
-            resources=m.ResourceRequirements(
-                requests={"storage": m.Quantity(__root__="1Gi")},
-            )
-        ),
-    )]
+    volume_claim_templates=[
+        m.PersistentVolumeClaim(
+            metadata=m.ObjectMeta(name="workdir"),
+            spec=m.PersistentVolumeClaimSpec(
+                access_modes=["ReadWriteOnce"],
+                resources=m.ResourceRequirements(
+                    requests={"storage": m.Quantity(__root__="1Gi")},
+                ),
+            ),
+        )
+    ],
 ) as w:
     v = Volume(
-            name="workdir",
-            size="1Gi",
-            mount_path="/mnt/vol",
-            access_modes=["ReadWriteOnce"],
-        )
+        name="workdir",
+        size="1Gi",
+        mount_path="/mnt/vol",
+        access_modes=["ReadWriteOnce"],
+    )
     whalesay = Container(
         name="whalesay",
         image="docker/whalesay:latest",
         command=["sh", "-c"],
-        args=[
-            "echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"
-        ],
-        volume_mounts=[m.VolumeMount(name="workdir", mount_path="/mnt/vol")])
+        args=["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
+        volume_mounts=[m.VolumeMount(name="workdir", mount_path="/mnt/vol")],
+    )
     print_message = Container(
         name="print-message",
         image="alpine:latest",
         command=["sh", "-c"],
-        args=[
-            "echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"
-        ],
-        volume_mounts=[m.VolumeMount(name="workdir", mount_path="/mnt/vol")])
+        args=["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
+        volume_mounts=[m.VolumeMount(name="workdir", mount_path="/mnt/vol")],
+    )
     with Steps(name="volumes-pvc-example") as s:
         whalesay(name="generate")
         print_message(name="print")

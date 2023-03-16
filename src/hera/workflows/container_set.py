@@ -18,7 +18,6 @@ from hera.workflows.models import (
     ContainerSetRetryStrategy,
     ContainerSetTemplate as _ModelContainerSetTemplate,
     Template as _ModelTemplate,
-    VolumeMount,
 )
 
 

@@ -45,7 +45,7 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
-from hera.workflows.volume import _BaseVolume, Volume
+from hera.workflows.volume import Volume, _BaseVolume
 
 Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]
 Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]

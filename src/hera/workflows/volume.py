@@ -1,6 +1,6 @@
 import uuid
 from enum import Enum
-from typing import List, Optional, cast, Union
+from typing import List, Optional, Union, cast
 
 from pydantic import root_validator, validator
 
@@ -476,7 +476,9 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
         return _ModelPersistentVolumeClaim(
             metadata=self.metadata or ObjectMeta(name=self.name),
             spec=_ModelPersistentVolumeClaimSpec(
-                access_modes=[str(am.value) for am in self.access_modes] if self.access_modes is not None else None,
+                access_modes=[str(cast(AccessMode, am).value) for am in self.access_modes]
+                if self.access_modes is not None
+                else None,
                 data_source=self.data_source,
                 data_source_ref=self.data_source_ref,
                 resources=self.resources,
