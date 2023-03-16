@@ -38,14 +38,14 @@ from hera.workflows.models import (
     TerminationMessagePolicy,
     Toleration,
     UserContainer as ModelUserContainer,
-    Volume,
+    Volume as ModelVolume,
     VolumeDevice,
     VolumeMount,
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
-from hera.workflows.volume import Volume, _BaseVolume
+from hera.workflows.volume import _BaseVolume, Volume
 
 Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]
 Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
@@ -241,14 +241,14 @@ class VolumeMountMixin(BaseMixin):
             return None
 
         result = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
-
         if result is None and self.volume_mounts is None:
             return None
         elif result is None and self.volume_mounts is not None:
             return self.volume_mounts
-        return cast(List[VolumeMount], self.volume_mounts) + cast(List[VolumeMount], result)
 
-    def _build_volumes(self) -> Optional[List[Volume]]:
+        return cast(List[VolumeMount], self.volume_mounts) or [] + cast(List[VolumeMount], result) or []
+
+    def _build_volumes(self) -> Optional[List[ModelVolume]]:
         if self.volumes is None:
             return None
         return [v._build_volume() for v in self.volumes]
@@ -256,8 +256,15 @@ class VolumeMountMixin(BaseMixin):
     def _build_persistent_volume_claims(self) -> Optional[List[PersistentVolumeClaim]]:
         if self.volumes is None:
             return None
+
         volumes_with_pv_claims = [v for v in self.volumes if isinstance(v, Volume)]
-        return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims]
+        if not volumes_with_pv_claims:
+            return None
+
+        claims = [v._build_persistent_volume_claim() for v in volumes_with_pv_claims]
+        if not claims:
+            return None
+        return claims
 
 
 class ArgumentsMixin(BaseMixin):

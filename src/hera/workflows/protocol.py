@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Union, Optional, List
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -12,6 +12,7 @@ from hera.workflows.models import (
     Template,
     Workflow,
     WorkflowTemplate,
+    PersistentVolumeClaim,
 )
 
 TTemplate = Union[
@@ -38,7 +39,7 @@ class Templatable(Protocol):
 
 @runtime_checkable
 class VolumeClaimable(Protocol):
-    def _build_persistent_volume_claims(self) -> Any:
+    def _build_persistent_volume_claims(self) -> Optional[List[PersistentVolumeClaim]]:
         ...
 
 

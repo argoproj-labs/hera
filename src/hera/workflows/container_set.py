@@ -64,7 +64,6 @@ class ContainerSet(
 ):
     containers: List[ContainerNode] = []
     container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
-    volume_mounts: Optional[List[VolumeMount]] = None
 
     def _add_sub(self, node: Any):
         if not isinstance(node, ContainerNode):

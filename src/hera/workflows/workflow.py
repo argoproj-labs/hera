@@ -156,16 +156,25 @@ class Workflow(
                 raise InvalidType(f"{type(template)} is not a valid template type")
 
             if isinstance(template, VolumeClaimable):
-                if self.volume_claim_templates is None:
-                    self.volume_claim_templates = []
-
-                current_volume_claims_map = {claim.metadata.name: claim for claim in self.volume_claim_templates}
-                new_volume_claims_map = {
-                    claim.metadata.name: claim for claim in template._build_persistent_volume_claims()
-                }
-                for claim in new_volume_claims_map.keys():
-                    if claim not in current_volume_claims_map:
-                        self.volume_claim_templates.append(new_volume_claims_map[claim])
+                claims = template._build_persistent_volume_claims()
+                # If there are no claims, continue, nothing to add
+                if not claims:
+                    continue
+                # If there are no volume claim templates, set them to the constructed claims
+                elif self.volume_claim_templates is None:
+                    self.volume_claim_templates = claims
+                else:
+                    # otherwise, we need to merge the two lists of volume claim templates. This prioritizes the
+                    # already existing volume claim templates under the assumption that the user has already set
+                    # a claim template on the workflow intentionally, or the user is sharing the same volumes across
+                    # different templates
+                    current_volume_claims_map = {claim.metadata.name: claim for claim in self.volume_claim_templates}
+                    new_volume_claims_map = {
+                        claim.metadata.name: claim for claim in template._build_persistent_volume_claims()
+                    }
+                    for claim in new_volume_claims_map.keys():
+                        if claim not in current_volume_claims_map:
+                            self.volume_claim_templates.append(new_volume_claims_map[claim])
 
         return _ModelWorkflow(
             api_version=self.api_version,

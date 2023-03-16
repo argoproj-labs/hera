@@ -1,6 +1,6 @@
 import uuid
 from enum import Enum
-from typing import List, Optional, cast
+from typing import List, Optional, cast, Union
 
 from pydantic import root_validator, validator
 
@@ -431,8 +431,21 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[ResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[AccessMode]] = [AccessMode.read_write_once]  # type: ignore
-    storage_class_name: Optional[str] = "standard"
+    access_modes: Optional[List[Union[str, AccessMode]]] = [AccessMode.read_write_once]  # type: ignore
+    storage_class_name: Optional[str] = None
+
+    @validator("access_modes", pre=True, always=True)
+    def _check_access_modes(cls, v):
+        if not v:
+            return [AccessMode.read_write_once]
+
+        result = []
+        for mode in v:
+            if isinstance(mode, AccessMode):
+                result.append(mode)
+            else:
+                result.append(AccessMode(mode))
+        return result
 
     @validator("name", pre=True, always=True)
     def _check_name(cls, v):
