@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: steps-
+spec:
+  entrypoint: hello-hello-hello
+  templates:
+  - container:
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - cowsay
+      image: docker/whalesay
+    inputs:
+      parameters:
+      - name: message
+    name: whalesay
+  - name: hello-hello-hello
+    steps:
+    - - arguments:
+          parameters:
+          - name: message
+            value: hello1
+        name: hello1
+        template: whalesay
+    - - arguments:
+          parameters:
+          - name: message
+            value: hello2a
+        name: hello2a
+        template: whalesay
+      - arguments:
+          parameters:
+          - name: message
+            value: hello2b
+        name: hello2b
+        template: whalesay
