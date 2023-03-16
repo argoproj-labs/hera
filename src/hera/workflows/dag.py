@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import ContextMixin, IOMixin, TemplateMixin
+from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     DAGTask,
     DAGTemplate as _ModelDAGTemplate,
@@ -17,6 +18,8 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
     tasks: List[Union[Task, DAGTask]] = []
 
     def _add_sub(self, node: Any):
+        if not isinstance(node, Task):
+            raise InvalidType()
         self.tasks.append(node)
 
     def _build_template(self) -> _ModelTemplate:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from hera.workflows._mixins import (
+    CallableTemplateMixin,
     ContainerMixin,
     EnvMixin,
     IOMixin,
@@ -25,6 +26,7 @@ class Container(
     TemplateMixin,
     ResourceMixin,
     VolumeMountMixin,
+    CallableTemplateMixin,
 ):
     args: Optional[List[str]] = None
     command: Optional[List[str]] = None

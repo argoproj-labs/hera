@@ -5,6 +5,7 @@ from typing import Callable, List, Optional, Union
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
+    CallableTemplateMixin,
     ContainerMixin,
     EnvMixin,
     IOMixin,
@@ -23,6 +24,7 @@ from hera.workflows.parameter import Parameter
 
 class Script(
     IOMixin,
+    CallableTemplateMixin,
     ContainerMixin,
     EnvMixin,
     TemplateMixin,
