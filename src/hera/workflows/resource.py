@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import IOMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
     ManifestFrom,
@@ -17,6 +18,10 @@ class Resource(TemplateMixin, SubNodeMixin, IOMixin):
     merge_strategy: Optional[str] = None
     set_owner_reference: Optional[bool] = None
     success_condition: Optional[str] = None
+
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.resource_post_init_hooks:
+            hook(self)
 
     def _build_resource_template(self) -> _ModelResourceTemplate:
         return _ModelResourceTemplate(

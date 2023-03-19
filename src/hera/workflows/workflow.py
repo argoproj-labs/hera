@@ -47,7 +47,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import Templatable, TTemplate, TWorkflow
+from hera.workflows.protocol import Dispatchable, Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
@@ -133,6 +133,10 @@ class Workflow(
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.workflow_post_init_hooks:
+            hook(self)
+
     @validator("workflows_service", pre=True, always=True)
     def _set_workflows_service(cls, v):
         if v is None:
@@ -146,14 +150,48 @@ class Workflow(
         return v
 
     def build(self) -> TWorkflow:
+        self._dispatch_hooks()
+
         templates = []
         for template in self.templates:
+            if isinstance(template, Dispatchable):
+                template._dispatch_hooks()
+
             if isinstance(template, Templatable):
                 templates.append(template._build_template())
             elif isinstance(template, get_args(TTemplate)):
                 templates.append(template)
             else:
                 raise InvalidType(f"{type(template)} is not a valid template type")
+
+            if isinstance(template, VolumeClaimable):
+                claims = template._build_persistent_volume_claims()
+                # If there are no claims, continue, nothing to add
+                if not claims:
+                    continue
+                # If there are no volume claim templates, set them to the constructed claims
+                elif self.volume_claim_templates is None:
+                    self.volume_claim_templates = claims
+                else:
+                    # otherwise, we need to merge the two lists of volume claim templates. This prioritizes the
+                    # already existing volume claim templates under the assumption that the user has already set
+                    # a claim template on the workflow intentionally, or the user is sharing the same volumes across
+                    # different templates
+                    current_volume_claims_map = {}
+                    for claim in self.volume_claim_templates:
+                        assert claim.metadata is not None, "expected a workflow volume claim with metadata"
+                        assert claim.metadata.name is not None, "expected a named workflow volume claim"
+                        current_volume_claims_map[claim.metadata.name] = claim
+
+                    new_volume_claims_map = {}
+                    for claim in claims:
+                        assert claim.metadata is not None, "expected a volume claim with metadata"
+                        assert claim.metadata.name is not None, "expected a named volume claim"
+                        new_volume_claims_map[claim.metadata.name] = claim
+
+                    for claim_name in new_volume_claims_map.keys():
+                        if claim_name not in current_volume_claims_map:
+                            self.volume_claim_templates.append(new_volume_claims_map[claim_name])
 
         return _ModelWorkflow(
             api_version=self.api_version,

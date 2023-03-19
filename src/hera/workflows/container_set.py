@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Union
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     ContainerMixin,
     ContextMixin,
@@ -18,11 +19,14 @@ from hera.workflows.models import (
     ContainerSetRetryStrategy,
     ContainerSetTemplate as _ModelContainerSetTemplate,
     Template as _ModelTemplate,
-    VolumeMount,
 )
 
 
 class ContainerNode(_ModelContainerNode, SubNodeMixin):
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.container_node_post_init_hooks:
+            hook(self)
+
     def next(self, other: ContainerNode) -> ContainerNode:
         assert issubclass(other.__class__, ContainerNode)
         if other.dependencies is None:
@@ -64,7 +68,6 @@ class ContainerSet(
 ):
     containers: List[ContainerNode] = []
     container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
-    volume_mounts: Optional[List[VolumeMount]] = None
 
     def _add_sub(self, node: Any):
         if not isinstance(node, ContainerNode):
