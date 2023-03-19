@@ -13,7 +13,6 @@ from hera.workflows._mixins import (
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     ContinueOn as _ModelContinueOn,
-    Item as _ModelItem,
     LifecycleHook as _ModelLifecycleHook,
     Sequence as _ModelSequence,
     Template as _ModelTemplate,
@@ -37,7 +36,6 @@ class Step(
     template: Union[str, _ModelTemplate, TemplateMixin]
     template_ref: Optional[_ModelTemplateRef]
     when: Optional[str]
-    with_items: Optional[List[_ModelItem]]
     with_sequence: Optional[_ModelSequence]
 
     def _dispatch_hooks(self):
