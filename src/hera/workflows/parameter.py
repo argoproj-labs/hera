@@ -1,21 +1,10 @@
 """Holds input model specifications"""
-import json
 from typing import Any, Optional
 
 from pydantic import root_validator
 
+from hera.shared.serialization import serialize
 from hera.workflows.models import Parameter as _ModelParameter
-
-MISSING = object()
-
-
-def _serialize(value: Any):
-    if value is MISSING:
-        return None
-    elif isinstance(value, str):
-        return value
-    else:
-        return json.dumps(value)  # None serialized as `null`
 
 
 class Parameter(_ModelParameter):
@@ -27,10 +16,10 @@ class Parameter(_ModelParameter):
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
 
         if values.get("value") is not None and not isinstance(values.get("value"), str):
-            values["value"] = _serialize(values.get("value"))
+            values["value"] = serialize(values.get("value"))
 
         if values.get("default") is not None and not isinstance(values.get("value"), str):
-            values["default"] = _serialize(values.get("default"))
+            values["default"] = serialize(values.get("default"))
 
         return values
 
