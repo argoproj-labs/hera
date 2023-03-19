@@ -3,6 +3,7 @@ from __future__ import annotations
 from types import ModuleType
 from typing import Optional
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
@@ -33,7 +34,13 @@ class CronWorkflow(Workflow):
     timezone: Optional[str] = None
     cron_status: Optional[CronWorkflowStatus] = None
 
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.cron_workflow_post_init_hooks:
+            hook(self)
+
     def build(self) -> TWorkflow:
+        self._dispatch_hooks()
+
         return _ModelCronWorkflow(
             api_version=self.api_version,
             kind=self.kind,

@@ -1,6 +1,6 @@
 import uuid
 from enum import Enum
-from typing import List, Optional, cast
+from typing import List, Optional, Union, cast
 
 from pydantic import root_validator, validator
 
@@ -25,8 +25,8 @@ from hera.workflows.models import (
     ISCSIVolumeSource as _ModelISCSIVolumeSource,
     NFSVolumeSource as _ModelNFSVolumeSource,
     ObjectMeta,
+    PersistentVolumeClaim as _ModelPersistentVolumeClaim,
     PersistentVolumeClaimSpec as _ModelPersistentVolumeClaimSpec,
-    PersistentVolumeClaimTemplate as _ModelPersistentVolumeClaimTemplate,
     PersistentVolumeClaimVolumeSource as _ModelPersistentVolumeClaimVolumeSource,
     PhotonPersistentDiskVolumeSource as _ModelPhotonPersistentDiskVolumeSource,
     PortworxVolumeSource as _ModelPortworxVolumeSource,
@@ -84,7 +84,7 @@ class _BaseVolume(_ModelVolumeMount):
             return str(uuid.uuid4())
         return v
 
-    def _build_persistent_volume_claim_template(self) -> _ModelPersistentVolumeClaimTemplate:
+    def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:
         raise NotImplementedError
 
     def _build_volume(self) -> _ModelVolume:
@@ -431,8 +431,21 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[ResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[AccessMode]] = [AccessMode.read_write_once]  # type: ignore
-    storage_class_name: Optional[str] = "standard"
+    access_modes: Optional[List[Union[str, AccessMode]]] = [AccessMode.read_write_once]  # type: ignore
+    storage_class_name: Optional[str] = None
+
+    @validator("access_modes", pre=True, always=True)
+    def _check_access_modes(cls, v):
+        if not v:
+            return [AccessMode.read_write_once]
+
+        result = []
+        for mode in v:
+            if isinstance(mode, AccessMode):
+                result.append(mode)
+            else:
+                result.append(AccessMode(mode))
+        return result
 
     @validator("name", pre=True, always=True)
     def _check_name(cls, v):
@@ -459,11 +472,13 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
             validate_storage_units(cast(str, storage))
         return values
 
-    def _build_persistent_volume_claim_template(self) -> _ModelPersistentVolumeClaimTemplate:
-        return _ModelPersistentVolumeClaimTemplate(
+    def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:
+        return _ModelPersistentVolumeClaim(
             metadata=self.metadata or ObjectMeta(name=self.name),
             spec=_ModelPersistentVolumeClaimSpec(
-                access_modes=[str(am.value) for am in self.access_modes] if self.access_modes is not None else None,
+                access_modes=[str(cast(AccessMode, am).value) for am in self.access_modes]
+                if self.access_modes is not None
+                else None,
                 data_source=self.data_source,
                 data_source_ref=self.data_source_ref,
                 resources=self.resources,
@@ -475,7 +490,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
         )
 
     def _build_volume(self) -> _ModelVolume:
-        claim = self._build_persistent_volume_claim_template()
+        claim = self._build_persistent_volume_claim()
         assert claim.metadata is not None, "claim metadata is required"
         return _ModelVolume(
             name=self.name,

@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, List, Optional, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -6,6 +6,7 @@ from hera.workflows.models import (
     ContainerSetTemplate,
     CronWorkflow,
     DAGTemplate,
+    PersistentVolumeClaim,
     ResourceTemplate,
     ScriptTemplate,
     SuspendTemplate,
@@ -37,6 +38,12 @@ class Templatable(Protocol):
 
 
 @runtime_checkable
+class VolumeClaimable(Protocol):
+    def _build_persistent_volume_claims(self) -> Optional[List[PersistentVolumeClaim]]:
+        ...
+
+
+@runtime_checkable
 class Subbable(Protocol):
     def _add_sub(self, node: Any) -> Any:
         ...
@@ -45,4 +52,10 @@ class Subbable(Protocol):
 @runtime_checkable
 class Steppable(Protocol):
     def _build_step(self) -> Any:
+        ...
+
+
+@runtime_checkable
+class Dispatchable(Protocol):
+    def _dispatch_hooks(self) -> None:
         ...
