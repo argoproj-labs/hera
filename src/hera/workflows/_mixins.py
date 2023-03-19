@@ -337,7 +337,7 @@ class ParameterMixin(BaseMixin):
 
 
 class ItemMixin(BaseMixin):
-    with_items: Optional[List[Any]] = None
+    with_items: Optional[List[Any]] = None  # this must composed of serializable objects
 
     def _build_with_items(self) -> Optional[List[Item]]:
         if self.with_items is None:
@@ -350,6 +350,8 @@ class ItemMixin(BaseMixin):
                     items.append(Item(__root__=item.value))
                 elif isinstance(item, str):
                     items.append(Item(__root__=item))
+                elif isinstance(item, Item):
+                    items.append(item)
                 else:
                     items.append(Item(__root__=serialize(item)))
             return items
