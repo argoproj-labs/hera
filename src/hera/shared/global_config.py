@@ -3,27 +3,17 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
-from typing_extensions import Protocol
-
 if TYPE_CHECKING:
+    from hera.workflows.container import Container
+    from hera.workflows.container_set import ContainerNode, ContainerSet
+    from hera.workflows.cron_workflow import CronWorkflow
+    from hera.workflows.dag import DAG
+    from hera.workflows.resource import Resource
+    from hera.workflows.script import Script
+    from hera.workflows.steps import Step, Steps
     from hera.workflows.task import Task
     from hera.workflows.workflow import Workflow
-
-
-# usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested
-# but protocols encourage nominal typing, so any function definition that implements a protocol will not be "noticed"
-# by coverage. See `test_global_config` for test coverage
-class TaskHook(Protocol):  # pragma: no cover
-    def __call__(self, t: Task) -> None:
-        ...
-
-
-# usage of `pragma: no cover` since coverage will complain that protocols are not tested. These are indeed tested
-# but protocols encourage nominal typing, so any function definition that implements a protocol will not be "noticed"
-# by coverage. See `test_global_config` for test coverage
-class WorkflowHook(Protocol):  # pragma: no cover
-    def __call__(self, w: Workflow) -> None:
-        ...
+    from hera.workflows.workflow_template import WorkflowTemplate
 
 
 class _GlobalConfig:
@@ -45,9 +35,23 @@ class _GlobalConfig:
     namespace: Optional[str] = None
     image: str = "python:3.7"
     service_account_name: Optional[str] = None
-    task_post_init_hooks: Tuple[TaskHook, ...] = ()
-    workflow_post_init_hooks: Tuple[WorkflowHook, ...] = ()
     script_command: Optional[List[str]] = ["python"]
+
+    # subbable hooks - these hooks are applied once the workflow is constructed for submission
+    workflow_post_init_hooks: Tuple[Callable[[Workflow], None], ...] = ()
+    cron_workflow_post_init_hooks: Tuple[Callable[[CronWorkflow], None], ...] = ()
+    workflow_template_post_init_hooks: Tuple[Callable[[WorkflowTemplate], None], ...] = ()
+    dag_post_init_hooks: Tuple[Callable[[DAG], None], ...] = ()
+    container_set_post_init_hooks: Tuple[Callable[[ContainerSet], None], ...] = ()
+    steps_post_init_hooks: Tuple[Callable[[Steps], None], ...] = ()
+
+    # subnode hooks - these hooks are applied once the workflow is constructed for submission
+    task_post_init_hooks: Tuple[Callable[[Task], None], ...] = ()
+    resource_post_init_hooks: Tuple[Callable[[Resource], None], ...] = ()
+    container_node_post_init_hooks: Tuple[Callable[[ContainerNode], None], ...] = ()
+    step_post_init_hooks: Tuple[Callable[[Step], None], ...] = ()
+    container_post_init_hooks: Tuple[Callable[[Container], None], ...] = ()
+    script_post_init_hooks: Tuple[Callable[[Script], None], ...] = ()
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
