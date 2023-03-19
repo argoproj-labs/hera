@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
+from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ContextMixin,
@@ -35,6 +36,10 @@ class Step(
     with_items: Optional[List[_ModelItem]]
     with_param: Optional[str]
     with_sequence: Optional[_ModelSequence]
+
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.step_post_init_hooks:
+            hook(self)
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         return _ModelWorkflowStep(
@@ -95,6 +100,10 @@ class Steps(
             List[_ModelWorkflowStep],
         ]
     ] = []
+
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.steps_post_init_hooks:
+            hook(self)
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
         steps = []
