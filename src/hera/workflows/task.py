@@ -4,11 +4,10 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 
 from hera.shared.global_config import GlobalConfig
-from hera.workflows._mixins import ArgumentsMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, ItemMixin, ParameterMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
     ContinueOn,
     DAGTask as _ModelDAGTask,
-    Item,
     LifecycleHook,
     Sequence,
     Template,
@@ -30,7 +29,7 @@ class TaskResult(Enum):
     all_failed = "AllFailed"
 
 
-class Task(ArgumentsMixin, SubNodeMixin):
+class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
     name: str
     continue_on: Optional[ContinueOn] = None
     dependencies: Optional[List[str]] = None
@@ -41,8 +40,6 @@ class Task(ArgumentsMixin, SubNodeMixin):
     template_ref: Optional[TemplateRef] = None
     inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None
-    with_items: Optional[List[Item]] = None
-    with_param: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
     def _dispatch_hooks(self):
