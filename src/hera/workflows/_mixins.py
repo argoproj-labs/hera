@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
+from hera.shared.serialization import serialize
 from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
@@ -23,6 +24,7 @@ from hera.workflows.models import (
     ImagePullPolicy,
     Inputs as ModelInputs,
     IntOrString,
+    Item,
     Memoize,
     Metadata,
     Metrics,
@@ -301,7 +303,7 @@ class ArgumentsMixin(BaseMixin):
         return model_arguments
 
 
-class CallableTemplateMixin:
+class CallableTemplateMixin(BaseMixin):
     def __call__(self, *args, **kwargs) -> SubNodeMixin:
         try:
             from hera.workflows.steps import Step
@@ -318,3 +320,43 @@ class CallableTemplateMixin:
             pass
 
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
+
+
+class ParameterMixin(BaseMixin):
+    with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
+
+    def _build_with_param(self) -> Optional[str]:
+        if self.with_param is None:
+            return None
+
+        if isinstance(self.with_param, Parameter):
+            return self.with_param.value
+        elif isinstance(self.with_param, str):
+            return self.with_param
+        return serialize(self.with_param)
+
+
+class ItemMixin(BaseMixin):
+    with_items: Optional[List[Any]] = None  # this must composed of serializable objects
+
+    def _build_with_items(self) -> Optional[List[Item]]:
+        if self.with_items is None:
+            return None
+
+        if isinstance(self.with_items, list):
+            items = []
+            for item in self.with_items:
+                if isinstance(item, Parameter):
+                    items.append(Item(__root__=item.value))
+                elif isinstance(item, str):
+                    items.append(Item(__root__=item))
+                elif isinstance(item, Item):
+                    items.append(item)
+                else:
+                    items.append(Item(__root__=serialize(item)))
+            return items
+        elif isinstance(self.with_items, Parameter):
+            return [Item(__root__=self.with_items.value)]
+        elif isinstance(self.with_items, str):
+            return [Item(__root__=self.with_items)]
+        return [Item(__root__=serialize(self.with_items))]
