@@ -6,4 +6,8 @@ class InvalidTemplateCall(Exception):
     ...
 
 
-__all__ = ["InvalidType", "InvalidTemplateCall"]
+class InvalidDispatchType(Exception):
+    ...
+
+
+__all__ = ["InvalidType", "InvalidTemplateCall", "InvalidDispatchType"]
