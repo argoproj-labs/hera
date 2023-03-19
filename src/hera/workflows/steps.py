@@ -5,6 +5,7 @@ from hera.workflows._mixins import (
     ArgumentsMixin,
     ContextMixin,
     IOMixin,
+    ParameterMixin,
     SubNodeMixin,
     TemplateMixin,
 )
@@ -24,6 +25,7 @@ from hera.workflows.protocol import Steppable
 class Step(
     ArgumentsMixin,
     SubNodeMixin,
+    ParameterMixin,
 ):
     continue_on: Optional[_ModelContinueOn]
     hooks: Optional[Dict[str, _ModelLifecycleHook]]
@@ -34,7 +36,6 @@ class Step(
     template_ref: Optional[_ModelTemplateRef]
     when: Optional[str]
     with_items: Optional[List[_ModelItem]]
-    with_param: Optional[str]
     with_sequence: Optional[_ModelSequence]
 
     def _dispatch_hooks(self):

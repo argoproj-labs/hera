@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
+from hera.shared.serialization import serialize
 from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
@@ -301,7 +302,7 @@ class ArgumentsMixin(BaseMixin):
         return model_arguments
 
 
-class CallableTemplateMixin:
+class CallableTemplateMixin(BaseMixin):
     def __call__(self, *args, **kwargs) -> SubNodeMixin:
         try:
             from hera.workflows.steps import Step
@@ -318,3 +319,14 @@ class CallableTemplateMixin:
             pass
 
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
+
+
+class ParameterMixin(BaseMixin):
+    with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
+
+    def _build_with_param(self) -> Optional[str]:
+        if isinstance(self.with_param, Parameter):
+            return self.with_param.value
+        elif isinstance(self.with_param, str):
+            return self.with_param
+        return serialize(self.with_param)
