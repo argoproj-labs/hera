@@ -19,8 +19,9 @@ class Resource(TemplateMixin, SubNodeMixin, IOMixin):
     set_owner_reference: Optional[bool] = None
     success_condition: Optional[str] = None
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.resource_post_init_hooks:
+            hook(self)
 
     def _build_resource_template(self) -> _ModelResourceTemplate:
         return _ModelResourceTemplate(

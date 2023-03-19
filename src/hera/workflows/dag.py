@@ -18,8 +18,9 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
     target: Optional[str] = None
     tasks: List[Union[Task, DAGTask]] = []
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.dag_post_init_hooks:
+            hook(self)
 
     def _add_sub(self, node: Any):
         if not isinstance(node, Task):

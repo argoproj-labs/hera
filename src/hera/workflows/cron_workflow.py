@@ -34,10 +34,13 @@ class CronWorkflow(Workflow):
     timezone: Optional[str] = None
     cron_status: Optional[CronWorkflowStatus] = None
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.cron_workflow_post_init_hooks:
+            hook(self)
 
     def build(self) -> TWorkflow:
+        self._dispatch_hooks()
+
         return _ModelCronWorkflow(
             api_version=self.api_version,
             kind=self.kind,

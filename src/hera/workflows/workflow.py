@@ -47,7 +47,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
+from hera.workflows.protocol import Dispatchable, Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
@@ -133,8 +133,9 @@ class Workflow(
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.workflow_post_init_hooks:
+            hook(self)
 
     @validator("workflows_service", pre=True, always=True)
     def _set_workflows_service(cls, v):
@@ -149,8 +150,13 @@ class Workflow(
         return v
 
     def build(self) -> TWorkflow:
+        self._dispatch_hooks()
+
         templates = []
         for template in self.templates:
+            if isinstance(template, Dispatchable):
+                template._dispatch_hooks()
+
             if isinstance(template, Templatable):
                 templates.append(template._build_template())
             elif isinstance(template, get_args(TTemplate)):

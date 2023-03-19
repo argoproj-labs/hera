@@ -45,8 +45,9 @@ class Task(ArgumentsMixin, SubNodeMixin):
     with_param: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.task_post_init_hooks:
+            hook(self)
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:

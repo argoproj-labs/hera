@@ -35,8 +35,9 @@ class Container(
     security_context: Optional[SecurityContext] = None
     working_dir: Optional[str] = None
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.container_post_init_hooks:
+            hook(self)
 
     def _build_container(self) -> _ModelContainer:
         return _ModelContainer(

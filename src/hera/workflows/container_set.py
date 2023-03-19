@@ -23,8 +23,9 @@ from hera.workflows.models import (
 
 
 class ContainerNode(_ModelContainerNode, SubNodeMixin):
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.container_node_post_init_hooks:
+            hook(self)
 
     def next(self, other: ContainerNode) -> ContainerNode:
         assert issubclass(other.__class__, ContainerNode)

@@ -37,8 +37,9 @@ class Step(
     with_param: Optional[str]
     with_sequence: Optional[_ModelSequence]
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.step_post_init_hooks:
+            hook(self)
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         return _ModelWorkflowStep(
@@ -99,6 +100,10 @@ class Steps(
             List[_ModelWorkflowStep],
         ]
     ] = []
+
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.steps_post_init_hooks:
+            hook(self)
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
         steps = []

@@ -40,8 +40,9 @@ class Script(
     working_dir: Optional[str] = None
     add_cwd_to_sys_path: bool = True
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self):
+        for hook in GlobalConfig.script_post_init_hooks:
+            hook(self)
 
     def _get_param_script_portion(self) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes

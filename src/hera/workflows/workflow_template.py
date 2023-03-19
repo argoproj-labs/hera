@@ -18,8 +18,9 @@ class WorkflowTemplate(Workflow):
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
 
-    def __hera_hooks__(self):
-        GlobalConfig.dispatch_hooks(self)
+    def _dispatch_hooks(self) -> None:
+        for hook in GlobalConfig.workflow_template_post_init_hooks:
+            hook(self)
 
     @validator("status", pre=True, always=True)
     def _set_status(cls, v):
@@ -41,6 +42,8 @@ class WorkflowTemplate(Workflow):
         )
 
     def build(self) -> TWorkflow:
+        self._dispatch_hooks()
+
         templates = []
         for template in self.templates:
             if isinstance(template, Templatable):
