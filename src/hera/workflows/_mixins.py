@@ -24,6 +24,7 @@ from hera.workflows.models import (
     ImagePullPolicy,
     Inputs as ModelInputs,
     IntOrString,
+    Item,
     Memoize,
     Metadata,
     Metrics,
@@ -325,8 +326,35 @@ class ParameterMixin(BaseMixin):
     with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
 
     def _build_with_param(self) -> Optional[str]:
+        if self.with_param is None:
+            return None
+
         if isinstance(self.with_param, Parameter):
             return self.with_param.value
         elif isinstance(self.with_param, str):
             return self.with_param
         return serialize(self.with_param)
+
+
+class ItemMixin(BaseMixin):
+    with_items: Optional[List[Any]] = None
+
+    def _build_with_items(self) -> Optional[List[Item]]:
+        if self.with_items is None:
+            return None
+
+        if isinstance(self.with_items, list):
+            items = []
+            for item in self.with_items:
+                if isinstance(item, Parameter):
+                    items.append(Item(__root__=item.value))
+                elif isinstance(item, str):
+                    items.append(Item(__root__=item))
+                else:
+                    items.append(Item(__root__=serialize(item)))
+            return items
+        elif isinstance(self.with_items, Parameter):
+            return [Item(__root__=self.with_items.value)]
+        elif isinstance(self.with_items, str):
+            return [Item(__root__=self.with_items)]
+        return [Item(__root__=serialize(self.with_items))]

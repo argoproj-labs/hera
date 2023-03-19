@@ -5,6 +5,7 @@ from hera.workflows._mixins import (
     ArgumentsMixin,
     ContextMixin,
     IOMixin,
+    ItemMixin,
     ParameterMixin,
     SubNodeMixin,
     TemplateMixin,
@@ -26,6 +27,7 @@ class Step(
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,
+    ItemMixin,
 ):
     continue_on: Optional[_ModelContinueOn]
     hooks: Optional[Dict[str, _ModelLifecycleHook]]
