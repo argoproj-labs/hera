@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, TypeVar, Union, cast
+import inspect
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
 from hera.shared.global_config import GlobalConfig
 from hera.shared.serialization import serialize
@@ -356,8 +357,11 @@ class ArgumentsMixin(BaseMixin):
         return result
 
 
-class CallableTemplateMixin(BaseMixin):
+class CallableTemplateMixin(ArgumentsMixin):
     def __call__(self, *args, **kwargs) -> SubNodeMixin:
+        if "name" not in kwargs:
+            kwargs["name"] = self.name
+
         try:
             from hera.workflows.steps import Step
 
@@ -367,6 +371,32 @@ class CallableTemplateMixin(BaseMixin):
 
         try:
             from hera.workflows.task import Task
+
+            # these are the already set parameters. If a users has already set a parameter argument, then Hera
+            # uses the user-provided value rather than the inferred value
+            arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]
+            parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
+            parameter_names = {p.name for p in parameters}
+            if "source" in kwargs and "with_param" in kwargs:
+                # Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
+                # `arguments` are used to indicate exactly what _values_ are assigned to the set inputs. Here,
+                # we infer the arguments when `with_param` is used. If a source is passed along with `with_param`, we
+                # infer the arguments to set from the given source. It is assumed that `with_param` will return the
+                # expected result for Argo to fan out the task on
+                new_parameters = _get_params_from_source(kwargs["source"])
+                for p in new_parameters:
+                    if p.name not in parameter_names:
+                        arguments.append(p)
+            elif "source" in kwargs and "with_items" in kwargs:
+                # similarly to the above, we can infer the arguments to create based on the content of `with_items`.
+                # The main difference between `with_items` and `with_param` is that param is a serialized version of
+                # `with_items`. Hence, `with_items` comes in the form of a list of objects, whereas `with_param` comes
+                # in as a single serialized object. Here, we can infer the parameters to create based on the content
+                # of `with_items`
+                new_parameters = _get_params_from_items(kwargs["with_items"])
+                for p in new_parameters:
+                    if p.name not in parameter_names:
+                        arguments.append(p)
 
             return Task(*args, template=self, **kwargs)
         except InvalidType:
@@ -401,7 +431,9 @@ class ItemMixin(BaseMixin):
             for item in self.with_items:
                 if isinstance(item, Parameter):
                     items.append(Item(__root__=item.value))
-                elif isinstance(item, str) or isinstance(item, dict):
+                elif (
+                    isinstance(item, str) or isinstance(item, dict) or isinstance(item, float) or isinstance(item, int)
+                ):
                     items.append(Item(__root__=item))
                 elif isinstance(item, Item):
                     items.append(item)
@@ -436,3 +468,30 @@ class EnvIOMixin(EnvMixin, IOMixin):
             if param.name not in already_set_params:
                 inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
         return inputs
+
+
+def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
+    source_signature: Dict[str, Optional[str]] = {}
+    for p in inspect.signature(source).parameters.values():
+        if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            source_signature[p.name] = p.default
+        else:
+            source_signature[p.name] = None
+
+    if len(source_signature) == 0:
+        return None
+    elif len(source_signature) == 1:
+        return [Parameter(name=n, value="{{item}}") for n in source_signature.keys()]
+    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in source_signature.keys()]
+
+
+def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
+    if len(with_items) == 0:
+        return None
+    elif len(with_items) == 1:
+        el = with_items[0]
+        if len(el.keys()) == 1:
+            return [Parameter(name=n, value="{{item}}") for n in el.keys()]
+        else:
+            return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
+    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]

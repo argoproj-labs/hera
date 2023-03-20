@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-maps-
+spec:
+  entrypoint: loop-map-example
+  templates:
+  - container:
+      args:
+      - /etc/os-release
+      command:
+      - cat
+      image: '{{inputs.parameters.image}}:{{inputs.parameters.tag}}'
+    inputs:
+      parameters:
+      - name: image
+      - name: tag
+    name: cat-os-release
+  - name: loop-map-example
+    steps:
+    - - arguments:
+          parameters:
+          - name: image
+            value: '{{item.image}}'
+          - name: tag
+            value: '{{item.tag}}'
+        name: test-linux
+        template: cat-os-release
+        withItems:
+        - image: debian
+          tag: '9.1'
+        - image: debian
+          tag: '8.9'
+        - image: alpine
+          tag: '3.6'
+        - image: ubuntu
+          tag: '17.10'

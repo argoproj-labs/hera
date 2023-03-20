@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: parallelism-nested-
+spec:
+  arguments:
+    parameters:
+    - name: seq-list
+      value: '["a","b","c","d"]
+
+        '
+    - name: parallel-list
+      value: '[1,2,3,4]
+
+        '
+  entrypoint: parallel-worker
+  templates:
+  - container:
+      args:
+      - echo {{inputs.parameters.parallel-id}} {{inputs.parameters.seq-id}}; sleep
+        10
+      command:
+      - /bin/sh
+      - -c
+      image: alpine
+    inputs:
+      parameters:
+      - name: seq-id
+      - name: parallel-id
+    name: one-job
+  - inputs:
+      parameters:
+      - name: seq-list
+      - name: parallel-id
+    name: seq-worker
+    parallelism: 1
+    steps:
+    - - arguments:
+          parameters:
+          - name: parallel-id
+            value: '{{inputs.parameters.parallel-id}}'
+          - name: seq-id
+            value: '{{item}}'
+        name: seq-step
+        template: one-job
+        withParam: '{{inputs.parameters.seq-list}}'
+  - inputs:
+      parameters:
+      - name: seq-list
+      - name: parallel-list
+    name: parallel-worker
+    steps:
+    - - arguments:
+          parameters:
+          - name: seq-list
+            value: '{{inputs.parameters.seq-list}}'
+          - name: parallel-id
+            value: '{{item}}'
+        name: parallel-worker
+        template: seq-worker
+        withParam: '{{inputs.parameters.parallel-list}}'

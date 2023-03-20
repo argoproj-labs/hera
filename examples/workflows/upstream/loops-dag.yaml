@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-dag-
+spec:
+  entrypoint: loops-dag
+  templates:
+  - container:
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    inputs:
+      parameters:
+      - name: message
+    name: whalesay
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: message
+            value: A
+        name: A
+        template: whalesay
+      - arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'
+        depends: A
+        name: B
+        template: whalesay
+        withItems:
+        - foo
+        - bar
+        - baz
+      - arguments:
+          parameters:
+          - name: message
+            value: C
+        depends: B
+        name: C
+        template: whalesay
+    name: loops-dag
