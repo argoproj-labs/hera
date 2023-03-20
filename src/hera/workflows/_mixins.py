@@ -7,7 +7,7 @@ from hera.shared.serialization import serialize
 from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
-from hera.workflows.env import _BaseEnv
+from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
 from hera.workflows.models import (
@@ -49,10 +49,29 @@ from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
 
-Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]
-Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
-Env = Optional[List[Union[_BaseEnv, EnvVar]]]
-EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
+InputsT = Optional[
+    Union[
+        ModelInputs,
+        Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
+        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+    ]
+]
+OutputsT = Optional[
+    Union[
+        ModelOutputs,
+        Union[Parameter, ModelParameter, Artifact, ModelArtifact],
+        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
+    ]
+]
+ArgumentsT = Optional[
+    Union[
+        ModelArguments,
+        Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
+        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+    ]
+]
+EnvT = Optional[Union[Union[_BaseEnv, EnvVar], List[Union[_BaseEnv, EnvVar]]]]
+EnvFromT = Optional[Union[Union[_BaseEnvFrom, EnvFromSource], List[Union[_BaseEnvFrom, EnvFromSource]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 
 
@@ -95,17 +114,18 @@ class ContainerMixin(BaseMixin):
 
 
 class IOMixin(BaseMixin):
-    inputs: Inputs = []
-    outputs: Outputs = []
+    inputs: InputsT = None
+    outputs: OutputsT = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
-        if not self.inputs:
+        if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
             return self.inputs
 
         result = ModelInputs()
-        for value in self.inputs:
+        inputs = self.inputs if isinstance(self.inputs, list) else [self.inputs]
+        for value in inputs:
             if isinstance(value, dict):
                 for k, v in value.items():
                     value = Parameter(name=k, value=v)
@@ -136,7 +156,8 @@ class IOMixin(BaseMixin):
             return self.outputs
 
         result = ModelOutputs()
-        for value in self.outputs:
+        outputs = self.outputs if isinstance(self.outputs, list) else [self.outputs]
+        for value in outputs:
             if isinstance(value, Parameter):
                 result.parameters = (
                     [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
@@ -158,22 +179,54 @@ class IOMixin(BaseMixin):
 
 
 class EnvMixin(BaseMixin):
-    env: Env = None
-    env_from: EnvFrom = None
+    env: EnvT = None
+    env_from: EnvFromT = None
 
-    def _build_env(self) -> Optional[EnvVar]:
-        if self.env is None or isinstance(self.env, EnvVar):
-            return self.env
+    def _build_env(self) -> Optional[List[EnvVar]]:
+        if self.env is None:
+            return None
 
-        v = cast(_BaseEnv, self.env)
-        return v.build()
+        result: List[EnvVar] = []
+        env = self.env if isinstance(self.env, list) else [self.env]
+        for e in env:
+            if isinstance(e, EnvVar):
+                result.append(e)
+            elif isinstance(e, _BaseEnv):
+                result.append(e.build())
+        return result
 
-    def _build_env_from(self) -> Optional[EnvFromSource]:
-        if self.env_from is None or isinstance(self.env_from, EnvFromSource):
-            return self.env_from
+    def _build_env_from(self) -> Optional[List[EnvFromSource]]:
+        if self.env_from is None:
+            return None
 
-        v = cast(_BaseEnvFrom, self.env_from)
-        return v.build()
+        result: List[EnvFromSource] = []
+        env_from = self.env_from if isinstance(self.env_from, list) else [self.env_from]
+        for e in env_from:
+            if isinstance(e, EnvFromSource):
+                result.append(e)
+            elif isinstance(e, _BaseEnvFrom):
+                result.append(e.build())
+        return result
+
+    def _build_params_from_env(self) -> Optional[List[Parameter]]:
+        if self.env is None:
+            return None
+
+        params: Optional[List[Parameter]] = None
+        for spec in self.env:
+            if isinstance(spec, Env) and spec.value_from_input is not None:
+                value = (
+                    spec.value_from_input.value
+                    if isinstance(spec.value_from_input, Parameter)
+                    else spec.value_from_input
+                )
+                params = (
+                    [Parameter(name=spec.param_name, value=value)]
+                    if params is None
+                    else params + [Parameter(name=spec.param_name, value=value)]
+                )
+
+        return params
 
 
 class TemplateMixin(SubNodeMixin):
@@ -270,37 +323,37 @@ class VolumeMountMixin(BaseMixin):
 
 
 class ArgumentsMixin(BaseMixin):
-    arguments: Optional[Union[ModelArguments, List[Union[Artifact, ModelArtifact, Parameter, ModelParameter]]]] = None
+    arguments: ArgumentsT = None
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         if self.arguments is None:
             return None
-
-        if isinstance(self.arguments, ModelArguments):
+        elif isinstance(self.arguments, ModelArguments):
             return self.arguments
 
-        artifacts = []
-        for arg in self.arguments:
-            if isinstance(arg, ModelArtifact):
-                artifacts.append(arg)
+        result = ModelArguments()
+        arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]
+        for arg in arguments:
+            if isinstance(arg, dict):
+                for k, v in arg.items():
+                    value = Parameter(name=k, value=v)
+                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
+            elif isinstance(arg, ModelArtifact):
+                result.artifacts = [arg] if result.artifacts is None else result.artifacts + [arg]
             elif isinstance(arg, Artifact):
-                artifacts.append(arg._build_artifact())
-
-        parameters = []
-        for arg in self.arguments:
-            if isinstance(arg, ModelParameter):
-                parameters.append(arg)
+                result.artifacts = (
+                    [arg._build_artifact()] if result.artifacts is None else result.artifacts + [arg._build_artifact()]
+                )
+            elif isinstance(arg, ModelParameter):
+                result.parameters = [arg] if result.parameters is None else result.parameters + [arg]
             elif isinstance(arg, Parameter):
-                parameters.append(arg.as_argument())
+                result.parameters = (
+                    [arg.as_argument()] if result.parameters is None else result.parameters + [arg.as_argument()]
+                )
 
-        if not artifacts and not parameters:
+        if result.parameters is None and result.artifacts is None:
             return None
-
-        model_arguments = ModelArguments(
-            artifacts=artifacts or None,
-            parameters=parameters or None,
-        )
-        return model_arguments
+        return result
 
 
 class CallableTemplateMixin(BaseMixin):
@@ -348,7 +401,7 @@ class ItemMixin(BaseMixin):
             for item in self.with_items:
                 if isinstance(item, Parameter):
                     items.append(Item(__root__=item.value))
-                elif isinstance(item, str):
+                elif isinstance(item, str) or isinstance(item, dict):
                     items.append(Item(__root__=item))
                 elif isinstance(item, Item):
                     items.append(item)
@@ -360,3 +413,26 @@ class ItemMixin(BaseMixin):
         elif isinstance(self.with_items, str):
             return [Item(__root__=self.with_items)]
         return [Item(__root__=serialize(self.with_items))]
+
+
+class EnvIOMixin(EnvMixin, IOMixin):
+    def _build_inputs(self) -> Optional[ModelInputs]:
+        inputs = super()._build_inputs()
+        env_params = self._build_params_from_env()
+        if inputs is None and env_params is None:
+            return None
+        elif inputs is None:
+            return ModelInputs(parameters=env_params)
+        elif env_params is None:
+            return inputs
+
+        # at this stage we know that they are both defined, so we have to join them. One thing to be aware of is that
+        # the user might have already set the env parameters in the inputs, so we need to check for that
+        if inputs.parameters is None:
+            return inputs
+
+        already_set_params = {p.name for p in inputs.parameters or []}
+        for param in env_params:
+            if param.name not in already_set_params:
+                inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
+        return inputs

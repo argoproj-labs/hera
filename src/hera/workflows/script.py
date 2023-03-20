@@ -1,19 +1,19 @@
 import copy
 import inspect
 import textwrap
-from typing import Callable, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
-    EnvMixin,
-    IOMixin,
+    EnvIOMixin,
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
 )
 from hera.workflows.models import (
+    Inputs as ModelInputs,
     Lifecycle,
     ScriptTemplate as _ModelScriptTemplate,
     SecurityContext,
@@ -23,10 +23,9 @@ from hera.workflows.parameter import Parameter
 
 
 class Script(
-    IOMixin,
+    EnvIOMixin,
     CallableTemplateMixin,
     ContainerMixin,
-    EnvMixin,
     TemplateMixin,
     ResourceMixin,
     VolumeMountMixin,
@@ -123,6 +122,23 @@ class Script(
             assert isinstance(self.source, str)
             return self.source
 
+    def _build_inputs(self) -> Optional[ModelInputs]:
+        inputs = super()._build_inputs()
+        func_parameters = _get_parameters_from_callable(self.source) if callable(self.source) else None
+
+        if inputs is None and func_parameters is None:
+            return None
+        elif func_parameters is None:
+            return inputs
+        elif inputs is None:
+            inputs = ModelInputs(parameters=func_parameters)
+
+        already_set_params = {p.name for p in inputs.parameters or []}
+        for param in func_parameters:
+            if param.name not in already_set_params:
+                inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
+        return inputs
+
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
@@ -186,6 +202,21 @@ class Script(
             volume_mounts=self._build_volume_mounts(),
             working_dir=self.working_dir,
         )
+
+
+def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]:
+    # If there are any kwargs arguments associated with the function signature,
+    # we store these as we can set them as default values for argo arguments
+    source_signature: Dict[str, Optional[str]] = {}
+    for p in inspect.signature(source).parameters.values():
+        if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            source_signature[p.name] = p.default
+        else:
+            source_signature[p.name] = None
+
+    if len(source_signature) == 0:
+        return None
+    return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
 __all__ = ["Script"]
