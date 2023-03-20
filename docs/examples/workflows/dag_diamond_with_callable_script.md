@@ -20,12 +20,13 @@ def my_print_script(message):
 
 
 def get_script(callable):
+    # note that we have the _option_ to set `inputs=Parameter(name="message")`, but Hera infers the `Parameter`s
+    # that are necessary based on the passed in callable!
     return Script(
         name=callable.__name__.replace("_", "-"),
         source=callable,
         add_cwd_to_sys_path=False,
         image="python:alpine3.6",
-        inputs=[Parameter(name="message")],
     )
 
 
