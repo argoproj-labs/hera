@@ -7,7 +7,7 @@
 ## Hera
 
 ```python
-from hera.workflows import Workflow, Container, Steps, Parameter
+from hera.workflows import Container, Parameter, Steps, Workflow
 
 with Workflow(
     generate_name="loops-maps-",

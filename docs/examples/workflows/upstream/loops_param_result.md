@@ -2,54 +2,20 @@
 
 > Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/loops-param-result.yaml).
 
-# This workflow demonstrates the use of a generator step which produces a list of items as a result.
-# This list is subsequently used for expanding the next step into multiple parallel steps.
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: loops-param-result-
-spec:
-  entrypoint: loop-param-result-example
-  templates:
-  - name: loop-param-result-example
-    steps:
-    - - name: generate
-        template: gen-number-list
-    - - name: sleep
-        template: sleep-n-sec
-        arguments:
-          parameters:
-          - name: seconds
-            value: "{{item}}"
-        withParam: "{{steps.generate.outputs.result}}"
 
-  - name: gen-number-list
-    script:
-      image: python:alpine3.6
-      command: [python]
-      source: |
-        import json
-        import sys
-        json.dump([i for i in range(20, 31)], sys.stdout)
-
-  - name: sleep-n-sec
-    inputs:
-      parameters:
-      - name: seconds
-    container:
-      image: alpine:latest
-      command: [sh, -c]
-      args: ["echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}}; echo done"]
 
 ## Hera
 
 ```python
-from hera.workflows import Workflow, Steps, Container, Parameter, Script
+from hera.workflows import Container, Parameter, Script, Steps, Workflow
+
 
 def _gen_number_list():
     import json
     import sys
+
     json.dump([i for i in range(20, 31)], sys.stdout)
+
 
 with Workflow(
     generate_name="loops-param-result-",
@@ -67,7 +33,9 @@ with Workflow(
         inputs=Parameter(name="seconds"),
         image="alpine:latest",
         command=["sh", "-c"],
-        args=["echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}}; echo done"],
+        args=[
+            "echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}}; echo done"
+        ],
     )
 
     with Steps(name="loop-param-result-example"):
@@ -97,6 +65,7 @@ spec:
       source: 'import json
 
         import sys
+
 
         json.dump([i for i in range(20, 31)], sys.stdout)
 
