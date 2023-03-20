@@ -43,7 +43,7 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
     with_sequence: Optional[Sequence] = None
 
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.task_post_init_hooks:
+        for hook in GlobalConfig.task_pre_build_hooks:
             hook(self)
 
     def _get_dependency_tasks(self) -> List[str]:

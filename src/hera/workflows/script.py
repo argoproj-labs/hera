@@ -40,7 +40,7 @@ class Script(
     add_cwd_to_sys_path: bool = True
 
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.script_post_init_hooks:
+        for hook in GlobalConfig.script_pre_build_hooks:
             hook(self)
 
     def _get_param_script_portion(self) -> str:
