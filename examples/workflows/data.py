@@ -11,5 +11,5 @@ with Workflow(generate_name="data-") as w:
         name="list-log-files",
         source=S3Artifact(name="test-bucket", bucket="my-bucket"),
         transformations=[g.data.filter(it.ends_with("main.log"))],  # type: ignore
-        outputs=[Artifact(name="file", path="/file")],
+        outputs=Artifact(name="file", path="/file"),
     )
