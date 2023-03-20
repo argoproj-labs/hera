@@ -8,11 +8,9 @@ from typing_extensions import get_args
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import ArgumentsMixin, ContextMixin
-from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
-    Artifact as _ModelArtifact,
     ArtifactGC,
     ArtifactRepositoryRef,
     ExecutorConfig,
@@ -24,7 +22,6 @@ from hera.workflows.models import (
     Metrics,
     ObjectMeta,
     OwnerReference,
-    Parameter as _ModelParameter,
     PersistentVolumeClaim,
     PodDisruptionBudgetSpec,
     PodDNSConfig,
@@ -46,7 +43,6 @@ from hera.workflows.models import (
     WorkflowStatus,
     WorkflowTemplateRef,
 )
-from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Dispatchable, Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 
@@ -90,7 +86,6 @@ class Workflow(
     active_deadline_seconds: Optional[int] = None
     affinity: Optional[Affinity] = None
     archive_logs: Optional[bool] = None
-    arguments: Optional[List[Union[Artifact, _ModelArtifact, Parameter, _ModelParameter]]] = None
     artifact_gc: Optional[ArtifactGC] = None
     artifact_repository_ref: Optional[ArtifactRepositoryRef] = None
     automount_service_account_token: Optional[bool] = None

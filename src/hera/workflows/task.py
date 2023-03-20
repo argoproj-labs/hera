@@ -187,8 +187,8 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
             template=_template,
             template_ref=self.template_ref,
             when=self.when,
-            with_items=self.with_items,
-            with_param=self.with_param,
+            with_items=self._build_with_items(),
+            with_param=self._build_with_param(),
             with_sequence=self.with_sequence,
         )
 
