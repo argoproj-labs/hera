@@ -26,7 +26,7 @@ class _GlobalConfig:
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
     namespace: Optional[str] = None
-    image: str = "python:3.7"
+    _image: Union[str, Callable[[], str]] = "python:3.7"
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = ["python"]
     _pre_build_hooks: Optional[_HookMap] = None
@@ -34,6 +34,18 @@ class _GlobalConfig:
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
         self.__dict__.clear()  # Wipe instance values to fallback to the class defaults
+
+    @property
+    def image(self) -> str:
+        """Return the default image to use for Tasks"""
+        if isinstance(self._image, str):
+            return self._image
+        return self._image()
+
+    @image.setter
+    def image(self, image: Union[str, Callable[[], str]]) -> None:
+        """Set the default image to use for Tasks"""
+        self._image = image
 
     @property
     def token(self) -> Optional[str]:
