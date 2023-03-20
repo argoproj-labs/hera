@@ -401,7 +401,7 @@ class ItemMixin(BaseMixin):
             for item in self.with_items:
                 if isinstance(item, Parameter):
                     items.append(Item(__root__=item.value))
-                elif isinstance(item, str):
+                elif isinstance(item, str) or isinstance(item, dict):
                     items.append(Item(__root__=item))
                 elif isinstance(item, Item):
                     items.append(item)
@@ -428,8 +428,11 @@ class EnvIOMixin(EnvMixin, IOMixin):
 
         # at this stage we know that they are both defined, so we have to join them. One thing to be aware of is that
         # the user might have already set the env parameters in the inputs, so we need to check for that
-        input_set = set([p.name for p in inputs.parameters])
-        for env_p in env_params:
-            if env_p.name not in input_set:
-                inputs.parameters.append(env_p)
+        if inputs.parameters is None:
+            return inputs
+
+        already_set_params = {p.name for p in inputs.parameters or []}
+        for param in env_params:
+            if param.name not in already_set_params:
+                inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
         return inputs

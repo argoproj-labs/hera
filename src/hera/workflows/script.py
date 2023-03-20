@@ -124,7 +124,7 @@ class Script(
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
-        func_parameters = _get_parameters_from_callable(self.source)
+        func_parameters = _get_parameters_from_callable(self.source) if callable(self.source) else None
 
         if inputs is None and func_parameters is None:
             return None
@@ -133,10 +133,10 @@ class Script(
         elif inputs is None:
             inputs = ModelInputs(parameters=func_parameters)
 
-        already_set_params = {p.name for p in inputs.parameters}
+        already_set_params = {p.name for p in inputs.parameters or []}
         for param in func_parameters:
             if param.name not in already_set_params:
-                inputs.parameters.append(param)
+                inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
         return inputs
 
     def _build_template(self) -> _ModelTemplate:
