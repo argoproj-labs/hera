@@ -19,7 +19,7 @@ class WorkflowTemplate(Workflow):
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
 
     def _dispatch_hooks(self) -> None:
-        for hook in GlobalConfig.workflow_template_post_init_hooks:
+        for hook in GlobalConfig.workflow_template_pre_build_hooks:
             hook(self)
 
     @validator("status", pre=True, always=True)

@@ -129,7 +129,7 @@ class Workflow(
     workflows_service: Optional[WorkflowsService] = None
 
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.workflow_post_init_hooks:
+        for hook in GlobalConfig.workflow_pre_build_hooks:
             hook(self)
 
     @validator("workflows_service", pre=True, always=True)
@@ -184,9 +184,9 @@ class Workflow(
                         assert claim.metadata.name is not None, "expected a named volume claim"
                         new_volume_claims_map[claim.metadata.name] = claim
 
-                    for claim_name in new_volume_claims_map.keys():
+                    for claim_name, claim in new_volume_claims_map.items():
                         if claim_name not in current_volume_claims_map:
-                            self.volume_claim_templates.append(new_volume_claims_map[claim_name])
+                            self.volume_claim_templates.append(claim)
 
         return _ModelWorkflow(
             api_version=self.api_version,

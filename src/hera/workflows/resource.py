@@ -20,7 +20,7 @@ class Resource(TemplateMixin, SubNodeMixin, IOMixin):
     success_condition: Optional[str] = None
 
     def _dispatch_hooks(self) -> None:
-        for hook in GlobalConfig.resource_post_init_hooks:
+        for hook in GlobalConfig.resource_pre_build_hooks:
             hook(self)
 
     def _build_resource_template(self) -> _ModelResourceTemplate:

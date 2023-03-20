@@ -19,7 +19,7 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
     tasks: List[Union[Task, DAGTask]] = []
 
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.dag_post_init_hooks:
+        for hook in GlobalConfig.dag_pre_build_hooks:
             hook(self)
 
     def _add_sub(self, node: Any):
