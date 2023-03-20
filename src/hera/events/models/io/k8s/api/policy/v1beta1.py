@@ -7,7 +7,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from hera.events._base_model import BaseModel
+from hera.shared._base_model import BaseModel
 
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr

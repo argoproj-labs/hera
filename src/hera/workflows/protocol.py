@@ -53,9 +53,3 @@ class Subbable(Protocol):
 class Steppable(Protocol):
     def _build_step(self) -> Any:
         ...
-
-
-@runtime_checkable
-class Dispatchable(Protocol):
-    def _dispatch_hooks(self) -> None:
-        ...

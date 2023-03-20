@@ -1,4 +1,8 @@
+from typing import TypeVar
+
 from pydantic import BaseModel as PyBaseModel
+
+TBase = TypeVar("TBase", bound="BaseMixin")
 
 
 class BaseModel(PyBaseModel):

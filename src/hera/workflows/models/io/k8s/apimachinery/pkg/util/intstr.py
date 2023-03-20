@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from hera.workflows._base_model import BaseModel
+from hera.shared._base_model import BaseModel
 
 
 class IntOrString(BaseModel):

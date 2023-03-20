@@ -3,7 +3,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import ArgumentsMixin, ItemMixin, ParameterMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
     ContinueOn,
@@ -41,10 +40,6 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
     inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
-
-    def _dispatch_hooks(self):
-        for hook in GlobalConfig.task_pre_build_hooks:
-            hook(self)
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:

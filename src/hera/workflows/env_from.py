@@ -1,6 +1,6 @@
 from typing import Optional
 
-from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.shared._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     ConfigMapEnvSource as _ModelConfigMapEnvSource,
     EnvFromSource as _ModelEnvFromSource,

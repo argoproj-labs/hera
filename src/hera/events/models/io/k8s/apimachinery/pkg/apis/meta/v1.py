@@ -8,7 +8,7 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera.events._base_model import BaseModel
+from hera.shared._base_model import BaseModel
 
 
 class CreateOptions(BaseModel):

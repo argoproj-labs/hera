@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import validator
 from typing_extensions import get_args
 
-from hera.shared.global_config import GlobalConfig
-from hera.workflows._mixins import ArgumentsMixin, ContextMixin
+from hera.shared import global_config
+from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
@@ -43,7 +43,7 @@ from hera.workflows.models import (
     WorkflowStatus,
     WorkflowTemplateRef,
 )
-from hera.workflows.protocol import Dispatchable, Templatable, TTemplate, TWorkflow, VolumeClaimable
+from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 
 _yaml: Optional[ModuleType] = None
@@ -58,9 +58,10 @@ except ImportError:
 class Workflow(
     ArgumentsMixin,
     ContextMixin,
+    HookMixin,
 ):
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    api_version: Optional[str] = GlobalConfig.api_version
+    api_version: Optional[str] = global_config.api_version
     kind: Optional[str] = None
     status: Optional[WorkflowStatus] = None
 
@@ -76,7 +77,7 @@ class Workflow(
     labels: Optional[Dict[str, str]] = None
     managed_fields: Optional[List[ManagedFieldsEntry]] = None
     name: Optional[str] = None
-    namespace: Optional[str] = GlobalConfig.namespace
+    namespace: Optional[str] = global_config.namespace
     owner_references: Optional[List[OwnerReference]] = None
     resource_version: Optional[str] = None
     self_link: Optional[str] = None
@@ -128,10 +129,6 @@ class Workflow(
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
-    def _dispatch_hooks(self):
-        for hook in GlobalConfig.workflow_pre_build_hooks:
-            hook(self)
-
     @validator("workflows_service", pre=True, always=True)
     def _set_workflows_service(cls, v):
         if v is None:
@@ -145,12 +142,12 @@ class Workflow(
         return v
 
     def build(self) -> TWorkflow:
-        self._dispatch_hooks()
+        self = self._dispatch_hooks()
 
         templates = []
         for template in self.templates:
-            if isinstance(template, Dispatchable):
-                template._dispatch_hooks()
+            if isinstance(template, HookMixin):
+                template = template._dispatch_hooks()
 
             if isinstance(template, Templatable):
                 templates.append(template._build_template())

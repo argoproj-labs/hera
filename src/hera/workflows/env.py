@@ -6,8 +6,8 @@ from typing import Any, Optional, Union
 
 from pydantic import root_validator, validator
 
-from hera.shared.global_config import GlobalConfig
-from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.shared import global_config
+from hera.shared._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     ConfigMapKeySelector as _ModelConfigMapKeySelector,
     EnvVar as _ModelEnvVar,
@@ -137,7 +137,7 @@ class FieldEnv(_BaseEnv):
     @validator("api_version")
     def _check_api_version(cls, v):
         if v is None:
-            return GlobalConfig.api_version
+            return global_config.api_version
         return v
 
     def build(self) -> _ModelEnvVar:
