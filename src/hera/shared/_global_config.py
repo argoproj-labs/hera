@@ -15,7 +15,7 @@ class _GlobalConfig:
     Notes
     -----
     This should not be instantiated directly by the user. There is an instance of the `_GlobalConfig` in this module,
-    which is what should be used. Access as `hera.shared.global_config`.
+    which is what should be used. Access as `hera.shared.global_config` or `hera.shared.GlobalConfig`.
     """
 
     # protected attributes are ones that are computed/go through some light processing upon setting or
@@ -74,5 +74,5 @@ class _GlobalConfig:
         return self._pre_build_hooks.get(type(instance)) or []
 
 
-global_config = _GlobalConfig()
+GlobalConfig = global_config = _GlobalConfig()
 register_pre_build_hook = global_config.register_pre_build_hook

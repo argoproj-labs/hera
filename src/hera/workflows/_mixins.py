@@ -82,6 +82,11 @@ class HookMixin(BaseMixin):
         output = self
         for hook in global_config._get_pre_build_hooks(output):
             output = hook(output)
+            if output is None:
+                raise RuntimeError(
+                    f"Pre-build hook {hook.__name__} returned None."
+                    "Please ensure you are returning the output value from the hook."
+                )
         return output
 
 
