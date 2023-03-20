@@ -3,7 +3,7 @@ from typing import Optional, Union, cast
 
 from pydantic import validator
 
-from hera.workflows._base_model import BaseModel as _BaseModel
+from hera.shared._base_model import BaseModel as _BaseModel
 from hera.workflows.models import (
     Backoff,
     IntOrString,

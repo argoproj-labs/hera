@@ -3,7 +3,7 @@ import inspect
 import textwrap
 from typing import Callable, Dict, List, Optional, Union
 
-from hera.shared.global_config import GlobalConfig
+from hera.shared import global_config
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
@@ -32,16 +32,12 @@ class Script(
 ):
     container_name: Optional[str] = None
     args: Optional[List[str]] = None
-    command: Optional[List[str]] = GlobalConfig.script_command
+    command: Optional[List[str]] = global_config.script_command
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
     add_cwd_to_sys_path: bool = True
-
-    def _dispatch_hooks(self):
-        for hook in GlobalConfig.script_pre_build_hooks:
-            hook(self)
 
     def _get_param_script_portion(self) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes

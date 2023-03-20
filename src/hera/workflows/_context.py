@@ -1,7 +1,7 @@
 import threading
 from typing import List, TypeVar, Union
 
-from hera.workflows._base_model import BaseMixin
+from hera.shared._base_model import BaseMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Subbable, TTemplate
 

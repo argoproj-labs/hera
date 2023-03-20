@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from hera.workflows._base_model import BaseModel
+from hera.shared._base_model import BaseModel
 
 
 class Quantity(BaseModel):

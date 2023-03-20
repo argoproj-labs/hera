@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import Field
 
-from hera.events._base_model import BaseModel
+from hera.shared._base_model import BaseModel
 
 from ...k8s.api.core import v1
 from ...k8s.api.policy import v1beta1

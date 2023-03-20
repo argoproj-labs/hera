@@ -3,9 +3,9 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
-from hera.shared.global_config import GlobalConfig
+from hera.shared import global_config
+from hera.shared._base_model import BaseMixin
 from hera.shared.serialization import serialize
-from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
@@ -74,6 +74,15 @@ ArgumentsT = Optional[
 EnvT = Optional[Union[Union[_BaseEnv, EnvVar], List[Union[_BaseEnv, EnvVar]]]]
 EnvFromT = Optional[Union[Union[_BaseEnvFrom, EnvFromSource], List[Union[_BaseEnvFrom, EnvFromSource]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
+THookable = TypeVar("THookable", bound="HookMixin")
+
+
+class HookMixin(BaseMixin):
+    def _dispatch_hooks(self: THookable) -> THookable:
+        output = self
+        for hook in global_config._get_pre_build_hooks(output):
+            output = hook(output)
+        return output
 
 
 class ContextMixin(BaseMixin):
@@ -95,7 +104,7 @@ class ContextMixin(BaseMixin):
 
 
 class ContainerMixin(BaseMixin):
-    image: str = GlobalConfig.image
+    image: str = global_config.image
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
     liveness_probe: Optional[Probe] = None
@@ -230,7 +239,7 @@ class EnvMixin(BaseMixin):
         return params
 
 
-class TemplateMixin(SubNodeMixin):
+class TemplateMixin(SubNodeMixin, HookMixin):
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
