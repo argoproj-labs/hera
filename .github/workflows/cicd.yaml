@@ -117,7 +117,7 @@ jobs:
       
       - name: build wheel
         run: |
-          poetry version 0.0.0+${{ env.GITHUB_SHA }}
+          poetry version 0.0.0+${{ github.sha }}
           poetry build
 
       - name: upload wheel as artifact
