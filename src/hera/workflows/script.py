@@ -124,7 +124,7 @@ class Script(
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
-        func_parameters = _get_parameters_from_func_signature(self.source)
+        func_parameters = _get_parameters_from_callable(self.source)
 
         if inputs is None and func_parameters is None:
             return None
@@ -204,7 +204,7 @@ class Script(
         )
 
 
-def _get_parameters_from_func_signature(source: Callable) -> Optional[List[Parameter]]:
+def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]:
     # If there are any kwargs arguments associated with the function signature,
     # we store these as we can set them as default values for argo arguments
     source_signature: Dict[str, Optional[str]] = {}
