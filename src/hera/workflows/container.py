@@ -34,7 +34,7 @@ class Container(
     working_dir: Optional[str] = None
 
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.container_post_init_hooks:
+        for hook in GlobalConfig.container_pre_build_hooks:
             hook(self)
 
     def _build_container(self) -> _ModelContainer:

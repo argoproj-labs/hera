@@ -23,7 +23,7 @@ from hera.workflows.models import (
 
 class ContainerNode(_ModelContainerNode, SubNodeMixin):
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.container_node_post_init_hooks:
+        for hook in GlobalConfig.container_node_pre_build_hooks:
             hook(self)
 
     def next(self, other: ContainerNode) -> ContainerNode:

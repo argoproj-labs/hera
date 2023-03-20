@@ -39,7 +39,7 @@ class Step(
     with_sequence: Optional[_ModelSequence]
 
     def _dispatch_hooks(self):
-        for hook in GlobalConfig.step_post_init_hooks:
+        for hook in GlobalConfig.step_pre_build_hooks:
             hook(self)
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
@@ -103,7 +103,7 @@ class Steps(
     ] = []
 
     def _dispatch_hooks(self) -> None:
-        for hook in GlobalConfig.steps_post_init_hooks:
+        for hook in GlobalConfig.steps_pre_build_hooks:
             hook(self)
 
     def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:

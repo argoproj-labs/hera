@@ -35,7 +35,7 @@ class CronWorkflow(Workflow):
     cron_status: Optional[CronWorkflowStatus] = None
 
     def _dispatch_hooks(self) -> None:
-        for hook in GlobalConfig.cron_workflow_post_init_hooks:
+        for hook in GlobalConfig.cron_workflow_pre_build_hooks:
             hook(self)
 
     def build(self) -> TWorkflow:

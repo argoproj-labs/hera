@@ -37,21 +37,22 @@ class _GlobalConfig:
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = ["python"]
 
-    # subbable hooks - these hooks are applied once the workflow is constructed for submission
-    workflow_post_init_hooks: Tuple[Callable[[Workflow], None], ...] = ()
-    cron_workflow_post_init_hooks: Tuple[Callable[[CronWorkflow], None], ...] = ()
-    workflow_template_post_init_hooks: Tuple[Callable[[WorkflowTemplate], None], ...] = ()
-    dag_post_init_hooks: Tuple[Callable[[DAG], None], ...] = ()
-    container_set_post_init_hooks: Tuple[Callable[[ContainerSet], None], ...] = ()
-    steps_post_init_hooks: Tuple[Callable[[Steps], None], ...] = ()
+    # These hooks are applied once the workflow is constructed for submission
+    # subbable hooks
+    workflow_pre_build_hooks: Tuple[Callable[[Workflow], None], ...] = ()
+    cron_workflow_pre_build_hooks: Tuple[Callable[[CronWorkflow], None], ...] = ()
+    workflow_template_pre_build_hooks: Tuple[Callable[[WorkflowTemplate], None], ...] = ()
+    dag_pre_build_hooks: Tuple[Callable[[DAG], None], ...] = ()
+    container_set_pre_build_hooks: Tuple[Callable[[ContainerSet], None], ...] = ()
+    steps_pre_build_hooks: Tuple[Callable[[Steps], None], ...] = ()
 
-    # subnode hooks - these hooks are applied once the workflow is constructed for submission
-    task_post_init_hooks: Tuple[Callable[[Task], None], ...] = ()
-    resource_post_init_hooks: Tuple[Callable[[Resource], None], ...] = ()
-    container_node_post_init_hooks: Tuple[Callable[[ContainerNode], None], ...] = ()
-    step_post_init_hooks: Tuple[Callable[[Step], None], ...] = ()
-    container_post_init_hooks: Tuple[Callable[[Container], None], ...] = ()
-    script_post_init_hooks: Tuple[Callable[[Script], None], ...] = ()
+    # subnode hooks
+    task_pre_build_hooks: Tuple[Callable[[Task], None], ...] = ()
+    resource_pre_build_hooks: Tuple[Callable[[Resource], None], ...] = ()
+    container_node_pre_build_hooks: Tuple[Callable[[ContainerNode], None], ...] = ()
+    step_pre_build_hooks: Tuple[Callable[[Step], None], ...] = ()
+    container_pre_build_hooks: Tuple[Callable[[Container], None], ...] = ()
+    script_pre_build_hooks: Tuple[Callable[[Script], None], ...] = ()
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
