@@ -25,7 +25,7 @@ from hera.events.models import (
     UpdateSensorRequest,
     Version,
 )
-from hera.shared.global_config import GlobalConfig
+from hera.shared import global_config
 
 
 class EventsService:
@@ -36,10 +36,10 @@ class EventsService:
         token: Optional[str] = None,
         namespace: Optional[str] = None,
     ):
-        self.host = cast(str, host or GlobalConfig.host)
-        self.verify_ssl = verify_ssl or GlobalConfig.verify_ssl
-        self.token = token or GlobalConfig.token
-        self.namespace = namespace or GlobalConfig.namespace
+        self.host = cast(str, host or global_config.host)
+        self.verify_ssl = verify_ssl or global_config.verify_ssl
+        self.token = token or global_config.token
+        self.namespace = namespace or global_config.namespace
 
     def list_event_sources(
         self,

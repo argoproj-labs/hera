@@ -1,13 +1,13 @@
-from hera.shared.global_config import GlobalConfig
+from hera.shared import global_config, register_pre_build_hook
 from hera.workflows.container import Container
 from hera.workflows.workflow import Workflow
 
 
 def test_container_pre_build_hooks():
-    def set_container_default_image(container: Container) -> None:
+    @register_pre_build_hook
+    def set_container_default_image(container: Container) -> Container:
         container.image = "test_image"
-
-    GlobalConfig.container_pre_build_hooks = (set_container_default_image,)
+        return container
 
     with Workflow(name="t") as w:
         c = Container()
@@ -15,15 +15,14 @@ def test_container_pre_build_hooks():
     assert c.image == "python:3.7"
     w.build()
     assert c.image == "test_image"
-    GlobalConfig.reset()
+    global_config.reset()
 
-    def set_container_label(container: Container) -> None:
+    @register_pre_build_hook
+    def set_container_label(container: Container) -> Container:
         container.labels = {"test": "test"}
+        return container
 
-    GlobalConfig.container_pre_build_hooks = (
-        set_container_default_image,
-        set_container_label,
-    )
+    register_pre_build_hook(set_container_default_image)
 
     with Workflow(name="t") as w:
         c = Container()
@@ -33,17 +32,17 @@ def test_container_pre_build_hooks():
     w.build()
     assert c.image == "test_image"
     assert c.labels["test"] == "test"
-    GlobalConfig.reset()
+    global_config.reset()
 
 
 def test_workflow_pre_build_hooks():
-    def set_workflow_default_node_selector(workflow: Workflow) -> None:
+    @register_pre_build_hook
+    def set_workflow_default_node_selector(workflow: Workflow) -> Workflow:
         workflow.node_selector = {
             "domain": "test",
             "team": "ABC",
         }
-
-    GlobalConfig.workflow_pre_build_hooks = (set_workflow_default_node_selector,)
+        return workflow
 
     with Workflow(name="t") as w:
         pass
@@ -52,14 +51,16 @@ def test_workflow_pre_build_hooks():
     w.build()
     assert w.node_selector["domain"] == "test"
     assert w.node_selector["team"] == "ABC"
-    GlobalConfig.reset()
+    global_config.reset()
 
-    def set_workflow_default_labels(workflow: Workflow) -> None:
+    register_pre_build_hook(set_workflow_default_node_selector)
+
+    @register_pre_build_hook
+    def set_workflow_default_labels(workflow: Workflow) -> Workflow:
         workflow.labels = {
             "label": "test",
         }
-
-    GlobalConfig.workflow_pre_build_hooks = (set_workflow_default_node_selector, set_workflow_default_labels)
+        return workflow
 
     with Workflow(name="t") as w:
         pass
@@ -70,4 +71,4 @@ def test_workflow_pre_build_hooks():
     assert w.node_selector["domain"] == "test"
     assert w.node_selector["team"] == "ABC"
     assert w.labels["label"] == "test"
-    GlobalConfig.reset()
+    global_config.reset()

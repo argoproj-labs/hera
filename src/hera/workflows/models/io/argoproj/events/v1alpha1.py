@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 
 from pydantic import Field
 
-from hera.workflows._base_model import BaseModel
+from hera.shared._base_model import BaseModel
 
 from ...k8s.api.core import v1
 from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1
