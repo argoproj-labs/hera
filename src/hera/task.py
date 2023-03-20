@@ -35,12 +35,14 @@ from hera.memoize import Memoize
 from hera.metric import Metric, Metrics
 from hera.operator import Operator
 from hera.parameter import Parameter
+from hera.port import ContainerPort
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
 from hera.retry_strategy import RetryStrategy
 from hera.security_context import TaskSecurityContext
 from hera.sequence import Sequence
 from hera.sidecar import Sidecar
+from hera.suspend import Suspend
 from hera.template_ref import TemplateRef
 from hera.toleration import Toleration
 from hera.validators import validate_name
@@ -93,7 +95,6 @@ class Task(IO):
         https://argoproj.github.io/argo-workflows/fields/#sequence.
     inputs: Optional[
             Union[
-                List[Union[Parameter, Artifact]],
                 List[Union[Parameter, Artifact, Dict[str, Any]]],
                 Dict[str, Any],
             ]
@@ -171,6 +172,10 @@ class Task(IO):
         Any built-in/custom Prometheus metrics to track.
     sidecars: Optional[List[Sidecar]] = None
         List of sidecars to create for the main pods of the container that runs the task.
+    ports: Optional[List[ContainerPort]] = None
+        List of ports to create for the main pods of the container that runs the task.
+    suspend: Optional[Suspend] = None
+        Turns this task into a SuspendTemplate, with a duration to suspend the task given in the Suspend object.
 
     Notes
     -----
@@ -185,9 +190,7 @@ class Task(IO):
         source: Optional[Union[Callable, str]] = None,
         with_param: Optional[Any] = None,
         with_sequence: Optional[Sequence] = None,
-        inputs: Optional[
-            Union[List[Union[Parameter, Artifact]], List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]
-        ] = None,
+        inputs: Optional[Union[List[Union[Parameter, Artifact, Dict[str, Any]]], Dict[str, Any]]] = None,
         outputs: Optional[List[Union[Parameter, Artifact]]] = None,
         dag: Optional[DAG] = None,
         image: Optional[str] = None,
@@ -214,6 +217,8 @@ class Task(IO):
         timeout: Optional[str] = None,
         metrics: Optional[Union[Metric, List[Metric], Metrics]] = None,
         sidecars: Optional[List[Sidecar]] = None,
+        ports: Optional[List[ContainerPort]] = None,
+        suspend: Optional[Suspend] = None,
     ):
         if dag and source:
             raise ValueError("Cannot use both `dag` and `source`")
@@ -221,6 +226,8 @@ class Task(IO):
             raise ValueError("Cannot use both `dag` and `template_ref`")
         if with_param is not None and with_sequence is not None:
             raise ValueError("Cannot use both `with_sequence` and `with_param`")
+        if suspend and any((dag, image, command, args, source)):
+            raise ValueError("Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`")
         self.name = validate_name(name)
         self.dag = dag
         self.source = source
@@ -250,8 +257,14 @@ class Task(IO):
                     "`Optional[Union[Metric, List[Metric], Metrics]]`"
                 )
 
+        self.suspend = suspend
+        self.image: Optional[str]
+        if not self.suspend:
+            self.image = image or GlobalConfig.image
+        else:
+            self.image = None
+
         self.sidecars = sidecars
-        self.image = image or GlobalConfig.image
         self.image_pull_policy = image_pull_policy
         self.daemon = daemon
         self.command = command
@@ -272,12 +285,10 @@ class Task(IO):
         self.is_exit_task: bool = False
         self.depends: Optional[str] = None
         self.when: Optional[str] = None
+        self.ports = ports
 
         self.validate()
 
-        # here we cast for otherwise `mypy` complains that Hera adds an incompatible type with a dictionary, which is
-        # an acceptable type for the `inputs` field upon `init`
-        self.inputs = cast(List[Union[Parameter, Artifact]], self.inputs)
         self.inputs += self._deduce_input_params()
 
         if hera.dag_context.is_set():
@@ -824,8 +835,8 @@ class Task(IO):
             # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
             # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
             # payload of the script is not necessary when regular input is set on the task via `func_params`
-            extract += f"""try: {param.name} = json.loads('''{{{{inputs.parameters.{param.name}}}}}''')\n"""
-            extract += f"""except: {param.name} = '''{{{{inputs.parameters.{param.name}}}}}'''\n"""
+            extract += f"""try: {param.name} = json.loads(r'''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            extract += f"""except: {param.name} = r'''{{{{inputs.parameters.{param.name}}}}}'''\n"""
         return textwrap.dedent(extract)
 
     def _get_script(self) -> str:
@@ -927,6 +938,7 @@ class Task(IO):
             command=self.get_command(),
             resources=self.resources.build() if self.resources else None,
             args=self.get_args(),
+            ports=None if self.ports is None else [p.build() for p in self.ports],
             env=env,
             env_from=env_from,
             working_dir=self.working_dir,
@@ -1008,13 +1020,15 @@ class Task(IO):
         if self.retry_strategy is not None:
             setattr(template, "retry_strategy", self.retry_strategy.build())
 
-        if self.source is not None:
-            setattr(template, "script", self._build_script())
-        elif self.resource_template is not None:
-            setattr(template, "resource", self.resource_template.build())
+        if self.suspend is not None:
+            setattr(template, "suspend", self.suspend.build())
         else:
-            setattr(template, "container", self._build_container())
-
+            if self.source is not None:
+                setattr(template, "script", self._build_script())
+            elif self.resource_template is not None:
+                setattr(template, "resource", self.resource_template.build())
+            else:
+                setattr(template, "container", self._build_container())
         affinity = self.affinity.build() if self.affinity else None
         if affinity is not None:
             setattr(template, "affinity", affinity)

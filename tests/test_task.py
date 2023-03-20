@@ -1,4 +1,5 @@
 import json
+from textwrap import dedent
 from unittest import mock
 
 import pytest
@@ -20,6 +21,7 @@ from hera import (
     ConfigMapEnv,
     ConfigMapEnvFrom,
     ConfigMapVolume,
+    ContainerPort,
     EmptyDirVolume,
     Env,
     ExistingVolume,
@@ -37,6 +39,7 @@ from hera import (
     RetryStrategy,
     S3Artifact,
     Sequence,
+    Suspend,
     Task,
     TaskResult,
     TaskSecurityContext,
@@ -99,34 +102,44 @@ class TestTask:
     def test_param_script_portion_adds_formatted_json_calls(self, op):
         t = Task("t", op, [{"a": 1}])
         script = t._get_param_script_portion()
-        assert (
-            script == "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
+        assert script == dedent(
+            """\
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+            """
         )
 
     def test_script_getter_returns_expected_string(self, op, typed_op):
         t = Task("t", op, [{"a": 1}])
         script = t._get_script()
-        assert (
-            script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
+        assert script == dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            print(a)
+            """
         )
 
         t = Task("t", typed_op, [{"a": 1}])
         script = t._get_script()
-        assert (
-            script == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
-            'return [{"a": (a, a)}]\n'
+        assert script == dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            print(a)
+            return [{"a": (a, a)}]
+            """
         )
 
     def test_script_getter_parses_multi_line_function(self, long_op):
@@ -144,23 +157,26 @@ class TestTask:
             ],
         )
 
-        expected_script = """import os
-import sys
-sys.path.append(os.getcwd())
-import json
-try: very_long_parameter_name = json.loads('''{{inputs.parameters.very_long_parameter_name}}''')
-except: very_long_parameter_name = '''{{inputs.parameters.very_long_parameter_name}}'''
-try: very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_long_parameter_name}}''')
-except: very_very_long_parameter_name = '''{{inputs.parameters.very_very_long_parameter_name}}'''
-try: very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_long_parameter_name}}''')
-except: very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_long_parameter_name}}'''
-try: very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
-except: very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
-try: very_very_very_very_very_long_parameter_name = json.loads('''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
-except: very_very_very_very_very_long_parameter_name = '''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
+        expected_script = dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_long_parameter_name}}''')
+            except: very_long_parameter_name = r'''{{inputs.parameters.very_long_parameter_name}}'''
+            try: very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_long_parameter_name}}''')
+            except: very_very_long_parameter_name = r'''{{inputs.parameters.very_very_long_parameter_name}}'''
+            try: very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_long_parameter_name}}''')
+            except: very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_long_parameter_name}}'''
+            try: very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}''')
+            except: very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_long_parameter_name}}'''
+            try: very_very_very_very_very_long_parameter_name = json.loads(r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}''')
+            except: very_very_very_very_very_long_parameter_name = r'''{{inputs.parameters.very_very_very_very_very_long_parameter_name}}'''
 
-print(42)
-"""
+            print(42)
+            """
+        )
         assert t._get_script() == expected_script
 
     def test_resources_returned_with_appropriate_limits(self, op):
@@ -199,6 +215,16 @@ print(42)
         assert vs[2].mount_path == "/dev/shm"
         assert vs[3].name
         assert vs[3].mount_path == "/v3"
+
+    def test_container_port_returns_expected_ports(self, no_op):
+        t = Task(
+            "t",
+            no_op,
+            ports=[ContainerPort(8080, name="test-port")],
+        )
+        cp = t.ports
+        assert cp[0].name == "test-port"
+        assert cp[0].container_port == 8080
 
     def test_gpu_toleration_returns_expected_toleration(self):
         tn = GPUToleration
@@ -277,13 +303,17 @@ print(42)
         assert isinstance(tt.daemon, bool)
         assert all([isinstance(x, _ArgoToleration) for x in tt.tolerations])
         assert tt.name == "t"
-        assert (
-            tt.script.source == "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-            "import json\n"
-            "try: a = json.loads('''{{inputs.parameters.a}}''')\n"
-            "except: a = '''{{inputs.parameters.a}}'''\n"
-            "\n"
-            "print(a)\n"
+        assert tt.script.source == dedent(
+            """\
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            print(a)
+            """
         )
         assert tt.inputs.parameters[0].name == "a"
         assert len(tt.tolerations) == 1
@@ -334,12 +364,45 @@ print(42)
         tt = t._build_template()
         assert hasattr(tt, "retry_strategy") is False
 
-    def test_task_sets_kwarg(self, kwarg_op, kwarg_multi_op):
+    def test_task_sets_kwarg(self, kwarg_op, kwarg_op_bool_default, kwarg_op_none_default, kwarg_multi_op):
         t = Task("t", kwarg_op)
         deduced_input = t.inputs[0]
         assert isinstance(deduced_input, Parameter)
         assert deduced_input.name == "a"
         assert deduced_input.default == "42"
+
+        # Ensure defaults are json encoded. This ensures eg: `x=False` is not converted
+        # into `x="False"`, which is actually truth-y.
+        t = Task("t", kwarg_op_bool_default)
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == None
+        assert deduced_input_1.default == "false"
+
+        t = Task("t", kwarg_op_bool_default, [{"a": True}])
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == "{{item.a}}"
+        assert deduced_input_1.default == "false"
+
+        # Ensure function parameters with None defaults are distinguished from missing
+        # arguments in *internal* code. This ensures eg: `x=None` is not incorrectly
+        # thought to be missing an argument when creating a Task.
+        t = Task("t", kwarg_op_none_default)
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == None
+        assert deduced_input_1.default == "null"
+
+        t = Task("t", kwarg_op_none_default, [{"a": None}])
+        deduced_input_1 = t.inputs[0]
+        assert isinstance(deduced_input_1, Parameter)
+        assert deduced_input_1.name == "a"
+        assert deduced_input_1.value == "{{item.a}}"
+        assert deduced_input_1.default == "null"
 
         t = Task("t", kwarg_multi_op, [{"a": 50}])
         deduced_input_1 = t.inputs[0]
@@ -405,6 +468,14 @@ print(42)
         assert artifact.path == "/my-repo"
         assert artifact.git.repo == "https://github.com/argoproj/argo-workflows.git"
         assert artifact.git.revision == "master"
+
+    def test_task_suspend_template(self):
+        t = Task('t', suspend=Suspend(duration="10"))
+        assert hasattr(t, "suspend")
+        assert t.suspend is not None
+        assert t.suspend.duration == "10"
+        assert hasattr(t, "image")
+        assert t.image is None
 
     @pytest.fixture
     def task_security_context_kwargs(self):
@@ -484,6 +555,16 @@ print(42)
         assert tt.container.image == "python:3.7"
         assert tt.container.command[0] == "cowsay"
         assert tt.container.resources["requests"]["memory"] == "4Gi"
+
+    def test_task_should_create_suspend_task(self):
+        t = Task("t", suspend=Suspend("10"))
+        tt = t._build_template()
+
+        assert tt.suspend is not None
+        assert tt.suspend.duration == "10"
+        assert not hasattr(tt, "container")
+        assert not hasattr(tt, "script")
+        assert not hasattr(tt, "script")
 
     def test_task_allow_subclassing_when_assigned_next(self, no_op):
         class SubclassTask(Task):
@@ -716,6 +797,27 @@ print(42)
         with pytest.raises(ValueError) as e:
             Task("t", with_param=["abc"], with_sequence=Sequence("abc"))
         assert str(e.value) == "Cannot use both `with_sequence` and `with_param`"
+
+        # SuspendTemplate mutually exclusive kwargs
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), dag=DAG("d"))
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), image="python:3.7")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), command=["python"])
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), args=["an-arg"])
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
+
+        with pytest.raises(ValueError) as e:
+            Task("t", suspend=Suspend(), source="print('test')")
+        assert str(e.value) == "Cannot use `suspend` with any of `dag`, `image`, `command`, `args`, `source`"
 
     def test_task_uses_sequences(self):
         t = Task("t", with_sequence=Sequence("abc", start=1, end=42))._build_dag_task()

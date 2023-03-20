@@ -1,7 +1,10 @@
+import json
+from textwrap import dedent
 from unittest import mock
 from unittest.mock import Mock
 
 import pytest
+import yaml
 from argo_workflows.models import HostAlias as ArgoHostAlias
 from argo_workflows.models import (
     IoArgoprojWorkflowV1alpha1Workflow,
@@ -416,91 +419,49 @@ class TestWorkflow:
 
         hera.workflow._yaml = yaml
 
-    def test_to_yaml(self):
+    @pytest.mark.parametrize(
+        ["roundtripper"],
+        (
+            pytest.param(lambda w: w.to_dict(), id="dict"),
+            pytest.param(lambda w: json.loads(w.to_json()), id="json"),
+            pytest.param(lambda w: yaml.safe_load(w.to_yaml()), id="yaml"),
+        ),
+    )
+    def test_serialization(self, roundtripper):
         def hello():
             print("Hello, Hera!")
 
         with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
             Task("t", hello)
 
-        expected_yaml = """apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  labels:
-    a_b_c: a_b_c
-  name: hello-hera
-spec:
-  entrypoint: hello-hera
-  nodeSelector:
-    a_b_c: a_b_c
-  templates:
-  - name: t
-    script:
-      command:
-      - python
-      image: python:3.7
-      source: 'import os
-
-        import sys
-
-        sys.path.append(os.getcwd())
-
-        print("Hello, Hera!")
-
-        '
-  - dag:
-      tasks:
-      - name: t
-        template: t
-    name: hello-hera
-"""
-        assert w.to_yaml() == expected_yaml
-
-    def test_to_dict(self):
-        def hello():
-            print("Hello, Hera!")
-
-        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
-            Task("t", hello)
-        expected_dict = {
-            'metadata': {'name': 'hello-hera', 'labels': {'a_b_c': 'a_b_c'}},
-            'spec': {
-                'entrypoint': 'hello-hera',
-                'templates': [
+        expected = {
+            "metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}},
+            "spec": {
+                "entrypoint": "hello-hera",
+                "templates": [
                     {
-                        'name': 't',
-                        'script': {
-                            'image': 'python:3.7',
-                            'source': 'import os\nimport sys\nsys.path.append(os.getcwd())\nprint("Hello, Hera!")\n',
-                            'command': ['python'],
+                        "name": "t",
+                        "script": {
+                            "image": "python:3.7",
+                            "source": dedent(
+                                """\
+                                import os
+                                import sys
+                                sys.path.append(os.getcwd())
+                                print("Hello, Hera!")
+                                """
+                            ),
+                            "command": ["python"],
                         },
                     },
-                    {'name': 'hello-hera', 'dag': {'tasks': [{'name': 't', 'template': 't'}]}},
+                    {"name": "hello-hera", "dag": {"tasks": [{"name": "t", "template": "t"}]}},
                 ],
-                'nodeSelector': {'a_b_c': 'a_b_c'},
+                "nodeSelector": {"a_b_c": "a_b_c"},
             },
-            'apiVersion': 'argoproj.io/v1alpha1',
-            'kind': 'Workflow',
+            "apiVersion": "argoproj.io/v1alpha1",
+            "kind": "Workflow",
         }
-        assert expected_dict == w.to_dict()
-
-    def test_to_json(self):
-        def hello():
-            print("Hello, Hera!")
-
-        with Workflow("hello-hera", node_selectors={'a_b_c': 'a_b_c'}, labels={'a_b_c': 'a_b_c'}) as w:
-            Task("t", hello)
-
-        expected_json = (
-            '{"metadata": {"name": "hello-hera", "labels": {"a_b_c": "a_b_c"}}, "spec": '
-            '{"entrypoint": "hello-hera", "templates": [{"name": "t", "script": {"image": '
-            '"python:3.7", "source": "import os\\nimport '
-            'sys\\nsys.path.append(os.getcwd())\\nprint(\\"Hello, Hera!\\")\\n", '
-            '"command": ["python"]}}, {"name": "hello-hera", "dag": {"tasks": [{"name": '
-            '"t", "template": "t"}]}}], "nodeSelector": {"a_b_c": "a_b_c"}}, '
-            '"apiVersion": "argoproj.io/v1alpha1", "kind": "Workflow"}'
-        )
-        assert expected_json == w.to_json()
+        assert expected == roundtripper(w)
 
     def test_workflow_applies_hooks(self, global_config):
         def hook1(w: Workflow) -> None:
