@@ -15,8 +15,8 @@ class TestGlobalConfig:
         assert c.token is None
         c.token = '123'
         assert c.token == '123'
-        c.token = lambda: '123'
-        assert c.token == '123'
+        c.token = lambda: 'abc'
+        assert c.token == 'abc'
 
     def test_verify_ssl(self):
         c = _GlobalConfig()
@@ -41,6 +41,8 @@ class TestGlobalConfig:
         assert c.image == "python:3.7"
         c.image = "123"
         assert c.image == "123"
+        c.image = lambda: "abc"
+        assert c.image == "abc"
 
     def test_service_account_name(self):
         c = _GlobalConfig()
