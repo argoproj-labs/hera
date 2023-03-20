@@ -1,19 +1,19 @@
 import copy
 import inspect
 import textwrap
-from typing import Callable, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
-    EnvMixin,
-    IOMixin,
+    EnvIOMixin,
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
 )
 from hera.workflows.models import (
+    Inputs as ModelInputs,
     Lifecycle,
     ScriptTemplate as _ModelScriptTemplate,
     SecurityContext,
@@ -23,10 +23,9 @@ from hera.workflows.parameter import Parameter
 
 
 class Script(
-    IOMixin,
+    EnvIOMixin,
     CallableTemplateMixin,
     ContainerMixin,
-    EnvMixin,
     TemplateMixin,
     ResourceMixin,
     VolumeMountMixin,
@@ -123,6 +122,13 @@ class Script(
             assert isinstance(self.source, str)
             return self.source
 
+    def _build_inputs(self) -> Optional[ModelInputs]:
+        inputs = super()._build_inputs()
+        func_parameters = _get_parameters_from_func_signature(self.source, inputs.parameters)
+        if func_parameters is not None:
+            inputs.parameters = inputs.parameters + func_parameters
+        return inputs
+
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
@@ -186,6 +192,25 @@ class Script(
             volume_mounts=self._build_volume_mounts(),
             working_dir=self.working_dir,
         )
+
+
+def _get_parameters_from_func_signature(
+    source: Callable, already_set_inputs: Optional[List[Parameter]]
+) -> Optional[List[Parameter]]:
+    inputs_to_check = already_set_inputs or []
+    # If there are any kwargs arguments associated with the function signature,
+    # we store these as we can set them as default values for argo arguments
+    source_signature: Dict[str, Optional[str]] = {}
+    for p in inspect.signature(source).parameters.values():
+        if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            source_signature[p.name] = p.default
+        else:
+            source_signature[p.name] = None
+
+    # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
+    input_params_names = [p.name for p in inputs_to_check if isinstance(p, Parameter)]
+    result = [Parameter(name=n, default=v) for n, v in source_signature.items() if n not in input_params_names]
+    return None if result == [] else result
 
 
 __all__ = ["Script"]

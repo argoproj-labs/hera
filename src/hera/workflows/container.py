@@ -6,14 +6,14 @@ from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
-    EnvMixin,
-    IOMixin,
+    EnvIOMixin,
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
 )
 from hera.workflows.models import (
     Container as _ModelContainer,
+    Inputs as ModelInputs,
     Lifecycle,
     SecurityContext,
     Template as _ModelTemplate,
@@ -21,9 +21,8 @@ from hera.workflows.models import (
 
 
 class Container(
-    IOMixin,
+    EnvIOMixin,
     ContainerMixin,
-    EnvMixin,
     TemplateMixin,
     ResourceMixin,
     VolumeMountMixin,

@@ -6,8 +6,7 @@ from hera.shared.global_config import GlobalConfig
 from hera.workflows._mixins import (
     ContainerMixin,
     ContextMixin,
-    EnvMixin,
-    IOMixin,
+    EnvIOMixin,
     ResourceMixin,
     SubNodeMixin,
     TemplateMixin,
@@ -58,9 +57,8 @@ class ContainerNode(_ModelContainerNode, SubNodeMixin):
 
 
 class ContainerSet(
-    IOMixin,
+    EnvIOMixin,
     ContainerMixin,
-    EnvMixin,
     TemplateMixin,
     ResourceMixin,
     VolumeMountMixin,

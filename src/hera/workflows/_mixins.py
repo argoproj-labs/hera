@@ -7,7 +7,7 @@ from hera.shared.serialization import serialize
 from hera.workflows._base_model import BaseMixin
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
-from hera.workflows.env import _BaseEnv
+from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
 from hera.workflows.models import (
@@ -28,7 +28,7 @@ from hera.workflows.models import (
     Memoize,
     Metadata,
     Metrics,
-    Outputs as ModelOutputs,
+    OutputsT as ModelOutputs,
     Parameter as ModelParameter,
     PersistentVolumeClaim,
     Plugin,
@@ -49,10 +49,10 @@ from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
 
-Inputs = Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]
-Outputs = Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]
-Env = Optional[List[Union[_BaseEnv, EnvVar]]]
-EnvFrom = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
+InputsT = Optional[Union[ModelInputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]]]]
+OutputsT = Optional[Union[ModelOutputs, List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]]]]
+EnvT = Optional[List[Union[_BaseEnv, EnvVar]]]
+EnvFromT = Optional[List[Union[_BaseEnvFrom, EnvFromSource]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 
 
@@ -95,11 +95,11 @@ class ContainerMixin(BaseMixin):
 
 
 class IOMixin(BaseMixin):
-    inputs: Inputs = []
-    outputs: Outputs = []
+    inputs: InputsT = None
+    outputs: OutputsT = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
-        if not self.inputs:
+        if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
             return self.inputs
@@ -158,8 +158,8 @@ class IOMixin(BaseMixin):
 
 
 class EnvMixin(BaseMixin):
-    env: Env = None
-    env_from: EnvFrom = None
+    env: EnvT = None
+    env_from: EnvFromT = None
 
     def _build_env(self) -> Optional[EnvVar]:
         if self.env is None or isinstance(self.env, EnvVar):
@@ -174,6 +174,24 @@ class EnvMixin(BaseMixin):
 
         v = cast(_BaseEnvFrom, self.env_from)
         return v.build()
+
+    def _build_params_from_env(self) -> Optional[List[Parameter]]:
+        params: Optional[List[Parameter]] = None
+
+        for spec in self.env:
+            if isinstance(spec, Env) and spec.value_from_input is not None:
+                value = (
+                    spec.value_from_input.value
+                    if isinstance(spec.value_from_input, Parameter)
+                    else spec.value_from_input
+                )
+                params = (
+                    [Parameter(name=spec.param_name, value=value)]
+                    if params is None
+                    else params + [Parameter(name=spec.param_name, value=value)]
+                )
+
+        return params
 
 
 class TemplateMixin(SubNodeMixin):
@@ -360,3 +378,23 @@ class ItemMixin(BaseMixin):
         elif isinstance(self.with_items, str):
             return [Item(__root__=self.with_items)]
         return [Item(__root__=serialize(self.with_items))]
+
+
+class EnvIOMixin(EnvMixin, IOMixin):
+    def _build_inputs(self) -> Optional[ModelInputs]:
+        inputs = super()._build_inputs()
+        env_params = self._build_params_from_env()
+        if inputs is None and env_params is None:
+            return None
+        elif inputs is None:
+            return ModelInputs(parameters=env_params)
+        elif env_params is None:
+            return inputs
+
+        # at this stage we know that they are both defined, so we have to join them. One thing to be aware of is that
+        # the user might have already set the env parameters in the inputs, so we need to check for that
+        input_set = set([p.name for p in inputs.parameters])
+        for env_p in env_params:
+            if env_p.name not in input_set:
+                inputs.parameters.append(env_p)
+        return inputs
