@@ -28,7 +28,7 @@ from hera.workflows.models import (
     Memoize,
     Metadata,
     Metrics,
-    OutputsT as ModelOutputs,
+    Outputs as ModelOutputs,
     Parameter as ModelParameter,
     PersistentVolumeClaim,
     Plugin,
@@ -176,8 +176,10 @@ class EnvMixin(BaseMixin):
         return v.build()
 
     def _build_params_from_env(self) -> Optional[List[Parameter]]:
-        params: Optional[List[Parameter]] = None
+        if self.env is None:
+            return None
 
+        params: Optional[List[Parameter]] = None
         for spec in self.env:
             if isinstance(spec, Env) and spec.value_from_input is not None:
                 value = (

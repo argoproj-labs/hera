@@ -13,7 +13,6 @@ from hera.workflows._mixins import (
 )
 from hera.workflows.models import (
     Container as _ModelContainer,
-    Inputs as ModelInputs,
     Lifecycle,
     SecurityContext,
     Template as _ModelTemplate,

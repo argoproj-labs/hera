@@ -124,9 +124,19 @@ class Script(
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
-        func_parameters = _get_parameters_from_func_signature(self.source, inputs.parameters)
-        if func_parameters is not None:
-            inputs.parameters = inputs.parameters + func_parameters
+        func_parameters = _get_parameters_from_func_signature(self.source)
+
+        if inputs is None and func_parameters is None:
+            return None
+        elif func_parameters is None:
+            return inputs
+        elif inputs is None:
+            inputs = ModelInputs(parameters=func_parameters)
+
+        already_set_params = {p.name for p in inputs.parameters}
+        for param in func_parameters:
+            if param.name not in already_set_params:
+                inputs.parameters.append(param)
         return inputs
 
     def _build_template(self) -> _ModelTemplate:
@@ -194,10 +204,7 @@ class Script(
         )
 
 
-def _get_parameters_from_func_signature(
-    source: Callable, already_set_inputs: Optional[List[Parameter]]
-) -> Optional[List[Parameter]]:
-    inputs_to_check = already_set_inputs or []
+def _get_parameters_from_func_signature(source: Callable) -> Optional[List[Parameter]]:
     # If there are any kwargs arguments associated with the function signature,
     # we store these as we can set them as default values for argo arguments
     source_signature: Dict[str, Optional[str]] = {}
@@ -207,10 +214,9 @@ def _get_parameters_from_func_signature(
         else:
             source_signature[p.name] = None
 
-    # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
-    input_params_names = [p.name for p in inputs_to_check if isinstance(p, Parameter)]
-    result = [Parameter(name=n, default=v) for n, v in source_signature.items() if n not in input_params_names]
-    return None if result == [] else result
+    if len(source_signature) == 0:
+        return None
+    return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
 __all__ = ["Script"]
