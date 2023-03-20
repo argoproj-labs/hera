@@ -360,7 +360,7 @@ class ArgumentsMixin(BaseMixin):
 class CallableTemplateMixin(ArgumentsMixin):
     def __call__(self, *args, **kwargs) -> SubNodeMixin:
         if "name" not in kwargs:
-            kwargs["name"] = self.name
+            kwargs["name"] = self.name  # type: ignore
 
         try:
             from hera.workflows.steps import Step
@@ -374,7 +374,7 @@ class CallableTemplateMixin(ArgumentsMixin):
 
             # these are the already set parameters. If a users has already set a parameter argument, then Hera
             # uses the user-provided value rather than the inferred value
-            arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]
+            arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]  # type: ignore
             parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
             parameter_names = {p.name for p in parameters}
             if "source" in kwargs and "with_param" in kwargs:
@@ -384,9 +384,10 @@ class CallableTemplateMixin(ArgumentsMixin):
                 # infer the arguments to set from the given source. It is assumed that `with_param` will return the
                 # expected result for Argo to fan out the task on
                 new_parameters = _get_params_from_source(kwargs["source"])
-                for p in new_parameters:
-                    if p.name not in parameter_names:
-                        arguments.append(p)
+                if new_parameters is not None:
+                    for p in new_parameters:
+                        if p.name not in parameter_names:
+                            arguments.append(p)
             elif "source" in kwargs and "with_items" in kwargs:
                 # similarly to the above, we can infer the arguments to create based on the content of `with_items`.
                 # The main difference between `with_items` and `with_param` is that param is a serialized version of
@@ -394,9 +395,10 @@ class CallableTemplateMixin(ArgumentsMixin):
                 # in as a single serialized object. Here, we can infer the parameters to create based on the content
                 # of `with_items`
                 new_parameters = _get_params_from_items(kwargs["with_items"])
-                for p in new_parameters:
-                    if p.name not in parameter_names:
-                        arguments.append(p)
+                if new_parameters is not None:
+                    for p in new_parameters:
+                        if p.name not in parameter_names:
+                            arguments.append(p)
 
             return Task(*args, template=self, **kwargs)
         except InvalidType:
