@@ -1,6 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
-
-from pydantic import root_validator
+from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -9,46 +7,24 @@ from hera.workflows._mixins import (
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
+    TemplateInvocatorMixin,
     TemplateMixin,
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
-    ContinueOn as _ModelContinueOn,
-    LifecycleHook as _ModelLifecycleHook,
-    Sequence as _ModelSequence,
     Template as _ModelTemplate,
-    TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
 from hera.workflows.protocol import Steppable, Templatable
 
 
 class Step(
+    TemplateInvocatorMixin,
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
 ):
-    continue_on: Optional[_ModelContinueOn] = None
-    hooks: Optional[Dict[str, _ModelLifecycleHook]] = None
-    inline: Optional[Union[_ModelTemplate, TemplateMixin]] = None
-    name: Optional[str] = None
-    on_exit: Optional[str] = None
-    template: Optional[Union[str, _ModelTemplate, TemplateMixin]] = None
-    template_ref: Optional[_ModelTemplateRef] = None
-    when: Optional[str] = None
-    with_sequence: Optional[_ModelSequence] = None
-
-    @root_validator(pre=False)
-    def _check_values(cls, values):
-        def one(xs: List):
-            xs = list(map(bool, xs))
-            return xs.count(True) == 1
-
-        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
-            raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
-        return values
-
     @property
     def id(self) -> str:
         return f"{{{{steps.{self.name}.id}}}}"

@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from pydantic import root_validator
-
-from hera.workflows._mixins import ArgumentsMixin, ItemMixin, ParameterMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import (
+    ArgumentsMixin,
+    ItemMixin,
+    ParameterMixin,
+    SubNodeMixin,
+    TemplateInvocatorMixin,
+    TemplateMixin,
+)
 from hera.workflows.models import (
-    ContinueOn,
     DAGTask as _ModelDAGTask,
-    LifecycleHook,
-    Sequence,
     Template,
-    TemplateRef,
 )
 from hera.workflows.operator import Operator
 from hera.workflows.protocol import Templatable
@@ -31,22 +32,14 @@ class TaskResult(Enum):
 
 
 class Task(
+    TemplateInvocatorMixin,
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
 ):
-    name: str
-    continue_on: Optional[ContinueOn] = None
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
-    hooks: Optional[Dict[str, LifecycleHook]] = None
-    on_exit: Optional[str] = None
-    template: Optional[Union[str, Template, TemplateMixin]] = None
-    template_ref: Optional[TemplateRef] = None
-    inline: Optional[Union[Template, TemplateMixin]] = None
-    when: Optional[str] = None
-    with_sequence: Optional[Sequence] = None
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
@@ -59,16 +52,6 @@ class Task(
         # remove dot suffixes
         task_names = [t.split(".")[0] for t in tasks]
         return task_names
-
-    @root_validator(pre=False)
-    def _check_values(cls, values):
-        def one(xs: List):
-            xs = list(map(bool, xs))
-            return xs.count(True) == 1
-
-        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
-            raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
-        return values
 
     @property
     def id(self) -> str:
