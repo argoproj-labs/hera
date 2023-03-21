@@ -1,5 +1,8 @@
 from typing import Any, Dict, List, Optional, Union
 
+from pydantic import root_validator
+from operator import xor
+
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ContextMixin,
@@ -32,10 +35,16 @@ class Step(
     inline: Optional[_ModelTemplate]
     name: Optional[str]
     on_exit: Optional[str]
-    template: Union[str, _ModelTemplate, TemplateMixin]
+    template: Optional[Union[str, _ModelTemplate, TemplateMixin]]
     template_ref: Optional[_ModelTemplateRef]
     when: Optional[str]
     with_sequence: Optional[_ModelSequence]
+
+    @root_validator(pre=False)
+    def _check_values(cls, values):
+        if not xor(bool(values.get("template")), bool(values.get("template_ref"))):
+            raise ValueError("exactly one of ['template', 'template_ref'] must be present")
+        return values
 
     @property
     def id(self) -> str:
@@ -66,6 +75,12 @@ class Step(
         return f"{{{{steps.{self.name}.outputs.result}}}}"
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
+        _template = None
+        if isinstance(self.template, str):
+            _template = self.template
+        elif isinstance(self.template, (_ModelTemplate, TemplateMixin)):
+            _template = self.template.name
+
         return _ModelWorkflowStep(
             arguments=self._build_arguments(),
             continue_on=self.continue_on,
@@ -73,7 +88,7 @@ class Step(
             inline=self.inline,
             name=self.name,
             on_exit=self.on_exit,
-            template=self.template if isinstance(self.template, str) else self.template.name,
+            template=_template,
             template_ref=self.template_ref,
             when=self.when,
             with_items=self._build_with_items(),

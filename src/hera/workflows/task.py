@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Dict, List, Optional, Union
+from pydantic import root_validator
 
 from hera.workflows._mixins import ArgumentsMixin, ItemMixin, ParameterMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.models import (
@@ -52,6 +53,16 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
         # remove dot suffixes
         task_names = [t.split(".")[0] for t in tasks]
         return task_names
+
+    @root_validator(pre=False)
+    def _check_values(cls, values):
+        def one(xs: List):
+            xs = list(map(bool, xs))
+            return xs.count(True) == 1
+
+        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
+            raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
+        return values
 
     @property
     def id(self) -> str:
@@ -155,8 +166,6 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
         return self.next(other, on=TaskResult.all_failed)
 
     def _build_dag_task(self) -> _ModelDAGTask:
-        if self.template is None and self.inline is None:
-            raise ValueError("Exactly one of `template` or `inline` must be supplied")
 
         _template = None
         if isinstance(self.template, str):

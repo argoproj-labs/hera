@@ -58,6 +58,8 @@ class Env(_BaseEnv):
         if values.get("value") is not None and values.get("value_from_input") is not None:
             raise ValueError("cannot specify both `value` and `value_from_input`")
 
+        return values
+
     @property
     def param_name(self) -> str:
         if not self.value_from_input:

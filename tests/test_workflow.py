@@ -34,12 +34,14 @@ def _generate_yaml(path: Path) -> bool:
 
 def _transform_workflow(obj):
     w = ModelWorkflow.parse_obj(obj)
-    w.spec.templates.sort(key=lambda t: t.name)
     w.metadata.annotations = {}
     w.metadata.labels = {}
-    for t in w.spec.templates:
-        if t.script:
-            t.script.source = ast.dump(ast.parse(t.script.source))
+
+    if w.spec.templates is not None:
+        w.spec.templates.sort(key=lambda t: t.name)
+        for t in w.spec.templates:
+            if t.script:
+                t.script.source = ast.dump(ast.parse(t.script.source))
     return w.dict()
 
 
