@@ -8,7 +8,7 @@ from hera.workflows import (
 )
 
 
-def get_container(name: str, args: List[str]) -> Container:
+def _get_container(name: str, args: List[str]) -> Container:
     """Creates container (alpine:latest) with a mounted volume"""
     return Container(
         name=name,
@@ -26,8 +26,8 @@ with Workflow(
     entrypoint="volumes-existing-example",
     volumes=[m.Volume(name="workdir", persistent_volume_claim={"claim_name": "my-existing-volume"})],
 ) as w:
-    append_to_log = get_container("append-to-accesslog", ["echo accessed at: $(date) | tee -a /mnt/vol/accesslog"])
-    print_log = get_container("print-accesslog", ["echo 'Volume access log:'; cat /mnt/vol/accesslog"])
+    append_to_log = _get_container("append-to-accesslog", ["echo accessed at: $(date) | tee -a /mnt/vol/accesslog"])
+    print_log = _get_container("print-accesslog", ["echo 'Volume access log:'; cat /mnt/vol/accesslog"])
 
     with Steps(name="volumes-existing-example") as s:
         append_to_log(name="generate")
