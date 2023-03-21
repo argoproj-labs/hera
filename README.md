@@ -23,11 +23,9 @@ and its crew were specially protected by the goddess Hera.
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
 
 
-Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
-ecosystem accessible by simplifying workflow construction and submission.
+Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo ecosystem accessible by simplifying workflow construction and submission.
 
-You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 20 Oct
-2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
+You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 20 Oct 2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
 
 # Table of content
 
@@ -39,15 +37,9 @@ You can watch the introductory Hera presentation at the "Argo Workflows and Even
 
 # Requirements
 
-Hera requires an Argo server to be deployed to a Kubernetes cluster. Currently, Hera assumes that the Argo server sits
-behind an authentication layer that can authenticate workflow submission requests by using the Bearer token on the
-request. To learn how to deploy Argo to your own Kubernetes cluster you can follow the
-[Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
+Hera requires an Argo server to be deployed to a Kubernetes cluster. Currently, Hera assumes that the Argo server sits behind an authentication layer that can authenticate workflow submission requests by using the Bearer token on the request. To learn how to deploy Argo to your own Kubernetes cluster you can follow the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
 
-Another option for workflow submission without the authentication layer is using port forwarding to your Argo server
-deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to use yours). Please
-refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the
-command for port forward!
+Another option for workflow submission without the authentication layer is using port forwarding to your Argo server deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to use yours). Please refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the command for port forward!
 
 > **Note**
 > Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens in place,
@@ -65,26 +57,29 @@ command for port forward!
 # Examples
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import DAG, Container, Parameter, Workflow
 
-
-def say(message: str):
-    print(message)
-
-
-with Workflow("diamond") as w:
-    a = Task('a', say, ['This is task A!'])
-    b = Task('b', say, ['This is task B!'])
-    c = Task('c', say, ['This is task C!'])
-    d = Task('d', say, ['This is task D!'])
-
-    a >> [b, c] >> d
+with Workflow(
+    generate_name="dag-diamond-",
+    entrypoint="diamond",
+) as w:
+    echo = Container(
+        name="echo",
+        image="alpine:3.7",
+        command=["echo", "{{inputs.parameters.message}}"],
+        inputs=[Parameter(name="message")],
+    )
+    with DAG(name="diamond"):
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
+        A >> [B, C] >> D
 
 w.create()
 ```
 
-See the [examples](./examples/) directory for a collection of
-Argo workflow construction and submission via Hera!
+See the [examples](./examples/) directory for a collection of Argo workflow construction and submission via Hera!
 
 # Contributing
 
@@ -118,21 +113,18 @@ Also, see the [contributing guide](./CONTRIBUTING.md)!
 
 # Comparison
 
-There are other libraries currently available for structuring and submitting Argo Workflows:
+There have been other libraries available for structuring and submitting Argo Workflows:
 
-- [Couler](https://github.com/couler-proj/couler), which aims to provide a unified interface for constructing and
-  managing workflows on different workflow engines;
-- [Argo Python DSL](https://github.com/argoproj-labs/argo-python-dsl), which allows you to programmaticaly define Argo
-  worfklows using Python.
+- [Couler](https://github.com/couler-proj/couler), which aimed to provide a unified interface for constructing and managing workflows on different workflow engines. It has now been unmaintained since its last commit in April 2022.
+- [Argo Python DSL](https://github.com/argoproj-labs/argo-python-dsl), which allows you to programmatically define Argo worfklows using Python. It was archived in October 2021.
 
-While the aforementioned libraries provide amazing functionality for Argo workflow construction and submission, they
-require an advanced understanding of Argo concepts. When [Dyno Therapeutics](https://dynotx.com) started using Argo
-Workflows, it was challenging to construct and submit experimental machine learning workflows. Scientists and engineers
-at [Dyno Therapeutics](https://dynotx.com) used a lot of time for workflow definition rather than the implementation of
-the atomic unit of execution - the Python function - that performed, for instance, model training.
+While the aforementioned libraries provided amazing functionality for Argo workflow construction and submission, they required an advanced understanding of Argo concepts. When [Dyno Therapeutics](https://dynotx.com) started using Argo Workflows, it was challenging to construct and submit experimental machine learning workflows. Scientists and engineers at [Dyno Therapeutics](https://dynotx.com) used a lot of time for workflow definition rather than the implementation of the atomic unit of execution - the Python function - that performed, for instance, model training.
 
-Hera presents a much simpler interface for task and workflow construction, empowering users to focus on their own
-executable payloads rather than workflow setup. Here's a side by side comparison of Hera, Argo Python DSL, and Couler:
+Hera presents an intuitive Python interface to the underlying API of Argo, with custom classes making use of context managers and callables, empowering users to focus on their own executable payloads rather than workflow setup.
+
+<details><summary>Here's a side by side comparison of Hera, Couler, and Argo Python DSL</summary>
+
+You will see how Hera has focused on reducing the complexity of Argo concepts while also reducing the total lines of code required to construct the `diamond` example, which can be [found in the upstream Argo repository](https://github.com/argoproj/argo-workflows/blob/2a9bd6c83601990259fd5162edeb425741757484/examples/dag-diamond.yaml).
 
 <table>
 <tr><th>Hera</th><th>Couler</th><th>Argo Python DSL</th></tr>
@@ -141,20 +133,24 @@ executable payloads rather than workflow setup. Here's a side by side comparison
 <td valign="top"><p>
 
 ```python
-from hera import Task, Workflow
+from hera.workflows import DAG, Container, Parameter, Workflow
 
-
-def say(message: str):
-    print(message)
-
-
-with Workflow("diamond") as w:
-    a = Task('a', say, ['This is task A!'])
-    b = Task('b', say, ['This is task B!'])
-    c = Task('c', say, ['This is task C!'])
-    d = Task('d', say, ['This is task D!'])
-
-    a >> [b, c] >> d
+with Workflow(
+    generate_name="dag-diamond-",
+    entrypoint="diamond",
+) as w:
+    echo = Container(
+        name="echo",
+        image="alpine:3.7",
+        command=["echo", "{{inputs.parameters.message}}"],
+        inputs=[Parameter(name="message")],
+    )
+    with DAG(name="diamond"):
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
+        A >> [B, C] >> D
 
 w.create()
 ```
@@ -245,3 +241,4 @@ class DagDiamond(Workflow):
 </p></td>
 </tr>
 </table>
+</details>
