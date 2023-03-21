@@ -1,7 +1,6 @@
 from hera.workflows import DAG, Task, Workflow
 from hera.workflows.models import TemplateRef
 
-
 with Workflow(
     generate_name="workflow-template-dag-diamond-",
     entrypoint="diamond",

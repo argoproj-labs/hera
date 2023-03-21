@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Dict, List, Optional, Union
+
 from pydantic import root_validator
 
 from hera.workflows._mixins import ArgumentsMixin, ItemMixin, ParameterMixin, SubNodeMixin, TemplateMixin
@@ -166,7 +167,6 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
         return self.next(other, on=TaskResult.all_failed)
 
     def _build_dag_task(self) -> _ModelDAGTask:
-
         _template = None
         if isinstance(self.template, str):
             _template = self.template

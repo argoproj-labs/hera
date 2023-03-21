@@ -1,7 +1,7 @@
+from operator import xor
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import root_validator
-from operator import xor
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
