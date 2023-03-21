@@ -1,4 +1,3 @@
-from operator import xor
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import root_validator
@@ -21,7 +20,7 @@ from hera.workflows.models import (
     TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
-from hera.workflows.protocol import Steppable
+from hera.workflows.protocol import Steppable, Templatable
 
 
 class Step(
@@ -30,20 +29,24 @@ class Step(
     ParameterMixin,
     ItemMixin,
 ):
-    continue_on: Optional[_ModelContinueOn]
-    hooks: Optional[Dict[str, _ModelLifecycleHook]]
-    inline: Optional[_ModelTemplate]
-    name: Optional[str]
-    on_exit: Optional[str]
-    template: Optional[Union[str, _ModelTemplate, TemplateMixin]]
-    template_ref: Optional[_ModelTemplateRef]
-    when: Optional[str]
-    with_sequence: Optional[_ModelSequence]
+    continue_on: Optional[_ModelContinueOn] = None
+    hooks: Optional[Dict[str, _ModelLifecycleHook]] = None
+    inline: Optional[Union[_ModelTemplate, TemplateMixin]] = None
+    name: Optional[str] = None
+    on_exit: Optional[str] = None
+    template: Optional[Union[str, _ModelTemplate, TemplateMixin]] = None
+    template_ref: Optional[_ModelTemplateRef] = None
+    when: Optional[str] = None
+    with_sequence: Optional[_ModelSequence] = None
 
     @root_validator(pre=False)
     def _check_values(cls, values):
-        if not xor(bool(values.get("template")), bool(values.get("template_ref"))):
-            raise ValueError("exactly one of ['template', 'template_ref'] must be present")
+        def one(xs: List):
+            xs = list(map(bool, xs))
+            return xs.count(True) == 1
+
+        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
+            raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
         return values
 
     @property
@@ -81,11 +84,17 @@ class Step(
         elif isinstance(self.template, (_ModelTemplate, TemplateMixin)):
             _template = self.template.name
 
+        _inline = None
+        if isinstance(self.inline, _ModelTemplate):
+            _inline = self.inline
+        elif isinstance(self.inline, Templatable):
+            _inline = self.inline._build_template()
+
         return _ModelWorkflowStep(
             arguments=self._build_arguments(),
             continue_on=self.continue_on,
             hooks=self.hooks,
-            inline=self.inline,
+            inline=_inline,
             name=self.name,
             on_exit=self.on_exit,
             template=_template,

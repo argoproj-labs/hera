@@ -30,7 +30,12 @@ class TaskResult(Enum):
     all_failed = "AllFailed"
 
 
-class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
+class Task(
+    ArgumentsMixin,
+    SubNodeMixin,
+    ParameterMixin,
+    ItemMixin,
+):
     name: str
     continue_on: Optional[ContinueOn] = None
     dependencies: Optional[List[str]] = None

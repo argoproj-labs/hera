@@ -12,10 +12,6 @@ from hera.workflows import Container, CronWorkflow
 with CronWorkflow(
     name="hello-world",
     entrypoint="whalesay",
-    annotations={
-        "workflows.argoproj.io/description": ("This example demonstrates running a DAG with inline templates."),
-        "workflows.argoproj.io/version": ">= 3.2.0",
-    },
     schedule="* * * * *",
     timezone="America/Los_Angeles",
     starting_deadline_seconds=0,
@@ -38,10 +34,6 @@ with CronWorkflow(
 apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
-  annotations:
-    workflows.argoproj.io/description: This example demonstrates running a DAG with
-      inline templates.
-    workflows.argoproj.io/version: '>= 3.2.0'
   name: hello-world
 spec:
   concurrencyPolicy: Replace
