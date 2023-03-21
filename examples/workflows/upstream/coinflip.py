@@ -15,18 +15,19 @@ with Workflow(
             "This is an example of coin flip defined as a sequence of conditional steps."
         ),
     },
+    entrypoint="coinflip",
 ) as w:
     heads = Container(
         name="heads",
         image="alpine:3.6",
         command=["sh", "-c"],
-        args=["echo 'it was heads'"],
+        args=['echo "it was heads"'],
     )
     tails = Container(
         name="tails",
         image="alpine:3.6",
         command=["sh", "-c"],
-        args=["echo 'it was tails'"],
+        args=['echo "it was tails"'],
     )
 
     flip_coin = Script(
@@ -34,6 +35,7 @@ with Workflow(
         image="python:alpine3.6",
         command=["python"],
         source=flip_coin_func,
+        add_cwd_to_sys_path=False,
     )
 
     with Steps(name="coinflip") as s:

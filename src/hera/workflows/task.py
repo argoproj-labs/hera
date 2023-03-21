@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from hera.workflows._mixins import ArgumentsMixin, ItemMixin, ParameterMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import (
+    ArgumentsMixin,
+    ItemMixin,
+    ParameterMixin,
+    SubNodeMixin,
+    TemplateInvocatorMixin,
+    TemplateMixin,
+)
 from hera.workflows.models import (
-    ContinueOn,
     DAGTask as _ModelDAGTask,
-    LifecycleHook,
-    Sequence,
     Template,
-    TemplateRef,
 )
 from hera.workflows.operator import Operator
 from hera.workflows.protocol import Templatable
@@ -28,18 +31,15 @@ class TaskResult(Enum):
     all_failed = "AllFailed"
 
 
-class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
-    name: str
-    continue_on: Optional[ContinueOn] = None
+class Task(
+    TemplateInvocatorMixin,
+    ArgumentsMixin,
+    SubNodeMixin,
+    ParameterMixin,
+    ItemMixin,
+):
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
-    hooks: Optional[Dict[str, LifecycleHook]] = None
-    on_exit: Optional[str] = None
-    template: Optional[Union[str, Template, TemplateMixin]] = None
-    template_ref: Optional[TemplateRef] = None
-    inline: Optional[Union[Template, TemplateMixin]] = None
-    when: Optional[str] = None
-    with_sequence: Optional[Sequence] = None
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
@@ -155,9 +155,6 @@ class Task(ArgumentsMixin, SubNodeMixin, ParameterMixin, ItemMixin):
         return self.next(other, on=TaskResult.all_failed)
 
     def _build_dag_task(self) -> _ModelDAGTask:
-        if self.template is None and self.inline is None:
-            raise ValueError("Exactly one of `template` or `inline` must be supplied")
-
         _template = None
         if isinstance(self.template, str):
             _template = self.template

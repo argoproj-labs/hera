@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  annotations:
+    workflows.argoproj.io/description: This workflow demonstrates running a steps
+      with inline templates.
+    workflows.argoproj.io/version: '>= 3.2.0'
+  generateName: steps-inline-
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    steps:
+    - - inline:
+          container:
+            image: argoproj/argosay:v2
+        name: a

@@ -3,6 +3,8 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
+from pydantic import root_validator
+
 from hera.shared import global_config
 from hera.shared._base_model import BaseMixin
 from hera.shared.serialization import serialize
@@ -18,6 +20,7 @@ from hera.workflows.models import (
     Artifact as ModelArtifact,
     ArtifactLocation,
     ContainerPort,
+    ContinueOn,
     EnvFromSource,
     EnvVar,
     ExecutorConfig,
@@ -26,6 +29,7 @@ from hera.workflows.models import (
     Inputs as ModelInputs,
     IntOrString,
     Item,
+    LifecycleHook,
     Memoize,
     Metadata,
     Metrics,
@@ -37,7 +41,10 @@ from hera.workflows.models import (
     Probe,
     ResourceRequirements,
     RetryStrategy,
+    Sequence,
     Synchronization,
+    Template,
+    TemplateRef,
     TerminationMessagePolicy,
     Toleration,
     UserContainer as ModelUserContainer,
@@ -484,6 +491,28 @@ class EnvIOMixin(EnvMixin, IOMixin):
             if param.name not in already_set_params:
                 inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
         return inputs
+
+
+class TemplateInvocatorMixin(BaseMixin):
+    name: str
+    continue_on: Optional[ContinueOn] = None
+    hooks: Optional[Dict[str, LifecycleHook]] = None
+    on_exit: Optional[str] = None
+    template: Optional[Union[str, Template, TemplateMixin]] = None
+    template_ref: Optional[TemplateRef] = None
+    inline: Optional[Union[Template, TemplateMixin]] = None
+    when: Optional[str] = None
+    with_sequence: Optional[Sequence] = None
+
+    @root_validator(pre=False)
+    def _check_values(cls, values):
+        def one(xs: List):
+            xs = list(map(bool, xs))
+            return xs.count(True) == 1
+
+        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
+            raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
+        return values
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:

@@ -1,6 +1,6 @@
 # Coinflip
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/coinflip.yaml).
 
 
 
@@ -24,18 +24,19 @@ with Workflow(
             "This is an example of coin flip defined as a sequence of conditional steps."
         ),
     },
+    entrypoint="coinflip",
 ) as w:
     heads = Container(
         name="heads",
         image="alpine:3.6",
         command=["sh", "-c"],
-        args=["echo 'it was heads'"],
+        args=['echo "it was heads"'],
     )
     tails = Container(
         name="tails",
         image="alpine:3.6",
         command=["sh", "-c"],
-        args=["echo 'it was tails'"],
+        args=['echo "it was tails"'],
     )
 
     flip_coin = Script(
@@ -43,6 +44,7 @@ with Workflow(
         image="python:alpine3.6",
         command=["python"],
         source=flip_coin_func,
+        add_cwd_to_sys_path=False,
     )
 
     with Steps(name="coinflip") as s:
@@ -64,10 +66,11 @@ metadata:
       a sequence of conditional steps.
   generateName: coinflip-
 spec:
+  entrypoint: coinflip
   templates:
   - container:
       args:
-      - echo 'it was heads'
+      - echo "it was heads"
       command:
       - sh
       - -c
@@ -75,7 +78,7 @@ spec:
     name: heads
   - container:
       args:
-      - echo 'it was tails'
+      - echo "it was tails"
       command:
       - sh
       - -c
@@ -86,13 +89,7 @@ spec:
       command:
       - python
       image: python:alpine3.6
-      source: 'import os
-
-        import sys
-
-        sys.path.append(os.getcwd())
-
-        import random
+      source: 'import random
 
 
         result = "heads" if random.randint(0, 1) == 0 else "tails"

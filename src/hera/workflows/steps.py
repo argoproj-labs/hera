@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -7,36 +7,24 @@ from hera.workflows._mixins import (
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
+    TemplateInvocatorMixin,
     TemplateMixin,
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
-    ContinueOn as _ModelContinueOn,
-    LifecycleHook as _ModelLifecycleHook,
-    Sequence as _ModelSequence,
     Template as _ModelTemplate,
-    TemplateRef as _ModelTemplateRef,
     WorkflowStep as _ModelWorkflowStep,
 )
-from hera.workflows.protocol import Steppable
+from hera.workflows.protocol import Steppable, Templatable
 
 
 class Step(
+    TemplateInvocatorMixin,
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
 ):
-    continue_on: Optional[_ModelContinueOn]
-    hooks: Optional[Dict[str, _ModelLifecycleHook]]
-    inline: Optional[_ModelTemplate]
-    name: Optional[str]
-    on_exit: Optional[str]
-    template: Union[str, _ModelTemplate, TemplateMixin]
-    template_ref: Optional[_ModelTemplateRef]
-    when: Optional[str]
-    with_sequence: Optional[_ModelSequence]
-
     @property
     def id(self) -> str:
         return f"{{{{steps.{self.name}.id}}}}"
@@ -66,14 +54,26 @@ class Step(
         return f"{{{{steps.{self.name}.outputs.result}}}}"
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
+        _template = None
+        if isinstance(self.template, str):
+            _template = self.template
+        elif isinstance(self.template, (_ModelTemplate, TemplateMixin)):
+            _template = self.template.name
+
+        _inline = None
+        if isinstance(self.inline, _ModelTemplate):
+            _inline = self.inline
+        elif isinstance(self.inline, Templatable):
+            _inline = self.inline._build_template()
+
         return _ModelWorkflowStep(
             arguments=self._build_arguments(),
             continue_on=self.continue_on,
             hooks=self.hooks,
-            inline=self.inline,
+            inline=_inline,
             name=self.name,
             on_exit=self.on_exit,
-            template=self.template if isinstance(self.template, str) else self.template.name,
+            template=_template,
             template_ref=self.template_ref,
             when=self.when,
             with_items=self._build_with_items(),
