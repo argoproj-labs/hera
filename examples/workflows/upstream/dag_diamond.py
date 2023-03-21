@@ -1,9 +1,4 @@
-from hera.workflows import (
-    DAG,
-    Container,
-    Parameter,
-    Workflow,
-)
+from hera.workflows import DAG, Container, Parameter, Workflow
 
 with Workflow(
     generate_name="dag-diamond-",
@@ -16,8 +11,8 @@ with Workflow(
         inputs=[Parameter(name="message")],
     )
     with DAG(name="diamond"):
-        A = echo(name="A", arguments=[Parameter(name="message", value="A")])
-        B = echo(name="B", arguments=[Parameter(name="message", value="B")])
-        C = echo(name="C", arguments=[Parameter(name="message", value="C")])
-        D = echo(name="D", arguments=[Parameter(name="message", value="D")])
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
