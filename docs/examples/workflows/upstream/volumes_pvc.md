@@ -2,57 +2,33 @@
 
 > Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/volumes-pvc.yaml).
 
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: volumes-pvc-
-spec:
-  entrypoint: volumes-pvc-example
-  volumeClaimTemplates:
-  - metadata:
-      name: workdir
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
 
-  templates:
-  - name: volumes-pvc-example
-    steps:
-    - - name: generate
-        template: whalesay
-    - - name: print
-        template: print-message
-
-  - name: whalesay
-    container:
-      image: docker/whalesay:latest
-      command: [sh, -c]
-      args: ["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"]
-      volumeMounts:
-      - name: workdir
-        mountPath: /mnt/vol
-
-  - name: print-message
-    container:
-      image: alpine:latest
-      command: [sh, -c]
-      args: ["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"]
-      volumeMounts:
-      - name: workdir
-        mountPath: /mnt/vol
 
 ## Hera
 
 ```python
+from typing import List
+
 from hera.workflows import (
     Container,
     Steps,
-    Volume,
     Workflow,
     models as m,
 )
+
+
+def _get_container(name: str, image: str, args: List[str]) -> Container:
+    """Creates container with a mounted volume"""
+    return Container(
+        name=name,
+        image=image,
+        command=["sh", "-c"],
+        args=args,
+        volume_mounts=[
+            m.VolumeMount(name="workdir", mount_path="/mnt/vol"),
+        ],
+    )
+
 
 with Workflow(
     generate_name="volumes-pvc-",
@@ -69,25 +45,15 @@ with Workflow(
         )
     ],
 ) as w:
-    v = Volume(
-        name="workdir",
-        size="1Gi",
-        mount_path="/mnt/vol",
-        access_modes=["ReadWriteOnce"],
+    whalesay = _get_container(
+        "whalesay",
+        "docker/whalesay:latest",
+        ["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
     )
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["sh", "-c"],
-        args=["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
-        volume_mounts=[m.VolumeMount(name="workdir", mount_path="/mnt/vol")],
-    )
-    print_message = Container(
-        name="print-message",
-        image="alpine:latest",
-        command=["sh", "-c"],
-        args=["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
-        volume_mounts=[m.VolumeMount(name="workdir", mount_path="/mnt/vol")],
+    print_message = _get_container(
+        "print-message",
+        "alpine:latest",
+        ["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
     )
     with Steps(name="volumes-pvc-example") as s:
         whalesay(name="generate")
