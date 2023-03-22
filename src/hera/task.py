@@ -34,7 +34,7 @@ from hera.io import IO
 from hera.memoize import Memoize
 from hera.metric import Metric, Metrics
 from hera.operator import Operator
-from hera.parameter import Parameter
+from hera.parameter import Parameter, MISSING
 from hera.port import ContainerPort
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
@@ -696,12 +696,12 @@ class Task(IO):
 
         # If there are any kwargs arguments associated with the function signature,
         # we store these as we can set them as default values for argo arguments
-        source_signature: Dict[str, Optional[str]] = {}
+        source_signature: Dict[str, Optional[Any]] = {}
         for p in inspect.signature(self.source).parameters.values():
             if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
                 source_signature[p.name] = p.default
             else:
-                source_signature[p.name] = None
+                source_signature[p.name] = MISSING
 
         # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
         input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]
@@ -772,7 +772,7 @@ class Task(IO):
             # Verify that we're utilizing 'item'
             if not any([p.contains_item for p in self.inputs + deduced_params]):  # type: ignore
                 raise ValueError(
-                    "`with_param` or `with_sequence` items are utilized in inputs, nor could they be deduced"
+                    "`with_param` or `with_sequence` items are not utilized in inputs, nor could they be deduced"
                 )
 
         return deduced_params
