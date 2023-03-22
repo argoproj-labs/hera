@@ -696,7 +696,7 @@ class Task(IO):
 
         # If there are any kwargs arguments associated with the function signature,
         # we store these as we can set them as default values for argo arguments
-        source_signature: Dict[str, Optional[str]] = {}
+        source_signature: Dict[str, Optional[Any]] = {}
         for p in inspect.signature(self.source).parameters.values():
             if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
                 source_signature[p.name] = p.default
