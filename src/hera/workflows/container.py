@@ -1,3 +1,8 @@
+"""The container module provides the Container class.
+
+See https://argoproj.github.io/argo-workflows/workflow-concepts/#container
+for more on containers.
+"""
 from __future__ import annotations
 
 from typing import List, Optional
@@ -26,6 +31,8 @@ class Container(
     VolumeMountMixin,
     CallableTemplateMixin,
 ):
+    """The Container template type defines a container to run on Argo."""
+
     args: Optional[List[str]] = None
     command: Optional[List[str]] = None
     lifecycle: Optional[Lifecycle] = None

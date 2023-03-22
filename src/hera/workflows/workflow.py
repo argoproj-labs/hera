@@ -1,3 +1,8 @@
+"""The workflow module provides the Workflow class
+
+See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
+for more on Workflows.
+"""
 from __future__ import annotations
 
 from types import ModuleType

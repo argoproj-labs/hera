@@ -1,3 +1,8 @@
+"""The workflow_template module provides the WorkflowTemplate class
+
+See https://argoproj.github.io/argo-workflows/workflow-templates/
+for more on WorkflowTemplates.
+"""
 from pydantic import validator
 from typing_extensions import get_args
 
@@ -15,6 +20,11 @@ from hera.workflows.workflow import Workflow
 
 
 class WorkflowTemplate(Workflow):
+    """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
+    to create a library of frequently-used templates and reuse them by referencing them from your
+    Workflows.
+    """
+
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
     @validator("status", pre=True, always=True)

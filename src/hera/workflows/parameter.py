@@ -1,4 +1,5 @@
-"""Holds input model specifications"""
+"""TODO: module docstring
+"""
 from typing import Any, Optional
 
 from pydantic import root_validator

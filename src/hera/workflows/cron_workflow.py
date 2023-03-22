@@ -1,3 +1,8 @@
+"""The cron_workflow module provides the CronWorkflow class
+
+See https://argoproj.github.io/argo-workflows/cron-workflows
+for more on CronWorkflows.
+"""
 from __future__ import annotations
 
 from types import ModuleType
@@ -24,6 +29,13 @@ except ImportError:
 
 
 class CronWorkflow(Workflow):
+    """CronWorkflow allows a user to run a Workflow on a recurring basis.
+
+    NB: Hera's CronWorkflow is a subclass of Workflow which means certain fields are renamed
+    for compatibility, see `cron_suspend` and `cron_status` which are different from the Argo
+    spec. See https://argoproj.github.io/argo-workflows/fields/#cronworkflow
+    """
+
     concurrency_policy: Optional[str] = None
     failed_jobs_history_limit: Optional[int] = None
     schedule: str
