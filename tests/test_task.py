@@ -832,7 +832,7 @@ class TestTask:
         assert t.with_sequence.format == "abc"
 
     def test_task_utilize_items(self, no_op):
-        error_string = "`with_param` or `with_sequence` items are utilized in inputs, nor could they be deduced"
+        error_string = "`with_param` or `with_sequence` items are not utilized in inputs, nor could they be deduced"
         with pytest.raises(ValueError) as e:
             Task("t", no_op, with_sequence=Sequence("abc", start=1, end=42))
         assert str(e.value) == error_string

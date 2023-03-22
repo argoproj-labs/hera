@@ -772,7 +772,7 @@ class Task(IO):
             # Verify that we're utilizing 'item'
             if not any([p.contains_item for p in self.inputs + deduced_params]):  # type: ignore
                 raise ValueError(
-                    "`with_param` or `with_sequence` items are utilized in inputs, nor could they be deduced"
+                    "`with_param` or `with_sequence` items are not utilized in inputs, nor could they be deduced"
                 )
 
         return deduced_params
