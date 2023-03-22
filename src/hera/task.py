@@ -34,7 +34,7 @@ from hera.io import IO
 from hera.memoize import Memoize
 from hera.metric import Metric, Metrics
 from hera.operator import Operator
-from hera.parameter import Parameter
+from hera.parameter import Parameter, MISSING
 from hera.port import ContainerPort
 from hera.resource_template import ResourceTemplate
 from hera.resources import Resources
@@ -701,7 +701,7 @@ class Task(IO):
             if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
                 source_signature[p.name] = p.default
             else:
-                source_signature[p.name] = None
+                source_signature[p.name] = MISSING
 
         # Deduce input parameters from function source. Only add those which haven't been explicitly set in inputs
         input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]
