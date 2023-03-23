@@ -5,7 +5,6 @@ for more on CronWorkflows.
 """
 from __future__ import annotations
 
-from types import ModuleType
 from typing import Optional
 
 from hera.workflows.models import (

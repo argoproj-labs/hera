@@ -1,4 +1,7 @@
-"""TODO: module docstring
+"""The dag module provides the DAG class.
+
+See https://argoproj.github.io/argo-workflows/walk-through/dag/
+for more on DAGs (Directed Acyclic Graphs).
 """
 from __future__ import annotations
 
@@ -15,6 +18,12 @@ from hera.workflows.task import Task
 
 
 class DAG(IOMixin, TemplateMixin, ContextMixin):
+    """A DAG template invocator is used to define Task dependencies as an acyclic graph.
+
+    DAG implements the contextmanager interface so allows usage of `with`, under which any
+    `hera.workflows.task.Task` objects instantiated will be added to the DAG's list of Tasks.
+    """
+
     fail_fast: Optional[bool] = None
     target: Optional[str] = None
     tasks: List[Union[Task, DAGTask]] = []

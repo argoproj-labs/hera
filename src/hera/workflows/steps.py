@@ -1,4 +1,7 @@
-"""TODO: module docstring
+"""The steps module provides the Steps, Step and Parallel classes.
+
+See https://argoproj.github.io/argo-workflows/walk-through/steps/
+for more on Steps.
 """
 from typing import Any, List, Optional, Union
 
@@ -27,6 +30,10 @@ class Step(
     ParameterMixin,
     ItemMixin,
 ):
+    """Step is used to run a given template. Must be instantiated under a Steps or Parallel context,
+    or outside of a Workflow.
+    """
+
     @property
     def id(self) -> str:
         return f"{{{{steps.{self.name}.id}}}}"
@@ -93,6 +100,12 @@ class Parallel(
     ContextMixin,
     SubNodeMixin,
 ):
+    """Parallel is used to add a list of steps which will run in parallel.
+
+    Parallel implements the contextmanager interface so allows usage of `with`, under which any
+    `hera.workflows.steps.Step` objects instantiated will be added to Parallel's list of sub_steps.
+    """
+
     sub_steps: List[Union[Step, _ModelWorkflowStep]] = []
 
     def _add_sub(self, node: Any):
@@ -117,6 +130,17 @@ class Steps(
     IOMixin,
     TemplateMixin,
 ):
+    """A Steps template invocator is used to define a sequence of steps which can run
+    sequentially or in parallel.
+
+    Steps implements the contextmanager interface so allows usage of `with`, under which any
+    `hera.workflows.steps.Step` objects instantiated will be added to the Steps' list of sub_steps.
+
+    * Step and Parallel objects initialised within a Steps context will be added to the list of sub_steps
+    in the order they are initialised.
+    * All Step objects initialised within a Parallel context will run in parallel.
+    """
+
     sub_steps: List[
         Union[
             Step,
@@ -156,6 +180,7 @@ class Steps(
         self.sub_steps.append(node)
 
     def parallel(self) -> Parallel:
+        """Returns a Parallel object which can be used in a sub-context manager."""
         return Parallel()
 
     def _build_template(self) -> _ModelTemplate:
