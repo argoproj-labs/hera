@@ -9,11 +9,9 @@ Welcome to Hera's documentation!
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo ecosystem accessible by simplifying workflow construction and submission. Hera presents an intuitive Python interface to the underlying API of Argo, with custom classes making use of context managers and callables, empowering users to focus on their own executable payloads rather than workflow setup. Hera allows power users of Argo to use Python if preferred, by ensuring feature parity with Argo and a fallback option through an OpenAPI generated Python module found at `hera.workflows.models`.
 
 .. toctree::
-   :glob:
-   :maxdepth: 2
-   :caption: Hera Modules
+   :caption: Getting Started
 
-   src/*
+   hera_getting_started
 
 .. toctree::
    :caption: Expr Transpilation
@@ -33,6 +31,12 @@ Hera is a Python framework for constructing and submitting Argo Workflows. The m
    :caption: Hera - Argo Workflow Examples Replication
 
    examples/workflows/upstream/*
+
+.. toctree::
+   :maxdepth: -1
+   :caption: Hera Modules Reference
+
+   hera <autoapi/hera/index>
 
 Indices and tables
 ==================
