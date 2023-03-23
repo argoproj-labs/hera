@@ -10,7 +10,7 @@ from hera.workflows._mixins import (
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
-    TemplateInvocatorMixin,
+    TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
 from hera.workflows.models import (
@@ -34,7 +34,7 @@ class TaskResult(Enum):
 
 
 class Task(
-    TemplateInvocatorMixin,
+    TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,

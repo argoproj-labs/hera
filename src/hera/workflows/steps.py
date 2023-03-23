@@ -9,7 +9,7 @@ from hera.workflows._mixins import (
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
-    TemplateInvocatorMixin,
+    TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
 from hera.workflows.exceptions import InvalidType
@@ -21,7 +21,7 @@ from hera.workflows.protocol import Steppable, Templatable
 
 
 class Step(
-    TemplateInvocatorMixin,
+    TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,

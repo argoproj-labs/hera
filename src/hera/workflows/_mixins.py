@@ -493,7 +493,12 @@ class EnvIOMixin(EnvMixin, IOMixin):
         return inputs
 
 
-class TemplateInvocatorMixin(BaseMixin):
+class TemplateInvocatorSubNodeMixin(BaseMixin):
+    """Used for classes that form sub nodes of Template Invocators - "Steps" and "DAG".
+
+    See https://argoproj.github.io/argo-workflows/workflow-concepts/#template-invocators for
+    more on template invocators
+    """
     name: str
     continue_on: Optional[ContinueOn] = None
     hooks: Optional[Dict[str, LifecycleHook]] = None
