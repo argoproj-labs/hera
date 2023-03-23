@@ -260,10 +260,10 @@ hera.volumes module
    :undoc-members:
    :show-inheritance:
 
-hera.workflow module
+hera.workflows module
 --------------------
 
-.. automodule:: hera.workflow
+.. automodule:: hera.workflows
    :members:
    :undoc-members:
    :show-inheritance:
