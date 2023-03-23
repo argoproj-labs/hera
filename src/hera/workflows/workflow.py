@@ -65,6 +65,17 @@ class Workflow(
     ContextMixin,
     HookMixin,
 ):
+    """The base Workflow class for Hera.
+
+    Workflow implements the contextmanager interface so allows usage of `with`, under which
+    any `hera.workflows.protocol.Templatable` object or `hera.workflows.models.Template` object
+    instantiated under the context will be added to the Workflow's list of templates.
+
+    Workflows can be created directly on your Argo cluster via `create`. They can also be dumped
+    to yaml via `to_yaml` or built according to the Argo schema via `build` to get an OpenAPI model
+    object.
+    """
+
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
     api_version: Optional[str] = global_config.api_version
     kind: Optional[str] = None
@@ -147,6 +158,7 @@ class Workflow(
         return v
 
     def build(self) -> TWorkflow:
+        """Builds the Workflow and its components into an Argo schema Workflow object."""
         self = self._dispatch_hooks()
 
         templates = []
@@ -259,24 +271,31 @@ class Workflow(
         )
 
     def to_dict(self) -> Any:
+        """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
         return self.build().dict(exclude_none=True, by_alias=True)
 
     def to_yaml(self, *args, **kwargs) -> str:
+        """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
         if not yaml:
             raise ImportError("PyYAML is not installed")
         return yaml.dump(self.to_dict(), *args, **kwargs)
 
     def create(self) -> TWorkflow:
+        """Creates the Workflow on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
 
     def lint(self) -> TWorkflow:
+        """Lints the Workflow using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow(self.namespace, WorkflowLintRequest(workflow=self.build()))
 
     def _add_sub(self, node: Any):
+        """Adds any objects instantiated under the Workflow context manager that conform to the `Templatable` protocol
+        or are Argo schema Template objects to the Workflow's list of templates.
+        """
         if not isinstance(node, (Templatable, *get_args(Template))):
             raise InvalidType()
         self.templates.append(node)
