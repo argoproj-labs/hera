@@ -19,14 +19,6 @@ from hera.workflows.models import (
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
 
-_yaml: Optional[ModuleType] = None
-try:
-    import yaml
-
-    _yaml = yaml
-except ImportError:
-    _yaml = None
-
 
 class CronWorkflow(Workflow):
     """CronWorkflow allows a user to run a Workflow on a recurring basis.
@@ -46,6 +38,7 @@ class CronWorkflow(Workflow):
     cron_status: Optional[CronWorkflowStatus] = None
 
     def build(self) -> TWorkflow:
+        """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
         return _ModelCronWorkflow(
@@ -84,6 +77,7 @@ class CronWorkflow(Workflow):
         )
 
     def create(self) -> TWorkflow:
+        """Creates the CronWorkflow on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_cron_workflow(
@@ -91,6 +85,7 @@ class CronWorkflow(Workflow):
         )
 
     def lint(self) -> TWorkflow:
+        """Lints the CronWorkflow using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cron_workflow(

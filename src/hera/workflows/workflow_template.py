@@ -33,6 +33,7 @@ class WorkflowTemplate(Workflow):
             raise ValueError("status is not a valid field on a WorkflowTemplate")
 
     def create(self) -> TWorkflow:
+        """Creates the WorkflowTemplate on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow_template(
@@ -40,6 +41,7 @@ class WorkflowTemplate(Workflow):
         )
 
     def lint(self) -> TWorkflow:
+        """Lints the WorkflowTemplate using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow_template(
@@ -47,6 +49,7 @@ class WorkflowTemplate(Workflow):
         )
 
     def build(self) -> TWorkflow:
+        """Builds the WorkflowTemplate and its components into an Argo schema WorkflowTemplate object."""
         self = self._dispatch_hooks()
 
         templates = []

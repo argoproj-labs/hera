@@ -276,9 +276,9 @@ class Workflow(
 
     def to_yaml(self, *args, **kwargs) -> str:
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
-        if not yaml:
+        if not _yaml:
             raise ImportError("PyYAML is not installed")
-        return yaml.dump(self.to_dict(), *args, **kwargs)
+        return _yaml.dump(self.to_dict(), *args, **kwargs)
 
     def create(self) -> TWorkflow:
         """Creates the Workflow on the Argo cluster."""
