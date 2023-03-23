@@ -36,7 +36,7 @@ Hera is a Python framework for constructing and submitting Argo Workflows. The m
    :maxdepth: -1
    :caption: Hera Modules Reference
 
-   hera <autoapi/hera/index>
+   hera <autoapi/src/hera/index>
 
 Indices and tables
 ==================
