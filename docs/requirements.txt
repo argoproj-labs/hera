@@ -1,5 +1,6 @@
 sphinx
 sphinx-book-theme
+sphinx-autoapi
 myst-parser
 Jinja2<3.1
 # -e .  # hera itself

@@ -1,4 +1,8 @@
-"""Holds input model specifications"""
+"""The parameter module provides the Parameter class.
+
+See https://argoproj.github.io/argo-workflows/walk-through/parameters/
+for a tutorial on Parameters.
+"""
 from typing import Any, Optional
 
 from pydantic import root_validator
@@ -8,6 +12,12 @@ from hera.workflows.models import Parameter as _ModelParameter
 
 
 class Parameter(_ModelParameter):
+    """A `Parameter` is used to pass values in and out of templates.
+
+    They are to declare input and output parameters in the case of templates, and are used
+    for Steps and Tasks to assign values.
+    """
+
     value: Optional[Any]
 
     @root_validator(pre=True)

@@ -1,3 +1,8 @@
+"""The workflow_template module provides the WorkflowTemplate class
+
+See https://argoproj.github.io/argo-workflows/workflow-templates/
+for more on WorkflowTemplates.
+"""
 from pydantic import validator
 from typing_extensions import get_args
 
@@ -15,6 +20,11 @@ from hera.workflows.workflow import Workflow
 
 
 class WorkflowTemplate(Workflow):
+    """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
+    to create a library of frequently-used templates and reuse them by referencing them from your
+    Workflows.
+    """
+
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
     @validator("status", pre=True, always=True)
@@ -23,6 +33,7 @@ class WorkflowTemplate(Workflow):
             raise ValueError("status is not a valid field on a WorkflowTemplate")
 
     def create(self) -> TWorkflow:
+        """Creates the WorkflowTemplate on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow_template(
@@ -30,6 +41,7 @@ class WorkflowTemplate(Workflow):
         )
 
     def lint(self) -> TWorkflow:
+        """Lints the WorkflowTemplate using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow_template(
@@ -37,6 +49,7 @@ class WorkflowTemplate(Workflow):
         )
 
     def build(self) -> TWorkflow:
+        """Builds the WorkflowTemplate and its components into an Argo schema WorkflowTemplate object."""
         self = self._dispatch_hooks()
 
         templates = []

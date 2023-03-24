@@ -1,3 +1,8 @@
+"""The task module provides the Task and TaskResult classes.
+
+See https://argoproj.github.io/argo-workflows/walk-through/dag/
+for more on using Tasks within a DAG.
+"""
 from __future__ import annotations
 
 from enum import Enum
@@ -8,7 +13,7 @@ from hera.workflows._mixins import (
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
-    TemplateInvocatorMixin,
+    TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
 from hera.workflows.models import (
@@ -21,6 +26,10 @@ from hera.workflows.workflow_status import WorkflowStatus
 
 
 class TaskResult(Enum):
+    """The enumeration of Task Results specified at
+    https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends
+    """
+
     failed = "Failed"
     succeeded = "Succeeded"
     errored = "Errored"
@@ -32,12 +41,67 @@ class TaskResult(Enum):
 
 
 class Task(
-    TemplateInvocatorMixin,
+    TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
 ):
+    r"""Task is used to run a given template within a DAG. Must be instantiated under a DAG context.
+
+    ## Dependencies
+    Any Tasks without a dependency defined will start immediately.
+
+    Dependencies between Tasks can be described using the convenience syntax `>>`, for example:
+        A = Task(...)
+        B = Task(...)
+        A >> B
+    describes the relationships:
+    * "A has no dependencies (so starts immediately)
+    * "B depends on A".
+    As a diagram:
+    A
+    |
+    B
+
+    `A >> B` is equivalent to `A.next(B)`.
+
+    ## Lists of Tasks
+    A list of Tasks used with the rshift syntax describes an "AND" dependency between the single Task on the left of
+    `>>` and the list Tasks to the right of `>>` (or vice versa). A list of Tasks on both sides of `>>` is not supported.
+    For example:
+        A = Task(...)
+        B = Task(...)
+        C = Task(...)
+        D = Task(...)
+        A >> [B, C] >> D
+    describes the relationships:
+    * "A has no dependencies
+    * "B AND C depend on A"
+    * "D depends on B AND C"
+    As a diagram:
+      A
+     / \
+    B   C
+     \ /
+      D
+
+    Dependencies can be described over multiple statements:
+        A = Task(...)
+        B = Task(...)
+        C = Task(...)
+        D = Task(...)
+        A >> [C, D]
+        B >> [C, D]
+    describes the relationships:
+    * "A and B have no dependencies
+    * "C depends on A AND B"
+    * "D depends on A AND B"
+    As a diagram:
+    A   B
+    | X |
+    C   D
+    """
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
 
@@ -82,6 +146,7 @@ class Task(
         return f"{{{{tasks.{self.name}.outputs.result}}}}"
 
     def next(self, other: Task, operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> Task:
+        """Set self as a dependency of `other`."""
         assert issubclass(other.__class__, Task)
 
         condition = f".{on}" if on else ""
@@ -97,12 +162,14 @@ class Task(
         return other
 
     def __rrshift__(self, other: List[Task]) -> Task:
+        """Set `other` as a dependency self."""
         assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
         for o in other:
             o.next(self)
         return self
 
     def __rshift__(self, other: Union["Task", List["Task"]]) -> Union[Task, List[Task]]:
+        """Set self as a dependency of `other` which can be a single Task or list of Tasks."""
         if isinstance(other, Task):
             return self.next(other)
         elif isinstance(other, list):
