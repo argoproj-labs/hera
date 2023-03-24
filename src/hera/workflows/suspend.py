@@ -27,6 +27,7 @@ class Suspend(TemplateMixin):
     the "inputs" and "outputs" of the template, resulting in a Suspend template that pauses and
     waits for values from the user for the given list of parameters.
     """
+
     duration: Optional[Union[int, str]] = None
     intermediate_parameters: List[Parameter] = []
 

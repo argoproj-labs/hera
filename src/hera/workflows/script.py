@@ -38,6 +38,7 @@ class Script(
     """A Script acts as a wrapper around a container. In Hera this defaults to a "python:3.7" image
     specified by global_config.image, which runs a python source specified by `Script.source`.
     """
+
     container_name: Optional[str] = None
     args: Optional[List[str]] = None
     command: Optional[List[str]] = global_config.script_command

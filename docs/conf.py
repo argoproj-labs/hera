@@ -29,20 +29,23 @@ extensions = [
 master_doc = "index"
 
 autoapi_type = "python"
-autoapi_dirs = ["../src"]
+autoapi_dirs = ["../src/hera"]  # Starts from the `hera` module, without including `src` in the name
 autoapi_file_pattern = "*.py"
 autoapi_python_use_implicit_namespaces = True
 autoapi_add_toctree_entry = False
 
 templates_path = ["_templates"]
-exclude_patterns = [
-    "_build",
-    "Thumbs.db",
-    ".DS_Store",
-    "conftest.py",
-    "tests",
-    "\.github",
-]
+exclude_patterns = (
+    [  # uses glob-style https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-exclude_patterns
+        "_[!_]*[!_][!_].py",  # exclude private modules like `_mixins.py` but not dunder files (not working?)
+        "_build",
+        "Thumbs.db",
+        ".DS_Store",
+        "conftest.py",
+        "tests",
+        ".github",
+    ]
+)
 numpydoc_show_inherited_class_members = True
 numpydoc_show_class_members = False
 

@@ -33,10 +33,16 @@ Hera is a Python framework for constructing and submitting Argo Workflows. The m
    examples/workflows/upstream/*
 
 .. toctree::
-   :maxdepth: -1
-   :caption: Hera Modules Reference
+   :maxdepth: 3
+   :caption: Hera Workflows API Reference
 
-   hera <autoapi/src/hera/index>
+   hera.workflows <autoapi/hera/workflows/index>
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Hera Events API Reference
+
+   hera.events <autoapi/hera/events/index>
 
 Indices and tables
 ==================
