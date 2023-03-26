@@ -7,7 +7,7 @@
 ## Hera
 
 ```python
-from hera.workflows import Workflow, script, DAG
+from hera.workflows import DAG, Workflow, script
 
 
 @script()
