@@ -1,0 +1,68 @@
+# Colored Logs
+
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/colored-logs.yaml).
+
+
+
+## Hera
+
+```python
+from hera.workflows import Env, Script, Workflow
+
+
+def colored_logs():
+    import time  # noqa: I001
+    import random
+
+    messages = [
+        "No Color",
+        "\x1b[30m%s\x1b[0m" % "FG Black",
+        "\x1b[32m%s\x1b[0m" % "FG Green",
+        "\x1b[34m%s\x1b[0m" % "FG Blue",
+        "\x1b[36m%s\x1b[0m" % "FG Cyan",
+        "\x1b[41m%s\x1b[0m" % "BG Red",
+        "\x1b[43m%s\x1b[0m" % "BG Yellow",
+        "\x1b[45m%s\x1b[0m" % "BG Magenta",
+    ]
+    for i in range(1, 100):
+        print(random.choice(messages))
+        time.sleep(1)
+
+
+with Workflow(generate_name="colored-logs-") as w:
+    s = Script(
+        name="whalesay",
+        source=colored_logs,
+        image="python:3.7",
+        add_cwd_to_sys_path=False,
+        env=[Env(name="PYTHONUNBUFFERED", value="1")],
+    )
+    w.entrypoint = s.name
+```
+
+## YAML
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: colored-logs-
+spec:
+  entrypoint: whalesay
+  templates:
+  - name: whalesay
+    script:
+      command:
+      - python
+      env:
+      - name: PYTHONUNBUFFERED
+        value: '1'
+      image: python:3.7
+      source: "import time  # noqa: I001\nimport random\n\nmessages = [\n    \"No\
+        \ Color\",\n    \"\\x1b[30m%s\\x1b[0m\" % \"FG Black\",\n    \"\\x1b[32m%s\\\
+        x1b[0m\" % \"FG Green\",\n    \"\\x1b[34m%s\\x1b[0m\" % \"FG Blue\",\n   \
+        \ \"\\x1b[36m%s\\x1b[0m\" % \"FG Cyan\",\n    \"\\x1b[41m%s\\x1b[0m\" % \"\
+        BG Red\",\n    \"\\x1b[43m%s\\x1b[0m\" % \"BG Yellow\",\n    \"\\x1b[45m%s\\\
+        x1b[0m\" % \"BG Magenta\",\n]\nfor i in range(1, 100):\n    print(random.choice(messages))\n\
+        \    time.sleep(1)\n"
+```
