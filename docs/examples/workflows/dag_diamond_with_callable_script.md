@@ -51,6 +51,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: dag-diamond-
+  namespace: default
 spec:
   entrypoint: diamond
   templates:

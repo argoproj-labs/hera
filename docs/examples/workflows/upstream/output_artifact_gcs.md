@@ -39,6 +39,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: output-artifact-gcs-
+  namespace: default
 spec:
   entrypoint: whalesay
   templates:

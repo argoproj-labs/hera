@@ -50,6 +50,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: volumes-existing-
+  namespace: default
 spec:
   entrypoint: volumes-existing-example
   templates:

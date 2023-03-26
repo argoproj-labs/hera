@@ -39,6 +39,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: volumes-emptydir-
+  namespace: default
 spec:
   entrypoint: volumes-emptydir-example
   templates:

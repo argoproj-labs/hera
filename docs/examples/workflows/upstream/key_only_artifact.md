@@ -46,6 +46,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: key-only-artifacts-
+  namespace: default
 spec:
   entrypoint: main
   templates:

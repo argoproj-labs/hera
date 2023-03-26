@@ -35,6 +35,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: CronWorkflow
 metadata:
   name: hello-world
+  namespace: default
 spec:
   concurrencyPolicy: Replace
   failedJobsHistoryLimit: 4

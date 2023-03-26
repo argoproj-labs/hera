@@ -61,6 +61,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: resource-delete-with-flags-
+  namespace: default
 spec:
   entrypoint: main
   templates:

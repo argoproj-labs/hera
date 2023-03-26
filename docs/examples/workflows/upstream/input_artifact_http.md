@@ -33,6 +33,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: input-artifact-http-
+  namespace: default
 spec:
   entrypoint: http-artifact-example
   templates:

@@ -23,7 +23,7 @@ class _HeraContext(threading.local):
 
     def enter(self, p: Subbable) -> None:
         if not isinstance(p, Subbable):
-            raise InvalidType()
+            raise InvalidType(type(p))
         self._pieces.append(p)
 
     def exit(self) -> None:
@@ -31,7 +31,19 @@ class _HeraContext(threading.local):
 
     def add_sub_node(self, node: Union[SubNodeMixin, TTemplate]) -> None:
         if self._pieces:
-            self._pieces[-1]._add_sub(node)
+            try:
+                self._pieces[-1]._add_sub(node)
+            except InvalidType:
+                self._pieces[-1]._add_sub(node.template)  # type: ignore
+
+            if hasattr(node, "template") and node.template is not None and not isinstance(node.template, str):
+                found = False
+                for t in self._pieces[0].templates:  # type: ignore
+                    if t.name == node.template.name:
+                        found = True
+                        break
+                if not found:
+                    self._pieces[0]._add_sub(node.template)
 
 
 _context = _HeraContext()

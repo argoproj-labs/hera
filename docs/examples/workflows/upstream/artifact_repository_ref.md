@@ -35,6 +35,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: artifactory-repository-ref-
+  namespace: default
 spec:
   artifactRepositoryRef:
     key: my-key

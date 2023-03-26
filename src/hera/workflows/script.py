@@ -181,7 +181,6 @@ class Script(
         )
 
     def _build_script(self) -> _ModelScriptTemplate:
-        source = self._build_source()
         return _ModelScriptTemplate(
             args=self.args,
             command=self.command,
@@ -196,7 +195,7 @@ class Script(
             readiness_probe=self.readiness_probe,
             resources=self._build_resources(),
             security_context=self.security_context,
-            source=source,
+            source=self._build_source(),
             startup_probe=self.startup_probe,
             stdin=self.stdin,
             stdin_once=self.stdin_once,
@@ -224,4 +223,18 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
     return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
-__all__ = ["Script"]
+def script(**script_kwargs):
+    def script_wrapper(func):
+        s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
+
+        def task_wrapper(**task_params):
+            return s.__call__(**task_params)
+
+        return task_wrapper
+
+    return script_wrapper
+
+
+task = script
+
+__all__ = ["Script", "script", "task"]

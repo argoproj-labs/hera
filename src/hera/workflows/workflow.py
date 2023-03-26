@@ -297,7 +297,7 @@ class Workflow(
         or are Argo schema Template objects to the Workflow's list of templates.
         """
         if not isinstance(node, (Templatable, *get_args(Template))):
-            raise InvalidType()
+            raise InvalidType(type(node))
         self.templates.append(node)
 
 

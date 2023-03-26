@@ -1,7 +1,8 @@
-from hera.workflows import Env, Script, Workflow
+from hera.workflows import Env, Workflow, script
 
 
-def colored_logs():
+@script(image="python:3.7", add_cwd_to_sys_path=False, env=[Env(name="PYTHONUNBUFFERED", value="1")])
+def whalesay():
     import time  # noqa: I001
     import random
 
@@ -20,12 +21,7 @@ def colored_logs():
         time.sleep(1)
 
 
-with Workflow(generate_name="colored-logs-") as w:
-    s = Script(
-        name="whalesay",
-        source=colored_logs,
-        image="python:3.7",
-        add_cwd_to_sys_path=False,
-        env=[Env(name="PYTHONUNBUFFERED", value="1")],
-    )
-    w.entrypoint = s.name
+with Workflow(generate_name="colored-logs-", entrypoint="whalesay") as w:
+    whalesay(name="whalesay")
+
+print(w.to_yaml())

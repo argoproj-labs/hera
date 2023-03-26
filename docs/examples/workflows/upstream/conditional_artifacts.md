@@ -95,6 +95,7 @@ metadata:
   generateName: conditional-artifacts-
   labels:
     workflows.argoproj.io/test: 'true'
+  namespace: default
 spec:
   entrypoint: main
   templates:

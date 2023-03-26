@@ -126,6 +126,7 @@ metadata:
   generateName: exit-handler-with-artifacts-
   labels:
     workflows.argoproj.io/test: 'true'
+  namespace: default
 spec:
   entrypoint: main
   templates:

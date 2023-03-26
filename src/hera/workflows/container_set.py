@@ -64,7 +64,7 @@ class ContainerSet(
 
     def _add_sub(self, node: Any):
         if not isinstance(node, ContainerNode):
-            raise InvalidType()
+            raise InvalidType(type(node))
 
         self.containers.append(node)
 

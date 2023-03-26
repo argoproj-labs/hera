@@ -61,6 +61,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: dag-conditional-parameter-
+  namespace: default
 spec:
   entrypoint: main
   templates:

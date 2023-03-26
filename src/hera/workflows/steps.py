@@ -110,7 +110,7 @@ class Parallel(
 
     def _add_sub(self, node: Any):
         if not isinstance(node, Step):
-            raise InvalidType()
+            raise InvalidType(type(node))
         self.sub_steps.append(node)
 
     def _build_step(self) -> List[_ModelWorkflowStep]:
@@ -121,7 +121,7 @@ class Parallel(
             elif isinstance(step, _ModelWorkflowStep):
                 steps.append(step)
             else:
-                raise InvalidType()
+                raise InvalidType(type(step))
         return steps
 
 
@@ -166,16 +166,16 @@ class Steps(
                     elif isinstance(s, _ModelWorkflowStep):
                         substeps.append(s)
                     else:
-                        raise InvalidType()
+                        raise InvalidType(type(s))
                 steps.append(substeps)
             else:
-                raise InvalidType()
+                raise InvalidType(type(workflow_step))
 
         return steps or None
 
     def _add_sub(self, node: Any):
         if not isinstance(node, (Step, Parallel)):
-            raise InvalidType()
+            raise InvalidType(type(node))
 
         self.sub_steps.append(node)
 

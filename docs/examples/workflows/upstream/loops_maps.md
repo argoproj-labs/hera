@@ -44,6 +44,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: loops-maps-
+  namespace: default
 spec:
   entrypoint: loop-map-example
   templates:

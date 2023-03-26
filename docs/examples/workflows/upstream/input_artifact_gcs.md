@@ -42,6 +42,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: input-artifact-gcs-
+  namespace: default
 spec:
   entrypoint: input-artifact-gcs-example
   templates:

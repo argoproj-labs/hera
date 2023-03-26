@@ -41,6 +41,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: workspace-
+  namespace: default
 spec:
   entrypoint: main
   templates:

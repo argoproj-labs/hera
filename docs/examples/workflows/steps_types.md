@@ -115,6 +115,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: steps-
+  namespace: default
 spec:
   entrypoint: hello-hello-hello
   templates:
