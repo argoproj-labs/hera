@@ -45,6 +45,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 		--disable-appending-item-suffix \
 		--disable-timestamp
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
+	@poetry run stubgen -o src -p hera.workflows.models && rm -rf **/__init__.pyi
 	@$(MAKE) format
 
 .PHONY: events-models
@@ -59,6 +60,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 		--disable-appending-item-suffix \
 		--disable-timestamp
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
+	@poetry run stubgen -o src -p hera.events.models && rm -rf **/__init__.pyi
 	@$(MAKE) format
 
 .PHONY: models
