@@ -1,0 +1,92 @@
+---
+site_name: hera
+site_author: Flaviu Vadan, Sambhav Kothari, Elliot Gunton
+copyright: Copyright &copy; 2023 Flaviu Vadan, Sambhav Kothari, Elliot Gunton
+
+nav:
+  - Home: README.md
+  - Hera expr transpiler: expr.md
+  - Examples:
+    - Workflows:
+      - Hera:
+        - ... | flat | examples/workflows/*.md
+      - Upstream:
+        - ... | flat | examples/workflows/upstream/*.md
+  - API Reference:
+    - Shared: api/shared.md
+    - Workflows:
+      - Hera: api/workflows/hera.md
+      - Models: api/workflows/models.md
+    - Events:
+      - Models: api/events/models.md
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+  features:
+    - content.code.copy
+    - search.suggest
+    - search.share
+    - search.highlight
+
+repo_url: https://github.com/argoproj-labs/hera-workflows
+repo_name: argoproj-labs/hera-workflows
+edit_uri: blob/main/docs
+
+extra:
+  version:
+    provider: mike
+
+markdown_extensions:
+  - admonition
+  - smarty
+  - attr_list
+  - mkdocs-click
+  - pymdownx.smartsymbols
+  - footnotes
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+plugins:
+  - awesome-pages
+  - include-markdown
+  - autorefs
+  - mkdocstrings:
+      watch:
+        - src
+      handlers:
+        python:
+          options:
+            # show_category_heading: true
+            show_if_no_docstring: true
+            show_inherited_members: true
+            filters: ["!^_.*$"]
+            show_bases: false
+            separate_signature: true
+          paths: [src]
+          import:
+            - https://docs.python.org/3/objects.inv
+  - search:
+      lang: en

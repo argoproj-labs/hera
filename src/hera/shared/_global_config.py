@@ -12,10 +12,9 @@ _HookMap = Dict[Type[TBase], List[Hook]]
 class _GlobalConfig:
     """Hera global configuration holds any user configuration such as global tokens, hooks, etc.
 
-    Notes
-    -----
-    This should not be instantiated directly by the user. There is an instance of the `_GlobalConfig` in this module,
-    which is what should be used. Access as `hera.shared.global_config` or `hera.shared.GlobalConfig`.
+    Notes:
+        This should not be instantiated directly by the user. There is an instance of the `_GlobalConfig` in this module,
+        which is what should be used. Access as `hera.shared.global_config` or `hera.shared.GlobalConfig`.
     """
 
     # protected attributes are ones that are computed/go through some light processing upon setting or
