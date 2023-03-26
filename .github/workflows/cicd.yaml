@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - hera/v5
     paths:
       - "src/**"
   pull_request:
