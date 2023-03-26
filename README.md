@@ -1,16 +1,15 @@
-# Hera (hera-workflows)
+# Hera
 
 ```text
 The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
-(https://en.wikipedia.org/wiki/Argo)
 
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera-workflows)
 
 [![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](./.github/workflows/cicd.yaml)
-[![Docs](https://readthedocs.org/projects/hera-workflows/badge/?version=latest)](https://hera-workflows.readthedocs.io/en/latest/?badge=latest)
+[![Docs](https://readthedocs.org/projects/hera-workflows/badge/?version=stable)](https://hera-workflows.readthedocs.io/en/stable/?badge=stable)
 [![codecov](https://codecov.io/gh/argoproj-labs/hera-workflows/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera-workflows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,9 +28,11 @@ You can watch the introductory Hera presentation at the "Argo Workflows and Even
 
 # Table of content
 
+- [Hera](#hera)
+- [Table of content](#table-of-content)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Examples](#examples)
-- [Requirements](#requirements)
 - [Contributing](#contributing)
 - [Comparison](#comparison)
 
@@ -124,7 +125,9 @@ Hera presents an intuitive Python interface to the underlying API of Argo, with 
 
 <details><summary>Here's a side by side comparison of Hera, Couler, and Argo Python DSL</summary>
 
-You will see how Hera has focused on reducing the complexity of Argo concepts while also reducing the total lines of code required to construct the `diamond` example, which can be [found in the upstream Argo repository](https://github.com/argoproj/argo-workflows/blob/2a9bd6c83601990259fd5162edeb425741757484/examples/dag-diamond.yaml).
+
+You will see how Hera has focused on reducing the complexity of Argo concepts while also reducing the total lines of code required to construct the `diamond` example, which can be <a href="https://github.com/argoproj/argo-workflows/blob/2a9bd6c83601990259fd5162edeb425741757484/examples/dag-diamond.yaml">found in the upstream Argo repository</a>.
+
 
 <table>
 <tr><th>Hera</th><th>Couler</th><th>Argo Python DSL</th></tr>

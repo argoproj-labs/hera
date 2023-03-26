@@ -1,6 +1,6 @@
-sphinx
-sphinx-book-theme
-sphinx-autoapi
-myst-parser
-Jinja2<3.1
-# -e .  # hera itself
+mkdocs
+mkdocs-material
+mkdocs-include-markdown-plugin
+mkdocs-click
+mkdocstrings[python]
+mkdocs-awesome-pages-plugin
