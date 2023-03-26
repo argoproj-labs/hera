@@ -2,6 +2,7 @@
 
 # we want the init of `workflows.models` to have a filtered import of Workflow models
 # we can parse out the JSON using the old code and filter on Workflow objects
+import os
 import sys
 from pathlib import Path
 
@@ -127,6 +128,19 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
         ]
         for enum in enums:
             f.write(f"from hera.{models_type}.models.io.k8s.api.core.v1 import {enum}\n")
+
+
+# Ensure that an init file is present in every folder recursively inside the hera/<models_type>/models folder
+# This is to ensure that stubgen works appropriately
+def ensure_init():
+    for models_type in model_types:
+        for root, _, files in os.walk(f"src/hera/{models_type}/models"):
+            # ignore __pycache__ folders
+            if "__pycache__" in root:
+                continue
+            if "__init__.py" not in files:
+                with open(f"{root}/__init__.py", "w") as f:
+                    f.write("")
 
 
 if __name__ == "__main__":
