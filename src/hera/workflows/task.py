@@ -213,7 +213,10 @@ class Task(
                 assert isinstance(
                     o, str
                 ), f"Unknown list item type {type(o)} specified using reverse right bitshift operator"
-                self.depends += f" && {o}"
+                if self.depends is None:
+                    self.depends = o
+                else:
+                    self.depends += f" && {o}"
         return self
 
     def __rshift__(self, other: Union[Task, List[Task]]) -> Union[Task, List[Task]]:
