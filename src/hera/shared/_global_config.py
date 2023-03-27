@@ -24,7 +24,7 @@ class _GlobalConfig:
     host: Optional[str] = None
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
-    namespace: Optional[str] = "default"
+    namespace: Optional[str] = None
     _image: Union[str, Callable[[], str]] = "python:3.7"
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = ["python"]

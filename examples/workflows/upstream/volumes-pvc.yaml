@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: volumes-pvc-
-  namespace: default
 spec:
   entrypoint: volumes-pvc-example
   templates:

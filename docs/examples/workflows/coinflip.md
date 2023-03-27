@@ -42,7 +42,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: coinflip-
-  namespace: default
 spec:
   entrypoint: d
   templates:

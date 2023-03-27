@@ -45,7 +45,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: artifact-gc-
-  namespace: default
 spec:
   artifactGC:
     strategy: OnWorkflowDeletion

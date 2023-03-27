@@ -36,7 +36,6 @@ def _transform_workflow(obj):
     w = ModelWorkflow.parse_obj(obj)
     w.metadata.annotations = {}
     w.metadata.labels = {}
-    w.metadata.namespace = None
 
     if w.spec.templates is not None:
         w.spec.templates.sort(key=lambda t: t.name)
@@ -51,7 +50,6 @@ def _transform_cron_workflow(obj):
     wt.spec.workflow_spec.templates.sort(key=lambda t: t.name)
     wt.metadata.annotations = {}
     wt.metadata.labels = {}
-    wt.metadata.namespace = None
     for t in wt.spec.workflow_spec.templates:
         if t.script:
             t.script.source = ast.dump(ast.parse(t.script.source))

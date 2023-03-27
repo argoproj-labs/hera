@@ -58,7 +58,6 @@ metadata:
     workflows.argoproj.io/description: This is an example of coin flip defined as
       a sequence of conditional steps.
   generateName: coinflip-
-  namespace: default
 spec:
   entrypoint: coinflip
   templates:

@@ -41,7 +41,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: artifact-passing-
-  namespace: default
 spec:
   entrypoint: artifact-example
   templates:

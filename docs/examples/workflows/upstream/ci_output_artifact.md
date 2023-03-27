@@ -99,7 +99,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: ci-output-artifact-
-  namespace: default
 spec:
   entrypoint: ci-example
   templates:

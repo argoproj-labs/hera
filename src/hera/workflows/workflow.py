@@ -93,7 +93,7 @@ class Workflow(
     labels: Optional[Dict[str, str]] = None
     managed_fields: Optional[List[ManagedFieldsEntry]] = None
     name: Optional[str] = None
-    namespace: Optional[str] = global_config.namespace
+    namespace: Optional[str] = None
     owner_references: Optional[List[OwnerReference]] = None
     resource_version: Optional[str] = None
     self_link: Optional[str] = None
@@ -155,6 +155,12 @@ class Workflow(
     def _set_kind(cls, v):
         if v is None:
             return cls.__name__  # type: ignore
+        return v
+
+    @validator("namespace", pre=True, always=True)
+    def _set_namespace(cls, v):
+        if v is None:
+            return global_config.namespace
         return v
 
     def build(self) -> TWorkflow:

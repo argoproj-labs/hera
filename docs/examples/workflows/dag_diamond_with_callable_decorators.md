@@ -26,8 +26,6 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         C = echo(name="C", arguments={"message": "C"})
         D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
-
-print(w.to_yaml())
 ```
 
 ## YAML
@@ -37,7 +35,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: dag-diamond-
-  namespace: default
 spec:
   entrypoint: diamond
   templates:

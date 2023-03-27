@@ -43,7 +43,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: colored-logs-
-  namespace: default
 spec:
   entrypoint: whalesay
   templates:

@@ -28,7 +28,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: sequence-
-  namespace: default
 spec:
   entrypoint: main
   templates:

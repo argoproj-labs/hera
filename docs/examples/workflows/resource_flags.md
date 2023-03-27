@@ -52,7 +52,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: resource-validate-
-  namespace: default
 spec:
   entrypoint: resource-validate-example
   templates:

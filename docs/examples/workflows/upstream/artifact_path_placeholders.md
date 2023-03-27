@@ -47,7 +47,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: artifact-path-placeholders-
-  namespace: default
 spec:
   arguments:
     artifacts:

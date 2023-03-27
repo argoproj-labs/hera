@@ -12,7 +12,7 @@ from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
-from hera.workflows.exceptions import InvalidType
+from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
 from hera.workflows.models import (
     HTTP,
     Affinity,
@@ -424,7 +424,8 @@ class CallableTemplateMixin(ArgumentsMixin):
             return Task(*args, template=self, **kwargs)
         except InvalidType:
             pass
-        return None
+
+        raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
 
 
 class ParameterMixin(BaseMixin):

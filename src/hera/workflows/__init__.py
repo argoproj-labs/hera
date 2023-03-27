@@ -34,7 +34,7 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.resource import Resource
 from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryPolicy, RetryStrategy
-from hera.workflows.script import Script, script, task
+from hera.workflows.script import Script, script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.steps import Parallel, Step, Steps
 from hera.workflows.suspend import Suspend
@@ -159,5 +159,4 @@ __all__ = [
     "WorkflowsService",
     "ZipArchiveStrategy",
     "script",
-    "task",
 ]

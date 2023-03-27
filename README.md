@@ -82,10 +82,10 @@ w.create()
 ### DAG diamond
 
 ```python
-from hera.workflows import DAG, Workflow, task
+from hera.workflows import DAG, Workflow, script
 
 
-@task()
+@script()
 def echo(message: str):
     print(message)
 

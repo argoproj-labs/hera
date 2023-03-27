@@ -34,7 +34,6 @@ metadata:
       inline templates.
     workflows.argoproj.io/version: '>= 3.2.0'
   name: dag-inline
-  namespace: default
 spec:
   entrypoint: main
   templates:
