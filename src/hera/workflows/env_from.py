@@ -9,9 +9,7 @@ from hera.workflows.models import (
 
 
 class _BaseEnvFrom(_BaseModel):
-    def __init__(self, prefix: Optional[str] = None) -> None:
-        self.prefix = prefix
-        super().__init__()
+    prefix: Optional[str] = None
 
     def build(self) -> _ModelEnvFromSource:
         """Constructs and returns the Argo EnvFrom specification"""
