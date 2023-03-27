@@ -17,9 +17,11 @@ from hera.workflows._mixins import (
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
+    Parameter as _ModelParameter,
     Template as _ModelTemplate,
     WorkflowStep as _ModelWorkflowStep,
 )
+from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Steppable, Templatable
 
 
@@ -61,6 +63,46 @@ class Step(
     @property
     def result(self) -> str:
         return f"{{{{steps.{self.name}.outputs.result}}}}"
+
+    def get_parameters_as(self, name):
+        """Gets all the output parameters from this task"""
+        return Parameter(name=name, value=f"{{{{steps.{self.name}.outputs.parameters}}}}")
+
+    def get_parameter(self, name: str) -> Parameter:
+        """Returns a Parameter from the task's outputs based on the name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to extract as an output.
+
+        Returns
+        -------
+        Parameter
+            Parameter with the same name
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = self.template
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
+        if template.outputs.parameters is None:  # type: ignore
+            raise ValueError(f"Cannot get output parameters when the template has no output parameters: {template}")
+        parameters = template.outputs.parameters  # type: ignore
+
+        obj = next((output for output in parameters if output.name == name), None)
+        if obj is not None:
+            if isinstance(obj, _ModelParameter):
+                obj.value = f"{{{{steps.{self.name}.outputs.parameters.{name}}}}}"
+                return Parameter.from_model(obj)
+        raise KeyError(f"No output parameter named `{name}` found")
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         _template = None

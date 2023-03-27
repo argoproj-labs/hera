@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: param-passing-
+spec:
+  entrypoint: d
+  templates:
+  - container:
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    name: out
+    outputs:
+      parameters:
+      - name: x
+        value: '42'
+  - container:
+      args:
+      - '{{inputs.parameters.a}}'
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    inputs:
+      parameters:
+      - name: a
+    name: in
+  - dag:
+      tasks:
+      - name: a
+        template: out
+      - arguments:
+          parameters:
+          - name: a
+            value: '{{tasks.a.outputs.parameters.x}}'
+        depends: a
+        name: b
+        template: in
+    name: d
