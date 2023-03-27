@@ -1,7 +1,8 @@
-from hera.workflows import Container, Parameter, Script, Steps, Workflow
+from hera.workflows import Container, Parameter, Steps, Workflow, script
 
 
-def _gen_number_list():
+@script(image="python:alpine3.6", command=["python"], add_cwd_to_sys_path=False)
+def gen_number_list():
     import json
     import sys
 
@@ -12,13 +13,6 @@ with Workflow(
     generate_name="loops-param-result-",
     entrypoint="loop-param-result-example",
 ) as w:
-    gen_number_list = Script(
-        name="gen-number-list",
-        image="python:alpine3.6",
-        command=["python"],
-        source=_gen_number_list,
-        add_cwd_to_sys_path=False,
-    )
     sleep_n_sec = Container(
         name="sleep-n-sec",
         inputs=Parameter(name="seconds"),

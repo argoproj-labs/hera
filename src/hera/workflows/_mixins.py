@@ -379,7 +379,7 @@ class ArgumentsMixin(BaseMixin):
 
 
 class CallableTemplateMixin(ArgumentsMixin):
-    def __call__(self, *args, **kwargs) -> SubNodeMixin:
+    def __call__(self, *args, **kwargs) -> Optional[SubNodeMixin]:
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 

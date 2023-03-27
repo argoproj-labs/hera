@@ -28,13 +28,13 @@ from hera.workflows.data import Data
 from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretEnv
 from hera.workflows.env_from import ConfigMapEnvFrom, SecretEnvFrom
 from hera.workflows.exceptions import InvalidDispatchType, InvalidTemplateCall, InvalidType
-from hera.workflows.http import HTTP
+from hera.workflows.http_template import HTTP
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
 from hera.workflows.resource import Resource
 from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryPolicy, RetryStrategy
-from hera.workflows.script import Script
+from hera.workflows.script import Script, script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.steps import Parallel, Step, Steps
 from hera.workflows.suspend import Suspend
@@ -158,4 +158,5 @@ __all__ = [
     "WorkflowTemplate",
     "WorkflowsService",
     "ZipArchiveStrategy",
+    "script",
 ]

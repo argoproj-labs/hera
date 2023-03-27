@@ -25,6 +25,8 @@ from hera.workflows.models import (
     Template as _ModelTemplate,
 )
 from hera.workflows.parameter import Parameter
+from hera.workflows.steps import Step
+from hera.workflows.task import Task
 
 
 class Script(
@@ -181,7 +183,6 @@ class Script(
         )
 
     def _build_script(self) -> _ModelScriptTemplate:
-        source = self._build_source()
         return _ModelScriptTemplate(
             args=self.args,
             command=self.command,
@@ -196,7 +197,7 @@ class Script(
             readiness_probe=self.readiness_probe,
             resources=self._build_resources(),
             security_context=self.security_context,
-            source=source,
+            source=self._build_source(),
             startup_probe=self.startup_probe,
             stdin=self.stdin,
             stdin_once=self.stdin_once,
@@ -224,4 +225,47 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
     return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
-__all__ = ["Script"]
+def script(**script_kwargs):
+    """A decorator that wraps a function into a Script object.
+
+    Using this decorator users can define a function that will be executed as a script in a container. Once the
+    `Script` is returned users can use it as they generally use a `Script` e.g. as a callable inside a DAG or Steps.
+    Note that invoking the function will result in the template associated with the script to be added to the
+    workflow context, so users do not have to worry about that.
+
+    Parameters
+    ----------
+    script_kwargs : dict
+        Keyword arguments to be passed to the Script object.
+
+    Returns
+    -------
+    Callable
+        Function that wraps a given function into a `Script`.
+    """
+
+    def script_wrapper(func: Callable) -> Callable:
+        """Wraps the given callable into a `Script` object that can be invoked.
+
+        Parameters
+        ----------
+        func: Callable
+            Function to wrap.
+
+        Returns
+        -------
+        Callable
+            Another callable that represents the `Script` object `__call__` method.
+        """
+        s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
+
+        def task_wrapper(**task_params) -> Union[Task, Step]:
+            """Invokes a `Script` object's `__call__` method using the given `task_params`"""
+            return s.__call__(**task_params)  # type: ignore
+
+        return task_wrapper
+
+    return script_wrapper
+
+
+__all__ = ["Script", "script"]

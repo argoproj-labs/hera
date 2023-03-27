@@ -24,6 +24,16 @@ spec:
       - -c
       image: alpine:3.6
     name: tails
+  - name: coinflip
+    steps:
+    - - name: flip-coin
+        template: flip-coin
+    - - name: heads
+        template: heads
+        when: '{{steps.flip-coin.outputs.result}} == heads'
+      - name: tails
+        template: tails
+        when: '{{steps.flip-coin.outputs.result}} == tails'
   - name: flip-coin
     script:
       command:
@@ -37,13 +47,3 @@ spec:
         print(result)
 
         '
-  - name: coinflip
-    steps:
-    - - name: flip-coin
-        template: flip-coin
-    - - name: heads
-        template: heads
-        when: '{{steps.flip-coin.outputs.result}} == heads'
-      - name: tails
-        template: tails
-        when: '{{steps.flip-coin.outputs.result}} == tails'

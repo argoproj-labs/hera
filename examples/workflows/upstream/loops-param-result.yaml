@@ -5,19 +5,6 @@ metadata:
 spec:
   entrypoint: loop-param-result-example
   templates:
-  - name: gen-number-list
-    script:
-      command:
-      - python
-      image: python:alpine3.6
-      source: 'import json
-
-        import sys
-
-
-        json.dump([i for i in range(20, 31)], sys.stdout)
-
-        '
   - container:
       args:
       - echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}};
@@ -41,3 +28,16 @@ spec:
         name: sleep
         template: sleep-n-sec
         withParam: '{{steps.generate.outputs.result}}'
+  - name: gen-number-list
+    script:
+      command:
+      - python
+      image: python:alpine3.6
+      source: 'import json
+
+        import sys
+
+
+        json.dump([i for i in range(20, 31)], sys.stdout)
+
+        '

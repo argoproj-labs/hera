@@ -30,7 +30,7 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
 
     def _add_sub(self, node: Any):
         if not isinstance(node, Task):
-            raise InvalidType()
+            raise InvalidType(type(node))
         self.tasks.append(node)
 
     def _build_template(self) -> _ModelTemplate:

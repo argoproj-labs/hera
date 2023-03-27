@@ -57,19 +57,43 @@ Another option for workflow submission without the authentication layer is using
 
 # Examples
 
+### Single step script
+
 ```python
-from hera.workflows import DAG, Container, Parameter, Workflow
+from hera.workflows import Steps, Workflow, script
+
+
+@script()
+def echo(message: str):
+    print(message)
+
+
+with Workflow(
+    generate_name="single-script-",
+    entrypoint="steps",
+) as w:
+    with Steps(name="steps"):
+        echo(arguments={"message": "A"})
+
+w.create()
+
+```
+
+### DAG diamond
+
+```python
+from hera.workflows import DAG, Workflow, script
+
+
+@script()
+def echo(message: str):
+    print(message)
+
 
 with Workflow(
     generate_name="dag-diamond-",
     entrypoint="diamond",
 ) as w:
-    echo = Container(
-        name="echo",
-        image="alpine:3.7",
-        command=["echo", "{{inputs.parameters.message}}"],
-        inputs=[Parameter(name="message")],
-    )
     with DAG(name="diamond"):
         A = echo(name="A", arguments={"message": "A"})
         B = echo(name="B", arguments={"message": "B"})

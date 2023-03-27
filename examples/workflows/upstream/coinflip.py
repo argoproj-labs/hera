@@ -1,7 +1,8 @@
-from hera.workflows import Container, Script, Steps, Workflow
+from hera.workflows import Container, Steps, Workflow, script
 
 
-def flip_coin_func() -> None:
+@script(image="python:alpine3.6", command=["python"], add_cwd_to_sys_path=False)
+def flip_coin() -> None:
     import random
 
     result = "heads" if random.randint(0, 1) == 0 else "tails"
@@ -30,16 +31,8 @@ with Workflow(
         args=['echo "it was tails"'],
     )
 
-    flip_coin = Script(
-        name="flip-coin",
-        image="python:alpine3.6",
-        command=["python"],
-        source=flip_coin_func,
-        add_cwd_to_sys_path=False,
-    )
-
     with Steps(name="coinflip") as s:
-        fc = flip_coin()
+        fc = flip_coin(name="flip-coin")
 
         with s.parallel():
             heads(when=f"{fc.result} == heads")
