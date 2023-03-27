@@ -4,13 +4,14 @@ Hera is a Python library that allows you to construct and submit Argo Workflows.
 
 ## Hera V5 vs V4
 
-Hera v5 is a major release that introduces breaking changes from v4. The main reason for this is that v5 is a complete rewrite of the library, and is now based on the OpenAPI specification of Argo Workflows.
+Hera v5 is a major release that introduces breaking changes from v4. The main reason for this is that v5 is a complete rewrite of the library, and is now based on the OpenAPI specification of Argo Workflows. This allows us to provide a more intuitive interface to the Argo API, while also providing full feature parity with Argo Workflows. This means that you can now use all the features of Argo Workflows in your workflows. Additionally, it has been re-structured to accommodate other Argo projects, such as Argo Events and Argo CD. Currently only Argo Workflows is supported, and there is some work in progress to add support for Argo Events.
 
-This allows us to provide a more intuitive interface to the Argo API, while also providing full feature parity with Argo Workflows. This means that you can now use all the features of Argo Workflows in your workflows.
+The codebase is now much more readable, and the focus can be fully dedicated to improving the Python interface to various Argo projects rather than maintaining feature parity with the Argo codebase. 
+The library is divided into the following components:
 
-In addition, the codebase is now much more readable, and the focus can be fully dedicated to improving user workflows.
+- `hera.shared` - This package contains the shared code that will be used by all Argo projects. This includes common global configuration to interact with the Argo API, and common Pydantic base models that are used by all Argo projects.
 
-The library is divided into two main components:
+- `hera.events.models` - This package contains the auto-generated code that allows you to construct Argo Events. It provides Pydantic models for all the Argo Events OpenAPI objects, and allows you to construct events using these models. These models are based on the OpenAPI specification, and are therefore exactly the same as the models used by Argo Events.
 
 - `hera.workflows.models` - This package contains the auto-generated code that allows you to construct Argo Workflows. It provides Pydantic models for all the Argo Workflows OpenAPI objects, and allows you to construct workflows using these models. These models are based on the OpenAPI specification, and are therefore exactly the same as the models used by Argo Workflows.
 
