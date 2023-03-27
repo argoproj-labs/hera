@@ -167,11 +167,18 @@ class Workflow(
 
     @validator("image_pull_secrets", pre=True, always=True)
     def _set_image_pull_secrets(cls, v):
+        if v is None:
+            return None
+
         if isinstance(v, str):
             return [LocalObjectReference(name=v)]
         elif isinstance(v, LocalObjectReference):
             return [v]
 
+        assert isinstance(v, list), (
+            "`image_pull_secrets` expected to be either a `str`, a `LocalObjectReferences`, a list of `str`, "
+            "or a list of `LocalObjectReferences`"
+        )
         result = []
         for secret in v:
             if isinstance(secret, str):
