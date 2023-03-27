@@ -12,3 +12,4 @@ Please open a PR with your organization or project name in the following section
 3. [Reverie Labs](https://www.reverielabs.com/)
 4. [Infinite Lambda](https://infinitelambda.com/)
 5. [Bloomberg](https://techatbloomberg.com)
+6. [PayIt](https://payitgov.com)
