@@ -10,7 +10,7 @@ ci: CI=1
 ci: lint test check-codegen
 
 .PHONY: codegen
-codegen: ## Generate all the code
+codegen: ## Generate all the code (models, services, examples, and init files)
 codegen: models services examples init-files
 
 .PHONY: check-codegen
