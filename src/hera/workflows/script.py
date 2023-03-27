@@ -235,7 +235,7 @@ def script(**script_kwargs):
 
     Parameters
     ----------
-    script_kwargs : dict
+    **script_kwargs
         Keyword arguments to be passed to the Script object.
 
     Returns
