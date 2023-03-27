@@ -3,6 +3,9 @@
 See https://argoproj.github.io/argo-workflows/walk-through/parameters/
 for a tutorial on Parameters.
 """
+from __future__ import annotations
+
+import copy
 from typing import Any, Optional
 
 from pydantic import root_validator
@@ -42,6 +45,23 @@ class Parameter(_ModelParameter):
         if self.value is None:
             raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
         return self.value
+
+    @classmethod
+    def from_model(cls, p: _ModelParameter) -> Parameter:
+        return Parameter(
+            default=p.default,
+            description=p.description,
+            enum=p.enum,
+            name=p.name,
+            value=p.value,
+            value_from=p.value_from,
+        )
+
+    def with_name(self, name: str) -> Parameter:
+        """Returns a copy of the parameter with the name set to the value"""
+        p = copy.deepcopy(self)
+        p.name = name
+        return p
 
     def as_input(self) -> _ModelParameter:
         """Assembles the parameter for use as an input of a template"""

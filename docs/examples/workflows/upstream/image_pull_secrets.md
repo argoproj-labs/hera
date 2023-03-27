@@ -4,32 +4,34 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import Container, Workflow
+=== "Hera"
 
-with Workflow(generate_name="hello-world-", image_pull_secrets="docker-registry-secret", entrypoint="whalesay") as w:
-    Container(name="whalesay", image="docker/whalesay:latest", command=["cowsay"], args=["hello world"])
-```
+    ```python linenums="1"
+    from hera.workflows import Container, Workflow
 
-## YAML
+    with Workflow(generate_name="hello-world-", image_pull_secrets="docker-registry-secret", entrypoint="whalesay") as w:
+        Container(name="whalesay", image="docker/whalesay:latest", command=["cowsay"], args=["hello world"])
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: hello-world-
-spec:
-  entrypoint: whalesay
-  imagePullSecrets:
-  - name: docker-registry-secret
-  templates:
-  - container:
-      args:
-      - hello world
-      command:
-      - cowsay
-      image: docker/whalesay:latest
-    name: whalesay
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: hello-world-
+    spec:
+      entrypoint: whalesay
+      imagePullSecrets:
+      - name: docker-registry-secret
+      templates:
+      - container:
+          args:
+          - hello world
+          command:
+          - cowsay
+          image: docker/whalesay:latest
+        name: whalesay
+    ```
+
