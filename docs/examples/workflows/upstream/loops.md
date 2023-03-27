@@ -4,57 +4,59 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import Container, Parameter, Steps, Workflow
+=== "Hera"
 
-with Workflow(generate_name="loops-", entrypoint="loop-example") as w:
-    whalesay = Container(
-        name="whalesay",
-        inputs=Parameter(name="message"),
-        image="docker/whalesay:latest",
-        command=["cowsay"],
-        args=["{{inputs.parameters.message}}"],
-    )
+    ```python linenums="1"
+    from hera.workflows import Container, Parameter, Steps, Workflow
 
-    with Steps(name="loop-example"):
-        whalesay(
-            name="print-message",
-            arguments={"message": "{{item}}"},
-            with_items=["hello world", "goodbye world"],
+    with Workflow(generate_name="loops-", entrypoint="loop-example") as w:
+        whalesay = Container(
+            name="whalesay",
+            inputs=Parameter(name="message"),
+            image="docker/whalesay:latest",
+            command=["cowsay"],
+            args=["{{inputs.parameters.message}}"],
         )
-```
 
-## YAML
+        with Steps(name="loop-example"):
+            whalesay(
+                name="print-message",
+                arguments={"message": "{{item}}"},
+                with_items=["hello world", "goodbye world"],
+            )
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: loops-
-spec:
-  entrypoint: loop-example
-  templates:
-  - container:
-      args:
-      - '{{inputs.parameters.message}}'
-      command:
-      - cowsay
-      image: docker/whalesay:latest
-    inputs:
-      parameters:
-      - name: message
-    name: whalesay
-  - name: loop-example
-    steps:
-    - - arguments:
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: loops-
+    spec:
+      entrypoint: loop-example
+      templates:
+      - container:
+          args:
+          - '{{inputs.parameters.message}}'
+          command:
+          - cowsay
+          image: docker/whalesay:latest
+        inputs:
           parameters:
           - name: message
-            value: '{{item}}'
-        name: print-message
-        template: whalesay
-        withItems:
-        - hello world
-        - goodbye world
-```
+        name: whalesay
+      - name: loop-example
+        steps:
+        - - arguments:
+              parameters:
+              - name: message
+                value: '{{item}}'
+            name: print-message
+            template: whalesay
+            withItems:
+            - hello world
+            - goodbye world
+    ```
+

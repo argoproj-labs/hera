@@ -1,6 +1,7 @@
 import re
 import shutil
 from pathlib import Path
+import textwrap
 
 
 # This code reads the contents at the path which is a python file,
@@ -32,17 +33,19 @@ def generate_markdown(path: Path, sub_folder: str):
 
 {docstring.strip()}
 
-## Hera
 
-```python
-{py_contents.strip()}
-```
+=== "Hera"
 
-## YAML
+    ```python linenums="1"
+{textwrap.indent(py_contents.strip(), "    ")}
+    ```
 
-```yaml
-{yaml_contents.strip()}
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+{textwrap.indent(yaml_contents.strip(), "    ")}
+    ```
+
 """
     (Path("examples") / sub_folder / path.stem).with_suffix(".md").write_text(contents)
 

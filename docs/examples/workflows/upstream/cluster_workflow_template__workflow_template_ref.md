@@ -4,29 +4,31 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import Workflow
-from hera.workflows.models import WorkflowTemplateRef
+=== "Hera"
 
-wt_ref = WorkflowTemplateRef(name="cluster-workflow-template-submittable", cluster_scope=True)
+    ```python linenums="1"
+    from hera.workflows import Workflow
+    from hera.workflows.models import WorkflowTemplateRef
 
-w = Workflow(
-    generate_name="cluster-workflow-template-hello-world-",
-    workflow_template_ref=wt_ref,
-)
-```
+    wt_ref = WorkflowTemplateRef(name="cluster-workflow-template-submittable", cluster_scope=True)
 
-## YAML
+    w = Workflow(
+        generate_name="cluster-workflow-template-hello-world-",
+        workflow_template_ref=wt_ref,
+    )
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: cluster-workflow-template-hello-world-
-spec:
-  workflowTemplateRef:
-    clusterScope: true
-    name: cluster-workflow-template-submittable
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: cluster-workflow-template-hello-world-
+    spec:
+      workflowTemplateRef:
+        clusterScope: true
+        name: cluster-workflow-template-submittable
+    ```
+

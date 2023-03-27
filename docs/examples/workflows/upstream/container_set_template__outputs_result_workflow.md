@@ -4,95 +4,97 @@
 
 
 
-## Hera
 
-```python
-from hera.expr import g
-from hera.workflows import (
-    DAG,
-    ContainerNode,
-    ContainerSet,
-    Parameter,
-    Script,
-    Task,
-    Workflow,
-    models as m,
-)
+=== "Hera"
 
-
-def _check():
-    assert "{{inputs.parameters.x}}" == "hi"
-
-
-with Workflow(
-    generate_name="outputs-result-",
-    entrypoint="main",
-) as w:
-    with ContainerSet(name="group") as group:
-        ContainerNode(name="main", image="python:alpine3.6", command=["python", "-c"], args=['print("hi")\n'])
-
-    verify = Script(
-        source=_check,
-        image="python:alpine3.6",
-        command=["python"],
-        inputs=[Parameter(name="x")],
-        add_cwd_to_sys_path=False,
-        name="verify",
+    ```python linenums="1"
+    from hera.expr import g
+    from hera.workflows import (
+        DAG,
+        ContainerNode,
+        ContainerSet,
+        Parameter,
+        Script,
+        Task,
+        Workflow,
+        models as m,
     )
-    with DAG(name="main") as dag:
-        a = Task(name="a", template=group)
-        b = Task(
-            name="b",
-            arguments=m.Arguments(parameters=[Parameter(name="x", value=f"{g.tasks.a.outputs.result:$}")]),
-            template=verify,
-            dependencies=["a"],
+
+
+    def _check():
+        assert "{{inputs.parameters.x}}" == "hi"
+
+
+    with Workflow(
+        generate_name="outputs-result-",
+        entrypoint="main",
+    ) as w:
+        with ContainerSet(name="group") as group:
+            ContainerNode(name="main", image="python:alpine3.6", command=["python", "-c"], args=['print("hi")\n'])
+
+        verify = Script(
+            source=_check,
+            image="python:alpine3.6",
+            command=["python"],
+            inputs=[Parameter(name="x")],
+            add_cwd_to_sys_path=False,
+            name="verify",
         )
-```
+        with DAG(name="main") as dag:
+            a = Task(name="a", template=group)
+            b = Task(
+                name="b",
+                arguments=m.Arguments(parameters=[Parameter(name="x", value=f"{g.tasks.a.outputs.result:$}")]),
+                template=verify,
+                dependencies=["a"],
+            )
+    ```
 
-## YAML
+=== "YAML"
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: outputs-result-
-spec:
-  entrypoint: main
-  templates:
-  - containerSet:
-      containers:
-      - args:
-        - 'print("hi")
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: outputs-result-
+    spec:
+      entrypoint: main
+      templates:
+      - containerSet:
+          containers:
+          - args:
+            - 'print("hi")
 
-          '
-        command:
-        - python
-        - -c
-        image: python:alpine3.6
-        name: main
-    name: group
-  - inputs:
-      parameters:
-      - name: x
-    name: verify
-    script:
-      command:
-      - python
-      image: python:alpine3.6
-      source: 'assert "{{inputs.parameters.x}}" == "hi"
-
-        '
-  - dag:
-      tasks:
-      - name: a
-        template: group
-      - arguments:
+              '
+            command:
+            - python
+            - -c
+            image: python:alpine3.6
+            name: main
+        name: group
+      - inputs:
           parameters:
           - name: x
-            value: '{{tasks.a.outputs.result}}'
-        dependencies:
-        - a
-        name: b
-        template: verify
-    name: main
-```
+        name: verify
+        script:
+          command:
+          - python
+          image: python:alpine3.6
+          source: 'assert "{{inputs.parameters.x}}" == "hi"
+
+            '
+      - dag:
+          tasks:
+          - name: a
+            template: group
+          - arguments:
+              parameters:
+              - name: x
+                value: '{{tasks.a.outputs.result}}'
+            dependencies:
+            - a
+            name: b
+            template: verify
+        name: main
+    ```
+

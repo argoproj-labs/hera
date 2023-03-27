@@ -4,74 +4,76 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import (
-    Container,
-    S3Artifact,
-    Workflow,
-    models as m,
-)
+=== "Hera"
 
-with Workflow(
-    generate_name="artifact-gc-", entrypoint="main", artifact_gc=m.ArtifactGC(strategy="OnWorkflowDeletion")
-) as w:
-    main = Container(
-        name="main",
-        image="argoproj/argosay:v2",
-        command=["sh", "-c"],
-        args=['echo "hello world" > /tmp/on-completion.txt\necho "hello world" > /tmp/on-deletion.txt\n'],
-        outputs=[
-            S3Artifact(
-                name="on-completion",
-                path="/tmp/on-completion.txt",
-                key="on-completion.txt",
-                artifact_gc=m.ArtifactGC(strategy="OnWorkflowCompletion"),
-            ),
-            S3Artifact(
-                name="on-deletion",
-                path="/tmp/on-deletion.txt",
-                key="on-deletion.txt",
-            ),
-        ],
+    ```python linenums="1"
+    from hera.workflows import (
+        Container,
+        S3Artifact,
+        Workflow,
+        models as m,
     )
-```
 
-## YAML
+    with Workflow(
+        generate_name="artifact-gc-", entrypoint="main", artifact_gc=m.ArtifactGC(strategy="OnWorkflowDeletion")
+    ) as w:
+        main = Container(
+            name="main",
+            image="argoproj/argosay:v2",
+            command=["sh", "-c"],
+            args=['echo "hello world" > /tmp/on-completion.txt\necho "hello world" > /tmp/on-deletion.txt\n'],
+            outputs=[
+                S3Artifact(
+                    name="on-completion",
+                    path="/tmp/on-completion.txt",
+                    key="on-completion.txt",
+                    artifact_gc=m.ArtifactGC(strategy="OnWorkflowCompletion"),
+                ),
+                S3Artifact(
+                    name="on-deletion",
+                    path="/tmp/on-deletion.txt",
+                    key="on-deletion.txt",
+                ),
+            ],
+        )
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: artifact-gc-
-spec:
-  artifactGC:
-    strategy: OnWorkflowDeletion
-  entrypoint: main
-  templates:
-  - container:
-      args:
-      - 'echo "hello world" > /tmp/on-completion.txt
+=== "YAML"
 
-        echo "hello world" > /tmp/on-deletion.txt
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: artifact-gc-
+    spec:
+      artifactGC:
+        strategy: OnWorkflowDeletion
+      entrypoint: main
+      templates:
+      - container:
+          args:
+          - 'echo "hello world" > /tmp/on-completion.txt
 
-        '
-      command:
-      - sh
-      - -c
-      image: argoproj/argosay:v2
-    name: main
-    outputs:
-      artifacts:
-      - artifactGC:
-          strategy: OnWorkflowCompletion
-        name: on-completion
-        path: /tmp/on-completion.txt
-        s3:
-          key: on-completion.txt
-      - name: on-deletion
-        path: /tmp/on-deletion.txt
-        s3:
-          key: on-deletion.txt
-```
+            echo "hello world" > /tmp/on-deletion.txt
+
+            '
+          command:
+          - sh
+          - -c
+          image: argoproj/argosay:v2
+        name: main
+        outputs:
+          artifacts:
+          - artifactGC:
+              strategy: OnWorkflowCompletion
+            name: on-completion
+            path: /tmp/on-completion.txt
+            s3:
+              key: on-completion.txt
+          - name: on-deletion
+            path: /tmp/on-deletion.txt
+            s3:
+              key: on-deletion.txt
+    ```
+

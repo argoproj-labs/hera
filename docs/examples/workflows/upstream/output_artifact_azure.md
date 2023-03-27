@@ -4,62 +4,64 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import (
-    AzureArtifact,
-    Container,
-    Workflow,
-    models as m,
-)
+=== "Hera"
 
-with Workflow(generate_name="output-artifact-s3-", entrypoint="whalesay") as w:
-    Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["sh", "-c"],
-        args=["cowsay hello world | tee /tmp/hello_world.txt"],
-        outputs=[
-            AzureArtifact(
-                name="message",
-                path="/tmp",
-                endpoint="https://myazurestorageaccountname.blob.core.windows.net",
-                container="my-container",
-                blob="path/in/container/hello_world.txt.tgz",
-                account_key_secret=m.SecretKeySelector(name="my-azure-credentials", key="accountKey"),
-            )
-        ],
+    ```python linenums="1"
+    from hera.workflows import (
+        AzureArtifact,
+        Container,
+        Workflow,
+        models as m,
     )
-```
 
-## YAML
+    with Workflow(generate_name="output-artifact-s3-", entrypoint="whalesay") as w:
+        Container(
+            name="whalesay",
+            image="docker/whalesay:latest",
+            command=["sh", "-c"],
+            args=["cowsay hello world | tee /tmp/hello_world.txt"],
+            outputs=[
+                AzureArtifact(
+                    name="message",
+                    path="/tmp",
+                    endpoint="https://myazurestorageaccountname.blob.core.windows.net",
+                    container="my-container",
+                    blob="path/in/container/hello_world.txt.tgz",
+                    account_key_secret=m.SecretKeySelector(name="my-azure-credentials", key="accountKey"),
+                )
+            ],
+        )
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: output-artifact-s3-
-spec:
-  entrypoint: whalesay
-  templates:
-  - container:
-      args:
-      - cowsay hello world | tee /tmp/hello_world.txt
-      command:
-      - sh
-      - -c
-      image: docker/whalesay:latest
-    name: whalesay
-    outputs:
-      artifacts:
-      - azure:
-          accountKeySecret:
-            key: accountKey
-            name: my-azure-credentials
-          blob: path/in/container/hello_world.txt.tgz
-          container: my-container
-          endpoint: https://myazurestorageaccountname.blob.core.windows.net
-        name: message
-        path: /tmp
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: output-artifact-s3-
+    spec:
+      entrypoint: whalesay
+      templates:
+      - container:
+          args:
+          - cowsay hello world | tee /tmp/hello_world.txt
+          command:
+          - sh
+          - -c
+          image: docker/whalesay:latest
+        name: whalesay
+        outputs:
+          artifacts:
+          - azure:
+              accountKeySecret:
+                key: accountKey
+                name: my-azure-credentials
+              blob: path/in/container/hello_world.txt.tgz
+              container: my-container
+              endpoint: https://myazurestorageaccountname.blob.core.windows.net
+            name: message
+            path: /tmp
+    ```
+

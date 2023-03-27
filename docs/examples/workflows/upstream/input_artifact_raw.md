@@ -4,55 +4,57 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import Container, RawArtifact, Workflow
+=== "Hera"
 
-with Workflow(generate_name="input-artifact-raw-", entrypoint="raw-contents") as w:
-    Container(
-        name="raw-contents",
-        image="alpine:latest",
-        command=["sh", "-c"],
-        args=["cat /tmp/file"],
-        inputs=[
-            RawArtifact(
-                name="myfile",
-                path="/tmp/file",
-                data="this is\nthe raw file\ncontents\n",
-            )
-        ],
-    )
-```
+    ```python linenums="1"
+    from hera.workflows import Container, RawArtifact, Workflow
 
-## YAML
+    with Workflow(generate_name="input-artifact-raw-", entrypoint="raw-contents") as w:
+        Container(
+            name="raw-contents",
+            image="alpine:latest",
+            command=["sh", "-c"],
+            args=["cat /tmp/file"],
+            inputs=[
+                RawArtifact(
+                    name="myfile",
+                    path="/tmp/file",
+                    data="this is\nthe raw file\ncontents\n",
+                )
+            ],
+        )
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: input-artifact-raw-
-spec:
-  entrypoint: raw-contents
-  templates:
-  - container:
-      args:
-      - cat /tmp/file
-      command:
-      - sh
-      - -c
-      image: alpine:latest
-    inputs:
-      artifacts:
-      - name: myfile
-        path: /tmp/file
-        raw:
-          data: 'this is
+=== "YAML"
 
-            the raw file
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: input-artifact-raw-
+    spec:
+      entrypoint: raw-contents
+      templates:
+      - container:
+          args:
+          - cat /tmp/file
+          command:
+          - sh
+          - -c
+          image: alpine:latest
+        inputs:
+          artifacts:
+          - name: myfile
+            path: /tmp/file
+            raw:
+              data: 'this is
 
-            contents
+                the raw file
 
-            '
-    name: raw-contents
-```
+                contents
+
+                '
+        name: raw-contents
+    ```
+

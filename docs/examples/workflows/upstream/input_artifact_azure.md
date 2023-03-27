@@ -4,67 +4,69 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import (
-    AzureArtifact,
-    Container,
-    Workflow,
-    models as m,
-)
+=== "Hera"
 
-# the example is accidentally named input-artifact-s3-... upstream, keeping here for testing/consistency. Note that
-# the Azure artifact is set correctly
-with Workflow(generate_name="input-artifact-s3-", entrypoint="input-artifact-s3-example") as w:
-    Container(
-        name="input-artifact-s3-example",
-        image="debian:latest",
-        command=["sh", "-c"],
-        args=["ls -l /my-artifact"],
-        inputs=[
-            AzureArtifact(
-                name="my-art",
-                path="/my-artifact",
-                endpoint="https://myazurestorageaccountname.blob.core.windows.net",
-                container="my-container",
-                blob="path/in/container",
-                account_key_secret=m.SecretKeySelector(
-                    name="my-azure-credentials",
-                    key="accountKey",
-                ),
-            )
-        ],
+    ```python linenums="1"
+    from hera.workflows import (
+        AzureArtifact,
+        Container,
+        Workflow,
+        models as m,
     )
-```
 
-## YAML
+    # the example is accidentally named input-artifact-s3-... upstream, keeping here for testing/consistency. Note that
+    # the Azure artifact is set correctly
+    with Workflow(generate_name="input-artifact-s3-", entrypoint="input-artifact-s3-example") as w:
+        Container(
+            name="input-artifact-s3-example",
+            image="debian:latest",
+            command=["sh", "-c"],
+            args=["ls -l /my-artifact"],
+            inputs=[
+                AzureArtifact(
+                    name="my-art",
+                    path="/my-artifact",
+                    endpoint="https://myazurestorageaccountname.blob.core.windows.net",
+                    container="my-container",
+                    blob="path/in/container",
+                    account_key_secret=m.SecretKeySelector(
+                        name="my-azure-credentials",
+                        key="accountKey",
+                    ),
+                )
+            ],
+        )
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: input-artifact-s3-
-spec:
-  entrypoint: input-artifact-s3-example
-  templates:
-  - container:
-      args:
-      - ls -l /my-artifact
-      command:
-      - sh
-      - -c
-      image: debian:latest
-    inputs:
-      artifacts:
-      - azure:
-          accountKeySecret:
-            key: accountKey
-            name: my-azure-credentials
-          blob: path/in/container
-          container: my-container
-          endpoint: https://myazurestorageaccountname.blob.core.windows.net
-        name: my-art
-        path: /my-artifact
-    name: input-artifact-s3-example
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: input-artifact-s3-
+    spec:
+      entrypoint: input-artifact-s3-example
+      templates:
+      - container:
+          args:
+          - ls -l /my-artifact
+          command:
+          - sh
+          - -c
+          image: debian:latest
+        inputs:
+          artifacts:
+          - azure:
+              accountKeySecret:
+                key: accountKey
+                name: my-azure-credentials
+              blob: path/in/container
+              container: my-container
+              endpoint: https://myazurestorageaccountname.blob.core.windows.net
+            name: my-art
+            path: /my-artifact
+        name: input-artifact-s3-example
+    ```
+

@@ -5,6 +5,7 @@ copyright: Copyright &copy; 2023 Flaviu Vadan, Sambhav Kothari, Elliot Gunton
 
 nav:
   - Home: README.md
+  - Introduction: introduction.md
   - Hera expr transpiler: expr.md
   - Examples:
     - Workflows:
@@ -40,10 +41,11 @@ theme:
         name: Switch to dark mode
   features:
     - content.code.copy
+    - content.code.select
     - search.suggest
     - search.share
     - search.highlight
-
+    - content.tabs.link
 repo_url: https://github.com/argoproj-labs/hera-workflows
 repo_name: argoproj-labs/hera-workflows
 edit_uri: blob/main/docs
@@ -69,6 +71,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  #   slugify: !!python/object/apply:pymdownx.slugs.slugify
+  #     kwds:
+  #       case: lower
 plugins:
   - awesome-pages
   - include-markdown

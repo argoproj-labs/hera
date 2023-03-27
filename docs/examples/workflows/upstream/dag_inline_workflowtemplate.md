@@ -4,44 +4,46 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import DAG, Container, Task, WorkflowTemplate
+=== "Hera"
 
-container = Container(image="argoproj/argosay:v2")
+    ```python linenums="1"
+    from hera.workflows import DAG, Container, Task, WorkflowTemplate
 
-with WorkflowTemplate(
-    name="dag-inline",
-    entrypoint="main",
-    annotations={
-        "workflows.argoproj.io/description": ("This example demonstrates running a DAG with inline templates."),
-        "workflows.argoproj.io/version": ">= 3.2.0",
-    },
-) as w:
-    with DAG(name="main"):
-        Task(name="a", inline=container)
-```
+    container = Container(image="argoproj/argosay:v2")
 
-## YAML
+    with WorkflowTemplate(
+        name="dag-inline",
+        entrypoint="main",
+        annotations={
+            "workflows.argoproj.io/description": ("This example demonstrates running a DAG with inline templates."),
+            "workflows.argoproj.io/version": ">= 3.2.0",
+        },
+    ) as w:
+        with DAG(name="main"):
+            Task(name="a", inline=container)
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
-metadata:
-  annotations:
-    workflows.argoproj.io/description: This example demonstrates running a DAG with
-      inline templates.
-    workflows.argoproj.io/version: '>= 3.2.0'
-  name: dag-inline
-spec:
-  entrypoint: main
-  templates:
-  - dag:
-      tasks:
-      - inline:
-          container:
-            image: argoproj/argosay:v2
-        name: a
-    name: main
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: WorkflowTemplate
+    metadata:
+      annotations:
+        workflows.argoproj.io/description: This example demonstrates running a DAG with
+          inline templates.
+        workflows.argoproj.io/version: '>= 3.2.0'
+      name: dag-inline
+    spec:
+      entrypoint: main
+      templates:
+      - dag:
+          tasks:
+          - inline:
+              container:
+                image: argoproj/argosay:v2
+            name: a
+        name: main
+    ```
+

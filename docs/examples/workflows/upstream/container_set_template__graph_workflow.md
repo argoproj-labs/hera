@@ -4,50 +4,52 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows.container_set import ContainerNode, ContainerSet
-from hera.workflows.workflow import Workflow
+=== "Hera"
 
-with Workflow(
-    generate_name="graph-",
-    entrypoint="main",
-) as w:
-    with ContainerSet(name="main"):
-        a = ContainerNode(name="a", image="argoproj/argosay:v2")
-        b = ContainerNode(name="b", image="argoproj/argosay:v2")
-        c = ContainerNode(name="c", image="argoproj/argosay:v2")
-        d = ContainerNode(name="d", image="argoproj/argosay:v2")
-        a >> [b, c] >> d
-```
+    ```python linenums="1"
+    from hera.workflows.container_set import ContainerNode, ContainerSet
+    from hera.workflows.workflow import Workflow
 
-## YAML
+    with Workflow(
+        generate_name="graph-",
+        entrypoint="main",
+    ) as w:
+        with ContainerSet(name="main"):
+            a = ContainerNode(name="a", image="argoproj/argosay:v2")
+            b = ContainerNode(name="b", image="argoproj/argosay:v2")
+            c = ContainerNode(name="c", image="argoproj/argosay:v2")
+            d = ContainerNode(name="d", image="argoproj/argosay:v2")
+            a >> [b, c] >> d
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: graph-
-spec:
-  entrypoint: main
-  templates:
-  - containerSet:
-      containers:
-      - image: argoproj/argosay:v2
-        name: a
-      - dependencies:
-        - a
-        image: argoproj/argosay:v2
-        name: b
-      - dependencies:
-        - a
-        image: argoproj/argosay:v2
-        name: c
-      - dependencies:
-        - b
-        - c
-        image: argoproj/argosay:v2
-        name: d
-    name: main
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: graph-
+    spec:
+      entrypoint: main
+      templates:
+      - containerSet:
+          containers:
+          - image: argoproj/argosay:v2
+            name: a
+          - dependencies:
+            - a
+            image: argoproj/argosay:v2
+            name: b
+          - dependencies:
+            - a
+            image: argoproj/argosay:v2
+            name: c
+          - dependencies:
+            - b
+            - c
+            image: argoproj/argosay:v2
+            name: d
+        name: main
+    ```
+

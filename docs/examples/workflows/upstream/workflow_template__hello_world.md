@@ -4,46 +4,48 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import Step, Steps, Workflow
-from hera.workflows.models import TemplateRef
+=== "Hera"
 
-with Workflow(
-    generate_name="workflow-template-hello-world-",
-    entrypoint="whalesay",
-) as w:
-    whalesay_template_ref = TemplateRef(
-        name="workflow-template-whalesay-template",
-        template="whalesay-template",
-    )
-    with Steps(name="whalesay"):
-        Step(
-            name="call-whalesay-template",
-            template_ref=whalesay_template_ref,
-            arguments={"message": "hello world"},
+    ```python linenums="1"
+    from hera.workflows import Step, Steps, Workflow
+    from hera.workflows.models import TemplateRef
+
+    with Workflow(
+        generate_name="workflow-template-hello-world-",
+        entrypoint="whalesay",
+    ) as w:
+        whalesay_template_ref = TemplateRef(
+            name="workflow-template-whalesay-template",
+            template="whalesay-template",
         )
-```
+        with Steps(name="whalesay"):
+            Step(
+                name="call-whalesay-template",
+                template_ref=whalesay_template_ref,
+                arguments={"message": "hello world"},
+            )
+    ```
 
-## YAML
+=== "YAML"
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: workflow-template-hello-world-
-spec:
-  entrypoint: whalesay
-  templates:
-  - name: whalesay
-    steps:
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello world
-        name: call-whalesay-template
-        templateRef:
-          name: workflow-template-whalesay-template
-          template: whalesay-template
-```
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: workflow-template-hello-world-
+    spec:
+      entrypoint: whalesay
+      templates:
+      - name: whalesay
+        steps:
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello world
+            name: call-whalesay-template
+            templateRef:
+              name: workflow-template-whalesay-template
+              template: whalesay-template
+    ```
+
