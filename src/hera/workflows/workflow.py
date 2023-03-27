@@ -59,6 +59,8 @@ try:
 except ImportError:
     _yaml = None
 
+ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
+
 
 class Workflow(
     ArgumentsMixin,
@@ -113,7 +115,7 @@ class Workflow(
     hooks: Optional[Dict[str, LifecycleHook]] = None
     host_aliases: Optional[List[HostAlias]] = None
     host_network: Optional[bool] = None
-    image_pull_secrets: Optional[List[LocalObjectReference]] = None
+    image_pull_secrets: ImagePullSecrets = None
     metrics: Optional[Metrics] = None
     node_selector: Optional[Dict[str, str]] = None
     on_exit: Optional[str] = None
@@ -162,6 +164,21 @@ class Workflow(
         if v is None:
             return global_config.namespace
         return v
+
+    @validator("image_pull_secrets", pre=True, always=True)
+    def _set_image_pull_secrets(cls, v):
+        if isinstance(v, str):
+            return [LocalObjectReference(name=v)]
+        elif isinstance(v, LocalObjectReference):
+            return [v]
+
+        result = []
+        for secret in v:
+            if isinstance(secret, str):
+                result.append(LocalObjectReference(name=secret))
+            elif isinstance(secret, LocalObjectReference):
+                result.append(secret)
+        return result
 
     def build(self) -> TWorkflow:
         """Builds the Workflow and its components into an Argo schema Workflow object."""
