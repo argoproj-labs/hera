@@ -4,192 +4,194 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import (
-    Container,
-    Parameter,
-    Step,
-    Steps,
-    Workflow,
-    models as m,
-)
+=== "Hera"
 
-my_step = Step(
-    name="manually-adding-my-step",
-    template="whalesay",
-    arguments=[Parameter(name="message", value="hello1")],
-)
-
-
-my_steps = [
-    Step(
-        name="list-of-step-1",
-        template="whalesay",
-        arguments=[Parameter(name="message", value="hello1")],
-    ),
-    Step(
-        name="list-of-step-2",
-        template="whalesay",
-        arguments=[Parameter(name="message", value="hello1")],
-    ),
-]
-
-with Workflow(
-    generate_name="steps-",
-    entrypoint="hello-hello-hello",
-) as w:
-    whalesay = Container(
-        name="whalesay",
-        inputs=[Parameter(name="message")],
-        image="docker/whalesay",
-        command=["cowsay"],
-        args=["{{inputs.parameters.message}}"],
+    ```python linenums="1"
+    from hera.workflows import (
+        Container,
+        Parameter,
+        Step,
+        Steps,
+        Workflow,
+        models as m,
     )
 
-    with Steps(name="hello-hello-hello") as s:
-        # Manually add a step defined elsewhere
-        s.sub_steps.append(my_step)
+    my_step = Step(
+        name="manually-adding-my-step",
+        template="whalesay",
+        arguments=[Parameter(name="message", value="hello1")],
+    )
 
-        # Manually add a list of steps defined elsewhere as sequential steps
-        s.sub_steps.extend(my_steps)
 
-        # Manually add a list of steps defined elsewhere as parallel steps
-        s.sub_steps.append(my_steps)
-
-        # Add a step to s implicitly through init
+    my_steps = [
         Step(
-            name="implicitly-adding-step-on-init",
+            name="list-of-step-1",
             template="whalesay",
             arguments=[Parameter(name="message", value="hello1")],
+        ),
+        Step(
+            name="list-of-step-2",
+            template="whalesay",
+            arguments=[Parameter(name="message", value="hello1")],
+        ),
+    ]
+
+    with Workflow(
+        generate_name="steps-",
+        entrypoint="hello-hello-hello",
+    ) as w:
+        whalesay = Container(
+            name="whalesay",
+            inputs=[Parameter(name="message")],
+            image="docker/whalesay",
+            command=["cowsay"],
+            args=["{{inputs.parameters.message}}"],
         )
 
-        # Manually add a model WorkflowStep to s
-        s.sub_steps.append(
-            m.WorkflowStep(
-                name="model-workflow-step",
-                template="whalesay",
-                arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model1")]),
-            )
-        )
+        with Steps(name="hello-hello-hello") as s:
+            # Manually add a step defined elsewhere
+            s.sub_steps.append(my_step)
 
-        with s.parallel() as ps:
-            # Add a step to ps implicitly through init
+            # Manually add a list of steps defined elsewhere as sequential steps
+            s.sub_steps.extend(my_steps)
+
+            # Manually add a list of steps defined elsewhere as parallel steps
+            s.sub_steps.append(my_steps)
+
+            # Add a step to s implicitly through init
             Step(
-                name="parallel-step-1",
+                name="implicitly-adding-step-on-init",
                 template="whalesay",
-                arguments=[Parameter(name="message", value="hello2a")],
+                arguments=[Parameter(name="message", value="hello1")],
             )
 
-            # Manually add a model WorkflowStep to ps
-            ps.sub_steps.append(
+            # Manually add a model WorkflowStep to s
+            s.sub_steps.append(
                 m.WorkflowStep(
-                    name="parallel-step-2-model-workflow-step",
+                    name="model-workflow-step",
                     template="whalesay",
-                    arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model2b")]),
+                    arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model1")]),
                 )
             )
 
-    # Fully falling back to add a model Template containing a model WorkflowStep
-    w.templates.append(
-        m.Template(
-            name="my-model-template",
-            steps=[
-                [
+            with s.parallel() as ps:
+                # Add a step to ps implicitly through init
+                Step(
+                    name="parallel-step-1",
+                    template="whalesay",
+                    arguments=[Parameter(name="message", value="hello2a")],
+                )
+
+                # Manually add a model WorkflowStep to ps
+                ps.sub_steps.append(
                     m.WorkflowStep(
-                        name="model-template-workflow-step",
+                        name="parallel-step-2-model-workflow-step",
                         template="whalesay",
-                        arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model-template")]),
+                        arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model2b")]),
                     )
-                ]
-            ],
+                )
+
+        # Fully falling back to add a model Template containing a model WorkflowStep
+        w.templates.append(
+            m.Template(
+                name="my-model-template",
+                steps=[
+                    [
+                        m.WorkflowStep(
+                            name="model-template-workflow-step",
+                            template="whalesay",
+                            arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model-template")]),
+                        )
+                    ]
+                ],
+            )
         )
-    )
-```
+    ```
 
-## YAML
+=== "YAML"
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: steps-
-spec:
-  entrypoint: hello-hello-hello
-  templates:
-  - container:
-      args:
-      - '{{inputs.parameters.message}}'
-      command:
-      - cowsay
-      image: docker/whalesay
-    inputs:
-      parameters:
-      - name: message
-    name: whalesay
-  - name: hello-hello-hello
-    steps:
-    - - arguments:
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: steps-
+    spec:
+      entrypoint: hello-hello-hello
+      templates:
+      - container:
+          args:
+          - '{{inputs.parameters.message}}'
+          command:
+          - cowsay
+          image: docker/whalesay
+        inputs:
           parameters:
           - name: message
-            value: hello1
-        name: manually-adding-my-step
-        template: whalesay
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello1
-        name: list-of-step-1
-        template: whalesay
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello1
-        name: list-of-step-2
-        template: whalesay
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello1
-        name: list-of-step-1
-        template: whalesay
-      - arguments:
-          parameters:
-          - name: message
-            value: hello1
-        name: list-of-step-2
-        template: whalesay
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello1
-        name: implicitly-adding-step-on-init
-        template: whalesay
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello-model1
-        name: model-workflow-step
-        template: whalesay
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello2a
-        name: parallel-step-1
-        template: whalesay
-      - arguments:
-          parameters:
-          - name: message
-            value: hello-model2b
-        name: parallel-step-2-model-workflow-step
-        template: whalesay
-  - name: my-model-template
-    steps:
-    - - arguments:
-          parameters:
-          - name: message
-            value: hello-model-template
-        name: model-template-workflow-step
-        template: whalesay
-```
+        name: whalesay
+      - name: hello-hello-hello
+        steps:
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello1
+            name: manually-adding-my-step
+            template: whalesay
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello1
+            name: list-of-step-1
+            template: whalesay
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello1
+            name: list-of-step-2
+            template: whalesay
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello1
+            name: list-of-step-1
+            template: whalesay
+          - arguments:
+              parameters:
+              - name: message
+                value: hello1
+            name: list-of-step-2
+            template: whalesay
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello1
+            name: implicitly-adding-step-on-init
+            template: whalesay
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello-model1
+            name: model-workflow-step
+            template: whalesay
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello2a
+            name: parallel-step-1
+            template: whalesay
+          - arguments:
+              parameters:
+              - name: message
+                value: hello-model2b
+            name: parallel-step-2-model-workflow-step
+            template: whalesay
+      - name: my-model-template
+        steps:
+        - - arguments:
+              parameters:
+              - name: message
+                value: hello-model-template
+            name: model-template-workflow-step
+            template: whalesay
+    ```
+

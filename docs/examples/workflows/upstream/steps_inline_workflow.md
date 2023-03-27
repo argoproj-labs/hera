@@ -4,43 +4,45 @@
 
 
 
-## Hera
 
-```python
-from hera.workflows import Container, Step, Steps, Workflow
+=== "Hera"
 
-container = Container(image="argoproj/argosay:v2")
+    ```python linenums="1"
+    from hera.workflows import Container, Step, Steps, Workflow
 
-with Workflow(
-    generate_name="steps-inline-",
-    entrypoint="main",
-    annotations={
-        "workflows.argoproj.io/description": ("This workflow demonstrates running a steps with inline templates."),
-        "workflows.argoproj.io/version": ">= 3.2.0",
-    },
-) as w:
-    with Steps(name="main"):
-        Step(name="a", inline=container)
-```
+    container = Container(image="argoproj/argosay:v2")
 
-## YAML
+    with Workflow(
+        generate_name="steps-inline-",
+        entrypoint="main",
+        annotations={
+            "workflows.argoproj.io/description": ("This workflow demonstrates running a steps with inline templates."),
+            "workflows.argoproj.io/version": ">= 3.2.0",
+        },
+    ) as w:
+        with Steps(name="main"):
+            Step(name="a", inline=container)
+    ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  annotations:
-    workflows.argoproj.io/description: This workflow demonstrates running a steps
-      with inline templates.
-    workflows.argoproj.io/version: '>= 3.2.0'
-  generateName: steps-inline-
-spec:
-  entrypoint: main
-  templates:
-  - name: main
-    steps:
-    - - inline:
-          container:
-            image: argoproj/argosay:v2
-        name: a
-```
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      annotations:
+        workflows.argoproj.io/description: This workflow demonstrates running a steps
+          with inline templates.
+        workflows.argoproj.io/version: '>= 3.2.0'
+      generateName: steps-inline-
+    spec:
+      entrypoint: main
+      templates:
+      - name: main
+        steps:
+        - - inline:
+              container:
+                image: argoproj/argosay:v2
+            name: a
+    ```
+
