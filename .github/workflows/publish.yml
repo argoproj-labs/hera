@@ -22,6 +22,18 @@ jobs:
       - name: Build and publish
         env:
           PYPI_USERNAME: __token__
+          PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN_HERA }}
+        run: |
+          poetry build
+          twine upload -u __token__ -p $PYPI_PASSWORD --skip-existing dist/*
+          rm -rf dist/*
+      - name: Rename hera to hera-workflows for backwards compat
+        run: |
+          sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' project.toml
+          sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' src/hera/_version.py
+      - name: Build and publish
+        env:
+          PYPI_USERNAME: __token__
           PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           poetry build
