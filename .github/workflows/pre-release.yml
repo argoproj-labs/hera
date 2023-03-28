@@ -26,7 +26,7 @@ jobs:
           rm -rf dist/*
       - name: Rename hera to hera-workflows for backwards compat
         run: |
-          sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' project.toml
+          sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' pyproject.toml
           sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' src/hera/_version.py
       - name: Build and publish
         run: |
