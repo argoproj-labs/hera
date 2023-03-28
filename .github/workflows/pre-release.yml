@@ -1,6 +1,5 @@
 ---
 name: Test PyPI publish
-
 on:
   release:
     types: [prereleased]
@@ -23,4 +22,14 @@ jobs:
         run: |
           poetry build
           poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_API_TOKEN }}
+          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_API_TOKEN_HERA }}
+          rm -rf dist/*
+      - name: Rename hera to hera-workflows for backwards compat
+        run: |
+          sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' project.toml
+          sed -i 's/name = "hera"  # project-name/name = "hera-workflows"  # project-name/g' src/hera/_version.py
+      - name: Build and publish
+        run: |
+          poetry build
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}

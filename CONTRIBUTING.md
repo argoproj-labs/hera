@@ -8,7 +8,7 @@ Please keep in mind the following guidelines and practices when contributing to 
 1. Your commit must be signed. Hera uses [an application](https://github.com/apps/dco) that enforces the Developer 
    Certificate of Origin (DCO). Currently, a Contributor License Agreement 
    ([CLA](https://github.com/cla-assistant/cla-assistant)) check also appears on submitted pull requests. This can be
-   safely ignored and is **not** a requirement for contributions to hera-workflows. This is an artifact as the Argo Project is slowly migrating projects from CLA to DCO.
+   safely ignored and is **not** a requirement for contributions to hera. This is an artifact as the Argo Project is slowly migrating projects from CLA to DCO.
 1. Use `make format` to format the repository code. `make format` maps to a usage of
    [black](https://github.com/psf/black), and the repository adheres to whatever `black` uses as its strict pep8 format.
    No questions asked!
@@ -45,4 +45,4 @@ In order to add a new workflow test to test Hera functionality, do the following
 ### Code of Conduct
 
 Please be mindful of and adhere to the CNCF's
-[Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) when contributing to hera-workflows.
+[Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) when contributing to hera.

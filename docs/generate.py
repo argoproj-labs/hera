@@ -1,7 +1,7 @@
 import re
 import shutil
-from pathlib import Path
 import textwrap
+from pathlib import Path
 
 
 # This code reads the contents at the path which is a python file,
