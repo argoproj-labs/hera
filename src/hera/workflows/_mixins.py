@@ -78,8 +78,15 @@ ArgumentsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
-EnvT = Optional[Union[Union[_BaseEnv, EnvVar], List[Union[_BaseEnv, EnvVar]]]]
-EnvFromT = Optional[Union[Union[_BaseEnvFrom, EnvFromSource], List[Union[_BaseEnvFrom, EnvFromSource]]]]
+EnvT = Optional[
+    Union[
+        _BaseEnv,
+        EnvVar,
+        List[Union[_BaseEnv, EnvVar, Dict[str, Any]]],
+        Dict[str, Any],
+    ]
+]
+EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, EnvFromSource]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 THookable = TypeVar("THookable", bound="HookMixin")
 
@@ -215,6 +222,9 @@ class EnvMixin(BaseMixin):
                 result.append(e)
             elif isinstance(e, _BaseEnv):
                 result.append(e.build())
+            elif isinstance(e, dict):
+                for k, v in e.items():
+                    result.append(EnvVar(name=k, value=v))
         return result
 
     def _build_env_from(self) -> Optional[List[EnvFromSource]]:
