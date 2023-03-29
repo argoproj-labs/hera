@@ -18,7 +18,6 @@ from hera.workflows._mixins import (
 )
 from hera.workflows.models import (
     DAGTask as _ModelDAGTask,
-    Parameter as _ModelParameter,
     Template,
 )
 from hera.workflows.operator import Operator
@@ -182,15 +181,14 @@ class Task(
 
         obj = next((output for output in parameters if output.name == name), None)
         if obj is not None:
-            if isinstance(obj, _ModelParameter):
-                obj.value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
-                return Parameter(
-                    name=obj.name,
-                    value=obj.value,
-                    value_from=obj.value_from,
-                    global_name=obj.global_name,
-                    description=obj.description,
-                )
+            obj.value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
+            return Parameter(
+                name=obj.name,
+                value=obj.value,
+                value_from=obj.value_from,
+                global_name=obj.global_name,
+                description=obj.description,
+            )
         raise KeyError(f"No output parameter named `{name}` found")
 
     def next(self, other: Task, operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> Task:
