@@ -102,7 +102,13 @@ class Step(
         if obj is not None:
             if isinstance(obj, _ModelParameter):
                 obj.value = f"{{{{steps.{self.name}.outputs.parameters.{name}}}}}"
-                return Parameter.from_model(obj)
+                return Parameter(
+                    name=obj.name,
+                    value=obj.value,
+                    value_from=obj.value_from,
+                    global_name=obj.global_name,
+                    description=obj.description,
+                )
         raise KeyError(f"No output parameter named `{name}` found")
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:

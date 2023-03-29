@@ -532,7 +532,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
-    source_signature: Dict[str, Optional[str]] = {}
+    source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             source_signature[p.name] = p.default
