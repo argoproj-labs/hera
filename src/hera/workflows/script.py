@@ -9,7 +9,6 @@ import textwrap
 from typing import Callable, Dict, List, Optional, Union
 
 from hera.shared import global_config
-from hera.shared.serialization import MISSING
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
@@ -25,7 +24,7 @@ from hera.workflows.models import (
     SecurityContext,
     Template as _ModelTemplate,
 )
-from hera.workflows.parameter import Parameter
+from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 

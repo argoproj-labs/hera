@@ -12,14 +12,16 @@
 
 
     @script()
-    def foo(a, b=42):
-        print(a, b)
+    def foo(a, b=42, c=None):
+        print(a, b, c)
 
 
     with Workflow(generate_name="script-default-params-", entrypoint="d") as w:
         with DAG(name="d"):
-            foo(name="b-set", arguments={"a": 1, "b": 2})
-            foo(name="b-unset", arguments={"a": 1})
+            foo(name="b-unset-c-unset", arguments={"a": 1})
+            foo(name="b-set-c-unset", arguments={"a": 1, "b": 2})
+            foo(name="b-unset-c-set", arguments={"a": 1, "c": 2})
+            foo(name="b-set-c-set", arguments={"a": 1, "b": 2, "c": 3})
     ```
 
 === "YAML"
@@ -38,15 +40,33 @@
               parameters:
               - name: a
                 value: '1'
-              - name: b
-                value: '2'
-            name: b-set
+            name: b-unset-c-unset
             template: foo
           - arguments:
               parameters:
               - name: a
                 value: '1'
-            name: b-unset
+              - name: b
+                value: '2'
+            name: b-set-c-unset
+            template: foo
+          - arguments:
+              parameters:
+              - name: a
+                value: '1'
+              - name: c
+                value: '2'
+            name: b-unset-c-set
+            template: foo
+          - arguments:
+              parameters:
+              - name: a
+                value: '1'
+              - name: b
+                value: '2'
+              - name: c
+                value: '3'
+            name: b-set-c-set
             template: foo
         name: d
       - inputs:
@@ -54,6 +74,8 @@
           - name: a
           - default: '42'
             name: b
+          - default: 'null'
+            name: c
         name: foo
         script:
           command:
@@ -75,8 +97,12 @@
 
             except: b = r''''''{{inputs.parameters.b}}''''''
 
+            try: c = json.loads(r''''''{{inputs.parameters.c}}'''''')
 
-            print(a, b)
+            except: c = r''''''{{inputs.parameters.c}}''''''
+
+
+            print(a, b, c)
 
             '
     ```

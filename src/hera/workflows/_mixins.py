@@ -7,7 +7,7 @@ from pydantic import root_validator
 
 from hera.shared import global_config
 from hera.shared._base_model import BaseMixin
-from hera.shared.serialization import MISSING, serialize
+from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
@@ -52,7 +52,7 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
-from hera.workflows.parameter import Parameter
+from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
