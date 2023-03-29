@@ -12,7 +12,7 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared import global_config
-from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin
+from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin, VolumeMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
@@ -66,6 +66,7 @@ class Workflow(
     ArgumentsMixin,
     ContextMixin,
     HookMixin,
+    VolumeMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -140,7 +141,6 @@ class Workflow(
     ttl_strategy: Optional[TTLStrategy] = None
     volume_claim_gc: Optional[VolumeClaimGC] = None
     volume_claim_templates: Optional[List[PersistentVolumeClaim]] = None
-    volumes: Optional[List[Volume]] = None
     workflow_metadata: Optional[WorkflowMetadata] = None
     workflow_template_ref: Optional[WorkflowTemplateRef] = None
 
@@ -232,6 +232,7 @@ class Workflow(
                         if claim_name not in current_volume_claims_map:
                             self.volume_claim_templates.append(claim)
 
+        built_claims = self._build_persistent_volume_claims()
         return _ModelWorkflow(
             api_version=self.api_version,
             kind=self.kind,
@@ -292,8 +293,8 @@ class Workflow(
                 tolerations=self.tolerations,
                 ttl_strategy=self.ttl_strategy,
                 volume_claim_gc=self.volume_claim_gc,
-                volume_claim_templates=self.volume_claim_templates,
-                volumes=self.volumes,
+                volume_claim_templates=([] if self.volume_claim_templates is None else self.volume_claim_templates) + ([] if built_claims is None else built_claims),
+                volumes=self._build_volumes(),
                 workflow_metadata=self.workflow_metadata,
                 workflow_template_ref=self.workflow_template_ref,
             ),

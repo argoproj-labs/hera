@@ -318,22 +318,8 @@ class ResourceMixin(BaseMixin):
         return self.resources.build()
 
 
-class VolumeMountMixin(BaseMixin):
-    volume_devices: Optional[List[VolumeDevice]] = None
-    volume_mounts: Optional[List[VolumeMount]] = None
+class VolumeMixin(BaseMixin):
     volumes: Optional[List[_BaseVolume]] = None
-
-    def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
-        if self.volume_mounts is None and self.volumes is None:
-            return None
-
-        result = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
-        if result is None and self.volume_mounts is None:
-            return None
-        elif result is None and self.volume_mounts is not None:
-            return self.volume_mounts
-
-        return cast(List[VolumeMount], self.volume_mounts) or [] + cast(List[VolumeMount], result) or []
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
         if self.volumes is None:
@@ -352,6 +338,23 @@ class VolumeMountMixin(BaseMixin):
         if not claims:
             return None
         return claims
+
+
+class VolumeMountMixin(VolumeMixin):
+    volume_devices: Optional[List[VolumeDevice]] = None
+    volume_mounts: Optional[List[VolumeMount]] = None
+
+    def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
+        if self.volume_mounts is None and self.volumes is None:
+            return None
+
+        result = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
+        if result is None and self.volume_mounts is None:
+            return None
+        elif result is None and self.volume_mounts is not None:
+            return self.volume_mounts
+
+        return cast(List[VolumeMount], self.volume_mounts) or [] + cast(List[VolumeMount], result) or []
 
 
 class ArgumentsMixin(BaseMixin):

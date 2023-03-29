@@ -460,6 +460,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
                     pass  # take the storage specification in resources
                 else:
                     resources.requests["storage"] = values.get("size")
+            values["resources"] = resources
         elif "resources" not in values:
             assert "size" in values, "at least one of `size` or `resources` must be specified"
             validate_storage_units(cast(str, values.get("size")))
