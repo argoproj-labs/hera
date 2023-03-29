@@ -22,7 +22,7 @@ jobs:
         run: |
           poetry build
           poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_API_TOKEN_HERA }}
+          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_API_TOKEN_HERA }} --skip-existing
           rm -rf dist/*
       - name: Rename hera to hera-workflows for backwards compat
         run: |
@@ -32,4 +32,4 @@ jobs:
         run: |
           poetry build
           poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}
+          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_API_TOKEN }} --skip-existing
