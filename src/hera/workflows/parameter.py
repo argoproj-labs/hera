@@ -51,7 +51,7 @@ class Parameter(_ModelParameter):
 
     def with_name(self, name: str) -> Parameter:
         """Returns a copy of the parameter with the name set to the value"""
-        p = copy.deepcopy(self)
+        p = self.copy(deep=True)
         p.name = name
         return p
 
