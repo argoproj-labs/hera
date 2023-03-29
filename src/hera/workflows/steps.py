@@ -67,7 +67,7 @@ class Step(
 
     def get_parameters_as(self, name):
         """Gets all the output parameters from this task"""
-        return Parameter(name=name, value_from=ValueFrom(expression=f"{{{{steps.{self.name}.outputs.parameters}}}}"))
+        return Parameter(name=name, value=f"{{{{steps.{self.name}.outputs.parameters}}}}"))
 
     def get_parameter(self, name: str) -> Parameter:
         """Returns a Parameter from the task's outputs based on the name.
