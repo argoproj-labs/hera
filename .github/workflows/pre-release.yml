@@ -32,4 +32,4 @@ jobs:
         run: |
           poetry build
           poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}
+          poetry publish -r testpypi -u __token__ -p ${{ secrets.PYPI_TEST_API_TOKEN }}
