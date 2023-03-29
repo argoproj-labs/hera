@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: script-param-passing-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - name: out
+        template: out
+      - arguments:
+          parameters:
+          - name: a
+            value: '{{tasks.out.outputs.result}}'
+        depends: out
+        name: in-
+        template: in-
+    name: d
+  - name: out
+    script:
+      command:
+      - python
+      image: python:3.7
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print(42)
+
+        '
+  - inputs:
+      parameters:
+      - name: a
+    name: in-
+    script:
+      command:
+      - python
+      image: python:3.7
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
+
+        except: a = r''''''{{inputs.parameters.a}}''''''
+
+
+        print(a)
+
+        '

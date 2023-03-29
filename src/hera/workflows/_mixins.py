@@ -52,7 +52,7 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
-from hera.workflows.parameter import Parameter
+from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
@@ -78,8 +78,15 @@ ArgumentsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
-EnvT = Optional[Union[Union[_BaseEnv, EnvVar], List[Union[_BaseEnv, EnvVar]]]]
-EnvFromT = Optional[Union[Union[_BaseEnvFrom, EnvFromSource], List[Union[_BaseEnvFrom, EnvFromSource]]]]
+EnvT = Optional[
+    Union[
+        _BaseEnv,
+        EnvVar,
+        List[Union[_BaseEnv, EnvVar, Dict[str, Any]]],
+        Dict[str, Any],
+    ]
+]
+EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, EnvFromSource]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 THookable = TypeVar("THookable", bound="HookMixin")
 
@@ -215,6 +222,9 @@ class EnvMixin(BaseMixin):
                 result.append(e)
             elif isinstance(e, _BaseEnv):
                 result.append(e.build())
+            elif isinstance(e, dict):
+                for k, v in e.items():
+                    result.append(EnvVar(name=k, value=v))
         return result
 
     def _build_env_from(self) -> Optional[List[EnvFromSource]]:
@@ -522,12 +532,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
-    source_signature: Dict[str, Optional[str]] = {}
+    source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             source_signature[p.name] = p.default
         else:
-            source_signature[p.name] = None
+            source_signature[p.name] = MISSING
 
     if len(source_signature) == 0:
         return None
