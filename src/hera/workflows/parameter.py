@@ -5,7 +5,6 @@ for a tutorial on Parameters.
 """
 from __future__ import annotations
 
-import copy
 from typing import Any, Optional
 
 from pydantic import root_validator

@@ -20,7 +20,6 @@ from hera.workflows.models import (
     DAGTask as _ModelDAGTask,
     Parameter as _ModelParameter,
     Template,
-    ValueFrom,
 )
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
@@ -150,7 +149,7 @@ class Task(
 
     def get_parameters_as(self, name):
         """Gets all the output parameters from this task"""
-        return Parameter(name=name, value_from=ValueFrom(expression=f"{{tasks.{self.name}.outputs.parameters}}"))
+        return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
 
     def get_parameter(self, name: str) -> Parameter:
         """Returns a Parameter from the task's outputs based on the name.
