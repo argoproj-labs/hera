@@ -21,6 +21,10 @@ nav:
     - Events:
       - Models: api/events/models.md
 theme:
+  custom_dir: docs/overrides
+  font:
+    text: Roboto
+    code: Roboto Mono
   name: material
   icon:
     repo: fontawesome/brands/github
@@ -40,6 +44,9 @@ theme:
         icon: material/weather-sunny
         name: Switch to dark mode
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
     - content.code.copy
     - content.code.select
     - search.suggest
