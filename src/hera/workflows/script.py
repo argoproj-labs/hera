@@ -9,6 +9,7 @@ import textwrap
 from typing import Callable, Dict, List, Optional, Union
 
 from hera.shared import global_config
+from hera.shared.serialization import MISSING
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
@@ -218,7 +219,7 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             source_signature[p.name] = p.default
         else:
-            source_signature[p.name] = None
+            source_signature[p.name] = MISSING
 
     if len(source_signature) == 0:
         return None

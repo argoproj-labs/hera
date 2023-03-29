@@ -7,7 +7,7 @@ from pydantic import root_validator
 
 from hera.shared import global_config
 from hera.shared._base_model import BaseMixin
-from hera.shared.serialization import serialize
+from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
@@ -537,7 +537,7 @@ def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             source_signature[p.name] = p.default
         else:
-            source_signature[p.name] = None
+            source_signature[p.name] = MISSING
 
     if len(source_signature) == 0:
         return None
