@@ -105,3 +105,16 @@ def test_hera_output_upstream(module_name):
         assert _transform_workflow(output) == _transform_workflow(yaml.safe_load(upstream_yaml_path.read_text()))
     else:
         assert False, "Unsupported workflow type"
+
+
+def test_to_file(tmpdir):
+    # GIVEN
+    workflow = importlib.import_module("examples.workflows.coinflip").w
+    output_dir = Path(tmpdir)
+
+    # WHEN
+    yaml_path = workflow.to_file(output_dir)
+
+    # THEN
+    assert yaml_path.exists()
+    assert workflow.to_dict() == yaml.safe_load(yaml_path.read_text())

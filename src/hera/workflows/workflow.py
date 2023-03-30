@@ -5,6 +5,7 @@ for more on Workflows.
 """
 from __future__ import annotations
 
+from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, List, Optional, Union
 
@@ -309,6 +310,9 @@ class Workflow(
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
         if not _yaml:
             raise ImportError("PyYAML is not installed")
+        # Set some default options if not provided by the user
+        kwargs.setdefault("default_flow_style", False)
+        kwargs.setdefault("sort_keys", False)
         return _yaml.dump(self.to_dict(), *args, **kwargs)
 
     def create(self) -> TWorkflow:
@@ -330,6 +334,23 @@ class Workflow(
         if not isinstance(node, (Templatable, *get_args(Template))):
             raise InvalidType(type(node))
         self.templates.append(node)
+
+    def to_file(self, output_directory: Union[Path, str] = ".", name: str = "", *args, **kwargs) -> Path:
+        """Writes the Workflow as an Argo schema Workflow object to a YAML file and returns the path to the file.
+
+        Args:
+            output_directory: The directory to write the file to. Defaults to the current working directory.
+            name: The name of the file to write without the file extension. Defaults to the Workflow's name or a generated name.
+            *args: Additional arguments to pass to `yaml.dump`.
+            **kwargs: Additional keyword arguments to pass to `yaml.dump`.
+        """
+        workflow_name = self.name or (self.generate_name or "workflow").rstrip("-")
+        name = name or workflow_name
+        output_directory = Path(output_directory)
+        output_path = Path(output_directory) / f"{name}.yaml"
+        output_directory.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(self.to_yaml(*args, **kwargs))
+        return output_path.absolute()
 
 
 __all__ = ["Workflow"]
