@@ -24,7 +24,7 @@ from hera.workflows.models import (
     SecurityContext,
     Template as _ModelTemplate,
 )
-from hera.workflows.parameter import Parameter
+from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 
@@ -213,12 +213,12 @@ class Script(
 def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]:
     # If there are any kwargs arguments associated with the function signature,
     # we store these as we can set them as default values for argo arguments
-    source_signature: Dict[str, Optional[str]] = {}
+    source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             source_signature[p.name] = p.default
         else:
-            source_signature[p.name] = None
+            source_signature[p.name] = MISSING
 
     if len(source_signature) == 0:
         return None

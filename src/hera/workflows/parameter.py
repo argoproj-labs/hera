@@ -5,12 +5,11 @@ for a tutorial on Parameters.
 """
 from __future__ import annotations
 
-import copy
 from typing import Any, Optional
 
 from pydantic import root_validator
 
-from hera.shared.serialization import serialize
+from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
 
 
@@ -21,18 +20,21 @@ class Parameter(_ModelParameter):
     for Steps and Tasks to assign values.
     """
 
-    value: Optional[Any]
+    # `MISSING` is the default value so that `Parameter` serialization understands the difference between a
+    # missing value and a value of `None`, as set by a user. With this, when something sets a value of `None` it is
+    # taken as a proper `None`. By comparison, if a user does not set a value, it is taken as `MISSING` and therefore
+    # not serialized. This happens because the values if turned into an _actual_ `None` by `serialize` and therefore
+    # Pydantic will not include it in the YAML that is passed to Argo
+    value: Optional[Any] = MISSING
+    default: Optional[Any] = MISSING
 
-    @root_validator(pre=True)
+    @root_validator(pre=True, allow_reuse=True)
     def _check_values(cls, values):
         if values.get("value") is not None and values.get("value_from") is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
 
-        if values.get("value") is not None and not isinstance(values.get("value"), str):
-            values["value"] = serialize(values.get("value"))
-
-        if values.get("default") is not None and not isinstance(values.get("value"), str):
-            values["default"] = serialize(values.get("default"))
+        values["value"] = serialize(values.get("value", MISSING))
+        values["default"] = serialize(values.get("default", MISSING))
 
         return values
 
@@ -46,20 +48,9 @@ class Parameter(_ModelParameter):
             raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
         return self.value
 
-    @classmethod
-    def from_model(cls, p: _ModelParameter) -> Parameter:
-        return Parameter(
-            default=p.default,
-            description=p.description,
-            enum=p.enum,
-            name=p.name,
-            value=p.value,
-            value_from=p.value_from,
-        )
-
     def with_name(self, name: str) -> Parameter:
         """Returns a copy of the parameter with the name set to the value"""
-        p = copy.deepcopy(self)
+        p = self.copy(deep=True)
         p.name = name
         return p
 

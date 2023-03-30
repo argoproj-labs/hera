@@ -5,7 +5,7 @@ MISSING = object()
 
 
 def serialize(value: Any):
-    if value is MISSING:
+    if value == MISSING:
         return None
     elif isinstance(value, str):
         return value

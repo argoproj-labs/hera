@@ -52,7 +52,7 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
-from hera.workflows.parameter import Parameter
+from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
@@ -535,12 +535,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
-    source_signature: Dict[str, Optional[str]] = {}
+    source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             source_signature[p.name] = p.default
         else:
-            source_signature[p.name] = None
+            source_signature[p.name] = MISSING
 
     if len(source_signature) == 0:
         return None
