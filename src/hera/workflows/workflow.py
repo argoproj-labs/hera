@@ -232,9 +232,7 @@ class Workflow(
                             self.volume_claim_templates.append(claim)
 
         workflow_claims = self._build_persistent_volume_claims()
-        volume_claim_templates = ([] if self.volume_claim_templates is None else self.volume_claim_templates) + (
-            [] if workflow_claims is None else workflow_claims
-        )
+        volume_claim_templates = (self.volume_claim_templates or []) + (workflow_claims or [])
         return _ModelWorkflow(
             api_version=self.api_version,
             kind=self.kind,
@@ -295,7 +293,7 @@ class Workflow(
                 tolerations=self.tolerations,
                 ttl_strategy=self.ttl_strategy,
                 volume_claim_gc=self.volume_claim_gc,
-                volume_claim_templates=None if volume_claim_templates == [] else volume_claim_templates,
+                volume_claim_templates=volume_claim_templates or None,
                 volumes=self._build_volumes(),
                 workflow_metadata=self.workflow_metadata,
                 workflow_template_ref=self.workflow_template_ref,
