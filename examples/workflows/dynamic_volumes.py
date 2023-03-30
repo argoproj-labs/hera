@@ -1,7 +1,7 @@
 from hera.workflows import DAG, Volume, Workflow, script
 
 
-@script(volumes=Volume(size="1Gi", mount_path="/mnt/vol"))
+@script(volumes=Volume(name="v", size="1Gi", mount_path="/mnt/vol"))
 def foo():
     import subprocess
 

@@ -29,10 +29,10 @@ spec:
         '
       volumeMounts:
       - mountPath: /mnt/vol
-        name: 7073640a-bbd3-4064-a4a2-e77926189675
+        name: v
   volumeClaimTemplates:
   - metadata:
-      name: 7073640a-bbd3-4064-a4a2-e77926189675
+      name: v
     spec:
       accessModes:
       - ReadWriteOnce

@@ -352,11 +352,23 @@ class VolumeMountMixin(VolumeMixin):
     volume_mounts: Optional[List[VolumeMount]] = None
 
     def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
+        # while it's possible for `volume_mounts` to be `None`, this has to check that `volumes` is also `None` since
+        # it's possible that Hera can find volume mounts to generate for the user if there are any volumes set
         if self.volume_mounts is None and self.volumes is None:
             return None
 
-        volumes = self.volumes if isinstance(self.volumes, list) else [self.volumes]
-        result = None if self.volumes is None else [v._build_volume_mount() for v in volumes]
+        if isinstance(self.volumes, list):
+            volumes = self.volumes
+        elif not isinstance(self.volumes, list) and self.volumes is not None:
+            volumes = [self.volumes]
+        else:
+            volumes = []
+
+        result = (
+            None
+            if self.volumes is None
+            else [v._build_volume_mount() if issubclass(v.__class__, _BaseVolume) else v for v in volumes]
+        )
         if result is None and self.volume_mounts is None:
             return None
         elif result is None and self.volume_mounts is not None:

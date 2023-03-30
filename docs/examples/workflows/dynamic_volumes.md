@@ -11,7 +11,7 @@
     from hera.workflows import DAG, Volume, Workflow, script
 
 
-    @script(volumes=Volume(size="1Gi", mount_path="/mnt/vol"))
+    @script(volumes=Volume(name="v", size="1Gi", mount_path="/mnt/vol"))
     def foo():
         import subprocess
 
@@ -57,10 +57,10 @@
             '
           volumeMounts:
           - mountPath: /mnt/vol
-            name: 7073640a-bbd3-4064-a4a2-e77926189675
+            name: v
       volumeClaimTemplates:
       - metadata:
-          name: 7073640a-bbd3-4064-a4a2-e77926189675
+          name: v
         spec:
           accessModes:
           - ReadWriteOnce
