@@ -38,7 +38,6 @@ from hera.workflows.models import (
     Time,
     Toleration,
     TTLStrategy,
-    Volume,
     VolumeClaimGC,
     Workflow as _ModelWorkflow,
     WorkflowCreateRequest,
@@ -232,7 +231,10 @@ class Workflow(
                         if claim_name not in current_volume_claims_map:
                             self.volume_claim_templates.append(claim)
 
-        built_claims = self._build_persistent_volume_claims()
+        workflow_claims = self._build_persistent_volume_claims()
+        volume_claim_templates = ([] if self.volume_claim_templates is None else self.volume_claim_templates) + (
+            [] if workflow_claims is None else workflow_claims
+        )
         return _ModelWorkflow(
             api_version=self.api_version,
             kind=self.kind,
@@ -293,7 +295,7 @@ class Workflow(
                 tolerations=self.tolerations,
                 ttl_strategy=self.ttl_strategy,
                 volume_claim_gc=self.volume_claim_gc,
-                volume_claim_templates=([] if self.volume_claim_templates is None else self.volume_claim_templates) + ([] if built_claims is None else built_claims),
+                volume_claim_templates=None if volume_claim_templates == [] else volume_claim_templates,
                 volumes=self._build_volumes(),
                 workflow_metadata=self.workflow_metadata,
                 workflow_template_ref=self.workflow_template_ref,
