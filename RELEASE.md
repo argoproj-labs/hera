@@ -30,7 +30,7 @@ Once the pull-request is merged, based on the type label on the merged pull-requ
 
 ## Publishing a new version
 
-Once the maintainers are ready to publish a new version, they can go to the Github draft release at https://github.com/argoproj-labs/hera-workflows/releases.
+Once the maintainers are ready to publish a new version, they can go to the Github draft release at https://github.com/argoproj-labs/hera/releases.
 
 They will find a draft release with the appropriate version and changelog that is only visible to maintainers on the repository.
 

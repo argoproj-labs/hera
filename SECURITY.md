@@ -14,7 +14,7 @@ All vulnerabilities and associated information will be treated with full confide
 ## Public Disclosure
 
 Security vulnerabilities will be disclosed via [change logs](CHANGELOG.md) and using the
-[GitHub Security Advisories](https://github.com/argoproj-labs/hera-workflows/security/advisories)
+[GitHub Security Advisories](https://github.com/argoproj-labs/hera/security/advisories)
 feature to keep our community well informed, and will credit you for your findings (unless you prefer to stay anonymous,
 of course).
 
