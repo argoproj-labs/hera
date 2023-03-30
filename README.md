@@ -6,20 +6,20 @@ and its crew were specially protected by the goddess Hera.
 ```
 
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera-workflows)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
 
-[![Build](https://github.com/argoproj-labs/hera-workflows/actions/workflows/cicd.yaml/badge.svg)](./.github/workflows/cicd.yaml)
-[![Docs](https://readthedocs.org/projects/hera-workflows/badge/?version=stable)](https://hera-workflows.readthedocs.io/en/stable/?badge=stable)
-[![codecov](https://codecov.io/gh/argoproj-labs/hera-workflows/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera-workflows)
+[![Build](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml/badge.svg)](./.github/workflows/cicd.yaml)
+[![Docs](https://readthedocs.org/projects/hera/badge/?version=latest)](https://hera.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/argoproj-labs/hera/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Pypi](https://img.shields.io/pypi/v/hera-workflows.svg)](https://pypi.python.org/pypi/hera-workflows)
+[![Pypi](https://img.shields.io/pypi/v/hera.svg)](https://pypi.python.org/pypi/hera)
 [![CondaForge](https://anaconda.org/conda-forge/hera-workflows/badges/version.svg)](https://anaconda.org/conda-forge/hera-workflows)
-[![Versions](https://img.shields.io/pypi/pyversions/hera-workflows.svg)](https://github.com/argoproj-labs/hera-workflows)
+[![Versions](https://img.shields.io/pypi/pyversions/hera.svg)](https://github.com/argoproj-labs/hera)
 
-[![Downloads](https://pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
-[![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
-[![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
+[![Downloads](https://pepy.tech/badge/hera)](https://pepy.tech/project/hera)
+[![Downloads/month](https://pepy.tech/badge/hera/month)](https://pepy.tech/project/hera)
+[![Downloads/week](https://pepy.tech/badge/hera/week)](https://pepy.tech/project/hera)
 
 
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo ecosystem accessible by simplifying workflow construction and submission.
@@ -33,6 +33,8 @@ You can watch the introductory Hera presentation at the "Argo Workflows and Even
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Examples](#examples)
+    - [Single step script](#single-step-script)
+    - [DAG diamond](#dag-diamond)
 - [Contributing](#contributing)
 - [Comparison](#comparison)
 
@@ -45,15 +47,15 @@ Another option for workflow submission without the authentication layer is using
 > **Note**
 > Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens in place,
 > it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes v1.24+ 
-> in order for hera-workflows to communicate to the Argo Server.
+> in order for hera to communicate to the Argo Server.
 
 # Installation
 
 | Source                                                         | Command                                                                                                        |
 |----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| [PyPi](https://pypi.org/project/hera-workflows/)               | `pip install hera-workflows`                                                                                   |
+| [PyPi](https://pypi.org/project/hera/)               | `pip install hera`                                                                                   |
 | [Conda](https://anaconda.org/conda-forge/hera-workflows)       | `conda install -c conda-forge hera-workflows`                                                                  |
-| [GitHub repo](https://github.com/argoproj-labs/hera-workflows) | `python -m pip install git+https://github.com/argoproj-labs/hera-workflows --ignore-installed`/`pip install .` |
+| [GitHub repo](https://github.com/argoproj-labs/hera) | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
 
 # Examples
 

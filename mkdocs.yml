@@ -53,8 +53,8 @@ theme:
     - search.share
     - search.highlight
     - content.tabs.link
-repo_url: https://github.com/argoproj-labs/hera-workflows
-repo_name: argoproj-labs/hera-workflows
+repo_url: https://github.com/argoproj-labs/hera
+repo_name: argoproj-labs/hera
 edit_uri: blob/main/docs
 
 extra:

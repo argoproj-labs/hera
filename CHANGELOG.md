@@ -61,7 +61,7 @@ The general format is:
 ### Added
 
 - `to_yaml`, `to_dict`, and `to_json` on workflows
-- optional PyYAML dependency (`hera-workflows[yaml]`)
+- optional PyYAML dependency (`hera[yaml]`)
 - global default service account
 - global task image
 - global SSL verification flag
@@ -547,8 +547,8 @@ The general format is:
 ### Changed
 
 - underlying SDK of Hera, which moved from `argo-workflows` to the Argo Workflows repository (unpublished on PyPi)
-  Python SDK. This was originally released in https://github.com/argoproj-labs/hera-workflows/pull/38 but the
-  publication process to PyPi failed. A fix was attempted in https://github.com/argoproj-labs/hera-workflows/pull/43
+  Python SDK. This was originally released in https://github.com/argoproj-labs/hera/pull/38 but the
+  publication process to PyPi failed. A fix was attempted in https://github.com/argoproj-labs/hera/pull/43
   but that published a broken version because the `dependency_links` of `setup.py` did not actually install the
   necessary dependency. As a consequence, the release was quickly deleted from PyPi because it was broken. The best
   course of action was to wait for the official release of the new SDK under `argo-workflows==6.0.0`, in collaboration

@@ -6,9 +6,9 @@ description = "Hera is a Python framework for constructing and submitting Argo W
 authors = ["Flaviu Vadan <flaviu.vadan@dynotx.com>", "Sambhav Kothari <sambhavs.email@gmail.com>", "Elliot Gunton <elliotgunton@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/argoproj-labs/hera-workflows"
-repository = "https://github.com/argoproj-labs/hera-workflows"
-documentation = "https://github.com/argoproj-labs/hera-workflows/README.md"
+homepage = "https://github.com/argoproj-labs/hera"
+repository = "https://github.com/argoproj-labs/hera"
+documentation = "https://github.com/argoproj-labs/hera/README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -25,7 +25,7 @@ packages = [
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/argoproj-labs/hera-workflows/issues"
+"Bug Tracker" = "https://github.com/argoproj-labs/hera/issues"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
