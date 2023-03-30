@@ -23,5 +23,3 @@ def whalesay():
 
 with Workflow(generate_name="colored-logs-", entrypoint="whalesay") as w:
     whalesay(name="whalesay")
-
-print(w.to_yaml())

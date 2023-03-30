@@ -29,8 +29,6 @@
         with Steps(name="volumes-pvc-example") as s:
             whalesay(name="generate")
             print_message(name="print")
-
-    print(w.to_yaml())
     ```
 
 === "YAML"
