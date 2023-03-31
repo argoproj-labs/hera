@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v0beta9000
+kind: Workflow
+metadata:
+  generateName: global-config-
+  namespace: argo-namespace
+spec:
+  entrypoint: whalesay
+  serviceAccountName: argo-account
+  templates:
+  - container:
+      command:
+      - cowsay
+      image: docker/whalesay:latest

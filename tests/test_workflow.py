@@ -10,6 +10,7 @@ import yaml
 
 import examples.workflows as hera_examples
 import examples.workflows.upstream as hera_upstream_examples
+from hera.shared import global_config
 from hera.workflows import (
     CronWorkflow as HeraCronWorkflow,
     Workflow as HeraWorkflow,
@@ -61,6 +62,7 @@ def _transform_cron_workflow(obj):
 )
 def test_hera_output(module_name):
     # GIVEN
+    global_config.reset()
     workflow = importlib.import_module(f"examples.workflows.{module_name}").w
     yaml_path = Path(hera_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
 
@@ -77,6 +79,7 @@ def test_hera_output(module_name):
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
 def test_hera_output_upstream(module_name):
     # GIVEN
+    global_config.reset()
     workflow = importlib.import_module(f"examples.workflows.upstream.{module_name}").w
     yaml_path = Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
     upstream_yaml_path = (
