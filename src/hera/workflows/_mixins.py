@@ -124,7 +124,7 @@ class ContextMixin(BaseMixin):
 
 
 class ContainerMixin(BaseMixin):
-    image: str = None
+    image: Optional[str] = None
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
     liveness_probe: Optional[Probe] = None
