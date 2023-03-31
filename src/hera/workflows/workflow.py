@@ -80,7 +80,7 @@ class Workflow(
     """
 
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    api_version: Optional[str] = global_config.api_version
+    api_version: Optional[str] = None
     kind: Optional[str] = None
     status: Optional[WorkflowStatus] = None
 
@@ -147,6 +147,12 @@ class Workflow(
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
+    @validator("api_version", pre=True, always=True)
+    def _set_api_version(cls, v):
+        if v is None:
+            return global_config.api_version
+        return v
+
     @validator("workflows_service", pre=True, always=True)
     def _set_workflows_service(cls, v):
         if v is None:
@@ -163,6 +169,12 @@ class Workflow(
     def _set_namespace(cls, v):
         if v is None:
             return global_config.namespace
+        return v
+
+    @validator("service_account_name", pre=True, always=True)
+    def _set_service_account_name(cls, v):
+        if v is None:
+            return global_config.service_account_name
         return v
 
     @validator("image_pull_secrets", pre=True, always=True)
