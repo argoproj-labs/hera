@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
-from pydantic import root_validator
+from pydantic import root_validator, validator
 
 from hera.shared import global_config
 from hera.shared._base_model import BaseMixin
@@ -124,7 +124,7 @@ class ContextMixin(BaseMixin):
 
 
 class ContainerMixin(BaseMixin):
-    image: str = global_config.image
+    image: Optional[str] = None
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
     liveness_probe: Optional[Probe] = None
@@ -141,6 +141,12 @@ class ContainerMixin(BaseMixin):
         if self.image_pull_policy is None or isinstance(self.image_pull_policy, ImagePullPolicy):
             return self.image_pull_policy
         return ImagePullPolicy[self.image_pull_policy.lower()]
+
+    @validator("image", pre=True, always=True)
+    def _set_image(cls, v):
+        if v is None:
+            return global_config.image
+        return v
 
 
 class IOMixin(BaseMixin):
