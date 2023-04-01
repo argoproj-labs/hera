@@ -1,7 +1,7 @@
 from hera.workflows import Env, Workflow, script
 
 
-@script(image="python:3.7", add_cwd_to_sys_path=False, env=[Env(name="PYTHONUNBUFFERED", value="1")])
+@script(image="python:3.8", add_cwd_to_sys_path=False, env=[Env(name="PYTHONUNBUFFERED", value="1")])
 def whalesay():
     import time  # noqa: I001
     import random

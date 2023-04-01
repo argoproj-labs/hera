@@ -54,7 +54,7 @@
         script:
           command:
           - python
-          image: python:3.7
+          image: python:3.8
           source: 'import os
 
             import sys
@@ -71,7 +71,7 @@
         script:
           command:
           - python
-          image: python:3.7
+          image: python:3.8
           source: 'import os
 
             import sys

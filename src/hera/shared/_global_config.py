@@ -27,9 +27,10 @@ class _GlobalConfig:
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
     namespace: Optional[str] = None
-    _image: Union[str, Callable[[], str]] = "python:3.7"
+    _image: Union[str, Callable[[], str]] = "python:3.8"
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
+    script_callable: bool = False
     _pre_build_hooks: Optional[_HookMap] = None
 
     def reset(self) -> None:

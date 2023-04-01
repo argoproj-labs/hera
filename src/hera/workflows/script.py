@@ -8,9 +8,11 @@ import inspect
 import textwrap
 from typing import Callable, Dict, List, Optional, Union
 
-from pydantic import validator
+from pydantic import root_validator, validator
 
+from hera.expr import g
 from hera.shared import global_config
+from hera.workflows._context import _context
 from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
@@ -39,7 +41,7 @@ class Script(
     ResourceMixin,
     VolumeMountMixin,
 ):
-    """A Script acts as a wrapper around a container. In Hera this defaults to a "python:3.7" image
+    """A Script acts as a wrapper around a container. In Hera this defaults to a "python:3.8" image
     specified by global_config.image, which runs a python source specified by `Script.source`.
     """
 
@@ -51,8 +53,35 @@ class Script(
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
     add_cwd_to_sys_path: bool = True
+    callable: bool = False
 
-    @validator("command", pre=True, always=True)
+    @validator("callable", pre=True, always=True)
+    @classmethod
+    def _check_callable(cls, v):
+        if v is None:
+            return global_config.script_callable
+        return v
+
+    @root_validator(pre=True)
+    @classmethod
+    def _change_command(cls, values):
+        if not values.get("callable"):
+            return values
+
+        if not callable(values.get("source")):
+            return values
+
+        if values.get("args") is not None:
+            raise ValueError("Cannot specify args when callable is True")
+        values["args"] = [
+            "-m",
+            "hera.workflows.runner",
+            "-e",
+            f'{values["source"].__module__}:{values["source"].__name__}',
+        ]
+        return values
+
+    @validator("command", always=True)
     @classmethod
     def _check_command(cls, v):
         if v is None:
@@ -93,50 +122,40 @@ class Script(
         str
             Final formatted script.
         """
-        if callable(self.source):
-            signature = inspect.signature(self.source)
-            args = inspect.getfullargspec(self.source).args
-            if signature.return_annotation == str:
-                # Resolve function by filling in templated inputs
-                input_params_names = [p.name for p in self.inputs if isinstance(p, Parameter)]  # type: ignore
-                missing_args = set(args) - set(input_params_names)
-                if missing_args:
-                    raise ValueError(f"Missing inputs for source args: {missing_args}")
-                kwargs = {name: f"{{{{inputs.parameters.{name}}}}}" for name in args}
-                # Resolve the function to a string
-                return self.source(**kwargs)
-            else:
-                script = ""
-                # Argo will save the script as a file and run it with cmd:
-                # - python /argo/staging/script
-                # However, this prevents the script from importing modules in its cwd,
-                # since it's looking for files relative to the script path.
-                # We fix this by appending the cwd path to sys:
-                if self.add_cwd_to_sys_path:
-                    script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-
-                script_extra = self._get_param_script_portion() if args else None
-                if script_extra:
-                    script += copy.deepcopy(script_extra)
-                    script += "\n"
-
-                # content represents the function components, separated by new lines
-                # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
-                content = inspect.getsourcelines(self.source)[0]
-                token_index, start_token = 1, ":\n"
-                for curr_index, curr_token in enumerate(content):
-                    if start_token in curr_token:
-                        # when we find the curr token we find the end of the function header. The next index is the
-                        # starting point of the function body
-                        token_index = curr_index + 1
-                        break
-
-                s = "".join(content[token_index:])
-                script += textwrap.dedent(s)
-                return textwrap.dedent(script)
-        else:
+        if not callable(self.source):
             assert isinstance(self.source, str)
             return self.source
+        if self.callable:
+            return f"{g.inputs.parameters:$}"
+        args = inspect.getfullargspec(self.source).args
+        script = ""
+        # Argo will save the script as a file and run it with cmd:
+        # - python /argo/staging/script
+        # However, this prevents the script from importing modules in its cwd,
+        # since it's looking for files relative to the script path.
+        # We fix this by appending the cwd path to sys:
+        if self.add_cwd_to_sys_path:
+            script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
+
+        script_extra = self._get_param_script_portion() if args else None
+        if script_extra:
+            script += copy.deepcopy(script_extra)
+            script += "\n"
+
+        # content represents the function components, separated by new lines
+        # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
+        content = inspect.getsourcelines(self.source)[0]
+        token_index, start_token = 1, ":\n"
+        for curr_index, curr_token in enumerate(content):
+            if start_token in curr_token:
+                # when we find the curr token we find the end of the function header. The next index is the
+                # starting point of the function body
+                token_index = curr_index + 1
+                break
+
+        s = "".join(content[token_index:])
+        script += textwrap.dedent(s)
+        return textwrap.dedent(script)
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
@@ -157,6 +176,8 @@ class Script(
         return inputs
 
     def _build_template(self) -> _ModelTemplate:
+        # script needs to be called before inputs
+        # since it may modify other fields
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
@@ -269,10 +290,14 @@ def script(**script_kwargs):
         """
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
-        def task_wrapper(**task_params) -> Union[Task, Step]:
+        def task_wrapper(**kwargs) -> Union[Task, Step]:
             """Invokes a `Script` object's `__call__` method using the given `task_params`"""
-            return s.__call__(**task_params)  # type: ignore
+            if _context.active:
+                return s.__call__(**kwargs)  # type: ignore
+            return func(**kwargs)
 
+        # Set the wrapped function to the original function so that we can use it later
+        task_wrapper.wrapped_function = func  # type: ignore
         return task_wrapper
 
     return script_wrapper

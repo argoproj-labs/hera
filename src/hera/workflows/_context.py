@@ -29,6 +29,10 @@ class _HeraContext(threading.local):
     def exit(self) -> None:
         self._pieces.pop()
 
+    @property
+    def active(self) -> bool:
+        return bool(self._pieces)
+
     def add_sub_node(self, node: Union[SubNodeMixin, TTemplate]) -> None:
         if self._pieces:
             try:
