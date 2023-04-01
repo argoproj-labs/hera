@@ -8,6 +8,8 @@ import inspect
 import textwrap
 from typing import Callable, Dict, List, Optional, Union
 
+from pydantic import validator
+
 from hera.shared import global_config
 from hera.workflows._mixins import (
     CallableTemplateMixin,
@@ -43,12 +45,19 @@ class Script(
 
     container_name: Optional[str] = None
     args: Optional[List[str]] = None
-    command: Optional[List[str]] = global_config.script_command
+    command: Optional[List[str]] = None
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
     add_cwd_to_sys_path: bool = True
+
+    @validator("command", pre=True, always=True)
+    @classmethod
+    def _check_command(cls, v):
+        if v is None:
+            return global_config.script_command
+        return v
 
     def _get_param_script_portion(self) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes

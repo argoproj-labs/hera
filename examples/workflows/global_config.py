@@ -5,6 +5,7 @@ global_config.api_version = "argoproj.io/v0beta9000"
 global_config.namespace = "argo-namespace"
 global_config.service_account_name = "argo-account"
 global_config.image = "image-say"
+global_config.script_command = ["python3"]
 
 
 @script()

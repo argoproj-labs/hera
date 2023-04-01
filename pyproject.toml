@@ -48,6 +48,8 @@ types-PyYAML = "*"
 jsonpath-ng = "^1.5.3"
 datamodel-code-generator = {extras = ["http"], version = "^0.17.1"}
 types-requests = "^2.28.11.12"
+pytest-clarity = "^1.0.1"
+pytest-sugar = "^0.9.6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -59,7 +61,7 @@ max-line-length = 119
 target-version = ['py38']
 
 [tool.pytest.ini_options]
-addopts = "--durations=5 -vv --cov=hera --cov-report=term-missing --cov-report=xml --cov-config=pyproject.toml"
+addopts = "-vv --cov=hera --cov-report=xml --cov-config=pyproject.toml"
 filterwarnings = [
     # Hide the hera.host_config deprecations
     'ignore:.*is deprecated in favor of `global_config.GlobalConfig',

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Type, Union
 
 from ._base_model import TBase
@@ -9,6 +10,7 @@ Hook = Callable[[TBase], TBase]
 _HookMap = Dict[Type[TBase], List[Hook]]
 
 
+@dataclass
 class _GlobalConfig:
     """Hera global configuration holds any user configuration such as global tokens, hooks, etc.
 
@@ -27,12 +29,12 @@ class _GlobalConfig:
     namespace: Optional[str] = None
     _image: Union[str, Callable[[], str]] = "python:3.7"
     service_account_name: Optional[str] = None
-    script_command: Optional[List[str]] = ["python"]
+    script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
     _pre_build_hooks: Optional[_HookMap] = None
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
-        self.__dict__.clear()  # Wipe instance values to fallback to the class defaults
+        self.__dict__ = _GlobalConfig().__dict__
 
     @property
     def image(self) -> str:

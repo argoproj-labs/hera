@@ -11,12 +11,17 @@ spec:
       command:
       - cowsay
       image: docker/whalesay:latest
-  - name: 'say'
+  - name: say
     script:
-      command: ['python']
-      image: 'image-say'
-      source: |
-        import os
+      command:
+      - python3
+      image: image-say
+      source: 'import os
+
         import sys
+
         sys.path.append(os.getcwd())
+
         print("hello")
+
+        '
