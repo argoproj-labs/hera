@@ -436,8 +436,11 @@ class CallableTemplateMixin(ArgumentsMixin):
             # these are the already set parameters. If a users has already set a parameter argument, then Hera
             # uses the user-provided value rather than the inferred value
             arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]  # type: ignore
+            arguments = list(filter(lambda x: x is not None, arguments))
             parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
             parameter_names = {p.name for p in parameters}
+            artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
+            artifact_names = {a.name for a in artifacts}
             if "source" in kwargs and "with_param" in kwargs:
                 # Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
                 # `arguments` are used to indicate exactly what _values_ are assigned to the set inputs. Here,
@@ -447,7 +450,7 @@ class CallableTemplateMixin(ArgumentsMixin):
                 new_parameters = _get_params_from_source(kwargs["source"])
                 if new_parameters is not None:
                     for p in new_parameters:
-                        if p.name not in parameter_names:
+                        if p.name not in parameter_names and p.name not in artifact_names:
                             arguments.append(p)
             elif "source" in kwargs and "with_items" in kwargs:
                 # similarly to the above, we can infer the arguments to create based on the content of `with_items`.

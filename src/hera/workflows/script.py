@@ -150,8 +150,9 @@ class Script(
             inputs = ModelInputs(parameters=func_parameters)
 
         already_set_params = {p.name for p in inputs.parameters or []}
+        already_set_artifacts = {p.name for p in inputs.artifacts or []}
         for param in func_parameters:
-            if param.name not in already_set_params:
+            if param.name not in already_set_params and param.name not in already_set_artifacts:
                 inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
         return inputs
 
