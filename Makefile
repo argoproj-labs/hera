@@ -31,7 +31,7 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run python -m pytest -v
+	@poetry run python -m pytest
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows

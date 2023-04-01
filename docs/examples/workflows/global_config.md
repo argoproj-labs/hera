@@ -15,6 +15,7 @@
     global_config.namespace = "argo-namespace"
     global_config.service_account_name = "argo-account"
     global_config.image = "image-say"
+    global_config.script_command = ["python3"]
 
 
     @script()
@@ -43,14 +44,19 @@
           command:
           - cowsay
           image: docker/whalesay:latest
-      - name: 'say'
+      - name: say
         script:
-          command: ['python']
-          image: 'image-say'
-          source: |
-            import os
+          command:
+          - python3
+          image: image-say
+          source: 'import os
+
             import sys
+
             sys.path.append(os.getcwd())
+
             print("hello")
+
+            '
     ```
 
