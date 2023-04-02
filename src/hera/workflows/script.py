@@ -3,15 +3,17 @@
 See https://argoproj.github.io/argo-workflows/workflow-concepts/#script
 for more on scripts.
 """
+
 import copy
 import inspect
 import textwrap
-from typing import Callable, Dict, List, Optional, Union
+from abc import abstractmethod
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from pydantic import root_validator, validator
 
 from hera.expr import g
-from hera.shared import global_config
+from hera.shared import BaseMixin, global_config
 from hera.workflows._context import _context
 from hera.workflows._mixins import (
     CallableTemplateMixin,
@@ -33,6 +35,21 @@ from hera.workflows.steps import Step
 from hera.workflows.task import Task
 
 
+class ScriptConstructor(BaseMixin):
+    @abstractmethod
+    def generate_source(self, instance: "Script") -> str:
+        raise NotImplementedError
+
+    def transform_inputs(self, cls: Type["Script"], values: Any) -> Any:
+        return values
+
+    def transform_script_template(self, instance: "Script", script: _ModelScriptTemplate) -> _ModelScriptTemplate:
+        return script
+
+    def transform_template(self, instance: "Script", template: _ModelTemplate) -> _ModelTemplate:
+        return template
+
+
 class Script(
     EnvIOMixin,
     CallableTemplateMixin,
@@ -52,110 +69,43 @@ class Script(
     security_context: Optional[SecurityContext] = None
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
-    add_cwd_to_sys_path: bool = True
-    callable: bool = False
+    add_cwd_to_sys_path: Optional[bool] = None
+    constructor: Optional[Union[str, ScriptConstructor]] = None
 
-    @validator("callable", pre=True, always=True)
+    @validator("constructor", always=True)
     @classmethod
-    def _check_callable(cls, v):
+    def _set_constructor(cls, v):
         if v is None:
-            return global_config.script_callable
-        return v
-
-    @root_validator(pre=True)
-    @classmethod
-    def _change_command(cls, values):
-        if not values.get("callable"):
-            return values
-
-        if not callable(values.get("source")):
-            return values
-
-        if values.get("args") is not None:
-            raise ValueError("Cannot specify args when callable is True")
-        values["args"] = [
-            "-m",
-            "hera.workflows.runner",
-            "-e",
-            f'{values["source"].__module__}:{values["source"].__name__}',
-        ]
-        return values
+            # TODO: In the future we can insert
+            # detection code here to determine
+            # the best constructor to use.
+            v = InlineScriptConstructor()
+        if isinstance(v, ScriptConstructor):
+            return v
+        assert isinstance(v, str)
+        if v.lower() == "inline":
+            return InlineScriptConstructor()
+        elif v.lower() == "runner":
+            return RunnerScriptConstructor()
+        raise ValueError(f"Unknown constructor {v}")
 
     @validator("command", always=True)
     @classmethod
-    def _check_command(cls, v):
+    def _set_command(cls, v):
+        return v or global_config.script_command
+
+    @validator("add_cwd_to_sys_path", always=True)
+    @classmethod
+    def _set_add_cwd_to_sys_path(cls, v):
         if v is None:
-            return global_config.script_command
-        return v
+            return True
 
-    def _get_param_script_portion(self) -> str:
-        """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
-        parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
-        script that automatically imports json and loads/adds code to interpret each independent argument into the
-        script.
-
-        Returns
-        -------
-        str
-            The string representation of the script to load.
-        """
-        inputs = self._build_inputs()
-        assert inputs
-        extract = "import json\n"
-        for param in sorted(inputs.parameters or [], key=lambda x: x.name):
-            # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
-            # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
-            # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
-            # payload of the script is not necessary when regular input is set on the task via `func_params`
-            extract += f"""try: {param.name} = json.loads(r'''{{{{inputs.parameters.{param.name}}}}}''')\n"""
-            extract += f"""except: {param.name} = r'''{{{{inputs.parameters.{param.name}}}}}'''\n"""
-        return textwrap.dedent(extract)
-
-    def _build_source(self) -> str:
-        """Assembles and returns a script representation of the given function, along with the extra script material
-        prefixed to the string. The script is expected to be a callable function the client is interested in submitting
-        for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
-        through get_param_script_portion.
-
-        Returns
-        -------
-        str
-            Final formatted script.
-        """
-        if not callable(self.source):
-            assert isinstance(self.source, str)
-            return self.source
-        if self.callable:
-            return f"{g.inputs.parameters:$}"
-        args = inspect.getfullargspec(self.source).args
-        script = ""
-        # Argo will save the script as a file and run it with cmd:
-        # - python /argo/staging/script
-        # However, this prevents the script from importing modules in its cwd,
-        # since it's looking for files relative to the script path.
-        # We fix this by appending the cwd path to sys:
-        if self.add_cwd_to_sys_path:
-            script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
-
-        script_extra = self._get_param_script_portion() if args else None
-        if script_extra:
-            script += copy.deepcopy(script_extra)
-            script += "\n"
-
-        # content represents the function components, separated by new lines
-        # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
-        content = inspect.getsourcelines(self.source)[0]
-        token_index, start_token = 1, ":\n"
-        for curr_index, curr_token in enumerate(content):
-            if start_token in curr_token:
-                # when we find the curr token we find the end of the function header. The next index is the
-                # starting point of the function body
-                token_index = curr_index + 1
-                break
-
-        s = "".join(content[token_index:])
-        script += textwrap.dedent(s)
-        return textwrap.dedent(script)
+    @root_validator
+    @classmethod
+    def _constructor_validate(cls, values):
+        constructor = values.get("constructor")
+        assert isinstance(constructor, ScriptConstructor)
+        return constructor.transform_inputs(cls, values)
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
@@ -176,68 +126,74 @@ class Script(
         return inputs
 
     def _build_template(self) -> _ModelTemplate:
-        # script needs to be called before inputs
-        # since it may modify other fields
-        return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
-            affinity=self.affinity,
-            archive_location=self.archive_location,
-            automount_service_account_token=self.automount_service_account_token,
-            daemon=self.daemon,
-            executor=self.executor,
-            fail_fast=self.fail_fast,
-            host_aliases=self.host_aliases,
-            init_containers=self.init_containers,
-            inputs=self._build_inputs(),
-            memoize=self.memoize,
-            metadata=self._build_metadata(),
-            metrics=self.metrics,
-            name=self.name,
-            node_selector=self.node_selector,
-            outputs=self._build_outputs(),
-            parallelism=self.parallelism,
-            plugin=self.plugin,
-            pod_spec_patch=self.pod_spec_patch,
-            priority=self.priority,
-            priority_class_name=self.priority_class_name,
-            resource=self._build_resources(),
-            retry_strategy=self.retry_strategy,
-            scheduler_name=self.scheduler_name,
-            script=self._build_script(),
-            security_context=self.pod_security_context,
-            service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
-            synchronization=self.synchronization,
-            timeout=self.timeout,
-            tolerations=self.tolerations,
-            volumes=self._build_volumes(),
+        assert isinstance(self.constructor, ScriptConstructor)
+        return self.constructor.transform_template(
+            self,
+            _ModelTemplate(
+                active_deadline_seconds=self.active_deadline_seconds,
+                affinity=self.affinity,
+                archive_location=self.archive_location,
+                automount_service_account_token=self.automount_service_account_token,
+                daemon=self.daemon,
+                executor=self.executor,
+                fail_fast=self.fail_fast,
+                host_aliases=self.host_aliases,
+                init_containers=self.init_containers,
+                inputs=self._build_inputs(),
+                memoize=self.memoize,
+                metadata=self._build_metadata(),
+                metrics=self.metrics,
+                name=self.name,
+                node_selector=self.node_selector,
+                outputs=self._build_outputs(),
+                parallelism=self.parallelism,
+                plugin=self.plugin,
+                pod_spec_patch=self.pod_spec_patch,
+                priority=self.priority,
+                priority_class_name=self.priority_class_name,
+                resource=self._build_resources(),
+                retry_strategy=self.retry_strategy,
+                scheduler_name=self.scheduler_name,
+                script=self._build_script(),
+                security_context=self.pod_security_context,
+                service_account_name=self.service_account_name,
+                sidecars=self.sidecars,
+                synchronization=self.synchronization,
+                timeout=self.timeout,
+                tolerations=self.tolerations,
+                volumes=self._build_volumes(),
+            ),
         )
 
     def _build_script(self) -> _ModelScriptTemplate:
-        return _ModelScriptTemplate(
-            args=self.args,
-            command=self.command,
-            env=self._build_env(),
-            env_from=self._build_env_from(),
-            image=self.image,
-            image_pull_policy=self._build_image_pull_policy(),
-            lifecycle=self.lifecycle,
-            liveness_probe=self.liveness_probe,
-            name=self.container_name,
-            ports=self.ports,
-            readiness_probe=self.readiness_probe,
-            resources=self._build_resources(),
-            security_context=self.security_context,
-            source=self._build_source(),
-            startup_probe=self.startup_probe,
-            stdin=self.stdin,
-            stdin_once=self.stdin_once,
-            termination_message_path=self.termination_message_path,
-            termination_message_policy=self.termination_message_policy,
-            tty=self.tty,
-            volume_devices=self.volume_devices,
-            volume_mounts=self._build_volume_mounts(),
-            working_dir=self.working_dir,
+        assert isinstance(self.constructor, ScriptConstructor)
+        return self.constructor.transform_script_template(
+            self,
+            _ModelScriptTemplate(
+                args=self.args,
+                command=self.command,
+                env=self._build_env(),
+                env_from=self._build_env_from(),
+                image=self.image,
+                image_pull_policy=self._build_image_pull_policy(),
+                lifecycle=self.lifecycle,
+                liveness_probe=self.liveness_probe,
+                name=self.container_name,
+                ports=self.ports,
+                readiness_probe=self.readiness_probe,
+                resources=self._build_resources(),
+                security_context=self.security_context,
+                source=self.constructor.generate_source(self),
+                startup_probe=self.startup_probe,
+                stdin=self.stdin,
+                stdin_once=self.stdin_once,
+                termination_message_path=self.termination_message_path,
+                termination_message_policy=self.termination_message_policy,
+                tty=self.tty,
+                volume_devices=self.volume_devices,
+                volume_mounts=self._build_volume_mounts(),
+                working_dir=self.working_dir,
+            ),
         )
 
 
@@ -303,4 +259,94 @@ def script(**script_kwargs):
     return script_wrapper
 
 
-__all__ = ["Script", "script"]
+class InlineScriptConstructor(ScriptConstructor):
+    add_cwd_to_sys_path: Optional[bool] = None
+
+    def _get_param_script_portion(self, instance: Script) -> str:
+        """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
+        parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
+        script that automatically imports json and loads/adds code to interpret each independent argument into the
+        script.
+
+        Returns
+        -------
+        str
+            The string representation of the script to load.
+        """
+        inputs = instance._build_inputs()
+        assert inputs
+        extract = "import json\n"
+        for param in sorted(inputs.parameters or [], key=lambda x: x.name):
+            # Hera does not know what the content of the `InputFrom` is, coming from another task. In some cases
+            # non-JSON encoded strings are returned, which fail the loads, but they can be used as plain strings
+            # which is why this captures that in an except. This is only used for `InputFrom` cases as the extra
+            # payload of the script is not necessary when regular input is set on the task via `func_params`
+            extract += f"""try: {param.name} = json.loads(r'''{{{{inputs.parameters.{param.name}}}}}''')\n"""
+            extract += f"""except: {param.name} = r'''{{{{inputs.parameters.{param.name}}}}}'''\n"""
+        return textwrap.dedent(extract)
+
+    def generate_source(self, instance: Script) -> str:
+        """Assembles and returns a script representation of the given function, along with the extra script material
+        prefixed to the string. The script is expected to be a callable function the client is interested in submitting
+        for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
+        through get_param_script_portion.
+
+        Returns
+        -------
+        str
+            Final formatted script.
+        """
+        if not callable(instance.source):
+            assert isinstance(instance.source, str)
+            return instance.source
+        args = inspect.getfullargspec(instance.source).args
+        script = ""
+        # Argo will save the script as a file and run it with cmd:
+        # - python /argo/staging/script
+        # However, this prevents the script from importing modules in its cwd,
+        # since it's looking for files relative to the script path.
+        # We fix this by appending the cwd path to sys:
+        if instance.add_cwd_to_sys_path or self.add_cwd_to_sys_path:
+            script = "import os\nimport sys\nsys.path.append(os.getcwd())\n"
+
+        script_extra = self._get_param_script_portion(instance) if args else None
+        if script_extra:
+            script += copy.deepcopy(script_extra)
+            script += "\n"
+
+        # content represents the function components, separated by new lines
+        # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
+        content = inspect.getsourcelines(instance.source)[0]
+        token_index, start_token = 1, ":\n"
+        for curr_index, curr_token in enumerate(content):
+            if start_token in curr_token:
+                # when we find the curr token we find the end of the function header. The next index is the
+                # starting point of the function body
+                token_index = curr_index + 1
+                break
+
+        s = "".join(content[token_index:])
+        script += textwrap.dedent(s)
+        return textwrap.dedent(script)
+
+
+class RunnerScriptConstructor(ScriptConstructor):
+    def transform_inputs(self, cls: Type[Script], values: Any) -> Any:
+        if not callable(values.get("source")):
+            return values
+
+        if values.get("args") is not None:
+            raise ValueError("Cannot specify args when callable is True")
+        values["args"] = [
+            "-m",
+            "hera.workflows.runner",
+            "-e",
+            f'{values["source"].__module__}:{values["source"].__name__}',
+        ]
+        return values
+
+    def generate_source(self, instance: Script) -> str:
+        return f"{g.inputs.parameters:$}"
+
+
+__all__ = ["Script", "script", "ScriptConstructor", "InlineScriptConstructor", "RunnerScriptConstructor"]

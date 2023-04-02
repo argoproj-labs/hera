@@ -1,11 +1,9 @@
-apiVersion: argoproj.io/v0beta9000
+apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: coinflip-
-  namespace: argo-namespace
 spec:
   entrypoint: d
-  serviceAccountName: argo-account
   templates:
   - dag:
       tasks:
@@ -28,8 +26,8 @@ spec:
       - -e
       - examples.workflows.callable_coinflip:flip
       command:
-      - python3
-      image: image-say
+      - python
+      image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - name: heads
     script:
@@ -39,8 +37,8 @@ spec:
       - -e
       - examples.workflows.callable_coinflip:heads
       command:
-      - python3
-      image: image-say
+      - python
+      image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - name: tails
     script:
@@ -50,6 +48,6 @@ spec:
       - -e
       - examples.workflows.callable_coinflip:tails
       command:
-      - python3
-      image: image-say
+      - python
+      image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'

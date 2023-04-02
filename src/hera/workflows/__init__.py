@@ -34,7 +34,7 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.resource import Resource
 from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryPolicy, RetryStrategy
-from hera.workflows.script import Script, script
+from hera.workflows.script import InlineScriptConstructor, RunnerScriptConstructor, Script, ScriptConstructor, script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.steps import Parallel, Step, Steps
 from hera.workflows.suspend import Suspend
@@ -117,6 +117,7 @@ __all__ = [
     "HTTPArtifact",
     "HostPathVolume",
     "ISCSIVolume",
+    "InlineScriptConstructor",
     "InvalidDispatchType",
     "InvalidTemplateCall",
     "InvalidType",
@@ -137,9 +138,11 @@ __all__ = [
     "Resources",
     "RetryPolicy",
     "RetryStrategy",
+    "RunnerScriptConstructor",
     "S3Artifact",
     "ScaleIOVolume",
     "Script",
+    "ScriptConstructor",
     "SecretEnv",
     "SecretEnvFrom",
     "SecretVolume",

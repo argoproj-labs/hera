@@ -11,7 +11,7 @@
     from hera.workflows import Env, Workflow, script
 
 
-    @script(image="python:3.8", add_cwd_to_sys_path=False, env=[Env(name="PYTHONUNBUFFERED", value="1")])
+    @script(image="python:3.7", add_cwd_to_sys_path=False, env=[Env(name="PYTHONUNBUFFERED", value="1")])
     def whalesay():
         import time  # noqa: I001
         import random
@@ -52,7 +52,7 @@
           env:
           - name: PYTHONUNBUFFERED
             value: '1'
-          image: python:3.8
+          image: python:3.7
           source: "import time  # noqa: I001\nimport random\n\nmessages = [\n    \"No\
             \ Color\",\n    \"\\x1b[30m%s\\x1b[0m\" % \"FG Black\",\n    \"\\x1b[32m%s\\\
             x1b[0m\" % \"FG Green\",\n    \"\\x1b[34m%s\\x1b[0m\" % \"FG Blue\",\n   \

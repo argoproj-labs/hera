@@ -10,28 +10,29 @@
     ```python linenums="1"
     import random
 
-    from examples.workflows import global_config
-    from hera.workflows import DAG, Workflow, script
+    from hera.shared import global_config
+    from hera.workflows import DAG, Script, Workflow, script
 
-    # Note, callable mode is only possible if the source code is available
+    # Note, setting constructor to runner is only possible if the source code is available
     # along with dependencies include hera in the image.
     # Callable is a robust mode that allows you to run any python function
     # and is compatible with pydantic. It automatically parses the input
     # and serializes the output.
     global_config.image = "my-image-with-python-source-code-and-dependencies"
+    global_config.set_class_defaults(Script, constructor="runner")
 
 
-    @script(callable=True)
+    @script()
     def flip():
         return "heads" if random.randint(0, 1) == 0 else "tails"
 
 
-    @script(callable=True)
+    @script()
     def heads():
         return "it was heads"
 
 
-    @script(callable=True)
+    @script()
     def tails():
         return "it was tails"
 
@@ -46,14 +47,12 @@
 === "YAML"
 
     ```yaml linenums="1"
-    apiVersion: argoproj.io/v0beta9000
+    apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
       generateName: coinflip-
-      namespace: argo-namespace
     spec:
       entrypoint: d
-      serviceAccountName: argo-account
       templates:
       - dag:
           tasks:
@@ -76,8 +75,8 @@
           - -e
           - examples.workflows.callable_coinflip:flip
           command:
-          - python3
-          image: image-say
+          - python
+          image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - name: heads
         script:
@@ -87,8 +86,8 @@
           - -e
           - examples.workflows.callable_coinflip:heads
           command:
-          - python3
-          image: image-say
+          - python
+          image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - name: tails
         script:
@@ -98,8 +97,8 @@
           - -e
           - examples.workflows.callable_coinflip:tails
           command:
-          - python3
-          image: image-say
+          - python
+          image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
     ```
 

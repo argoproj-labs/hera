@@ -7,7 +7,8 @@ spec:
   entrypoint: whalesay
   serviceAccountName: argo-account
   templates:
-  - container:
+  - activeDeadlineSeconds: '100'
+    container:
       command:
       - cowsay
       image: docker/whalesay:latest

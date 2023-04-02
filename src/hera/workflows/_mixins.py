@@ -5,8 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
 from pydantic import root_validator, validator
 
-from hera.shared import global_config
-from hera.shared._base_model import BaseMixin
+from hera.shared import BaseMixin, global_config
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact

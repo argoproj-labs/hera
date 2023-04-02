@@ -13,14 +13,16 @@
     from pydantic import BaseModel
 
     from hera.shared import global_config
-    from hera.workflows import Steps, Workflow, script
+    from hera.workflows import Script, Steps, Workflow, script
 
-    # Note, callable mode is only possible if the source code is available
+    # Note, setting constructor to runner is only possible if the source code is available
     # along with dependencies include hera in the image.
     # Callable is a robust mode that allows you to run any python function
     # and is compatible with pydantic. It automatically parses the input
     # and serializes the output.
     global_config.image = "my-image-with-python-source-code-and-dependencies"
+    global_config.set_class_defaults(Script, constructor="runner")
+
 
     # An optional pydantic input type
     # hera can automatically de-serialize argo
@@ -32,6 +34,7 @@
         a: int
         b: str = "foo"
 
+
     # An optional pydantic output type
     # hera can automatically serialize the output
     # of your function into a json string
@@ -42,7 +45,7 @@
         output: List[Input]
 
 
-    @script(callable=True)
+    @script()
     def my_function(input: Input) -> Output:
         return Output(output=[input])
 
@@ -50,7 +53,7 @@
     # Note that the input type is a list of Input
     # hera can also automatically de-serialize
     # composite types like lists and dicts
-    @script(callable=True)
+    @script()
     def another_function(inputs: List[Input]) -> Output:
         return Output(output=inputs)
 
@@ -58,7 +61,7 @@
     # it also works with raw json strings
     # but those must be explicitly marked as
     # a string type
-    @script(callable=True)
+    @script()
     def str_function(input: str) -> Output:
         # Example function to ensure we are not json parsing
         # string types before passing it to the function
