@@ -19,6 +19,7 @@ from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
     EnvIOMixin,
+    ExperimentalMixin,
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
@@ -36,17 +37,31 @@ from hera.workflows.task import Task
 
 
 class ScriptConstructor(BaseMixin):
+    """A ScriptConstructor is responsible for generating the source code for a Script given a python callable.
+
+    This allows users to customize the behaviour of the template that hera generates when a python callable is
+    passed to the Script class.
+
+    In order to use your custom ScriptConstructor implementation, you can set it as the Script.constructor field.
+    """
+
     @abstractmethod
     def generate_source(self, instance: "Script") -> str:
+        """A function that can inspect the Script instance and generate the source field."""
         raise NotImplementedError
 
-    def transform_inputs(self, cls: Type["Script"], values: Any) -> Any:
+    def transform_values(self, cls: Type["Script"], values: Any) -> Any:
+        """A function that will be inokved by the root validator of the Script class."""
         return values
 
-    def transform_script_template(self, instance: "Script", script: _ModelScriptTemplate) -> _ModelScriptTemplate:
+    def transform_script_template_post_build(
+        self, instance: "Script", script: _ModelScriptTemplate
+    ) -> _ModelScriptTemplate:
+        """A hook to transform the generated script template."""
         return script
 
-    def transform_template(self, instance: "Script", template: _ModelTemplate) -> _ModelTemplate:
+    def transform_template_post_build(self, instance: "Script", template: _ModelTemplate) -> _ModelTemplate:
+        """A hook to transform the generated template."""
         return template
 
 
@@ -105,7 +120,7 @@ class Script(
     def _constructor_validate(cls, values):
         constructor = values.get("constructor")
         assert isinstance(constructor, ScriptConstructor)
-        return constructor.transform_inputs(cls, values)
+        return constructor.transform_values(cls, values)
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
@@ -127,7 +142,7 @@ class Script(
 
     def _build_template(self) -> _ModelTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
-        return self.constructor.transform_template(
+        return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
                 active_deadline_seconds=self.active_deadline_seconds,
@@ -167,7 +182,7 @@ class Script(
 
     def _build_script(self) -> _ModelScriptTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
-        return self.constructor.transform_script_template(
+        return self.constructor.transform_script_template_post_build(
             self,
             _ModelScriptTemplate(
                 args=self.args,
@@ -330,8 +345,10 @@ class InlineScriptConstructor(ScriptConstructor):
         return textwrap.dedent(script)
 
 
-class RunnerScriptConstructor(ScriptConstructor):
-    def transform_inputs(self, cls: Type[Script], values: Any) -> Any:
+class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
+    _flag: str = "script_runner"
+
+    def transform_values(self, cls: Type[Script], values: Any) -> Any:
         if not callable(values.get("source")):
             return values
 
@@ -343,6 +360,7 @@ class RunnerScriptConstructor(ScriptConstructor):
             "-e",
             f'{values["source"].__module__}:{values["source"].__name__}',
         ]
+
         return values
 
     def generate_source(self, instance: Script) -> str:

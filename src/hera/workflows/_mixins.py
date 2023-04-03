@@ -588,3 +588,19 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+
+class ExperimentalMixin(BaseMixin):
+    _experimental_warning_message: str = (
+        "Unable to instantiate {} since it is an experimental feature."
+        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+    _flag: str
+
+    @root_validator
+    def _check_enabled(cls, values):
+        if not global_config.experimental_features[cls._flag]:
+            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
+        return values

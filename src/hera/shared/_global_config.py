@@ -39,6 +39,7 @@ class _GlobalConfig:
     script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
     _pre_build_hooks: Optional[_HookMap] = None
     _defaults: _Defaults = field(default_factory=lambda: defaultdict(dict))
+    experimental_features: Dict[str, bool] = field(default_factory=lambda: defaultdict(bool))
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
