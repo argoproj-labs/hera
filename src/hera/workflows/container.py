@@ -87,7 +87,6 @@ class Container(
             pod_spec_patch=self.pod_spec_patch,
             priority=self.priority,
             priority_class_name=self.priority_class_name,
-            resource=self._build_resources(),
             retry_strategy=self.retry_strategy,
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
