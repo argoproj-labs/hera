@@ -6,6 +6,7 @@ global_config.namespace = "argo-namespace"
 global_config.service_account_name = "argo-account"
 global_config.image = "image-say"
 global_config.script_command = ["python3"]
+global_config.set_class_defaults(Container, active_deadline_seconds=100, command=["cowsay"])
 
 
 @script()
@@ -14,5 +15,5 @@ def say():
 
 
 with Workflow(generate_name="global-config-", entrypoint="whalesay") as w:
-    whalesay = Container(image="docker/whalesay:latest", command=["cowsay"])
+    whalesay = Container(image="docker/whalesay:latest")
     say()

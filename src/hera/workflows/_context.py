@@ -1,7 +1,7 @@
 import threading
 from typing import List, TypeVar, Union
 
-from hera.shared._base_model import BaseMixin
+from hera.shared import BaseMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Subbable, TTemplate
 
@@ -28,6 +28,10 @@ class _HeraContext(threading.local):
 
     def exit(self) -> None:
         self._pieces.pop()
+
+    @property
+    def active(self) -> bool:
+        return bool(self._pieces)
 
     def add_sub_node(self, node: Union[SubNodeMixin, TTemplate]) -> None:
         if self._pieces:

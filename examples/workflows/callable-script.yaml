@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: my-workflow
+spec:
+  templates:
+  - name: my-steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: input
+            value: '{"a": 2, "b": "bar"}'
+        name: my-function
+        template: my-function
+    - - arguments:
+          parameters:
+          - name: input
+            value: '{"a": 2, "b": "bar"}'
+        name: str-function
+        template: str-function
+    - - arguments:
+          parameters:
+          - name: inputs
+            value: '[{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]'
+        name: another-function
+        template: another-function
+  - inputs:
+      parameters:
+      - name: input
+    name: my-function
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.callable_script:my_function
+      command:
+      - python
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: input
+    name: str-function
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.callable_script:str_function
+      command:
+      - python
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: inputs
+    name: another-function
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.callable_script:another_function
+      command:
+      - python
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'

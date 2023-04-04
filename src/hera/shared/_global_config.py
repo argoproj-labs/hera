@@ -1,13 +1,20 @@
 from __future__ import annotations
 
 import inspect
+from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
-from ._base_model import TBase
+from pydantic import root_validator
+
+from ._base_model import BaseModel
+
+TBase = TypeVar("TBase", bound="BaseMixin")
+TypeTBase = Type[TBase]
 
 Hook = Callable[[TBase], TBase]
 _HookMap = Dict[Type[TBase], List[Hook]]
+_Defaults = Dict[TBase, Dict]
 
 
 @dataclass
@@ -27,10 +34,12 @@ class _GlobalConfig:
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
     namespace: Optional[str] = None
-    _image: Union[str, Callable[[], str]] = "python:3.7"
+    _image: Union[str, Callable[[], str]] = "python:3.8"
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
     _pre_build_hooks: Optional[_HookMap] = None
+    _defaults: _Defaults = field(default_factory=lambda: defaultdict(dict))
+    experimental_features: Dict[str, bool] = field(default_factory=lambda: defaultdict(bool))
 
     def reset(self) -> None:
         """Resets the global config container to its initial state"""
@@ -73,6 +82,50 @@ class _GlobalConfig:
         """Registers a hook to be called before building a model."""
         self._pre_build_hooks = self._pre_build_hooks or {}
         return self._pre_build_hooks.get(type(instance)) or []
+
+    def set_class_defaults(self, cls: Type[TBase], **kwargs: Any) -> None:
+        """Sets default values for a class.
+
+        Args:
+            cls: The class to set defaults for.
+            kwargs: The default values to set.
+        """
+        invalid_keys = set(kwargs) - set(cls.__fields__)
+        if invalid_keys:
+            raise ValueError(f"Invalid keys for class {cls}: {invalid_keys}")
+        self._defaults[cls].update(kwargs)
+
+    def _get_class_defaults(self, cls: BaseMixin) -> Any:
+        """Gets a default value for a class.
+
+        Args:
+            cls: The class to get defaults for.
+        """
+        return self._defaults[cls]
+
+
+class BaseMixin(BaseModel):
+    # Note this is pydantic private method that
+    # is called after __init__
+    # In order to inject __hera_init__ after __init__
+    # without destroying the autocomplete, we have opted
+    # for this method. We also tried other ways
+    # including creating a metaclass that invokes hera_init
+    # after init, but that always broke auto-complete for vscode
+    def _init_private_attributes(self):
+        super()._init_private_attributes()
+        self.__hera_init__()
+
+    def __hera_init__(self):
+        ...
+
+    @root_validator(pre=True)
+    def _set_defaults(cls, values):
+        defaults = global_config._get_class_defaults(cls)
+        for key, value in defaults.items():
+            if values.get(key) is None:
+                values[key] = value
+        return values
 
 
 GlobalConfig = global_config = _GlobalConfig()

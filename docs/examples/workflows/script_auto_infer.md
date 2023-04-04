@@ -66,7 +66,7 @@
         script:
           command:
           - python
-          image: python:3.7
+          image: python:3.8
           source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport pickle\n\
             \nresult = \"foo testing\"\nwith open(\"/tmp/result\", \"wb\") as f:\n   \
             \ pickle.dump(result, f)\n"
@@ -78,7 +78,7 @@
         script:
           command:
           - python
-          image: python:3.7
+          image: python:3.8
           source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\n\
             import pickle\n\nwith open(\"/tmp/i\", \"rb\") as f:\n    i = pickle.load(f)\n\
             print(i)\n"

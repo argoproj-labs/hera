@@ -12,7 +12,7 @@ def test_container_pre_build_hooks():
     with Workflow(name="t") as w:
         c = Container()
 
-    assert c.image == "python:3.7"
+    assert c.image == "python:3.8"
     w.build()
     assert c.image == "test_image"
     global_config.reset()
@@ -27,7 +27,7 @@ def test_container_pre_build_hooks():
     with Workflow(name="t") as w:
         c = Container()
 
-    assert c.image == "python:3.7"
+    assert c.image == "python:3.8"
     assert c.labels is None
     w.build()
     assert c.image == "test_image"
