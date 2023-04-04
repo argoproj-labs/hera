@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: container-with-resources-
+spec:
+  entrypoint: c
+  templates:
+  - container:
+      args:
+      - echo Hello, world!
+      command:
+      - sh
+      - -c
+      image: alpine:3.7
+      resources:
+        requests:
+          cpu: '1'
+          memory: 5Gi
+          ephemeral-storage: 5Gi
+    name: c
