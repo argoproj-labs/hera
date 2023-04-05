@@ -1,3 +1,4 @@
+typing_extensions
 mkdocs
 mkdocs-material
 mkdocs-include-markdown-plugin
