@@ -59,7 +59,7 @@ class WorkflowsService:
         namespace: Optional[str] = None,
     ):
         self.host = cast(str, host or global_config.host)
-        self.verify_ssl = verify_ssl or global_config.verify_ssl
+        self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
         self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace
 
