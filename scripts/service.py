@@ -91,6 +91,8 @@ class ServiceEndpoint:
         self.url = self.parse_url(url)
         self.method = method
         self.name = name
+        # these need to be sorted as they are used to create the function signature. Required parameters must be
+        # prioritized. Note that we set `reverse=True` since `False` will be sorted before `True`
         self.params = sorted(params, key=lambda p: p.required, reverse=True)
         self.response = response
         self.summary = summary
