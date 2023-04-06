@@ -36,7 +36,7 @@ class RetryStrategy(_BaseModel):
     affinity: Optional[RetryAffinity] = None
     backoff: Optional[Backoff] = None
     expression: Optional[str] = None
-    limit: Optional[Union[int, str]] = None
+    limit: Optional[IntOrString] = None
     retry_policy: Optional[Union[str, RetryPolicy]] = None
 
     @validator("retry_policy", pre=True)
