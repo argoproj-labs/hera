@@ -43,7 +43,7 @@ class EventsService:
 
     def list_event_sources(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -55,7 +55,9 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> EventSourceList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -77,9 +79,11 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def create_event_source(self, namespace: str, req: CreateEventSourceRequest) -> EventSource:
+    def create_event_source(self, req: CreateEventSourceRequest, namespace: Optional[str] = None) -> EventSource:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -93,10 +97,10 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_event_source(self, namespace: str, name: str) -> EventSource:
+    def get_event_source(self, name: str, namespace: Optional[str] = None) -> EventSource:
         resp = requests.get(
             url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -109,10 +113,12 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def update_event_source(self, namespace: str, name: str, req: UpdateEventSourceRequest) -> EventSource:
+    def update_event_source(
+        self, name: str, req: UpdateEventSourceRequest, namespace: Optional[str] = None
+    ) -> EventSource:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -129,8 +135,8 @@ class EventsService:
 
     def delete_event_source(
         self,
-        namespace: str,
         name: str,
+        namespace: Optional[str] = None,
         grace_period_seconds: Optional[str] = None,
         uid: Optional[str] = None,
         resource_version: Optional[str] = None,
@@ -140,7 +146,7 @@ class EventsService:
     ) -> EventSourceDeletedResponse:
         resp = requests.delete(
             url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
@@ -160,10 +166,10 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def receive_event(self, namespace: str, discriminator: str, req: Item) -> EventResponse:
+    def receive_event(self, discriminator: str, req: Item, namespace: Optional[str] = None) -> EventResponse:
         resp = requests.post(
             url=os.path.join(self.host, "api/v1/events/{namespace}/{discriminator}").format(
-                namespace=namespace, discriminator=discriminator
+                discriminator=discriminator, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -194,7 +200,7 @@ class EventsService:
 
     def list_sensors(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -206,7 +212,9 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> SensorList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -228,9 +236,11 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def create_sensor(self, namespace: str, req: CreateSensorRequest) -> Sensor:
+    def create_sensor(self, req: CreateSensorRequest, namespace: Optional[str] = None) -> Sensor:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -244,9 +254,11 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_sensor(self, namespace: str, name: str, resource_version: Optional[str] = None) -> Sensor:
+    def get_sensor(self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None) -> Sensor:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(
+                name=name, namespace=namespace if namespace is not None else self.namespace
+            ),
             params={"getOptions.resourceVersion": resource_version},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -258,9 +270,11 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def update_sensor(self, namespace: str, name: str, req: UpdateSensorRequest) -> Sensor:
+    def update_sensor(self, name: str, req: UpdateSensorRequest, namespace: Optional[str] = None) -> Sensor:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(
+                name=name, namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -276,8 +290,8 @@ class EventsService:
 
     def delete_sensor(
         self,
-        namespace: str,
         name: str,
+        namespace: Optional[str] = None,
         grace_period_seconds: Optional[str] = None,
         uid: Optional[str] = None,
         resource_version: Optional[str] = None,
@@ -286,7 +300,9 @@ class EventsService:
         dry_run: Optional[list] = None,
     ) -> DeleteSensorResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(
+                name=name, namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
                 "deleteOptions.preconditions.uid": uid,
@@ -307,7 +323,7 @@ class EventsService:
 
     def watch_event_sources(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -319,7 +335,9 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> EventSourceWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -343,7 +361,7 @@ class EventsService:
 
     def event_sources_logs(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         name: Optional[str] = None,
         event_source_type: Optional[str] = None,
         event_name: Optional[str] = None,
@@ -360,7 +378,9 @@ class EventsService:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> EventsourceLogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "name": name,
                 "eventSourceType": event_source_type,
@@ -389,7 +409,7 @@ class EventsService:
 
     def watch_events(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -401,7 +421,9 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> Event:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/events/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/events/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -425,7 +447,7 @@ class EventsService:
 
     def watch_sensors(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -437,7 +459,9 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> SensorWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -461,7 +485,7 @@ class EventsService:
 
     def sensors_logs(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         name: Optional[str] = None,
         trigger_name: Optional[str] = None,
         grep: Optional[str] = None,
@@ -477,7 +501,9 @@ class EventsService:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> SensorLogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}/logs").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}/logs").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "name": name,
                 "triggerName": trigger_name,
@@ -533,12 +559,12 @@ class EventsService:
 
     def get_artifact_file(
         self,
-        namespace: str,
         id_discriminator: str,
         id_: str,
         node_id: str,
         artifact_name: str,
         artifact_discriminator: str,
+        namespace: Optional[str] = None,
     ) -> str:
         """Get an artifact."""
         resp = requests.get(
@@ -546,12 +572,12 @@ class EventsService:
                 self.host,
                 "artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
-                namespace=namespace,
                 idDiscriminator=id_discriminator,
                 id=id_,
                 nodeId=node_id,
                 artifactName=artifact_name,
                 artifactDiscriminator=artifact_discriminator,
+                namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -581,11 +607,14 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_output_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
+    def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
         resp = requests.get(
             url=os.path.join(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
-                namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
+                name=name,
+                nodeId=node_id,
+                artifactName=artifact_name,
+                namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -615,11 +644,14 @@ class EventsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_input_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
+    def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
         resp = requests.get(
             url=os.path.join(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
-                namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
+                name=name,
+                nodeId=node_id,
+                artifactName=artifact_name,
+                namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},

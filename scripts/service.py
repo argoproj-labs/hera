@@ -91,7 +91,9 @@ class ServiceEndpoint:
         self.url = self.parse_url(url)
         self.method = method
         self.name = name
-        self.params = params
+        # these need to be sorted as they are used to create the function signature. Required parameters must be
+        # prioritized. Note that we set `reverse=True` since `False` will be sorted before `True`
+        self.params = sorted(params, key=lambda p: p.required, reverse=True)
         self.response = response
         self.summary = summary
         self.consumes = consumes
@@ -126,8 +128,16 @@ class ServiceEndpoint:
         if len(path_params) == 0:
             req_url = f"os.path.join(self.host, '{self.url}')"
         else:
-            req_url_params = ", ".join([f"{p.field}={p.name}" for p in path_params])
-            req_url = f"os.path.join(self.host, '{self.url}').format({req_url_params})"
+            # note that here we have a condition on `namespace` because `namespace` can be a global configuration. So,
+            # we either take it from the endpoint (prioritized just in case users rely on the service to use
+            # generated models but not Hera models) or from the global configuration
+            req_url_params = []
+            for p in path_params:
+                if p.name == "namespace":
+                    req_url_params.append("namespace=namespace if namespace is not None else self.namespace")
+                else:
+                    req_url_params.append(f"{p.field}={p.name}")
+            req_url = f"os.path.join(self.host, '{self.url}').format({', '.join(req_url_params)})"
 
         # query params
         query_params = [p for p in self.params if p.in_ == "query"]
@@ -304,6 +314,11 @@ def parse_parameter(parameter: dict, models_type: str) -> Parameter:
     name_ = parse_builtin(name_)
     name_ = name_.lower()
 
+    # a lot of endpoints use a parameter called `namespace`. The Hera service uses `namespace` as an optional keyword
+    # because it's actually set on the service itself. Here, we check for `namespace` and intentionally make
+    # it optional
+    if name_ == "namespace":
+        return Parameter(name_, name, in_, type_, False)
     return Parameter(name_, name, in_, type_, required)
 
 

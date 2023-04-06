@@ -342,7 +342,7 @@ class WorkflowsService:
 
     def list_cron_workflows(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -354,7 +354,9 @@ class WorkflowsService:
         continue_: Optional[str] = None,
     ) -> CronWorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -376,9 +378,11 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def create_cron_workflow(self, namespace: str, req: CreateCronWorkflowRequest) -> CronWorkflow:
+    def create_cron_workflow(self, req: CreateCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -392,9 +396,11 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def lint_cron_workflow(self, namespace: str, req: LintCronWorkflowRequest) -> CronWorkflow:
+    def lint_cron_workflow(self, req: LintCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/lint").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/lint").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -408,10 +414,12 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_cron_workflow(self, namespace: str, name: str, resource_version: Optional[str] = None) -> CronWorkflow:
+    def get_cron_workflow(
+        self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
+    ) -> CronWorkflow:
         resp = requests.get(
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version},
             headers={"Authorization": f"Bearer {self.token}"},
@@ -424,10 +432,12 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def update_cron_workflow(self, namespace: str, name: str, req: UpdateCronWorkflowRequest) -> CronWorkflow:
+    def update_cron_workflow(
+        self, name: str, req: UpdateCronWorkflowRequest, namespace: Optional[str] = None
+    ) -> CronWorkflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -444,8 +454,8 @@ class WorkflowsService:
 
     def delete_cron_workflow(
         self,
-        namespace: str,
         name: str,
+        namespace: Optional[str] = None,
         grace_period_seconds: Optional[str] = None,
         uid: Optional[str] = None,
         resource_version: Optional[str] = None,
@@ -455,7 +465,7 @@ class WorkflowsService:
     ) -> CronWorkflowDeletedResponse:
         resp = requests.delete(
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
@@ -475,10 +485,12 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def resume_cron_workflow(self, namespace: str, name: str, req: CronWorkflowResumeRequest) -> CronWorkflow:
+    def resume_cron_workflow(
+        self, name: str, req: CronWorkflowResumeRequest, namespace: Optional[str] = None
+    ) -> CronWorkflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}/resume").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -493,10 +505,12 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def suspend_cron_workflow(self, namespace: str, name: str, req: CronWorkflowSuspendRequest) -> CronWorkflow:
+    def suspend_cron_workflow(
+        self, name: str, req: CronWorkflowSuspendRequest, namespace: Optional[str] = None
+    ) -> CronWorkflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}/suspend").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -555,7 +569,7 @@ class WorkflowsService:
 
     def list_workflow_templates(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -567,7 +581,9 @@ class WorkflowsService:
         continue_: Optional[str] = None,
     ) -> WorkflowTemplateList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -589,9 +605,13 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def create_workflow_template(self, namespace: str, req: WorkflowTemplateCreateRequest) -> WorkflowTemplate:
+    def create_workflow_template(
+        self, req: WorkflowTemplateCreateRequest, namespace: Optional[str] = None
+    ) -> WorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -605,9 +625,13 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def lint_workflow_template(self, namespace: str, req: WorkflowTemplateLintRequest) -> WorkflowTemplate:
+    def lint_workflow_template(
+        self, req: WorkflowTemplateLintRequest, namespace: Optional[str] = None
+    ) -> WorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/lint").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/lint").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -622,11 +646,11 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def get_workflow_template(
-        self, namespace: str, name: str, resource_version: Optional[str] = None
+        self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.get(
             url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version},
             headers={"Authorization": f"Bearer {self.token}"},
@@ -640,11 +664,11 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def update_workflow_template(
-        self, namespace: str, name: str, req: WorkflowTemplateUpdateRequest
+        self, name: str, req: WorkflowTemplateUpdateRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -661,8 +685,8 @@ class WorkflowsService:
 
     def delete_workflow_template(
         self,
-        namespace: str,
         name: str,
+        namespace: Optional[str] = None,
         grace_period_seconds: Optional[str] = None,
         uid: Optional[str] = None,
         resource_version: Optional[str] = None,
@@ -672,7 +696,7 @@ class WorkflowsService:
     ) -> WorkflowTemplateDeleteResponse:
         resp = requests.delete(
             url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
@@ -694,7 +718,7 @@ class WorkflowsService:
 
     def list_workflows(
         self,
-        namespace: str,
+        namespace: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -707,7 +731,9 @@ class WorkflowsService:
         fields: Optional[str] = None,
     ) -> WorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -730,9 +756,11 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def create_workflow(self, namespace: str, req: WorkflowCreateRequest) -> Workflow:
+    def create_workflow(self, req: WorkflowCreateRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -746,9 +774,11 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def lint_workflow(self, namespace: str, req: WorkflowLintRequest) -> Workflow:
+    def lint_workflow(self, req: WorkflowLintRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/lint").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/lint").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -762,9 +792,11 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def submit_workflow(self, namespace: str, req: WorkflowSubmitRequest) -> Workflow:
+    def submit_workflow(self, req: WorkflowSubmitRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/submit").format(namespace=namespace),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/submit").format(
+                namespace=namespace if namespace is not None else self.namespace
+            ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -779,10 +811,16 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def get_workflow(
-        self, namespace: str, name: str, resource_version: Optional[str] = None, fields: Optional[str] = None
+        self,
+        name: str,
+        namespace: Optional[str] = None,
+        resource_version: Optional[str] = None,
+        fields: Optional[str] = None,
     ) -> Workflow:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(
+                name=name, namespace=namespace if namespace is not None else self.namespace
+            ),
             params={"getOptions.resourceVersion": resource_version, "fields": fields},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -796,8 +834,8 @@ class WorkflowsService:
 
     def delete_workflow(
         self,
-        namespace: str,
         name: str,
+        namespace: Optional[str] = None,
         grace_period_seconds: Optional[str] = None,
         uid: Optional[str] = None,
         resource_version: Optional[str] = None,
@@ -807,7 +845,9 @@ class WorkflowsService:
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(namespace=namespace, name=name),
+            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(
+                name=name, namespace=namespace if namespace is not None else self.namespace
+            ),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
                 "deleteOptions.preconditions.uid": uid,
@@ -829,8 +869,8 @@ class WorkflowsService:
 
     def workflow_logs(
         self,
-        namespace: str,
         name: str,
+        namespace: Optional[str] = None,
         pod_name: Optional[str] = None,
         container: Optional[str] = None,
         follow: Optional[bool] = None,
@@ -847,7 +887,7 @@ class WorkflowsService:
     ) -> V1alpha1LogEntry:
         resp = requests.get(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/log").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
                 "podName": pod_name,
@@ -874,10 +914,10 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def resubmit_workflow(self, namespace: str, name: str, req: WorkflowResubmitRequest) -> Workflow:
+    def resubmit_workflow(self, name: str, req: WorkflowResubmitRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/resubmit").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -892,10 +932,10 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def resume_workflow(self, namespace: str, name: str, req: WorkflowResumeRequest) -> Workflow:
+    def resume_workflow(self, name: str, req: WorkflowResumeRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/resume").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -910,10 +950,10 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def retry_workflow(self, namespace: str, name: str, req: WorkflowRetryRequest) -> Workflow:
+    def retry_workflow(self, name: str, req: WorkflowRetryRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/retry").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -928,10 +968,10 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def set_workflow(self, namespace: str, name: str, req: WorkflowSetRequest) -> Workflow:
+    def set_workflow(self, name: str, req: WorkflowSetRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/set").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -946,10 +986,10 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def stop_workflow(self, namespace: str, name: str, req: WorkflowStopRequest) -> Workflow:
+    def stop_workflow(self, name: str, req: WorkflowStopRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/stop").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -964,10 +1004,10 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def suspend_workflow(self, namespace: str, name: str, req: WorkflowSuspendRequest) -> Workflow:
+    def suspend_workflow(self, name: str, req: WorkflowSuspendRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/suspend").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -982,10 +1022,12 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def terminate_workflow(self, namespace: str, name: str, req: WorkflowTerminateRequest) -> Workflow:
+    def terminate_workflow(
+        self, name: str, req: WorkflowTerminateRequest, namespace: Optional[str] = None
+    ) -> Workflow:
         resp = requests.put(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/terminate").format(
-                namespace=namespace, name=name
+                name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -1002,9 +1044,9 @@ class WorkflowsService:
 
     def pod_logs(
         self,
-        namespace: str,
         name: str,
         pod_name: str,
+        namespace: Optional[str] = None,
         container: Optional[str] = None,
         follow: Optional[bool] = None,
         previous: Optional[bool] = None,
@@ -1021,7 +1063,7 @@ class WorkflowsService:
         """DEPRECATED: Cannot work via HTTP if podName is an empty string. Use WorkflowLogs."""
         resp = requests.get(
             url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/{podName}/log").format(
-                namespace=namespace, name=name, podName=pod_name
+                name=name, podName=pod_name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
                 "logOptions.container": container,
@@ -1049,12 +1091,12 @@ class WorkflowsService:
 
     def get_artifact_file(
         self,
-        namespace: str,
         id_discriminator: str,
         id_: str,
         node_id: str,
         artifact_name: str,
         artifact_discriminator: str,
+        namespace: Optional[str] = None,
     ) -> str:
         """Get an artifact."""
         resp = requests.get(
@@ -1062,12 +1104,12 @@ class WorkflowsService:
                 self.host,
                 "artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
-                namespace=namespace,
                 idDiscriminator=id_discriminator,
                 id=id_,
                 nodeId=node_id,
                 artifactName=artifact_name,
                 artifactDiscriminator=artifact_discriminator,
+                namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -1097,11 +1139,14 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_output_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
+    def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
         resp = requests.get(
             url=os.path.join(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
-                namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
+                name=name,
+                nodeId=node_id,
+                artifactName=artifact_name,
+                namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
@@ -1131,11 +1176,14 @@ class WorkflowsService:
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
-    def get_input_artifact(self, namespace: str, name: str, node_id: str, artifact_name: str) -> str:
+    def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
         resp = requests.get(
             url=os.path.join(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
-                namespace=namespace, name=name, nodeId=node_id, artifactName=artifact_name
+                name=name,
+                nodeId=node_id,
+                artifactName=artifact_name,
+                namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
