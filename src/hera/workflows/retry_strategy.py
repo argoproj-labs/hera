@@ -36,7 +36,7 @@ class RetryStrategy(_BaseModel):
     affinity: Optional[RetryAffinity] = None
     backoff: Optional[Backoff] = None
     expression: Optional[str] = None
-    limit: Optional[IntOrString] = None
+    limit: Optional[Union[str, int, IntOrString]] = None
     retry_policy: Optional[Union[str, RetryPolicy]] = None
 
     @validator("retry_policy", pre=True)
@@ -52,7 +52,7 @@ class RetryStrategy(_BaseModel):
         if v is None or isinstance(v, IntOrString):
             return v
 
-        return IntOrString(__root__=str(v))  # int or str
+        return str(v)  # int or str
 
     def build(self) -> _ModelRetryStrategy:
         return _ModelRetryStrategy(
@@ -65,3 +65,4 @@ class RetryStrategy(_BaseModel):
 
 
 __all__ = ["RetryPolicy", "RetryStrategy"]
+r = RetryStrategy(limit=3)
