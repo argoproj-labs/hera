@@ -331,13 +331,17 @@ class Workflow(
         """Creates the Workflow on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.create_workflow(self.namespace, WorkflowCreateRequest(workflow=self.build()))
+        return self.workflows_service.create_workflow(
+            WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
+        )
 
     def lint(self) -> TWorkflow:
         """Lints the Workflow using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.lint_workflow(self.namespace, WorkflowLintRequest(workflow=self.build()))
+        return self.workflows_service.lint_workflow(
+            WorkflowLintRequest(workflow=self.build()), namespace=self.namespace
+        )
 
     def _add_sub(self, node: Any):
         """Adds any objects instantiated under the Workflow context manager that conform to the `Templatable` protocol

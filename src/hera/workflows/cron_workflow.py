@@ -80,7 +80,7 @@ class CronWorkflow(Workflow):
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_cron_workflow(
-            self.namespace, CreateCronWorkflowRequest(cron_workflow=self.build())
+            CreateCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
 
     def lint(self) -> TWorkflow:
@@ -88,7 +88,7 @@ class CronWorkflow(Workflow):
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cron_workflow(
-            self.namespace, LintCronWorkflowRequest(cron_workflow=self.build())
+            LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
 
 
