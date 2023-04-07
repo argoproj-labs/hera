@@ -1,4 +1,4 @@
-from hera.workflows import Workflow, script, RetryStrategy
+from hera.workflows import RetryStrategy, Workflow, script
 
 
 @script(image="python:alpine3.6", retry_strategy=RetryStrategy(limit=10), add_cwd_to_sys_path=False)
