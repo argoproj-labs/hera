@@ -65,4 +65,3 @@ class RetryStrategy(_BaseModel):
 
 
 __all__ = ["RetryPolicy", "RetryStrategy"]
-r = RetryStrategy(limit=3)
