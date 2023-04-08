@@ -146,7 +146,7 @@ class Task(
     def result(self) -> str:
         return f"{{{{tasks.{self.name}.outputs.result}}}}"
 
-    def get_parameters_as(self, name):
+    def get_parameters_as(self, name: str) -> Parameter:
         """Gets all the output parameters from this task"""
         return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
 
@@ -181,13 +181,9 @@ class Task(
 
         obj = next((output for output in parameters if output.name == name), None)
         if obj is not None:
-            obj.value = f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}"
             return Parameter(
                 name=obj.name,
-                value=obj.value,
-                value_from=obj.value_from,
-                global_name=obj.global_name,
-                description=obj.description,
+                value=f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}",
             )
         raise KeyError(f"No output parameter named `{name}` found")
 
