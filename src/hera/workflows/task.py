@@ -184,8 +184,6 @@ class Task(
             return Parameter(
                 name=obj.name,
                 value=f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}",
-                global_name=obj.global_name,
-                description=obj.description,
             )
         raise KeyError(f"No output parameter named `{name}` found")
 
