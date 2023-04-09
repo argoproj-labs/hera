@@ -1,7 +1,6 @@
 from hera.workflows import (
     Container,
     Workflow,
-    models as m,
 )
 
 with Workflow(
