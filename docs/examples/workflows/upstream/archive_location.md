@@ -8,7 +8,11 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import Container, Workflow, models as m
+    from hera.workflows import (
+        Container,
+        Workflow,
+        models as m,
+    )
 
     with Workflow(
         generate_name="archive-location-",
