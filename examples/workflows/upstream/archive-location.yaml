@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: archive-location-
+spec:
+  entrypoint: whalesay
+  templates:
+  - archiveLocation:
+      archiveLogs: true
+    container:
+      args:
+      - hello world
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    name: whalesay
