@@ -13,5 +13,5 @@ with Workflow(
         image="docker/whalesay:latest",
         command=["cowsay"],
         args=["hello world"],
-        archive_location=m.ArtifactLocation(archive_logs=True),
+        archive_location={"archive_logs": True},
     )
