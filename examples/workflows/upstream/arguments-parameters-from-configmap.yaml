@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: arguments-parameters-from-configmap-
+spec:
+  entrypoint: whalesay
+  serviceAccountName: argo
+  templates:
+  - container:
+      args:
+      - echo
+      - '{{inputs.parameters.message}}'
+      image: argoproj/argosay:v2
+    inputs:
+      parameters:
+      - name: message
+        valueFrom:
+          configMapKeyRef:
+            key: msg
+            name: simple-parameters
+    name: whalesay

@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: event-consumer
+spec:
+  arguments:
+    parameters:
+    - name: salutation
+      value: hello
+  entrypoint: main
+  templates:
+  - container:
+      args:
+      - echo
+      - '{{inputs.parameters.salutation}} {{inputs.parameters.appellation}}'
+      image: argoproj/argosay:v2
+    inputs:
+      parameters:
+      - name: salutation
+      - name: appellation
+    name: argosay
+  - name: main
+    steps:
+    - - arguments:
+          parameters:
+          - name: salutation
+            value: '{{workflow.parameters.salutation}}'
+          - name: appellation
+            value: '{{workflow.parameters.appellation}}'
+        name: a
+        template: argosay
