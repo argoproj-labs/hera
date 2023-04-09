@@ -9,14 +9,9 @@ with Workflow(
     generate_name="workflow-template-retry-with-steps-",
     entrypoint="retry-with-steps",
 ) as w:
+    template_ref = m.TemplateRef(name="workflow-template-random-fail-template", template="random-fail-template")
     with Steps(name="retry-with-steps") as s:
-        Step(
-            name="hello1",
-            template_ref=m.TemplateRef(
-                name="workflow-template-random-fail-template",
-                template="random-fail-template",
-            ),
-        )
+        Step(name="hello1", template_ref=template_ref)
         with s.parallel():
             Step(
                 name="hello2a",
@@ -25,10 +20,4 @@ with Workflow(
                     template="random-fail-template",
                 ),
             )
-            Step(
-                name="hello2b",
-                template_ref=m.TemplateRef(
-                    name="workflow-template-random-fail-template",
-                    template="random-fail-template",
-                ),
-            )
+            Step(name="hello2b", template_ref=template_ref)

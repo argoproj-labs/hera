@@ -1,11 +1,11 @@
-from hera.workflows import Container, Parameter, Step, Steps, WorkflowTemplate
+from hera.workflows import Container, Parameter, Steps, WorkflowTemplate
 
 with WorkflowTemplate(
     name="event-consumer",
     entrypoint="main",
     arguments=Parameter(name="salutation", value="hello"),
 ) as w:
-    Container(
+    say = Container(
         name="argosay",
         image="argoproj/argosay:v2",
         inputs=[
@@ -15,9 +15,8 @@ with WorkflowTemplate(
         args=["echo", "{{inputs.parameters.salutation}} {{inputs.parameters.appellation}}"],
     )
     with Steps(name="main"):
-        Step(
+        say(
             name="a",
-            template="argosay",
             arguments=[
                 Parameter(name="salutation", value="{{workflow.parameters.salutation}}"),
                 Parameter(name="appellation", value="{{workflow.parameters.appellation}}"),
