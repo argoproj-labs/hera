@@ -51,10 +51,7 @@
 
             import subprocess
 
-
-            print(subprocess.run("cd && /mnt && df -h", shell=True, capture_output=True).stdout.decode())
-
-            '
+            print(subprocess.run(''cd && /mnt && df -h'', shell=True, capture_output=True).stdout.decode())'
           volumeMounts:
           - mountPath: /mnt/vol
             name: v

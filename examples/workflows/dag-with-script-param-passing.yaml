@@ -28,9 +28,7 @@ spec:
 
         sys.path.append(os.getcwd())
 
-        print(42)
-
-        '
+        print(42)'
   - inputs:
       parameters:
       - name: a
@@ -52,6 +50,4 @@ spec:
         except: a = r''''''{{inputs.parameters.a}}''''''
 
 
-        print(a)
-
-        '
+        print(a)'

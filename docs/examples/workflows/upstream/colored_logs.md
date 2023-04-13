@@ -53,12 +53,11 @@
           - name: PYTHONUNBUFFERED
             value: '1'
           image: python:3.7
-          source: "import time  # noqa: I001\nimport random\n\nmessages = [\n    \"No\
-            \ Color\",\n    \"\\x1b[30m%s\\x1b[0m\" % \"FG Black\",\n    \"\\x1b[32m%s\\\
-            x1b[0m\" % \"FG Green\",\n    \"\\x1b[34m%s\\x1b[0m\" % \"FG Blue\",\n   \
-            \ \"\\x1b[36m%s\\x1b[0m\" % \"FG Cyan\",\n    \"\\x1b[41m%s\\x1b[0m\" % \"\
-            BG Red\",\n    \"\\x1b[43m%s\\x1b[0m\" % \"BG Yellow\",\n    \"\\x1b[45m%s\\\
-            x1b[0m\" % \"BG Magenta\",\n]\nfor i in range(1, 100):\n    print(random.choice(messages))\n\
-            \    time.sleep(1)\n"
+          source: "import time\nimport random\nmessages = ['No Color', '\\x1b[30m%s\\\
+            x1b[0m' % 'FG Black', '\\x1b[32m%s\\x1b[0m' % 'FG Green', '\\x1b[34m%s\\x1b[0m'\
+            \ % 'FG Blue', '\\x1b[36m%s\\x1b[0m' % 'FG Cyan', '\\x1b[41m%s\\x1b[0m' %\
+            \ 'BG Red', '\\x1b[43m%s\\x1b[0m' % 'BG Yellow', '\\x1b[45m%s\\x1b[0m' % 'BG\
+            \ Magenta']\nfor i in range(1, 100):\n    print(random.choice(messages))\n\
+            \    time.sleep(1)"
     ```
 

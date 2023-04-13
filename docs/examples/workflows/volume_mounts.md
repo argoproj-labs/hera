@@ -94,12 +94,9 @@
 
             import subprocess
 
+            print(os.listdir(''/mnt''))
 
-            print(os.listdir("/mnt"))
-
-            print(subprocess.run("cd /mnt && df -h", shell=True, capture_output=True).stdout.decode())
-
-            '
+            print(subprocess.run(''cd /mnt && df -h'', shell=True, capture_output=True).stdout.decode())'
           volumeMounts:
           - mountPath: /mnt/vol
             name: '{{inputs.parameters.vol}}'

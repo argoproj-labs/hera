@@ -139,7 +139,7 @@ spec:
           command:
           - python
           image: python:alpine3.6
-          source: "with open(\"result.txt\", \"w\") as f:\n    f.write(\"Welcome\")\n"
+          source: "with open('result.txt', 'w') as f:\n    f.write('Welcome')"
       - container:
           args:
           - cat /tmp/message

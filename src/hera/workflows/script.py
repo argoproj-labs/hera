@@ -24,6 +24,7 @@ from hera.workflows._mixins import (
     TemplateMixin,
     VolumeMountMixin,
 )
+from hera.workflows._unparse import roundtrip
 from hera.workflows.models import (
     Inputs as ModelInputs,
     Lifecycle,
@@ -328,18 +329,16 @@ class InlineScriptConstructor(ScriptConstructor):
             script += copy.deepcopy(script_extra)
             script += "\n"
 
-        # content represents the function components, separated by new lines
-        # therefore, the actual code block occurs after the end parenthesis, which is a literal `):\n`
-        content = inspect.getsourcelines(instance.source)[0]
-        token_index, start_token = 1, ":\n"
-        for curr_index, curr_token in enumerate(content):
-            if start_token in curr_token:
-                # when we find the curr token we find the end of the function header. The next index is the
-                # starting point of the function body
-                token_index = curr_index + 1
+        # We use ast parse/unparse to get the source code of the function
+        # in order to have consistent looking functions and getting rid of any comments
+        # parsing issues.
+        # See https://github.com/argoproj-labs/hera/issues/572
+        content = roundtrip(inspect.getsource(instance.source)).splitlines()
+        for i, line in enumerate(content):
+            if line.startswith("def") or line.startswith("async def"):
                 break
 
-        s = "".join(content[token_index:])
+        s = "\n".join(content[i + 1 :])
         script += textwrap.dedent(s)
         return textwrap.dedent(script)
 
