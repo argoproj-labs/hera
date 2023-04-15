@@ -106,10 +106,7 @@
           image: python:alpine3.6
           source: 'import random
 
-
-            print("heads" if random.randint(0, 1) == 0 else "tails")
-
-            '
+            print(''heads'' if random.randint(0, 1) == 0 else ''tails'')'
       - name: heads
         outputs:
           artifacts:
@@ -119,8 +116,7 @@
           command:
           - python
           image: python:alpine3.6
-          source: "with open(\"result.txt\", \"w\") as f:\n    f.write(\"it was heads\"\
-            )\n"
+          source: "with open('result.txt', 'w') as f:\n    f.write('it was heads')"
       - name: tails
         outputs:
           artifacts:
@@ -130,8 +126,7 @@
           command:
           - python
           image: python:alpine3.6
-          source: "with open(\"result.txt\", \"w\") as f:\n    f.write(\"it was tails\"\
-            )\n"
+          source: "with open('result.txt', 'w') as f:\n    f.write('it was tails')"
       - name: main
         outputs:
           artifacts:

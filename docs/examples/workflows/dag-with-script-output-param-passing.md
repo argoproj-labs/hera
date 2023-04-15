@@ -68,8 +68,8 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open(\"/test\"\
-            , \"w\") as f_out:\n    f_out.write(\"test\")\n"
+          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/test',\
+            \ 'w') as f_out:\n    f_out.write('test')"
       - inputs:
           parameters:
           - name: a
@@ -91,8 +91,6 @@
             except: a = r''''''{{inputs.parameters.a}}''''''
 
 
-            print(a)
-
-            '
+            print(a)'
     ```
 

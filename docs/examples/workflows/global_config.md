@@ -57,8 +57,6 @@
 
             sys.path.append(os.getcwd())
 
-            print("hello")
-
-            '
+            print(''hello'')'
     ```
 

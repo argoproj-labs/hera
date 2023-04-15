@@ -45,11 +45,8 @@
 
             import sys
 
-
             exit_code = random.choice([0, 1, 1])
 
-            sys.exit(exit_code)
-
-            '
+            sys.exit(exit_code)'
     ```
 

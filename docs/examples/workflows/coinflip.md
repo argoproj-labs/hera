@@ -72,12 +72,9 @@
 
             import random
 
+            result = ''heads'' if random.randint(0, 1) == 0 else ''tails''
 
-            result = "heads" if random.randint(0, 1) == 0 else "tails"
-
-            print(result)
-
-            '
+            print(result)'
       - name: heads
         script:
           command:
@@ -89,9 +86,7 @@
 
             sys.path.append(os.getcwd())
 
-            print("it was heads")
-
-            '
+            print(''it was heads'')'
       - name: tails
         script:
           command:
@@ -103,8 +98,6 @@
 
             sys.path.append(os.getcwd())
 
-            print("it was tails")
-
-            '
+            print(''it was tails'')'
     ```
 

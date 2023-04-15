@@ -102,8 +102,6 @@
             except: c = r''''''{{inputs.parameters.c}}''''''
 
 
-            print(a, b, c)
-
-            '
+            print(a, b, c)'
     ```
 

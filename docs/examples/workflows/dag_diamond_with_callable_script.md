@@ -70,9 +70,7 @@
             except: message = r''''''{{inputs.parameters.message}}''''''
 
 
-            print(message)
-
-            '
+            print(message)'
       - dag:
           tasks:
           - arguments:
