@@ -201,7 +201,7 @@ class Task(
         else:
             # Add follow-up dependency
             other.depends += f" {operator} {self.name + condition}"
-        return otherq
+        return other
 
     def __rrshift__(self, other: List[Union[Task, str]]) -> Task:
         """Set `other` as a dependency self."""
