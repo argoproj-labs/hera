@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-conditional-on-task-status-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - name: fail-or-succeed
+        template: fail-or-succeed
+      - depends: fail-or-succeed.Failed
+        name: when-failed
+        template: when-failed
+      - depends: fail-or-succeed.Succeeded
+        name: when-succeeded
+        template: when-succeeded
+    name: d
+  - name: fail-or-succeed
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport random\n\
+        \nif random.randint(0, 1) == 0:\n    raise ValueError\n"
+  - name: when-failed
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print("It was a failure")
+
+        '
+  - name: when-succeeded
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print("It was a success")
+
+        '
