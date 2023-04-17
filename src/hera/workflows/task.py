@@ -191,7 +191,7 @@ class Task(
         """Set self as a dependency of `other`."""
         assert issubclass(other.__class__, Task)
 
-        condition = f".{on}" if on else ""
+        condition = f".{on.value}" if on else ""
 
         if other.depends is None:
             # First dependency
@@ -201,7 +201,7 @@ class Task(
         else:
             # Add follow-up dependency
             other.depends += f" {operator} {self.name + condition}"
-        return other
+        return otherq
 
     def __rrshift__(self, other: List[Union[Task, str]]) -> Task:
         """Set `other` as a dependency self."""
