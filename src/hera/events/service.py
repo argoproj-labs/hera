@@ -2,6 +2,7 @@ import os
 from typing import Optional, cast
 
 import requests
+from urllib.parse import urljoin
 
 from hera.events.models import (
     CreateEventSourceRequest,
@@ -55,7 +56,7 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> EventSourceList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(
+            url=urljoin(self.host, "api/v1/event-sources/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -81,7 +82,7 @@ class EventsService:
 
     def create_event_source(self, req: CreateEventSourceRequest, namespace: Optional[str] = None) -> EventSource:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}").format(
+            url=urljoin(self.host, "api/v1/event-sources/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -99,7 +100,7 @@ class EventsService:
 
     def get_event_source(self, name: str, namespace: Optional[str] = None) -> EventSource:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -117,7 +118,7 @@ class EventsService:
         self, name: str, req: UpdateEventSourceRequest, namespace: Optional[str] = None
     ) -> EventSource:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -145,7 +146,7 @@ class EventsService:
         dry_run: Optional[list] = None,
     ) -> EventSourceDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/event-sources/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -168,7 +169,7 @@ class EventsService:
 
     def receive_event(self, discriminator: str, req: Item, namespace: Optional[str] = None) -> EventResponse:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/events/{namespace}/{discriminator}").format(
+            url=urljoin(self.host, "api/v1/events/{namespace}/{discriminator}").format(
                 discriminator=discriminator, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -186,7 +187,7 @@ class EventsService:
 
     def get_info(self) -> InfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/info"),
+            url=urljoin(self.host, "api/v1/info"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -212,7 +213,7 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> SensorList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(
+            url=urljoin(self.host, "api/v1/sensors/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -238,7 +239,7 @@ class EventsService:
 
     def create_sensor(self, req: CreateSensorRequest, namespace: Optional[str] = None) -> Sensor:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}").format(
+            url=urljoin(self.host, "api/v1/sensors/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -256,7 +257,7 @@ class EventsService:
 
     def get_sensor(self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None) -> Sensor:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/sensors/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version},
@@ -272,7 +273,7 @@ class EventsService:
 
     def update_sensor(self, name: str, req: UpdateSensorRequest, namespace: Optional[str] = None) -> Sensor:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/sensors/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -300,7 +301,7 @@ class EventsService:
         dry_run: Optional[list] = None,
     ) -> DeleteSensorResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/sensors/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/sensors/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -335,7 +336,7 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> EventSourceWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}").format(
+            url=urljoin(self.host, "api/v1/stream/event-sources/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -378,7 +379,7 @@ class EventsService:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> EventsourceLogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(
+            url=urljoin(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -421,7 +422,7 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> Event:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/events/{namespace}").format(
+            url=urljoin(self.host, "api/v1/stream/events/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -459,7 +460,7 @@ class EventsService:
         continue_: Optional[str] = None,
     ) -> SensorWatchEvent:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}").format(
+            url=urljoin(self.host, "api/v1/stream/sensors/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -501,7 +502,7 @@ class EventsService:
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> SensorLogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/stream/sensors/{namespace}/logs").format(
+            url=urljoin(self.host, "api/v1/stream/sensors/{namespace}/logs").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -531,7 +532,7 @@ class EventsService:
 
     def get_user_info(self) -> GetUserInfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/userinfo"),
+            url=urljoin(self.host, "api/v1/userinfo"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -545,7 +546,7 @@ class EventsService:
 
     def get_version(self) -> Version:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/version"),
+            url=urljoin(self.host, "api/v1/version"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -568,7 +569,7 @@ class EventsService:
     ) -> str:
         """Get an artifact."""
         resp = requests.get(
-            url=os.path.join(
+            url=urljoin(
                 self.host,
                 "artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
@@ -593,7 +594,7 @@ class EventsService:
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -610,7 +611,7 @@ class EventsService:
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
                 nodeId=node_id,
                 artifactName=artifact_name,
@@ -630,7 +631,7 @@ class EventsService:
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -647,7 +648,7 @@ class EventsService:
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
                 nodeId=node_id,
                 artifactName=artifact_name,

@@ -2,6 +2,7 @@ import os
 from typing import Optional, cast
 
 import requests
+from urllib.parse import urljoin
 
 from hera.shared import global_config
 from hera.workflows.models import (
@@ -77,7 +78,7 @@ class WorkflowsService:
         name_prefix: Optional[str] = None,
     ) -> WorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/archived-workflows"),
+            url=urljoin(self.host, "api/v1/archived-workflows"),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -102,7 +103,7 @@ class WorkflowsService:
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/archived-workflows-label-keys"),
+            url=urljoin(self.host, "api/v1/archived-workflows-label-keys"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -127,7 +128,7 @@ class WorkflowsService:
         continue_: Optional[str] = None,
     ) -> LabelValues:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/archived-workflows-label-values"),
+            url=urljoin(self.host, "api/v1/archived-workflows-label-values"),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -151,7 +152,7 @@ class WorkflowsService:
 
     def get_archived_workflow(self, uid: str) -> Workflow:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
+            url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -165,7 +166,7 @@ class WorkflowsService:
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
+            url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -179,7 +180,7 @@ class WorkflowsService:
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
+            url=urljoin(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -195,7 +196,7 @@ class WorkflowsService:
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
+            url=urljoin(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -222,7 +223,7 @@ class WorkflowsService:
         continue_: Optional[str] = None,
     ) -> ClusterWorkflowTemplateList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/cluster-workflow-templates"),
+            url=urljoin(self.host, "api/v1/cluster-workflow-templates"),
             params={
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
@@ -246,7 +247,7 @@ class WorkflowsService:
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/cluster-workflow-templates"),
+            url=urljoin(self.host, "api/v1/cluster-workflow-templates"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -262,7 +263,7 @@ class WorkflowsService:
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/lint"),
+            url=urljoin(self.host, "api/v1/cluster-workflow-templates/lint"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -280,7 +281,7 @@ class WorkflowsService:
         self, name: str, resource_version: Optional[str] = None
     ) -> ClusterWorkflowTemplate:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
+            url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={"getOptions.resourceVersion": resource_version},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -296,7 +297,7 @@ class WorkflowsService:
         self, name: str, req: ClusterWorkflowTemplateUpdateRequest
     ) -> ClusterWorkflowTemplate:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
+            url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=req.json(
@@ -321,7 +322,7 @@ class WorkflowsService:
         dry_run: Optional[list] = None,
     ) -> ClusterWorkflowTemplateDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
+            url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={
                 "deleteOptions.gracePeriodSeconds": grace_period_seconds,
                 "deleteOptions.preconditions.uid": uid,
@@ -354,7 +355,7 @@ class WorkflowsService:
         continue_: Optional[str] = None,
     ) -> CronWorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -380,7 +381,7 @@ class WorkflowsService:
 
     def create_cron_workflow(self, req: CreateCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -398,7 +399,7 @@ class WorkflowsService:
 
     def lint_cron_workflow(self, req: LintCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/lint").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/lint").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -418,7 +419,7 @@ class WorkflowsService:
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
     ) -> CronWorkflow:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version},
@@ -436,7 +437,7 @@ class WorkflowsService:
         self, name: str, req: UpdateCronWorkflowRequest, namespace: Optional[str] = None
     ) -> CronWorkflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -464,7 +465,7 @@ class WorkflowsService:
         dry_run: Optional[list] = None,
     ) -> CronWorkflowDeletedResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -489,7 +490,7 @@ class WorkflowsService:
         self, name: str, req: CronWorkflowResumeRequest, namespace: Optional[str] = None
     ) -> CronWorkflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}/resume").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}/resume").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -509,7 +510,7 @@ class WorkflowsService:
         self, name: str, req: CronWorkflowSuspendRequest, namespace: Optional[str] = None
     ) -> CronWorkflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/cron-workflows/{namespace}/{name}/suspend").format(
+            url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}/suspend").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -527,7 +528,7 @@ class WorkflowsService:
 
     def get_info(self) -> InfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/info"),
+            url=urljoin(self.host, "api/v1/info"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -541,7 +542,7 @@ class WorkflowsService:
 
     def get_user_info(self) -> GetUserInfoResponse:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/userinfo"),
+            url=urljoin(self.host, "api/v1/userinfo"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -555,7 +556,7 @@ class WorkflowsService:
 
     def get_version(self) -> Version:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/version"),
+            url=urljoin(self.host, "api/v1/version"),
             params=None,
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -581,7 +582,7 @@ class WorkflowsService:
         continue_: Optional[str] = None,
     ) -> WorkflowTemplateList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(
+            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -609,7 +610,7 @@ class WorkflowsService:
         self, req: WorkflowTemplateCreateRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}").format(
+            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -629,7 +630,7 @@ class WorkflowsService:
         self, req: WorkflowTemplateLintRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/lint").format(
+            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/lint").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -649,7 +650,7 @@ class WorkflowsService:
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version},
@@ -667,7 +668,7 @@ class WorkflowsService:
         self, name: str, req: WorkflowTemplateUpdateRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -695,7 +696,7 @@ class WorkflowsService:
         dry_run: Optional[list] = None,
     ) -> WorkflowTemplateDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -731,7 +732,7 @@ class WorkflowsService:
         fields: Optional[str] = None,
     ) -> WorkflowList:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -758,7 +759,7 @@ class WorkflowsService:
 
     def create_workflow(self, req: WorkflowCreateRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -776,7 +777,7 @@ class WorkflowsService:
 
     def lint_workflow(self, req: WorkflowLintRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/lint").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/lint").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -794,7 +795,7 @@ class WorkflowsService:
 
     def submit_workflow(self, req: WorkflowSubmitRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/submit").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/submit").format(
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -818,7 +819,7 @@ class WorkflowsService:
         fields: Optional[str] = None,
     ) -> Workflow:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version, "fields": fields},
@@ -845,7 +846,7 @@ class WorkflowsService:
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
         resp = requests.delete(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -886,7 +887,7 @@ class WorkflowsService:
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/log").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/log").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -916,7 +917,7 @@ class WorkflowsService:
 
     def resubmit_workflow(self, name: str, req: WorkflowResubmitRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/resubmit").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/resubmit").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -934,7 +935,7 @@ class WorkflowsService:
 
     def resume_workflow(self, name: str, req: WorkflowResumeRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/resume").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/resume").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -952,7 +953,7 @@ class WorkflowsService:
 
     def retry_workflow(self, name: str, req: WorkflowRetryRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/retry").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/retry").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -970,7 +971,7 @@ class WorkflowsService:
 
     def set_workflow(self, name: str, req: WorkflowSetRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/set").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/set").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -988,7 +989,7 @@ class WorkflowsService:
 
     def stop_workflow(self, name: str, req: WorkflowStopRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/stop").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/stop").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -1006,7 +1007,7 @@ class WorkflowsService:
 
     def suspend_workflow(self, name: str, req: WorkflowSuspendRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/suspend").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/suspend").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -1026,7 +1027,7 @@ class WorkflowsService:
         self, name: str, req: WorkflowTerminateRequest, namespace: Optional[str] = None
     ) -> Workflow:
         resp = requests.put(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/terminate").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/terminate").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
@@ -1062,7 +1063,7 @@ class WorkflowsService:
     ) -> V1alpha1LogEntry:
         """DEPRECATED: Cannot work via HTTP if podName is an empty string. Use WorkflowLogs."""
         resp = requests.get(
-            url=os.path.join(self.host, "api/v1/workflows/{namespace}/{name}/{podName}/log").format(
+            url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/{podName}/log").format(
                 name=name, podName=pod_name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={
@@ -1100,7 +1101,7 @@ class WorkflowsService:
     ) -> str:
         """Get an artifact."""
         resp = requests.get(
-            url=os.path.join(
+            url=urljoin(
                 self.host,
                 "artifact-files/{namespace}/{idDiscriminator}/{id}/{nodeId}/{artifactDiscriminator}/{artifactName}",
             ).format(
@@ -1125,7 +1126,7 @@ class WorkflowsService:
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -1142,7 +1143,7 @@ class WorkflowsService:
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
                 nodeId=node_id,
                 artifactName=artifact_name,
@@ -1162,7 +1163,7 @@ class WorkflowsService:
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
         resp = requests.get(
-            url=os.path.join(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
@@ -1179,7 +1180,7 @@ class WorkflowsService:
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
         resp = requests.get(
-            url=os.path.join(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
+            url=urljoin(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
                 nodeId=node_id,
                 artifactName=artifact_name,
