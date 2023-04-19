@@ -191,7 +191,7 @@ class Task(
         """Set self as a dependency of `other`."""
         assert issubclass(other.__class__, Task)
 
-        condition = f".{on}" if on else ""
+        condition = f".{on.value}" if on else ""
 
         if other.depends is None:
             # First dependency
