@@ -400,8 +400,8 @@ def get_endpoints(
 def get_service_def() -> str:
     """Assembles the service definition string/code representation"""
     return """
+from urllib.parse import urljoin
 import requests
-import os
 from hera.{module}.models import {imports}
 from hera.shared import global_config
 from typing import Optional, cast
