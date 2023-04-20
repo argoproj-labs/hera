@@ -136,10 +136,12 @@ class ContainerMixin(BaseMixin):
     termination_message_policy: Optional[TerminationMessagePolicy] = None
     tty: Optional[bool] = None
 
-    def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
-        if self.image_pull_policy is None or isinstance(self.image_pull_policy, ImagePullPolicy):
-            return self.image_pull_policy
-        return ImagePullPolicy[self.image_pull_policy.lower()]
+    def _build_image_pull_policy(self) -> Optional[str]:
+        if self.image_pull_policy is None:
+            return None
+        elif isinstance(self.image_pull_policy, ImagePullPolicy):
+            return self.image_pull_policy.value
+        return ImagePullPolicy[self.image_pull_policy.lower()].value
 
     @validator("image", pre=True, always=True)
     def _set_image(cls, v):
