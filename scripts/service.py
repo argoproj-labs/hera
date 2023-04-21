@@ -126,7 +126,7 @@ class ServiceEndpoint:
         # url
         path_params = [p for p in self.params if p.in_ == "path"]
         if len(path_params) == 0:
-            req_url = f"os.path.join(self.host, '{self.url}')"
+            req_url = f"urljoin(self.host, '{self.url}')"
         else:
             # note that here we have a condition on `namespace` because `namespace` can be a global configuration. So,
             # we either take it from the endpoint (prioritized just in case users rely on the service to use
@@ -137,7 +137,7 @@ class ServiceEndpoint:
                     req_url_params.append("namespace=namespace if namespace is not None else self.namespace")
                 else:
                     req_url_params.append(f"{p.field}={p.name}")
-            req_url = f"os.path.join(self.host, '{self.url}').format({', '.join(req_url_params)})"
+            req_url = f"urljoin(self.host, '{self.url}').format({', '.join(req_url_params)})"
 
         # query params
         query_params = [p for p in self.params if p.in_ == "query"]
@@ -400,8 +400,8 @@ def get_endpoints(
 def get_service_def() -> str:
     """Assembles the service definition string/code representation"""
     return """
+from urllib.parse import urljoin
 import requests
-import os
 from hera.{module}.models import {imports}
 from hera.shared import global_config
 from typing import Optional, cast
