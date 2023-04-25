@@ -8,6 +8,7 @@ import copy
 import inspect
 import textwrap
 from abc import abstractmethod
+from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from pydantic import root_validator, validator
@@ -261,11 +262,12 @@ def script(**script_kwargs):
         """
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
-        def task_wrapper(**kwargs) -> Union[Task, Step]:
+        @wraps(func)
+        def task_wrapper(*args, **kwargs) -> Union[Task, Step]:
             """Invokes a `Script` object's `__call__` method using the given `task_params`"""
             if _context.active:
-                return s.__call__(**kwargs)  # type: ignore
-            return func(**kwargs)
+                return s.__call__(*args, **kwargs)  # type: ignore
+            return func(*args, **kwargs)
 
         # Set the wrapped function to the original function so that we can use it later
         task_wrapper.wrapped_function = func  # type: ignore
