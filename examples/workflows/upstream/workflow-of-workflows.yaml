@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: workflow-of-workflows-
+spec:
+  entrypoint: main
+  templates:
+  - inputs:
+      parameters:
+      - name: workflowtemplate
+    name: resource-without-argument
+    resource:
+      action: create
+      failureCondition: status.phase in (Failed, Error)
+      manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
+        \ workflow-of-workflows-1-\nspec:\n  workflowTemplateRef:\n    name: {{inputs.parameters.workflowtemplate}}\n"
+      successCondition: status.phase == Succeeded
+  - inputs:
+      parameters:
+      - name: workflowtemplate
+      - name: message
+    name: resource-with-argument
+    resource:
+      action: create
+      failureCondition: status.phase in (Failed, Error)
+      manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
+        \ workflow-of-workflows-2-\nspec:\n  arguments:\n    parameters:\n    - name:\
+        \ message\n      value: {{inputs.parameters.message}}\n  workflowTemplateRef:\n\
+        \    name: {{inputs.parameters.workflowtemplate}}\n"
+      successCondition: status.phase == Succeeded
+  - name: main
+    steps:
+    - - arguments:
+          parameters:
+          - name: workflowtemplate
+            value: workflow-template-submittable
+        name: workflow1
+        template: resource-without-argument
+    - - arguments:
+          parameters:
+          - name: workflowtemplate
+            value: workflow-template-submittable
+          - name: message
+            value: Welcome Argo
+        name: workflow2
+        template: resource-with-argument
