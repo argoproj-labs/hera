@@ -1,4 +1,4 @@
-from hera.workflows import Workflow, Resource, Parameter, Steps, Step
+from hera.workflows import Parameter, Resource, Step, Steps, Workflow
 
 with Workflow(generate_name="workflow-of-workflows-", entrypoint="main") as w:
     res_without_args = Resource(
@@ -44,9 +44,7 @@ spec:
         Step(
             name="workflow1",
             template=res_without_args,
-            arguments={
-                "workflowtemplate": "workflow-template-submittable"
-            }
+            arguments={"workflowtemplate": "workflow-template-submittable"},
         )
         Step(
             name="workflow2",
@@ -54,5 +52,5 @@ spec:
             arguments={
                 "workflowtemplate": "workflow-template-submittable",
                 "message": "Welcome Argo",
-            }
+            },
         )
