@@ -6,12 +6,12 @@ import requests
 
 import examples.workflows.upstream as hera_upstream_examples
 
-GITHUB_API_ARGO_EXAMPLES = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/master?recursive=1"
+GITHUB_API_ARGO = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/master?recursive=1"
 
 
 @pytest.mark.xfail(reason="Dev tool test")
 def test_for_missing_examples():
-    repo_json = requests.get(GITHUB_API_ARGO_EXAMPLES).json()
+    repo_json = requests.get(GITHUB_API_ARGO).json()
     argo_examples = [
         file["path"] for file in repo_json["tree"] if "examples/" in file["path"] and ".yaml" in file["path"]
     ]
