@@ -1,11 +1,10 @@
-import requests
-import pkgutil
 import json
-import pytest
+import pkgutil
 
+import pytest
+import requests
 
 import examples.workflows.upstream as hera_upstream_examples
-
 
 GITHUB_API_ARGO_EXAMPLES = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/master?recursive=1"
 
