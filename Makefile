@@ -88,8 +88,9 @@ init-files:
 	$(MAKE) format
 
 .PHONY: examples
-examples:  ## Generate all the examples
+examples:  ## Generate all the examples, report missing examples
 	@(cd docs && poetry run python generate.py)
+	@poetry run python -m pytest -k test_for_missing_examples --runxfail
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests
