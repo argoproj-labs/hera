@@ -92,6 +92,7 @@ examples:  ## Generate all the examples
 	@(cd docs && poetry run python generate.py)
 
 .PHONY: regenerate-test-data
-regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests
+regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests, report missing examples
 	find examples -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 make test examples
+	@poetry run python -m pytest -k test_for_missing_examples --runxfail
