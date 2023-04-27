@@ -1,5 +1,5 @@
-from hera.workflows import Container, Step, Steps, Suspend, Workflow
-from hera.workflows.models import ValueFrom, SuppliedValueFrom, SuspendTemplate, Template, Parameter, Outputs
+from hera.workflows import Container, Step, Steps, Workflow
+from hera.workflows.models import Outputs, Parameter, SuppliedValueFrom, SuspendTemplate, Template, ValueFrom
 
 with Workflow(
     name="suspend-outputs",
