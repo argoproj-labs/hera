@@ -15,13 +15,6 @@ spec:
       parameters:
       - name: message
     name: whalesay
-  - name: approve
-    outputs:
-      parameters:
-      - name: message
-        valueFrom:
-          supplied: {}
-    suspend: {}
   - name: suspend
     steps:
     - - name: approve
@@ -32,3 +25,10 @@ spec:
             value: '{{steps.approve.outputs.parameters.message}}'
         name: release
         template: whalesay
+  - name: approve
+    outputs:
+      parameters:
+      - name: message
+        valueFrom:
+          supplied: {}
+    suspend: {}

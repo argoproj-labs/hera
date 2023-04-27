@@ -13,21 +13,20 @@ with Workflow(
         args=["{{inputs.parameters.message}}"],
     )
 
-    w._add_sub(
-        Template(
+    with Steps(name="suspend"):
+        Step(
             name="approve",
-            suspend=SuspendTemplate(),
-            outputs=Outputs(
-                parameters=[
-                    Parameter(
-                        name="message",
-                        value_from=ValueFrom(supplied=SuppliedValueFrom()),
-                    )
-                ]
+            template=Template(
+                name="approve",
+                suspend=SuspendTemplate(),
+                outputs=Outputs(
+                    parameters=[
+                        Parameter(
+                            name="message",
+                            value_from=ValueFrom(supplied=SuppliedValueFrom()),
+                        )
+                    ]
+                ),
             ),
         )
-    )
-
-    with Steps(name="suspend"):
-        Step(name="approve", template="approve")
         whalesay(name="release", arguments={"message": "{{steps.approve.outputs.parameters.message}}"})
