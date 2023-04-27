@@ -35,7 +35,7 @@ from hera.workflows.models import (
     PodSecurityContext,
     RetryStrategy,
     Synchronization,
-    Template,
+    Template as _ModelTemplate,
     Time,
     Toleration,
     TTLStrategy,
@@ -71,8 +71,8 @@ class Workflow(
     """The base Workflow class for Hera.
 
     Workflow implements the contextmanager interface so allows usage of `with`, under which
-    any `hera.workflows.protocol.Templatable` object or `hera.workflows.models.Template` object
-    instantiated under the context will be added to the Workflow's list of templates.
+    any `hera.workflows.protocol.Templatable` object instantiated under the context will be
+    added to the Workflow's list of templates.
 
     Workflows can be created directly on your Argo cluster via `create`. They can also be dumped
     to yaml via `to_yaml` or built according to the Argo schema via `build` to get an OpenAPI model
@@ -135,8 +135,8 @@ class Workflow(
     shutdown: Optional[str] = None
     suspend: Optional[bool] = None
     synchronization: Optional[Synchronization] = None
-    template_defaults: Optional[Template] = None
-    templates: List[Union[Template, Templatable]] = []
+    template_defaults: Optional[_ModelTemplate] = None
+    templates: List[Union[_ModelTemplate, Templatable]] = []
     tolerations: Optional[List[Toleration]] = None
     ttl_strategy: Optional[TTLStrategy] = None
     volume_claim_gc: Optional[VolumeClaimGC] = None
@@ -347,7 +347,7 @@ class Workflow(
         """Adds any objects instantiated under the Workflow context manager that conform to the `Templatable` protocol
         or are Argo schema Template objects to the Workflow's list of templates.
         """
-        if not isinstance(node, (Templatable, *get_args(Template))):
+        if not isinstance(node, (Templatable, _ModelTemplate)):
             raise InvalidType(type(node))
         self.templates.append(node)
 
