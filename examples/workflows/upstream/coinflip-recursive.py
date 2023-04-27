@@ -10,12 +10,7 @@ def flip_coin() -> None:
 
 
 with Workflow(
-    generate_name="coinflip-",
-    annotations={
-        "workflows.argoproj.io/description": (
-            "This is an example of coin flip defined as a sequence of conditional steps."
-        ),
-    },
+    generate_name="coinflip-recursive-",
     entrypoint="coinflip",
 ) as w:
     heads = Container(
@@ -24,16 +19,10 @@ with Workflow(
         command=["sh", "-c"],
         args=['echo "it was heads"'],
     )
-    tails = Container(
-        name="tails",
-        image="alpine:3.6",
-        command=["sh", "-c"],
-        args=['echo "it was tails"'],
-    )
 
     with Steps(name="coinflip") as s:
         fc: Step = flip_coin()
 
         with s.parallel():
             heads(when=f"{fc.result} == heads")
-            tails(when=f"{fc.result} == tails")
+            Step(name="tails", template=s, when=f"{fc.result} == tails")
