@@ -1,4 +1,4 @@
-from hera.workflows import Container, Step, Steps, Suspend, Workflow
+from hera.workflows import Container, Steps, Suspend, Workflow
 
 with Workflow(
     generate_name="suspend-template-",
@@ -11,6 +11,6 @@ with Workflow(
 
     with Steps(name="suspend"):
         whalesay(name="build")
-        Step(name="approve", template=approve)
-        Step(name="delay", template=delay)
+        approve()
+        delay()
         whalesay(name="release")

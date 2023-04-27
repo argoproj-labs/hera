@@ -10,7 +10,7 @@ for more on intermediate parameters.
 """
 from typing import List, Optional, Union
 
-from hera.workflows._mixins import TemplateMixin
+from hera.workflows._mixins import CallableTemplateMixin, TemplateMixin
 from hera.workflows.models import (
     Inputs,
     Outputs,
@@ -20,7 +20,10 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 
 
-class Suspend(TemplateMixin):
+class Suspend(
+    TemplateMixin,
+    CallableTemplateMixin,
+):
     """The Suspend template allows the user to pause a workflow for a specified length of time
     given by `duration` or indefinitely (i.e. until manually resumed). The Suspend template also
     allows you to specify `intermediate_parameters` which will replicate the given parameters to
