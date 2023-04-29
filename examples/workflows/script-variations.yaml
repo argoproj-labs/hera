@@ -5,6 +5,19 @@ metadata:
 spec:
   entrypoint: d
   templates:
+  - dag:
+      tasks:
+      - name: hello-world
+        template: hello-world
+      - arguments:
+          parameters:
+          - name: test
+            value: test string
+          - name: another_test
+            value: another test string
+        name: multiline-function
+        template: multiline-function
+    name: d
   - name: hello-world
     script:
       command:
@@ -43,4 +56,6 @@ spec:
         except: test = r''''''{{inputs.parameters.test}}''''''
 
 
-        print(''Hello World!'')'
+        print(test)
+
+        print(another_test)'
