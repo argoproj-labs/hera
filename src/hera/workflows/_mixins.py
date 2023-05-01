@@ -424,6 +424,11 @@ class CallableTemplateMixin(ArgumentsMixin):
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 
+        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
+        # set it here in order for the following logic to capture it
+        if "source" not in kwargs and hasattr(self, "source"):
+            kwargs["source"] = self.source  # type: ignore
+
         try:
             from hera.workflows.steps import Step
 
@@ -436,7 +441,13 @@ class CallableTemplateMixin(ArgumentsMixin):
 
             # these are the already set parameters. If a users has already set a parameter argument, then Hera
             # uses the user-provided value rather than the inferred value
-            arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]  # type: ignore
+            kwargs_arguments = kwargs.get("arguments", [])
+            kwargs_arguments = (
+                kwargs_arguments if isinstance(kwargs_arguments, list) else [kwargs_arguments]
+            )  # type: ignore
+            arguments = (
+                self.arguments if isinstance(self.arguments, list) else [self.arguments] + kwargs_arguments
+            )  # type: ignore
             arguments = list(filter(lambda x: x is not None, arguments))
             parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
             parameter_names = {p.name for p in parameters}
@@ -464,6 +475,10 @@ class CallableTemplateMixin(ArgumentsMixin):
                     for p in new_parameters:
                         if p.name not in parameter_names:
                             arguments.append(p)
+            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
+            # the task will miss adding them when building the final arguments
+            kwargs["arguments"] = arguments
 
             return Task(*args, template=self, **kwargs)
         except InvalidType:
