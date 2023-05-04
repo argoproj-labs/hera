@@ -1,29 +1,38 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from hera.workflows._mixins import IOMixin, SubNodeMixin, TemplateMixin
+from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import (
     ManifestFrom,
     ResourceTemplate as _ModelResourceTemplate,
     Template as _ModelTemplate,
 )
+from hera.workflows.workflow import Workflow
+from hera.workflows.workflow_template import WorkflowTemplate
 
 
 class Resource(TemplateMixin, SubNodeMixin, IOMixin):
     action: str
     failure_condition: Optional[str] = None
     flags: Optional[List[str]] = None
-    manifest: Optional[str] = None
+    manifest: Optional[Union[str, Workflow, CronWorkflow, WorkflowTemplate]] = None
     manifest_from: Optional[ManifestFrom] = None
     merge_strategy: Optional[str] = None
     set_owner_reference: Optional[bool] = None
     success_condition: Optional[str] = None
+
+    def _build_manifest(self) -> Optional[str]:
+        if isinstance(self.manifest, (Workflow, CronWorkflow, WorkflowTemplate)):
+            # hack to appease raw yaml string comparison
+            return self.manifest.to_yaml().replace("'{{", "{{").replace("}}'", "}}")
+        return self.manifest
 
     def _build_resource_template(self) -> _ModelResourceTemplate:
         return _ModelResourceTemplate(
             action=self.action,
             failure_condition=self.failure_condition,
             flags=self.flags,
-            manifest=self.manifest,
+            manifest=self._build_manifest(),
             manifest_from=self.manifest_from,
             merge_strategy=self.merge_strategy,
             set_owner_reference=self.set_owner_reference,

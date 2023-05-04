@@ -6,21 +6,19 @@ w1 = Workflow(
     workflow_template_ref=WorkflowTemplateRef(name="{{inputs.parameters.workflowtemplate}}"),
 )
 
-w1_yaml = w1.to_yaml().replace("'{{", "{{").replace("}}'", "}}")  # hack to appease raw yaml string comparison
 
 w2 = Workflow(
     generate_name="workflow-of-workflows-2-",
     arguments={"message": "{{inputs.parameters.message}}"},
     workflow_template_ref=WorkflowTemplateRef(name="{{inputs.parameters.workflowtemplate}}"),
 )
-w2_yaml = w2.to_yaml().replace("'{{", "{{").replace("}}'", "}}")  # hack to appease raw yaml string comparison
 
 with Workflow(generate_name="workflow-of-workflows-", entrypoint="main") as w:
     res_without_args = Resource(
         name="resource-without-argument",
         inputs=[Parameter(name="workflowtemplate")],
         action="create",
-        manifest=w1_yaml,
+        manifest=w1,
         success_condition="status.phase == Succeeded",
         failure_condition="status.phase in (Failed, Error)",
     )
@@ -32,7 +30,7 @@ with Workflow(generate_name="workflow-of-workflows-", entrypoint="main") as w:
             Parameter(name="message"),
         ],
         action="create",
-        manifest=w2_yaml,
+        manifest=w2,
         success_condition="status.phase == Succeeded",
         failure_condition="status.phase in (Failed, Error)",
     )
