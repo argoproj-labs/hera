@@ -24,7 +24,7 @@ folder for workflows because the upstream example is not formatted properly
         os.mkdir("/mnt/out")
 
         part_ids = list(map(lambda x: str(x), range(num_parts)))
-        for i, part_id in enumerate(part_ids, start=1):
+        for (i, part_id) in enumerate(part_ids, start=1):  # fmt: skip
             with open("/mnt/out/" + part_id + ".json", "w") as f:
                 json.dump({"foo": i}, f)
         json.dump(part_ids, sys.stdout)
