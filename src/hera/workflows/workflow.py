@@ -202,7 +202,7 @@ class Workflow(
 
     def _build_on_exit(self) -> Optional[str]:
         if isinstance(self.on_exit, Templatable):
-            return self.on_exit._build_template().name
+            return self.on_exit._build_template().name  # type: ignore
         return self.on_exit
 
     def get_parameter(self, name: str) -> Parameter:
