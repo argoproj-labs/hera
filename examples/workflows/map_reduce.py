@@ -1,23 +1,26 @@
-#
+"""
+This is a map reduce example from the upstream Argo Workflows repository. This is not part of the upstream examples
+folder for workflows because the upstream example is not formatted properly
+"""
 from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Parameter, S3Artifact, Workflow, script
 
 
-# fmt: off
 @script(
     image="python:alpine3.6",
     outputs=S3Artifact(name="parts", path="/mnt/out", archive=NoneArchiveStrategy(), key="{{workflow.name}}/parts"),
 )
-def split(numParts: int) -> None:
+def split(num_parts: int) -> None:
     import json
     import os
     import sys
+
     os.mkdir("/mnt/out")
-    partIds = list(map(lambda x: str(x), range({{inputs.parameters.numParts}})))
-    for i, partId in enumerate(partIds, start=1):
-        with open("/mnt/out/" + partId + ".json", "w") as f:
+
+    part_ids = list(map(lambda x: str(x), range(num_parts)))
+    for i, part_id in enumerate(part_ids, start=1):
+        with open("/mnt/out/" + part_id + ".json", "w") as f:
             json.dump({"foo": i}, f)
-    json.dump(partIds, sys.stdout)
-# fmt: on
+    json.dump(part_ids, sys.stdout)
 
 
 @script(
@@ -30,7 +33,7 @@ def split(numParts: int) -> None:
         key="{{workflow.name}}/results/{{inputs.parameters.partId}}.json",
     ),
 )
-def map(partId: str) -> None:
+def map(part_id: str) -> None:
     import json
     import os
 
@@ -41,9 +44,6 @@ def map(partId: str) -> None:
         json.dump({"bar": part["foo"] * 2}, f)
 
 
-# fmt: on
-
-# fmt: off
 @script(
     image="python:alpine3.6",
     inputs=S3Artifact(name="results", path="/mnt/in", key="{{workflow.name}}/results"),
@@ -54,23 +54,22 @@ def map(partId: str) -> None:
 def reduce() -> None:
     import json
     import os
-    total = 0
+
     os.mkdir("/mnt/out")
+
+    total = 0
     for f in list(map(lambda x: open("/mnt/in/" + x), os.listdir("/mnt/in"))):
         result = json.load(f)
         total = total + result["bar"]
     with open("/mnt/out/total.json", "w") as f:
         json.dump({"total": total}, f)
-# fmt: on
 
-with Workflow(generate_name="map-reduce-", entrypoint="main", arguments=Parameter(name="numParts", value="4")) as w:
+
+with Workflow(generate_name="map-reduce-", entrypoint="main", arguments=Parameter(name="num_parts", value="4")) as w:
     with DAG(name="main"):
-        s = split(arguments=Parameter(name="numParts", value="{{workflow.parameters.numParts}}"))
+        s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.numParts}}"))
         m = map(
             with_param=s.result,
             arguments=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
         )
-        r = reduce()
-        s >> m >> r
-
-print(w.to_yaml())
+        s >> m >> reduce()

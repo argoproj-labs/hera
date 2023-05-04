@@ -5,7 +5,7 @@ metadata:
 spec:
   arguments:
     parameters:
-    - name: numParts
+    - name: num_parts
       value: '4'
   entrypoint: main
   templates:
@@ -13,7 +13,7 @@ spec:
       tasks:
       - arguments:
           parameters:
-          - name: numParts
+          - name: num_parts
             value: '{{workflow.parameters.numParts}}'
         name: split
         template: split
@@ -23,7 +23,7 @@ spec:
             s3:
               key: '{{workflow.name}}/parts/{{item}}.json'
           parameters:
-          - name: partId
+          - name: part_id
             value: '{{item}}'
         depends: split
         name: map
@@ -35,7 +35,7 @@ spec:
     name: main
   - inputs:
       parameters:
-      - name: numParts
+      - name: num_parts
     name: split
     outputs:
       artifacts:
@@ -50,18 +50,18 @@ spec:
       - python
       image: python:alpine3.6
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-        try: numParts = json.loads(r'''{{inputs.parameters.numParts}}''')\nexcept:\
-        \ numParts = r'''{{inputs.parameters.numParts}}'''\n\nimport json\nimport\
-        \ os\nimport sys\nos.mkdir('/mnt/out')\npartIds = list(map(lambda x: str(x),\
-        \ range({{inputs.parameters.numParts}})))\nfor (i, partId) in enumerate(partIds,\
-        \ start=1):\n    with open('/mnt/out/' + partId + '.json', 'w') as f:\n  \
-        \      json.dump({'foo': i}, f)\njson.dump(partIds, sys.stdout)"
+        try: num_parts = json.loads(r'''{{inputs.parameters.num_parts}}''')\nexcept:\
+        \ num_parts = r'''{{inputs.parameters.num_parts}}'''\n\nimport json\nimport\
+        \ os\nimport sys\nos.mkdir('/mnt/out')\npart_ids = list(map(lambda x: str(x),\
+        \ range(num_parts)))\nfor (i, part_id) in enumerate(part_ids, start=1):\n\
+        \    with open('/mnt/out/' + part_id + '.json', 'w') as f:\n        json.dump({'foo':\
+        \ i}, f)\njson.dump(part_ids, sys.stdout)"
   - inputs:
       artifacts:
       - name: part
         path: /mnt/in/part.json
       parameters:
-      - name: partId
+      - name: part_id
     name: map
     outputs:
       artifacts:
@@ -76,11 +76,10 @@ spec:
       - python
       image: python:alpine3.6
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-        try: partId = json.loads(r'''{{inputs.parameters.partId}}''')\nexcept: partId\
-        \ = r'''{{inputs.parameters.partId}}'''\n\nimport json\nimport os\nimport\
-        \ sys\nos.mkdir('/mnt/out')\nwith open('/mnt/in/part.json') as f:\n    part\
-        \ = json.load(f)\nwith open('/mnt/out/part.json', 'w') as f:\n    json.dump({'bar':\
-        \ part['foo'] * 2}, f)"
+        try: part_id = json.loads(r'''{{inputs.parameters.part_id}}''')\nexcept: part_id\
+        \ = r'''{{inputs.parameters.part_id}}'''\n\nimport json\nimport os\nos.mkdir('/mnt/out')\n\
+        with open('/mnt/in/part.json') as f:\n    part = json.load(f)\nwith open('/mnt/out/part.json',\
+        \ 'w') as f:\n    json.dump({'bar': part['foo'] * 2}, f)"
   - inputs:
       artifacts:
       - name: results
@@ -101,7 +100,7 @@ spec:
       - python
       image: python:alpine3.6
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-        import os\nimport sys\ntotal = 0\nos.mkdir('/mnt/out')\nfor f in list(map(lambda\
-        \ x: open('/mnt/in/' + x), os.listdir('/mnt/in'))):\n    result = json.load(f)\n\
-        \    total = total + result['bar']\nwith open('/mnt/out/total.json', 'w')\
-        \ as f:\n    json.dump({'total': total}, f)"
+        import os\nos.mkdir('/mnt/out')\ntotal = 0\nfor f in list(map(lambda x: open('/mnt/in/'\
+        \ + x), os.listdir('/mnt/in'))):\n    result = json.load(f)\n    total = total\
+        \ + result['bar']\nwith open('/mnt/out/total.json', 'w') as f:\n    json.dump({'total':\
+        \ total}, f)"
