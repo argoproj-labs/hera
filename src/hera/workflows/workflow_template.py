@@ -103,7 +103,7 @@ class WorkflowTemplate(Workflow):
                 image_pull_secrets=self.image_pull_secrets,
                 metrics=self.metrics,
                 node_selector=self.node_selector,
-                on_exit=self.on_exit,
+                on_exit=self._build_on_exit(),
                 parallelism=self.parallelism,
                 pod_disruption_budget=self.pod_disruption_budget,
                 pod_gc=self.pod_gc,
