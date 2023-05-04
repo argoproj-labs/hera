@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: workflow-of-workflows-
+spec:
+  entrypoint: main
+  templates:
+  - name: w1-res
+    resource:
+      action: create
+      failureCondition: status.phase in (Failed, Error)
+      manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
+        \ workflow-of-workflows-1-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
+        \      image: docker/whalesay:latest\n    name: s\n"
+      successCondition: status.phase == Succeeded
+  - name: w2-res
+    resource:
+      action: create
+      failureCondition: status.phase in (Failed, Error)
+      manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
+        \ workflow-of-workflows-2-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
+        \      image: docker/whalesay:latest\n    name: s\n"
+      successCondition: status.phase == Succeeded
+  - name: main
+    steps:
+    - - name: workflow1
+        template: w1-res
+    - - name: workflow2
+        template: w2-res
