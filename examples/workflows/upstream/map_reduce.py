@@ -1,6 +1,7 @@
 #
 from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Parameter, S3Artifact, Workflow, script
 
+
 # fmt: off
 @script(
     image="python:alpine3.6",
@@ -18,6 +19,7 @@ def split(numParts: int) -> None:
     json.dump(partIds, sys.stdout)
 # fmt: on
 
+
 @script(
     image="python:alpine3.6",
     inputs=Artifact(name="part", path="/mnt/in/part.json"),
@@ -31,12 +33,14 @@ def split(numParts: int) -> None:
 def map(partId: str) -> None:
     import json
     import os
-    import sys
+
     os.mkdir("/mnt/out")
     with open("/mnt/in/part.json") as f:
         part = json.load(f)
     with open("/mnt/out/part.json", "w") as f:
         json.dump({"bar": part["foo"] * 2}, f)
+
+
 # fmt: on
 
 # fmt: off
@@ -50,7 +54,6 @@ def map(partId: str) -> None:
 def reduce() -> None:
     import json
     import os
-    import sys
     total = 0
     os.mkdir("/mnt/out")
     for f in list(map(lambda x: open("/mnt/in/" + x), os.listdir("/mnt/in"))):
