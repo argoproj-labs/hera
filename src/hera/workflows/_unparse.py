@@ -452,8 +452,6 @@ class Unparser:
                 self.write(repr(tree.s))
             elif isinstance(tree.s, str):
                 self.write("b" + repr(tree.s))
-            elif isinstance(tree.s, unicode):
-                self.write(repr(tree.s).lstrip("u"))
             else:
                 assert False, "shouldn't get here"
 
