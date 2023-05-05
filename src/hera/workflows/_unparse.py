@@ -1,5 +1,4 @@
 import ast
-import os
 import sys
 
 import six
@@ -267,7 +266,7 @@ class Unparser:
             self.leave()
 
     def _TryFinally(self, t):
-        if len(t.body) == 1 and isinstance(t.body[0], ast.TryExcept):
+        if len(t.body) == 1 and isinstance(t.body[0], ast.Try):
             # try-except-finally
             self.dispatch(t.body)
         else:
@@ -500,8 +499,8 @@ class Unparser:
         write("{")
         expr = StringIO()
         Unparser(t.value, expr)
-        expr = expr.getvalue().rstrip("\n")
-        if expr.startswith("{"):
+        expr = expr.getvalue().rstrip("\n")  # type: ignore
+        if expr.startswith("{"):  # type: ignore
             write(" ")  # Separate pair of opening brackets as "{ {"
         write(expr)
         if t.conversion != -1:
@@ -727,7 +726,7 @@ class Unparser:
         # Special case: 3.__abs__() is a syntax error, so if t.value
         # is an integer literal then we need to either parenthesize
         # it or add an extra space to get 3 .__abs__().
-        if isinstance(t.value, getattr(ast, "Constant", getattr(ast, "Num", None))) and isinstance(t.value.n, int):
+        if isinstance(t.value, getattr(ast, "Constant", getattr(ast, "Num", None))) and isinstance(t.value.n, int):  # type: ignore
             self.write(" ")
         self.write(".")
         self.write(t.attr)
@@ -896,25 +895,6 @@ class Unparser:
         if t.optional_vars:
             self.write(" as ")
             self.dispatch(t.optional_vars)
-
-
-def testdir(a):
-    try:
-        names = [n for n in os.listdir(a) if n.endswith(".py")]
-    except OSError:
-        print("Directory not readable: %s" % a, file=sys.stderr)
-    else:
-        for n in names:
-            fullname = os.path.join(a, n)
-            if os.path.isfile(fullname):
-                output = StringIO()
-                print("Testing %s" % fullname)
-                try:
-                    roundtrip(fullname, output)
-                except Exception as e:
-                    print("  Failed to compile, exception is %s" % repr(e))
-            elif os.path.isdir(fullname):
-                testdir(fullname)
 
 
 def unparse(tree):
