@@ -79,7 +79,7 @@
           image: python:alpine3.6
           source: 'import random
 
-            print(''heads'' if random.randint(0, 1) == 0 else ''tails'')'
+            print((''heads'' if (random.randint(0, 1) == 0) else ''tails''))'
       - name: heads
         script:
           command:

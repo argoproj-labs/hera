@@ -78,6 +78,6 @@
           image: python:3.8
           source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
             try: p = json.loads(r'''{{inputs.parameters.p}}''')\nexcept: p = r'''{{inputs.parameters.p}}'''\n\
-            \nif p < 0.5:\n    raise Exception(p)\nprint(42)"
+            \nif (p < 0.5):\n    raise Exception(p)\nprint(42)"
     ```
 

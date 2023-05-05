@@ -80,7 +80,7 @@
           command:
           - python
           image: python:alpine3.6
-          source: assert '{{inputs.parameters.x}}' == 'hi'
+          source: assert ('{{inputs.parameters.x}}' == 'hi')
       - dag:
           tasks:
           - name: a

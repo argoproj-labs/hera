@@ -78,11 +78,6 @@ check_untyped_defs = true
 no_implicit_optional = true
 strict_optional = false
 
-
-[[tool.mypy.overrides]]
-module = "mypy-argo.workflows.*"
-ignore_missing_imports = true
-
 [[tool.mypy.overrides]]
 module = "mypy-urllib3.*"
 ignore_missing_imports = true

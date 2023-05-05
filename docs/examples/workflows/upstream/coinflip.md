@@ -95,7 +95,7 @@
           image: python:alpine3.6
           source: 'import random
 
-            result = ''heads'' if random.randint(0, 1) == 0 else ''tails''
+            result = (''heads'' if (random.randint(0, 1) == 0) else ''tails'')
 
             print(result)'
     ```
