@@ -24,7 +24,7 @@ folder for workflows because the upstream example is not formatted properly
         os.mkdir("/mnt/out")
 
         part_ids = list(map(lambda x: str(x), range(num_parts)))
-        for (i, part_id) in enumerate(part_ids, start=1):  # fmt: skip
+        for i, part_id in enumerate(part_ids, start=1):  # fmt: skip
             with open("/mnt/out/" + part_id + ".json", "w") as f:
                 json.dump({"foo": i}, f)
         json.dump(part_ids, sys.stdout)
@@ -140,8 +140,8 @@ folder for workflows because the upstream example is not formatted properly
             try: num_parts = json.loads(r'''{{inputs.parameters.num_parts}}''')\nexcept:\
             \ num_parts = r'''{{inputs.parameters.num_parts}}'''\n\nimport json\nimport\
             \ os\nimport sys\nos.mkdir('/mnt/out')\npart_ids = list(map(lambda x: str(x),\
-            \ range(num_parts)))\nfor (i, part_id) in enumerate(part_ids, start=1):\n\
-            \    with open('/mnt/out/' + part_id + '.json', 'w') as f:\n        json.dump({'foo':\
+            \ range(num_parts)))\nfor i, part_id in enumerate(part_ids, start=1):\n  \
+            \  with open('/mnt/out/' + part_id + '.json', 'w') as f:\n        json.dump({'foo':\
             \ i}, f)\njson.dump(part_ids, sys.stdout)"
       - inputs:
           artifacts:
