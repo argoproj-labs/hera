@@ -15,6 +15,7 @@ from hera.workflows._mixins import (
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
+from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Template as _ModelTemplate,
@@ -63,12 +64,15 @@ class Step(
     def result(self) -> str:
         return f"{{{{steps.{self.name}.outputs.result}}}}"
 
+    def get_result_as(self, name: str) -> Parameter:
+        return Parameter(name=name, value=self.result)
+
     def get_parameters_as(self, name):
-        """Gets all the output parameters from this task"""
+        """Gets all the output parameters from this step"""
         return Parameter(name=name, value=f"{{{{steps.{self.name}.outputs.parameters}}}}")
 
     def get_parameter(self, name: str) -> Parameter:
-        """Returns a Parameter from the task's outputs based on the name.
+        """Returns a Parameter from the step's outputs based on the name.
 
         Parameters
         ----------
@@ -107,6 +111,42 @@ class Step(
                 description=obj.description,
             )
         raise KeyError(f"No output parameter named `{name}` found")
+
+    def get_artifact(self, name: str) -> Artifact:
+        """Returns an Artifact from the step's outputs based on the name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the artifact to extract as an output.
+
+        Returns
+        -------
+        Artifact
+            Parameter with the same name
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = self.template
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no outputs: {template}")
+        if template.outputs.artifacts is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no output artifacts: {template}")
+        artifacts = template.outputs.artifacts  # type: ignore
+
+        obj = next((output for output in artifacts if output.name == name), None)
+        if obj is not None:
+            if isinstance(obj, Artifact):
+                return Artifact(name=name, path=obj.path, from_=f"{{{{steps.{self.name}.outputs.artifacts.{name}}}}}")
+            raise NotImplementedError(type(obj))
+        raise KeyError(f"No output artifact named `{name}` found")
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         _template = None
@@ -263,7 +303,7 @@ class Steps(
             script=None,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             steps=self._build_steps(),
             suspend=None,
             synchronization=self.synchronization,

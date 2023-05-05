@@ -295,10 +295,19 @@ class TemplateMixin(SubNodeMixin, HookMixin):
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
     service_account_name: Optional[str] = None
-    sidecars: Optional[List[UserContainer]] = None
+    sidecars: Optional[Union[UserContainer, List[UserContainer]]] = None
     synchronization: Optional[Synchronization] = None
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
+
+    def _build_sidecars(self) -> Optional[List[UserContainer]]:
+        if self.sidecars is None:
+            return None
+
+        if isinstance(self.sidecars, UserContainer):
+            return [self.sidecars]
+
+        return self.sidecars
 
     def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
         if self.active_deadline_seconds is None:
@@ -399,7 +408,10 @@ class ArgumentsMixin(BaseMixin):
         for arg in arguments:
             if isinstance(arg, dict):
                 for k, v in arg.items():
-                    value = Parameter(name=k, value=v)
+                    if isinstance(v, Parameter):
+                        value = Parameter(name=k, value=v.value)
+                    else:
+                        value = Parameter(name=k, value=v)
                     result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(arg, ModelArtifact):
                 result.artifacts = [arg] if result.artifacts is None else result.artifacts + [arg]
@@ -423,6 +435,10 @@ class CallableTemplateMixin(ArgumentsMixin):
     def __call__(self, *args, **kwargs) -> Optional[SubNodeMixin]:
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
+        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
+        # set it here in order for the following logic to capture it
+        if "source" not in kwargs and hasattr(self, "source"):
+            kwargs["source"] = self.source  # type: ignore
 
         try:
             from hera.workflows.steps import Step
@@ -436,7 +452,13 @@ class CallableTemplateMixin(ArgumentsMixin):
 
             # these are the already set parameters. If a users has already set a parameter argument, then Hera
             # uses the user-provided value rather than the inferred value
-            arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]  # type: ignore
+            kwargs_arguments = kwargs.get("arguments", [])
+            kwargs_arguments = (
+                kwargs_arguments if isinstance(kwargs_arguments, list) else [kwargs_arguments]
+            )  # type: ignore
+            arguments = (
+                self.arguments if isinstance(self.arguments, list) else [self.arguments] + kwargs_arguments
+            )  # type: ignore
             arguments = list(filter(lambda x: x is not None, arguments))
             parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
             parameter_names = {p.name for p in parameters}
@@ -464,6 +486,11 @@ class CallableTemplateMixin(ArgumentsMixin):
                     for p in new_parameters:
                         if p.name not in parameter_names:
                             arguments.append(p)
+
+            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
+            # the task will miss adding them when building the final arguments
+            kwargs["arguments"] = arguments
 
             return Task(*args, template=self, **kwargs)
         except InvalidType:

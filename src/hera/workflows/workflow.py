@@ -48,6 +48,7 @@ from hera.workflows.models import (
     WorkflowStatus,
     WorkflowTemplateRef,
 )
+from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 
@@ -119,7 +120,7 @@ class Workflow(
     image_pull_secrets: ImagePullSecrets = None
     metrics: Optional[Metrics] = None
     node_selector: Optional[Dict[str, str]] = None
-    on_exit: Optional[str] = None
+    on_exit: Optional[Union[str, Templatable]] = None
     parallelism: Optional[int] = None
     pod_disruption_budget: Optional[PodDisruptionBudgetSpec] = None
     pod_gc: Optional[PodGC] = None
@@ -198,6 +199,23 @@ class Workflow(
             elif isinstance(secret, LocalObjectReference):
                 result.append(secret)
         return result
+
+    def _build_on_exit(self) -> Optional[str]:
+        if isinstance(self.on_exit, Templatable):
+            return self.on_exit._build_template().name  # type: ignore
+        return self.on_exit
+
+    def get_parameter(self, name: str) -> Parameter:
+        arguments = self._build_arguments()
+        if arguments is None:
+            raise KeyError("Workflow has no arguments set")
+        if arguments.parameters is None:
+            raise KeyError("Workflow has no argument parameters set")
+
+        parameters = arguments.parameters
+        if next((p for p in parameters if p.name == name), None) is None:
+            raise KeyError(f"`{name}` is not a valid workflow parameter")
+        return Parameter(name=name, value=f"{{{{workflow.parameters.{name}}}}}")
 
     def build(self) -> TWorkflow:
         """Builds the Workflow and its components into an Argo schema Workflow object."""
@@ -285,7 +303,7 @@ class Workflow(
                 image_pull_secrets=self.image_pull_secrets,
                 metrics=self.metrics,
                 node_selector=self.node_selector,
-                on_exit=self.on_exit,
+                on_exit=self._build_on_exit(),
                 parallelism=self.parallelism,
                 pod_disruption_budget=self.pod_disruption_budget,
                 pod_gc=self.pod_gc,

@@ -69,9 +69,21 @@ class Artifact(BaseModel):
         return _ModelArtifactPaths(**artifact.dict())
 
     def as_name(self, name: str) -> _ModelArtifact:
+        return self.with_name(name)  # backwards compatibility with v4
+
+    def with_name(self, name: str) -> _ModelArtifact:
         artifact = self._build_artifact()
         artifact.name = name
         return artifact
+
+    def to_path(self, path: str, sub_path: Optional[str] = None):
+        return self.with_path(path, sub_path=sub_path)  # backwards compatibility with v4
+
+    def with_path(self, path: str, sub_path: Optional[str] = None):
+        """Change the paths of the artifact"""
+        self.path = path
+        self.sub_path = sub_path
+        return self
 
 
 class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):

@@ -16,6 +16,7 @@ from hera.workflows._mixins import (
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
+from hera.workflows.artifact import Artifact
 from hera.workflows.models import (
     DAGTask as _ModelDAGTask,
     Template,
@@ -146,6 +147,9 @@ class Task(
     def result(self) -> str:
         return f"{{{{tasks.{self.name}.outputs.result}}}}"
 
+    def get_result_as(self, name: str) -> Parameter:
+        return Parameter(name=name, value=self.result)
+
     def get_parameters_as(self, name: str) -> Parameter:
         """Gets all the output parameters from this task"""
         return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
@@ -186,6 +190,40 @@ class Task(
                 value=f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}",
             )
         raise KeyError(f"No output parameter named `{name}` found")
+
+    def get_artifact(self, name: str) -> Artifact:
+        """Returns an Artifact from the task's outputs based on the name.
+
+        Parameters
+        ----------
+        name: str
+            The name of the artifact to extract as an output.
+
+        Returns
+        -------
+        Artifact
+            Parameter with the same name
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = self.template
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no outputs: {template}")
+        if template.outputs.artifacts is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no output artifacts: {template}")
+        artifacts = template.outputs.artifacts  # type: ignore
+
+        obj = next((output for output in artifacts if output.name == name), None)
+        if obj is not None:
+            return Artifact(name=name, path=obj.path, from_=f"{{{{tasks.{self.name}.outputs.artifacts.{name}}}}}")
+        raise KeyError(f"No output artifact named `{name}` found")
 
     def next(self, other: Task, operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> Task:
         """Set self as a dependency of `other`."""
