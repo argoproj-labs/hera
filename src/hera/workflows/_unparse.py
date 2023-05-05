@@ -4,6 +4,7 @@ NOTE: This is a verbatim copy of the code at https://github.com/python/cpython/b
 
 This is only used for backwards compatibility for python 3.8 as unparse was added in python 3.9.
 """
+import ast
 import sys
 from _ast import *
 from contextlib import contextmanager, nullcontext
