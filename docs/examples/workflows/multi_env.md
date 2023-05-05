@@ -61,10 +61,10 @@
 
             import os
 
-            assert (os.environ[''a''] == ''1''), os.environ[''a'']
+            assert os.environ[''a''] == ''1'', os.environ[''a'']
 
-            assert (os.environ[''b''] == ''2''), os.environ[''b'']
+            assert os.environ[''b''] == ''2'', os.environ[''b'']
 
-            assert (os.environ[''c''] == ''3''), os.environ[''c'']'
+            assert os.environ[''c''] == ''3'', os.environ[''c'']'
     ```
 

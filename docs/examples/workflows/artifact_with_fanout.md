@@ -86,9 +86,9 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\n    import json\n\
-            \    with open('/file', 'w+') as f:\n        for i in range(10):\n       \
-            \     f.write(f'''{json.dumps(i)}\n''')"
+          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+            with open('/file', 'w+') as f:\n    for i in range(10):\n        f.write(f'{json.dumps(i)}\\\
+            n')"
       - inputs:
           artifacts:
           - name: test

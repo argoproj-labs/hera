@@ -68,7 +68,7 @@ This example showcases conditional execution on success, failure, and error
           - python
           image: python:3.8
           source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport random\n\
-            p = random.random()\nif (p <= 0.5):\n    raise Exception('failure')\nprint('success')"
+            p = random.random()\nif p <= 0.5:\n    raise Exception('failure')\nprint('success')"
       - name: success
         script:
           command:

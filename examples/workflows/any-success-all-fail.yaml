@@ -41,7 +41,7 @@ spec:
       image: python:3.8
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
         try: a = json.loads(r'''{{inputs.parameters.a}}''')\nexcept: a = r'''{{inputs.parameters.a}}'''\n\
-        \nimport random\nrandom.seed(a)\nif (random.random() < 0.5):\n    raise Exception('Oh,\
+        \nimport random\nrandom.seed(a)\nif random.random() < 0.5:\n    raise Exception('Oh,\
         \ no!')"
   - inputs:
       parameters:

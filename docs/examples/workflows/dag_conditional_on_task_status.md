@@ -64,7 +64,7 @@
           - python
           image: python:3.8
           source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport random\n\
-            if (random.randint(0, 1) == 0):\n    raise ValueError"
+            if random.randint(0, 1) == 0:\n    raise ValueError"
       - name: when-failed
         script:
           command:
