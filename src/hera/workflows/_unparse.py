@@ -122,11 +122,7 @@ class Unparser:
 
     def _AnnAssign(self, t):
         self.fill()
-        if not t.simple and isinstance(t.target, ast.Name):
-            self.write("(")
         self.dispatch(t.target)
-        if not t.simple and isinstance(t.target, ast.Name):
-            self.write(")")
         self.write(": ")
         self.dispatch(t.annotation)
         if t.value:
@@ -688,11 +684,9 @@ class Unparser:
     }
 
     def _BinOp(self, t):
-        self.write("(")
         self.dispatch(t.left)
         self.write(" " + self.binop[t.op.__class__.__name__] + " ")
         self.dispatch(t.right)
-        self.write(")")
 
     cmpops = {
         "Eq": "==",
@@ -708,12 +702,10 @@ class Unparser:
     }
 
     def _Compare(self, t):
-        self.write("(")
         self.dispatch(t.left)
         for o, e in zip(t.ops, t.comparators):
             self.write(" " + self.cmpops[o.__class__.__name__] + " ")
             self.dispatch(e)
-        self.write(")")
 
     boolops = {ast.And: "and", ast.Or: "or"}
 
