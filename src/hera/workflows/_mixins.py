@@ -12,6 +12,7 @@ from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
+from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
     HTTP,
     Affinity,
@@ -31,13 +32,14 @@ from hera.workflows.models import (
     LifecycleHook,
     Memoize,
     Metadata,
-    Metrics,
+    Metrics as ModelMetrics,
     Outputs as ModelOutputs,
     Parameter as ModelParameter,
     PersistentVolumeClaim,
     Plugin,
     PodSecurityContext,
     Probe,
+    Prometheus as ModelPrometheus,
     ResourceRequirements,
     RetryStrategy,
     Sequence,
@@ -282,7 +284,16 @@ class TemplateMixin(SubNodeMixin, HookMixin):
     memoize: Optional[Memoize] = None
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
-    metrics: Optional[Metrics] = None
+    metrics: Optional[
+        Union[
+            ModelMetrics,
+            ModelPrometheus,
+            _BaseMetric,
+            Metrics,
+            List[ModelPrometheus],
+            List[_BaseMetric],
+        ]
+    ] = None
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
@@ -314,6 +325,24 @@ class TemplateMixin(SubNodeMixin, HookMixin):
             annotations=self.annotations,
             labels=self.labels,
         )
+
+    def _build_metrics(self) -> Optional[ModelMetrics]:
+        if self.metrics is None or isinstance(self.metrics, ModelMetrics):
+            return self.metrics
+        elif isinstance(self.metrics, ModelPrometheus):
+            return ModelMetrics(prometheus=[self.metrics])
+        elif isinstance(self.metrics, Metrics):
+            return ModelMetrics(prometheus=self.metrics._build_metrics())
+        elif isinstance(self.metrics, _BaseMetric):
+            return ModelMetrics(prometheus=[self.metrics._build_metric()])
+        else:
+            metrics = []
+            for m in self.metrics:
+                if isinstance(m, _BaseMetric):
+                    metrics.append(m._build_metric())
+                else:
+                    metrics.append(m)
+            return ModelMetrics(prometheus=metrics)
 
 
 class ResourceMixin(BaseMixin):

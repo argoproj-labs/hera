@@ -90,7 +90,7 @@ class ContainerSet(
             inputs=self._build_inputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),
-            metrics=self.metrics,
+            metrics=self._build_metrics(),
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
