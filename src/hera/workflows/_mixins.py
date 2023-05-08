@@ -327,10 +327,19 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
     service_account_name: Optional[str] = None
-    sidecars: Optional[List[UserContainer]] = None
+    sidecars: Optional[Union[UserContainer, List[UserContainer]]] = None
     synchronization: Optional[Synchronization] = None
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
+
+    def _build_sidecars(self) -> Optional[List[UserContainer]]:
+        if self.sidecars is None:
+            return None
+
+        if isinstance(self.sidecars, UserContainer):
+            return [self.sidecars]
+
+        return self.sidecars
 
     def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
         if self.active_deadline_seconds is None:
