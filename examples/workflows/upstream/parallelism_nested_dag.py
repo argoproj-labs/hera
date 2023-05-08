@@ -88,7 +88,7 @@ spec:
       args: ["echo {{inputs.parameters.msg}}; sleep 10"]
 """
 
-from hera.workflows import Workflow, DAG, Parameter, Container
+from hera.workflows import DAG, Container, Parameter, Workflow
 
 one_job = Container(
     name="one-job",
