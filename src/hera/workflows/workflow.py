@@ -282,7 +282,7 @@ class Workflow(
                 host_aliases=self.host_aliases,
                 host_network=self.host_network,
                 image_pull_secrets=self.image_pull_secrets,
-                metrics=self.metrics,
+                metrics=self._build_metrics(),
                 node_selector=self.node_selector,
                 on_exit=self.on_exit,
                 parallelism=self.parallelism,

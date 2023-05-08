@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from hera.shared import BaseMixin
 from hera.workflows.models import (
+    Amount as _ModelAmount,
     Counter as _ModelCounter,
     Gauge as _ModelGauge,
     Histogram as _ModelHistogram,
@@ -17,8 +18,15 @@ class _BaseMetric(BaseMixin):
 
     name: str
     help: str
-    labels: Optional[List[Label]] = None
+    labels: Optional[Union[Label, List[Label]]] = None
     when: Optional[str] = None
+
+    def _build_labels(self) -> Optional[List[_ModelMetricLabel]]:
+        if not self.labels:
+            return None
+        if isinstance(self.labels, Label):
+            return [self.labels]
+        return self.labels
 
     def _build_metric(self) -> _ModelPrometheus:
         raise NotImplementedError
@@ -36,7 +44,7 @@ class Counter(_BaseMetric, _ModelCounter):
         return _ModelPrometheus(
             name=self.name,
             help=self.help,
-            labels=self.labels,
+            labels=self._build_labels(),
             when=self.when,
             counter=_ModelCounter(value=self.value),
         )
@@ -54,7 +62,7 @@ class Gauge(_BaseMetric, _ModelGauge):
         return _ModelPrometheus(
             name=self.name,
             help=self.help,
-            labels=self.labels,
+            labels=self._build_labels(),
             when=self.when,
             gauge=_ModelGauge(realtime=self.realtime, value=self.value),
         )
@@ -68,14 +76,19 @@ class Histogram(_BaseMetric, _ModelHistogram):
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
+    buckets: List[float]
+
+    def _build_buckets(self) -> List[_ModelAmount]:
+        return [_ModelAmount(__root__=bucket) for bucket in self.buckets]
+
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
             name=self.name,
             help=self.help,
-            labels=self.labels,
+            labels=self._build_labels(),
             when=self.when,
             histogram=_ModelHistogram(
-                buckets=self.buckets,
+                buckets=self._build_buckets(),
                 value=self.value,
             ),
         )
@@ -97,7 +110,7 @@ class Metric(_BaseMetric):
         return _ModelPrometheus(
             name=self.name,
             help=self.help,
-            labels=self.labels,
+            labels=self._build_labels(),
             when=self.when,
             counter=_ModelCounter(value=self.counter.value) if self.counter else None,
             gauge=_ModelGauge(realtime=self.gauge.realtime, value=self.gauge.value) if self.gauge else None,
