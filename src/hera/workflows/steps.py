@@ -263,7 +263,7 @@ class Steps(
             script=None,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             steps=self._build_steps(),
             suspend=None,
             synchronization=self.synchronization,
