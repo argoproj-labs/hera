@@ -8,7 +8,7 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import Workflow, DAG, Container, Parameter
+    from hera.workflows import DAG, Container, Parameter, Workflow
 
     echo = Container(
         name="echo",
