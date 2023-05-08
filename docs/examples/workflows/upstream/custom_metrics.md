@@ -10,9 +10,9 @@
     ```python linenums="1"
     from hera.workflows import (
         Container,
+        Counter,
         Gauge,
         Histogram,
-    Counter,
         Label,
         Parameter,
         Steps,

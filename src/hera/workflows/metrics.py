@@ -32,7 +32,7 @@ class _BaseMetric(BaseMixin):
         raise NotImplementedError
 
 
-class Counter(_BaseMetric, _ModelCounter):
+class Counter(_BaseMetric):
     """Counter metric component used to count specific events based on the given value.
 
     Notes
@@ -40,13 +40,17 @@ class Counter(_BaseMetric, _ModelCounter):
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
+    value: str
+
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
-            name=self.name,
-            help=self.help,
-            labels=self._build_labels(),
-            when=self.when,
             counter=_ModelCounter(value=self.value),
+            gauge=None,
+            help=self.help,
+            histogram=None,
+            labels=self._build_labels(),
+            name=self.name,
+            when=self.when,
         )
 
 
@@ -58,17 +62,22 @@ class Gauge(_BaseMetric, _ModelGauge):
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
+    realtime: bool
+    value: str
+
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
-            name=self.name,
-            help=self.help,
-            labels=self._build_labels(),
-            when=self.when,
+            counter=None,
             gauge=_ModelGauge(realtime=self.realtime, value=self.value),
+            help=self.help,
+            histogram=None,
+            labels=self._build_labels(),
+            name=self.name,
+            when=self.when,
         )
 
 
-class Histogram(_BaseMetric, _ModelHistogram):
+class Histogram(_BaseMetric):
     """Histogram metric that records the value at the specified bucket intervals.
 
     Notes
@@ -76,21 +85,24 @@ class Histogram(_BaseMetric, _ModelHistogram):
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
 
-    buckets: List[float]
+    buckets: List[Union[float, _ModelAmount]]  # type: ignore
+    value: str
 
     def _build_buckets(self) -> List[_ModelAmount]:
-        return [_ModelAmount(__root__=bucket) for bucket in self.buckets]
+        return [_ModelAmount(__root__=bucket) if isinstance(bucket, float) else bucket for bucket in self.buckets]
 
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
-            name=self.name,
+            counter=None,
+            gauge=None,
             help=self.help,
-            labels=self._build_labels(),
-            when=self.when,
             histogram=_ModelHistogram(
                 buckets=self._build_buckets(),
                 value=self.value,
             ),
+            labels=self._build_labels(),
+            name=self.name,
+            when=self.when,
         )
 
 
@@ -108,18 +120,18 @@ class Metric(_BaseMetric):
 
     def _build_metric(self) -> _ModelPrometheus:
         return _ModelPrometheus(
-            name=self.name,
-            help=self.help,
-            labels=self._build_labels(),
-            when=self.when,
             counter=_ModelCounter(value=self.counter.value) if self.counter else None,
             gauge=_ModelGauge(realtime=self.gauge.realtime, value=self.gauge.value) if self.gauge else None,
+            help=self.help,
             histogram=_ModelHistogram(
                 buckets=self.histogram.buckets,
                 value=self.histogram.value,
             )
             if self.histogram
             else None,
+            labels=self._build_labels(),
+            name=self.name,
+            when=self.when,
         )
 
 

@@ -274,12 +274,12 @@ class EnvMixin(BaseMixin):
 class MetricsMixin(BaseMixin):
     metrics: Optional[
         Union[
-            ModelMetrics,
-            ModelPrometheus,
             _BaseMetric,
-            Metrics,
-            List[ModelPrometheus],
             List[_BaseMetric],
+            Metrics,
+            ModelPrometheus,
+            List[ModelPrometheus],
+            ModelMetrics,
         ]
     ] = None
 
@@ -292,14 +292,14 @@ class MetricsMixin(BaseMixin):
             return ModelMetrics(prometheus=self.metrics._build_metrics())
         elif isinstance(self.metrics, _BaseMetric):
             return ModelMetrics(prometheus=[self.metrics._build_metric()])
-        else:
-            metrics = []
-            for m in self.metrics:
-                if isinstance(m, _BaseMetric):
-                    metrics.append(m._build_metric())
-                else:
-                    metrics.append(m)
-            return ModelMetrics(prometheus=metrics)
+
+        metrics = []
+        for m in self.metrics:
+            if isinstance(m, _BaseMetric):
+                metrics.append(m._build_metric())
+            else:
+                metrics.append(m)
+        return ModelMetrics(prometheus=metrics)
 
 
 class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
