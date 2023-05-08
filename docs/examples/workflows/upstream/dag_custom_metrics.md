@@ -94,8 +94,6 @@
                     {"tag": "TEST-TWO-B", "command": "TWO-B"},
                 ],
             )
-
-    print(w.to_yaml())
     ```
 
 === "YAML"
