@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from hera.workflows._mixins import IOMixin, TemplateMixin
+from hera.workflows._mixins import CallableTemplateMixin, IOMixin, TemplateMixin
 from hera.workflows.models import (
     HTTP as _ModelHTTP,
     HTTPBodySource,
@@ -9,7 +9,7 @@ from hera.workflows.models import (
 )
 
 
-class HTTP(TemplateMixin, IOMixin):
+class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
     url: str
     body: Optional[str] = None
     body_from: Optional[HTTPBodySource] = None

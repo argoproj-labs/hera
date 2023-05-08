@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
+    CallableTemplateMixin,
     ContainerMixin,
     ContextMixin,
     EnvIOMixin,
@@ -55,6 +56,7 @@ class ContainerSet(
     EnvIOMixin,
     ContainerMixin,
     TemplateMixin,
+    CallableTemplateMixin,
     ResourceMixin,
     VolumeMountMixin,
     ContextMixin,
