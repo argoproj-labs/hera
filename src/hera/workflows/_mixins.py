@@ -271,7 +271,38 @@ class EnvMixin(BaseMixin):
         return params
 
 
-class TemplateMixin(SubNodeMixin, HookMixin):
+class MetricsMixin(BaseMixin):
+    metrics: Optional[
+        Union[
+            ModelMetrics,
+            ModelPrometheus,
+            _BaseMetric,
+            Metrics,
+            List[ModelPrometheus],
+            List[_BaseMetric],
+        ]
+    ] = None
+
+    def _build_metrics(self) -> Optional[ModelMetrics]:
+        if self.metrics is None or isinstance(self.metrics, ModelMetrics):
+            return self.metrics
+        elif isinstance(self.metrics, ModelPrometheus):
+            return ModelMetrics(prometheus=[self.metrics])
+        elif isinstance(self.metrics, Metrics):
+            return ModelMetrics(prometheus=self.metrics._build_metrics())
+        elif isinstance(self.metrics, _BaseMetric):
+            return ModelMetrics(prometheus=[self.metrics._build_metric()])
+        else:
+            metrics = []
+            for m in self.metrics:
+                if isinstance(m, _BaseMetric):
+                    metrics.append(m._build_metric())
+                else:
+                    metrics.append(m)
+            return ModelMetrics(prometheus=metrics)
+
+
+class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
@@ -284,16 +315,6 @@ class TemplateMixin(SubNodeMixin, HookMixin):
     memoize: Optional[Memoize] = None
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
-    metrics: Optional[
-        Union[
-            ModelMetrics,
-            ModelPrometheus,
-            _BaseMetric,
-            Metrics,
-            List[ModelPrometheus],
-            List[_BaseMetric],
-        ]
-    ] = None
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
@@ -325,24 +346,6 @@ class TemplateMixin(SubNodeMixin, HookMixin):
             annotations=self.annotations,
             labels=self.labels,
         )
-
-    def _build_metrics(self) -> Optional[ModelMetrics]:
-        if self.metrics is None or isinstance(self.metrics, ModelMetrics):
-            return self.metrics
-        elif isinstance(self.metrics, ModelPrometheus):
-            return ModelMetrics(prometheus=[self.metrics])
-        elif isinstance(self.metrics, Metrics):
-            return ModelMetrics(prometheus=self.metrics._build_metrics())
-        elif isinstance(self.metrics, _BaseMetric):
-            return ModelMetrics(prometheus=[self.metrics._build_metric()])
-        else:
-            metrics = []
-            for m in self.metrics:
-                if isinstance(m, _BaseMetric):
-                    metrics.append(m._build_metric())
-                else:
-                    metrics.append(m)
-            return ModelMetrics(prometheus=metrics)
 
 
 class ResourceMixin(BaseMixin):
