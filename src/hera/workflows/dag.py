@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Union
 
-from hera.workflows._mixins import ContextMixin, IOMixin, TemplateMixin
+from hera.workflows._mixins import CallableTemplateMixin, ContextMixin, IOMixin, TemplateMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     DAGTask,
@@ -17,7 +17,7 @@ from hera.workflows.models import (
 from hera.workflows.task import Task
 
 
-class DAG(IOMixin, TemplateMixin, ContextMixin):
+class DAG(IOMixin, TemplateMixin, CallableTemplateMixin, ContextMixin):
     """A DAG template invocator is used to define Task dependencies as an acyclic graph.
 
     DAG implements the contextmanager interface so allows usage of `with`, under which any
@@ -58,6 +58,7 @@ class DAG(IOMixin, TemplateMixin, ContextMixin):
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
+            parallelism=self.parallelism,
             plugin=self.plugin,
             pod_spec_patch=self.pod_spec_patch,
             priority=self.priority,

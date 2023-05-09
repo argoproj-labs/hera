@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from hera.workflows._mixins import IOMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import CallableTemplateMixin, IOMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import (
     ManifestFrom,
@@ -11,7 +11,7 @@ from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 
 
-class Resource(TemplateMixin, SubNodeMixin, IOMixin):
+class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     action: str
     failure_condition: Optional[str] = None
     flags: Optional[List[str]] = None

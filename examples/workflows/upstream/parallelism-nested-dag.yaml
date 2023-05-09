@@ -1,0 +1,82 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: parallelism-nested-dag-
+spec:
+  entrypoint: A
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: msg
+            value: '{{inputs.parameters.msg}} c1'
+        name: c1
+        template: one-job
+      - arguments:
+          parameters:
+          - name: msg
+            value: '{{inputs.parameters.msg}} c2'
+        depends: c1
+        name: c2
+        template: one-job
+      - arguments:
+          parameters:
+          - name: msg
+            value: '{{inputs.parameters.msg}} c3'
+        depends: c1
+        name: c3
+        template: one-job
+    inputs:
+      parameters:
+      - name: msg
+    name: B
+  - container:
+      args:
+      - echo {{inputs.parameters.msg}}; sleep 10
+      command:
+      - /bin/sh
+      - -c
+      image: alpine
+    inputs:
+      parameters:
+      - name: msg
+    name: one-job
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: msg
+            value: '1'
+        name: b1
+        template: B
+      - arguments:
+          parameters:
+          - name: msg
+            value: '2'
+        depends: b1
+        name: b2
+        template: B
+      - arguments:
+          parameters:
+          - name: msg
+            value: '3'
+        depends: b1
+        name: b3
+        template: B
+      - arguments:
+          parameters:
+          - name: msg
+            value: '4'
+        depends: b1
+        name: b4
+        template: B
+      - arguments:
+          parameters:
+          - name: msg
+            value: '5'
+        depends: b2 && b3 && b4
+        name: b5
+        template: B
+    name: A
+    parallelism: 2
