@@ -12,6 +12,7 @@ from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
 from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
+from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
     HTTP,
     Affinity,
@@ -31,13 +32,14 @@ from hera.workflows.models import (
     LifecycleHook,
     Memoize,
     Metadata,
-    Metrics,
+    Metrics as ModelMetrics,
     Outputs as ModelOutputs,
     Parameter as ModelParameter,
     PersistentVolumeClaim,
     Plugin,
     PodSecurityContext,
     Probe,
+    Prometheus as ModelPrometheus,
     ResourceRequirements,
     RetryStrategy,
     Sequence,
@@ -269,7 +271,38 @@ class EnvMixin(BaseMixin):
         return params
 
 
-class TemplateMixin(SubNodeMixin, HookMixin):
+class MetricsMixin(BaseMixin):
+    metrics: Optional[
+        Union[
+            _BaseMetric,
+            List[_BaseMetric],
+            Metrics,
+            ModelPrometheus,
+            List[ModelPrometheus],
+            ModelMetrics,
+        ]
+    ] = None
+
+    def _build_metrics(self) -> Optional[ModelMetrics]:
+        if self.metrics is None or isinstance(self.metrics, ModelMetrics):
+            return self.metrics
+        elif isinstance(self.metrics, ModelPrometheus):
+            return ModelMetrics(prometheus=[self.metrics])
+        elif isinstance(self.metrics, Metrics):
+            return ModelMetrics(prometheus=self.metrics._build_metrics())
+        elif isinstance(self.metrics, _BaseMetric):
+            return ModelMetrics(prometheus=[self.metrics._build_metric()])
+
+        metrics = []
+        for m in self.metrics:
+            if isinstance(m, _BaseMetric):
+                metrics.append(m._build_metric())
+            else:
+                metrics.append(m)
+        return ModelMetrics(prometheus=metrics)
+
+
+class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
@@ -282,7 +315,6 @@ class TemplateMixin(SubNodeMixin, HookMixin):
     memoize: Optional[Memoize] = None
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
-    metrics: Optional[Metrics] = None
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
@@ -295,10 +327,19 @@ class TemplateMixin(SubNodeMixin, HookMixin):
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
     service_account_name: Optional[str] = None
-    sidecars: Optional[List[UserContainer]] = None
+    sidecars: Optional[Union[UserContainer, List[UserContainer]]] = None
     synchronization: Optional[Synchronization] = None
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
+
+    def _build_sidecars(self) -> Optional[List[UserContainer]]:
+        if self.sidecars is None:
+            return None
+
+        if isinstance(self.sidecars, UserContainer):
+            return [self.sidecars]
+
+        return self.sidecars
 
     def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
         if self.active_deadline_seconds is None:

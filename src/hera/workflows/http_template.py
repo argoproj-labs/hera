@@ -55,7 +55,7 @@ class HTTP(TemplateMixin, IOMixin):
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
