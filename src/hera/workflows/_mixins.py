@@ -500,7 +500,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
 
     def _get_arguments(self, **kwargs) -> list:
-        # these are the already set parameters. If a users has already set a parameter argument, then Hera
+        # these are the already set parameters. If a user has already set a parameter argument, then Hera
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
         kwargs_arguments = (
