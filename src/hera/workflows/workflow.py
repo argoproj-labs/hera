@@ -13,7 +13,7 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared import global_config
-from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin, VolumeMixin
+from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin, MetricsMixin, VolumeMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
@@ -25,7 +25,6 @@ from hera.workflows.models import (
     LocalObjectReference,
     ManagedFieldsEntry,
     Metadata,
-    Metrics,
     ObjectMeta,
     OwnerReference,
     PersistentVolumeClaim,
@@ -67,6 +66,7 @@ class Workflow(
     ContextMixin,
     HookMixin,
     VolumeMixin,
+    MetricsMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -117,7 +117,6 @@ class Workflow(
     host_aliases: Optional[List[HostAlias]] = None
     host_network: Optional[bool] = None
     image_pull_secrets: ImagePullSecrets = None
-    metrics: Optional[Metrics] = None
     node_selector: Optional[Dict[str, str]] = None
     on_exit: Optional[str] = None
     parallelism: Optional[int] = None
@@ -283,7 +282,7 @@ class Workflow(
                 host_aliases=self.host_aliases,
                 host_network=self.host_network,
                 image_pull_secrets=self.image_pull_secrets,
-                metrics=self.metrics,
+                metrics=self._build_metrics(),
                 node_selector=self.node_selector,
                 on_exit=self.on_exit,
                 parallelism=self.parallelism,
