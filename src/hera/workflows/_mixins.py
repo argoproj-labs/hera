@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
 
 from pydantic import root_validator, validator
 
@@ -480,42 +480,16 @@ class CallableTemplateMixin(ArgumentsMixin):
         try:
             from hera.workflows.task import Task
 
-            # these are the already set parameters. If a users has already set a parameter argument, then Hera
-            # uses the user-provided value rather than the inferred value
-            kwargs_arguments = kwargs.get("arguments", [])
-            kwargs_arguments = (
-                kwargs_arguments if isinstance(kwargs_arguments, list) else [kwargs_arguments]
-            )  # type: ignore
-            arguments = (
-                self.arguments if isinstance(self.arguments, list) else [self.arguments] + kwargs_arguments
-            )  # type: ignore
-            arguments = list(filter(lambda x: x is not None, arguments))
-            parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
-            parameter_names = {p.name for p in parameters}
-            artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
-            artifact_names = {a.name for a in artifacts}
+            arguments = self._get_arguments(**kwargs)
+            parameter_names = self._get_parameter_names(arguments)
+            artifact_names = self._get_artifact_names(arguments)
             if "source" in kwargs and "with_param" in kwargs:
-                # Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
-                # `arguments` are used to indicate exactly what _values_ are assigned to the set inputs. Here,
-                # we infer the arguments when `with_param` is used. If a source is passed along with `with_param`, we
-                # infer the arguments to set from the given source. It is assumed that `with_param` will return the
-                # expected result for Argo to fan out the task on
-                new_parameters = _get_params_from_source(kwargs["source"])
-                if new_parameters is not None:
-                    for p in new_parameters:
-                        if p.name not in parameter_names and p.name not in artifact_names:
-                            arguments.append(p)
+                arguments += self._get_deduped_params_from_source(
+                    parameter_names, artifact_names, kwargs["source"]
+                )
             elif "source" in kwargs and "with_items" in kwargs:
-                # similarly to the above, we can infer the arguments to create based on the content of `with_items`.
-                # The main difference between `with_items` and `with_param` is that param is a serialized version of
-                # `with_items`. Hence, `with_items` comes in the form of a list of objects, whereas `with_param` comes
-                # in as a single serialized object. Here, we can infer the parameters to create based on the content
-                # of `with_items`
-                new_parameters = _get_params_from_items(kwargs["with_items"])
-                if new_parameters is not None:
-                    for p in new_parameters:
-                        if p.name not in parameter_names:
-                            arguments.append(p)
+                arguments = arguments + self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
             # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
             # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
             # the task will miss adding them when building the final arguments
@@ -526,6 +500,87 @@ class CallableTemplateMixin(ArgumentsMixin):
             pass
 
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
+
+    def _get_arguments(self, **kwargs) -> list:
+        # these are the already set parameters. If a users has already set a parameter argument, then Hera
+        # uses the user-provided value rather than the inferred value
+        kwargs_arguments = kwargs.get("arguments", [])
+        kwargs_arguments = (
+            kwargs_arguments if isinstance(kwargs_arguments, list) else [kwargs_arguments]
+        )  # type: ignore
+        arguments = (
+            self.arguments if isinstance(self.arguments, list) else [self.arguments] + kwargs_arguments
+        )  # type: ignore
+        return list(filter(lambda x: x is not None, arguments))
+
+    def _get_parameter_names(self, arguments: list) -> Set[str]:
+        parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
+        return {p.name for p in parameters}
+
+    def _get_artifact_names(self, arguments: list) -> Set[str]:
+        artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
+        return {a.name for a in artifacts}
+
+    def _get_deduped_params_from_source(
+        self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
+    ) -> List[Parameter]:
+        """Infer arguments from the given source and deduplicates based on the given params and artifacts.
+
+        Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
+        `arguments` are used to indicate exactly what _values_ are assigned to the set inputs. Here,
+        we infer the arguments when `with_param` is used. If a source is passed along with `with_param`, we
+        infer the arguments to set from the given source. It is assumed that `with_param` will return the
+        expected result for Argo to fan out the task on.
+
+        Parameters
+        ----------
+        parameter_names: Set[str]
+            Set of already constructed parameter names.
+        artifact_names: Set[str]
+            Set of already constructed artifact names.
+        source: Callable
+            The source function to infer the arguments from.
+
+        Returns
+        -------
+        List[Parameter]
+            The list of inferred arguments to set.
+        """
+        new_arguments = []
+        new_parameters = _get_params_from_source(source)
+        if new_parameters is not None:
+            for p in new_parameters:
+                if p.name not in parameter_names and p.name not in artifact_names:
+                    new_arguments.append(p)
+        return new_arguments
+
+    def _get_deduped_params_from_items(self, parameter_names: Set[str], items: List[Any]) -> List[Parameter]:
+        """Infer arguments from the given items.
+
+        The main difference between `with_items` and `with_param` is that param is a serialized version of
+        `with_items`. Hence, `with_items` comes in the form of a list of objects, whereas `with_param` comes
+        in as a single serialized object. Here, we can infer the parameters to create based on the content
+        of `with_items`.
+
+        Parameters
+        ----------
+        parameter_names: Set[str]
+            Set of already constructed parameter names.
+        items: List[Any]
+            The items to infer the arguments from.
+
+        Returns
+        -------
+        List[Parameter]
+            The list of inferred arguments to set.
+        """
+        item_params = _get_params_from_items(items)
+        new_params = []
+        if item_params is not None:
+            for p in item_params:
+                if p.name not in parameter_names:
+                    new_params.append(p)
+        return new_params
 
 
 class ParameterMixin(BaseMixin):
