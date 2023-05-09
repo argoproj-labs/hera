@@ -98,13 +98,9 @@ class Step(
 
         obj = next((output for output in parameters if output.name == name), None)
         if obj is not None:
-            obj.value = f"{{{{steps.{self.name}.outputs.parameters.{name}}}}}"
             return Parameter(
                 name=obj.name,
-                value=obj.value,
-                value_from=obj.value_from,
-                global_name=obj.global_name,
-                description=obj.description,
+                value=f"{{{{steps.{self.name}.outputs.parameters.{name}}}}}",
             )
         raise KeyError(f"No output parameter named `{name}` found")
 
