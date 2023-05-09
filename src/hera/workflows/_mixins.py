@@ -506,18 +506,18 @@ class CallableTemplateMixin(ArgumentsMixin):
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
         kwargs_arguments = (
-            kwargs_arguments if isinstance(kwargs_arguments, list) else [kwargs_arguments]
+            kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]
         )  # type: ignore
         arguments = (
-            self.arguments if isinstance(self.arguments, list) else [self.arguments] + kwargs_arguments
+            self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments
         )  # type: ignore
         return list(filter(lambda x: x is not None, arguments))
 
-    def _get_parameter_names(self, arguments: list) -> Set[str]:
+    def _get_parameter_names(self, arguments: List) -> Set[str]:
         parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
         return {p.name for p in parameters}
 
-    def _get_artifact_names(self, arguments: list) -> Set[str]:
+    def _get_artifact_names(self, arguments: List) -> Set[str]:
         artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
         return {a.name for a in artifacts}
 
