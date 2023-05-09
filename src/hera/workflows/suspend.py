@@ -76,7 +76,7 @@ class Suspend(
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             suspend=self._build_suspend_template(),
             synchronization=self.synchronization,
             timeout=self.timeout,

@@ -29,6 +29,7 @@ from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretE
 from hera.workflows.env_from import ConfigMapEnvFrom, SecretEnvFrom
 from hera.workflows.exceptions import InvalidDispatchType, InvalidTemplateCall, InvalidType
 from hera.workflows.http_template import HTTP
+from hera.workflows.metrics import Counter, Gauge, Histogram, Label, Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
 from hera.workflows.resource import Resource
@@ -95,6 +96,7 @@ __all__ = [
     "Container",
     "ContainerNode",
     "ContainerSet",
+    "Counter",
     "CronWorkflow",
     "DAG",
     "Data",
@@ -109,18 +111,23 @@ __all__ = [
     "FlockerVolume",
     "GCEPersistentDiskVolume",
     "GCSArtifact",
+    "Gauge",
     "GitArtifact",
     "GitRepoVolume",
     "GlusterfsVolume",
     "HDFSArtifact",
     "HTTP",
     "HTTPArtifact",
+    "Histogram",
     "HostPathVolume",
     "ISCSIVolume",
     "InlineScriptConstructor",
     "InvalidDispatchType",
     "InvalidTemplateCall",
     "InvalidType",
+    "Label",
+    "Metric",
+    "Metrics",
     "NFSVolume",
     "NoneArchiveStrategy",
     "OSSArtifact",
