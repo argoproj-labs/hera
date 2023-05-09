@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from hera.workflows._mixins import IOMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import CallableTemplateMixin, IOMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import (
     ManifestFrom,
@@ -11,7 +11,7 @@ from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 
 
-class Resource(TemplateMixin, SubNodeMixin, IOMixin):
+class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     action: str
     failure_condition: Optional[str] = None
     flags: Optional[List[str]] = None
@@ -53,7 +53,7 @@ class Resource(TemplateMixin, SubNodeMixin, IOMixin):
             inputs=self._build_inputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),
-            metrics=self.metrics,
+            metrics=self._build_metrics(),
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
@@ -67,7 +67,7 @@ class Resource(TemplateMixin, SubNodeMixin, IOMixin):
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,

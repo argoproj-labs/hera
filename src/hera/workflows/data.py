@@ -2,11 +2,11 @@ from typing import List, Union
 
 from hera.expr._node import Node
 from hera.workflows import models as m
-from hera.workflows._mixins import IOMixin, TemplateMixin
+from hera.workflows._mixins import CallableTemplateMixin, IOMixin, TemplateMixin
 from hera.workflows.artifact import Artifact
 
 
-class Data(TemplateMixin, IOMixin):
+class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     source: Union[m.DataSource, m.ArtifactPaths, Artifact]
     transformations: List[Union[str, Node]] = []
 
@@ -47,7 +47,7 @@ class Data(TemplateMixin, IOMixin):
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,

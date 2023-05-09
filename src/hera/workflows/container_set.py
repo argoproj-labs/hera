@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
+    CallableTemplateMixin,
     ContainerMixin,
     ContextMixin,
     EnvIOMixin,
@@ -55,6 +56,7 @@ class ContainerSet(
     EnvIOMixin,
     ContainerMixin,
     TemplateMixin,
+    CallableTemplateMixin,
     ResourceMixin,
     VolumeMountMixin,
     ContextMixin,
@@ -90,7 +92,7 @@ class ContainerSet(
             inputs=self._build_inputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),
-            metrics=self.metrics,
+            metrics=self._build_metrics(),
             name=self.name,
             node_selector=self.node_selector,
             outputs=self._build_outputs(),
@@ -103,7 +105,7 @@ class ContainerSet(
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
-            sidecars=self.sidecars,
+            sidecars=self._build_sidecars(),
             synchronization=self.synchronization,
             timeout=self.timeout,
             tolerations=self.tolerations,
