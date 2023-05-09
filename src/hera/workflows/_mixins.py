@@ -484,11 +484,9 @@ class CallableTemplateMixin(ArgumentsMixin):
             parameter_names = self._get_parameter_names(arguments)
             artifact_names = self._get_artifact_names(arguments)
             if "source" in kwargs and "with_param" in kwargs:
-                arguments += self._get_deduped_params_from_source(
-                    parameter_names, artifact_names, kwargs["source"]
-                )
+                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
             elif "source" in kwargs and "with_items" in kwargs:
-                arguments = arguments + self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
 
             # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
             # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
