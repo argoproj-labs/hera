@@ -17,11 +17,13 @@ and its crew were specially protected by the goddess Hera.
 [![Versions](https://img.shields.io/pypi/pyversions/hera.svg)](https://github.com/argoproj-labs/hera)
 
 ### Stats after the [rename to Hera](https://github.com/argoproj-labs/hera/discussions/532)
+
 [![Downloads](https://pepy.tech/badge/hera)](https://pepy.tech/project/hera)
 [![Downloads/month](https://pepy.tech/badge/hera/month)](https://pepy.tech/project/hera)
 [![Downloads/week](https://pepy.tech/badge/hera/week)](https://pepy.tech/project/hera)
 
 ### Stats before the [rename to Hera](https://github.com/argoproj-labs/hera/discussions/532)
+
 [![Downloads](https://pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
 [![Downloads/month](https://pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
@@ -75,6 +77,14 @@ publishes releases to both `hera` and `hera-workflows` for backwards compatibili
 | [PyPi](https://pypi.org/project/hera-workflows/)         | `pip install hera-workflows`                                                                         |
 | [Conda](https://anaconda.org/conda-forge/hera-workflows) | `conda install -c conda-forge hera-workflows`                                                        |
 | [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
+
+## Optional dependencies
+
+### yaml
+
+- Install via `hera[yaml]`
+- [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via  
+  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging
 
 # Examples
 
