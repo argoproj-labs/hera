@@ -198,10 +198,8 @@ class Workflow(
                 result.append(secret)
         return result
 
-    def build(self) -> TWorkflow:
-        """Builds the Workflow and its components into an Argo schema Workflow object."""
-        self = self._dispatch_hooks()
-
+    def _build_templates(self) -> List[TTemplate]:
+        """Builds the templates into an Argo schema."""
         templates = []
         for template in self.templates:
             if isinstance(template, HookMixin):
@@ -242,7 +240,13 @@ class Workflow(
                     for claim_name, claim in new_volume_claims_map.items():
                         if claim_name not in current_volume_claims_map:
                             self.volume_claim_templates.append(claim)
+        return templates
 
+    def build(self) -> TWorkflow:
+        """Builds the Workflow and its components into an Argo schema Workflow object."""
+        self = self._dispatch_hooks()
+
+        templates = self._build_templates()
         workflow_claims = self._build_persistent_volume_claims()
         volume_claim_templates = (self.volume_claim_templates or []) + (workflow_claims or [])
         return _ModelWorkflow(

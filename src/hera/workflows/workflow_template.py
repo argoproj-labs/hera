@@ -4,10 +4,7 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 from pydantic import validator
-from typing_extensions import get_args
 
-from hera.workflows._mixins import HookMixin
-from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -15,7 +12,7 @@ from hera.workflows.models import (
     WorkflowTemplateCreateRequest,
     WorkflowTemplateLintRequest,
 )
-from hera.workflows.protocol import Templatable, TTemplate, TWorkflow
+from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
 
 
@@ -52,18 +49,9 @@ class WorkflowTemplate(Workflow):
         """Builds the WorkflowTemplate and its components into an Argo schema WorkflowTemplate object."""
         self = self._dispatch_hooks()
 
-        templates = []
-        for template in self.templates:
-            if isinstance(template, HookMixin):
-                template = template._dispatch_hooks()
-
-            if isinstance(template, Templatable):
-                templates.append(template._build_template())
-            elif isinstance(template, get_args(TTemplate)):
-                templates.append(template)
-            else:
-                raise InvalidType(f"{type(template)} is not a valid template type")
-
+        templates = self._build_templates()
+        workflow_claims = self._build_persistent_volume_claims()
+        volume_claim_templates = (self.volume_claim_templates or []) + (workflow_claims or [])
         return _ModelWorkflowTemplate(
             api_version=self.api_version,
             kind=self.kind,
@@ -124,8 +112,8 @@ class WorkflowTemplate(Workflow):
                 tolerations=self.tolerations,
                 ttl_strategy=self.ttl_strategy,
                 volume_claim_gc=self.volume_claim_gc,
-                volume_claim_templates=self.volume_claim_templates,
-                volumes=self.volumes,
+                volume_claim_templates=volume_claim_templates or None,
+                volumes=self._build_volumes(),
                 workflow_metadata=self.workflow_metadata,
                 workflow_template_ref=self.workflow_template_ref,
             ),
