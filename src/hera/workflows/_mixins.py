@@ -230,7 +230,7 @@ class EnvMixin(BaseMixin):
         for e in env:
             if isinstance(e, EnvVar):
                 result.append(e)
-            elif isinstance(e, _BaseEnv):
+            elif issubclass(e.__class__, _BaseEnv):
                 result.append(e.build())
             elif isinstance(e, dict):
                 for k, v in e.items():
@@ -246,7 +246,7 @@ class EnvMixin(BaseMixin):
         for e in env_from:
             if isinstance(e, EnvFromSource):
                 result.append(e)
-            elif isinstance(e, _BaseEnvFrom):
+            elif issubclass(e.__class__, _BaseEnvFrom):
                 result.append(e.build())
         return result
 
