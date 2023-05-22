@@ -25,6 +25,13 @@ from hera.workflows.models import (
 
 
 class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, SubNodeMixin):
+    """A regular container that can be used as part of a `hera.workflows.ContainerSet`.
+
+    See Also
+    --------
+    https://argoproj.github.io/argo-workflows/container-set-template/
+    """
+
     name: str
     args: Optional[List[str]] = None
     command: Optional[List[str]] = None
@@ -34,6 +41,17 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
     working_dir: Optional[str] = None
 
     def next(self, other: ContainerNode) -> ContainerNode:
+        """Sets the given container as a dependency of this container and returns the given container.
+
+        Examples
+        --------
+        >>> from hera.workflows import ContainerNode
+        >>> # normally, you use the following within a `hera.workflows.ContainerSet` context.
+        >>> a, b = ContainerNode(name="a"), ContainerNode(name="b")
+        >>> a.next(b)
+        >>> b.dependencies
+        ['a']
+        """
         assert issubclass(other.__class__, ContainerNode)
         if other.dependencies is None:
             other.dependencies = [self.name]
@@ -43,6 +61,19 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         return other
 
     def __rrshift__(self, other: List[ContainerNode]) -> ContainerNode:
+        """Sets `self` as a dependent of the given list of other `hera.workflows.ContainerNode`.
+
+        Practically, the `__rrshift__` allows us to express statements such as `[a, b, c] >> d`, where `d` is `self.`
+
+        Examples
+        --------
+        >>> from hera.workflows import ContainerNode
+        >>> # normally, you use the following within a `hera.workflows.ContainerSet` context.
+        >>> a, b, c = ContainerNode(name="a"), ContainerNode(name="b"), ContainerNode(name="c")
+        >>> [a, b]
+        >>> c.dependencies
+        ['a', 'b']
+        """
         assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
         for o in other:
             o.next(self)
@@ -51,6 +82,17 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
     def __rshift__(
         self, other: Union[ContainerNode, List[ContainerNode]]
     ) -> Union[ContainerNode, List[ContainerNode]]:
+        """Sets the given container as a dependency of this container and returns the given container.
+
+        Examples
+        --------
+        >>> from hera.workflows import ContainerNode
+        >>> # normally, you use the following within a `hera.workflows.ContainerSet` context.
+        >>> a, b = ContainerNode(name="a"), ContainerNode(name="b")
+        >>> a >> b
+        >>> b.dependencies
+        ['a']
+        """
         if isinstance(other, ContainerNode):
             return self.next(other)
         elif isinstance(other, list):
