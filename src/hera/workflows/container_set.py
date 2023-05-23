@@ -7,6 +7,7 @@ from hera.workflows._mixins import (
     ContainerMixin,
     ContextMixin,
     EnvIOMixin,
+    EnvMixin,
     ResourceMixin,
     SubNodeMixin,
     TemplateMixin,
@@ -17,12 +18,40 @@ from hera.workflows.models import (
     ContainerNode as _ModelContainerNode,
     ContainerSetRetryStrategy,
     ContainerSetTemplate as _ModelContainerSetTemplate,
+    Lifecycle,
+    SecurityContext,
     Template as _ModelTemplate,
 )
 
 
-class ContainerNode(_ModelContainerNode, SubNodeMixin):
+class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, SubNodeMixin):
+    """A regular container that can be used as part of a `hera.workflows.ContainerSet`.
+
+    See Also
+    --------
+    https://argoproj.github.io/argo-workflows/container-set-template/
+    """
+
+    name: str
+    args: Optional[List[str]] = None
+    command: Optional[List[str]] = None
+    dependencies: Optional[List[str]] = None
+    lifecycle: Optional[Lifecycle] = None
+    security_context: Optional[SecurityContext] = None
+    working_dir: Optional[str] = None
+
     def next(self, other: ContainerNode) -> ContainerNode:
+        """Sets the given container as a dependency of this container and returns the given container.
+
+        Examples
+        --------
+        >>> from hera.workflows import ContainerNode
+        >>> # normally, you use the following within a `hera.workflows.ContainerSet` context.
+        >>> a, b = ContainerNode(name="a"), ContainerNode(name="b")
+        >>> a.next(b)
+        >>> b.dependencies
+        ['a']
+        """
         assert issubclass(other.__class__, ContainerNode)
         if other.dependencies is None:
             other.dependencies = [self.name]
@@ -32,6 +61,19 @@ class ContainerNode(_ModelContainerNode, SubNodeMixin):
         return other
 
     def __rrshift__(self, other: List[ContainerNode]) -> ContainerNode:
+        """Sets `self` as a dependent of the given list of other `hera.workflows.ContainerNode`.
+
+        Practically, the `__rrshift__` allows us to express statements such as `[a, b, c] >> d`, where `d` is `self.`
+
+        Examples
+        --------
+        >>> from hera.workflows import ContainerNode
+        >>> # normally, you use the following within a `hera.workflows.ContainerSet` context.
+        >>> a, b, c = ContainerNode(name="a"), ContainerNode(name="b"), ContainerNode(name="c")
+        >>> [a, b]
+        >>> c.dependencies
+        ['a', 'b']
+        """
         assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
         for o in other:
             o.next(self)
@@ -40,6 +82,17 @@ class ContainerNode(_ModelContainerNode, SubNodeMixin):
     def __rshift__(
         self, other: Union[ContainerNode, List[ContainerNode]]
     ) -> Union[ContainerNode, List[ContainerNode]]:
+        """Sets the given container as a dependency of this container and returns the given container.
+
+        Examples
+        --------
+        >>> from hera.workflows import ContainerNode
+        >>> # normally, you use the following within a `hera.workflows.ContainerSet` context.
+        >>> a, b = ContainerNode(name="a"), ContainerNode(name="b")
+        >>> a >> b
+        >>> b.dependencies
+        ['a']
+        """
         if isinstance(other, ContainerNode):
             return self.next(other)
         elif isinstance(other, list):
@@ -51,6 +104,33 @@ class ContainerNode(_ModelContainerNode, SubNodeMixin):
             return other
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
+    def _build_container_node(self) -> _ModelContainerNode:
+        return _ModelContainerNode(
+            args=self.args,
+            command=self.command,
+            dependencies=self.dependencies,
+            env=self._build_env(),
+            env_from=self._build_env_from(),
+            image=self.image,
+            image_pull_policy=self._build_image_pull_policy(),
+            lifecycle=self.lifecycle,
+            liveness_probe=self.liveness_probe,
+            name=self.name,
+            ports=self.ports,
+            readiness_probe=self.readiness_probe,
+            resources=self._build_resources(),
+            security_context=self.security_context,
+            startup_probe=self.startup_probe,
+            stdin=self.stdin,
+            stdin_once=self.stdin_once,
+            termination_message_path=self.termination_message_path,
+            termination_message_policy=self.termination_message_policy,
+            tty=self.tty,
+            volume_devices=self.volume_devices,
+            volume_mounts=self._build_volume_mounts(),
+            working_dir=self.working_dir,
+        )
+
 
 class ContainerSet(
     EnvIOMixin,
@@ -61,7 +141,7 @@ class ContainerSet(
     VolumeMountMixin,
     ContextMixin,
 ):
-    containers: List[ContainerNode] = []
+    containers: List[Union[ContainerNode, _ModelContainerNode]] = []
     container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
 
     def _add_sub(self, node: Any):
@@ -71,8 +151,9 @@ class ContainerSet(
         self.containers.append(node)
 
     def _build_container_set(self) -> _ModelContainerSetTemplate:
+        containers = [c._build_container_node() if isinstance(c, ContainerNode) else c for c in self.containers]
         return _ModelContainerSetTemplate(
-            containers=self.containers,
+            containers=containers,
             retry_strategy=self.container_set_retry_strategy,
             volume_mounts=self.volume_mounts,
         )
