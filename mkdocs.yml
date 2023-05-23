@@ -5,7 +5,11 @@ copyright: Copyright &copy; 2023 Flaviu Vadan, Sambhav Kothari, Elliot Gunton
 
 nav:
   - Home: README.md
-  - Introduction: introduction.md
+  - Getting Started:
+    - getting-started/introduction.md
+    - getting-started/quick-start.md
+    - Walk Through:
+      - getting-started/walk-through/hello-world.md
   - Hera expr transpiler: expr.md
   - Examples:
     - Workflows:
