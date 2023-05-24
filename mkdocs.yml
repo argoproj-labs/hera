@@ -9,6 +9,7 @@ nav:
     - getting-started/introduction.md
     - getting-started/quick-start.md
     - Walk Through:
+      - getting-started/walk-through/about-hera.md
       - getting-started/walk-through/hello-world.md
   - Hera expr transpiler: expr.md
   - Examples:
