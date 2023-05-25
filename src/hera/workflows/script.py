@@ -9,7 +9,9 @@ import inspect
 import textwrap
 from abc import abstractmethod
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, Unpack, get_type_hints
+from typing_extensions import TypeVarTuple, ParamSpec
+
 
 from pydantic import root_validator, validator
 
@@ -228,6 +230,9 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
     return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
+FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
+FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+
 def script(**script_kwargs):
     """A decorator that wraps a function into a Script object.
 
@@ -246,8 +251,9 @@ def script(**script_kwargs):
     Callable
         Function that wraps a given function into a `Script`.
     """
-
-    def script_wrapper(func: Callable) -> Callable:
+    def script_wrapper(
+        func: Callable[FuncIns, FuncR],
+    ) -> Union[Callable[FuncIns, FuncR], Callable[..., Union[Task, Step]]]:
         """Wraps the given callable into a `Script` object that can be invoked.
 
         Parameters
@@ -258,19 +264,20 @@ def script(**script_kwargs):
         Returns
         -------
         Callable
-            Another callable that represents the `Script` object `__call__` method.
+            Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
+            otherwise return the callable function unchanged.
         """
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
         @wraps(func)
-        def task_wrapper(*args, **kwargs) -> Union[Task, Step]:
+        def task_wrapper(*args, **kwargs) -> Union[Union[Task, Step], FuncR]:
             """Invokes a `Script` object's `__call__` method using the given `task_params`"""
             if _context.active:
-                return s.__call__(*args, **kwargs)  # type: ignore
+                return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
 
         # Set the wrapped function to the original function so that we can use it later
-        task_wrapper.wrapped_function = func  # type: ignore
+        task_wrapper.wrapped_function = func
         return task_wrapper
 
     return script_wrapper
