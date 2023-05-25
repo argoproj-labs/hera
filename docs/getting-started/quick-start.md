@@ -47,7 +47,7 @@ w.create()
 Run the file
 
 ```console
-python -m hello_world.py
+python -m hello_world
 ```
 
 You will then see the Workflow at <https://localhost:2746/>
@@ -55,8 +55,8 @@ You will then see the Workflow at <https://localhost:2746/>
 ## Hello World on an existing Argo installation
 
 If you or your organization are already running on Argo and you're interested in using Hera to write your Workflow
-definitions, you will need to set up some variables in `hera.shared.global_config`. Copy the following as a basis and
-fill in the blanks.
+definitions, you will need to set up some config variables in `hera.shared.global_config`. Copy the following as a basis
+and fill in the blanks.
 
 ```py
 from hera.workflows import Steps, Workflow, script
@@ -86,7 +86,7 @@ w.create()
 Run the file
 
 ```console
-python -m hello_world.py
+python -m hello_world
 ```
 
 You will then see the Workflow at https://\<your-host-name>

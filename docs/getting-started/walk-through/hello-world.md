@@ -96,7 +96,8 @@ with Steps(name="steps"):
 ```
 
 To invoke the `echo` template, you can call it, passing values to its arguments through the `arguments` kwarg, which is
-a dictionary of the _function_ kwargs to values.
+a dictionary of the _function_ kwargs to values. This is because under a `Steps` or `DAG` context manager, the `script`
+decorator converts a call of the function into a `Script` object, to which you must pass `Script` initialization kwargs.
 
 ```py
 echo(arguments={"message": "Hello world!"})

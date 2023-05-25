@@ -46,4 +46,4 @@ functionality in Hera.
 
 A natural extension of a Python DSL for Argo is tighter integration with Python scripts. This is where Hera improves the
 developer experience through its tailored classes and syntactic sugar to enable developers to easily orchestrate Python
-functions. Check out [Hello World](./hello-world.md) to get started!
+functions. Check out [Hello World](hello-world.md) to get started!
