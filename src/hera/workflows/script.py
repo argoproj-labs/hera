@@ -9,11 +9,10 @@ import inspect
 import textwrap
 from abc import abstractmethod
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, Unpack, get_type_hints
-from typing_extensions import TypeVarTuple, ParamSpec
-
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from pydantic import root_validator, validator
+from typing_extensions import ParamSpec
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
@@ -233,6 +232,7 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
 
+
 def script(**script_kwargs):
     """A decorator that wraps a function into a Script object.
 
@@ -251,6 +251,7 @@ def script(**script_kwargs):
     Callable
         Function that wraps a given function into a `Script`.
     """
+
     def script_wrapper(
         func: Callable[FuncIns, FuncR],
     ) -> Union[Callable[FuncIns, FuncR], Callable[..., Union[Task, Step]]]:
