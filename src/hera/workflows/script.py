@@ -243,21 +243,39 @@ FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decora
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
 ScriptIns = ParamSpec("ScriptIns")  # For attribute types of Script
 
-# R = Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]
-# def _take_annotation_from(_: Callable[ScriptIns, R]) -> Callable[[Callable], Callable[ScriptIns, R]]:
-#     def decorator(real_function: Callable) -> Callable[ScriptIns, R]:
-#         def new_function(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> R:
-#             return real_function(*args, **kwargs)
 
-#         return new_function
+def _take_annotation_from(
+    _: Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ]
+) -> Callable[
+    [Callable],
+    Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ],
+]:
+    def decorator(
+        real_function: Callable,
+    ) -> Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ]:
+        def new_function(
+            *args: ScriptIns.args, **kwargs: ScriptIns.kwargs
+        ) -> Callable[
+            [Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]
+        ]:
+            return real_function(*args, **kwargs)
 
-#     return decorator
+        return new_function
+
+    return decorator
 
 
-# @_take_annotation_from(Script)
-def script(
-    **script_kwargs,
-) -> Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]]:
+@_take_annotation_from(Script)  # type: ignore
+def script(**script_kwargs):
     """A decorator that wraps a function into a Script object.
 
     Using this decorator users can define a function that will be executed as a script in a container. Once the
@@ -298,7 +316,6 @@ def script(
         def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
             ...
 
-        # @_take_annotation_from(Script)
         @overload
         def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]:
             ...
