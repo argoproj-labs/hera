@@ -9,7 +9,17 @@ import inspect
 import textwrap
 from abc import abstractmethod
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from pydantic import root_validator, validator
 from typing_extensions import ParamSpec
@@ -231,9 +241,23 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+ScriptIns = ParamSpec("ScriptIns")  # For attribute types of Script
+
+# R = Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]
+# def _take_annotation_from(_: Callable[ScriptIns, R]) -> Callable[[Callable], Callable[ScriptIns, R]]:
+#     def decorator(real_function: Callable) -> Callable[ScriptIns, R]:
+#         def new_function(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> R:
+#             return real_function(*args, **kwargs)
+
+#         return new_function
+
+#     return decorator
 
 
-def script(**script_kwargs):
+# @_take_annotation_from(Script)
+def script(
+    **script_kwargs,
+) -> Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]]:
     """A decorator that wraps a function into a Script object.
 
     Using this decorator users can define a function that will be executed as a script in a container. Once the
@@ -254,7 +278,7 @@ def script(**script_kwargs):
 
     def script_wrapper(
         func: Callable[FuncIns, FuncR],
-    ) -> Union[Callable[FuncIns, FuncR], Callable[..., Union[Task, Step]]]:
+    ) -> Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]:
         """Wraps the given callable into a `Script` object that can be invoked.
 
         Parameters
@@ -270,15 +294,24 @@ def script(**script_kwargs):
         """
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
+        @overload
+        def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
+            ...
+
+        # @_take_annotation_from(Script)
+        @overload
+        def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]:
+            ...
+
         @wraps(func)
-        def task_wrapper(*args, **kwargs) -> Union[Union[Task, Step], FuncR]:
+        def task_wrapper(*args, **kwargs):
             """Invokes a `Script` object's `__call__` method using the given `task_params`"""
             if _context.active:
                 return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
 
         # Set the wrapped function to the original function so that we can use it later
-        task_wrapper.wrapped_function = func
+        task_wrapper.wrapped_function = func  # type: ignore
         return task_wrapper
 
     return script_wrapper
