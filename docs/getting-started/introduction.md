@@ -79,6 +79,6 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         B = say(name="B", arguments={"message": "B"})
         C = say(name="C", arguments={"message": "C"})
         D = say(name="D", arguments={"message": "D"})
-        # We can also use the `>>` operator to define dependencies between tasks.
+        # We can use the `>>` or `.next()` operators to define dependencies between tasks.
         A >> [B, C] >> D
 ```
