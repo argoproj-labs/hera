@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 
 import requests
 
+from hera.exceptions import exception_from_server_response
 from hera.shared import global_config
 from hera.workflows.models import (
     ArchivedWorkflowDeletedResponse,
@@ -102,8 +103,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -117,8 +118,8 @@ class WorkflowsService:
 
         if resp.ok:
             return LabelKeys(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_archived_workflow_label_values(
         self,
@@ -153,8 +154,8 @@ class WorkflowsService:
 
         if resp.ok:
             return LabelValues(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_archived_workflow(self, uid: str) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -168,8 +169,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -183,8 +184,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ArchivedWorkflowDeletedResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -200,8 +201,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -217,8 +218,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_cluster_workflow_templates(
         self,
@@ -253,8 +254,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplateList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -270,8 +271,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -287,8 +288,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_cluster_workflow_template(
         self, name: str, resource_version: Optional[str] = None
@@ -304,8 +305,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def update_cluster_workflow_template(
         self, name: str, req: ClusterWorkflowTemplateUpdateRequest
@@ -323,8 +324,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def delete_cluster_workflow_template(
         self,
@@ -354,8 +355,8 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplateDeleteResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_cron_workflows(
         self,
@@ -392,9 +393,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflowList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflowList(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def create_cron_workflow(self, req: CreateCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -411,9 +423,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def lint_cron_workflow(self, req: LintCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -430,9 +453,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def get_cron_workflow(
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
@@ -449,9 +483,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def update_cron_workflow(
         self, name: str, req: UpdateCronWorkflowRequest, namespace: Optional[str] = None
@@ -470,9 +515,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def delete_cron_workflow(
         self,
@@ -505,8 +561,8 @@ class WorkflowsService:
 
         if resp.ok:
             return CronWorkflowDeletedResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def resume_cron_workflow(
         self, name: str, req: CronWorkflowResumeRequest, namespace: Optional[str] = None
@@ -525,9 +581,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def suspend_cron_workflow(
         self, name: str, req: CronWorkflowSuspendRequest, namespace: Optional[str] = None
@@ -546,9 +613,20 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
+
+        raise exception_from_server_response(resp)
 
     def get_info(self) -> InfoResponse:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -562,8 +640,8 @@ class WorkflowsService:
 
         if resp.ok:
             return InfoResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_user_info(self) -> GetUserInfoResponse:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -577,8 +655,8 @@ class WorkflowsService:
 
         if resp.ok:
             return GetUserInfoResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_version(self) -> Version:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -592,8 +670,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Version(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_workflow_templates(
         self,
@@ -631,8 +709,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplateList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def create_workflow_template(
         self, req: WorkflowTemplateCreateRequest, namespace: Optional[str] = None
@@ -652,8 +730,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def lint_workflow_template(
         self, req: WorkflowTemplateLintRequest, namespace: Optional[str] = None
@@ -673,8 +751,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_workflow_template(
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
@@ -692,8 +770,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def update_workflow_template(
         self, name: str, req: WorkflowTemplateUpdateRequest, namespace: Optional[str] = None
@@ -713,8 +791,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def delete_workflow_template(
         self,
@@ -747,8 +825,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplateDeleteResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_workflows(
         self,
@@ -788,8 +866,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def create_workflow(self, req: WorkflowCreateRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -807,8 +885,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def lint_workflow(self, req: WorkflowLintRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -826,8 +904,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def submit_workflow(self, req: WorkflowSubmitRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -845,8 +923,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_workflow(
         self,
@@ -868,8 +946,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def delete_workflow(
         self,
@@ -904,8 +982,8 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowDeleteResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def workflow_logs(
         self,
@@ -952,8 +1030,8 @@ class WorkflowsService:
 
         if resp.ok:
             return V1alpha1LogEntry(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def resubmit_workflow(self, name: str, req: WorkflowResubmitRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -971,8 +1049,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def resume_workflow(self, name: str, req: WorkflowResumeRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -990,8 +1068,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def retry_workflow(self, name: str, req: WorkflowRetryRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -1009,8 +1087,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def set_workflow(self, name: str, req: WorkflowSetRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -1028,8 +1106,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def stop_workflow(self, name: str, req: WorkflowStopRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -1047,8 +1125,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def suspend_workflow(self, name: str, req: WorkflowSuspendRequest, namespace: Optional[str] = None) -> Workflow:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -1066,8 +1144,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def terminate_workflow(
         self, name: str, req: WorkflowTerminateRequest, namespace: Optional[str] = None
@@ -1087,8 +1165,8 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def pod_logs(
         self,
@@ -1135,8 +1213,8 @@ class WorkflowsService:
 
         if resp.ok:
             return V1alpha1LogEntry(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_artifact_file(
         self,
@@ -1169,8 +1247,8 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
@@ -1187,8 +1265,8 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
@@ -1208,8 +1286,8 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
@@ -1226,8 +1304,8 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
@@ -1247,8 +1325,8 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
 
 __all__ = ["WorkflowsService"]

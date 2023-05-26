@@ -25,6 +25,7 @@ from hera.events.models import (
     UpdateSensorRequest,
     Version,
 )
+from hera.exceptions import exception_from_server_response
 from hera.shared import global_config
 
 
@@ -81,8 +82,8 @@ class EventsService:
 
         if resp.ok:
             return EventSourceList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def create_event_source(self, req: CreateEventSourceRequest, namespace: Optional[str] = None) -> EventSource:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -100,8 +101,8 @@ class EventsService:
 
         if resp.ok:
             return EventSource(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_event_source(self, name: str, namespace: Optional[str] = None) -> EventSource:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -117,8 +118,8 @@ class EventsService:
 
         if resp.ok:
             return EventSource(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def update_event_source(
         self, name: str, req: UpdateEventSourceRequest, namespace: Optional[str] = None
@@ -138,8 +139,8 @@ class EventsService:
 
         if resp.ok:
             return EventSource(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def delete_event_source(
         self,
@@ -172,8 +173,8 @@ class EventsService:
 
         if resp.ok:
             return EventSourceDeletedResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def receive_event(self, discriminator: str, req: Item, namespace: Optional[str] = None) -> EventResponse:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -191,8 +192,8 @@ class EventsService:
 
         if resp.ok:
             return EventResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_info(self) -> InfoResponse:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -206,8 +207,8 @@ class EventsService:
 
         if resp.ok:
             return InfoResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def list_sensors(
         self,
@@ -245,8 +246,8 @@ class EventsService:
 
         if resp.ok:
             return SensorList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def create_sensor(self, req: CreateSensorRequest, namespace: Optional[str] = None) -> Sensor:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -264,8 +265,8 @@ class EventsService:
 
         if resp.ok:
             return Sensor(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_sensor(self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None) -> Sensor:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -281,8 +282,8 @@ class EventsService:
 
         if resp.ok:
             return Sensor(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def update_sensor(self, name: str, req: UpdateSensorRequest, namespace: Optional[str] = None) -> Sensor:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -300,8 +301,8 @@ class EventsService:
 
         if resp.ok:
             return Sensor(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def delete_sensor(
         self,
@@ -334,8 +335,8 @@ class EventsService:
 
         if resp.ok:
             return DeleteSensorResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def watch_event_sources(
         self,
@@ -373,8 +374,8 @@ class EventsService:
 
         if resp.ok:
             return EventSourceWatchEvent(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def event_sources_logs(
         self,
@@ -422,8 +423,8 @@ class EventsService:
 
         if resp.ok:
             return EventsourceLogEntry(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def watch_events(
         self,
@@ -461,8 +462,8 @@ class EventsService:
 
         if resp.ok:
             return Event(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def watch_sensors(
         self,
@@ -500,8 +501,8 @@ class EventsService:
 
         if resp.ok:
             return SensorWatchEvent(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def sensors_logs(
         self,
@@ -547,8 +548,8 @@ class EventsService:
 
         if resp.ok:
             return SensorLogEntry(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_user_info(self) -> GetUserInfoResponse:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -562,8 +563,8 @@ class EventsService:
 
         if resp.ok:
             return GetUserInfoResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_version(self) -> Version:
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -577,8 +578,8 @@ class EventsService:
 
         if resp.ok:
             return Version(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_artifact_file(
         self,
@@ -611,8 +612,8 @@ class EventsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
@@ -629,8 +630,8 @@ class EventsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
@@ -650,8 +651,8 @@ class EventsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
@@ -668,8 +669,8 @@ class EventsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
@@ -689,8 +690,8 @@ class EventsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+
+        raise exception_from_server_response(resp)
 
 
 __all__ = ["EventsService"]
