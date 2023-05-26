@@ -21,7 +21,6 @@ from hera.workflows.models import (
     Template,
 )
 from hera.workflows.operator import Operator
-from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.workflow_status import WorkflowStatus
 
@@ -119,73 +118,8 @@ class Task(
         return task_names
 
     @property
-    def id(self) -> str:
-        return f"{{{{tasks.{self.name}.id}}}}"
-
-    @property
-    def ip(self) -> str:
-        return f"{{{{tasks.{self.name}.ip}}}}"
-
-    @property
-    def status(self) -> str:
-        return f"{{{{tasks.{self.name}.status}}}}"
-
-    @property
-    def exit_code(self) -> str:
-        return f"{{{{tasks.{self.name}.exitCode}}}}"
-
-    @property
-    def started_at(self) -> str:
-        return f"{{{{tasks.{self.name}.startedAt}}}}"
-
-    @property
-    def finished_at(self) -> str:
-        return f"{{{{tasks.{self.name}.finishedAt}}}}"
-
-    @property
-    def result(self) -> str:
-        return f"{{{{tasks.{self.name}.outputs.result}}}}"
-
-    def get_parameters_as(self, name: str) -> Parameter:
-        """Gets all the output parameters from this task"""
-        return Parameter(name=name, value=f"{{{{tasks.{self.name}.outputs.parameters}}}}")
-
-    def get_parameter(self, name: str) -> Parameter:
-        """Returns a Parameter from the task's outputs based on the name.
-
-        Parameters
-        ----------
-        name: str
-            The name of the parameter to extract as an output.
-
-        Returns
-        -------
-        Parameter
-            Parameter with the same name
-        """
-        if isinstance(self.template, str):
-            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
-
-        # here, we build the template early to verify that we can get the outputs
-        if isinstance(self.template, Templatable):
-            template = self.template._build_template()
-        else:
-            template = self.template
-
-        # at this point, we know that the template is a `Template` object
-        if template.outputs is None:  # type: ignore
-            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
-        if template.outputs.parameters is None:  # type: ignore
-            raise ValueError(f"Cannot get output parameters when the template has no output parameters: {template}")
-        parameters = template.outputs.parameters  # type: ignore
-
-        obj = next((output for output in parameters if output.name == name), None)
-        if obj is not None:
-            return Parameter(
-                name=obj.name,
-                value=f"{{{{tasks.{self.name}.outputs.parameters.{name}}}}}",
-            )
-        raise KeyError(f"No output parameter named `{name}` found")
+    def _subtype(self) -> str:
+        return "tasks"
 
     def next(self, other: Task, operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> Task:
         """Set self as a dependency of `other`."""
