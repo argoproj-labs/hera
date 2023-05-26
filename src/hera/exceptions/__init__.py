@@ -2,8 +2,11 @@
 
 These are thin wrappers around the core Python `Exception`.
 """
+import json
 from http import HTTPStatus
 from typing import Dict, Type
+
+from requests import Response
 
 
 class HeraException(Exception):
@@ -54,3 +57,18 @@ status_code_to_exception_map: Dict[int, Type[HeraException]] = {
 def exception_from_status_code(status_code: int, msg: str) -> HeraException:
     """Returns a `HeraException` mapped from the given status code initialized with the given message"""
     return status_code_to_exception_map.get(status_code, HeraException)(msg)
+
+
+def exception_from_server_response(resp: Response) -> HeraException:
+    """Returns a `HeraException` mapped from the given `Response`"""
+    assert not resp.ok, "This function should only be called with non-2xx responses"
+    try:
+        return exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with message: `{resp.json()['message']}`",
+        )
+    except json.JSONDecodeError:
+        return exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with message: `{resp.text}`",
+        )

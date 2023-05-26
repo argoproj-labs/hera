@@ -9,9 +9,20 @@ import inspect
 import textwrap
 from abc import abstractmethod
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from pydantic import root_validator, validator
+from typing_extensions import ParamSpec
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
@@ -228,6 +239,42 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
     return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
+FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
+FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+ScriptIns = ParamSpec("ScriptIns")  # For attribute types of Script
+
+
+def _take_annotation_from(
+    _: Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ]
+) -> Callable[
+    [Callable],
+    Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ],
+]:
+    def decorator(
+        real_function: Callable,
+    ) -> Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ]:
+        def new_function(
+            *args: ScriptIns.args, **kwargs: ScriptIns.kwargs
+        ) -> Callable[
+            [Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]
+        ]:
+            return real_function(*args, **kwargs)
+
+        return new_function
+
+    return decorator
+
+
+@_take_annotation_from(Script)  # type: ignore
 def script(**script_kwargs):
     """A decorator that wraps a function into a Script object.
 
@@ -247,7 +294,9 @@ def script(**script_kwargs):
         Function that wraps a given function into a `Script`.
     """
 
-    def script_wrapper(func: Callable) -> Callable:
+    def script_wrapper(
+        func: Callable[FuncIns, FuncR],
+    ) -> Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]:
         """Wraps the given callable into a `Script` object that can be invoked.
 
         Parameters
@@ -258,15 +307,24 @@ def script(**script_kwargs):
         Returns
         -------
         Callable
-            Another callable that represents the `Script` object `__call__` method.
+            Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
+            otherwise return the callable function unchanged.
         """
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
+        @overload
+        def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
+            ...
+
+        @overload
+        def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]:
+            ...
+
         @wraps(func)
-        def task_wrapper(*args, **kwargs) -> Union[Task, Step]:
+        def task_wrapper(*args, **kwargs):
             """Invokes a `Script` object's `__call__` method using the given `task_params`"""
             if _context.active:
-                return s.__call__(*args, **kwargs)  # type: ignore
+                return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
 
         # Set the wrapped function to the original function so that we can use it later
