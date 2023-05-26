@@ -370,10 +370,11 @@ class Workflow(
         assert self.name is not None, "workflow name not defined"
 
         wf = self.workflows_service.get_workflow(self.name, namespace=self.namespace)
+        assert wf.metadata.name is not None, f"workflow name not defined for workflow {self.name}"
+
         assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
         assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
         status = WorkflowStatus.from_argo_status(wf.status.phase)
-        assert wf.metadata.name is not None, f"workflow name not defined for workflow {self.name}"
 
         # keep polling for workflow status until completed, at the interval dictated by the user
         while status == WorkflowStatus.running:
