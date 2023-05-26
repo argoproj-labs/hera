@@ -670,6 +670,41 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def _subtype(self) -> str:
         raise NotImplementedError
 
+    @property
+    def id(self) -> str:
+        """ID of this node."""
+        return f"{{{{{self._subtype}.{self.name}.id}}}}"
+
+    @property
+    def ip(self) -> str:
+        """IP of this node."""
+        return f"{{{{{self._subtype}.{self.name}.ip}}}}"
+
+    @property
+    def status(self) -> str:
+        """Status of this node."""
+        return f"{{{{{self._subtype}.{self.name}.status}}}}"
+
+    @property
+    def exit_code(self) -> str:
+        """ExitCode holds the exit code of a script template."""
+        return f"{{{{{self._subtype}.{self.name}.exitCode}}}}"
+
+    @property
+    def started_at(self) -> str:
+        """Time at which this node started."""
+        return f"{{{{{self._subtype}.{self.name}.startedAt}}}}"
+
+    @property
+    def finished_at(self) -> str:
+        """Time at which this node completed."""
+        return f"{{{{{self._subtype}.{self.name}.finishedAt}}}}"
+
+    @property
+    def result(self) -> str:
+        """Result holds the result (stdout) of a script template."""
+        return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
+
     @root_validator(pre=False)
     def _check_values(cls, values):
         def one(xs: List):

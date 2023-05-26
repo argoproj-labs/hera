@@ -36,34 +36,6 @@ class Step(
     """
 
     @property
-    def id(self) -> str:
-        return f"{{{{steps.{self.name}.id}}}}"
-
-    @property
-    def ip(self) -> str:
-        return f"{{{{steps.{self.name}.ip}}}}"
-
-    @property
-    def status(self) -> str:
-        return f"{{{{steps.{self.name}.status}}}}"
-
-    @property
-    def exit_code(self) -> str:
-        return f"{{{{steps.{self.name}.exitCode}}}}"
-
-    @property
-    def started_at(self) -> str:
-        return f"{{{{steps.{self.name}.startedAt}}}}"
-
-    @property
-    def finished_at(self) -> str:
-        return f"{{{{steps.{self.name}.finishedAt}}}}"
-
-    @property
-    def result(self) -> str:
-        return f"{{{{steps.{self.name}.outputs.result}}}}"
-
-    @property
     def _subtype(self) -> str:
         return "steps"
 

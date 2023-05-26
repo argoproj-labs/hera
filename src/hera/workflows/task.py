@@ -118,34 +118,6 @@ class Task(
         return task_names
 
     @property
-    def id(self) -> str:
-        return f"{{{{tasks.{self.name}.id}}}}"
-
-    @property
-    def ip(self) -> str:
-        return f"{{{{tasks.{self.name}.ip}}}}"
-
-    @property
-    def status(self) -> str:
-        return f"{{{{tasks.{self.name}.status}}}}"
-
-    @property
-    def exit_code(self) -> str:
-        return f"{{{{tasks.{self.name}.exitCode}}}}"
-
-    @property
-    def started_at(self) -> str:
-        return f"{{{{tasks.{self.name}.startedAt}}}}"
-
-    @property
-    def finished_at(self) -> str:
-        return f"{{{{tasks.{self.name}.finishedAt}}}}"
-
-    @property
-    def result(self) -> str:
-        return f"{{{{tasks.{self.name}.outputs.result}}}}"
-
-    @property
     def _subtype(self) -> str:
         return "tasks"
 
