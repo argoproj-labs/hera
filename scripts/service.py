@@ -175,10 +175,11 @@ class ServiceEndpoint:
         elif "CronWorkflow" in self.response.ref:
             # when users schedule cron workflows that have not executed the moment they are scheduled, the response
             # does contain `CronWorkflowStatus` but its fields are empty. However, the `CronWorkflowStatus` object,
-            # while option on `CronWorkflow`, has *required* fields. Here, we overwrite the response with a special
+            # while optional on `CronWorkflow`, has *required* fields. Here, we overwrite the response with a special
             # case that handles setting the `CronWorkflowStatus` to `None` if the response is empty.
             return f"""
     {signature}
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.{self.method}(
             url={req_url},
             params={params},
@@ -206,12 +207,13 @@ class ServiceEndpoint:
                 resp.status_code, 
                 f"Server returned status code {{resp.status_code}} with message: `{{resp.text}}`",
             )
-        """
+            """
         else:
             ret_val = f"{self.response}(**resp.json())"
 
         return f"""
     {signature}
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.{self.method}(
             url={req_url},
             params={params},
@@ -451,6 +453,9 @@ from hera.{module}.models import {imports}
 from hera.shared import global_config
 from hera.exceptions import exception_from_status_code
 from typing import Optional, cast
+
+def valid_host_scheme(host: str) -> bool:
+    return host.startswith("http://") or host.startswith("https://")    
 
 class {models_type}Service:
     def __init__(

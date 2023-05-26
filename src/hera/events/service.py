@@ -30,6 +30,10 @@ from hera.exceptions import exception_from_status_code
 from hera.shared import global_config
 
 
+def valid_host_scheme(host: str) -> bool:
+    return host.startswith("http://") or host.startswith("https://")
+
+
 class EventsService:
     def __init__(
         self,
@@ -56,6 +60,7 @@ class EventsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> EventSourceList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/event-sources/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -91,6 +96,7 @@ class EventsService:
             )
 
     def create_event_source(self, req: CreateEventSourceRequest, namespace: Optional[str] = None) -> EventSource:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/event-sources/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -118,6 +124,7 @@ class EventsService:
             )
 
     def get_event_source(self, name: str, namespace: Optional[str] = None) -> EventSource:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -145,6 +152,7 @@ class EventsService:
     def update_event_source(
         self, name: str, req: UpdateEventSourceRequest, namespace: Optional[str] = None
     ) -> EventSource:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -182,6 +190,7 @@ class EventsService:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> EventSourceDeletedResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/event-sources/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -214,6 +223,7 @@ class EventsService:
             )
 
     def receive_event(self, discriminator: str, req: Item, namespace: Optional[str] = None) -> EventResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/events/{namespace}/{discriminator}").format(
                 discriminator=discriminator, namespace=namespace if namespace is not None else self.namespace
@@ -241,6 +251,7 @@ class EventsService:
             )
 
     def get_info(self) -> InfoResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/info"),
             params=None,
@@ -276,6 +287,7 @@ class EventsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> SensorList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/sensors/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -311,6 +323,7 @@ class EventsService:
             )
 
     def create_sensor(self, req: CreateSensorRequest, namespace: Optional[str] = None) -> Sensor:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/sensors/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -338,6 +351,7 @@ class EventsService:
             )
 
     def get_sensor(self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None) -> Sensor:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/sensors/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -363,6 +377,7 @@ class EventsService:
             )
 
     def update_sensor(self, name: str, req: UpdateSensorRequest, namespace: Optional[str] = None) -> Sensor:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/sensors/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -400,6 +415,7 @@ class EventsService:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> DeleteSensorResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/sensors/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -444,6 +460,7 @@ class EventsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> EventSourceWatchEvent:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/stream/event-sources/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -496,6 +513,7 @@ class EventsService:
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> EventsourceLogEntry:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/stream/event-sources/{namespace}/logs").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -548,6 +566,7 @@ class EventsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> Event:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/stream/events/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -595,6 +614,7 @@ class EventsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> SensorWatchEvent:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/stream/sensors/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -646,6 +666,7 @@ class EventsService:
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
     ) -> SensorLogEntry:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/stream/sensors/{namespace}/logs").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -685,6 +706,7 @@ class EventsService:
             )
 
     def get_user_info(self) -> GetUserInfoResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/userinfo"),
             params=None,
@@ -708,6 +730,7 @@ class EventsService:
             )
 
     def get_version(self) -> Version:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/version"),
             params=None,
@@ -740,6 +763,7 @@ class EventsService:
         namespace: Optional[str] = None,
     ) -> str:
         """Get an artifact."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(
                 self.host,
@@ -774,6 +798,7 @@ class EventsService:
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
@@ -800,6 +825,7 @@ class EventsService:
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
@@ -829,6 +855,7 @@ class EventsService:
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
@@ -855,6 +882,7 @@ class EventsService:
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
