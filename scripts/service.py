@@ -179,6 +179,7 @@ class ServiceEndpoint:
             # case that handles setting the `CronWorkflowStatus` to `None` if the response is empty.
             return f"""
     {signature}
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.{self.method}(
             url={req_url},
             params={params},
