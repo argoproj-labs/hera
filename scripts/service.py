@@ -177,6 +177,7 @@ class ServiceEndpoint:
 
         return f"""
     {signature}
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.{self.method}(
             url={req_url},
             params={params},
@@ -406,6 +407,9 @@ from hera.{module}.models import {imports}
 from hera.shared import global_config
 from typing import Optional, cast
 
+def valid_host_scheme(host: str) -> bool:
+    return host.startswith("http://") or host.startswith("https://")    
+
 class {models_type}Service:
     def __init__(
         self,
@@ -415,7 +419,6 @@ class {models_type}Service:
         namespace: Optional[str] = None,
     ):
         self.host = cast(str, host or global_config.host)
-        assert self.host.startswith("http") or self.host.startswith("https"), "The host scheme is required for service usage"
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
         self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace

@@ -50,6 +50,10 @@ from hera.workflows.models import (
 )
 
 
+def valid_host_scheme(host: str) -> bool:
+    return host.startswith("http://") or host.startswith("https://")
+
+
 class WorkflowsService:
     def __init__(
         self,
@@ -59,9 +63,6 @@ class WorkflowsService:
         namespace: Optional[str] = None,
     ):
         self.host = cast(str, host or global_config.host)
-        assert self.host.startswith("http") or self.host.startswith(
-            "https"
-        ), "The host scheme is required for service usage"
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
         self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace
@@ -79,6 +80,7 @@ class WorkflowsService:
         continue_: Optional[str] = None,
         name_prefix: Optional[str] = None,
     ) -> WorkflowList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/archived-workflows"),
             params={
@@ -104,6 +106,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/archived-workflows-label-keys"),
             params=None,
@@ -129,6 +132,7 @@ class WorkflowsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> LabelValues:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/archived-workflows-label-values"),
             params={
@@ -153,6 +157,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def get_archived_workflow(self, uid: str) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
@@ -167,6 +172,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
             params=None,
@@ -181,6 +187,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
             params=None,
@@ -197,6 +204,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
             params=None,
@@ -224,6 +232,7 @@ class WorkflowsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> ClusterWorkflowTemplateList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates"),
             params={
@@ -248,6 +257,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates"),
             params=None,
@@ -264,6 +274,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/lint"),
             params=None,
@@ -282,6 +293,7 @@ class WorkflowsService:
     def get_cluster_workflow_template(
         self, name: str, resource_version: Optional[str] = None
     ) -> ClusterWorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={"getOptions.resourceVersion": resource_version},
@@ -298,6 +310,7 @@ class WorkflowsService:
     def update_cluster_workflow_template(
         self, name: str, req: ClusterWorkflowTemplateUpdateRequest
     ) -> ClusterWorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params=None,
@@ -323,6 +336,7 @@ class WorkflowsService:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> ClusterWorkflowTemplateDeleteResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params={
@@ -356,6 +370,7 @@ class WorkflowsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> CronWorkflowList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -382,6 +397,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def create_cron_workflow(self, req: CreateCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -400,6 +416,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def lint_cron_workflow(self, req: LintCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/lint").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -420,6 +437,7 @@ class WorkflowsService:
     def get_cron_workflow(
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
     ) -> CronWorkflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -438,6 +456,7 @@ class WorkflowsService:
     def update_cron_workflow(
         self, name: str, req: UpdateCronWorkflowRequest, namespace: Optional[str] = None
     ) -> CronWorkflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -466,6 +485,7 @@ class WorkflowsService:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> CronWorkflowDeletedResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -491,6 +511,7 @@ class WorkflowsService:
     def resume_cron_workflow(
         self, name: str, req: CronWorkflowResumeRequest, namespace: Optional[str] = None
     ) -> CronWorkflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}/resume").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -511,6 +532,7 @@ class WorkflowsService:
     def suspend_cron_workflow(
         self, name: str, req: CronWorkflowSuspendRequest, namespace: Optional[str] = None
     ) -> CronWorkflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/cron-workflows/{namespace}/{name}/suspend").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -529,6 +551,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def get_info(self) -> InfoResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/info"),
             params=None,
@@ -543,6 +566,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def get_user_info(self) -> GetUserInfoResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/userinfo"),
             params=None,
@@ -557,6 +581,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def get_version(self) -> Version:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/version"),
             params=None,
@@ -583,6 +608,7 @@ class WorkflowsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
     ) -> WorkflowTemplateList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/workflow-templates/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -611,6 +637,7 @@ class WorkflowsService:
     def create_workflow_template(
         self, req: WorkflowTemplateCreateRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/workflow-templates/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -631,6 +658,7 @@ class WorkflowsService:
     def lint_workflow_template(
         self, req: WorkflowTemplateLintRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/lint").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -651,6 +679,7 @@ class WorkflowsService:
     def get_workflow_template(
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
     ) -> WorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -669,6 +698,7 @@ class WorkflowsService:
     def update_workflow_template(
         self, name: str, req: WorkflowTemplateUpdateRequest, namespace: Optional[str] = None
     ) -> WorkflowTemplate:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -697,6 +727,7 @@ class WorkflowsService:
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
     ) -> WorkflowTemplateDeleteResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/workflow-templates/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -733,6 +764,7 @@ class WorkflowsService:
         continue_: Optional[str] = None,
         fields: Optional[str] = None,
     ) -> WorkflowList:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -760,6 +792,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def create_workflow(self, req: WorkflowCreateRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/workflows/{namespace}").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -778,6 +811,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def lint_workflow(self, req: WorkflowLintRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/lint").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -796,6 +830,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def submit_workflow(self, req: WorkflowSubmitRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.post(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/submit").format(
                 namespace=namespace if namespace is not None else self.namespace
@@ -820,6 +855,7 @@ class WorkflowsService:
         resource_version: Optional[str] = None,
         fields: Optional[str] = None,
     ) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -847,6 +883,7 @@ class WorkflowsService:
         dry_run: Optional[list] = None,
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -888,6 +925,7 @@ class WorkflowsService:
         grep: Optional[str] = None,
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/log").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -918,6 +956,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def resubmit_workflow(self, name: str, req: WorkflowResubmitRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/resubmit").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -936,6 +975,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def resume_workflow(self, name: str, req: WorkflowResumeRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/resume").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -954,6 +994,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def retry_workflow(self, name: str, req: WorkflowRetryRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/retry").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -972,6 +1013,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def set_workflow(self, name: str, req: WorkflowSetRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/set").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -990,6 +1032,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def stop_workflow(self, name: str, req: WorkflowStopRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/stop").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -1008,6 +1051,7 @@ class WorkflowsService:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
     def suspend_workflow(self, name: str, req: WorkflowSuspendRequest, namespace: Optional[str] = None) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/suspend").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -1028,6 +1072,7 @@ class WorkflowsService:
     def terminate_workflow(
         self, name: str, req: WorkflowTerminateRequest, namespace: Optional[str] = None
     ) -> Workflow:
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.put(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/terminate").format(
                 name=name, namespace=namespace if namespace is not None else self.namespace
@@ -1064,6 +1109,7 @@ class WorkflowsService:
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
         """DEPRECATED: Cannot work via HTTP if podName is an empty string. Use WorkflowLogs."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/workflows/{namespace}/{name}/{podName}/log").format(
                 name=name, podName=pod_name, namespace=namespace if namespace is not None else self.namespace
@@ -1102,6 +1148,7 @@ class WorkflowsService:
         namespace: Optional[str] = None,
     ) -> str:
         """Get an artifact."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(
                 self.host,
@@ -1127,6 +1174,7 @@ class WorkflowsService:
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
@@ -1144,6 +1192,7 @@ class WorkflowsService:
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
@@ -1164,6 +1213,7 @@ class WorkflowsService:
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "input-artifacts-by-uid/{uid}/{nodeId}/{artifactName}").format(
                 uid=uid, nodeId=node_id, artifactName=artifact_name
@@ -1181,6 +1231,7 @@ class WorkflowsService:
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "input-artifacts/{namespace}/{name}/{nodeId}/{artifactName}").format(
                 name=name,
