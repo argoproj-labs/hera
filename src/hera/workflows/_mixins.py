@@ -54,6 +54,7 @@ from hera.workflows.models import (
     VolumeMount,
 )
 from hera.workflows.parameter import MISSING, Parameter
+from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
@@ -674,6 +675,124 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
             raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
         return values
+
+    def _get_parameters_as(self, name: str, subtype: str) -> Parameter:
+        """Returns a `Parameter` that represents all the outputs of the specified subtype.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to search for.
+        subtype: str
+            The inheritor subtype field, used to construct the output artifact `from_` reference.
+
+        Returns
+        -------
+        Parameter
+            The parameter, named based on the given `name`, along with a value that references all outputs.
+        """
+        return Parameter(name=name, value=f"{{{{{subtype}.{self.name}.outputs.parameters}}}}")
+
+    def _get_parameter(self, name: str, subtype: str) -> Parameter:
+        """Attempts to find the specified parameter in the outputs for the specified subtype.
+
+        Notes
+        -----
+        This is specifically designed to be invoked by inheritors.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to search for.
+        subtype: str
+            The inheritor subtype field, used to construct the output artifact `from_` reference.
+
+        Returns
+        -------
+        Parameter
+            The parameter if found.
+
+        Raises
+        ------
+        ValueError
+            When no outputs can be constructed/no outputs are set.
+        KeyError
+            When the artifact is not found.
+        NotImplementedError
+            When something else other than an `Parameter` is found for the specified name.
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = self.template
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
+        if template.outputs.parameters is None:  # type: ignore
+            raise ValueError(f"Cannot get output parameters when the template has no output parameters: {template}")
+        parameters = template.outputs.parameters  # type: ignore
+
+        obj = next((output for output in parameters if output.name == name), None)
+        if obj is not None:
+            return Parameter(
+                name=obj.name,
+                value=f"{{{{{subtype}.{self.name}.outputs.parameters.{name}}}}}",
+            )
+        raise KeyError(f"No output parameter named `{name}` found")
+
+    def _get_artifact(self, name: str, subtype: str) -> Artifact:
+        """Attempts to find the specified artifact in the outputs for the specified subtype.
+
+        Notes
+        -----
+        This is specifically designed to be invoked by inheritors.
+
+        Parameters
+        ----------
+        name: str
+            The name of the artifact to search for.
+        subtype: str
+            The inheritor subtype field, used to construct the output artifact `from_` reference.
+
+        Returns
+        -------
+        Artifact
+            The artifact if found.
+
+        Raises
+        ------
+        ValueError
+            When no outputs can be constructed/no outputs are set.
+        KeyError
+            When the artifact is not found.
+        NotImplementedError
+            When something else other than an `Artifact` is found for the specified name.
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = cast(Template, self.template)
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no outputs: {template}")
+        elif template.outputs.artifacts is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no output artifacts: {template}")
+        artifacts = cast(List[ModelArtifact], template.outputs.artifacts)
+
+        obj = next((output for output in artifacts if output.name == name), None)
+        if obj is not None:
+            return Artifact(name=name, path=obj.path, from_=f"{{{{{subtype}.{self.name}.outputs.artifacts.{name}}}}}")
+        raise KeyError(f"No output artifact named `{name}` found")
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
