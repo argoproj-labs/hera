@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
 
 from pydantic import root_validator, validator
 
@@ -58,6 +58,11 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
+
+if TYPE_CHECKING:
+    from hera.workflows.steps import Step
+    from hera.workflows.task import Task
+
 
 InputsT = Optional[
     Union[
@@ -462,7 +467,7 @@ class ArgumentsMixin(BaseMixin):
 
 
 class CallableTemplateMixin(ArgumentsMixin):
-    def __call__(self, *args, **kwargs) -> Optional[SubNodeMixin]:
+    def __call__(self, *args, **kwargs) -> Union[Step, Task]:
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 
