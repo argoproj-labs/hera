@@ -434,7 +434,7 @@ from urllib.parse import urljoin
 import requests
 from hera.{module}.models import {imports}
 from hera.shared import global_config
-from hera.shared.exceptions import exception_from_status_code
+from hera.exceptions import exception_from_status_code
 from typing import Optional, cast
 
 class {models_type}Service:

@@ -3,8 +3,8 @@ from urllib.parse import urljoin
 
 import requests
 
+from hera.exceptions import exception_from_status_code
 from hera.shared import global_config
-from hera.shared.exceptions import exception_from_status_code
 from hera.workflows.models import (
     ArchivedWorkflowDeletedResponse,
     ClusterWorkflowTemplate,

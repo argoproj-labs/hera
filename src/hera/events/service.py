@@ -25,8 +25,8 @@ from hera.events.models import (
     UpdateSensorRequest,
     Version,
 )
+from hera.exceptions import exception_from_status_code
 from hera.shared import global_config
-from hera.shared.exceptions import exception_from_status_code
 
 
 class EventsService:
