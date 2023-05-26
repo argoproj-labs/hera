@@ -1,6 +1,6 @@
 # Parameters
 
-In [Hello World](hello-world.md), a simple use of parameters was introduced, namely that a Python function that takes
+In [Hello World](hello-world.md), a simple use of parameters was introduced, namely a Python function that takes
 kwargs. We'll now explore how Hera exposes other features of Argo's
 [Parameters](https://argoproj.github.io/argo-workflows/fields/#Parameter).
 
@@ -122,7 +122,7 @@ Currently, custom types are only supported in the "script runner" experimental f
 For the previous examples, we've been printing output to stdout, which allows subsequent steps to access the value from
 the
 [`result` output parameter](https://argoproj.github.io/argo-workflows/walk-through/output-parameters/#result-output-parameter)
-(that is, the `result` value *is* the stdout). In Hera, if we use a function user a `Steps` context, it returns a `Step`
+(that is, the `result` value *is* the stdout). In Hera, if we use a function under a `Steps` context, it returns a `Step`
 object, which has a `result` property that we can access. For example, if we have the following functions:
 
 ```py
