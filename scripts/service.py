@@ -197,16 +197,7 @@ class ServiceEndpoint:
                 resp_json['status'] = None
             return {self.response}(**resp_json)
         
-        try:
-            raise exception_from_status_code(
-                resp.status_code, 
-                f"Server returned status code {{resp.status_code}} with message: `{{resp.json()['message']}}`",
-            )
-        except json.JSONDecodeError:
-            raise exception_from_status_code(
-                resp.status_code, 
-                f"Server returned status code {{resp.status_code}} with message: `{{resp.text}}`",
-            )
+        raise exception_from_server_response(resp)
             """
         else:
             ret_val = f"{self.response}(**resp.json())"
@@ -225,16 +216,7 @@ class ServiceEndpoint:
         if resp.ok:
             return {ret_val}
         
-        try:
-            raise exception_from_status_code(
-                resp.status_code, 
-                f"Server returned status code {{resp.status_code}} with message: `{{resp.json()['message']}}`",
-            )
-        except json.JSONDecodeError:
-            raise exception_from_status_code(
-                resp.status_code, 
-                f"Server returned status code {{resp.status_code}} with message: `{{resp.text}}`",
-            )
+        raise exception_from_server_response(resp)
 """
 
 
@@ -451,7 +433,7 @@ import requests
 import json
 from hera.{module}.models import {imports}
 from hera.shared import global_config
-from hera.exceptions import exception_from_status_code
+from hera.exceptions import exception_from_server_response
 from typing import Optional, cast
 
 def valid_host_scheme(host: str) -> bool:
