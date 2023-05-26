@@ -16,13 +16,11 @@ from hera.workflows._mixins import (
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
-from hera.workflows.artifact import Artifact
 from hera.workflows.models import (
     DAGTask as _ModelDAGTask,
     Template,
 )
 from hera.workflows.operator import Operator
-from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.workflow_status import WorkflowStatus
 
@@ -147,30 +145,9 @@ class Task(
     def result(self) -> str:
         return f"{{{{tasks.{self.name}.outputs.result}}}}"
 
-    def get_parameters_as(self, name: str) -> Parameter:
-        """Returns a `Parameter` that represents all the outputs of the specified subtype.
-
-        Parameters
-        ----------
-        name: str
-            The name of the parameter to search for.
-        subtype: str
-            The inheritor subtype field, used to construct the output artifact `from_` reference.
-
-        Returns
-        -------
-        Parameter
-            The parameter, named based on the given `name`, along with a value that references all outputs.
-        """
-        return super()._get_parameters_as(name=name, subtype="tasks")
-
-    def get_artifact(self, name: str) -> Artifact:
-        """Gets an artifact from the outputs of this `Task`"""
-        return super()._get_artifact(name=name, subtype="tasks")
-
-    def get_parameter(self, name: str) -> Parameter:
-        """Gets a parameter from the outputs of this `Task`"""
-        return super()._get_parameter(name=name, subtype="tasks")
+    @property
+    def _subtype(self) -> str:
+        return "tasks"
 
     def next(self, other: Task, operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> Task:
         """Set self as a dependency of `other`."""

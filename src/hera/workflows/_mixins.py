@@ -666,6 +666,10 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
+    @property
+    def _subtype(self) -> str:
+        raise NotImplementedError
+
     @root_validator(pre=False)
     def _check_values(cls, values):
         def one(xs: List):
@@ -793,6 +797,29 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         if obj is not None:
             return Artifact(name=name, path=obj.path, from_=f"{{{{{subtype}.{self.name}.outputs.artifacts.{name}}}}}")
         raise KeyError(f"No output artifact named `{name}` found")
+
+    def get_parameters_as(self, name: str) -> Parameter:
+        """Returns a `Parameter` that represents all the outputs of this subnode.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to search for.
+
+        Returns
+        -------
+        Parameter
+            The parameter, named based on the given `name`, along with a value that references all outputs.
+        """
+        return self._get_parameters_as(name=name, subtype=self._subtype)
+
+    def get_artifact(self, name: str) -> Artifact:
+        """Gets an artifact from the outputs of this subnode"""
+        return self._get_artifact(name=name, subtype=self._subtype)
+
+    def get_parameter(self, name: str) -> Parameter:
+        """Gets a parameter from the outputs of this subnode"""
+        return self._get_parameter(name=name, subtype=self._subtype)
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
