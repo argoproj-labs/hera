@@ -936,7 +936,7 @@ def _get_source_params_from_kwargs(
     artifact_names: Set[str],
     source: Callable,
     kwargs: dict,
-) -> List[Parameter]:
+) -> List[Union[Parameter, Artifact]]:
     """Finds any args of the given `source` callable and returns them as `Parameter`s.
 
     Parameters
@@ -954,12 +954,14 @@ def _get_source_params_from_kwargs(
 
     Returns
     -------
-    List[Parameter]
+    List[Union[Parameter, Artifact]]
         The list of parameters inferred from the source.
     """
     s_args = _get_args_names_from_source(source)
     params = []
     for arg in s_args:
-        if arg in kwargs and arg not in parameter_names and arg not in artifact_names:
+        if isinstance(arg, Artifact) or isinstance(arg, Parameter):
+            params.append(arg)
+        elif arg in kwargs and arg not in parameter_names and arg not in artifact_names:
             params.append(Parameter(name=arg, value=kwargs[arg]))
     return params
