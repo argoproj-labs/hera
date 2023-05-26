@@ -63,6 +63,7 @@ def _transform_cron_workflow(obj):
 def test_hera_output(module_name):
     # GIVEN
     global_config.reset()
+    global_config.host = "http://hera.testing"
     workflow = importlib.import_module(f"examples.workflows.{module_name}").w
     yaml_path = Path(hera_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
 
@@ -80,6 +81,7 @@ def test_hera_output(module_name):
 def test_hera_output_upstream(module_name):
     # GIVEN
     global_config.reset()
+    global_config.host = "http://hera.testing"
     workflow = importlib.import_module(f"examples.workflows.upstream.{module_name}").w
     yaml_path = Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
     upstream_yaml_path = (

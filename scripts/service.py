@@ -203,6 +203,7 @@ class ServiceEndpoint:
 
         return f"""
     {signature}
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.{self.method}(
             url={req_url},
             params={params},
@@ -431,6 +432,9 @@ import requests
 from hera.{module}.models import {imports}
 from hera.shared import global_config
 from typing import Optional, cast
+
+def valid_host_scheme(host: str) -> bool:
+    return host.startswith("http://") or host.startswith("https://")    
 
 class {models_type}Service:
     def __init__(
