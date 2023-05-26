@@ -5,6 +5,7 @@ for more on Workflows.
 """
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, List, Optional, Union
@@ -44,11 +45,12 @@ from hera.workflows.models import (
     WorkflowLintRequest,
     WorkflowMetadata,
     WorkflowSpec as _ModelWorkflowSpec,
-    WorkflowStatus,
+    WorkflowStatus as _ModelWorkflowStatus,
     WorkflowTemplateRef,
 )
 from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
+from hera.workflows.workflow_status import WorkflowStatus
 
 _yaml: Optional[ModuleType] = None
 try:
@@ -82,7 +84,7 @@ class Workflow(
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
     api_version: Optional[str] = None
     kind: Optional[str] = None
-    status: Optional[WorkflowStatus] = None
+    status: Optional[_ModelWorkflowStatus] = None
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
     annotations: Optional[Dict[str, str]] = None
@@ -330,13 +332,58 @@ class Workflow(
         kwargs.setdefault("sort_keys", False)
         return _yaml.dump(self.to_dict(), *args, **kwargs)
 
-    def create(self) -> TWorkflow:
-        """Creates the Workflow on the Argo cluster."""
+    def create(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
+        """Creates the Workflow on the Argo cluster.
+
+        Parameters
+        ----------
+        wait: bool = False
+            If true then the workflow is created asynchronously and the function returns immediately.
+            If false then the workflow is created and the function blocks until the workflow is done executing.
+        poll_interval: int = 5
+            The interval in seconds to poll the workflow status if wait is true. Ignored when wait is true.
+        """
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.create_workflow(
+
+        wf = self.workflows_service.create_workflow(
             WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
         )
+        # set the workflow name to the name returned by the API, which helps cover the case of users relying on
+        # `generate_name=True`
+        self.name = wf.metadata.name
+
+        if wait:
+            return self.wait(poll_interval=poll_interval)
+        return wf
+
+    def wait(self, poll_interval: int = 5) -> TWorkflow:
+        """Waits for the Workflow to complete execution.
+
+        Parameters
+        ----------
+        poll_interval: int = 5
+            The interval in seconds to poll the workflow status.
+        """
+        assert self.workflows_service is not None, "workflow service not initialized"
+        assert self.namespace is not None, "workflow namespace not defined"
+        assert self.name is not None, "workflow name not defined"
+
+        wf = self.workflows_service.get_workflow(self.name, namespace=self.namespace)
+        assert wf.metadata.name is not None, f"workflow name not defined for workflow {self.name}"
+
+        assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
+        assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
+        status = WorkflowStatus.from_argo_status(wf.status.phase)
+
+        # keep polling for workflow status until completed, at the interval dictated by the user
+        while status == WorkflowStatus.running:
+            time.sleep(poll_interval)
+            wf = self.workflows_service.get_workflow(wf.metadata.name, namespace=self.namespace)
+            assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
+            assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
+            status = WorkflowStatus.from_argo_status(wf.status.phase)
+        return wf
 
     def lint(self) -> TWorkflow:
         """Lints the Workflow using the Argo cluster."""
