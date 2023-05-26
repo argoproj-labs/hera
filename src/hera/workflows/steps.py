@@ -15,13 +15,11 @@ from hera.workflows._mixins import (
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
-from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Template as _ModelTemplate,
     WorkflowStep as _ModelWorkflowStep,
 )
-from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Steppable, Templatable
 
 
@@ -38,57 +36,8 @@ class Step(
     """
 
     @property
-    def id(self) -> str:
-        return f"{{{{steps.{self.name}.id}}}}"
-
-    @property
-    def ip(self) -> str:
-        return f"{{{{steps.{self.name}.ip}}}}"
-
-    @property
-    def status(self) -> str:
-        return f"{{{{steps.{self.name}.status}}}}"
-
-    @property
-    def exit_code(self) -> str:
-        return f"{{{{steps.{self.name}.exitCode}}}}"
-
-    @property
-    def started_at(self) -> str:
-        return f"{{{{steps.{self.name}.startedAt}}}}"
-
-    @property
-    def finished_at(self) -> str:
-        return f"{{{{steps.{self.name}.finishedAt}}}}"
-
-    @property
-    def result(self) -> str:
-        return f"{{{{steps.{self.name}.outputs.result}}}}"
-
-    def get_parameters_as(self, name: str) -> Parameter:
-        """Returns a `Parameter` that represents all the outputs of the specified subtype.
-
-        Parameters
-        ----------
-        name: str
-            The name of the parameter to search for.
-        subtype: str
-            The inheritor subtype field, used to construct the output artifact `from_` reference.
-
-        Returns
-        -------
-        Parameter
-            The parameter, named based on the given `name`, along with a value that references all outputs.
-        """
-        return super()._get_parameters_as(name=name, subtype="steps")
-
-    def get_artifact(self, name: str) -> Artifact:
-        """Gets an artifact from the outputs of this `Step`"""
-        return super()._get_artifact(name=name, subtype="steps")
-
-    def get_parameter(self, name: str) -> Parameter:
-        """Gets a parameter from the outputs of this `Step`"""
-        return super()._get_parameter(name=name, subtype="steps")
+    def _subtype(self) -> str:
+        return "steps"
 
     def _build_as_workflow_step(self) -> _ModelWorkflowStep:
         _template = None
