@@ -3,7 +3,7 @@
 These are thin wrappers around the core Python `Exception`.
 """
 from http import HTTPStatus
-from typing import Type
+from typing import Dict, Type
 
 
 class HeraException(Exception):
@@ -40,7 +40,7 @@ class InternalServerError(HeraException):
     status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
 
 
-status_code_to_exception_map: dict[int, Type[HeraException]] = {
+status_code_to_exception_map: Dict[int, Type[HeraException]] = {
     Unauthorized.status_code: Unauthorized,
     BadRequest.status_code: BadRequest,
     Forbidden.status_code: Forbidden,
