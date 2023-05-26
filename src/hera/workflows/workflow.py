@@ -332,25 +332,30 @@ class Workflow(
         kwargs.setdefault("sort_keys", False)
         return _yaml.dump(self.to_dict(), *args, **kwargs)
 
-    def create(self, async_: bool = True, poll_interval: int = 5) -> TWorkflow:
+    def create(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
         """Creates the Workflow on the Argo cluster.
 
         Parameters
         ----------
-        async_: bool = True
-            If async is true, then the workflow is created asynchronously and the function returns immediately.
-            If async is false, then the workflow is created and the function blocks until the workflow is done
-            executing.
+        wait: bool = False
+            If true then the workflow is created asynchronously and the function returns immediately.
+            If false then the workflow is created and the function blocks until the workflow is done executing.
         poll_interval: int = 5
-            The interval in seconds to poll the workflow status if async is false. Ignored when async is true.
+            The interval in seconds to poll the workflow status if wait is true. Ignored when wait is true.
         """
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
-        if async_:
-            return self.workflows_service.create_workflow(
-                WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
-            )
-        return self.wait(poll_interval=poll_interval)
+
+        wf = self.workflows_service.create_workflow(
+            WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
+        )
+        # set the workflow name to the name returned by the API, which helps cover the case of users relying on
+        # `generate_name=True`
+        self.name = wf.metadata.name
+
+        if wait:
+            return self.wait(poll_interval=poll_interval)
+        return wf
 
     def wait(self, poll_interval: int = 5) -> TWorkflow:
         """Waits for the Workflow to complete execution.
@@ -360,10 +365,9 @@ class Workflow(
         poll_interval: int = 5
             The interval in seconds to poll the workflow status.
         """
-        wf = self.workflows_service.create_workflow(
-            WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
-        )
+        wf = self.workflows_service.get_workflow(self.name, namespace=self.namespace)
         status = WorkflowStatus.from_argo_status(wf.status.phase)
+
         # keep polling for workflow status until completed, at the interval dictated by the user
         while status == WorkflowStatus.running:
             time.sleep(poll_interval)
