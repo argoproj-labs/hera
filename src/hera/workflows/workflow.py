@@ -365,13 +365,22 @@ class Workflow(
         poll_interval: int = 5
             The interval in seconds to poll the workflow status.
         """
+        assert self.workflows_service is not None, "workflow service not initialized"
+        assert self.namespace is not None, "workflow namespace not defined"
+        assert self.name is not None, "workflow name not defined"
+
         wf = self.workflows_service.get_workflow(self.name, namespace=self.namespace)
+        assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
+        assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
         status = WorkflowStatus.from_argo_status(wf.status.phase)
+        assert wf.metadata.name is not None, f"workflow name not defined for workflow {self.name}"
 
         # keep polling for workflow status until completed, at the interval dictated by the user
         while status == WorkflowStatus.running:
             time.sleep(poll_interval)
             wf = self.workflows_service.get_workflow(wf.metadata.name, namespace=self.namespace)
+            assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
+            assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
             status = WorkflowStatus.from_argo_status(wf.status.phase)
         return wf
 

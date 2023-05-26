@@ -31,7 +31,7 @@ class WorkflowTemplate(Workflow):
         if v is not None:
             raise ValueError("status is not a valid field on a WorkflowTemplate")
 
-    def create(self) -> TWorkflow:
+    def create(self) -> TWorkflow:  # type: ignore
         """Creates the WorkflowTemplate on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
