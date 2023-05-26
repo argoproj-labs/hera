@@ -175,7 +175,7 @@ class ServiceEndpoint:
         elif "CronWorkflow" in self.response.ref:
             # when users schedule cron workflows that have not executed the moment they are scheduled, the response
             # does contain `CronWorkflowStatus` but its fields are empty. However, the `CronWorkflowStatus` object,
-            # while option on `CronWorkflow`, has *required* fields. Here, we overwrite the response with a special
+            # while optional on `CronWorkflow`, has *required* fields. Here, we overwrite the response with a special
             # case that handles setting the `CronWorkflowStatus` to `None` if the response is empty.
             return f"""
     {signature}
