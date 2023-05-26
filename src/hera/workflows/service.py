@@ -374,7 +374,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflowList(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflowList(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
@@ -392,7 +403,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
@@ -410,7 +432,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
@@ -428,7 +461,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
@@ -448,7 +492,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
@@ -501,7 +556,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
@@ -521,7 +587,18 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return CronWorkflow(**resp.json())
+            resp_json = resp.json()
+            if (
+                "status" in resp_json
+                and resp_json["status"]["active"] is None
+                and resp_json["status"]["lastScheduledTime"] is None
+                and resp_json["status"]["conditions"] is None
+            ):
+                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
+                # object. So, we overwrite the response with a value that allows the response to pass through safely.
+                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
+                resp_json["status"] = None
+            return CronWorkflow(**resp_json)
         else:
             raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
 
