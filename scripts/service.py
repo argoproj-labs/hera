@@ -196,8 +196,8 @@ class ServiceEndpoint:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json['status'] = None
             return {self.response}(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}")
+        
+        raise exception_from_server_response(resp)
             """
         else:
             ret_val = f"{self.response}(**resp.json())"
@@ -215,8 +215,8 @@ class ServiceEndpoint:
 
         if resp.ok:
             return {ret_val}
-        else:
-            raise Exception(f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}")
+        
+        raise exception_from_server_response(resp)
 """
 
 
@@ -432,6 +432,7 @@ from urllib.parse import urljoin
 import requests
 from hera.{module}.models import {imports}
 from hera.shared import global_config
+from hera.exceptions import exception_from_server_response
 from typing import Optional, cast
 
 def valid_host_scheme(host: str) -> bool:
