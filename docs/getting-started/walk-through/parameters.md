@@ -197,7 +197,7 @@ The output parameter will also show up in the UI under the node's INPUTS/OUTPUTS
 
 Now that we have a `hello_to_file` function, let's use its output in our `repeat_back` function. Under a `Steps`
 context, we can assign the `Step` object returned from the `hello_to_file` function, and use its `get_parameter`
-function.
+function, and get the `Parameter`'s `value`.
 
 ```py
 with Workflow(
@@ -207,12 +207,13 @@ with Workflow(
     with Steps(name="steps"):
         hello_world_step = hello_to_file()
         repeat_back(
-            arguments={"message": hello_world_step.get_parameter("hello-output")}
+            arguments={"message": hello_world_step.get_parameter("hello-output").value}
         )
 ```
 
 If you prefer, `arguments` can accept a single `Parameter`, and we can use the `with_name` function for convenience to
 specify the right name for `repeat_back`:
+
 ```py
 with Workflow(
     generate_name="hello-world-parameter-passing-",
@@ -223,4 +224,14 @@ with Workflow(
         repeat_back(
             arguments=hello_world_step.get_parameter("hello-output").with_name("message")
         )
+```
+
+
+Both of these Workflows will produce logs like
+
+```console
+hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="sub-process exited" argo=true error="<nil>"
+hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/parameters//tmp/hello_world.txt" argo=true
+hello-world-parameter-passing-vq7pm-repeat-back-3418430710: You just said: 'Hello World!'
+hello-world-parameter-passing-vq7pm-repeat-back-3418430710: time="2023-05-26T12:12:24.106Z" level=info msg="sub-process exited" argo=true error="<nil>"
 ```
