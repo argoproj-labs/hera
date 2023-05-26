@@ -195,10 +195,17 @@ class ServiceEndpoint:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json['status'] = None
             return {self.response}(**resp_json)
-        raise exception_from_status_code(
-            resp.status_code, 
-            f"Server returned status code {{resp.status_code}} with error: {{resp.json()['message']}}",
-        )
+        
+        try:
+            raise exception_from_status_code(
+                resp.status_code, 
+                f"Server returned status code {{resp.status_code}} with message: `{{resp.json()['message']}}`",
+            )
+        except json.JSONDecodeError:
+            raise exception_from_status_code(
+                resp.status_code, 
+                f"Server returned status code {{resp.status_code}} with message: `{{resp.text}}`",
+            )
         """
         else:
             ret_val = f"{self.response}(**resp.json())"
@@ -215,10 +222,17 @@ class ServiceEndpoint:
 
         if resp.ok:
             return {ret_val}
-        raise exception_from_status_code(
-            resp.status_code, 
-            f"Server returned status code {{resp.status_code}} with error: {{resp.json()['message']}}",
-        )
+        
+        try:
+            raise exception_from_status_code(
+                resp.status_code, 
+                f"Server returned status code {{resp.status_code}} with message: `{{resp.json()['message']}}`",
+            )
+        except json.JSONDecodeError:
+            raise exception_from_status_code(
+                resp.status_code, 
+                f"Server returned status code {{resp.status_code}} with message: `{{resp.text}}`",
+            )
 """
 
 
@@ -432,6 +446,7 @@ def get_service_def() -> str:
     return """
 from urllib.parse import urljoin
 import requests
+import json
 from hera.{module}.models import {imports}
 from hera.shared import global_config
 from hera.exceptions import exception_from_status_code
