@@ -63,7 +63,6 @@ if TYPE_CHECKING:
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
-
 InputsT = Optional[
     Union[
         ModelInputs,
@@ -479,6 +478,24 @@ class CallableTemplateMixin(ArgumentsMixin):
         try:
             from hera.workflows.steps import Step
 
+            arguments = self._get_arguments(**kwargs)
+            parameter_names = self._get_parameter_names(arguments)
+            artifact_names = self._get_artifact_names(arguments)
+            if "source" in kwargs and "with_param" in kwargs:
+                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+            elif "source" in kwargs and "with_items" in kwargs:
+                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+            if "source" in kwargs:
+                arguments += self._get_source_params_from_kwargs(
+                    parameter_names, artifact_names, kwargs["source"], kwargs
+                )
+
+            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
+            # the task will miss adding them when building the final arguments
+            kwargs["arguments"] = arguments
+
             return Step(*args, template=self, **kwargs)
         except InvalidType:
             pass
@@ -493,6 +510,11 @@ class CallableTemplateMixin(ArgumentsMixin):
                 arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
             elif "source" in kwargs and "with_items" in kwargs:
                 arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+            if "source" in kwargs:
+                arguments += self._get_source_params_from_kwargs(
+                    parameter_names, artifact_names, kwargs["source"], kwargs
+                )
 
             # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
             # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
@@ -526,6 +548,20 @@ class CallableTemplateMixin(ArgumentsMixin):
     def _get_artifact_names(self, arguments: List) -> Set[str]:
         artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
         return {a.name for a in artifacts}
+
+    def _get_source_params_from_kwargs(
+        self,
+        parameter_names: Set[str],
+        artifact_names: Set[str],
+        source: Callable,
+        kwargs: dict,
+    ) -> List[Parameter]:
+        s_args = _get_args_names_from_source(source)
+        params = []
+        for arg in s_args:
+            if arg in kwargs and arg not in parameter_names and arg not in artifact_names:
+                params.append(Parameter(name=arg, value=kwargs[arg]))
+        return params
 
     def _get_deduped_params_from_source(
         self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
@@ -862,6 +898,30 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
+class ExperimentalMixin(BaseMixin):
+    _experimental_warning_message: str = (
+        "Unable to instantiate {} since it is an experimental feature."
+        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+    _flag: str
+
+    @root_validator
+    def _check_enabled(cls, values):
+        if not global_config.experimental_features[cls._flag]:
+            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
+        return values
+
+
+def _get_args_names_from_source(source: Callable) -> List[str]:
+    return [
+        p.name
+        for p in inspect.signature(source).parameters.values()
+        if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+    ]
+
+
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
     source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
@@ -887,19 +947,3 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
-
-
-class ExperimentalMixin(BaseMixin):
-    _experimental_warning_message: str = (
-        "Unable to instantiate {} since it is an experimental feature."
-        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
-        " Note that experimental features are unstable and subject to breaking changes."
-    )
-
-    _flag: str
-
-    @root_validator
-    def _check_enabled(cls, values):
-        if not global_config.experimental_features[cls._flag]:
-            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
-        return values
