@@ -100,7 +100,7 @@ class WorkflowsService:
             return WorkflowList(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
@@ -116,7 +116,7 @@ class WorkflowsService:
             return LabelKeys(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_archived_workflow_label_values(
@@ -153,7 +153,7 @@ class WorkflowsService:
             return LabelValues(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_archived_workflow(self, uid: str) -> Workflow:
@@ -169,7 +169,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
@@ -185,7 +185,7 @@ class WorkflowsService:
             return ArchivedWorkflowDeletedResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
@@ -203,7 +203,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
@@ -221,7 +221,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_cluster_workflow_templates(
@@ -258,7 +258,7 @@ class WorkflowsService:
             return ClusterWorkflowTemplateList(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
@@ -276,7 +276,7 @@ class WorkflowsService:
             return ClusterWorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
@@ -294,7 +294,7 @@ class WorkflowsService:
             return ClusterWorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_cluster_workflow_template(
@@ -312,7 +312,7 @@ class WorkflowsService:
             return ClusterWorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def update_cluster_workflow_template(
@@ -332,7 +332,7 @@ class WorkflowsService:
             return ClusterWorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_cluster_workflow_template(
@@ -364,7 +364,7 @@ class WorkflowsService:
             return ClusterWorkflowTemplateDeleteResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_cron_workflows(
@@ -415,7 +415,7 @@ class WorkflowsService:
             return CronWorkflowList(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def create_cron_workflow(self, req: CreateCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
@@ -446,7 +446,7 @@ class WorkflowsService:
             return CronWorkflow(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def lint_cron_workflow(self, req: LintCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
@@ -477,7 +477,7 @@ class WorkflowsService:
             return CronWorkflow(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_cron_workflow(
@@ -508,7 +508,7 @@ class WorkflowsService:
             return CronWorkflow(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def update_cron_workflow(
@@ -541,7 +541,7 @@ class WorkflowsService:
             return CronWorkflow(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_cron_workflow(
@@ -576,7 +576,7 @@ class WorkflowsService:
             return CronWorkflowDeletedResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def resume_cron_workflow(
@@ -609,7 +609,7 @@ class WorkflowsService:
             return CronWorkflow(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def suspend_cron_workflow(
@@ -642,7 +642,7 @@ class WorkflowsService:
             return CronWorkflow(**resp_json)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_info(self) -> InfoResponse:
@@ -658,7 +658,7 @@ class WorkflowsService:
             return InfoResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_user_info(self) -> GetUserInfoResponse:
@@ -674,7 +674,7 @@ class WorkflowsService:
             return GetUserInfoResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_version(self) -> Version:
@@ -690,7 +690,7 @@ class WorkflowsService:
             return Version(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_workflow_templates(
@@ -730,7 +730,7 @@ class WorkflowsService:
             return WorkflowTemplateList(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def create_workflow_template(
@@ -752,7 +752,7 @@ class WorkflowsService:
             return WorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def lint_workflow_template(
@@ -774,7 +774,7 @@ class WorkflowsService:
             return WorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_workflow_template(
@@ -794,7 +794,7 @@ class WorkflowsService:
             return WorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def update_workflow_template(
@@ -816,7 +816,7 @@ class WorkflowsService:
             return WorkflowTemplate(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_workflow_template(
@@ -851,7 +851,7 @@ class WorkflowsService:
             return WorkflowTemplateDeleteResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_workflows(
@@ -893,7 +893,7 @@ class WorkflowsService:
             return WorkflowList(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def create_workflow(self, req: WorkflowCreateRequest, namespace: Optional[str] = None) -> Workflow:
@@ -913,7 +913,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def lint_workflow(self, req: WorkflowLintRequest, namespace: Optional[str] = None) -> Workflow:
@@ -933,7 +933,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def submit_workflow(self, req: WorkflowSubmitRequest, namespace: Optional[str] = None) -> Workflow:
@@ -953,7 +953,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_workflow(
@@ -977,7 +977,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_workflow(
@@ -1014,7 +1014,7 @@ class WorkflowsService:
             return WorkflowDeleteResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def workflow_logs(
@@ -1063,7 +1063,7 @@ class WorkflowsService:
             return V1alpha1LogEntry(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def resubmit_workflow(self, name: str, req: WorkflowResubmitRequest, namespace: Optional[str] = None) -> Workflow:
@@ -1083,7 +1083,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def resume_workflow(self, name: str, req: WorkflowResumeRequest, namespace: Optional[str] = None) -> Workflow:
@@ -1103,7 +1103,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def retry_workflow(self, name: str, req: WorkflowRetryRequest, namespace: Optional[str] = None) -> Workflow:
@@ -1123,7 +1123,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def set_workflow(self, name: str, req: WorkflowSetRequest, namespace: Optional[str] = None) -> Workflow:
@@ -1143,7 +1143,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def stop_workflow(self, name: str, req: WorkflowStopRequest, namespace: Optional[str] = None) -> Workflow:
@@ -1163,7 +1163,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def suspend_workflow(self, name: str, req: WorkflowSuspendRequest, namespace: Optional[str] = None) -> Workflow:
@@ -1183,7 +1183,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def terminate_workflow(
@@ -1205,7 +1205,7 @@ class WorkflowsService:
             return Workflow(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def pod_logs(
@@ -1254,7 +1254,7 @@ class WorkflowsService:
             return V1alpha1LogEntry(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_artifact_file(
@@ -1289,7 +1289,7 @@ class WorkflowsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
@@ -1308,7 +1308,7 @@ class WorkflowsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
@@ -1330,7 +1330,7 @@ class WorkflowsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
@@ -1349,7 +1349,7 @@ class WorkflowsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
@@ -1371,7 +1371,7 @@ class WorkflowsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
 

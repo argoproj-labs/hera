@@ -79,7 +79,7 @@ class EventsService:
             return EventSourceList(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def create_event_source(self, req: CreateEventSourceRequest, namespace: Optional[str] = None) -> EventSource:
@@ -99,7 +99,7 @@ class EventsService:
             return EventSource(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_event_source(self, name: str, namespace: Optional[str] = None) -> EventSource:
@@ -117,7 +117,7 @@ class EventsService:
             return EventSource(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def update_event_source(
@@ -139,7 +139,7 @@ class EventsService:
             return EventSource(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_event_source(
@@ -174,7 +174,7 @@ class EventsService:
             return EventSourceDeletedResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def receive_event(self, discriminator: str, req: Item, namespace: Optional[str] = None) -> EventResponse:
@@ -194,7 +194,7 @@ class EventsService:
             return EventResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_info(self) -> InfoResponse:
@@ -210,7 +210,7 @@ class EventsService:
             return InfoResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def list_sensors(
@@ -250,7 +250,7 @@ class EventsService:
             return SensorList(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def create_sensor(self, req: CreateSensorRequest, namespace: Optional[str] = None) -> Sensor:
@@ -270,7 +270,7 @@ class EventsService:
             return Sensor(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_sensor(self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None) -> Sensor:
@@ -288,7 +288,7 @@ class EventsService:
             return Sensor(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def update_sensor(self, name: str, req: UpdateSensorRequest, namespace: Optional[str] = None) -> Sensor:
@@ -308,7 +308,7 @@ class EventsService:
             return Sensor(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def delete_sensor(
@@ -343,7 +343,7 @@ class EventsService:
             return DeleteSensorResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def watch_event_sources(
@@ -383,7 +383,7 @@ class EventsService:
             return EventSourceWatchEvent(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def event_sources_logs(
@@ -433,7 +433,7 @@ class EventsService:
             return EventsourceLogEntry(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def watch_events(
@@ -473,7 +473,7 @@ class EventsService:
             return Event(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def watch_sensors(
@@ -513,7 +513,7 @@ class EventsService:
             return SensorWatchEvent(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def sensors_logs(
@@ -561,7 +561,7 @@ class EventsService:
             return SensorLogEntry(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_user_info(self) -> GetUserInfoResponse:
@@ -577,7 +577,7 @@ class EventsService:
             return GetUserInfoResponse()
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_version(self) -> Version:
@@ -593,7 +593,7 @@ class EventsService:
             return Version(**resp.json())
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_artifact_file(
@@ -628,7 +628,7 @@ class EventsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
@@ -647,7 +647,7 @@ class EventsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
@@ -669,7 +669,7 @@ class EventsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
@@ -688,7 +688,7 @@ class EventsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
@@ -710,7 +710,7 @@ class EventsService:
             return str(resp.content)
         raise exception_from_status_code(
             resp.status_code,
-            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+            f"Server returned status code {resp.status_code} with error: {resp.json()['message']}",
         )
 
 

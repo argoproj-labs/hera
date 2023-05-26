@@ -197,7 +197,7 @@ class ServiceEndpoint:
             return {self.response}(**resp_json)
         raise exception_from_status_code(
             resp.status_code, 
-            f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}",
+            f"Server returned status code {{resp.status_code}} with error: {{resp.json()['message']}}",
         )
         """
         else:
@@ -217,7 +217,7 @@ class ServiceEndpoint:
             return {ret_val}
         raise exception_from_status_code(
             resp.status_code, 
-            f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}",
+            f"Server returned status code {{resp.status_code}} with error: {{resp.json()['message']}}",
         )
 """
 
