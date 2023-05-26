@@ -5,6 +5,7 @@ for more on Workflows.
 """
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, List, Optional, Union
@@ -44,11 +45,12 @@ from hera.workflows.models import (
     WorkflowLintRequest,
     WorkflowMetadata,
     WorkflowSpec as _ModelWorkflowSpec,
-    WorkflowStatus,
+    WorkflowStatus as _ModelWorkflowStatus,
     WorkflowTemplateRef,
 )
 from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
+from hera.workflows.workflow_status import WorkflowStatus
 
 _yaml: Optional[ModuleType] = None
 try:
@@ -82,7 +84,7 @@ class Workflow(
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
     api_version: Optional[str] = None
     kind: Optional[str] = None
-    status: Optional[WorkflowStatus] = None
+    status: Optional[_ModelWorkflowStatus] = None
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
     annotations: Optional[Dict[str, str]] = None
@@ -330,13 +332,44 @@ class Workflow(
         kwargs.setdefault("sort_keys", False)
         return _yaml.dump(self.to_dict(), *args, **kwargs)
 
-    def create(self) -> TWorkflow:
-        """Creates the Workflow on the Argo cluster."""
+    def create(self, async_: bool = True, poll_interval: int = 5) -> TWorkflow:
+        """Creates the Workflow on the Argo cluster.
+
+        Parameters
+        ----------
+        async_: bool = True
+            If async is true, then the workflow is created asynchronously and the function returns immediately.
+            If async is false, then the workflow is created and the function blocks until the workflow is done
+            executing.
+        poll_interval: int = 5
+            The interval in seconds to poll the workflow status if async is false. Ignored when async is true.
+        """
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.create_workflow(
+        if async_:
+            return self.workflows_service.create_workflow(
+                WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
+            )
+        return self.wait(poll_interval=poll_interval)
+
+    def wait(self, poll_interval: int = 5) -> TWorkflow:
+        """Waits for the Workflow to complete execution.
+
+        Parameters
+        ----------
+        poll_interval: int = 5
+            The interval in seconds to poll the workflow status.
+        """
+        wf = self.workflows_service.create_workflow(
             WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
         )
+        status = WorkflowStatus.from_argo_status(wf.status.phase)
+        # keep polling for workflow status until completed, at the interval dictated by the user
+        while status == WorkflowStatus.running:
+            time.sleep(poll_interval)
+            wf = self.workflows_service.get_workflow(wf.metadata.name, namespace=self.namespace)
+            status = WorkflowStatus.from_argo_status(wf.status.phase)
+        return wf
 
     def lint(self) -> TWorkflow:
         """Lints the Workflow using the Argo cluster."""
