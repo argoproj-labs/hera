@@ -487,9 +487,7 @@ class CallableTemplateMixin(ArgumentsMixin):
                 arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
 
             if "source" in kwargs:
-                arguments += self._get_source_params_from_kwargs(
-                    parameter_names, artifact_names, kwargs["source"], kwargs
-                )
+                arguments += _get_source_params_from_kwargs(parameter_names, artifact_names, kwargs["source"], kwargs)
 
             # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
             # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
@@ -512,9 +510,7 @@ class CallableTemplateMixin(ArgumentsMixin):
                 arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
 
             if "source" in kwargs:
-                arguments += self._get_source_params_from_kwargs(
-                    parameter_names, artifact_names, kwargs["source"], kwargs
-                )
+                arguments += _get_source_params_from_kwargs(parameter_names, artifact_names, kwargs["source"], kwargs)
 
             # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
             # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
@@ -548,20 +544,6 @@ class CallableTemplateMixin(ArgumentsMixin):
     def _get_artifact_names(self, arguments: List) -> Set[str]:
         artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
         return {a.name for a in artifacts}
-
-    def _get_source_params_from_kwargs(
-        self,
-        parameter_names: Set[str],
-        artifact_names: Set[str],
-        source: Callable,
-        kwargs: dict,
-    ) -> List[Parameter]:
-        s_args = _get_args_names_from_source(source)
-        params = []
-        for arg in s_args:
-            if arg in kwargs and arg not in parameter_names and arg not in artifact_names:
-                params.append(Parameter(name=arg, value=kwargs[arg]))
-        return params
 
     def _get_deduped_params_from_source(
         self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
@@ -947,3 +929,37 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+
+def _get_source_params_from_kwargs(
+    parameter_names: Set[str],
+    artifact_names: Set[str],
+    source: Callable,
+    kwargs: dict,
+) -> List[Parameter]:
+    """Finds any args of the given `source` callable and returns them as `Parameter`s.
+
+    Parameters
+    ----------
+    parameter_names: Set[str]
+        Already existing parameters to verify the source args against. If any parameter name matches an arg, then the
+        new arg parameter is *not* added.
+    artifact_names: Set[str]
+        Already existing artifacts to verify the source args against. If any artifact name matches an arg, then the
+        new arg parameter is *not* added.
+    source: Callable
+        The source callable to inspect.
+    kwargs: dict
+        The kwargs to inspect for args of the source callable.
+
+    Returns
+    -------
+    List[Parameter]
+        The list of parameters inferred from the source.
+    """
+    s_args = _get_args_names_from_source(source)
+    params = []
+    for arg in s_args:
+        if arg in kwargs and arg not in parameter_names and arg not in artifact_names:
+            params.append(Parameter(name=arg, value=kwargs[arg]))
+    return params

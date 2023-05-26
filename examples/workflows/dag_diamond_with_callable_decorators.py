@@ -4,6 +4,7 @@ from hera.workflows import (
     script,
 )
 
+
 @script(add_cwd_to_sys_path=False, image="python:alpine3.6")
 def echo(message):
     print(message)
@@ -16,4 +17,3 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         C = echo(name="C", message="C")
         D = echo(name="D", message="D")
         A >> [B, C] >> D
-
