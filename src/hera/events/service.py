@@ -37,6 +37,9 @@ class EventsService:
         namespace: Optional[str] = None,
     ):
         self.host = cast(str, host or global_config.host)
+        assert self.host.startswith("http") or self.host.startswith(
+            "https"
+        ), "The host scheme is required for service usage"
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
         self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace
