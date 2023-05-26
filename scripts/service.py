@@ -195,9 +195,11 @@ class ServiceEndpoint:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json['status'] = None
             return {self.response}(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}")
-            """
+        raise exception_from_status_code(
+            resp.status_code, 
+            f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}",
+        )
+        """
         else:
             ret_val = f"{self.response}(**resp.json())"
 
@@ -213,8 +215,10 @@ class ServiceEndpoint:
 
         if resp.ok:
             return {ret_val}
-        else:
-            raise Exception(f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}")
+        raise exception_from_status_code(
+            resp.status_code, 
+            f"Server returned status code {{resp.status_code}} with error: {{resp.json()}}",
+        )
 """
 
 
@@ -430,6 +434,7 @@ from urllib.parse import urljoin
 import requests
 from hera.{module}.models import {imports}
 from hera.shared import global_config
+from hera.shared.exceptions import exception_from_status_code
 from typing import Optional, cast
 
 class {models_type}Service:

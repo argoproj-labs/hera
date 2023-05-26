@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import requests
 
 from hera.shared import global_config
+from hera.shared.exceptions import exception_from_status_code
 from hera.workflows.models import (
     ArchivedWorkflowDeletedResponse,
     ClusterWorkflowTemplate,
@@ -97,8 +98,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def list_archived_workflow_label_keys(self) -> LabelKeys:
         resp = requests.get(
@@ -111,8 +114,10 @@ class WorkflowsService:
 
         if resp.ok:
             return LabelKeys(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def list_archived_workflow_label_values(
         self,
@@ -146,8 +151,10 @@ class WorkflowsService:
 
         if resp.ok:
             return LabelValues(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_archived_workflow(self, uid: str) -> Workflow:
         resp = requests.get(
@@ -160,8 +167,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
         resp = requests.delete(
@@ -174,8 +183,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ArchivedWorkflowDeletedResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def resubmit_archived_workflow(self, uid: str, req: ResubmitArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
@@ -190,8 +201,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def retry_archived_workflow(self, uid: str, req: RetryArchivedWorkflowRequest) -> Workflow:
         resp = requests.put(
@@ -206,8 +219,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def list_cluster_workflow_templates(
         self,
@@ -241,8 +256,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplateList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def create_cluster_workflow_template(self, req: ClusterWorkflowTemplateCreateRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
@@ -257,8 +274,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def lint_cluster_workflow_template(self, req: ClusterWorkflowTemplateLintRequest) -> ClusterWorkflowTemplate:
         resp = requests.post(
@@ -273,8 +292,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_cluster_workflow_template(
         self, name: str, resource_version: Optional[str] = None
@@ -289,8 +310,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def update_cluster_workflow_template(
         self, name: str, req: ClusterWorkflowTemplateUpdateRequest
@@ -307,8 +330,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def delete_cluster_workflow_template(
         self,
@@ -337,8 +362,10 @@ class WorkflowsService:
 
         if resp.ok:
             return ClusterWorkflowTemplateDeleteResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def list_cron_workflows(
         self,
@@ -386,8 +413,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflowList(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def create_cron_workflow(self, req: CreateCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         resp = requests.post(
@@ -415,8 +444,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflow(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def lint_cron_workflow(self, req: LintCronWorkflowRequest, namespace: Optional[str] = None) -> CronWorkflow:
         resp = requests.post(
@@ -444,8 +475,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflow(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_cron_workflow(
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
@@ -473,8 +506,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflow(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def update_cron_workflow(
         self, name: str, req: UpdateCronWorkflowRequest, namespace: Optional[str] = None
@@ -504,8 +539,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflow(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def delete_cron_workflow(
         self,
@@ -537,8 +574,10 @@ class WorkflowsService:
 
         if resp.ok:
             return CronWorkflowDeletedResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def resume_cron_workflow(
         self, name: str, req: CronWorkflowResumeRequest, namespace: Optional[str] = None
@@ -568,8 +607,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflow(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def suspend_cron_workflow(
         self, name: str, req: CronWorkflowSuspendRequest, namespace: Optional[str] = None
@@ -599,8 +640,10 @@ class WorkflowsService:
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json["status"] = None
             return CronWorkflow(**resp_json)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_info(self) -> InfoResponse:
         resp = requests.get(
@@ -613,8 +656,10 @@ class WorkflowsService:
 
         if resp.ok:
             return InfoResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_user_info(self) -> GetUserInfoResponse:
         resp = requests.get(
@@ -627,8 +672,10 @@ class WorkflowsService:
 
         if resp.ok:
             return GetUserInfoResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_version(self) -> Version:
         resp = requests.get(
@@ -641,8 +688,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Version(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def list_workflow_templates(
         self,
@@ -679,8 +728,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplateList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def create_workflow_template(
         self, req: WorkflowTemplateCreateRequest, namespace: Optional[str] = None
@@ -699,8 +750,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def lint_workflow_template(
         self, req: WorkflowTemplateLintRequest, namespace: Optional[str] = None
@@ -719,8 +772,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_workflow_template(
         self, name: str, namespace: Optional[str] = None, resource_version: Optional[str] = None
@@ -737,8 +792,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def update_workflow_template(
         self, name: str, req: WorkflowTemplateUpdateRequest, namespace: Optional[str] = None
@@ -757,8 +814,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplate(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def delete_workflow_template(
         self,
@@ -790,8 +849,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowTemplateDeleteResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def list_workflows(
         self,
@@ -830,8 +891,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowList(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def create_workflow(self, req: WorkflowCreateRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
@@ -848,8 +911,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def lint_workflow(self, req: WorkflowLintRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
@@ -866,8 +931,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def submit_workflow(self, req: WorkflowSubmitRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.post(
@@ -884,8 +951,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_workflow(
         self,
@@ -906,8 +975,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def delete_workflow(
         self,
@@ -941,8 +1012,10 @@ class WorkflowsService:
 
         if resp.ok:
             return WorkflowDeleteResponse()
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def workflow_logs(
         self,
@@ -988,8 +1061,10 @@ class WorkflowsService:
 
         if resp.ok:
             return V1alpha1LogEntry(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def resubmit_workflow(self, name: str, req: WorkflowResubmitRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
@@ -1006,8 +1081,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def resume_workflow(self, name: str, req: WorkflowResumeRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
@@ -1024,8 +1101,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def retry_workflow(self, name: str, req: WorkflowRetryRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
@@ -1042,8 +1121,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def set_workflow(self, name: str, req: WorkflowSetRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
@@ -1060,8 +1141,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def stop_workflow(self, name: str, req: WorkflowStopRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
@@ -1078,8 +1161,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def suspend_workflow(self, name: str, req: WorkflowSuspendRequest, namespace: Optional[str] = None) -> Workflow:
         resp = requests.put(
@@ -1096,8 +1181,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def terminate_workflow(
         self, name: str, req: WorkflowTerminateRequest, namespace: Optional[str] = None
@@ -1116,8 +1203,10 @@ class WorkflowsService:
 
         if resp.ok:
             return Workflow(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def pod_logs(
         self,
@@ -1163,8 +1252,10 @@ class WorkflowsService:
 
         if resp.ok:
             return V1alpha1LogEntry(**resp.json())
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_artifact_file(
         self,
@@ -1196,8 +1287,10 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_output_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an output artifact by UID."""
@@ -1213,8 +1306,10 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_output_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an output artifact."""
@@ -1233,8 +1328,10 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_input_artifact_by_uid(self, uid: str, node_id: str, artifact_name: str) -> str:
         """Get an input artifact by UID."""
@@ -1250,8 +1347,10 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
     def get_input_artifact(self, name: str, node_id: str, artifact_name: str, namespace: Optional[str] = None) -> str:
         """Get an input artifact."""
@@ -1270,8 +1369,10 @@ class WorkflowsService:
 
         if resp.ok:
             return str(resp.content)
-        else:
-            raise Exception(f"Server returned status code {resp.status_code} with error: {resp.json()}")
+        raise exception_from_status_code(
+            resp.status_code,
+            f"Server returned status code {resp.status_code} with error: {resp.json()}",
+        )
 
 
 __all__ = ["WorkflowsService"]
