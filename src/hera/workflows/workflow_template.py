@@ -5,12 +5,14 @@ for more on WorkflowTemplates.
 """
 from pydantic import validator
 
+from hera.exceptions import NotFound
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
     WorkflowTemplate as _ModelWorkflowTemplate,
     WorkflowTemplateCreateRequest,
     WorkflowTemplateLintRequest,
+    WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
@@ -35,6 +37,38 @@ class WorkflowTemplate(Workflow):
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow_template(
             WorkflowTemplateCreateRequest(template=self.build()), namespace=self.namespace
+        )
+
+    def get(self) -> TWorkflow:
+        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace"""
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        assert self.name, "workflow name not defined"
+        return self.workflows_service.get_workflow_template(name=self.name, namespace=self.namespace)
+
+    def update(self) -> TWorkflow:
+        """
+        Attempts to perform a workflow template update based on the parameters of this template
+        e.g. name, namespace. Note that this creates the template if it does not exist. In addition, this performs
+        a get prior to updating to get the resource version to update in the first place. If you know the template
+        does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
+        """
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        assert self.name, "workflow name not defined"
+        # we always need to do a get prior to updating to get the resource version to update in the first place
+        # https://github.com/argoproj/argo-workflows/pull/5465#discussion_r597797052
+
+        template = self.build()
+        try:
+            curr = self.get()
+            template.metadata.resource_version = curr.metadata.resource_version
+        except NotFound:
+            return self.create()
+        return self.workflows_service.update_workflow_template(
+            self.name,
+            WorkflowTemplateUpdateRequest(template=template),
+            namespace=self.namespace,
         )
 
     def lint(self) -> TWorkflow:
