@@ -1,6 +1,6 @@
 """
 This is a map reduce example from the upstream Argo Workflows repository. This is not part of the upstream examples
-folder for workflows because the upstream example is not formatted properly.
+folder for workflows because the upstream example is not formatted according to PEP recommendations.
 
 See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/master/examples/map-reduce.yaml).
 """
@@ -18,8 +18,8 @@ def split(num_parts: int) -> None:
 
     os.mkdir("/mnt/out")
 
-    part_ids = list(map(lambda x: str(x), range(num_parts)))
-    for i, part_id in enumerate(part_ids, start=1):  # fmt: skip
+    part_ids = list(map_(lambda x: str(x), range(num_parts)))
+    for i, part_id in enumerate(part_ids, start=1):
         with open("/mnt/out/" + part_id + ".json", "w") as f:
             json.dump({"foo": i}, f)
     json.dump(part_ids, sys.stdout)
@@ -32,10 +32,10 @@ def split(num_parts: int) -> None:
         name="part",
         path="/mnt/out/part.json",
         archive=NoneArchiveStrategy(),
-        key="{{workflow.name}}/results/{{inputs.parameters.partId}}.json",
+        key="{{workflow.name}}/results/{{inputs.parameters.part_id}}.json",
     ),
 )
-def map(part_id: str) -> None:
+def map_() -> None:
     import json
     import os
 
@@ -60,7 +60,7 @@ def reduce() -> None:
     os.mkdir("/mnt/out")
 
     total = 0
-    for f in list(map(lambda x: open("/mnt/in/" + x), os.listdir("/mnt/in"))):
+    for f in list(map_(lambda x: open("/mnt/in/" + x), os.listdir("/mnt/in"))):
         result = json.load(f)
         total = total + result["bar"]
     with open("/mnt/out/total.json", "w") as f:
@@ -70,8 +70,8 @@ def reduce() -> None:
 with Workflow(generate_name="map-reduce-", entrypoint="main", arguments=Parameter(name="num_parts", value="4")) as w:
     with DAG(name="main"):
         s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.numParts}}"))
-        m = map(
+        m = map_(
             with_param=s.result,
-            arguments=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+            part=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
         )
         s >> m >> reduce()
