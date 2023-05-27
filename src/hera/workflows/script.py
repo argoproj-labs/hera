@@ -49,7 +49,13 @@ from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 
-CLASHING_KWARGS = list(Step.__fields__.keys()) + list(Task.__fields__.keys())
+CLASHING_KWARGS = set(Step.__fields__.keys()).union(set(Task.__fields__.keys()))
+
+# We specify these two kwargs as they can accept input with type [Model]Parameter
+# and [Model]Artifact. When checking for function kwargs of these types, if the kwarg
+# has the name "arguments" or "with_param", it is always interpreted as a field of Script,
+# *not* of the function. The user will get a warning log from the function defintion (not
+# during the call) as this is implicit behaviour that we cannot guard against at runtime.
 ARGUMENT_TYPE_KWARGS = ("arguments", "with_param")
 
 

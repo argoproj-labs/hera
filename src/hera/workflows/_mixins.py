@@ -535,9 +535,10 @@ class CallableTemplateMixin(ArgumentsMixin):
         for arg_name, arg_value in kwargs.items():
             if isinstance(arg_value, (Parameter, ModelParameter, Artifact, ModelArtifact)):
                 if arg_name not in CLASHING_KWARGS:
-                    # replace names for each argo argument so that this  step/task receives them with correct names
-                    arg_value.name = arg_name
-                    arguments.append(arg_value)
+                    # replace names for each argo argument so that this step/task receives them with correct names
+                    arg_copy = arg_value.copy(deep=True)
+                    arg_copy.name = arg_name
+                    arguments.append(arg_copy)
                 elif arg_name not in ARGUMENT_TYPE_KWARGS:
                     raise ValueError(
                         f"'{arg_name}' clashes with Step/Task kwargs. Rename '{arg_name}' or "
