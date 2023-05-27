@@ -486,9 +486,6 @@ class CallableTemplateMixin(ArgumentsMixin):
         elif "source" in kwargs and "with_items" in kwargs:
             arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
 
-        if "source" in kwargs:
-            arguments += _get_source_params_from_kwargs(parameter_names, artifact_names, kwargs["source"], kwargs)
-
         # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
         # additional parameters are inferred and have to be added to the `kwargs['arguments']` otherwise
         # the step/task will miss adding them when building the final arguments
@@ -535,10 +532,14 @@ class CallableTemplateMixin(ArgumentsMixin):
         for arg_name, arg_value in kwargs.items():
             if isinstance(arg_value, (Parameter, ModelParameter, Artifact, ModelArtifact)):
                 if arg_name not in CLASHING_KWARGS:
-                    # replace names for each argo argument so that this step/task receives them with correct names
-                    arg_copy = arg_value.copy(deep=True)
-                    arg_copy.name = arg_name
-                    arguments.append(arg_copy)
+                    # note that this replaces names for each argo argument so that this step/task
+                    # receives them with correct names
+                    if isinstance(arg_value, (Parameter, Artifact)):
+                        arg = arg_value.as_argument(name=arg_name)
+                    else:
+                        arg = arg_value.copy(deep=True)
+                        arg.name = arg_name
+                    arguments.append(arg)
                 elif arg_name not in ARGUMENT_TYPE_KWARGS:
                     raise ValueError(
                         f"'{arg_name}' clashes with Step/Task kwargs. Rename '{arg_name}' or "
@@ -959,39 +960,3 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
-
-
-def _get_source_params_from_kwargs(
-    parameter_names: Set[str],
-    artifact_names: Set[str],
-    source: Callable,
-    kwargs: dict,
-) -> List[Union[Parameter, Artifact]]:
-    """Finds any args of the given `source` callable and returns them as `Parameter`s.
-
-    Parameters
-    ----------
-    parameter_names: Set[str]
-        Already existing parameters to verify the source args against. If any parameter name matches an arg, then the
-        new arg parameter is *not* added.
-    artifact_names: Set[str]
-        Already existing artifacts to verify the source args against. If any artifact name matches an arg, then the
-        new arg parameter is *not* added.
-    source: Callable
-        The source callable to inspect.
-    kwargs: dict
-        The kwargs to inspect for args of the source callable.
-
-    Returns
-    -------
-    List[Union[Parameter, Artifact]]
-        The list of parameters inferred from the source.
-    """
-    s_args = _get_args_names_from_source(source)
-    params: List[Union[Parameter, Artifact]] = []
-    for arg in s_args:
-        if isinstance(arg, Artifact) or isinstance(arg, Parameter):
-            params.append(arg)
-        elif arg in kwargs and arg not in parameter_names and arg not in artifact_names:
-            params.append(Parameter(name=arg, value=kwargs[arg]))
-    return params

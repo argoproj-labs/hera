@@ -48,7 +48,6 @@
               artifacts:
               - from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
                 name: message
-                path: /tmp/hello_world.txt
             name: consume-artifact
             template: print-message
       - name: whalesay
