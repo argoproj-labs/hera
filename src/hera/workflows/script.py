@@ -6,12 +6,24 @@ for more on scripts.
 
 import copy
 import inspect
+import logging
 import textwrap
 from abc import abstractmethod
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from pydantic import root_validator, validator
+from typing_extensions import ParamSpec
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
@@ -36,6 +48,15 @@ from hera.workflows.models import (
 from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
+
+CLASHING_KWARGS = set(Step.__fields__.keys()).union(set(Task.__fields__.keys()))
+
+# We specify these two kwargs as they can accept input with type [Model]Parameter
+# and [Model]Artifact. When checking for function kwargs of these types, if the kwarg
+# has the name "arguments" or "with_param", it is always interpreted as a field of Script,
+# *not* of the function. The user will get a warning log from the function defintion (not
+# during the call) as this is implicit behaviour that we cannot guard against at runtime.
+ARGUMENT_TYPE_KWARGS = ("arguments", "with_param")
 
 
 class ScriptConstructor(BaseMixin):
@@ -228,6 +249,42 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
     return [Parameter(name=n, default=v) for n, v in source_signature.items()]
 
 
+FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
+FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+ScriptIns = ParamSpec("ScriptIns")  # For attribute types of Script
+
+
+def _take_annotation_from(
+    _: Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ]
+) -> Callable[
+    [Callable],
+    Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ],
+]:
+    def decorator(
+        real_function: Callable,
+    ) -> Callable[
+        ScriptIns,
+        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+    ]:
+        def new_function(
+            *args: ScriptIns.args, **kwargs: ScriptIns.kwargs
+        ) -> Callable[
+            [Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]
+        ]:
+            return real_function(*args, **kwargs)
+
+        return new_function
+
+    return decorator
+
+
+@_take_annotation_from(Script)  # type: ignore
 def script(**script_kwargs):
     """A decorator that wraps a function into a Script object.
 
@@ -247,7 +304,9 @@ def script(**script_kwargs):
         Function that wraps a given function into a `Script`.
     """
 
-    def script_wrapper(func: Callable) -> Callable:
+    def script_wrapper(
+        func: Callable[FuncIns, FuncR],
+    ) -> Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]:
         """Wraps the given callable into a `Script` object that can be invoked.
 
         Parameters
@@ -258,15 +317,36 @@ def script(**script_kwargs):
         Returns
         -------
         Callable
-            Another callable that represents the `Script` object `__call__` method.
+            Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
+            otherwise return the callable function unchanged.
         """
+        clashing_func_args = []
+        for p in inspect.signature(func).parameters.values():
+            if p.name in CLASHING_KWARGS:
+                clashing_func_args.append(p.name)
+        if clashing_func_args:
+            logging.warning(
+                "'%s' clash with Step/Task kwargs. You must pass values through "
+                "one of %s to use this function in a Hera Workflow.",
+                clashing_func_args,
+                ARGUMENT_TYPE_KWARGS,
+            )
+
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
+        @overload
+        def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
+            ...
+
+        @overload
+        def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]:
+            ...
+
         @wraps(func)
-        def task_wrapper(*args, **kwargs) -> Union[Task, Step]:
+        def task_wrapper(*args, **kwargs):
             """Invokes a `Script` object's `__call__` method using the given `task_params`"""
             if _context.active:
-                return s.__call__(*args, **kwargs)  # type: ignore
+                return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
 
         # Set the wrapped function to the original function so that we can use it later

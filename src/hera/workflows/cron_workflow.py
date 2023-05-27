@@ -75,7 +75,7 @@ class CronWorkflow(Workflow):
             status=self.cron_status,
         )
 
-    def create(self) -> TWorkflow:
+    def create(self) -> TWorkflow:  # type: ignore
         """Creates the CronWorkflow on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"

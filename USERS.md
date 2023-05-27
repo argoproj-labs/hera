@@ -13,3 +13,4 @@ Please open a PR with your organization or project name in the following section
 4. [Infinite Lambda](https://infinitelambda.com/)
 5. [Bloomberg](https://techatbloomberg.com)
 6. [PayIt](https://payitgov.com)
+7. [Intuition Machines](https://www.imachines.com/)

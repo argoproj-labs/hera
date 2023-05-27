@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
 
 from pydantic import root_validator, validator
 
@@ -54,9 +54,14 @@ from hera.workflows.models import (
     VolumeMount,
 )
 from hera.workflows.parameter import MISSING, Parameter
+from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
+
+if TYPE_CHECKING:
+    from hera.workflows.steps import Step
+    from hera.workflows.task import Task
 
 InputsT = Optional[
     Union[
@@ -230,7 +235,7 @@ class EnvMixin(BaseMixin):
         for e in env:
             if isinstance(e, EnvVar):
                 result.append(e)
-            elif isinstance(e, _BaseEnv):
+            elif issubclass(e.__class__, _BaseEnv):
                 result.append(e.build())
             elif isinstance(e, dict):
                 for k, v in e.items():
@@ -246,7 +251,7 @@ class EnvMixin(BaseMixin):
         for e in env_from:
             if isinstance(e, EnvFromSource):
                 result.append(e)
-            elif isinstance(e, _BaseEnvFrom):
+            elif issubclass(e.__class__, _BaseEnvFrom):
                 result.append(e.build())
         return result
 
@@ -461,43 +466,90 @@ class ArgumentsMixin(BaseMixin):
 
 
 class CallableTemplateMixin(ArgumentsMixin):
-    def __call__(self, *args, **kwargs) -> Optional[SubNodeMixin]:
+    def __call__(self, *args, **kwargs) -> Union[Step, Task]:
+        from hera.workflows.steps import Step
+        from hera.workflows.task import Task
+
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
+
+        arguments = self._get_arguments(**kwargs)
+        parameter_names = self._get_parameter_names(arguments)
+        artifact_names = self._get_artifact_names(arguments)
 
         # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
         # set it here in order for the following logic to capture it
         if "source" not in kwargs and hasattr(self, "source"):
             kwargs["source"] = self.source  # type: ignore
+        if "source" in kwargs and "with_param" in kwargs:
+            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+        elif "source" in kwargs and "with_items" in kwargs:
+            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+        # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+        # additional parameters are inferred and have to be added to the `kwargs['arguments']` otherwise
+        # the step/task will miss adding them when building the final arguments
+        kwargs["arguments"] = arguments
 
         try:
-            from hera.workflows.steps import Step
-
             return Step(*args, template=self, **kwargs)
         except InvalidType:
             pass
 
         try:
-            from hera.workflows.task import Task
-
-            arguments = self._get_arguments(**kwargs)
-            parameter_names = self._get_parameter_names(arguments)
-            artifact_names = self._get_artifact_names(arguments)
-            if "source" in kwargs and "with_param" in kwargs:
-                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-            elif "source" in kwargs and "with_items" in kwargs:
-                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
-
-            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
-            # the task will miss adding them when building the final arguments
-            kwargs["arguments"] = arguments
-
             return Task(*args, template=self, **kwargs)
         except InvalidType:
             pass
 
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
+
+    def _extract_function_argo_arguments(self, **kwargs) -> List:
+        """Returns a list of Parameters and Artifacts extracted from kwargs that belong to the function.
+
+        We inspect the kwargs in a function call, and where assigned values are a Parameter
+        or Artifact, we append them to the arguments list with names replaced. If the
+        function takes a kwarg that name-clashes with any Step or Task field (except "arguments",
+        which are dealt with above), then we raise an error, as `arguments` should be used as a
+        workaround if the function kwarg cannot be renamed.
+
+        Example 1 (basic data types): a kwarg to a function like
+        `message="hello"` will pass through a Parameter with
+        name "message" and value "hello"
+
+        Example 2 (parameters): a kwarg to a function like
+        `message=prev_step.get_parameter("parameter-name")` will
+        pass through a new parameter called "message" with a value of
+        "{{steps.prev-step.outputs.parameters.parameter-name}}".
+
+        Example 3 (artifacts): a kwarg to a function like
+        `message=prev_step.get_artifact("artifact-name")` will
+        pass through a new artifact called "message" with a "from" value of
+        "{{steps.prev-step.outputs.artifacts.artifact-name}}".
+        """
+        from hera.workflows.script import ARGUMENT_TYPE_KWARGS, CLASHING_KWARGS
+
+        arguments = []
+        for arg_name, arg_value in kwargs.items():
+            if isinstance(arg_value, (Parameter, ModelParameter, Artifact, ModelArtifact)):
+                if arg_name not in CLASHING_KWARGS:
+                    # note that this replaces names for each argo argument so that this step/task
+                    # receives them with correct names
+                    if isinstance(arg_value, (Parameter, Artifact)):
+                        arg = arg_value.as_argument(name=arg_name)
+                    else:
+                        arg = arg_value.copy(deep=True)
+                        arg.name = arg_name
+                    arguments.append(arg)
+                elif arg_name not in ARGUMENT_TYPE_KWARGS:
+                    raise ValueError(
+                        f"'{arg_name}' clashes with Step/Task kwargs. Rename '{arg_name}' or "
+                        "pass your Parameter/Artifact through 'arguments' or 'with_param'"
+                    )
+            elif arg_name not in CLASHING_KWARGS:
+                # Append arguments with implied basic data types
+                arguments.append(Parameter(name=arg_name, value=arg_value))
+
+        return arguments
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call"""
@@ -511,6 +563,9 @@ class CallableTemplateMixin(ArgumentsMixin):
         arguments = (
             self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments
         )  # type: ignore
+
+        arguments += self._extract_function_argo_arguments(**kwargs)
+
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
@@ -665,6 +720,45 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
+    @property
+    def _subtype(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def id(self) -> str:
+        """ID of this node."""
+        return f"{{{{{self._subtype}.{self.name}.id}}}}"
+
+    @property
+    def ip(self) -> str:
+        """IP of this node."""
+        return f"{{{{{self._subtype}.{self.name}.ip}}}}"
+
+    @property
+    def status(self) -> str:
+        """Status of this node."""
+        return f"{{{{{self._subtype}.{self.name}.status}}}}"
+
+    @property
+    def exit_code(self) -> str:
+        """ExitCode holds the exit code of a script template."""
+        return f"{{{{{self._subtype}.{self.name}.exitCode}}}}"
+
+    @property
+    def started_at(self) -> str:
+        """Time at which this node started."""
+        return f"{{{{{self._subtype}.{self.name}.startedAt}}}}"
+
+    @property
+    def finished_at(self) -> str:
+        """Time at which this node completed."""
+        return f"{{{{{self._subtype}.{self.name}.finishedAt}}}}"
+
+    @property
+    def result(self) -> str:
+        """Result holds the result (stdout) of a script template."""
+        return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
+
     @root_validator(pre=False)
     def _check_values(cls, values):
         def one(xs: List):
@@ -674,6 +768,171 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
             raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
         return values
+
+    def _get_parameters_as(self, name: str, subtype: str) -> Parameter:
+        """Returns a `Parameter` that represents all the outputs of the specified subtype.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to search for.
+        subtype: str
+            The inheritor subtype field, used to construct the output artifact `from_` reference.
+
+        Returns
+        -------
+        Parameter
+            The parameter, named based on the given `name`, along with a value that references all outputs.
+        """
+        return Parameter(name=name, value=f"{{{{{subtype}.{self.name}.outputs.parameters}}}}")
+
+    def _get_parameter(self, name: str, subtype: str) -> Parameter:
+        """Attempts to find the specified parameter in the outputs for the specified subtype.
+
+        Notes
+        -----
+        This is specifically designed to be invoked by inheritors.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to search for.
+        subtype: str
+            The inheritor subtype field, used to construct the output artifact `from_` reference.
+
+        Returns
+        -------
+        Parameter
+            The parameter if found.
+
+        Raises
+        ------
+        ValueError
+            When no outputs can be constructed/no outputs are set.
+        KeyError
+            When the artifact is not found.
+        NotImplementedError
+            When something else other than an `Parameter` is found for the specified name.
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = self.template
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
+        if template.outputs.parameters is None:  # type: ignore
+            raise ValueError(f"Cannot get output parameters when the template has no output parameters: {template}")
+        parameters = template.outputs.parameters  # type: ignore
+
+        obj = next((output for output in parameters if output.name == name), None)
+        if obj is not None:
+            return Parameter(
+                name=obj.name,
+                value=f"{{{{{subtype}.{self.name}.outputs.parameters.{name}}}}}",
+            )
+        raise KeyError(f"No output parameter named `{name}` found")
+
+    def _get_artifact(self, name: str, subtype: str) -> Artifact:
+        """Attempts to find the specified artifact in the outputs for the specified subtype.
+
+        Notes
+        -----
+        This is specifically designed to be invoked by inheritors.
+
+        Parameters
+        ----------
+        name: str
+            The name of the artifact to search for.
+        subtype: str
+            The inheritor subtype field, used to construct the output artifact `from_` reference.
+
+        Returns
+        -------
+        Artifact
+            The artifact if found.
+
+        Raises
+        ------
+        ValueError
+            When no outputs can be constructed/no outputs are set.
+        KeyError
+            When the artifact is not found.
+        NotImplementedError
+            When something else other than an `Artifact` is found for the specified name.
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = cast(Template, self.template)
+
+        # at this point, we know that the template is a `Template` object
+        if template.outputs is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no outputs: {template}")
+        elif template.outputs.artifacts is None:  # type: ignore
+            raise ValueError(f"Cannot get output artifacts when the template has no output artifacts: {template}")
+        artifacts = cast(List[ModelArtifact], template.outputs.artifacts)
+
+        obj = next((output for output in artifacts if output.name == name), None)
+        if obj is not None:
+            return Artifact(name=name, path=obj.path, from_=f"{{{{{subtype}.{self.name}.outputs.artifacts.{name}}}}}")
+        raise KeyError(f"No output artifact named `{name}` found")
+
+    def get_parameters_as(self, name: str) -> Parameter:
+        """Returns a `Parameter` that represents all the outputs of this subnode.
+
+        Parameters
+        ----------
+        name: str
+            The name of the parameter to search for.
+
+        Returns
+        -------
+        Parameter
+            The parameter, named based on the given `name`, along with a value that references all outputs.
+        """
+        return self._get_parameters_as(name=name, subtype=self._subtype)
+
+    def get_artifact(self, name: str) -> Artifact:
+        """Gets an artifact from the outputs of this subnode"""
+        return self._get_artifact(name=name, subtype=self._subtype)
+
+    def get_parameter(self, name: str) -> Parameter:
+        """Gets a parameter from the outputs of this subnode"""
+        return self._get_parameter(name=name, subtype=self._subtype)
+
+
+class ExperimentalMixin(BaseMixin):
+    _experimental_warning_message: str = (
+        "Unable to instantiate {} since it is an experimental feature."
+        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+    _flag: str
+
+    @root_validator
+    def _check_enabled(cls, values):
+        if not global_config.experimental_features[cls._flag]:
+            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
+        return values
+
+
+def _get_args_names_from_source(source: Callable) -> List[str]:
+    return [
+        p.name
+        for p in inspect.signature(source).parameters.values()
+        if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+    ]
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
@@ -701,19 +960,3 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
-
-
-class ExperimentalMixin(BaseMixin):
-    _experimental_warning_message: str = (
-        "Unable to instantiate {} since it is an experimental feature."
-        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
-        " Note that experimental features are unstable and subject to breaking changes."
-    )
-
-    _flag: str
-
-    @root_validator
-    def _check_enabled(cls, values):
-        if not global_config.experimental_features[cls._flag]:
-            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
-        return values

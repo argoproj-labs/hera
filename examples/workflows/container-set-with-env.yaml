@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: secret-env-from-
+spec:
+  entrypoint: whalesay
+  templates:
+  - containerSet:
+      containers:
+      - command:
+        - cowsay
+        env:
+        - name: test
+          value: '1'
+        - name: s1
+          valueFrom:
+            secretKeyRef:
+              key: s1
+              name: abc
+        - name: r1
+          valueFrom:
+            resourceFieldRef:
+              resource: abc
+        - name: c1
+          valueFrom:
+            configMapKeyRef:
+              key: c1
+              name: abc
+        envFrom:
+        - prefix: abc
+          secretRef:
+            name: secret
+            optional: false
+        - configMapRef:
+            name: configmap
+            optional: false
+          prefix: abc
+        image: docker/whalesay:latest
+        name: node
+    name: whalesay
