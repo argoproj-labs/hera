@@ -515,19 +515,19 @@ class CallableTemplateMixin(ArgumentsMixin):
         which are dealt with above), then we raise an error, as `arguments` should be used as a
         workaround if the function kwarg cannot be renamed.
 
-        Example 1 (artifacts): a kwarg to a function like
-        `message=prev_step.get_artifact("artifact-name")` should
-        pass through a new artifact called "message" with a "from" value of
-        "{{steps.prev-step.outputs.artifacts.artifact-name}}".
+        Example 1 (basic data types): a kwarg to a function like
+        `message="hello"` will pass through a Parameter with
+        name "message" and value "hello"
 
         Example 2 (parameters): a kwarg to a function like
-        `message=prev_step.get_parameter("parameter-name")` should
+        `message=prev_step.get_parameter("parameter-name")` will
         pass through a new parameter called "message" with a value of
-        "{{steps.prev-step.outputs.parameters.artifact-name}}".
+        "{{steps.prev-step.outputs.parameters.parameter-name}}".
 
-        Example 3 (basic data types): a kwarg to a function like
-        `message="hello"` should pass through a Parameter with
-        name "message" and value "hello"
+        Example 3 (artifacts): a kwarg to a function like
+        `message=prev_step.get_artifact("artifact-name")` will
+        pass through a new artifact called "message" with a "from" value of
+        "{{steps.prev-step.outputs.artifacts.artifact-name}}".
         """
         from hera.workflows.script import ARGUMENT_TYPE_KWARGS, CLASHING_KWARGS
 
