@@ -228,6 +228,7 @@ class _Unparser(ast.NodeVisitor):
     def visit_Assign(self, node):
         self.fill()
         for target in node.targets:
+            self.set_precedence(_Precedence.TUPLE, target)
             self.traverse(target)
             self.write(" = ")
         self.traverse(node.value)
@@ -399,6 +400,7 @@ class _Unparser(ast.NodeVisitor):
 
     def _for_helper(self, fill, node):
         self.fill(fill)
+        self.set_precedence(_Precedence.TUPLE, node.target)
         self.traverse(node.target)
         self.write(" in ")
         self.traverse(node.iter)
@@ -674,7 +676,7 @@ class _Unparser(ast.NodeVisitor):
             self.interleave(lambda: self.write(", "), write_item, zip(node.keys, node.values))
 
     def visit_Tuple(self, node):
-        with self.delimit("(", ")"):
+        with self.require_parens(_Precedence.TUPLE, node):
             self.items_view(self.traverse, node.elts)
 
     unop = {"Invert": "~", "Not": "not", "UAdd": "+", "USub": "-"}
@@ -944,6 +946,10 @@ def unparse(ast_obj):
 
 def roundtrip(source):
     tree = ast.parse(source)
-    if hasattr(ast, "unparse"):
+    # python 3.11 ast.unparse stopped using brackets around tuples used in assignment,
+    # see https://github.com/python/cpython/commit/51cef8be8c77dff522bec6f95d6853031bf19038
+    # Previous versions will unparse with brackets
+    if sys.version_info[1] >= 11 and hasattr(ast, "unparse"):
         return ast.unparse(tree)
+    # The _for_helper copied in this file has the patch above applied for tuples, so does not use brackets
     return unparse(tree)

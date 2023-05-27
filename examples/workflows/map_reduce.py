@@ -1,6 +1,8 @@
 """
 This is a map reduce example from the upstream Argo Workflows repository. This is not part of the upstream examples
-folder for workflows because the upstream example is not formatted properly
+folder for workflows because the upstream example is not formatted properly.
+
+See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/master/examples/map-reduce.yaml).
 """
 from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Parameter, S3Artifact, Workflow, script
 
