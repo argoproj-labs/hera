@@ -988,7 +988,7 @@ def _get_source_params_from_kwargs(
         The list of parameters inferred from the source.
     """
     s_args = _get_args_names_from_source(source)
-    params = []
+    params: List[Union[Parameter, Artifact]] = []
     for arg in s_args:
         if isinstance(arg, Artifact) or isinstance(arg, Parameter):
             params.append(arg)
