@@ -77,6 +77,7 @@ OutputsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
     ]
 ]
+ArgumentT = Union[Parameter, ModelParameter, Artifact, ModelArtifact]
 ArgumentsT = Optional[
     Union[
         ModelArguments,
@@ -467,6 +468,9 @@ class ArgumentsMixin(BaseMixin):
 
 class CallableTemplateMixin(ArgumentsMixin):
     def __call__(self, *args, **kwargs) -> Union[Step, Task]:
+        from hera.workflows.steps import Step
+        from hera.workflows.task import Task
+
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 
@@ -475,48 +479,28 @@ class CallableTemplateMixin(ArgumentsMixin):
         if "source" not in kwargs and hasattr(self, "source"):
             kwargs["source"] = self.source  # type: ignore
 
+        arguments = self._get_arguments(**kwargs)
+        parameter_names = self._get_parameter_names(arguments)
+        artifact_names = self._get_artifact_names(arguments)
+        if "source" in kwargs and "with_param" in kwargs:
+            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+        elif "source" in kwargs and "with_items" in kwargs:
+            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+        if "source" in kwargs:
+            arguments += _get_source_params_from_kwargs(parameter_names, artifact_names, kwargs["source"], kwargs)
+
+        # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+        # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
+        # the task will miss adding them when building the final arguments
+        kwargs["arguments"] = arguments
+
         try:
-            from hera.workflows.steps import Step
-
-            arguments = self._get_arguments(**kwargs)
-            parameter_names = self._get_parameter_names(arguments)
-            artifact_names = self._get_artifact_names(arguments)
-            if "source" in kwargs and "with_param" in kwargs:
-                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-            elif "source" in kwargs and "with_items" in kwargs:
-                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
-
-            if "source" in kwargs:
-                arguments += _get_source_params_from_kwargs(parameter_names, artifact_names, kwargs["source"], kwargs)
-
-            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
-            # the task will miss adding them when building the final arguments
-            kwargs["arguments"] = arguments
-
             return Step(*args, template=self, **kwargs)
         except InvalidType:
             pass
 
         try:
-            from hera.workflows.task import Task
-
-            arguments = self._get_arguments(**kwargs)
-            parameter_names = self._get_parameter_names(arguments)
-            artifact_names = self._get_artifact_names(arguments)
-            if "source" in kwargs and "with_param" in kwargs:
-                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-            elif "source" in kwargs and "with_items" in kwargs:
-                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
-
-            if "source" in kwargs:
-                arguments += _get_source_params_from_kwargs(parameter_names, artifact_names, kwargs["source"], kwargs)
-
-            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
-            # the task will miss adding them when building the final arguments
-            kwargs["arguments"] = arguments
-
             return Task(*args, template=self, **kwargs)
         except InvalidType:
             pass
@@ -525,6 +509,12 @@ class CallableTemplateMixin(ArgumentsMixin):
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call"""
+        from hera.workflows.steps import Step
+        from hera.workflows.task import Task
+
+        # We must import Step and Task and construct this list in the function as top-level imports of
+        # Step and Task produce a circular import
+        CLASHING_KWARGS = list(Step.__fields__.keys()) + list(Task.__fields__.keys())
 
         # these are the already set parameters. If a user has already set a parameter argument, then Hera
         # uses the user-provided value rather than the inferred value
@@ -535,6 +525,27 @@ class CallableTemplateMixin(ArgumentsMixin):
         arguments = (
             self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments
         )  # type: ignore
+
+        # We inspect the kwargs in a function call, and where assigned values are a Parameter
+        # or Artifact, we append them to the arguments list with names replaced. If the
+        # function takes a kwarg that name-clashes with any Step or Task field (except "arguments",
+        # which are dealt with above), then we raise an error, as `arguments` should be used as a
+        # workaround if the function kwarg cannot be renamed.
+        #
+        # e.g. a kwarg `message=prev_step.get_artifact("artifact-name")`` should
+        # pass through a new artifact called "message" with a "from" value of
+        # "{{steps.prev-step.outputs.artifacts.artifact-name}}".
+        for name, argo_argument in kwargs.items():
+            if isinstance(argo_argument, ArgumentT):
+                if name not in CLASHING_KWARGS:
+                    # replace names for each argo argument so that this step receives them with correct names
+                    argo_argument.name = name
+                    arguments.append(argo_argument)
+                elif name in CLASHING_KWARGS and name != "arguments":
+                    raise ValueError(
+                        f"{name} clashes with Step/Task kwargs. Rename {name} or pass your Parameter/Artifact through 'arguments'"
+                    )
+
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
