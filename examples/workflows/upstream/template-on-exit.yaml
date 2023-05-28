@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: container-on-exit-
+spec:
+  entrypoint: step-template
+  templates:
+  - container:
+      args:
+      - goodbye world
+      command:
+      - cowsay
+      image: docker/whalesay
+    name: exitContainer
+  - container:
+      args:
+      - hello world
+      command:
+      - cowsay
+      image: docker/whalesay
+    name: whalesay
+  - name: step-template
+    steps:
+    - - name: stepA
+        onExit: exitContainer
+        template: whalesay
+    - - name: stepB
+        onExit: exitContainer
+        template: whalesay
