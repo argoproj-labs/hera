@@ -1,6 +1,6 @@
 # Continue On Fail
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/continue-on-fail.yaml).
 
 
 
@@ -34,8 +34,9 @@
         )
         with Steps(name="workflow-ignore") as steps:
             whalesay(name="A")
-            whalesay(name="B")
-            intentional_fail(name="C", continue_on=m.ContinueOn(failed=True))
+            with steps.parallel():
+                whalesay(name="B")
+                intentional_fail(name="C", continue_on=m.ContinueOn(failed=True))
             whalesay(name="D")
     ```
 
@@ -71,7 +72,7 @@
             template: whalesay
         - - name: B
             template: whalesay
-        - - continueOn:
+          - continueOn:
               failed: true
             name: C
             template: intentional-fail

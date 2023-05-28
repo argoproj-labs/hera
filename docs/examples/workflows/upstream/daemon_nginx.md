@@ -1,6 +1,6 @@
 # Daemon Nginx
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/daemon-nginx.yaml).
 
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
@@ -81,7 +81,7 @@ spec:
         )
         with Steps(name="daemon-nginx-example"):
             s = nginx_server()
-            nginx_client(arguments={"server_ip": s.ip})
+            nginx_client(arguments={"server-ip": s.ip})
     ```
 
 === "YAML"
@@ -122,7 +122,7 @@ spec:
             template: nginx-server
         - - arguments:
               parameters:
-              - name: server_ip
+              - name: server-ip
                 value: '{{steps.nginx-server.ip}}'
             name: nginx-client
             template: nginx-client

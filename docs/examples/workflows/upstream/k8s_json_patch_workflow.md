@@ -1,6 +1,6 @@
 # K8S Json Patch Workflow
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-json-patch-workflow.yaml).
 
 
 
@@ -9,6 +9,11 @@
 
     ```python linenums="1"
     from hera.workflows import Resource, Workflow
+
+    manifest = """- op: add
+      path: /metadata/labels/foo
+      value: bar
+    """
 
     with Workflow(
         generate_name="k8s-patch-workflow-",
@@ -19,11 +24,7 @@
             action="patch",
             merge_strategy="json",
             flags=["workflow", "{{workflow.name}}"],
-            manifest="""
-            - op: add
-              path: /metadata/labels/foo
-              value:bar
-            """,
+            manifest=manifest,
         )
     ```
 
@@ -43,8 +44,7 @@
           flags:
           - workflow
           - '{{workflow.name}}'
-          manifest: "\n        - op: add\n          path: /metadata/labels/foo\n     \
-            \     value:bar\n        "
+          manifest: "- op: add\n  path: /metadata/labels/foo\n  value: bar\n"
           mergeStrategy: json
     ```
 

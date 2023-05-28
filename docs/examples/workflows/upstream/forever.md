@@ -1,6 +1,6 @@
 # Forever
 
-
+> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/forever.yaml).
 
 
 
@@ -17,8 +17,7 @@
         Container(
             name="main",
             image="docker/whalesay:latest",
-            command=["sh", "-c"],
-            args=["for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done"],
+            command=["sh", "-c", "for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done"],
         )
     ```
 
@@ -33,11 +32,10 @@
       entrypoint: main
       templates:
       - container:
-          args:
-          - for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done
           command:
           - sh
           - -c
+          - for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done
           image: docker/whalesay:latest
         name: main
     ```

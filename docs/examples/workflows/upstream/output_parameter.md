@@ -39,7 +39,10 @@
         )
         with Steps(name="output-parameter"):
             g = whalesay(name="generate-parameter")
-            print_message(name="consume-parameter", arguments={"message": "{{steps.generate-parameter.outputs.parameters.hello-param}}"})
+            print_message(
+                name="consume-parameter",
+                arguments={"message": "{{steps.generate-parameter.outputs.parameters.hello-param}}"},
+            )
     ```
 
 === "YAML"
