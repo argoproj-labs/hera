@@ -8,7 +8,7 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import Workflow, Container, Steps
+    from hera.workflows import Container, Steps, Workflow
 
     with Workflow(generate_name="container-on-exit-", entrypoint="step-template") as w:
         exit_container = Container(

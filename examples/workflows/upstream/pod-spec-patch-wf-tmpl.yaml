@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pod-spec-patch-
+spec:
+  arguments:
+    parameters:
+    - name: cpu-limit
+      value: 100m
+    - name: mem-limit
+      value: 100Mi
+  entrypoint: whalesay
+  podSpecPatch: "containers:\n  - name: main\n    resources:\n      limits:\n    \
+    \    memory: \"{{workflow.parameters.mem-limit}}\"\n"
+  templates:
+  - container:
+      args:
+      - hello world
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    name: whalesay
+    podSpecPatch: '{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}"
+      }}}]}'

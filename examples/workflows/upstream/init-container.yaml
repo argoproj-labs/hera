@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: init-container-
+spec:
+  entrypoint: init-container-example
+  templates:
+  - container:
+      command:
+      - echo
+      - bye
+      image: alpine:latest
+      volumeMounts:
+      - mountPath: /foo
+        name: foo
+    initContainers:
+    - command:
+      - echo
+      - hello
+      image: alpine:latest
+      mirrorVolumeMounts: true
+      name: hello
+    name: init-container-example
+  volumes:
+  - emptyDir: {}
+    name: foo

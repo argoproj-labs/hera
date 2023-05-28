@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: output-parameter-
+spec:
+  entrypoint: output-parameter
+  templates:
+  - container:
+      args:
+      - sleep 1; echo -n hello world > /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: docker/whalesay:latest
+    name: whalesay
+    outputs:
+      parameters:
+      - name: hello-param
+        valueFrom:
+          default: Foobar
+          path: /tmp/hello_world.txt
+  - container:
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    inputs:
+      parameters:
+      - name: message
+    name: print-message
+  - name: output-parameter
+    steps:
+    - - name: generate-parameter
+        template: whalesay
+    - - arguments:
+          parameters:
+          - name: message
+            value: '{{steps.generate-parameter.outputs.parameters.hello-param}}'
+        name: consume-parameter
+        template: print-message

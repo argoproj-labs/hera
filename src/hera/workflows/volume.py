@@ -77,6 +77,7 @@ class AccessMode(Enum):
 
 class _BaseVolume(_ModelVolumeMount):
     name: Optional[str] = None  # type: ignore
+    mount_path: Optional[str] = None  # type: ignore
 
     @validator("name", pre=True)
     def _check_name(cls, v):

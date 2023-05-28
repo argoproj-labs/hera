@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: synchronization-tmpl-level-mutex-
+spec:
+  entrypoint: synchronization-tmpl-level-mutex-example
+  templates:
+  - container:
+      args:
+      - sleep 20; echo acquired lock
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+    name: acquire-lock
+    synchronization:
+      mutex:
+        name: welcome
+  - container:
+      args:
+      - sleep 50; echo acquired lock
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+    name: acquire-lock-1
+    synchronization:
+      mutex:
+        name: test
+  - name: synchronization-tmpl-level-mutex-example
+    steps:
+    - - arguments:
+          parameters:
+          - name: seconds
+            value: '{{item}}'
+        name: synchronization-acquire-lock
+        template: acquire-lock
+        withParam: '["1","2","3","4","5"]'
+      - arguments:
+          parameters:
+          - name: seconds
+            value: '{{item}}'
+        name: synchronization-acquire-lock1
+        template: acquire-lock-1
+        withParam: '["1","2","3","4","5"]'
