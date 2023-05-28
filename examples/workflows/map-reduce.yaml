@@ -1,0 +1,100 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: map-reduce-
+spec:
+  arguments:
+    parameters:
+    - name: num_parts
+      value: '4'
+  entrypoint: main
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: num_parts
+            value: '{{workflow.parameters.numParts}}'
+        name: split
+        template: split
+      - arguments:
+          artifacts:
+          - name: part
+            s3:
+              key: '{{workflow.name}}/parts/{{item}}.json'
+        depends: split
+        name: map-
+        template: map-
+        withParam: '{{tasks.split.outputs.result}}'
+      - depends: map-
+        name: reduce
+        template: reduce
+    name: main
+  - inputs:
+      parameters:
+      - name: num_parts
+    name: split
+    outputs:
+      artifacts:
+      - archive:
+          none: {}
+        name: parts
+        path: /mnt/out
+        s3:
+          key: '{{workflow.name}}/parts'
+    script:
+      command:
+      - python
+      image: python:alpine3.6
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+        try: num_parts = json.loads(r'''{{inputs.parameters.num_parts}}''')\nexcept:\
+        \ num_parts = r'''{{inputs.parameters.num_parts}}'''\n\nimport json\nimport\
+        \ os\nimport sys\nos.mkdir('/mnt/out')\npart_ids = list(map_(lambda x: str(x),\
+        \ range(num_parts)))\nfor i, part_id in enumerate(part_ids, start=1):\n  \
+        \  with open('/mnt/out/' + part_id + '.json', 'w') as f:\n        json.dump({'foo':\
+        \ i}, f)\njson.dump(part_ids, sys.stdout)"
+  - inputs:
+      artifacts:
+      - name: part
+        path: /mnt/in/part.json
+    name: map-
+    outputs:
+      artifacts:
+      - archive:
+          none: {}
+        name: part
+        path: /mnt/out/part.json
+        s3:
+          key: '{{workflow.name}}/results/{{inputs.parameters.part_id}}.json'
+    script:
+      command:
+      - python
+      image: python:alpine3.6
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+        import os\nos.mkdir('/mnt/out')\nwith open('/mnt/in/part.json') as f:\n  \
+        \  part = json.load(f)\nwith open('/mnt/out/part.json', 'w') as f:\n    json.dump({'bar':\
+        \ part['foo'] * 2}, f)"
+  - inputs:
+      artifacts:
+      - name: results
+        path: /mnt/in
+        s3:
+          key: '{{workflow.name}}/results'
+    name: reduce
+    outputs:
+      artifacts:
+      - archive:
+          none: {}
+        name: total
+        path: /mnt/out/total.json
+        s3:
+          key: '{{workflow.name}}/total.json'
+    script:
+      command:
+      - python
+      image: python:alpine3.6
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+        import os\nos.mkdir('/mnt/out')\ntotal = 0\nfor f in list(map_(lambda x: open('/mnt/in/'\
+        \ + x), os.listdir('/mnt/in'))):\n    result = json.load(f)\n    total = total\
+        \ + result['bar']\nwith open('/mnt/out/total.json', 'w') as f:\n    json.dump({'total':\
+        \ total}, f)"

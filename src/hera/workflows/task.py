@@ -234,7 +234,7 @@ class Task(
             hooks=self.hooks,
             inline=_inline,
             name=self.name,
-            on_exit=self.on_exit,
+            on_exit=self._build_on_exit(),
             template=_template,
             template_ref=self.template_ref,
             when=self.when,

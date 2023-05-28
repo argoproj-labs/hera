@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: global-parameter-from-configmap-referenced-as-local-variable-
+spec:
+  arguments:
+    parameters:
+    - name: message
+      valueFrom:
+        configMapKeyRef:
+          key: msg
+          name: simple-parameters
+  entrypoint: whalesay
+  serviceAccountName: argo
+  templates:
+  - container:
+      args:
+      - echo
+      - '{{inputs.parameters.message}}'
+      image: argoproj/argosay:v2
+    inputs:
+      parameters:
+      - name: message
+    name: whalesay

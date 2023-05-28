@@ -713,12 +713,17 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     name: str
     continue_on: Optional[ContinueOn] = None
     hooks: Optional[Dict[str, LifecycleHook]] = None
-    on_exit: Optional[str] = None
+    on_exit: Optional[Union[str, Templatable]] = None
     template: Optional[Union[str, Template, TemplateMixin]] = None
     template_ref: Optional[TemplateRef] = None
     inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
+
+    def _build_on_exit(self) -> Optional[str]:
+        if isinstance(self.on_exit, Templatable):
+            return self.on_exit._build_template().name  # type: ignore
+        return self.on_exit
 
     @property
     def _subtype(self) -> str:
@@ -758,6 +763,9 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def result(self) -> str:
         """Result holds the result (stdout) of a script template."""
         return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
+
+    def get_result_as(self, name: str) -> Parameter:
+        return Parameter(name=name, value=self.result)
 
     @root_validator(pre=False)
     def _check_values(cls, values):
