@@ -10,13 +10,13 @@ _client: Optional[ModuleType] = None
 _config: Optional[ModuleType] = None
 
 try:
-    from kubernetes import client, config
+    from kubernetes import client, config  # type: ignore
 
     _client = client
     _config = config
 except ImportError:
-    client = None
-    config = None
+    _client = None
+    _config = None
 
 
 class TokenGenerator:
