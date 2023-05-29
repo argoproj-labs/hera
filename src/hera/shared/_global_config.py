@@ -38,8 +38,7 @@ class _GlobalConfig:
     host: Optional[str] = None
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
-    # namespace assumes the default namespace is `default`, which is the default assumption of Argo
-    namespace: Optional[str] = "default"
+    namespace: Optional[str] = None
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
     experimental_features: Dict[str, bool] = field(default_factory=lambda: defaultdict(bool))
