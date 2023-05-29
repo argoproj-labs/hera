@@ -3,9 +3,20 @@ import errno
 import os
 import shutil
 import subprocess
+from types import ModuleType
 from typing import Optional
 
-from kubernetes import client, config
+_client: Optional[ModuleType] = None
+_config: Optional[ModuleType] = None
+
+try:
+    from kubernetes import client, config
+
+    _client = client
+    _config = config
+except ImportError:
+    client = None
+    config = None
 
 
 class TokenGenerator:
@@ -61,6 +72,9 @@ class KubernetesServiceAccountTokenGenerator(TokenGenerator):
     ------
     FileNotFoundError
         If the K8s local config file does not exist.
+    ImportError
+        If the `kubernetes` package is not installed.
+
     """
 
     def __init__(self, service_account: str, namespace: str = "default", config_file: Optional[str] = None) -> None:
@@ -69,11 +83,14 @@ class KubernetesServiceAccountTokenGenerator(TokenGenerator):
         self.config_file: Optional[str] = config_file
 
     def __call__(self) -> str:
+        if not _client or not _config:
+            raise ImportError("`kubernetes` is not installed. Install `hera[k8s]` to bring in the extra dependency")
+
         if self.config_file is not None and not os.path.isfile(self.config_file):
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), self.config_file)
 
-        config.load_kube_config(config_file=self.config_file)
-        v1 = client.CoreV1Api()
+        _config.load_kube_config(config_file=self.config_file)
+        v1 = _client.CoreV1Api()
         secret_name = v1.read_namespaced_service_account(self.service_account, self.namespace).secrets[0].name
         sec = v1.read_namespaced_secret(secret_name, self.namespace).data
         return base64.b64decode(sec["token"]).decode()
