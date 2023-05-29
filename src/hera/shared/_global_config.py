@@ -7,6 +7,8 @@ from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from pydantic import root_validator
 
+from hera.auth import TokenGenerator
+
 from ._base_model import BaseModel
 
 TBase = TypeVar("TBase", bound="BaseMixin")
@@ -28,17 +30,18 @@ class _GlobalConfig:
 
     # protected attributes are ones that are computed/go through some light processing upon setting or
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
-    _token: Union[Optional[str], Callable[[], Optional[str]]] = None
+    _token: Union[Optional[str], TokenGenerator, Callable[[], Optional[str]]] = None
+    _image: Union[str, Callable[[], str]] = "python:3.8"
+    _pre_build_hooks: Optional[_HookMap] = None
+    _defaults: _Defaults = field(default_factory=lambda: defaultdict(dict))
 
     host: Optional[str] = None
     verify_ssl: bool = True
     api_version: str = "argoproj.io/v1alpha1"
-    namespace: Optional[str] = None
-    _image: Union[str, Callable[[], str]] = "python:3.8"
+    # namespace assumes the default namespace is `default`, which is the default assumption of Argo
+    namespace: Optional[str] = "default"
     service_account_name: Optional[str] = None
     script_command: Optional[List[str]] = field(default_factory=lambda: ["python"])
-    _pre_build_hooks: Optional[_HookMap] = None
-    _defaults: _Defaults = field(default_factory=lambda: defaultdict(dict))
     experimental_features: Dict[str, bool] = field(default_factory=lambda: defaultdict(bool))
 
     def reset(self) -> None:
@@ -65,7 +68,7 @@ class _GlobalConfig:
         return self._token()
 
     @token.setter
-    def token(self, t: Union[Optional[str], Callable[[], Optional[str]]]) -> None:
+    def token(self, t: Union[Optional[str], TokenGenerator, Callable[[], Optional[str]]]) -> None:
         """Sets the Argo Workflows token at a global level so services can use it"""
         self._token = t
 

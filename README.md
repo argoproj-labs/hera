@@ -86,6 +86,14 @@ publishes releases to both `hera` and `hera-workflows` for backwards compatibili
 - [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via  
   `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging
 
+### kubernetes
+
+- Install via `hera[k8s]`
+- [Kubernetes]((https://pypi.org/project/kubernetes/) is required for Hera's `auth` module, which provides approaches
+  for generating authentication tokens with the Argo server. One of the approaches for generating a token is by using
+  a local Kubernetes service account. Hera needs the `kubernetes` package to access the service account and unpack
+  the token
+
 # Examples
 
 ### Single step script
