@@ -27,10 +27,16 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         A >> [B, C] >> D
 ```
 
-Notice the `>>` (rshift) syntax used with the returned objects from the `echo` calls. The `echo` calls are returning
-`Task` objects as the function is being called under a `DAG` context. Then, we can specify dependencies between `Tasks`
-and lists of `Tasks` using the `>>` syntax. A list acts as a boolean `and` of the elements, and it is important to note
-that a list cannot appear first in the chain or on both sides of a `>>`.
+Notice the `>>` (rshift) syntax used with the returned objects from the `echo` calls; it specifies the left-hand-side of
+the operator is a dependency of the right-hand-side, i.e. `A >> B` means "B depends on A". This is syntactic sugar for
+`A.next(B)`, see the
+[Task - Dependencies](https://hera.readthedocs.io/en/stable/api/workflows/hera/#hera.workflows.Task--dependencies)
+section for more examples.
+
+The `echo` calls are
+returning `Task` objects as the function is being called under a `DAG` context. Then, we can specify dependencies
+between `Tasks` and lists of `Tasks` using the `>>` syntax. A list acts as a boolean `and` of the elements, and it is
+important to note that a list cannot appear first in the chain or on both sides of a `>>`.
 
 ```py
         A >> [B, C] >> D
