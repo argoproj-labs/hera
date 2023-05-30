@@ -113,3 +113,9 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
             arguments=ga.get_artifact("hello-art").as_name("message"),
         )
 ```
+
+The logs when running this Workflow will look like
+
+```console
+TODO: paste log here
+```
