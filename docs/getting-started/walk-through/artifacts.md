@@ -89,9 +89,9 @@ def print_message():
     ...
 ```
 
-Specifying an Artifact in the inputs means the Kubernetes container running this script will mount Artifacts passed as
-arguments to `Steps` or `Tasks`. In this case, whatever artifact is passed in through the `message` argument is mounted
-to the path `/tmp/message`. Here, we just want to echo what was in the artifact.
+Specifying an Artifact in the inputs means the Kubernetes container running this script will mount Artifacts that are
+passed as arguments to `Steps` or `Tasks`. In this case, whatever artifact is passed in through the `message` argument
+is mounted to the path `/tmp/message`. Here, we just want to echo what was in the artifact.
 
 ```py
 @script(inputs=Artifact(name="message", path="/tmp/message"))
