@@ -30,7 +30,7 @@ class _GlobalConfig:
 
     # protected attributes are ones that are computed/go through some light processing upon setting or
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
-    _token: Optional[Union[str], TokenGenerator, Callable[[], Optional[str]]] = None
+    _token: Optional[Union[str, TokenGenerator, Callable[[], Optional[str]]]] = None
     _image: Union[str, Callable[[], str]] = "python:3.8"
     _pre_build_hooks: Optional[_HookMap] = None
     _defaults: _Defaults = field(default_factory=lambda: defaultdict(dict))
