@@ -2,7 +2,7 @@
 
 DAGs (Directed Acyclic Graphs) are similar to `Steps`, and in Hera, the syntax using context managers is exactly the same as `Steps`.
 DAGs are formed of `Tasks`, and offer more flexibility in Workflow construction, with the key difference being that you
-specify the dependencies of each `Task`, i.e. what other `Tasks` must run to completion before running this one.
+specify the dependencies of each `Task`, i.e. which other `Tasks` must run to completion before running this one.
 
 ## Specifying Dependencies
 

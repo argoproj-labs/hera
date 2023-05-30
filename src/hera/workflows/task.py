@@ -132,6 +132,7 @@ A   B
 C   D
 ```
     """
+
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
 
