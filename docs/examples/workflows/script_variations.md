@@ -25,7 +25,7 @@
     with Workflow(generate_name="fv-test-", entrypoint="d") as w:
         with DAG(name="d"):
             hello_world()
-            multiline_function(test="test string", another_test="another test string")
+            multiline_function(arguments={"test": "test string", "another_test": "another test string"})
     ```
 
 === "YAML"

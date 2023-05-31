@@ -12,6 +12,6 @@ with Workflow(generate_name="loops-", entrypoint="loop-example") as w:
     with Steps(name="loop-example"):
         whalesay(
             name="print-message",
-            message="{{item}}",
+            arguments={"message": "{{item}}"},
             with_items=["hello world", "goodbye world"],
         )

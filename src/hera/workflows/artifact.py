@@ -73,15 +73,6 @@ class Artifact(BaseModel):
         artifact.name = name
         return artifact
 
-    def as_argument(self, name: Optional[str] = None) -> _ModelArtifact:
-        artifact = self._build_artifact()
-        # if we're using this artifact as an argument then the input of that step/task sets the path of the argument
-        # content, not the artifact itself. The rest of the fields are ok to use as-is
-        artifact.name = name or artifact.name
-        artifact.path = None
-        artifact.sub_path = None
-        return artifact
-
 
 class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
     def _build_artifact(self) -> _ModelArtifact:

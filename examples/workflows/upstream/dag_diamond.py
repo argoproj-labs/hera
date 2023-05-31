@@ -11,8 +11,8 @@ with Workflow(
         inputs=[Parameter(name="message")],
     )
     with DAG(name="diamond"):
-        A = echo(name="A", message="A")
-        B = echo(name="B", message="B")
-        C = echo(name="C", message="C")
-        D = echo(name="D", message="D")
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
