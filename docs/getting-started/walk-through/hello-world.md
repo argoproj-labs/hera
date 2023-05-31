@@ -29,13 +29,16 @@ As we are using Argo Workflows, we import specialized classes from `hera.workflo
 Argo spec have been transformed into powerful Python classes, explore them at the
 [Hera Workflows API reference](../../api/workflows/hera.md).
 
-For this Workflow, we want to echo using Python's `print` function, which is wrapped in our convenience `echo` function.
-We use Hera's `script` decorator to turn the `echo` function into what's known as a
+
+## Using Any Function on Argo
+
+For this Workflow, we want to echo using Python's `print` function, which is wrapped in our convenience `echo` function
+so that we can decorate it. We use Hera's `script` decorator to turn the `echo` function into what's known as a
 [Script template](https://argoproj.github.io/argo-workflows/workflow-concepts/#script), and is mirrored in Hera with the
 `Script` class. As we're defining the Workflow in Python, Hera is able to infer multiple field values that the developer
 would otherwise have to define when using YAML.
 
-## The script decorator
+### The `script` Decorator
 
 The `script` decorator can take kwargs that a `Script` can take. Importantly, you can specify the `image` of Python
 to use instead of the default `python:3.8` for your script if required:
@@ -63,7 +66,7 @@ def echo_twice(message: str):
     print(message)
 ```
 
-## The Workflow context manager
+## The Workflow Context Manager
 
 The Workflow context manager acts as a scope under which `template` Hera objects can be declared, which include
 Containers, Scripts, DAGs [and more](https://argoproj.github.io/argo-workflows/workflow-concepts/#template-types). For a
@@ -84,7 +87,7 @@ with Workflow(
 * `namespace` refers to the Kubernetes namespace you want to submit to.
 * `workflows_service` is the submission service.
 
-## The Steps context manager
+## The Steps Context Manager
 
 A `Steps` template is the second template type of this example, the first being the `Script`. The `Steps` template,
 along with the `DAG` template, is known as a "template invocator". This is because they are used to arrange other
