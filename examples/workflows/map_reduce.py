@@ -72,6 +72,6 @@ with Workflow(generate_name="map-reduce-", entrypoint="main", arguments=Paramete
         s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.numParts}}"))
         m = map_(
             with_param=s.result,
-            part=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+            arguments=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
         )
         s >> m >> reduce()
