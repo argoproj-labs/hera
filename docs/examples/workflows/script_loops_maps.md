@@ -1,0 +1,90 @@
+# Script Loops Maps
+
+
+
+
+
+
+=== "Hera"
+
+    ```python linenums="1"
+    from hera.workflows import Container, Parameter, Steps, Workflow
+    from hera.workflows import DAG, Workflow, script
+
+    @script()
+    def test_key_mapping(key_1: str, key_2: str):  # pragma: no cover
+        print(f"{key_1}:{key_2}")
+
+    with Workflow(
+        generate_name="loops-maps-",
+        entrypoint="loop-map-example",
+    ) as w:
+        with Steps(name="loop-map-example") as loop_map_example:
+            test_key_mapping(
+                with_items=[
+                    {"key_1": "value:1-1", "key_2": "value:2-1"},
+                    {"key_1": "value:1-2", "key_2": "value:2-2"},
+                    {"key_1": "value:1-3", "key_2": "value:2-3"},
+                    {"key_1": "value:1-4", "key_2": "value:2-4"},
+                ],
+            )
+    ```
+
+=== "YAML"
+
+    ```yaml linenums="1"
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: loops-maps-
+    spec:
+      entrypoint: loop-map-example
+      templates:
+      - name: loop-map-example
+        steps:
+        - - arguments:
+              parameters:
+              - name: key_1
+                value: '{{item.key_1}}'
+              - name: key_2
+                value: '{{item.key_2}}'
+            name: test-key-mapping
+            template: test-key-mapping
+            withItems:
+            - key_1: value:1-1
+              key_2: value:2-1
+            - key_1: value:1-2
+              key_2: value:2-2
+            - key_1: value:1-3
+              key_2: value:2-3
+            - key_1: value:1-4
+              key_2: value:2-4
+      - inputs:
+          parameters:
+          - name: key_1
+          - name: key_2
+        name: test-key-mapping
+        script:
+          command:
+          - python
+          image: python:3.8
+          source: 'import os
+
+            import sys
+
+            sys.path.append(os.getcwd())
+
+            import json
+
+            try: key_1 = json.loads(r''''''{{inputs.parameters.key_1}}'''''')
+
+            except: key_1 = r''''''{{inputs.parameters.key_1}}''''''
+
+            try: key_2 = json.loads(r''''''{{inputs.parameters.key_2}}'''''')
+
+            except: key_2 = r''''''{{inputs.parameters.key_2}}''''''
+
+
+            print(f''{key_1}:{key_2}'')'
+    ```
+
