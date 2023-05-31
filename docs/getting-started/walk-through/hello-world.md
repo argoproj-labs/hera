@@ -18,7 +18,7 @@ with Workflow(
     workflows_service=WorkflowsService(host="https://localhost:2746")
 ) as w:
     with Steps(name="steps"):
-        echo(message="Hello world!")
+        echo(arguments={"message": "Hello world!"})
 
 w.create()
 ```
@@ -102,7 +102,7 @@ To invoke the `echo` template, you can call it exactly like a normal function, h
 its arguments via keyword arguments
 
 ```py
-echo(message="Hello world!")
+echo(arguments={"message": "Hello world!"})
 ```
 
 > For advanced users: kwargs must be used because under a `Steps` or `DAG` context manager, the `script` decorator

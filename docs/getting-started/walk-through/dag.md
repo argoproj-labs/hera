@@ -19,10 +19,10 @@ def echo(message):
 
 with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
     with DAG(name="diamond"):
-        A = echo(name="A", message="A")
-        B = echo(name="B", message="B")
-        C = echo(name="C", message="C")
-        D = echo(name="D", message="D")
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
 
         A >> [B, C] >> D
 ```
@@ -56,14 +56,14 @@ Looking at the `with Steps` section:
 
 ```py
     with Steps(name="steps") as s:
-        echo(name="pre-parallel", message="Hello world!")
+        echo(name="pre-parallel", arguments={"message": "Hello world!"})
 
         with s.parallel():
-            echo(name="parallel-1", message="I'm parallel-1!")
-            echo(name="parallel-2", message="I'm parallel-2!")
-            echo(name="parallel-3", message="I'm parallel-3!")
+            echo(name="parallel-1", arguments={"message": "I'm parallel-1!"})
+            echo(name="parallel-2", arguments={"message": "I'm parallel-2!"})
+            echo(name="parallel-3", arguments={"message": "I'm parallel-3!"})
 
-        echo(name="post-parallel", message="Goodbye world!")
+        echo(name="post-parallel", arguments={"message": "Goodbye world!"})
 ```
 
 First, remember to change your imports to get the `DAG` class:
@@ -78,7 +78,7 @@ let's assign it to a variable:
 
 ```py
     with DAG(name="dag") as d:
-        pre = echo(name="pre-parallel", message="Hello world!")
+        pre = echo(name="pre-parallel", arguments={"message": "Hello world!"})
 ```
 
 Next, `DAG`s don't have a `parallel` function so we can remove that line and de-indent the parallel steps, and we can
@@ -86,22 +86,22 @@ leave `post-parallel` as is. Remember we still need to assign variables!
 
 ```py
     with DAG(name="dag") as d:
-        pre = echo(name="pre-parallel", message="Hello world!")
-        parallel_1 = echo(name="parallel-1", message="I'm parallel-1!")
-        parallel_2 = echo(name="parallel-2", message="I'm parallel-2!")
-        parallel_3 = echo(name="parallel-3", message="I'm parallel-3!")
-        post = echo(name="post-parallel", message="Goodbye world!")
+        pre = echo(name="pre-parallel", arguments={"message": "Hello world!"})
+        parallel_1 = echo(name="parallel-1", arguments={"message": "I'm parallel-1!"})
+        parallel_2 = echo(name="parallel-2", arguments={"message": "I'm parallel-2!"})
+        parallel_3 = echo(name="parallel-3", arguments={"message": "I'm parallel-3!"})
+        post = echo(name="post-parallel", arguments={"message": "Goodbye world!"})
 ```
 
 Finally, we need to specify the dependencies, which will look very similar to the DAG diamond example.
 
 ```py
     with DAG(name="dag") as d:
-        pre = echo(name="pre-parallel", message="Hello world!")
-        parallel_1 = echo(name="parallel-1", message="I'm parallel-1!")
-        parallel_2 = echo(name="parallel-2", message="I'm parallel-2!")
-        parallel_3 = echo(name="parallel-3", message="I'm parallel-3!")
-        post = echo(name="post-parallel", message="Goodbye world!")
+        pre = echo(name="pre-parallel", arguments={"message": "Hello world!"})
+        parallel_1 = echo(name="parallel-1", arguments={"message": "I'm parallel-1!"})
+        parallel_2 = echo(name="parallel-2", arguments={"message": "I'm parallel-2!"})
+        parallel_3 = echo(name="parallel-3", arguments={"message": "I'm parallel-3!"})
+        post = echo(name="post-parallel", arguments={"message": "Goodbye world!"})
 
         pre >> [parallel_1, parallel_2, parallel_3] >> post
 ```

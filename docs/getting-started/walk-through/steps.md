@@ -22,8 +22,8 @@ with Workflow(
     entrypoint="steps",
 ) as w:
     with Steps(name="steps"):
-        echo(name="hello", message="Hello world!")
-        echo(name="goodbye", message="Goodbye world!")
+        echo(name="hello", arguments={"message": "Hello world!"})
+        echo(name="goodbye", arguments={"message": "Goodbye world!"})
 
 w.create()
 ```
@@ -48,14 +48,14 @@ with Workflow(
     entrypoint="steps",
 ) as w:
     with Steps(name="steps") as s:
-        echo(name="pre-parallel", message="Hello world!")
+        echo(name="pre-parallel", arguments={"message": "Hello world!"})
 
         with s.parallel():
-            echo(name="parallel-1", message="I'm parallel-1!")
-            echo(name="parallel-2", message="I'm parallel-2!")
-            echo(name="parallel-3", message="I'm parallel-3!")
+            echo(name="parallel-1", arguments={"message": "I'm parallel-1!"})
+            echo(name="parallel-2", arguments={"message": "I'm parallel-2!"})
+            echo(name="parallel-3", arguments={"message": "I'm parallel-3!"})
 
-        echo(name="post-parallel", message="Goodbye world!")
+        echo(name="post-parallel", arguments={"message": "Goodbye world!"})
 
 w.create()
 ```
@@ -97,6 +97,6 @@ with Workflow(generate_name="coinflip-", entrypoint="steps") as w:
     with Steps(name="steps") as s:
         f = flip()
         with s.parallel():
-            it_was(name="heads", result="heads").on_other_result(f, "heads")
-            it_was(name="tails", result="tails").on_other_result(f, "tails")
+            it_was(name="heads", arguments={"result": "heads"}).on_other_result(f, "heads")
+            it_was(name="tails", arguments={"result": "tails"}).on_other_result(f, "tails")
 ```
