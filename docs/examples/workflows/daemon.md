@@ -45,7 +45,7 @@ http requests to the server.
     with Workflow(generate_name="daemon-", entrypoint="d") as w:
         with DAG(name="d"):
             s = server()
-            c = consumer(ip=s.ip)
+            c = consumer(arguments={"ip": s.ip})
             s >> c
     ```
 

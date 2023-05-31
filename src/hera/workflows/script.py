@@ -6,7 +6,6 @@ for more on scripts.
 
 import copy
 import inspect
-import logging
 import textwrap
 from abc import abstractmethod
 from functools import wraps
@@ -48,15 +47,6 @@ from hera.workflows.models import (
 from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
-
-CLASHING_KWARGS = set(Step.__fields__.keys()).union(set(Task.__fields__.keys()))
-
-# We specify these two kwargs as they can accept input with type [Model]Parameter
-# and [Model]Artifact. When checking for function kwargs of these types, if the kwarg
-# has the name "arguments" or "with_param", it is always interpreted as a field of Script,
-# *not* of the function. The user will get a warning log from the function defintion (not
-# during the call) as this is implicit behaviour that we cannot guard against at runtime.
-ARGUMENT_TYPE_KWARGS = ("arguments", "with_param")
 
 
 class ScriptConstructor(BaseMixin):
@@ -320,18 +310,6 @@ def script(**script_kwargs):
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
             otherwise return the callable function unchanged.
         """
-        clashing_func_args = []
-        for p in inspect.signature(func).parameters.values():
-            if p.name in CLASHING_KWARGS:
-                clashing_func_args.append(p.name)
-        if clashing_func_args:
-            logging.warning(
-                "'%s' clash with Step/Task kwargs. You must pass values through "
-                "one of %s to use this function in a Hera Workflow.",
-                clashing_func_args,
-                ARGUMENT_TYPE_KWARGS,
-            )
-
         s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
         @overload

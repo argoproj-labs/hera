@@ -26,8 +26,11 @@
 
     with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
         with Steps(name="artifact-example") as s:
-            ga = whalesay(name="generate-artifact")
-            print_message(name="consume-artifact", message=ga.get_artifact("hello-art"))
+            whalesay(name="generate-artifact")
+            print_message(
+                name="consume-artifact",
+                arguments=[Artifact(name="message", from_="{{steps.generate-artifact.outputs.artifacts.hello-art}}")],
+            )
     ```
 
 === "YAML"
