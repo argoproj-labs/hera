@@ -116,8 +116,8 @@ with Workflow(
         )
 ```
 
-Now we need the actual values! For `with_item`, we will pass a list of dictionaries, with the keys "name", "flavor",
-"ice_level" and "sugar_level":
+Now we need the actual values! For `with_item`, we will pass a list of dictionaries, with the keys to match the `item`
+accesses of "name", "flavor", "ice_level" and "sugar_level":
 
 ```py
 with Workflow(
@@ -194,12 +194,12 @@ def create_orders():
             }
         )
 
-    print(json.dumps(orders, ident=4))  # indent is just for nice, human-readable logs
+    print(json.dumps(orders, indent=4))  # indent is just used here for nice human-readable logs
 ```
 
 > **Note:** we must import any modules used within the function itself, as Hera currently only passes the source lines
 > of the function to Argo. If you need to import modules not in the standard Python image, use a custom image as
-> described in [The `script` Decorator](hello-world.md#the-script-decorator), or see the **experimental**
+> described in [the `script` decorator](hello-world.md#the-script-decorator) section, or see the **experimental**
 > [callable script](../../examples/workflows/callable_script.md) example.
 
 Now we can construct a Workflow that calls `create_orders`, and passes its `result` to `make_bubble_tea`. We'll need to
@@ -224,8 +224,8 @@ with Workflow(
         )
 ```
 
-<details>
-<summary>Click to expand for logs. A Workflow run will look <i>something</i> like this. Remember, it's all random!</summary>
+<details> <summary>Click to expand for logs. A Workflow run will look <i>something</i> like this. Remember, it's all
+random!</summary>
 
 ```console
 make-drinks-t49mm-create-orders-628494701: [
@@ -258,5 +258,102 @@ make-drinks-t49mm-make-bubble-tea-3020754075: Making Flaviu's Brown Sugar Milk T
 make-drinks-t49mm-make-bubble-tea-2627605331: Making Elliot's Green Tea bubble tea with 0% ice and 50% sugar.
 make-drinks-t49mm-make-bubble-tea-3584623812: Making Sambhav's Green Tea bubble tea with 0% ice and 25% sugar.
 make-drinks-t49mm-make-bubble-tea-1040507004: Making Flaviu's Taro Milk Tea bubble tea with 50% ice and 50% sugar.
+```
+</details>
+
+## Aggregating Fan Out Results (Fan In)
+
+Okay, we've made all these drinks, now we need to serve them up together!
+
+For this, we can again use the `result` output parameter, but as we will use it on the `make_bubble_tea` step, it
+expects JSON objects to aggregate them together.
+
+Let's edit our `make_bubble_tea` function to dump a JSON object:
+
+```py
+@script()
+def make_bubble_tea(
+    name: str,
+    flavor: str,
+    ice_level: float,
+    sugar_level: float,
+):
+    import json
+
+    print(json.dumps({"name": name, "status": "Completed"}))
+```
+
+And now let's write a function to call out "Serving N orders" and the names attached to the orders:
+
+```py
+@script()
+def serve_orders(orders: List[Dict[str, str]]):
+    names = list(set([order["name"] for order in orders]))
+    print(f"Serving {len(orders)} orders for {', '.join(names[:-1])} and {names[-1]}!")
+```
+
+In our Workflow, we can now link these scripts together with each Step's `result`:
+
+```py
+with Workflow(
+    generate_name="make-drinks-",
+    entrypoint="steps",
+) as w:
+    with Steps(name="steps"):
+        orders = create_orders()
+        teas = make_bubble_tea(
+            arguments={
+                "name": "{{item.name}}",
+                "flavor": "{{item.flavor}}",
+                "ice_level": "{{item.ice_level}}",
+                "sugar_level": "{{item.sugar_level}}",
+            },
+            with_param=orders.result,
+        )
+        serve_orders(arguments={"orders": teas.result})
+```
+
+
+<details> <summary>The logs will look something like this (click to expand).</summary>
+
+```console
+make-drinks-xk4hm-create-orders-2830038274: [
+make-drinks-xk4hm-create-orders-2830038274:     {
+make-drinks-xk4hm-create-orders-2830038274:         "name": "Elliot",
+make-drinks-xk4hm-create-orders-2830038274:         "flavor": "Green Tea",
+make-drinks-xk4hm-create-orders-2830038274:         "ice_level": 0.25,
+make-drinks-xk4hm-create-orders-2830038274:         "sugar_level": 0.5
+make-drinks-xk4hm-create-orders-2830038274:     },
+make-drinks-xk4hm-create-orders-2830038274:     {
+make-drinks-xk4hm-create-orders-2830038274:         "name": "Elliot",
+make-drinks-xk4hm-create-orders-2830038274:         "flavor": "Taro Milk Tea",
+make-drinks-xk4hm-create-orders-2830038274:         "ice_level": 0.5,
+make-drinks-xk4hm-create-orders-2830038274:         "sugar_level": 1.0
+make-drinks-xk4hm-create-orders-2830038274:     },
+make-drinks-xk4hm-create-orders-2830038274:     {
+make-drinks-xk4hm-create-orders-2830038274:         "name": "Sambhav",
+make-drinks-xk4hm-create-orders-2830038274:         "flavor": "Green Tea",
+make-drinks-xk4hm-create-orders-2830038274:         "ice_level": 0.25,
+make-drinks-xk4hm-create-orders-2830038274:         "sugar_level": 1.0
+make-drinks-xk4hm-create-orders-2830038274:     },
+make-drinks-xk4hm-create-orders-2830038274:     {
+make-drinks-xk4hm-create-orders-2830038274:         "name": "Sambhav",
+make-drinks-xk4hm-create-orders-2830038274:         "flavor": "Taro Milk Tea",
+make-drinks-xk4hm-create-orders-2830038274:         "ice_level": 0.5,
+make-drinks-xk4hm-create-orders-2830038274:         "sugar_level": 0.75
+make-drinks-xk4hm-create-orders-2830038274:     },
+make-drinks-xk4hm-create-orders-2830038274:     {
+make-drinks-xk4hm-create-orders-2830038274:         "name": "Flaviu",
+make-drinks-xk4hm-create-orders-2830038274:         "flavor": "Green Tea",
+make-drinks-xk4hm-create-orders-2830038274:         "ice_level": 0.25,
+make-drinks-xk4hm-create-orders-2830038274:         "sugar_level": 0.75
+make-drinks-xk4hm-create-orders-2830038274:     }
+make-drinks-xk4hm-create-orders-2830038274: ]
+make-drinks-xk4hm-make-bubble-tea-2143417526: {"name": "Elliot", "status": "Completed"}
+make-drinks-xk4hm-make-bubble-tea-2058639815: {"name": "Elliot", "status": "Completed"}
+make-drinks-xk4hm-make-bubble-tea-316598325: {"name": "Sambhav", "status": "Completed"}
+make-drinks-xk4hm-make-bubble-tea-4190830807: {"name": "Sambhav", "status": "Completed"}
+make-drinks-xk4hm-make-bubble-tea-3301714217: {"name": "Flaviu", "status": "Completed"}
+make-drinks-xk4hm-serve-orders-974975305: Serving 5 orders for Sambhav, Elliot and Flaviu!
 ```
 </details>
