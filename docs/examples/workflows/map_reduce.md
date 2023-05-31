@@ -139,8 +139,8 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
             try: num_parts = json.loads(r'''{{inputs.parameters.num_parts}}''')\nexcept:\
             \ num_parts = r'''{{inputs.parameters.num_parts}}'''\n\nimport json\nimport\
             \ os\nimport sys\nos.mkdir('/mnt/out')\npart_ids = list(map_(lambda x: str(x),\
-            \ range(num_parts)))\nfor i, part_id in enumerate(part_ids, start=1):\n  \
-            \  with open('/mnt/out/' + part_id + '.json', 'w') as f:\n        json.dump({'foo':\
+            \ range(num_parts)))\nfor (i, part_id) in enumerate(part_ids, start=1):\n\
+            \    with open('/mnt/out/' + part_id + '.json', 'w') as f:\n        json.dump({'foo':\
             \ i}, f)\njson.dump(part_ids, sys.stdout)"
       - inputs:
           artifacts:

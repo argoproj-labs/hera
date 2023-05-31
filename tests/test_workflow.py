@@ -1,7 +1,7 @@
-import ast
 import importlib
 import os
 import pkgutil
+import sys
 from pathlib import Path
 
 import pytest
@@ -15,6 +15,7 @@ from hera.workflows import (
     CronWorkflow as HeraCronWorkflow,
     Workflow as HeraWorkflow,
 )
+from hera.workflows._unparse import roundtrip
 from hera.workflows.models import (
     CronWorkflow as ModelCronWorkflow,
     Workflow as ModelWorkflow,
@@ -23,6 +24,12 @@ from hera.workflows.models import (
 ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
 CI_MODE = os.environ.get("CI")
+
+LOWEST_SUPPORTED_PY_VERSION = (3, 8)
+yaml_comparison = pytest.mark.skipif(
+    sys.version_info[0] == LOWEST_SUPPORTED_PY_VERSION[0] and sys.version_info[1] > LOWEST_SUPPORTED_PY_VERSION[1],
+    reason="Generate and compare yaml on lowest supported python version only",
+)
 
 
 def _generate_yaml(path: Path) -> bool:
@@ -42,7 +49,7 @@ def _transform_workflow(obj):
         w.spec.templates.sort(key=lambda t: t.name)
         for t in w.spec.templates:
             if t.script:
-                t.script.source = ast.dump(ast.parse(t.script.source))
+                t.script.source = roundtrip(t.script.source)
     return w.dict()
 
 
@@ -53,10 +60,11 @@ def _transform_cron_workflow(obj):
     wt.metadata.labels = {}
     for t in wt.spec.workflow_spec.templates:
         if t.script:
-            t.script.source = ast.dump(ast.parse(t.script.source))
+            t.script.source = roundtrip(t.script.source)
     return wt.dict()
 
 
+@yaml_comparison
 @pytest.mark.parametrize(
     "module_name", [name for _, name, _ in pkgutil.iter_modules(hera_examples.__path__) if name != "upstream"]
 )
@@ -77,6 +85,7 @@ def test_hera_output(module_name):
     assert output == yaml.safe_load(yaml_path.read_text())
 
 
+@yaml_comparison
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
 def test_hera_output_upstream(module_name):
     # GIVEN
