@@ -471,10 +471,24 @@ class CallableTemplateMixin(ArgumentsMixin):
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 
+        arguments = self._get_arguments(**kwargs)
+        parameter_names = self._get_parameter_names(arguments)
+        artifact_names = self._get_artifact_names(arguments)
+
         # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
         # set it here in order for the following logic to capture it
         if "source" not in kwargs and hasattr(self, "source"):
             kwargs["source"] = self.source  # type: ignore
+
+        if "source" in kwargs and "with_param" in kwargs:
+            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+        elif "source" in kwargs and "with_items" in kwargs:
+            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+        # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+        # additional parameters are inferred and have to be added to the `kwargs['arguments']`, otherwise
+        # the step/task will miss adding them when building the final arguments
+        kwargs["arguments"] = arguments
 
         try:
             from hera.workflows.steps import Step
@@ -485,19 +499,6 @@ class CallableTemplateMixin(ArgumentsMixin):
 
         try:
             from hera.workflows.task import Task
-
-            arguments = self._get_arguments(**kwargs)
-            parameter_names = self._get_parameter_names(arguments)
-            artifact_names = self._get_artifact_names(arguments)
-            if "source" in kwargs and "with_param" in kwargs:
-                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-            elif "source" in kwargs and "with_items" in kwargs:
-                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
-
-            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
-            # the task will miss adding them when building the final arguments
-            kwargs["arguments"] = arguments
 
             return Task(*args, template=self, **kwargs)
         except InvalidType:
