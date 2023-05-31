@@ -39,7 +39,7 @@ with Workflow(
     workflows_service=WorkflowsService(host="https://localhost:2746")
 ) as w:
     with Steps(name="steps"):
-        echo(message="Hello world!")
+        echo(arguments={"message": "Hello world!"})
 
 w.create()
 ```
@@ -78,7 +78,7 @@ with Workflow(
     namespace="argo",
 ) as w:
     with Steps(name="steps"):
-        echo(message="Hello world!")
+        echo(arguments={"message": "Hello world!"})
 
 w.create()
 ```

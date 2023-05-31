@@ -50,8 +50,8 @@ Note that when reusing a function in multiple steps, you must give unique names 
 
 ```py
 with Steps(name="steps"):
-        add_values(name="first", a=1, b=2)
-        add_values(name="second", a="1", "b"="2")  # "1" and "2" will be treated as ints
+        add_values(name="first", arguments={"a": 1, "b": 2})
+        add_values(name="second", arguments={"a": "1", "b": "2"})  # "1" and "2" will be treated as ints
 ```
 
 <details>
@@ -81,9 +81,9 @@ def echo_a_dict(my_dict: Dict[str, str]):
         print(f"{k}={v}")
 ```
 
-Then in the snippet below, during the compilation of the workflow, `my_dict` will be serialized via `json.dumps`. Then
-during the script execution on Argo, `json.loads` will load the serialized `dict`, passing it to `my_dict` and the
-function will run as expected.
+Then in the snippet below, during the compilation of the workflow, `arguments` will serialize the `dict` value of
+`my_dict` via `json.dumps`. Then during the script execution on Argo, `json.loads` will load the `dict` and the function
+will run as expected.
 
 ```py
 with Workflow(
@@ -92,9 +92,11 @@ with Workflow(
 ) as w:
     with Steps(name="steps"):
         echo_a_dict(
-            my_dict={
-                "my_key": "my_value",
-                "my_second_key": "my_second_value",
+            arguments={
+                "my_dict": {
+                    "my_key": "my_value",
+                    "my_second_key": "my_second_value",
+                }
             }
         )
 
@@ -113,7 +115,7 @@ my_second_key=my_second_value
 Currently, custom types are only supported in the "script runner" experimental feature. See an example usage
 [here](../../examples/workflows/callable_script.md). Please note this is an experimental feature so support is limited for now.
 
-## Passing Parameters Between Steps and Tasks
+## Passing Parameters
 
 ### The `result` Output Parameter
 
@@ -135,7 +137,7 @@ def repeat_back(message: str):
 
 Let's say we want to get the stdout from running the `hello` Script template. We have to assign the `Step` object
 returned from the function call to a variable, then we can access its `result` member, passing it to the `repeat_back`
-template's `message` kwarg.
+template.
 
 ```py
 with Workflow(
@@ -143,8 +145,8 @@ with Workflow(
     entrypoint="steps",
 ) as w:
     with Steps(name="steps"):
-        hello_step = hello(message="world!")
-        repeat_back(message=hello_step.result)
+        hello_step = hello(arguments={"message": "world!"})
+        repeat_back(arguments={"message": hello_step.result})
 
 w.create()
 ```
@@ -195,7 +197,7 @@ The output parameter will also show up in the UI under the node's INPUTS/OUTPUTS
 
 Now that we have a `hello_to_file` function, let's use its output in our `repeat_back` function. Under a `Steps`
 context, we can assign the `Step` object returned from the `hello_to_file` function, and use its `get_parameter`
-function and again we can pass it directly to `repeat_back`'s `message` kwarg.
+function, and get the `Parameter`'s `value`.
 
 ```py
 with Workflow(
@@ -204,10 +206,28 @@ with Workflow(
 ) as w:
     with Steps(name="steps"):
         hello_world_step = hello_to_file()
-        repeat_back(message=hello_world_step.get_parameter("hello-output"))
+        repeat_back(
+            arguments={"message": hello_world_step.get_parameter("hello-output").value}
+        )
 ```
 
-This Workflow will produce logs like
+If you prefer, `arguments` can accept a single `Parameter`, and we can use the `with_name` function for convenience to
+specify the right name for `repeat_back`:
+
+```py
+with Workflow(
+    generate_name="hello-world-parameter-passing-",
+    entrypoint="steps",
+) as w:
+    with Steps(name="steps"):
+        hello_world_step = hello_to_file()
+        repeat_back(
+            arguments=hello_world_step.get_parameter("hello-output").with_name("message")
+        )
+```
+
+
+Both of these Workflows will produce logs like
 
 ```console
 hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="sub-process exited" argo=true error="<nil>"
@@ -215,34 +235,3 @@ hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T1
 hello-world-parameter-passing-vq7pm-repeat-back-3418430710: You just said: 'Hello World!'
 hello-world-parameter-passing-vq7pm-repeat-back-3418430710: time="2023-05-26T12:12:24.106Z" level=info msg="sub-process exited" argo=true error="<nil>"
 ```
-
-## Passing Function `kwargs`
-
-You'll have seen that Hera allows you to call your function as normal with the caveat of having to use `kwargs`. This is
-because you can also pass `kwargs` that go to the created `Script` object, for example, the `when` Script kwarg to
-conditionally run certain steps. When you want to pass parameters into your Steps or Tasks, Hera will convert any
-function kwargs into Parameters or Artifacts.
-
-Example 1 (basic data types): a basic data type `kwarg` to a function call under a `Steps` or `DAG` context like
-`echo(message="hello")` will create a Parameter with name "message" and value "hello" passed into the `echo` function.
-
-Example 2 (`Parameters`): when passing output parameters through a `kwarg` to a function like
-`message=prev_step.get_parameter("parameter-name")`, Hera will create a parameter called "message" with a value of
-`{{steps.prev-step.outputs.parameters.parameter-name}}` for the given `Script` object.
-
-Example 3 (`Artifacts`): when passing output artifacts through a `kwarg` to a function like
-`message=prev_step.get_artifact("artifact-name")`, Hera will create an artifact called "message" with a "from" value of
-`{{steps.prev-step.outputs.artifacts.artifact-name}}`.
-
-### A Note on `kwarg` Name Clashing
-
-Where a function has been decorated with `@script`, Hera inspects the kwargs during function calls, and if any assigned
-kwarg values (that are not Script kwargs) are a `Parameter` or `Artifact`, they are used to create an input argument
-that takes the name of the `kwarg` and the dynamic value of the Parameter/Artifact (i.e. the value during the workflow,
-which looks like `{{steps.prev-step.outputs.parameters.parameter-name}}` in YAML, see examples above).
-
-If the function takes a kwarg that name-clashes with any Step or Task field (except `arguments` or `with_param`) then
-you will get an error. If you are unable to rename them, then their values *must* be passed in via the `arguments` or
-`with_param` Script kwarg. If your function has a kwarg named `arguments` or `with_param`, Hera *will not error* and
-will instead silently treat them as Script kwargs. Be aware that you will only get a warning log coming from the site of
-the decoration of the function.

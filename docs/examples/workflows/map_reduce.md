@@ -79,7 +79,7 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
             s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.numParts}}"))
             m = map_(
                 with_param=s.result,
-                part=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+                arguments=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
             )
             s >> m >> reduce()
     ```
