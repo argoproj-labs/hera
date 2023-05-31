@@ -18,7 +18,7 @@ with Workflow(
     workflows_service=WorkflowsService(host="https://localhost:2746")
 ) as w:
     with Steps(name="steps"):
-        echo(message="Hello world!")
+        echo(arguments={"message": "Hello world!"})
 
 w.create()
 ```
@@ -95,17 +95,19 @@ automatically arranges your templates in the order that you add them, with each 
 with Steps(name="steps"):
 ```
 
-To invoke the `echo` template, you can call it exactly like a normal function, however you must always pass values to
-its arguments via keyword arguments
+To invoke the `echo` template, you can call it, passing values to its arguments through the `arguments` kwarg, which is
+a dictionary of the _function_ kwargs to values. This is because under a `Steps` or `DAG` context manager, the `script`
+decorator converts a call of the function into a `Script` object, to which you must pass `Script` initialization kwargs.
 
 ```py
-echo(message="Hello world!")
+echo(arguments={"message": "Hello world!"})
 ```
 
-> For advanced users: kwargs must be used because under a `Steps` or `DAG` context manager, the `script` decorator
-> converts a call of the function into a `Script` object, so you can also pass `Script` initialization kwargs - if any
-> of these clash with your function kwargs you will get a warning log when running your code. See
-> [Passing Function kwargs](parameters.md#passing-function-kwargs) for more details.
+> For advanced users: the exact mechanism of the `script` decorator is to create a `Script` object when declared, so
+> that when your function is invoked you have to pass its arguments through the `arguments` kwarg as a dictionary, and
+> the `Script` objects `__call__` function is invoked with the `arguments` kwarg. The `__call__` function on a
+> `CallableTemplateMixin` automatically creates a `Step` or a `Task` depending on whether the context manager is a
+> `Steps` or a `DAG`.
 
 ## Submitting the Workflow
 

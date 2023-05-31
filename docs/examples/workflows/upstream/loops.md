@@ -22,7 +22,7 @@
         with Steps(name="loop-example"):
             whalesay(
                 name="print-message",
-                message="{{item}}",
+                arguments={"message": "{{item}}"},
                 with_items=["hello world", "goodbye world"],
             )
     ```

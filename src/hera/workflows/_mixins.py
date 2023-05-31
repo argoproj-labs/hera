@@ -63,6 +63,7 @@ if TYPE_CHECKING:
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
+
 InputsT = Optional[
     Union[
         ModelInputs,
@@ -467,89 +468,42 @@ class ArgumentsMixin(BaseMixin):
 
 class CallableTemplateMixin(ArgumentsMixin):
     def __call__(self, *args, **kwargs) -> Union[Step, Task]:
-        from hera.workflows.steps import Step
-        from hera.workflows.task import Task
-
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
-
-        arguments = self._get_arguments(**kwargs)
-        parameter_names = self._get_parameter_names(arguments)
-        artifact_names = self._get_artifact_names(arguments)
 
         # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
         # set it here in order for the following logic to capture it
         if "source" not in kwargs and hasattr(self, "source"):
             kwargs["source"] = self.source  # type: ignore
-        if "source" in kwargs and "with_param" in kwargs:
-            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-        elif "source" in kwargs and "with_items" in kwargs:
-            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
-
-        # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-        # additional parameters are inferred and have to be added to the `kwargs['arguments']` otherwise
-        # the step/task will miss adding them when building the final arguments
-        kwargs["arguments"] = arguments
 
         try:
+            from hera.workflows.steps import Step
+
             return Step(*args, template=self, **kwargs)
         except InvalidType:
             pass
 
         try:
+            from hera.workflows.task import Task
+
+            arguments = self._get_arguments(**kwargs)
+            parameter_names = self._get_parameter_names(arguments)
+            artifact_names = self._get_artifact_names(arguments)
+            if "source" in kwargs and "with_param" in kwargs:
+                arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+            elif "source" in kwargs and "with_items" in kwargs:
+                arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+            # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
+            # additional parameters are inferred and have to be added to the `kwargs['arguments']` for otherwise
+            # the task will miss adding them when building the final arguments
+            kwargs["arguments"] = arguments
+
             return Task(*args, template=self, **kwargs)
         except InvalidType:
             pass
 
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
-
-    def _extract_function_argo_arguments(self, **kwargs) -> List:
-        """Returns a list of Parameters and Artifacts extracted from kwargs that belong to the function.
-
-        We inspect the kwargs in a function call, and where assigned values are a Parameter
-        or Artifact, we append them to the arguments list with names replaced. If the
-        function takes a kwarg that name-clashes with any Step or Task field (except "arguments",
-        which are dealt with above), then we raise an error, as `arguments` should be used as a
-        workaround if the function kwarg cannot be renamed.
-
-        Example 1 (basic data types): a kwarg to a function like
-        `message="hello"` will pass through a Parameter with
-        name "message" and value "hello"
-
-        Example 2 (parameters): a kwarg to a function like
-        `message=prev_step.get_parameter("parameter-name")` will
-        pass through a new parameter called "message" with a value of
-        "{{steps.prev-step.outputs.parameters.parameter-name}}".
-
-        Example 3 (artifacts): a kwarg to a function like
-        `message=prev_step.get_artifact("artifact-name")` will
-        pass through a new artifact called "message" with a "from" value of
-        "{{steps.prev-step.outputs.artifacts.artifact-name}}".
-        """
-        from hera.workflows.script import ARGUMENT_TYPE_KWARGS, CLASHING_KWARGS
-
-        arguments = []
-        for arg_name, arg_value in kwargs.items():
-            if isinstance(arg_value, (Parameter, ModelParameter, Artifact, ModelArtifact)):
-                if arg_name not in CLASHING_KWARGS:
-                    # note that this replaces names for each argo argument so that this step/task
-                    # receives them with correct names
-                    if isinstance(arg_value, (Parameter, Artifact)):
-                        arg = arg_value.as_argument(name=arg_name)
-                    else:
-                        arg = arg_value.copy(deep=True)
-                        arg.name = arg_name
-                    arguments.append(arg)
-                elif arg_name not in ARGUMENT_TYPE_KWARGS:
-                    raise ValueError(
-                        f"'{arg_name}' clashes with Step/Task kwargs. Rename '{arg_name}' or "
-                        "pass your Parameter/Artifact through 'arguments' or 'with_param'"
-                    )
-            elif arg_name not in CLASHING_KWARGS:
-                # Append arguments with implied basic data types
-                arguments.append(Parameter(name=arg_name, value=arg_value))
-
-        return arguments
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call"""
@@ -563,9 +517,6 @@ class CallableTemplateMixin(ArgumentsMixin):
         arguments = (
             self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments
         )  # type: ignore
-
-        arguments += self._extract_function_argo_arguments(**kwargs)
-
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
@@ -919,30 +870,6 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
-class ExperimentalMixin(BaseMixin):
-    _experimental_warning_message: str = (
-        "Unable to instantiate {} since it is an experimental feature."
-        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
-        " Note that experimental features are unstable and subject to breaking changes."
-    )
-
-    _flag: str
-
-    @root_validator
-    def _check_enabled(cls, values):
-        if not global_config.experimental_features[cls._flag]:
-            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
-        return values
-
-
-def _get_args_names_from_source(source: Callable) -> List[str]:
-    return [
-        p.name
-        for p in inspect.signature(source).parameters.values()
-        if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
-    ]
-
-
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
     source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
@@ -968,3 +895,19 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+
+class ExperimentalMixin(BaseMixin):
+    _experimental_warning_message: str = (
+        "Unable to instantiate {} since it is an experimental feature."
+        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+    _flag: str
+
+    @root_validator
+    def _check_enabled(cls, values):
+        if not global_config.experimental_features[cls._flag]:
+            raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
+        return values

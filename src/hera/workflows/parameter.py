@@ -65,14 +65,14 @@ class Parameter(_ModelParameter):
             value_from=self.value_from,
         )
 
-    def as_argument(self, name: Optional[str] = None) -> _ModelParameter:
+    def as_argument(self) -> _ModelParameter:
         """Assembles the parameter for use as an argument of a step or a task"""
         # Setting a default value when used as an argument is a no-op so we exclude it as it would get overwritten by
         # `value` or `value_from` (one of which is required)
         # Overwrite ref: https://github.com/argoproj/argo-workflows/blob/781675ddcf6f1138d697cb9c71dae484daa0548b/workflow/common/util.go#L126-L139
         # One of value/value_from required ref: https://github.com/argoproj/argo-workflows/blob/ab178bb0b36a5ce34b4c1302cf4855879a0e8cf5/workflow/validate/validate.go#L794-L798
         return _ModelParameter(
-            name=name or self.name,
+            name=self.name,
             global_name=self.global_name,
             description=self.description,
             enum=self.enum,
