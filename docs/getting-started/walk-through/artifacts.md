@@ -41,9 +41,10 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
 
 ### Artifacts as Output
 
-We want to output the `/tmp/hello_world.txt` file from the `whalesay` function as an Artifact. To do this, we need to
-tell the `script` decorator through its `outputs` member that we will output an `Artifact`, where we give it the name
-`hello-art` that other `Steps` or `Tasks` can refer to, and the `path`.
+We want to output a file `/tmp/hello_world.txt` from a function. To do this, we need to tell the `script` decorator
+through its `outputs` member that we will output an `Artifact`. This tells Argo to expect a file at the given `path`, so
+that when the Workflow is submitted, it can export the file from the container running our script. We also give the
+`Artifact` a name that other `Steps` or `Tasks` can refer to, but is not relevant to the function itself.
 
 ```py
 @script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
@@ -51,7 +52,8 @@ def whalesay():
     ...
 ```
 
-Once we have specified the `Artifact` that Argo will export from this script, we can fill out the function, writing a file to the specified path.
+Once we have specified the `Artifact` that Argo will export from this script, we can fill out the function, writing a
+file to the specified path.
 
 ```py
 @script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
