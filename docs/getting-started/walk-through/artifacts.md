@@ -19,13 +19,13 @@ from hera.workflows import Artifact, Steps, Workflow, script
 
 @script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
 def whalesay():
-    with open("/tmp/hello_world.txt", "wb") as f:
+    with open("/tmp/hello_world.txt", "w") as f:
         f.write("hello world")
 
 
 @script(inputs=Artifact(name="message", path="/tmp/message"))
 def print_message():
-    with open("/tmp/message", "rb") as f:
+    with open("/tmp/message", "r") as f:
         message = f.readline()
     print(message)
 
@@ -56,7 +56,7 @@ Once we have specified the `Artifact` that Argo will export from this script, we
 ```py
 @script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
 def whalesay():
-    with open("/tmp/hello_world.txt", "wb") as f:
+    with open("/tmp/hello_world.txt", "w") as f:
         f.write("hello world")
 ```
 
@@ -68,10 +68,13 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
         ga = whalesay(name="generate-artifact")
 ```
 
-The log will show
+The log for the Workflow so far will show
 
 ```console
-TODO: paste log here
+artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="sub-process exited" argo=true error="<nil>"
+artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/artifacts/tmp/hello_world.txt.tgz" ar
+go=true
+artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="Taring /tmp/hello_world.txt"
 ```
 
 
@@ -96,7 +99,7 @@ is mounted to the path `/tmp/message`. Here, we just want to echo what was in th
 ```py
 @script(inputs=Artifact(name="message", path="/tmp/message"))
 def print_message():
-    with open("/tmp/message", "rb") as f:
+    with open("/tmp/message", "r") as f:
         message = f.readline()
     print(message)
 ```
@@ -114,8 +117,13 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
         )
 ```
 
-The logs when running this Workflow will look like
+The logs when running the full Workflow will look like
 
 ```console
-TODO: paste log here
+artifact-passing-s7xrb-whalesay-751687878: time="2023-05-31T09:22:50.999Z" level=info msg="sub-process exited" argo=true error="<nil>"
+artifact-passing-s7xrb-whalesay-751687878: time="2023-05-31T09:22:50.999Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/artifacts/tmp/hello_world.txt.tgz"
+argo=true
+artifact-passing-s7xrb-whalesay-751687878: time="2023-05-31T09:22:50.999Z" level=info msg="Taring /tmp/hello_world.txt"
+artifact-passing-s7xrb-print-message-154872134: hello world
+artifact-passing-s7xrb-print-message-154872134: time="2023-05-31T09:23:01.204Z" level=info msg="sub-process exited" argo=true error="<nil>"
 ```
