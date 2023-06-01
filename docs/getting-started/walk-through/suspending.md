@@ -1,8 +1,8 @@
 # Suspending Workflows
 
-Hera makes creating `suspend` templates in your workflow a breeze.
+Hera makes creating `Suspend` templates in your workflow a breeze.
 
-## Basic `suspend` Usage
+## Basic `Suspend` Usage
 
 If you want to pause your Workflow you can create a `Suspend` template, which can slot in anywhere in your `Steps` or
 `DAG` context. The only import you need on top of the Hello World example is `hera.workflows.Suspend`:
@@ -30,7 +30,7 @@ with Workflow(
 ```
 
 
-## Timed `suspend` Usage
+## Timed `Suspend` Usage
 
 If instead you want to pause the Workflow for a specific length of time, you can simply pass a value to the `Suspend`
 template's `duration` variable.
@@ -85,7 +85,7 @@ with Workflow(
         echo(arguments={"message": suspend_step.get_parameter("my-message")})
 ```
 
-We can use enums in the same way shown in the Argo example:
+We can also use enums in the same way shown in the Argo example:
 
 ```py
 @script()

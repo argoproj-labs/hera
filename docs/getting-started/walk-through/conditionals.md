@@ -1,11 +1,10 @@
 # Conditionals
 
 Argo uses [`govaluate`](https://github.com/Knetic/govaluate) in its `when` expressions - Hera is compatible with these
-`when` expression if you write them in literal strings, however, without prior Argo knowledge, you may not know th chain
-of keys to access steps and their parameters.
+`when` expression if you write them in literal strings, however, without prior Argo knowledge, you may not know the
+chain of keys to access steps and their parameters.
 
 You can instead use Parameters and the special `result` parameter in an f-string to make your code more readable:
-
 
 ```py
 run_script(
