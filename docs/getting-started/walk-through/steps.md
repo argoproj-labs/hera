@@ -68,7 +68,7 @@ parallel steps have completed.
 ## `when` Clauses
 
 Examples of `when` clauses can be found throughout the examples, such as
-[the Argo coinflip example](../../examples/workflows/upstream/coinflip.md). They specify conditions under which the step
+[the Argo coinflip example](../../examples/workflows/upstream/coinflip.md). They specify conditions under which the step or task
 will run.
 
 If we consider features offered by Hera along with what we've learned about parameters and parallel steps, we
@@ -89,14 +89,25 @@ def flip():
 
 
 @script()
-def it_was(result):
-    print(f"it was {result}")
+def it_was(coin_result):
+    print(f"it was {coin_result}")
 
 
 with Workflow(generate_name="coinflip-", entrypoint="steps") as w:
     with Steps(name="steps") as s:
         f = flip()
         with s.parallel():
-            it_was(name="heads", arguments={"result": "heads"}).on_other_result(f, "heads")
-            it_was(name="tails", arguments={"result": "tails"}).on_other_result(f, "tails")
+            it_was(name="heads", arguments={"coin_result": "heads"}, when=f'{f.result} == "heads"')
+            it_was(name="tails", arguments={"coin_result": "tails"}, when=f'{f.result} == "tails"')
 ```
+
+<details><summary>Click to see an example Workflow log</summary>
+
+```console
+coinflip-gfrws-flip-1899249874: heads
+coinflip-gfrws-it-was-2809981541: it was heads
+```
+
+</details>
+
+For more about `when` clauses, see the [Conditionals](conditionals.md) page!
