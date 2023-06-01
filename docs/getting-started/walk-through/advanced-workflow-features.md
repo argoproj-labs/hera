@@ -1,6 +1,6 @@
 # Advanced Workflow Features
 
-This section exemplifies features found in Argo, but are beyond the scope of the Walk Through.
+This section exemplifies Workflow features found in Argo, but are beyond the scope of the Walk Through.
 
 ## Exit Handlers
 
