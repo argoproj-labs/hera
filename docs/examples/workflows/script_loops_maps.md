@@ -8,12 +8,13 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import Container, Parameter, Steps, Workflow
-    from hera.workflows import DAG, Workflow, script
+    from hera.workflows import Steps, Workflow, script
+
 
     @script()
     def test_key_mapping(key_1: str, key_2: str):  # pragma: no cover
-        print(f"{key_1}:{key_2}")
+        print("{key_1}, {key_2}".format(key_1=key_1, key_2=key_2))
+
 
     with Workflow(
         generate_name="loops-maps-",
@@ -85,6 +86,6 @@
             except: key_2 = r''''''{{inputs.parameters.key_2}}''''''
 
 
-            print(f''{key_1}:{key_2}'')'
+            print(''{key_1}, {key_2}''.format(key_1=key_1, key_2=key_2))'
     ```
 

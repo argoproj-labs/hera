@@ -50,4 +50,4 @@ spec:
         except: key_2 = r''''''{{inputs.parameters.key_2}}''''''
 
 
-        print(f''{key_1}:{key_2}'')'
+        print(''{key_1}, {key_2}''.format(key_1=key_1, key_2=key_2))'

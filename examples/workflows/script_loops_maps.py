@@ -3,7 +3,7 @@ from hera.workflows import Steps, Workflow, script
 
 @script()
 def test_key_mapping(key_1: str, key_2: str):  # pragma: no cover
-    print(f"{key_1}:{key_2}")
+    print("{key_1}, {key_2}".format(key_1=key_1, key_2=key_2))
 
 
 with Workflow(
