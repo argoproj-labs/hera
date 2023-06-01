@@ -1,6 +1,10 @@
 # Suspending Workflows
 
-Hera makes creating `Suspend` templates in your workflow a breeze.
+A user can pause execution of a Workflow at any time through Argo CLI using `argo suspend WORKFLOW`, and resumed by
+`argo resume WORKFLOW`, or in the Argo UI. Alternatively, you can automatically suspend a Workflow at specific points
+using `Suspend` templates.
+
+Hera makes creating `Suspend` templates in your workflow a breeze!
 
 ## Basic `Suspend` Usage
 
@@ -24,11 +28,10 @@ with Workflow(
     suspend_template = Suspend(name="wait-for-resume")
 
     with Steps(name="steps"):
-        echo(arguments={"message": "The next node wait until you resume the workflow"})
+        echo(arguments={"message": "The next node waits until you resume the workflow"})
         suspend_template(name="suspend")
         echo(arguments={"message": "Finished waiting!"})
 ```
-
 
 ## Timed `Suspend` Usage
 
@@ -59,8 +62,9 @@ with Workflow(
 
 ## Intermediate Parameters
 
-[Intermediate Parameters](https://argoproj.github.io/argo-workflows/intermediate-inputs/) are an Argo UI feature that
-pause a Workflow to wait for user inputs, which Hera makes very easy to create.
+[Intermediate Parameters](https://argoproj.github.io/argo-workflows/intermediate-inputs/) is an Argo UI feature that
+pauses a Workflow to wait for user inputs. Hera makes Suspend templates using Intermediate Parameters very easy to
+create.
 
 Let's create a Workflow to suspend indefinitely, waiting for user input, and echo the user's input in the next `Step`.
 

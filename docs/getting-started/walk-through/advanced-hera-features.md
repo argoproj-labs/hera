@@ -1,6 +1,7 @@
 # Advanced Hera Features
 
-This section is used to publicize Hera's features beyond the essentials covered in the walk through.
+This section is used to publicize Hera's features beyond the essentials covered in the walk through. Note that these
+features do not exist in Argo as they are specific to the `hera` module.
 
 ## Pre-Build Hooks
 
@@ -8,8 +9,10 @@ Hera offers a pre-build hook feature through `hera.shared.register_pre_build_hoo
 processing on any type of `template` or `Workflow`. For example, it can be used to conditionally set the `image` of a
 `Script`, or set which cluster to submit a `Workflow` to.
 
-To use this feature, write a function that takes the `template` or `Workflow` type, processes it, then returns it. For a
-simple example, we'll write a function that adds an annotation with key "hera", value "This workflow was submitted
+To use this feature, you can write a function that takes an object of type `template` or `Workflow`, does some
+processing on the object, then returns it.
+
+For a simple example, we'll write a function that adds an annotation with key "hera", value "This workflow was submitted
 through Hera!"
 
 ```py

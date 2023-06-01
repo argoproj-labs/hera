@@ -60,16 +60,14 @@ with Workflow(
 w.create()
 ```
 
-Remember any parallel steps will run indeterminately within the context, so `parallel-1`, `parallel-2` and `parallel-3` could
-run in any order, but `pre-parallel` will always run before the parallel steps and `post-parallel` will run after *all* the
-parallel steps have completed.
-
+Remember any parallel steps will run indeterminately within the context, so `parallel-1`, `parallel-2` and `parallel-3`
+could run in any order, but `pre-parallel` will always run before the parallel steps and `post-parallel` will run after
+*all* the parallel steps have completed.
 
 ## `when` Clauses
 
-Examples of `when` clauses can be found throughout the examples, such as
-[the Argo coinflip example](../../examples/workflows/upstream/coinflip.md). They specify conditions under which the step or task
-will run.
+A `when` clause specifies the conditions under which the step or task will run. Examples of `when` clauses can be found
+throughout the examples, such as [the Argo coinflip example](../../examples/workflows/upstream/coinflip.md).
 
 If we consider features offered by Hera along with what we've learned about parameters and parallel steps, we
 can form a Workflow with identical behaviour to the upstream coinflip, but using only Python scripts and syntactic sugar
