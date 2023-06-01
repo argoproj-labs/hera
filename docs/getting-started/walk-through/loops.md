@@ -40,8 +40,8 @@ call. First, specify the list of items you want to echo in the `with_items` kwar
         )
 ```
 
-Now, we need to replace the value of the `message` argument. In Argo, you would use the `"{{item}}"` expression syntax,
-which is also what we use in Hera:
+Now, we need to replace the value of the `message` argument. In Argo, you would use the `{{item}}` expression syntax,
+which is also what we use in Hera (within a string):
 
 ```py
         echo(
