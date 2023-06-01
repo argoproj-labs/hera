@@ -97,7 +97,9 @@ with Workflow(
         make_bubble_tea(...)
 ```
 
-And now for each argument of `make_bubble_tea`, we use the key access syntax for each value:
+And now for each argument of `make_bubble_tea`, we can let Hera infer from the values in `with_item`! We just need to
+pass a list of dictionaries, with the keys matching the `make_bubble_tea` arguments: "name", "flavor", "ice_level" and
+"sugar_level":
 
 ```py
 with Workflow(
@@ -106,32 +108,6 @@ with Workflow(
 ) as w:
     with Steps(name="steps"):
         make_bubble_tea(
-            arguments={
-                "name": "{{item.name}}",
-                "flavor": "{{item.flavor}}",
-                "ice_level": "{{item.ice_level}}",
-                "sugar_level": "{{item.sugar_level}}",
-            },
-            ...
-        )
-```
-
-Now we need the actual values! For `with_item`, we will pass a list of dictionaries, with the keys to match the `item`
-accesses of "name", "flavor", "ice_level" and "sugar_level":
-
-```py
-with Workflow(
-    generate_name="make-drinks-",
-    entrypoint="steps",
-) as w:
-    with Steps(name="steps"):
-        make_bubble_tea(
-            arguments={
-                "name": "{{item.name}}",
-                "flavor": "{{item.flavor}}",
-                "ice_level": "{{item.ice_level}}",
-                "sugar_level": "{{item.sugar_level}}",
-            },
             with_items=[
                 {
                     "name": "Elliot",
@@ -213,15 +189,7 @@ with Workflow(
 ) as w:
     with Steps(name="steps"):
         orders = create_orders()
-        make_bubble_tea(
-            arguments={
-                "name": "{{item.name}}",
-                "flavor": "{{item.flavor}}",
-                "ice_level": "{{item.ice_level}}",
-                "sugar_level": "{{item.sugar_level}}",
-            },
-            with_param=orders.result,
-        )
+        make_bubble_tea(with_param=orders.result)
 ```
 
 <details> <summary>Click to expand for logs. A Workflow run will look <i>something</i> like this. Remember, it's all
@@ -301,15 +269,7 @@ with Workflow(
 ) as w:
     with Steps(name="steps"):
         orders = create_orders()
-        teas = make_bubble_tea(
-            arguments={
-                "name": "{{item.name}}",
-                "flavor": "{{item.flavor}}",
-                "ice_level": "{{item.ice_level}}",
-                "sugar_level": "{{item.sugar_level}}",
-            },
-            with_param=orders.result,
-        )
+        teas = make_bubble_tea(with_param=orders.result)
         serve_orders(arguments={"orders": teas.result})
 ```
 
