@@ -6,7 +6,7 @@ Release drafter automatically creates draft releases that are visible to maintai
 
 ## Versioning
 
-Each pull-request must be labeled with one of the following labels -
+Each pull-request must be labeled with one of the following labels (unless type:skip-changelog is used) -
 
 - semver:major
 - semver:minor
