@@ -21,6 +21,7 @@ nav:
       - Advanced Features:
         - getting-started/walk-through/advanced-workflow-features.md
         - getting-started/walk-through/advanced-template-features.md
+        - getting-started/walk-through/advanced-hera-features.md
         - getting-started/walk-through/pydantic-support.md
   - Hera expr transpiler: expr.md
   - Examples:
