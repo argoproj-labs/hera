@@ -15,7 +15,7 @@ jobs:
       - uses: mheap/github-action-required-labels@v2
         with:
           count: 1
-          labels: semver:major, semver:minor, semver:patch
+          labels: semver:major, semver:minor, semver:patch, type:skip-changelog
           mode: exactly
   type:
     name: Minimal Type Labels
