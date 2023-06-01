@@ -949,7 +949,7 @@ def roundtrip(source):
     # python 3.11 ast.unparse stopped using brackets around tuples used in assignment,
     # see https://github.com/python/cpython/commit/51cef8be8c77dff522bec6f95d6853031bf19038
     # Previous versions will unparse with brackets
-    if sys.version_info[1] >= 11 and hasattr(ast, "unparse"):
+    if hasattr(ast, "unparse"):
         return ast.unparse(tree)
     # The _for_helper copied in this file has the patch above applied for tuples, so does not use brackets
     return unparse(tree)
