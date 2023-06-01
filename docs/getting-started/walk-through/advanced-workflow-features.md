@@ -4,6 +4,8 @@
 
 ## Volume Claim Templates
 
-## Hera Pre-Build Hooks
+# Hera
+
+## Pre-Build Hooks
 
 ## Experimental Features
