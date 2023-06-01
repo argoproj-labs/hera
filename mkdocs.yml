@@ -18,9 +18,10 @@ nav:
       - getting-started/walk-through/loops.md
       - getting-started/walk-through/conditionals.md
       - getting-started/walk-through/suspending.md
-      - getting-started/walk-through/pydantic-support.md
-      - getting-started/walk-through/advanced-template-features.md
-      - getting-started/walk-through/advanced-workflow-features.md
+      - Advanced Features:
+        - getting-started/walk-through/pydantic-support.md
+        - getting-started/walk-through/advanced-template-features.md
+        - getting-started/walk-through/advanced-workflow-features.md
   - Hera expr transpiler: expr.md
   - Examples:
     - Workflows:
