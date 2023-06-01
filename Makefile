@@ -4,6 +4,16 @@ OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4
 help: ## Showcase the help instructions for all the available `make` commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: install
+install: ## Run poetry install with default behaviour
+	@poetry env use system
+	@poetry install
+
+.PHONY: install-3.8
+install-3.8: ## Install python3.8 for generating test data
+	@poetry env use 3.8
+	@poetry install
+
 .PHONY: ci
 ci: ## Run all the CI checks
 ci: CI=1
@@ -93,6 +103,7 @@ examples:  ## Generate all the examples
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests, report missing examples
+regenerate-test-data: install-3.8
 	find examples -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 make test examples
 	@poetry run python -m pytest -k test_for_missing_examples --runxfail

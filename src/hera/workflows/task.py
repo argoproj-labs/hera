@@ -47,61 +47,92 @@ class Task(
     ParameterMixin,
     ItemMixin,
 ):
-    r"""Task is used to run a given template within a DAG. Must be instantiated under a DAG context.
+    """Task is used to run a given template within a DAG. Must be instantiated under a DAG context.
 
-    ## Dependencies
-    Any Tasks without a dependency defined will start immediately.
+## Dependencies
 
-    Dependencies between Tasks can be described using the convenience syntax `>>`, for example:
-        A = Task(...)
-        B = Task(...)
-        A >> B
-    describes the relationships:
-    * "A has no dependencies (so starts immediately)
-    * "B depends on A".
-    As a diagram:
-    A
-    |
-    B
+Any `Tasks` without a dependency defined will start immediately.
 
-    `A >> B` is equivalent to `A.next(B)`.
+Dependencies between Tasks can be described using the convenience syntax `>>`, for example:
 
-    ## Lists of Tasks
-    A list of Tasks used with the rshift syntax describes an "AND" dependency between the single Task on the left of
-    `>>` and the list Tasks to the right of `>>` (or vice versa). A list of Tasks on both sides of `>>` is not supported.
-    For example:
-        A = Task(...)
-        B = Task(...)
-        C = Task(...)
-        D = Task(...)
-        A >> [B, C] >> D
-    describes the relationships:
-    * "A has no dependencies
-    * "B AND C depend on A"
-    * "D depends on B AND C"
-    As a diagram:
-      A
-     / \
-    B   C
-     \ /
-      D
+```py
+    A = Task(...)
+    B = Task(...)
+    A >> B
+```
 
-    Dependencies can be described over multiple statements:
-        A = Task(...)
-        B = Task(...)
-        C = Task(...)
-        D = Task(...)
-        A >> [C, D]
-        B >> [C, D]
-    describes the relationships:
-    * "A and B have no dependencies
-    * "C depends on A AND B"
-    * "D depends on A AND B"
-    As a diagram:
-    A   B
-    | X |
-    C   D
+describes the relationships:
+
+* "A has no dependencies (so starts immediately)
+* "B depends on A".
+
+As a diagram:
+
+```
+A
+|
+B
+```
+
+`A >> B` is equivalent to `A.next(B)`.
+
+## Lists of Tasks
+
+A list of Tasks used with the rshift syntax describes an "AND" dependency between the single Task on the left of
+`>>` and the list Tasks to the right of `>>` (or vice versa). A list of Tasks on both sides of `>>` is not supported.
+
+For example:
+
+```
+    A = Task(...)
+    B = Task(...)
+    C = Task(...)
+    D = Task(...)
+    A >> [B, C] >> D
+```
+
+describes the relationships:
+
+* "A has no dependencies
+* "B AND C depend on A"
+* "D depends on B AND C"
+
+As a diagram:
+
+```
+  A
+ / \\
+B   C
+ \ /
+  D
+```
+
+Dependencies can be described over multiple statements:
+
+```
+    A = Task(...)
+    B = Task(...)
+    C = Task(...)
+    D = Task(...)
+    A >> [C, D]
+    B >> [C, D]
+```
+
+describes the relationships:
+
+* "A and B have no dependencies
+* "C depends on A AND B"
+* "D depends on A AND B"
+
+As a diagram:
+
+```
+A   B
+| X |
+C   D
+```
     """
+
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
 
@@ -234,7 +265,7 @@ class Task(
             hooks=self.hooks,
             inline=_inline,
             name=self.name,
-            on_exit=self.on_exit,
+            on_exit=self._build_on_exit(),
             template=_template,
             template_ref=self.template_ref,
             when=self.when,

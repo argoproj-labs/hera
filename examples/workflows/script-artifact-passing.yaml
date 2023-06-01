@@ -25,7 +25,7 @@ spec:
       - python
       image: python:3.8
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/hello_world.txt',\
-        \ 'wb') as f:\n    f.write('hello world')"
+        \ 'w') as f:\n    f.write('hello world')"
   - inputs:
       artifacts:
       - name: message
@@ -35,5 +35,5 @@ spec:
       command:
       - python
       image: python:3.8
-      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('//tmp/message',\
-        \ 'rb') as f:\n    message = f.readline()\nprint(message)"
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/message',\
+        \ 'r') as f:\n    message = f.readline()\nprint(message)"

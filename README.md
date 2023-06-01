@@ -104,7 +104,7 @@ with Workflow(
     entrypoint="steps",
 ) as w:
     with Steps(name="steps"):
-        echo(message="A")
+        echo(arguments={"message": "A"})
 
 w.create()
 
@@ -126,10 +126,10 @@ with Workflow(
     entrypoint="diamond",
 ) as w:
     with DAG(name="diamond"):
-        A = echo(name="A", message="A")
-        B = echo(name="B", message="B")
-        C = echo(name="C", message="C")
-        D = echo(name="D", message="D")
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
 
 w.create()
@@ -214,10 +214,10 @@ with Workflow(
         inputs=[Parameter(name="message")],
     )
     with DAG(name="diamond"):
-        A = echo(name="A", message="A")
-        B = echo(name="B", message="B")
-        C = echo(name="C", message="C")
-        D = echo(name="D", message="D")
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
 
 w.create()

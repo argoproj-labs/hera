@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: k8s-patch-workflow-
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    resource:
+      action: patch
+      flags:
+      - workflow
+      - '{{workflow.name}}'
+      manifest: "- op: add\n  path: /metadata/labels/foo\n  value: bar\n"
+      mergeStrategy: json

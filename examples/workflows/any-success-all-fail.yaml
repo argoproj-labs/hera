@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: any-success-all-fail-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: a
+            value: '{{item}}'
+        name: t1
+        template: random-fail
+        withParam: '[1, 2, 3]'
+      - arguments:
+          parameters:
+          - name: a
+            value: '{{item}}'
+        depends: t1.AnySucceeded
+        name: t2
+        template: fail
+        withParam: '[1, 2, 3]'
+      - arguments:
+          parameters:
+          - name: a
+            value: '{{item}}'
+        depends: t2.AllFailed
+        name: t3
+        template: foo
+        withParam: '[1, 2, 3]'
+    name: d
+  - inputs:
+      parameters:
+      - name: a
+    name: random-fail
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+        try: a = json.loads(r'''{{inputs.parameters.a}}''')\nexcept: a = r'''{{inputs.parameters.a}}'''\n\
+        \nimport random\nrandom.seed(a)\nif random.random() < 0.5:\n    raise Exception('Oh,\
+        \ no!')"
+  - inputs:
+      parameters:
+      - name: a
+    name: fail
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
+
+        except: a = r''''''{{inputs.parameters.a}}''''''
+
+
+        raise Exception(a)'
+  - inputs:
+      parameters:
+      - name: a
+    name: foo
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
+
+        except: a = r''''''{{inputs.parameters.a}}''''''
+
+
+        print(a)'

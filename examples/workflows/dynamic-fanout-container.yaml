@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dynamic-fanout-container-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - name: generate
+        template: generate
+      - depends: generate
+        name: fanout
+        template: fanout
+        withParam: '{{tasks.generate.outputs.result}}'
+    name: d
+  - container:
+      command:
+      - echo
+      - '[{"value": "a"}, {"value": "b"}, {"value": "c"}]'
+      image: alpine:latest
+    name: generate
+  - container:
+      command:
+      - echo
+      - '{{inputs.parameters.value}}'
+      image: alpine:latest
+    inputs:
+      parameters:
+      - name: value
+        value: '{{item.value}}'
+    name: fanout

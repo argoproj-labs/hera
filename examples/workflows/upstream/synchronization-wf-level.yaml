@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: synchronization-wf-level-
+spec:
+  entrypoint: whalesay
+  synchronization:
+    semaphore:
+      configMapKeyRef:
+        key: workflow
+        name: my-config
+  templates:
+  - container:
+      args:
+      - hello world
+      command:
+      - cowsay
+      image: docker/whalesay:latest
+    name: whalesay

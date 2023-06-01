@@ -12,7 +12,7 @@ with Workflow(
         inputs=[Parameter(name="message")],
     )
     with DAG(name="loops-dag"):
-        A = echo(name="A", message="A")
-        B = echo(name="B", message="{{item}}", with_items=["foo", "bar", "baz"])
-        C = echo(name="C", message="C")
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "{{item}}"}, with_items=["foo", "bar", "baz"])
+        C = echo(name="C", arguments={"message": "C"})
         A >> B >> C

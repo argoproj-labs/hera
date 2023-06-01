@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: task-exit-handler-
+spec:
+  entrypoint: d
+  templates:
+  - name: bye
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print(''Bye Hera'')'
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: s
+            value: from Task1
+        name: s1
+        onExit: bye
+        template: hello
+      - arguments:
+          parameters:
+          - name: s
+            value: from Task2
+        depends: s1
+        name: s2
+        template: hello
+    name: d
+  - inputs:
+      parameters:
+      - name: s
+    name: hello
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: s = json.loads(r''''''{{inputs.parameters.s}}'''''')
+
+        except: s = r''''''{{inputs.parameters.s}}''''''
+
+
+        print(''Hello Hera, {s}''.format(s=s))'

@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: forever
+spec:
+  entrypoint: main
+  templates:
+  - container:
+      command:
+      - sh
+      - -c
+      - for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done
+      image: docker/whalesay:latest
+    name: main

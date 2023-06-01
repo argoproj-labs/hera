@@ -12,6 +12,10 @@ nav:
       - getting-started/walk-through/about-hera.md
       - getting-started/walk-through/hello-world.md
       - getting-started/walk-through/parameters.md
+      - getting-started/walk-through/steps.md
+      - getting-started/walk-through/dag.md
+      - getting-started/walk-through/artifacts.md
+      - getting-started/walk-through/loops.md
   - Hera expr transpiler: expr.md
   - Examples:
     - Workflows:
