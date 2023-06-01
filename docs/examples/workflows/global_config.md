@@ -25,7 +25,7 @@
 
 
     with Workflow(generate_name="global-config-", entrypoint="whalesay") as w:
-        whalesay = Container(image="docker/whalesay:latest")
+        whalesay = Container(name="whalesay", image="docker/whalesay:latest")
         say()
     ```
 
@@ -46,6 +46,7 @@
           command:
           - cowsay
           image: docker/whalesay:latest
+        name: whalesay
       - name: say
         script:
           command:
