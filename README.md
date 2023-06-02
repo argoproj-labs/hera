@@ -1,5 +1,8 @@
 # Hera
 
+[See the Quick Start guide](https://hera.readthedocs.io/en/latest/getting-started/quick-start/) to start using Hera
+to orchestrate your Argo Workflows!
+
 ```text
 The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
