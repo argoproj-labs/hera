@@ -1,6 +1,8 @@
 from hera.shared import global_config, register_pre_build_hook
+from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.container import Container
 from hera.workflows.workflow import Workflow
+from hera.workflows.workflow_template import WorkflowTemplate
 
 
 def test_container_pre_build_hooks():
@@ -44,13 +46,13 @@ def test_workflow_pre_build_hooks():
         }
         return workflow
 
-    with Workflow(name="t") as w:
+    with Workflow(name="t") as wt:
         pass
 
-    assert w.node_selector is None
-    w.build()
-    assert w.node_selector["domain"] == "test"
-    assert w.node_selector["team"] == "ABC"
+    assert wt.node_selector is None
+    wt.build()
+    assert wt.node_selector["domain"] == "test"
+    assert wt.node_selector["team"] == "ABC"
     global_config.reset()
 
     register_pre_build_hook(set_workflow_default_node_selector)
@@ -62,13 +64,63 @@ def test_workflow_pre_build_hooks():
         }
         return workflow
 
-    with Workflow(name="t") as w:
+    with Workflow(name="t") as wt:
         pass
 
-    assert w.node_selector is None
-    assert w.labels is None
-    w.build()
-    assert w.node_selector["domain"] == "test"
-    assert w.node_selector["team"] == "ABC"
-    assert w.labels["label"] == "test"
+    assert wt.node_selector is None
+    assert wt.labels is None
+    wt.build()
+    assert wt.node_selector["domain"] == "test"
+    assert wt.node_selector["team"] == "ABC"
+    assert wt.labels["label"] == "test"
     global_config.reset()
+
+
+def test_workflow_template_pre_build_hooks():
+    global_config.reset()
+
+    @register_pre_build_hook
+    def set_workflow_template_default_labels(workflow_template: WorkflowTemplate) -> WorkflowTemplate:
+        workflow_template.labels = {
+            "wt_label": "test",
+        }
+        return workflow_template
+
+    @register_pre_build_hook
+    def set_cwt_default_labels(cluster_workflow_template: ClusterWorkflowTemplate) -> ClusterWorkflowTemplate:
+        cluster_workflow_template.labels = {
+            "cwt_label": "test",
+        }
+        return cluster_workflow_template
+
+    with WorkflowTemplate(name="t") as wt:
+        pass
+
+    assert wt.labels is None
+    wt.build()
+    assert wt.labels == {"wt_label": "test"}
+
+
+def test_cluster_workflow_template_pre_build_hooks():
+    global_config.reset()
+
+    @register_pre_build_hook
+    def set_workflow_template_default_labels(workflow_template: WorkflowTemplate) -> WorkflowTemplate:
+        workflow_template.labels = {
+            "wt_label": "test",
+        }
+        return workflow_template
+
+    @register_pre_build_hook
+    def set_cwt_default_labels(cluster_workflow_template: ClusterWorkflowTemplate) -> ClusterWorkflowTemplate:
+        cluster_workflow_template.labels = {
+            "cwt_label": "test",
+        }
+        return cluster_workflow_template
+
+    with ClusterWorkflowTemplate(name="t") as cwt:
+        pass
+
+    assert cwt.labels is None
+    cwt.build()
+    assert cwt.labels == {"cwt_label": "test"}
