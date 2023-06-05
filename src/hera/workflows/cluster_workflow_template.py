@@ -1,3 +1,5 @@
+from pydantic import validator
+
 from hera.exceptions import NotFound
 from hera.workflows.models import (
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,
@@ -13,6 +15,11 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
     """ClusterWorkflowTemplates are WorkflowTemplates that are cluster scoped, meaning they are accessible from all
     namespaces.
     """
+
+    @validator("namespace", pre=True, always=True)
+    def _set_namespace(cls, v):
+        if v is not None:
+            raise ValueError("namespace is not a valid field on a ClusterWorkflowTemplate")
 
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the ClusterWorkflowTemplate on the Argo cluster."""
