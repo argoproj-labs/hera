@@ -4,6 +4,7 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 from typing import cast
+
 from pydantic import validator
 
 from hera.exceptions import NotFound
@@ -28,9 +29,9 @@ TRUNCATE_LENGTH = 63 - SUFFIX_LEN
 
 
 class WorkflowTemplate(Workflow):
-    """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
-    to create a library of frequently-used templates and reuse them by referencing them from your
-    Workflows.
+    """WorkflowTemplates are definitions of Workflows that live in your namespace in your cluster.
+    This allows you to create a library of frequently-used templates and reuse them by referencing
+    them from your Workflows.
     """
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
