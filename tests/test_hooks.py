@@ -46,13 +46,13 @@ def test_workflow_pre_build_hooks():
         }
         return workflow
 
-    with Workflow(name="t") as wt:
+    with Workflow(name="t") as w:
         pass
 
-    assert wt.node_selector is None
-    wt.build()
-    assert wt.node_selector["domain"] == "test"
-    assert wt.node_selector["team"] == "ABC"
+    assert w.node_selector is None
+    w.build()
+    assert w.node_selector["domain"] == "test"
+    assert w.node_selector["team"] == "ABC"
     global_config.reset()
 
     register_pre_build_hook(set_workflow_default_node_selector)
@@ -64,15 +64,15 @@ def test_workflow_pre_build_hooks():
         }
         return workflow
 
-    with Workflow(name="t") as wt:
+    with Workflow(name="t") as w:
         pass
 
-    assert wt.node_selector is None
-    assert wt.labels is None
-    wt.build()
-    assert wt.node_selector["domain"] == "test"
-    assert wt.node_selector["team"] == "ABC"
-    assert wt.labels["label"] == "test"
+    assert w.node_selector is None
+    assert w.labels is None
+    w.build()
+    assert w.node_selector["domain"] == "test"
+    assert w.node_selector["team"] == "ABC"
+    assert w.labels["label"] == "test"
     global_config.reset()
 
 
