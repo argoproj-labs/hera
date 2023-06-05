@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
+from typing import cast
 from pydantic import validator
 
 from hera.exceptions import NotFound
@@ -16,6 +17,14 @@ from hera.workflows.models import (
 )
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
+
+# The length of the random suffix plus the hyphen (used by convention) to separate the random suffix. Value of suffix
+# length (5) from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L45
+SUFFIX_LEN = 6
+
+# The max name length comes from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L44
+# We want to truncate according to SUFFIX_LEN
+TRUNCATE_LENGTH = 63 - SUFFIX_LEN
 
 
 class WorkflowTemplate(Workflow):
@@ -152,6 +161,22 @@ class WorkflowTemplate(Workflow):
                 workflow_template_ref=self.workflow_template_ref,
             ),
         )
+
+    def create_as_workflow(self, wait: bool = False, poll_interval: int = 5) -> Workflow:
+        """Run this WorkflowTemplate instantly as a Workflow.
+
+        Note: this does not require the WorkflowTemplate to exist on the cluster
+        """
+
+        workflow = self.build()
+        workflow.kind = "Workflow"
+        if workflow.metadata.name:
+            # In case of a name being > TRUNCATE_LENGTH, we need to truncate the value to assign to generate_name
+            # otherwise the random suffix will make the generated name too long
+            workflow.metadata.generate_name = workflow.metadata.name[:TRUNCATE_LENGTH] + "-"
+            workflow.metadata.name = None
+
+        return cast(Workflow, super().create(wait=wait, poll_interval=poll_interval))
 
 
 __all__ = ["WorkflowTemplate"]
