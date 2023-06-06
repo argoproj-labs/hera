@@ -10,7 +10,7 @@ from hera.workflows.models import (
 from hera.workflows.service import WorkflowsService
 
 
-def test_cluster_workflow_template_namespace_errors():
+def test_cluster_workflow_template_setting_namespace_errors():
     with pytest.raises(ValueError) as e:
         with ClusterWorkflowTemplate(name="my-cwt", namespace="my-namespace"):
             pass
