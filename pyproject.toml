@@ -50,6 +50,9 @@ types-requests = "^2.28.11.12"
 pytest-clarity = "^1.0.1"
 pytest-sugar = "^0.9.6"
 
+[tool.poetry.scripts]
+hera = "hera._cli.main:main"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
