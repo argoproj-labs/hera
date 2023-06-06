@@ -2,6 +2,7 @@ import pytest
 
 from hera.exceptions import NotFound
 from hera.workflows.models import (
+    WorkflowCreateRequest,
     WorkflowStatus,
     WorkflowTemplateCreateRequest,
     WorkflowTemplateLintRequest,
@@ -9,7 +10,7 @@ from hera.workflows.models import (
 )
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import Workflow
-from hera.workflows.workflow_template import WorkflowTemplate
+from hera.workflows.workflow_template import TRUNCATE_LENGTH, WorkflowTemplate
 
 
 def test_workflow_template_setting_status_errors():
@@ -43,13 +44,17 @@ def test_workflow_template_create(mocker):
 
 
 def test_workflow_template_create_as_workflow(mocker):
-    Workflow.create = mocker.MagicMock()
+    ws = WorkflowsService(namespace="my-namespace")
+    ws.create_workflow = mocker.MagicMock()
+
+    # Note we set the name to None here, otherwise the workflow will take the name from the returned object
+    ws.create_workflow.return_value.metadata.name = None
 
     # GIVEN
     with WorkflowTemplate(
         name="my-wt",
         namespace="my-namespace",
-        workflows_service=WorkflowsService(),
+        workflows_service=ws,
     ) as wt:
         pass
 
@@ -57,7 +62,46 @@ def test_workflow_template_create_as_workflow(mocker):
     wt.create_as_workflow()
 
     # THEN
-    Workflow.create.assert_called_once_with(wait=False, poll_interval=5)
+    wt.workflows_service.create_workflow.assert_called_once_with(
+        WorkflowCreateRequest(workflow=wt._get_as_workflow().build()),
+        namespace="my-namespace",
+    )
+
+
+def test_workflow_template_get_as_workflow():
+    # GIVEN
+    with WorkflowTemplate(
+        name="my-wt",
+        namespace="my-namespace",
+    ) as wt:
+        pass
+
+    # WHEN
+    workflow = wt._get_as_workflow()
+
+    # THEN
+    assert isinstance(workflow, Workflow)
+    assert workflow.kind == "Workflow"
+    assert workflow.name is None
+    assert workflow.generate_name == "my-wt-"
+
+
+def test_workflow_template_get_as_workflow_truncator():
+    # GIVEN
+    with WorkflowTemplate(
+        name="a" * (TRUNCATE_LENGTH * 2),
+        namespace="my-namespace",
+    ) as wt:
+        pass
+
+    # WHEN
+    workflow = wt._get_as_workflow()
+
+    # THEN
+    assert isinstance(workflow, Workflow)
+    assert workflow.kind == "Workflow"
+    assert workflow.name is None
+    assert workflow.generate_name == ("a" * TRUNCATE_LENGTH) + "-"
 
 
 def test_workflow_template_get(mocker):

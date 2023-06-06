@@ -162,12 +162,7 @@ class WorkflowTemplate(Workflow):
             ),
         )
 
-    def create_as_workflow(self, wait: bool = False, poll_interval: int = 5) -> Workflow:
-        """Run this WorkflowTemplate instantly as a Workflow.
-
-        Note: this does not require the WorkflowTemplate to exist on the cluster
-        """
-
+    def _get_as_workflow(self) -> Workflow:
         workflow = Workflow(**self.dict())
         workflow.kind = "Workflow"
 
@@ -177,6 +172,15 @@ class WorkflowTemplate(Workflow):
             workflow.generate_name = workflow.name[:TRUNCATE_LENGTH] + "-"
             workflow.name = None
 
+        return workflow
+
+    def create_as_workflow(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
+        """Run this WorkflowTemplate instantly as a Workflow, using a generated name
+
+        Note: this does not require the WorkflowTemplate to exist on the cluster
+        """
+
+        workflow = self._get_as_workflow()
         return workflow.create(wait=wait, poll_interval=poll_interval)
 
 
