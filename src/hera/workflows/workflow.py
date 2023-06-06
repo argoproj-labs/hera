@@ -14,7 +14,14 @@ from pydantic import validator
 from typing_extensions import get_args
 
 from hera.shared import global_config
-from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin, MetricsMixin, VolumeMixin
+from hera.workflows._mixins import (
+    ArgumentsMixin,
+    ContextMixin,
+    HookMixin,
+    MetricsMixin,
+    ParseFromYamlMixin,
+    VolumeMixin,
+)
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
@@ -70,6 +77,7 @@ class Workflow(
     HookMixin,
     VolumeMixin,
     MetricsMixin,
+    ParseFromYamlMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -435,6 +443,82 @@ class Workflow(
         output_directory.mkdir(parents=True, exist_ok=True)
         output_path.write_text(self.to_yaml(*args, **kwargs))
         return output_path.absolute()
+
+    @classmethod
+    def _from_model(cls: Workflow, model: _ModelWorkflow) -> Workflow:
+        return Workflow(
+            api_version=model.api_version,
+            kind=model.kind,
+            annotations=model.metadata.annotations,
+            cluster_name=model.metadata.cluster_name,
+            creation_timestamp=model.metadata.creation_timestamp,
+            deletion_grace_period_seconds=model.metadata.deletion_grace_period_seconds,
+            deletion_timestamp=model.metadata.deletion_timestamp,
+            finalizers=model.metadata.finalizers,
+            generate_name=model.metadata.generate_name,
+            generation=model.metadata.generation,
+            labels=model.metadata.labels,
+            managed_fields=model.metadata.managed_fields,
+            name=model.metadata.name,
+            namespace=model.metadata.namespace,
+            owner_references=model.metadata.owner_references,
+            resource_version=model.metadata.resource_version,
+            self_link=model.metadata.self_link,
+            uid=model.metadata.uid,
+            active_deadline_seconds=model.spec.active_deadline_seconds,
+            affinity=model.spec.affinity,
+            archive_logs=model.spec.archive_logs,
+            arguments=model.spec.arguments,
+            artifact_gc=model.spec.artifact_gc,
+            artifact_repository_ref=model.spec.artifact_repository_ref,
+            automount_service_account_token=model.spec.automount_service_account_token,
+            dns_config=model.spec.dns_config,
+            dns_policy=model.spec.dns_policy,
+            entrypoint=model.spec.entrypoint,
+            executor=model.spec.executor,
+            hooks=model.spec.hooks,
+            host_aliases=model.spec.host_aliases,
+            host_network=model.spec.host_network,
+            image_pull_secrets=model.spec.image_pull_secrets,
+            metrics=model.spec.metrics,
+            node_selector=model.spec.node_selector,
+            on_exit=model.spec.on_exit,
+            parallelism=model.spec.parallelism,
+            pod_disruption_budget=model.spec.pod_disruption_budget,
+            pod_gc=model.spec.pod_gc,
+            pod_metadata=model.spec.pod_metadata,
+            pod_priority=model.spec.pod_priority,
+            pod_priority_class_name=model.spec.pod_priority_class_name,
+            pod_spec_patch=model.spec.pod_spec_patch,
+            priority=model.spec.priority,
+            retry_strategy=model.spec.retry_strategy,
+            scheduler_name=model.spec.scheduler_name,
+            security_context=model.spec.security_context,
+            service_account_name=model.spec.service_account_name,
+            shutdown=model.spec.shutdown,
+            suspend=model.spec.suspend,
+            synchronization=model.spec.synchronization,
+            template_defaults=model.spec.template_defaults,
+            templates=model.spec.templates or None,
+            tolerations=model.spec.tolerations,
+            ttl_strategy=model.spec.ttl_strategy,
+            volume_claim_gc=model.spec.volume_claim_gc,
+            volume_claim_templates=model.spec.volume_claim_templates or None,
+            volumes=model.spec.volumes,
+            workflow_metadata=model.spec.workflow_metadata,
+            workflow_template_ref=model.spec.workflow_template_ref,
+            status=model.status,
+        )
+
+    @classmethod
+    def from_yaml(cls: Workflow, yaml_file: Union[Path, str]) -> Workflow:
+        """Create a Workflow from a Workflow contained in a YAML file.
+
+        Usage:
+            my_workflow = Workflow.from_yaml(yaml_file)
+        """
+        model_workflow = _ModelWorkflow.parse_file(yaml_file)
+        return cls.from_model(model_workflow)
 
 
 __all__ = ["Workflow"]

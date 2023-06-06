@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
 
 from pydantic import root_validator, validator
@@ -97,6 +98,7 @@ EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, 
 VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolume, _BaseVolume]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 THookable = TypeVar("THookable", bound="HookMixin")
+ParseableT = TypeVar("ParseableT")
 
 
 class HookMixin(BaseMixin):
@@ -896,6 +898,18 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+
+class ParseFromYamlMixin(BaseMixin):
+    @classmethod
+    def _from_model(cls: ParseableT, model: Any) -> ParseableT:
+        """Parse from given model to cls's type."""
+        raise NotImplementedError
+
+    @classmethod
+    def from_yaml(cls: ParseableT, yaml_file: Union[Path, str]) -> ParseableT:
+        """Parse from given yaml_file to cls's type."""
+        raise NotImplementedError
 
 
 class ExperimentalMixin(BaseMixin):
