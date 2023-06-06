@@ -3,7 +3,6 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
-from typing import cast
 
 from pydantic import validator
 
@@ -169,15 +168,16 @@ class WorkflowTemplate(Workflow):
         Note: this does not require the WorkflowTemplate to exist on the cluster
         """
 
-        workflow = self.build()
+        workflow = Workflow(**self.dict())
         workflow.kind = "Workflow"
-        if workflow.metadata.name:
+
+        if workflow.name:
             # In case of a name being > TRUNCATE_LENGTH, we need to truncate the value to assign to generate_name
             # otherwise the random suffix will make the generated name too long
-            workflow.metadata.generate_name = workflow.metadata.name[:TRUNCATE_LENGTH] + "-"
-            workflow.metadata.name = None
+            workflow.generate_name = workflow.name[:TRUNCATE_LENGTH] + "-"
+            workflow.name = None
 
-        return cast(Workflow, super().create(wait=wait, poll_interval=poll_interval))
+        return workflow.create(wait=wait, poll_interval=poll_interval)
 
 
 __all__ = ["WorkflowTemplate"]

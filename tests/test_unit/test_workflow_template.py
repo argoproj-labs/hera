@@ -8,6 +8,7 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.service import WorkflowsService
+from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 
 
@@ -39,6 +40,24 @@ def test_workflow_template_create(mocker):
     wt.workflows_service.create_workflow_template.assert_called_once_with(
         WorkflowTemplateCreateRequest(template=built_wt), namespace="my-namespace"
     )
+
+
+def test_workflow_template_create_as_workflow(mocker):
+    Workflow.create = mocker.MagicMock()
+
+    # GIVEN
+    with WorkflowTemplate(
+        name="my-wt",
+        namespace="my-namespace",
+        workflows_service=WorkflowsService(),
+    ) as wt:
+        pass
+
+    # WHEN
+    wt.create_as_workflow()
+
+    # THEN
+    Workflow.create.assert_called_once_with(wait=False, poll_interval=5)
 
 
 def test_workflow_template_get(mocker):
