@@ -24,7 +24,6 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the ClusterWorkflowTemplate on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
-        assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_cluster_workflow_template(
             ClusterWorkflowTemplateCreateRequest(template=self.build())
         )
@@ -32,7 +31,6 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
     def get(self) -> TWorkflow:
         """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace"""
         assert self.workflows_service, "workflow service not initialized"
-        assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         return self.workflows_service.get_cluster_workflow_template(name=self.name)
 
@@ -44,7 +42,6 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
         does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
         """
         assert self.workflows_service, "workflow service not initialized"
-        assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         # we always need to do a get prior to updating to get the resource version to update in the first place
         # https://github.com/argoproj/argo-workflows/pull/5465#discussion_r597797052
@@ -63,7 +60,6 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
     def lint(self) -> TWorkflow:
         """Lints the ClusterWorkflowTemplate using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
-        assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cluster_workflow_template(
             ClusterWorkflowTemplateLintRequest(template=self.build())
         )

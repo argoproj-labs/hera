@@ -1,8 +1,9 @@
-from hera.workflows.workflow import Workflow
-from hera.workflows.service import WorkflowsService
 from hera.workflows.models import WorkflowCreateRequest
+from hera.workflows.service import WorkflowsService
+from hera.workflows.workflow import Workflow
 
-def test_create(mocker):
+
+def test_workflow_create(mocker):
     ws = WorkflowsService(namespace="my-namespace")
     ws.create_workflow = mocker.MagicMock()
 
@@ -21,5 +22,7 @@ def test_create(mocker):
     w.create()
 
     # THEN
-    built_workflow=w.build()
-    w.workflows_service.create_workflow.assert_called_once_with(WorkflowCreateRequest(workflow=built_workflow), namespace="my-namespace")
+    built_workflow = w.build()
+    w.workflows_service.create_workflow.assert_called_once_with(
+        WorkflowCreateRequest(workflow=built_workflow), namespace="my-namespace"
+    )
