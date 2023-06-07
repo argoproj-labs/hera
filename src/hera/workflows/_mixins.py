@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 from pydantic import root_validator, validator
 
@@ -99,6 +99,7 @@ VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolum
 TContext = TypeVar("TContext", bound="ContextMixin")
 THookable = TypeVar("THookable", bound="HookMixin")
 ParseableT = TypeVar("ParseableT")
+ModelT = TypeVar("ModelT")
 
 
 class HookMixin(BaseMixin):
@@ -902,7 +903,7 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
 
 class ParseFromYamlMixin(BaseMixin):
     @classmethod
-    def _from_model(cls: ParseableT, model: Any) -> ParseableT:
+    def _from_model(cls: ParseableT, model: ModelT) -> ParseableT:
         """Parse from given model to cls's type."""
         raise NotImplementedError
 
@@ -910,6 +911,28 @@ class ParseFromYamlMixin(BaseMixin):
     def from_yaml(cls: ParseableT, yaml_file: Union[Path, str]) -> ParseableT:
         """Parse from given yaml_file to cls's type."""
         raise NotImplementedError
+
+    class ModelMapper:
+        def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
+            self.model_path = model_path.split(".")
+
+            curr_class = self._get_model_class()
+            for key in self.model_path:
+                if key not in curr_class.__fields__:
+                    raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
+                curr_class = curr_class.__fields__[key].outer_type_
+            # TODO add validation that curr_class now == expected hera type
+            # for api_version, check that curr_class == Optional[str]
+
+            self.builder = hera_builder
+
+        @classmethod
+        def _get_model_class(cls: ParseableT) -> Type[ModelT]:
+            raise NotImplementedError
+
+        @classmethod
+        def _get_hera_class(cls: ParseableT) -> Type[ParseableT]:
+            raise NotImplementedError
 
 
 class ExperimentalMixin(BaseMixin):
