@@ -18,15 +18,7 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import Workflow
-
-# The length of the random suffix plus the hyphen (used by convention) to separate the random suffix. Value of suffix
-# length (5) from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L45
-_SUFFIX_LEN = 6
-
-# The max name length comes from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L44
-# We want to truncate according to SUFFIX_LEN
-_TRUNCATE_LENGTH = 63 - _SUFFIX_LEN
+from hera.workflows.workflow import _TRUNCATE_LENGTH, Workflow
 
 
 class WorkflowTemplate(Workflow):
@@ -171,10 +163,10 @@ class WorkflowTemplate(Workflow):
         if generate_name is not None:
             workflow.generate_name = generate_name
         else:
-            # In case of a name being > TRUNCATE_LENGTH, we need to truncate the value to assign to generate_name
-            # otherwise the random suffix will make the generated name too long
+            # As this function is mainly for improved DevEx when iterating on a WorkflowTemplate, we do a basic
+            # truncation of the WT's name in case it being > _TRUNCATE_LENGTH, to assign to generate_name.
             assert workflow.name is not None
-            workflow.generate_name = workflow.name[:_TRUNCATE_LENGTH] + "-"
+            workflow.generate_name = workflow.name[:_TRUNCATE_LENGTH]
 
         workflow.name = None
 

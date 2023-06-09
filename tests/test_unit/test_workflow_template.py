@@ -11,7 +11,7 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.service import WorkflowsService
-from hera.workflows.workflow import Workflow
+from hera.workflows.workflow import NAME_LIMIT, Workflow
 from hera.workflows.workflow_template import _TRUNCATE_LENGTH, WorkflowTemplate
 
 
@@ -85,13 +85,13 @@ def test_workflow_template_get_as_workflow():
     assert isinstance(workflow, Workflow)
     assert workflow.kind == "Workflow"
     assert workflow.name is None
-    assert workflow.generate_name == "my-wt-"
+    assert workflow.generate_name == "my-wt"
 
 
 def test_workflow_template_get_as_workflow_truncator():
     # GIVEN
     with WorkflowTemplate(
-        name="a" * (_TRUNCATE_LENGTH * 2),
+        name="a" * NAME_LIMIT,  # this is a valid WT name, but must be truncated to create a workflow from it
         namespace="my-namespace",
     ) as wt:
         pass
@@ -103,7 +103,7 @@ def test_workflow_template_get_as_workflow_truncator():
     assert isinstance(workflow, Workflow)
     assert workflow.kind == "Workflow"
     assert workflow.name is None
-    assert workflow.generate_name == ("a" * _TRUNCATE_LENGTH) + "-"
+    assert workflow.generate_name == ("a" * _TRUNCATE_LENGTH)
 
 
 def test_workflow_template_get_as_workflow_with_generate_name():

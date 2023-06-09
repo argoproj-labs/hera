@@ -1,8 +1,22 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from hera.workflows.models import WorkflowCreateRequest
 from hera.workflows.service import WorkflowsService
-from hera.workflows.workflow import Workflow
+from hera.workflows.workflow import NAME_LIMIT, Workflow
+
+
+def test_workflow_name_validators():
+    with pytest.raises(ValueError) as e:
+        Workflow(name=("a" * NAME_LIMIT) + "a")
+
+    assert f"name must be no more than {NAME_LIMIT} characters" in str(e.value)
+
+    with pytest.raises(ValueError) as e:
+        Workflow(generate_name=("a" * NAME_LIMIT) + "a")
+
+    assert f"name must be no more than {NAME_LIMIT} characters" in str(e.value)
 
 
 def test_workflow_create():

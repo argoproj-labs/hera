@@ -64,6 +64,16 @@ except ImportError:
 ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
 
+NAME_LIMIT = 63
+
+# The length of the random suffix used for generate_name
+# length (5) from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L45
+_SUFFIX_LEN = 5
+# The max name length comes from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L44
+# We want to truncate according to SUFFIX_LEN
+_TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
+
+
 class Workflow(
     ArgumentsMixin,
     ContextMixin,
@@ -148,6 +158,18 @@ class Workflow(
 
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
+
+    @validator("name", pre=True, always=True)
+    def _set_name(cls, v):
+        if v is not None and len(v) > NAME_LIMIT:
+            raise ValueError(f"name must be no more than {NAME_LIMIT} characters: {v}")
+        return v
+
+    @validator("generate_name", pre=True, always=True)
+    def _set_generate_name(cls, v):
+        if v is not None and len(v) > NAME_LIMIT:
+            raise ValueError(f"generate_name must be no more than {NAME_LIMIT} characters: {v}")
+        return v
 
     @validator("api_version", pre=True, always=True)
     def _set_api_version(cls, v):
