@@ -4,6 +4,8 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 
+from typing import Optional
+
 from pydantic import validator
 
 from hera.exceptions import NotFound
@@ -20,11 +22,11 @@ from hera.workflows.workflow import Workflow
 
 # The length of the random suffix plus the hyphen (used by convention) to separate the random suffix. Value of suffix
 # length (5) from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L45
-SUFFIX_LEN = 6
+_SUFFIX_LEN = 6
 
 # The max name length comes from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L44
 # We want to truncate according to SUFFIX_LEN
-TRUNCATE_LENGTH = 63 - SUFFIX_LEN
+_TRUNCATE_LENGTH = 63 - _SUFFIX_LEN
 
 
 class WorkflowTemplate(Workflow):
@@ -162,25 +164,38 @@ class WorkflowTemplate(Workflow):
             ),
         )
 
-    def _get_as_workflow(self) -> Workflow:
+    def _get_as_workflow(self, generate_name: Optional[str]) -> Workflow:
         workflow = Workflow(**self.dict())
         workflow.kind = "Workflow"
 
-        if workflow.name:
+        if generate_name is not None:
+            workflow.generate_name = generate_name
+        else:
             # In case of a name being > TRUNCATE_LENGTH, we need to truncate the value to assign to generate_name
             # otherwise the random suffix will make the generated name too long
-            workflow.generate_name = workflow.name[:TRUNCATE_LENGTH] + "-"
-            workflow.name = None
+            assert workflow.name is not None
+            workflow.generate_name = workflow.name[:_TRUNCATE_LENGTH] + "-"
+
+        workflow.name = None
 
         return workflow
 
-    def create_as_workflow(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
-        """Run this WorkflowTemplate instantly as a Workflow, using a generated name
+    def create_as_workflow(
+        self,
+        generate_name: Optional[str] = None,
+        wait: bool = False,
+        poll_interval: int = 5,
+    ) -> TWorkflow:
+        """Run this WorkflowTemplate instantly as a Workflow.
 
-        Note: this does not require the WorkflowTemplate to exist on the cluster
+        If generate_name is given, the workflow created uses generate_name as a prefix, as per the usual for
+        hera.workflows.Workflow.generate_name. If not given, the WorkflowTemplate's name will be used, truncated to 57
+        chars and appended with a hyphen.
+
+        Note: this function does not require the WorkflowTemplate to already exist on the cluster
         """
 
-        workflow = self._get_as_workflow()
+        workflow = self._get_as_workflow(generate_name)
         return workflow.create(wait=wait, poll_interval=poll_interval)
 
 

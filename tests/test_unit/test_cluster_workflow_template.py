@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from hera.exceptions import NotFound
@@ -18,9 +20,9 @@ def test_cluster_workflow_template_setting_namespace_errors():
     assert "namespace is not a valid field on a ClusterWorkflowTemplate" in str(e.value)
 
 
-def test_cluster_workflow_template_create(mocker):
+def test_cluster_workflow_template_create():
     ws = WorkflowsService()
-    ws.create_cluster_workflow_template = mocker.MagicMock()
+    ws.create_cluster_workflow_template = MagicMock()
 
     # GIVEN
     with ClusterWorkflowTemplate(
@@ -39,7 +41,7 @@ def test_cluster_workflow_template_create(mocker):
     )
 
 
-def test_cluster_workflow_template_get(mocker):
+def test_cluster_workflow_template_get():
     # GIVEN
     with ClusterWorkflowTemplate(
         name="my-cwt",
@@ -47,7 +49,7 @@ def test_cluster_workflow_template_get(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.get_cluster_workflow_template = mocker.MagicMock(return_value=cwt.build())
+    ws.get_cluster_workflow_template = MagicMock(return_value=cwt.build())
     cwt.workflows_service = ws
 
     # WHEN
@@ -58,7 +60,7 @@ def test_cluster_workflow_template_get(mocker):
     assert got_cwt == cwt.build()
 
 
-def test_cluster_workflow_template_lint(mocker):
+def test_cluster_workflow_template_lint():
     # GIVEN
     with ClusterWorkflowTemplate(
         name="my-cwt",
@@ -66,7 +68,7 @@ def test_cluster_workflow_template_lint(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.lint_cluster_workflow_template = mocker.MagicMock(return_value=cwt.build())
+    ws.lint_cluster_workflow_template = MagicMock(return_value=cwt.build())
     cwt.workflows_service = ws
 
     # WHEN
@@ -79,7 +81,7 @@ def test_cluster_workflow_template_lint(mocker):
     assert got_cwt == cwt.build()
 
 
-def test_cluster_workflow_template_update_existing_cwt(mocker):
+def test_cluster_workflow_template_update_existing_cwt():
     # GIVEN
     with ClusterWorkflowTemplate(
         name="my-cwt",
@@ -87,10 +89,10 @@ def test_cluster_workflow_template_update_existing_cwt(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.update_cluster_workflow_template = mocker.MagicMock(return_value=cwt.build())
+    ws.update_cluster_workflow_template = MagicMock(return_value=cwt.build())
     cwt.workflows_service = ws
 
-    ClusterWorkflowTemplate.get = mocker.MagicMock(return_value=cwt.build())
+    ClusterWorkflowTemplate.get = MagicMock(return_value=cwt.build())
 
     # WHEN
     got_cwt = cwt.update()
@@ -104,7 +106,7 @@ def test_cluster_workflow_template_update_existing_cwt(mocker):
     assert got_cwt == cwt.build()
 
 
-def test_cluster_workflow_template_update_non_existent(mocker):
+def test_cluster_workflow_template_update_non_existent():
     # GIVEN
     with ClusterWorkflowTemplate(
         name="my-cwt",
@@ -112,12 +114,12 @@ def test_cluster_workflow_template_update_non_existent(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.create_cluster_workflow_template = mocker.MagicMock(return_value=cwt.build())
-    ws.update_cluster_workflow_template = mocker.MagicMock()  # to ensure NOT called
+    ws.create_cluster_workflow_template = MagicMock(return_value=cwt.build())
+    ws.update_cluster_workflow_template = MagicMock()  # to ensure NOT called
 
     cwt.workflows_service = ws
 
-    ClusterWorkflowTemplate.get = mocker.MagicMock(side_effect=NotFound())
+    ClusterWorkflowTemplate.get = MagicMock(side_effect=NotFound())
 
     # WHEN
     got_cwt = cwt.update()

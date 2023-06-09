@@ -1,11 +1,13 @@
+from unittest.mock import MagicMock
+
 from hera.workflows.models import WorkflowCreateRequest
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import Workflow
 
 
-def test_workflow_create(mocker):
+def test_workflow_create():
     ws = WorkflowsService(namespace="my-namespace")
-    ws.create_workflow = mocker.MagicMock()
+    ws.create_workflow = MagicMock()
 
     # Note we set the name to None here, otherwise the workflow will take the name from the returned object
     ws.create_workflow.return_value.metadata.name = None

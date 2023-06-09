@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from hera.exceptions import NotFound
@@ -10,7 +12,7 @@ from hera.workflows.models import (
 )
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import Workflow
-from hera.workflows.workflow_template import TRUNCATE_LENGTH, WorkflowTemplate
+from hera.workflows.workflow_template import _TRUNCATE_LENGTH, WorkflowTemplate
 
 
 def test_workflow_template_setting_status_errors():
@@ -21,9 +23,9 @@ def test_workflow_template_setting_status_errors():
     assert "status is not a valid field on a WorkflowTemplate" in str(e.value)
 
 
-def test_workflow_template_create(mocker):
+def test_workflow_template_create():
     ws = WorkflowsService()
-    ws.create_workflow_template = mocker.MagicMock()
+    ws.create_workflow_template = MagicMock()
 
     # GIVEN
     with WorkflowTemplate(
@@ -43,9 +45,9 @@ def test_workflow_template_create(mocker):
     )
 
 
-def test_workflow_template_create_as_workflow(mocker):
+def test_workflow_template_create_as_workflow():
     ws = WorkflowsService(namespace="my-namespace")
-    ws.create_workflow = mocker.MagicMock()
+    ws.create_workflow = MagicMock()
 
     # Note we set the name to None here, otherwise the workflow will take the name from the returned object
     ws.create_workflow.return_value.metadata.name = None
@@ -63,7 +65,7 @@ def test_workflow_template_create_as_workflow(mocker):
 
     # THEN
     wt.workflows_service.create_workflow.assert_called_once_with(
-        WorkflowCreateRequest(workflow=wt._get_as_workflow().build()),
+        WorkflowCreateRequest(workflow=wt._get_as_workflow(None).build()),
         namespace="my-namespace",
     )
 
@@ -77,7 +79,7 @@ def test_workflow_template_get_as_workflow():
         pass
 
     # WHEN
-    workflow = wt._get_as_workflow()
+    workflow = wt._get_as_workflow(None)
 
     # THEN
     assert isinstance(workflow, Workflow)
@@ -89,22 +91,40 @@ def test_workflow_template_get_as_workflow():
 def test_workflow_template_get_as_workflow_truncator():
     # GIVEN
     with WorkflowTemplate(
-        name="a" * (TRUNCATE_LENGTH * 2),
+        name="a" * (_TRUNCATE_LENGTH * 2),
         namespace="my-namespace",
     ) as wt:
         pass
 
     # WHEN
-    workflow = wt._get_as_workflow()
+    workflow = wt._get_as_workflow(None)
 
     # THEN
     assert isinstance(workflow, Workflow)
     assert workflow.kind == "Workflow"
     assert workflow.name is None
-    assert workflow.generate_name == ("a" * TRUNCATE_LENGTH) + "-"
+    assert workflow.generate_name == ("a" * _TRUNCATE_LENGTH) + "-"
 
 
-def test_workflow_template_get(mocker):
+def test_workflow_template_get_as_workflow_with_generate_name():
+    # GIVEN
+    with WorkflowTemplate(
+        name="my-wt",
+        namespace="my-namespace",
+    ) as wt:
+        pass
+
+    # WHEN
+    workflow = wt._get_as_workflow(generate_name="my-workflow-")
+
+    # THEN
+    assert isinstance(workflow, Workflow)
+    assert workflow.kind == "Workflow"
+    assert workflow.name is None
+    assert workflow.generate_name == "my-workflow-"
+
+
+def test_workflow_template_get():
     # GIVEN
     with WorkflowTemplate(
         name="my-wt",
@@ -113,7 +133,7 @@ def test_workflow_template_get(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.get_workflow_template = mocker.MagicMock(return_value=wt.build())
+    ws.get_workflow_template = MagicMock(return_value=wt.build())
     wt.workflows_service = ws
 
     # WHEN
@@ -124,7 +144,7 @@ def test_workflow_template_get(mocker):
     assert got_wt == wt.build()
 
 
-def test_workflow_template_lint(mocker):
+def test_workflow_template_lint():
     # GIVEN
     with WorkflowTemplate(
         name="my-wt",
@@ -133,7 +153,7 @@ def test_workflow_template_lint(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.lint_workflow_template = mocker.MagicMock(return_value=wt.build())
+    ws.lint_workflow_template = MagicMock(return_value=wt.build())
     wt.workflows_service = ws
 
     # WHEN
@@ -146,7 +166,7 @@ def test_workflow_template_lint(mocker):
     assert got_wt == wt.build()
 
 
-def test_workflow_template_update_existing_wt(mocker):
+def test_workflow_template_update_existing_wt():
     # GIVEN
     with WorkflowTemplate(
         name="my-wt",
@@ -155,10 +175,10 @@ def test_workflow_template_update_existing_wt(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.update_workflow_template = mocker.MagicMock(return_value=wt.build())
+    ws.update_workflow_template = MagicMock(return_value=wt.build())
     wt.workflows_service = ws
 
-    WorkflowTemplate.get = mocker.MagicMock(return_value=wt.build())
+    WorkflowTemplate.get = MagicMock(return_value=wt.build())
 
     # WHEN
     got_wt = wt.update()
@@ -173,7 +193,7 @@ def test_workflow_template_update_existing_wt(mocker):
     assert got_wt == wt.build()
 
 
-def test_workflow_template_update_non_existent(mocker):
+def test_workflow_template_update_non_existent():
     # GIVEN
     with WorkflowTemplate(
         name="my-wt",
@@ -182,12 +202,12 @@ def test_workflow_template_update_non_existent(mocker):
         pass
 
     ws = WorkflowsService()
-    ws.create_workflow_template = mocker.MagicMock(return_value=wt.build())
-    ws.update_workflow_template = mocker.MagicMock()  # to ensure NOT called
+    ws.create_workflow_template = MagicMock(return_value=wt.build())
+    ws.update_workflow_template = MagicMock()  # to ensure NOT called
 
     wt.workflows_service = ws
 
-    WorkflowTemplate.get = mocker.MagicMock(side_effect=NotFound())
+    WorkflowTemplate.get = MagicMock(side_effect=NotFound())
 
     # WHEN
     got_wt = wt.update()
