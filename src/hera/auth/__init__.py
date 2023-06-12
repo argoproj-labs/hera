@@ -1,22 +1,5 @@
-import base64
-import errno
-import os
 import shutil
 import subprocess
-from types import ModuleType
-from typing import Optional
-
-_client: Optional[ModuleType] = None
-_config: Optional[ModuleType] = None
-
-try:
-    from kubernetes import client, config  # type: ignore
-
-    _client = client
-    _config = config
-except ImportError:
-    _client = None
-    _config = None
 
 
 class TokenGenerator:
@@ -54,43 +37,3 @@ class ArgoCLITokenGenerator(TokenGenerator):
         if token.startswith("Bearer "):
             token = token[7:]
         return token
-
-
-class KubernetesServiceAccountTokenGenerator(TokenGenerator):
-    """A token generator that uses the K8s local config file to generate a token for the specific service account.
-
-    Parameters
-    ----------
-    service_account : str
-        The name of the service account to generate a token for.
-    namespace : Optional[str]
-        The namespace of the service account. Defaults to "default".
-    config_file : Optional[str]
-        The path to the K8s local config file. Defaults to "~/.kube/config".
-
-    Raises
-    ------
-    FileNotFoundError
-        If the K8s local config file does not exist.
-    ImportError
-        If the `kubernetes` package is not installed.
-
-    """
-
-    def __init__(self, service_account: str, namespace: str = "default", config_file: Optional[str] = None) -> None:
-        self.service_account = service_account
-        self.namespace: str = namespace
-        self.config_file: Optional[str] = config_file
-
-    def __call__(self) -> str:
-        if not _client or not _config:
-            raise ImportError("`kubernetes` is not installed. Install `hera[k8s]` to bring in the extra dependency")
-
-        if self.config_file is not None and not os.path.isfile(self.config_file):
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), self.config_file)
-
-        _config.load_kube_config(config_file=self.config_file)
-        v1 = _client.CoreV1Api()
-        secret_name = v1.read_namespaced_service_account(self.service_account, self.namespace).secrets[0].name
-        sec = v1.read_namespaced_secret(secret_name, self.namespace).data
-        return base64.b64decode(sec["token"]).decode()

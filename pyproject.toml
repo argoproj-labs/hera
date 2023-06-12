@@ -36,7 +36,6 @@ pydantic = { extras = ["email"], version = ">=1.7,<2.0" }
 
 [tool.poetry.extras]
 yaml = ["PyYAML"]
-k8s = ["kubernetes"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
