@@ -921,17 +921,11 @@ class ParseFromYamlMixin(BaseMixin):
                 if key not in curr_class.__fields__:
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
                 curr_class = curr_class.__fields__[key].outer_type_
-            # TODO add validation that curr_class now == expected hera type
-            # for api_version, check that curr_class == Optional[str]
 
             self.builder = hera_builder
 
         @classmethod
         def _get_model_class(cls: ParseableT) -> Type[ModelT]:
-            raise NotImplementedError
-
-        @classmethod
-        def _get_hera_class(cls: ParseableT) -> Type[ParseableT]:
             raise NotImplementedError
 
 

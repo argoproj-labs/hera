@@ -3,9 +3,8 @@
 See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
-from inspect import get_annotations
-
 import time
+from inspect import get_annotations
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, List, Optional, Type, Union
@@ -26,7 +25,6 @@ from hera.workflows._mixins import (
     MetricsMixin,
     ParseFromYamlMixin,
     VolumeMixin,
-    ArgumentsT,
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
@@ -101,10 +99,6 @@ class Workflow(
         def _get_model_class(cls: "Workflow") -> Type[_ModelWorkflow]:
             return _ModelWorkflow
 
-        # @classmethod
-        # def _get_hera_class(cls: "Workflow") -> Type["Workflow"]:
-        #     return Workflow
-
     def _build_volume_claim_templates(self) -> Optional[List]:
         return ((self.volume_claim_templates or []) + (self._build_persistent_volume_claims() or [])) or None
 
@@ -158,7 +152,6 @@ class Workflow(
         return templates or None
 
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    # TODO: We want to pass the member directly not as a string so that validation is basically automatic
     api_version: Annotated[Optional[str], _WorkflowModelMapper("api_version")] = None
     kind: Annotated[Optional[str], _WorkflowModelMapper("kind")] = None
     status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowModelMapper("status")] = None
@@ -351,6 +344,12 @@ class Workflow(
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
         return self.build().dict(exclude_none=True, by_alias=True)
 
+    def __eq__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.to_dict() == other.to_dict()
+
+        return False
+
     def to_yaml(self, *args, **kwargs) -> str:
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
         if not _yaml:
@@ -464,6 +463,8 @@ class Workflow(
                 mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
                 setattr(workflow, attr, model_attr_getter(mapper.model_path, model))
 
+        return workflow
+
     @classmethod
     def from_yaml(cls: "Workflow", yaml_file: Union[Path, str]) -> "Workflow":
         """Create a Workflow from a Workflow contained in a YAML file.
@@ -471,8 +472,9 @@ class Workflow(
         Usage:
             my_workflow = Workflow.from_yaml(yaml_file)
         """
-        model_workflow = _ModelWorkflow.parse_file(yaml_file)
-        return cls.from_model(model_workflow)
+        yaml_file = Path(yaml_file)
+        model_workflow = _ModelWorkflow.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
+        return cls._from_model(model_workflow)
 
 
 __all__ = ["Workflow"]

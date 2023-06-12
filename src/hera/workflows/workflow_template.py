@@ -3,9 +3,28 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
-from pydantic import validator
+try:
+    from inspect import get_annotations
+except ImportError:
+    from hera.workflows._inspect import get_annotations
+
+from types import ModuleType
+from typing import Any, List, Optional, Type, Union
+
+try:
+    from typing import Annotated, get_args, get_origin
+except ImportError:
+    from typing_extensions import Annotated, get_args, get_origin
+from inspect import get_annotations
+from pathlib import Path
+from typing import Any, List, Type, Union
+
+from pydantic import BaseModel, validator
 
 from hera.exceptions import NotFound
+from hera.workflows._mixins import (
+    ParseFromYamlMixin,
+)
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -17,12 +36,25 @@ from hera.workflows.models import (
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
 
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
+
 
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
     to create a library of frequently-used templates and reuse them by referencing them from your
     Workflows.
     """
+
+    class _WorkflowTemplateModelMapper(ParseFromYamlMixin.ModelMapper):
+        @classmethod
+        def _get_model_class(cls: "WorkflowTemplate") -> Type[_ModelWorkflowTemplate]:
+            return _ModelWorkflowTemplate
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
@@ -83,75 +115,59 @@ class WorkflowTemplate(Workflow):
         """Builds the WorkflowTemplate and its components into an Argo schema WorkflowTemplate object."""
         self = self._dispatch_hooks()
 
-        templates = self._build_templates()
-        workflow_claims = self._build_persistent_volume_claims()
-        volume_claim_templates = (self.volume_claim_templates or []) + (workflow_claims or [])
-        return _ModelWorkflowTemplate(
-            api_version=self.api_version,
-            kind=self.kind,
-            metadata=ObjectMeta(
-                annotations=self.annotations,
-                cluster_name=self.cluster_name,
-                creation_timestamp=self.creation_timestamp,
-                deletion_grace_period_seconds=self.deletion_grace_period_seconds,
-                deletion_timestamp=self.deletion_timestamp,
-                finalizers=self.finalizers,
-                generate_name=self.generate_name,
-                generation=self.generation,
-                labels=self.labels,
-                managed_fields=self.managed_fields,
-                name=self.name,
-                namespace=self.namespace,
-                owner_references=self.owner_references,
-                resource_version=self.resource_version,
-                self_link=self.self_link,
-                uid=self.uid,
-            ),
-            spec=_ModelWorkflowSpec(
-                active_deadline_seconds=self.active_deadline_seconds,
-                affinity=self.affinity,
-                archive_logs=self.archive_logs,
-                arguments=self._build_arguments(),
-                artifact_gc=self.artifact_gc,
-                artifact_repository_ref=self.artifact_repository_ref,
-                automount_service_account_token=self.automount_service_account_token,
-                dns_config=self.dns_config,
-                dns_policy=self.dns_policy,
-                entrypoint=self.entrypoint,
-                executor=self.executor,
-                hooks=self.hooks,
-                host_aliases=self.host_aliases,
-                host_network=self.host_network,
-                image_pull_secrets=self.image_pull_secrets,
-                metrics=self._build_metrics(),
-                node_selector=self.node_selector,
-                on_exit=self._build_on_exit(),
-                parallelism=self.parallelism,
-                pod_disruption_budget=self.pod_disruption_budget,
-                pod_gc=self.pod_gc,
-                pod_metadata=self.pod_metadata,
-                pod_priority=self.pod_priority,
-                pod_priority_class_name=self.pod_priority_class_name,
-                pod_spec_patch=self.pod_spec_patch,
-                priority=self.priority,
-                retry_strategy=self.retry_strategy,
-                scheduler_name=self.scheduler_name,
-                security_context=self.security_context,
-                service_account_name=self.service_account_name,
-                shutdown=self.shutdown,
-                suspend=self.suspend,
-                synchronization=self.synchronization,
-                template_defaults=self.template_defaults,
-                templates=templates or None,
-                tolerations=self.tolerations,
-                ttl_strategy=self.ttl_strategy,
-                volume_claim_gc=self.volume_claim_gc,
-                volume_claim_templates=volume_claim_templates or None,
-                volumes=self._build_volumes(),
-                workflow_metadata=self.workflow_metadata,
-                workflow_template_ref=self.workflow_template_ref,
-            ),
+        model_workflow = _ModelWorkflowTemplate(
+            metadata=ObjectMeta(),
+            spec=_ModelWorkflowSpec(),
         )
+
+        def model_attr_setter(attrs: List[str], model_workflow: _ModelWorkflowTemplate, value: Any):
+            curr: BaseModel = model_workflow
+            for attr in attrs[:-1]:
+                curr = getattr(curr, attr)
+
+            setattr(curr, attrs[-1], value)
+
+        for attr, annotation in get_annotations(WorkflowTemplate).items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], WorkflowTemplate._WorkflowTemplateModelMapper
+            ):
+                mapper: WorkflowTemplate._WorkflowTemplateModelMapper = get_args(annotation)[1]
+                # Value comes from builder function if it exists, otherwise directly from the attr
+                value = getattr(self, mapper.builder.__name__)() if mapper.builder is not None else getattr(self, attr)
+                model_attr_setter(mapper.model_path, model_workflow, value)
+
+        return model_workflow
+
+    @classmethod
+    def _from_model(cls: "WorkflowTemplate", model: _ModelWorkflowTemplate) -> "WorkflowTemplate":
+        def model_attr_getter(attrs: List[str], model_workflow: _ModelWorkflowTemplate) -> Any:
+            curr: BaseModel = model_workflow
+            for attr in attrs[:-1]:
+                curr = getattr(curr, attr)
+
+            return getattr(curr, attrs[-1])
+
+        workflow = WorkflowTemplate()
+
+        for attr, annotation in get_annotations(WorkflowTemplate).items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], WorkflowTemplate._WorkflowModelMapper
+            ):
+                mapper: WorkflowTemplate._WorkflowModelMapper = get_args(annotation)[1]
+                setattr(workflow, attr, model_attr_getter(mapper.model_path, model))
+
+        return workflow
+
+    @classmethod
+    def from_yaml(cls: "WorkflowTemplate", yaml_file: Union[Path, str]) -> "WorkflowTemplate":
+        """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
+
+        Usage:
+            my_workflow = WorkflowTemplate.from_yaml(yaml_file)
+        """
+        yaml_file = Path(yaml_file)
+        model_workflow = _ModelWorkflowTemplate.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
+        return cls._from_model(model_workflow)
 
 
 __all__ = ["WorkflowTemplate"]
