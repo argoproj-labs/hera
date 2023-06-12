@@ -39,7 +39,7 @@
         with DAG(name="d"):
             g = generate()
             fout = fanout(with_param=g.result)
-            fin = fanin(values=fout.get_parameters_as("values"))
+            fin = fanin(arguments=fout.get_parameters_as("values"))
             g >> fout >> fin
     ```
 

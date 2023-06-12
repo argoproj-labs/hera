@@ -16,11 +16,11 @@ with Workflow(
         name="dag-target",
         target="{{workflow.parameters.target}}",
     ):
-        A = echo(name="A", message="A")
-        B = echo(name="B", message="B")
-        C = echo(name="C", message="C")
-        D = echo(name="D", message="D")
-        E = echo(name="E", message="E")
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
+        E = echo(name="E", arguments={"message": "E"})
 
         A >> B >> D
         A >> C >> D

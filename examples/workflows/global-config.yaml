@@ -12,6 +12,7 @@ spec:
       command:
       - cowsay
       image: docker/whalesay:latest
+    name: whalesay
   - name: say
     script:
       command:

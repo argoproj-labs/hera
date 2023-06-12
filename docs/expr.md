@@ -62,7 +62,7 @@ There maybe times that you want to get a struct field whose name conflicts with 
 
 Map elements can be accessed used the `[]` syntax.
 
-* `g.var['element']` transpiles to `var.['element']`
+* `g.var['element']` transpiles to `var['element']`
 
 ### Reference
 

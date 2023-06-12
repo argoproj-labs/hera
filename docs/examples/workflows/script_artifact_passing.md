@@ -13,21 +13,24 @@
 
     @script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
     def whalesay():
-        with open("/tmp/hello_world.txt", "wb") as f:
+        with open("/tmp/hello_world.txt", "w") as f:
             f.write("hello world")
 
 
     @script(inputs=Artifact(name="message", path="/tmp/message"))
     def print_message():
-        with open("//tmp/message", "rb") as f:
+        with open("/tmp/message", "r") as f:
             message = f.readline()
         print(message)
 
 
     with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
         with Steps(name="artifact-example") as s:
-            ga = whalesay(name="generate-artifact")
-            print_message(name="consume-artifact", message=ga.get_artifact("hello-art"))
+            whalesay(name="generate-artifact")
+            print_message(
+                name="consume-artifact",
+                arguments=[Artifact(name="message", from_="{{steps.generate-artifact.outputs.artifacts.hello-art}}")],
+            )
     ```
 
 === "YAML"
@@ -60,7 +63,7 @@
           - python
           image: python:3.8
           source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/hello_world.txt',\
-            \ 'wb') as f:\n    f.write('hello world')"
+            \ 'w') as f:\n    f.write('hello world')"
       - inputs:
           artifacts:
           - name: message
@@ -70,7 +73,7 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('//tmp/message',\
-            \ 'rb') as f:\n    message = f.readline()\nprint(message)"
+          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/message',\
+            \ 'r') as f:\n    message = f.readline()\nprint(message)"
     ```
 

@@ -20,5 +20,5 @@ with Workflow(generate_name="default-param-overwrite-", entrypoint="d") as w:
     with DAG(name="d"):
         g = generator()
         c_default = consumer(name="consumer-default")
-        c_param = consumer(name="consumer-param", message=g.get_result_as("message"))
+        c_param = consumer(name="consumer-param", arguments=g.get_result_as("message"))
         g >> [c_default, c_param]
