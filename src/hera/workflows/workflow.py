@@ -366,7 +366,7 @@ class Workflow(
     def to_yaml(self, *args, **kwargs) -> str:
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
         if not _yaml:
-            raise ImportError("PyYAML is not installed")
+            raise ImportError("`PyYAML` is not installed. Install `hera[yaml]` to bring in the extra dependency")
         # Set some default options if not provided by the user
         kwargs.setdefault("default_flow_style", False)
         kwargs.setdefault("sort_keys", False)
