@@ -123,13 +123,6 @@ class WorkflowTemplate(Workflow):
             spec=_ModelWorkflowSpec(),
         )
 
-        def model_attr_setter(attrs: List[str], model_workflow: _ModelWorkflowTemplate, value: Any):
-            curr: BaseModel = model_workflow
-            for attr in attrs[:-1]:
-                curr = getattr(curr, attr)
-
-            setattr(curr, attrs[-1], value)
-
         for attr, annotation in WorkflowTemplate._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
                 get_args(annotation)[1], Workflow._WorkflowModelMapper
@@ -138,30 +131,9 @@ class WorkflowTemplate(Workflow):
                 # Value comes from builder function if it exists, otherwise directly from the attr
                 value = getattr(self, mapper.builder.__name__)() if mapper.builder is not None else getattr(self, attr)
                 if value:
-                    model_attr_setter(mapper.model_path, model_workflow, value)
+                    mapper.model_attr_setter(mapper.model_path, model_workflow, value)
 
         return model_workflow
-
-    @classmethod
-    def _from_model(cls: "WorkflowTemplate", model: _ModelWorkflowTemplate) -> "WorkflowTemplate":
-        def model_attr_getter(attrs: List[str], model_workflow: _ModelWorkflowTemplate) -> Any:
-            curr: BaseModel = model_workflow
-            for attr in attrs[:-1]:
-                curr = getattr(curr, attr)
-
-            return getattr(curr, attrs[-1])
-
-        workflow = WorkflowTemplate()
-
-        for attr, annotation in WorkflowTemplate._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], Workflow._WorkflowModelMapper
-            ):
-                mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
-                if mapper.model_path:
-                    setattr(workflow, attr, model_attr_getter(mapper.model_path, model))
-
-        return workflow
 
     @classmethod
     def from_yaml(cls: "WorkflowTemplate", yaml_file: Union[Path, str]) -> "WorkflowTemplate":
@@ -170,9 +142,7 @@ class WorkflowTemplate(Workflow):
         Usage:
             my_workflow = WorkflowTemplate.from_yaml(yaml_file)
         """
-        yaml_file = Path(yaml_file)
-        model_workflow = _ModelWorkflowTemplate.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
-        return cls._from_model(model_workflow)
+        return cls._from_yaml(yaml_file, _ModelWorkflowTemplate)
 
 
 __all__ = ["WorkflowTemplate"]

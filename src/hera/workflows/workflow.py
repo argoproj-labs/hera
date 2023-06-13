@@ -322,21 +322,14 @@ class Workflow(
             spec=_ModelWorkflowSpec(),
         )
 
-        def model_attr_setter(attrs: List[str], model_workflow: _ModelWorkflow, value: Any):
-            curr: BaseModel = model_workflow
-            for attr in attrs[:-1]:
-                curr = getattr(curr, attr)
-
-            setattr(curr, attrs[-1], value)
-
-        for attr, annotation in get_annotations(Workflow).items():
+        for attr, annotation in Workflow._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
                 get_args(annotation)[1], Workflow._WorkflowModelMapper
             ):
                 mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
                 # Value comes from builder function if it exists, otherwise directly from the attr
                 value = getattr(self, mapper.builder.__name__)() if mapper.builder is not None else getattr(self, attr)
-                model_attr_setter(mapper.model_path, model_workflow, value)
+                mapper.model_attr_setter(mapper.model_path, model_workflow, value)
 
         return model_workflow
 
@@ -446,35 +439,13 @@ class Workflow(
         return output_path.absolute()
 
     @classmethod
-    def _from_model(cls: "Workflow", model: _ModelWorkflow) -> "Workflow":
-        def model_attr_getter(attrs: List[str], model_workflow: _ModelWorkflow) -> Any:
-            curr: BaseModel = model_workflow
-            for attr in attrs[:-1]:
-                curr = getattr(curr, attr)
-
-            return getattr(curr, attrs[-1])
-
-        workflow = Workflow()
-
-        for attr, annotation in get_annotations(Workflow).items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], Workflow._WorkflowModelMapper
-            ):
-                mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
-                setattr(workflow, attr, model_attr_getter(mapper.model_path, model))
-
-        return workflow
-
-    @classmethod
     def from_yaml(cls: "Workflow", yaml_file: Union[Path, str]) -> "Workflow":
         """Create a Workflow from a Workflow contained in a YAML file.
 
         Usage:
             my_workflow = Workflow.from_yaml(yaml_file)
         """
-        yaml_file = Path(yaml_file)
-        model_workflow = _ModelWorkflow.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
-        return cls._from_model(model_workflow)
+        return cls._from_yaml(yaml_file, _ModelWorkflow)
 
 
 __all__ = ["Workflow"]

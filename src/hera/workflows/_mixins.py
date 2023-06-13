@@ -6,11 +6,25 @@ try:
 except ImportError:
     from hera.workflows._inspect import get_annotations
 from pathlib import Path
+from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 from collections import ChainMap
 
+try:
+    from typing import Annotated, get_args, get_origin, get_type_hints
+except ImportError:
+    from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
-from pydantic import root_validator, validator
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
+
+
+from pydantic import BaseModel, root_validator, validator
 
 from hera.shared import BaseMixin, global_config
 from hera.shared.serialization import serialize
@@ -908,22 +922,6 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
 
 
 class ParseFromYamlMixin(BaseMixin):
-    @classmethod
-    def _get_all_annotations(cls: ParseableT) -> Dict:
-        """Gets all annotations of this class and any parent classes."""
-        return ChainMap(*(get_annotations(c) for c in cls.__mro__))
-
-
-    @classmethod
-    def _from_model(cls: ParseableT, model: ModelT) -> ParseableT:
-        """Parse from given model to cls's type."""
-        raise NotImplementedError
-
-    @classmethod
-    def from_yaml(cls: ParseableT, yaml_file: Union[Path, str]) -> ParseableT:
-        """Parse from given yaml_file to cls's type."""
-        raise NotImplementedError
-
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
             self.model_path = None
@@ -940,11 +938,57 @@ class ParseFromYamlMixin(BaseMixin):
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
                 curr_class = curr_class.__fields__[key].outer_type_
 
+        def model_attr_setter(self, attrs: List[str], model: BaseModel, value: Any):
+            curr: BaseModel = model
+            for attr in attrs[:-1]:
+                curr = getattr(curr, attr)
+
+            setattr(curr, attrs[-1], value)
+
+        def model_attr_getter(self, attrs: List[str], model: BaseModel) -> Any:
+            curr: BaseModel = model
+            for attr in attrs[:-1]:
+                curr = getattr(curr, attr)
+
+            return getattr(curr, attrs[-1])
+
 
         @classmethod
         def _get_model_class(cls: ParseableT) -> Type[ModelT]:
             raise NotImplementedError
 
+    @classmethod
+    def _get_all_annotations(cls: ParseableT) -> Dict:
+        """Gets all annotations of this class and any parent classes."""
+        return ChainMap(*(get_annotations(c) for c in cls.__mro__))
+
+    @classmethod
+    def _from_model(cls: ParseableT, model: ModelT) -> ParseableT:
+        """Parse from given model to cls's type."""
+        hera_obj = cls()
+
+        for attr, annotation in cls._get_all_annotations().items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+            ):
+                mapper = get_args(annotation)[1]
+                if mapper.model_path:
+                    setattr(hera_obj, attr, mapper.model_attr_getter(mapper.model_path, model))
+
+        return hera_obj
+
+    @classmethod
+    def _from_yaml(cls: ParseableT, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ParseableT:
+        """Parse from given yaml_file to cls's type, using the given model type to call its parse_obj."""
+        yaml_file = Path(yaml_file)
+        model_workflow = model.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
+        return cls._from_model(model_workflow)
+
+
+    @classmethod
+    def from_yaml(cls: ParseableT, yaml_file: Union[Path, str]) -> ParseableT:
+        """Parse from given yaml_file to cls's type."""
+        raise NotImplementedError
 
 class ExperimentalMixin(BaseMixin):
     _experimental_warning_message: str = (
