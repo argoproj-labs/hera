@@ -118,8 +118,8 @@ EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, 
 VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolume, _BaseVolume]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 THookable = TypeVar("THookable", bound="HookMixin")
-ParseableT = TypeVar("ParseableT")
-ModelT = TypeVar("ModelT")
+ParseableT = TypeVar("ParseableT", bound="ParseFromYamlMixin")
+ModelT = TypeVar("ModelT", bound="BaseModel")
 
 
 class HookMixin(BaseMixin):
@@ -921,6 +921,22 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
 
 
+def _model_attr_setter(attrs: List[str], model: BaseModel, value: Any):
+    curr: BaseModel = model
+    for attr in attrs[:-1]:
+        curr = getattr(curr, attr)
+
+    setattr(curr, attrs[-1], value)
+
+
+def _model_attr_getter(attrs: List[str], model: BaseModel) -> Any:
+    curr: BaseModel = model
+    for attr in attrs[:-1]:
+        curr = getattr(curr, attr)
+
+    return getattr(curr, attrs[-1])
+
+
 class ParseFromYamlMixin(BaseMixin):
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
@@ -938,23 +954,29 @@ class ParseFromYamlMixin(BaseMixin):
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
                 curr_class = curr_class.__fields__[key].outer_type_
 
-        def model_attr_setter(self, attrs: List[str], model: BaseModel, value: Any):
-            curr: BaseModel = model
-            for attr in attrs[:-1]:
-                curr = getattr(curr, attr)
-
-            setattr(curr, attrs[-1], value)
-
-        def model_attr_getter(self, attrs: List[str], model: BaseModel) -> Any:
-            curr: BaseModel = model
-            for attr in attrs[:-1]:
-                curr = getattr(curr, attr)
-
-            return getattr(curr, attrs[-1])
-
         @classmethod
         def _get_model_class(cls) -> Type[ModelT]:
             raise NotImplementedError
+
+        @classmethod
+        def build_model(cls, hera_obj: ParseableT, model: ModelT) -> ModelT:
+            assert isinstance(hera_obj, ParseFromYamlMixin)
+
+            for attr, annotation in hera_obj._get_all_annotations().items():
+                if get_origin(annotation) is Annotated and isinstance(
+                    get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+                ):
+                    mapper = get_args(annotation)[1]
+                    # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
+                    value = (
+                        getattr(hera_obj, mapper.builder.__name__)()
+                        if mapper.builder is not None
+                        else getattr(hera_obj, attr)
+                    )
+                    if value:
+                        _model_attr_setter(mapper.model_path, model, value)
+
+            return model
 
     @classmethod
     def _get_all_annotations(cls: ParseableT) -> Dict:
@@ -972,7 +994,7 @@ class ParseFromYamlMixin(BaseMixin):
             ):
                 mapper = get_args(annotation)[1]
                 if mapper.model_path:
-                    setattr(hera_obj, attr, mapper.model_attr_getter(mapper.model_path, model))
+                    setattr(hera_obj, attr, _model_attr_getter(mapper.model_path, model))
 
         return hera_obj
 

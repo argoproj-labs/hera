@@ -320,17 +320,7 @@ class Workflow(
             metadata=ObjectMeta(),
             spec=_ModelWorkflowSpec(),
         )
-
-        for attr, annotation in Workflow._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], Workflow._WorkflowModelMapper
-            ):
-                mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
-                # Value comes from builder function if it exists, otherwise directly from the attr
-                value = getattr(self, mapper.builder.__name__)() if mapper.builder is not None else getattr(self, attr)
-                mapper.model_attr_setter(mapper.model_path, model_workflow, value)
-
-        return model_workflow
+        return Workflow._WorkflowModelMapper.build_model(self, model_workflow)
 
     def to_dict(self) -> Any:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
