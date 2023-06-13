@@ -1,4 +1,4 @@
-""" Copy of get_annotations FROM python 3.10 inspect module"""
+""" Copy of get_annotations and required imports from python 3.10 inspect module"""
 
 import dis
 import functools
