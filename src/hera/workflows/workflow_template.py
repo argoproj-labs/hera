@@ -23,19 +23,19 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import Workflow
+from hera.workflows.workflow import _WorkflowModelMapper, Workflow
 
+
+class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
+    @classmethod
+    def _get_model_class(cls) -> Type[_ModelWorkflowTemplate]:
+        return _ModelWorkflowTemplate
 
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
     to create a library of frequently-used templates and reuse them by referencing them from your
     Workflows.
     """
-
-    class _WorkflowTemplateModelMapper(Workflow._WorkflowModelMapper):
-        @classmethod
-        def _get_model_class(cls) -> Type[_ModelWorkflowTemplate]:
-            return _ModelWorkflowTemplate
 
     # Removes status mapping
     status: Annotated[get_type_hints(Workflow)["status"], _WorkflowTemplateModelMapper("")] = None
@@ -104,7 +104,7 @@ class WorkflowTemplate(Workflow):
             spec=_ModelWorkflowSpec(),
         )
 
-        return WorkflowTemplate._WorkflowTemplateModelMapper.build_model(self, model_workflow)
+        return _WorkflowTemplateModelMapper.build_model(self, model_workflow)
 
     @classmethod
     def from_yaml(cls: "WorkflowTemplate", yaml_file: Union[Path, str]) -> "WorkflowTemplate":

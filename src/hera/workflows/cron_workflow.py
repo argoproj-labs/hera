@@ -5,7 +5,12 @@ for more on CronWorkflows.
 """
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Type
+
+try:
+    from typing import Annotated
+except ImportError:
+    from typing_extensions import Annotated
 
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
@@ -16,8 +21,12 @@ from hera.workflows.models import (
     ObjectMeta,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import Workflow
+from hera.workflows.workflow import _WorkflowModelMapper, Workflow
 
+class _CronWorkflowModelMapper(_WorkflowModelMapper):
+    @classmethod
+    def _get_model_class(cls) -> Type[_ModelCronWorkflow]:
+        return _ModelCronWorkflow
 
 class CronWorkflow(Workflow):
     """CronWorkflow allows a user to run a Workflow on a recurring basis.
@@ -27,53 +36,37 @@ class CronWorkflow(Workflow):
     spec. See https://argoproj.github.io/argo-workflows/fields/#cronworkflow
     """
 
-    concurrency_policy: Optional[str] = None
-    failed_jobs_history_limit: Optional[int] = None
-    schedule: str
-    starting_deadline_seconds: Optional[int] = None
-    successful_jobs_history_limit: Optional[int] = None
-    cron_suspend: Optional[bool] = None
-    timezone: Optional[str] = None
-    cron_status: Optional[CronWorkflowStatus] = None
+    concurrency_policy: Annotated[Optional[str], _CronWorkflowModelMapper("spec.concurrency_policy")] = None
+    failed_jobs_history_limit: Annotated[
+        Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")
+    ] = None
+    schedule: Annotated[str, _CronWorkflowModelMapper("spec.schedule")]
+    starting_deadline_seconds: Annotated[
+        Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")
+    ] = None
+    successful_jobs_history_limit: Annotated[
+        Optional[int], _CronWorkflowModelMapper("spec.successful_jobs_history_limit")
+    ] = None
+    cron_suspend: Annotated[Optional[bool], _CronWorkflowModelMapper("spec.suspend")] = None
+    timezone: Annotated[Optional[str], _CronWorkflowModelMapper("spec.timezone")] = None
+    cron_status: Annotated[Optional[CronWorkflowStatus], _CronWorkflowModelMapper("status")] = None
+
+    entrypoint: Annotated[Optional[str], _WorkflowModelMapper("workflow_spec.entrypoint")] = None
+
 
     def build(self) -> TWorkflow:
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
-        return _ModelCronWorkflow(
-            api_version=self.api_version,
-            kind=self.kind,
-            metadata=ObjectMeta(
-                annotations=self.annotations,
-                cluster_name=self.cluster_name,
-                creation_timestamp=self.creation_timestamp,
-                deletion_grace_period_seconds=self.deletion_grace_period_seconds,
-                deletion_timestamp=self.deletion_timestamp,
-                finalizers=self.finalizers,
-                generate_name=self.generate_name,
-                generation=self.generation,
-                labels=self.labels,
-                managed_fields=self.managed_fields,
-                name=self.name,
-                namespace=self.namespace,
-                owner_references=self.owner_references,
-                resource_version=self.resource_version,
-                self_link=self.self_link,
-                uid=self.uid,
-            ),
+        model_workflow = _ModelCronWorkflow(
+            metadata=ObjectMeta(),
             spec=CronWorkflowSpec(
-                concurrency_policy=self.concurrency_policy,
-                failed_jobs_history_limit=self.failed_jobs_history_limit,
-                schedule=self.schedule,
-                starting_deadline_seconds=self.starting_deadline_seconds,
-                successful_jobs_history_limit=self.successful_jobs_history_limit,
-                suspend=self.cron_suspend,
-                timezone=self.timezone,
-                workflow_metadata=None,
+                schedule="",
                 workflow_spec=super().build().spec,
             ),
-            status=self.cron_status,
         )
+
+        return _CronWorkflowModelMapper.build_model(self, model_workflow)
 
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the CronWorkflow on the Argo cluster."""
@@ -90,6 +83,5 @@ class CronWorkflow(Workflow):
         return self.workflows_service.lint_cron_workflow(
             LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
-
 
 __all__ = ["CronWorkflow"]

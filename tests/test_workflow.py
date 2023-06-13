@@ -112,6 +112,8 @@ def test_hera_output(module_name):
 
     if isinstance(workflow, HeraWorkflowTemplate):
         assert workflow == HeraWorkflowTemplate.from_yaml(generated_yaml_path)
+    elif isinstance(workflow, HeraCronWorkflow):
+        assert workflow == HeraCronWorkflow.from_yaml(generated_yaml_path)
     elif isinstance(workflow, HeraWorkflow):
         assert workflow == HeraWorkflow.from_yaml(generated_yaml_path)
 

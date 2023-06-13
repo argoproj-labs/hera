@@ -9,9 +9,9 @@ from types import ModuleType
 from typing import Any, Dict, List, Optional, Type, Union
 
 try:
-    from typing import Annotated, get_args, get_origin, get_type_hints
+    from typing import Annotated, get_args, get_type_hints
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin, get_type_hints
+    from typing_extensions import Annotated, get_args, get_type_hints
 
 
 from pydantic import validator
@@ -73,6 +73,10 @@ except ImportError:
 
 ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
+class _WorkflowModelMapper(ParseFromYamlMixin.ModelMapper):
+    @classmethod
+    def _get_model_class(cls) -> Type[_ModelWorkflow]:
+        return _ModelWorkflow
 
 class Workflow(
     ArgumentsMixin,
@@ -92,11 +96,6 @@ class Workflow(
     to yaml via `to_yaml` or built according to the Argo schema via `build` to get an OpenAPI model
     object.
     """
-
-    class _WorkflowModelMapper(ParseFromYamlMixin.ModelMapper):
-        @classmethod
-        def _get_model_class(cls) -> Type[_ModelWorkflow]:
-            return _ModelWorkflow
 
     def _build_volume_claim_templates(self) -> Optional[List]:
         return ((self.volume_claim_templates or []) + (self._build_persistent_volume_claims() or [])) or None
@@ -320,7 +319,7 @@ class Workflow(
             metadata=ObjectMeta(),
             spec=_ModelWorkflowSpec(),
         )
-        return Workflow._WorkflowModelMapper.build_model(self, model_workflow)
+        return _WorkflowModelMapper.build_model(self, model_workflow)
 
     def to_dict(self) -> Any:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
