@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import inspect
+try:
+    from inspect import get_annotations
+except ImportError:
+    from hera.workflows._inspect import get_annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from collections import ChainMap
+
 
 from pydantic import root_validator, validator
 
@@ -903,6 +909,12 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
 
 class ParseFromYamlMixin(BaseMixin):
     @classmethod
+    def _get_all_annotations(cls: ParseableT) -> Dict:
+        """Gets all annotations of this class and any parent classes."""
+        return ChainMap(*(get_annotations(c) for c in cls.__mro__))
+
+
+    @classmethod
     def _from_model(cls: ParseableT, model: ModelT) -> ParseableT:
         """Parse from given model to cls's type."""
         raise NotImplementedError
@@ -914,15 +926,20 @@ class ParseFromYamlMixin(BaseMixin):
 
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
-            self.model_path = model_path.split(".")
+            self.model_path = None
+            self.builder = hera_builder
 
+            if not model_path:
+                # Allows overriding parent attribute annotations to remove the mapping
+                return
+
+            self.model_path = model_path.split(".")
             curr_class = self._get_model_class()
             for key in self.model_path:
                 if key not in curr_class.__fields__:
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
                 curr_class = curr_class.__fields__[key].outer_type_
 
-            self.builder = hera_builder
 
         @classmethod
         def _get_model_class(cls: ParseableT) -> Type[ModelT]:

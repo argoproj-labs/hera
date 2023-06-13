@@ -96,7 +96,7 @@ class Workflow(
 
     class _WorkflowModelMapper(ParseFromYamlMixin.ModelMapper):
         @classmethod
-        def _get_model_class(cls: "Workflow") -> Type[_ModelWorkflow]:
+        def _get_model_class(cls) -> Type:
             return _ModelWorkflow
 
     def _build_volume_claim_templates(self) -> Optional[List]:

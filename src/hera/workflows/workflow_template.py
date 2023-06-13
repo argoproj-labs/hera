@@ -12,9 +12,9 @@ from types import ModuleType
 from typing import Any, List, Optional, Type, Union
 
 try:
-    from typing import Annotated, get_args, get_origin
+    from typing import Annotated, get_args, get_origin, get_type_hints
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin
+    from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 from inspect import get_annotations
 from pathlib import Path
 from typing import Any, List, Type, Union
@@ -51,10 +51,13 @@ class WorkflowTemplate(Workflow):
     Workflows.
     """
 
-    class _WorkflowTemplateModelMapper(ParseFromYamlMixin.ModelMapper):
+    class _WorkflowTemplateModelMapper(Workflow._WorkflowModelMapper):
         @classmethod
-        def _get_model_class(cls: "WorkflowTemplate") -> Type[_ModelWorkflowTemplate]:
+        def _get_model_class(cls) -> Type:
             return _ModelWorkflowTemplate
+
+    # Remove status mapping
+    status: Annotated[get_type_hints(Workflow)["status"], _WorkflowTemplateModelMapper("")] = None
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
@@ -127,14 +130,15 @@ class WorkflowTemplate(Workflow):
 
             setattr(curr, attrs[-1], value)
 
-        for attr, annotation in get_annotations(WorkflowTemplate).items():
+        for attr, annotation in WorkflowTemplate._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], WorkflowTemplate._WorkflowTemplateModelMapper
+                get_args(annotation)[1], Workflow._WorkflowModelMapper
             ):
-                mapper: WorkflowTemplate._WorkflowTemplateModelMapper = get_args(annotation)[1]
+                mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
                 # Value comes from builder function if it exists, otherwise directly from the attr
                 value = getattr(self, mapper.builder.__name__)() if mapper.builder is not None else getattr(self, attr)
-                model_attr_setter(mapper.model_path, model_workflow, value)
+                if value:
+                    model_attr_setter(mapper.model_path, model_workflow, value)
 
         return model_workflow
 
@@ -149,12 +153,13 @@ class WorkflowTemplate(Workflow):
 
         workflow = WorkflowTemplate()
 
-        for attr, annotation in get_annotations(WorkflowTemplate).items():
+        for attr, annotation in WorkflowTemplate._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], WorkflowTemplate._WorkflowModelMapper
+                get_args(annotation)[1], Workflow._WorkflowModelMapper
             ):
-                mapper: WorkflowTemplate._WorkflowModelMapper = get_args(annotation)[1]
-                setattr(workflow, attr, model_attr_getter(mapper.model_path, model))
+                mapper: Workflow._WorkflowModelMapper = get_args(annotation)[1]
+                if mapper.model_path:
+                    setattr(workflow, attr, model_attr_getter(mapper.model_path, model))
 
         return workflow
 
