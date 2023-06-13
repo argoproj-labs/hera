@@ -4,7 +4,6 @@ See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
 import time
-from inspect import get_annotations
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Dict, List, Optional, Type, Union
@@ -15,7 +14,7 @@ except ImportError:
     from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from hera.shared import global_config
 from hera.workflows._mixins import (
@@ -96,7 +95,7 @@ class Workflow(
 
     class _WorkflowModelMapper(ParseFromYamlMixin.ModelMapper):
         @classmethod
-        def _get_model_class(cls) -> Type:
+        def _get_model_class(cls) -> Type[_ModelWorkflow]:
             return _ModelWorkflow
 
     def _build_volume_claim_templates(self) -> Optional[List]:

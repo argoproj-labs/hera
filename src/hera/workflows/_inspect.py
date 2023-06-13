@@ -1,24 +1,9 @@
 """ Copy of get_annotations FROM python 3.10 inspect module"""
 
-import abc
-import ast
 import dis
-import collections.abc
-import enum
-import importlib.machinery
-import itertools
-import linecache
-import os
-import re
-import sys
-import tokenize
-import token
-import types
-import warnings
 import functools
-import builtins
-from operator import attrgetter
-from collections import namedtuple, OrderedDict
+import sys
+import types
 
 # Create constants for the compiler flags in Include/code.h
 # We try to get them from dis to avoid duplication
@@ -77,34 +62,34 @@ def get_annotations(obj, *, globals=None, locals=None, eval_str=False):
     """
     if isinstance(obj, type):
         # class
-        obj_dict = getattr(obj, '__dict__', None)
-        if obj_dict and hasattr(obj_dict, 'get'):
-            ann = obj_dict.get('__annotations__', None)
+        obj_dict = getattr(obj, "__dict__", None)
+        if obj_dict and hasattr(obj_dict, "get"):
+            ann = obj_dict.get("__annotations__", None)
             if isinstance(ann, types.GetSetDescriptorType):
                 ann = None
         else:
             ann = None
 
         obj_globals = None
-        module_name = getattr(obj, '__module__', None)
+        module_name = getattr(obj, "__module__", None)
         if module_name:
             module = sys.modules.get(module_name, None)
             if module:
-                obj_globals = getattr(module, '__dict__', None)
+                obj_globals = getattr(module, "__dict__", None)
         obj_locals = dict(vars(obj))
         unwrap = obj
     elif isinstance(obj, types.ModuleType):
         # module
-        ann = getattr(obj, '__annotations__', None)
-        obj_globals = getattr(obj, '__dict__')
+        ann = getattr(obj, "__annotations__", None)
+        obj_globals = getattr(obj, "__dict__")
         obj_locals = None
         unwrap = None
     elif callable(obj):
         # this includes types.Function, types.BuiltinFunctionType,
         # types.BuiltinMethodType, functools.partial, functools.singledispatch,
         # "class funclike" from Lib/test/test_inspect... on and on it goes.
-        ann = getattr(obj, '__annotations__', None)
-        obj_globals = getattr(obj, '__globals__', None)
+        ann = getattr(obj, "__annotations__", None)
+        obj_globals = getattr(obj, "__globals__", None)
         obj_locals = None
         unwrap = obj
     else:
@@ -124,7 +109,7 @@ def get_annotations(obj, *, globals=None, locals=None, eval_str=False):
 
     if unwrap is not None:
         while True:
-            if hasattr(unwrap, '__wrapped__'):
+            if hasattr(unwrap, "__wrapped__"):
                 unwrap = unwrap.__wrapped__
                 continue
             if isinstance(unwrap, functools.partial):
@@ -139,8 +124,7 @@ def get_annotations(obj, *, globals=None, locals=None, eval_str=False):
     if locals is None:
         locals = obj_locals
 
-    return_value = {key:
-        value if not isinstance(value, str) else eval(value, globals, locals)
-        for key, value in ann.items() }
+    return_value = {
+        key: value if not isinstance(value, str) else eval(value, globals, locals) for key, value in ann.items()
+    }
     return return_value
-

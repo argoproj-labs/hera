@@ -3,28 +3,17 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
-try:
-    from inspect import get_annotations
-except ImportError:
-    from hera.workflows._inspect import get_annotations
-
-from types import ModuleType
-from typing import Any, List, Optional, Type, Union
+from typing import Type, Union
 
 try:
     from typing import Annotated, get_args, get_origin, get_type_hints
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin, get_type_hints
-from inspect import get_annotations
 from pathlib import Path
-from typing import Any, List, Type, Union
 
-from pydantic import BaseModel, validator
+from pydantic import validator
 
 from hera.exceptions import NotFound
-from hera.workflows._mixins import (
-    ParseFromYamlMixin,
-)
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -36,14 +25,6 @@ from hera.workflows.models import (
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
 
-_yaml: Optional[ModuleType] = None
-try:
-    import yaml
-
-    _yaml = yaml
-except ImportError:
-    _yaml = None
-
 
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
@@ -53,10 +34,10 @@ class WorkflowTemplate(Workflow):
 
     class _WorkflowTemplateModelMapper(Workflow._WorkflowModelMapper):
         @classmethod
-        def _get_model_class(cls) -> Type:
+        def _get_model_class(cls) -> Type[_ModelWorkflowTemplate]:
             return _ModelWorkflowTemplate
 
-    # Remove status mapping
+    # Removes status mapping
     status: Annotated[get_type_hints(Workflow)["status"], _WorkflowTemplateModelMapper("")] = None
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate

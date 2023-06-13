@@ -1,28 +1,20 @@
 from __future__ import annotations
 
 import inspect
+
 try:
     from inspect import get_annotations
 except ImportError:
     from hera.workflows._inspect import get_annotations
+from collections import ChainMap
 from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
-from collections import ChainMap
 
 try:
-    from typing import Annotated, get_args, get_origin, get_type_hints
+    from typing import Annotated, get_args, get_origin
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin, get_type_hints
-
-_yaml: Optional[ModuleType] = None
-try:
-    import yaml
-
-    _yaml = yaml
-except ImportError:
-    _yaml = None
-
+    from typing_extensions import Annotated, get_args, get_origin
 
 from pydantic import BaseModel, root_validator, validator
 
@@ -84,6 +76,14 @@ if TYPE_CHECKING:
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
+
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
 
 InputsT = Optional[
     Union[
@@ -952,9 +952,8 @@ class ParseFromYamlMixin(BaseMixin):
 
             return getattr(curr, attrs[-1])
 
-
         @classmethod
-        def _get_model_class(cls: ParseableT) -> Type[ModelT]:
+        def _get_model_class(cls) -> Type[ModelT]:
             raise NotImplementedError
 
     @classmethod
@@ -984,11 +983,11 @@ class ParseFromYamlMixin(BaseMixin):
         model_workflow = model.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
         return cls._from_model(model_workflow)
 
-
     @classmethod
     def from_yaml(cls: ParseableT, yaml_file: Union[Path, str]) -> ParseableT:
         """Parse from given yaml_file to cls's type."""
         raise NotImplementedError
+
 
 class ExperimentalMixin(BaseMixin):
     _experimental_warning_message: str = (
