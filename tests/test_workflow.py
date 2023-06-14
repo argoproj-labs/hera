@@ -15,11 +15,13 @@ from hera.shared import global_config
 from hera.workflows import (
     CronWorkflow as HeraCronWorkflow,
     Workflow as HeraWorkflow,
+    WorkflowTemplate as HeraWorkflowTemplate,
 )
 from hera.workflows._unparse import roundtrip
 from hera.workflows.models import (
     CronWorkflow as ModelCronWorkflow,
     Workflow as ModelWorkflow,
+    WorkflowTemplate as ModelWorkflowTemplate,
 )
 
 ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
@@ -53,6 +55,19 @@ def _transform_workflow(obj):
     return w.dict()
 
 
+def _transform_workflow_template(obj):
+    w = ModelWorkflowTemplate.parse_obj(obj)
+    w.metadata.annotations = {}
+    w.metadata.labels = {}
+
+    if w.spec.templates is not None:
+        w.spec.templates.sort(key=lambda t: t.name)
+        for t in w.spec.templates:
+            if t.script:
+                t.script.source = roundtrip(t.script.source)
+    return w.dict()
+
+
 def _transform_cron_workflow(obj):
     wt = ModelCronWorkflow.parse_obj(obj)
     wt.spec.workflow_spec.templates.sort(key=lambda t: t.name)
@@ -66,12 +81,13 @@ def _transform_cron_workflow(obj):
 
 def _compare_workflows(hera_workflow, w1: Dict, w2: Dict):
     if isinstance(hera_workflow, HeraCronWorkflow):
-        return _transform_cron_workflow(w1) == _transform_cron_workflow(w2)
-
-    if isinstance(hera_workflow, HeraWorkflow):
-        return _transform_workflow(w1) == _transform_workflow(w2)
-
-    assert False, "Unsupported workflow type"
+        assert _transform_cron_workflow(w1) == _transform_cron_workflow(w2)
+    elif isinstance(hera_workflow, HeraWorkflowTemplate):
+        assert _transform_workflow_template(w1) == _transform_workflow_template(w2)
+    elif isinstance(hera_workflow, HeraWorkflow):
+        assert _transform_workflow(w1) == _transform_workflow(w2)
+    else:
+        assert False, f"Unsupported workflow type {hera_workflow}"
 
 
 @pytest.mark.parametrize(
@@ -91,8 +107,22 @@ def test_hera_output(module_name):
     if _generate_yaml(generated_yaml_path):
         generated_yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
 
+    # Check there have been no regressions from the generated yaml committed in the repo
     assert generated_yaml_path.exists()
-    assert _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
+    _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
+
+    if isinstance(workflow, HeraWorkflowTemplate):
+        assert workflow == HeraWorkflowTemplate.from_dict(workflow.to_dict())
+        assert workflow == HeraWorkflowTemplate.from_yaml(workflow.to_yaml())
+        assert workflow == HeraWorkflowTemplate.from_file(generated_yaml_path)
+    elif isinstance(workflow, HeraCronWorkflow):
+        assert workflow == HeraCronWorkflow.from_dict(workflow.to_dict())
+        assert workflow == HeraCronWorkflow.from_yaml(workflow.to_yaml())
+        assert workflow == HeraCronWorkflow.from_file(generated_yaml_path)
+    elif isinstance(workflow, HeraWorkflow):
+        assert workflow == HeraWorkflow.from_dict(workflow.to_dict())
+        assert workflow == HeraWorkflow.from_yaml(workflow.to_yaml())
+        assert workflow == HeraWorkflow.from_file(generated_yaml_path)
 
 
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
@@ -119,11 +149,11 @@ def test_hera_output_upstream(module_name):
 
     # Check there have been no regressions from the generated yaml
     assert generated_yaml_path.exists()
-    assert _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
+    _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
 
     # Check there have been no regressions with the upstream source
     assert upstream_yaml_path.exists()
-    assert _compare_workflows(workflow, output, yaml.safe_load(upstream_yaml_path.read_text()))
+    _compare_workflows(workflow, output, yaml.safe_load(upstream_yaml_path.read_text()))
 
 
 def test_to_file(tmpdir):

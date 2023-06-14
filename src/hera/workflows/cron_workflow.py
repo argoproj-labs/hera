@@ -3,10 +3,19 @@
 See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
-from __future__ import annotations
+from pathlib import Path
+from typing import Dict, Optional, Type, Union
 
-from typing import Optional
+try:
+    from typing import Annotated, get_args, get_origin
+except ImportError:
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
+from hera.shared._base_model import BaseModel
+from hera.workflows._mixins import (
+    ParseFromYamlMixin,
+    _model_attr_setter,
+)
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
@@ -16,7 +25,39 @@ from hera.workflows.models import (
     ObjectMeta,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import Workflow
+from hera.workflows.workflow import Workflow, _WorkflowModelMapper
+
+
+class _CronWorkflowModelMapper(_WorkflowModelMapper):
+    @classmethod
+    def _get_model_class(cls) -> Type[BaseModel]:
+        return _ModelCronWorkflow
+
+    @classmethod
+    def build_model(
+        cls, hera_class: Type[ParseFromYamlMixin], hera_obj: ParseFromYamlMixin, model: TWorkflow
+    ) -> TWorkflow:
+        assert isinstance(hera_obj, ParseFromYamlMixin)
+
+        for attr, annotation in hera_class._get_all_annotations().items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+            ):
+                mapper = get_args(annotation)[1]
+                if not isinstance(mapper, _CronWorkflowModelMapper) and mapper.model_path[0] == "spec":
+                    # Skip attributes mapped to spec by parent _WorkflowModelMapper
+                    continue
+
+                # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
+                value = (
+                    getattr(hera_obj, mapper.builder.__name__)()
+                    if mapper.builder is not None
+                    else getattr(hera_obj, attr)
+                )
+                if value is not None:
+                    _model_attr_setter(mapper.model_path, model, value)
+
+        return model
 
 
 class CronWorkflow(Workflow):
@@ -27,53 +68,34 @@ class CronWorkflow(Workflow):
     spec. See https://argoproj.github.io/argo-workflows/fields/#cronworkflow
     """
 
-    concurrency_policy: Optional[str] = None
-    failed_jobs_history_limit: Optional[int] = None
-    schedule: str
-    starting_deadline_seconds: Optional[int] = None
-    successful_jobs_history_limit: Optional[int] = None
-    cron_suspend: Optional[bool] = None
-    timezone: Optional[str] = None
-    cron_status: Optional[CronWorkflowStatus] = None
+    concurrency_policy: Annotated[Optional[str], _CronWorkflowModelMapper("spec.concurrency_policy")] = None
+    failed_jobs_history_limit: Annotated[
+        Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")
+    ] = None
+    schedule: Annotated[str, _CronWorkflowModelMapper("spec.schedule")]
+    starting_deadline_seconds: Annotated[
+        Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")
+    ] = None
+    successful_jobs_history_limit: Annotated[
+        Optional[int], _CronWorkflowModelMapper("spec.successful_jobs_history_limit")
+    ] = None
+    cron_suspend: Annotated[Optional[bool], _CronWorkflowModelMapper("spec.suspend")] = None
+    timezone: Annotated[Optional[str], _CronWorkflowModelMapper("spec.timezone")] = None
+    cron_status: Annotated[Optional[CronWorkflowStatus], _CronWorkflowModelMapper("status")] = None
 
     def build(self) -> TWorkflow:
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
-        return _ModelCronWorkflow(
-            api_version=self.api_version,
-            kind=self.kind,
-            metadata=ObjectMeta(
-                annotations=self.annotations,
-                cluster_name=self.cluster_name,
-                creation_timestamp=self.creation_timestamp,
-                deletion_grace_period_seconds=self.deletion_grace_period_seconds,
-                deletion_timestamp=self.deletion_timestamp,
-                finalizers=self.finalizers,
-                generate_name=self.generate_name,
-                generation=self.generation,
-                labels=self.labels,
-                managed_fields=self.managed_fields,
-                name=self.name,
-                namespace=self.namespace,
-                owner_references=self.owner_references,
-                resource_version=self.resource_version,
-                self_link=self.self_link,
-                uid=self.uid,
-            ),
+        model_workflow = _ModelCronWorkflow(
+            metadata=ObjectMeta(),
             spec=CronWorkflowSpec(
-                concurrency_policy=self.concurrency_policy,
-                failed_jobs_history_limit=self.failed_jobs_history_limit,
-                schedule=self.schedule,
-                starting_deadline_seconds=self.starting_deadline_seconds,
-                successful_jobs_history_limit=self.successful_jobs_history_limit,
-                suspend=self.cron_suspend,
-                timezone=self.timezone,
-                workflow_metadata=None,
+                schedule="",
                 workflow_spec=super().build().spec,
             ),
-            status=self.cron_status,
         )
+
+        return _CronWorkflowModelMapper.build_model(CronWorkflow, self, model_workflow)
 
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the CronWorkflow on the Argo cluster."""
@@ -90,6 +112,35 @@ class CronWorkflow(Workflow):
         return self.workflows_service.lint_cron_workflow(
             LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
+
+    @classmethod
+    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+        """Create a CronWorkflow from a CronWorkflow contained in a dict.
+
+        Examples:
+            my_cron_workflow = CronWorkflow(...)
+            my_cron_workflow == CronWorkflow.from_dict(my_cron_workflow.to_dict())
+        """
+        return cls._from_dict(model_dict, _ModelCronWorkflow)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+        """Create a CronWorkflow from a CronWorkflow contained in a YAML string.
+
+        Usage:
+            my_cron_workflow = CronWorkflow.from_yaml(yaml_str)
+        """
+        return cls._from_yaml(yaml_str, _ModelCronWorkflow)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+        """Create a CronWorkflow from a CronWorkflow contained in a YAML file.
+
+        Usage:
+            yaml_file = Path(...)
+            my_workflow_template = CronWorkflow.from_file(yaml_file)
+        """
+        return cls._from_file(yaml_file, _ModelCronWorkflow)
 
 
 __all__ = ["CronWorkflow"]
