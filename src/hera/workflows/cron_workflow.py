@@ -3,15 +3,18 @@
 See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
-from __future__ import annotations
-
 from typing import Optional, Type
 
 try:
-    from typing import Annotated
+    from typing import Annotated, get_args, get_origin
 except ImportError:
-    from typing_extensions import Annotated
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
+from hera.shared._base_model import BaseModel
+from hera.workflows._mixins import (
+    ParseFromYamlMixin,
+    _model_attr_setter,
+)
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
@@ -21,12 +24,40 @@ from hera.workflows.models import (
     ObjectMeta,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import _WorkflowModelMapper, Workflow
+from hera.workflows.workflow import Workflow, _WorkflowModelMapper
+
 
 class _CronWorkflowModelMapper(_WorkflowModelMapper):
     @classmethod
-    def _get_model_class(cls) -> Type[_ModelCronWorkflow]:
+    def _get_model_class(cls) -> Type[BaseModel]:
         return _ModelCronWorkflow
+
+    @classmethod
+    def build_model(
+        cls, hera_class: Type[ParseFromYamlMixin], hera_obj: ParseFromYamlMixin, model: TWorkflow
+    ) -> TWorkflow:
+        assert isinstance(hera_obj, ParseFromYamlMixin)
+
+        for attr, annotation in hera_class._get_all_annotations().items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+            ):
+                mapper = get_args(annotation)[1]
+                if not isinstance(mapper, _CronWorkflowModelMapper) and mapper.model_path[0] == "spec":
+                    # Skip attributes mapped to spec by parent _WorkflowModelMapper
+                    continue
+
+                # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
+                value = (
+                    getattr(hera_obj, mapper.builder.__name__)()
+                    if mapper.builder is not None
+                    else getattr(hera_obj, attr)
+                )
+                if value is not None:
+                    _model_attr_setter(mapper.model_path, model, value)
+
+        return model
+
 
 class CronWorkflow(Workflow):
     """CronWorkflow allows a user to run a Workflow on a recurring basis.
@@ -51,9 +82,6 @@ class CronWorkflow(Workflow):
     timezone: Annotated[Optional[str], _CronWorkflowModelMapper("spec.timezone")] = None
     cron_status: Annotated[Optional[CronWorkflowStatus], _CronWorkflowModelMapper("status")] = None
 
-    entrypoint: Annotated[Optional[str], _WorkflowModelMapper("workflow_spec.entrypoint")] = None
-
-
     def build(self) -> TWorkflow:
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
@@ -66,7 +94,7 @@ class CronWorkflow(Workflow):
             ),
         )
 
-        return _CronWorkflowModelMapper.build_model(self, model_workflow)
+        return _CronWorkflowModelMapper.build_model(CronWorkflow, self, model_workflow)
 
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the CronWorkflow on the Argo cluster."""
@@ -83,5 +111,6 @@ class CronWorkflow(Workflow):
         return self.workflows_service.lint_cron_workflow(
             LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
+
 
 __all__ = ["CronWorkflow"]

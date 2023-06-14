@@ -3,33 +3,37 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
-from typing import Type, Union
+from typing import Optional, Type, Union
 
 try:
-    from typing import Annotated, get_type_hints
+    from typing import Annotated
 except ImportError:
-    from typing_extensions import Annotated, get_type_hints
+    from typing_extensions import Annotated  # type: ignore
 from pathlib import Path
 
 from pydantic import validator
 
 from hera.exceptions import NotFound
+from hera.shared._base_model import BaseModel
+from hera.workflows._mixins import ParseFromYamlMixin
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
+    WorkflowStatus as _ModelWorkflowStatus,
     WorkflowTemplate as _ModelWorkflowTemplate,
     WorkflowTemplateCreateRequest,
     WorkflowTemplateLintRequest,
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import _WorkflowModelMapper, Workflow
+from hera.workflows.workflow import Workflow, _WorkflowModelMapper
 
 
 class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
     @classmethod
-    def _get_model_class(cls) -> Type[_ModelWorkflowTemplate]:
-        return _ModelWorkflowTemplate
+    def _get_model_class(cls) -> Type[BaseModel]:
+        return _ModelWorkflowTemplate  # type: ignore
+
 
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
@@ -38,7 +42,7 @@ class WorkflowTemplate(Workflow):
     """
 
     # Removes status mapping
-    status: Annotated[get_type_hints(Workflow)["status"], _WorkflowTemplateModelMapper("")] = None
+    status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowTemplateModelMapper("")] = None
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
@@ -104,10 +108,10 @@ class WorkflowTemplate(Workflow):
             spec=_ModelWorkflowSpec(),
         )
 
-        return _WorkflowTemplateModelMapper.build_model(self, model_workflow)
+        return _WorkflowTemplateModelMapper.build_model(WorkflowTemplate, self, model_workflow)
 
     @classmethod
-    def from_yaml(cls: "WorkflowTemplate", yaml_file: Union[Path, str]) -> "WorkflowTemplate":
+    def from_yaml(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
 
         Usage:

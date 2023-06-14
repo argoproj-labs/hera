@@ -14,11 +14,12 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 try:
     from typing import Annotated, get_args, get_origin
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import root_validator, validator
 
 from hera.shared import BaseMixin, global_config
+from hera.shared._base_model import BaseModel
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
@@ -67,7 +68,7 @@ from hera.workflows.models import (
     VolumeMount,
 )
 from hera.workflows.parameter import MISSING, Parameter
-from hera.workflows.protocol import Templatable
+from hera.workflows.protocol import Templatable, TWorkflow
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
@@ -106,6 +107,16 @@ ArgumentsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
+MetricsT = Optional[
+    Union[
+        _BaseMetric,
+        List[_BaseMetric],
+        Metrics,
+        ModelPrometheus,
+        List[ModelPrometheus],
+        ModelMetrics,
+    ]
+]
 EnvT = Optional[
     Union[
         _BaseEnv,
@@ -118,8 +129,6 @@ EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, 
 VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolume, _BaseVolume]]]]
 TContext = TypeVar("TContext", bound="ContextMixin")
 THookable = TypeVar("THookable", bound="HookMixin")
-ParseableT = TypeVar("ParseableT", bound="ParseFromYamlMixin")
-ModelT = TypeVar("ModelT", bound="BaseModel")
 
 
 class HookMixin(BaseMixin):
@@ -301,16 +310,7 @@ class EnvMixin(BaseMixin):
 
 
 class MetricsMixin(BaseMixin):
-    metrics: Optional[
-        Union[
-            _BaseMetric,
-            List[_BaseMetric],
-            Metrics,
-            ModelPrometheus,
-            List[ModelPrometheus],
-            ModelMetrics,
-        ]
-    ] = None
+    metrics: MetricsT = None
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         if self.metrics is None or isinstance(self.metrics, ModelMetrics):
@@ -948,21 +948,23 @@ class ParseFromYamlMixin(BaseMixin):
                 return
 
             self.model_path = model_path.split(".")
-            curr_class = self._get_model_class()
+            curr_class: Type[BaseModel] = self._get_model_class()
             for key in self.model_path:
                 if key not in curr_class.__fields__:
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
                 curr_class = curr_class.__fields__[key].outer_type_
 
         @classmethod
-        def _get_model_class(cls) -> Type[ModelT]:
+        def _get_model_class(cls) -> Type[BaseModel]:
             raise NotImplementedError
 
         @classmethod
-        def build_model(cls, hera_obj: ParseableT, model: ModelT) -> ModelT:
+        def build_model(
+            cls, hera_class: Type[ParseFromYamlMixin], hera_obj: ParseFromYamlMixin, model: TWorkflow
+        ) -> TWorkflow:
             assert isinstance(hera_obj, ParseFromYamlMixin)
 
-            for attr, annotation in hera_obj._get_all_annotations().items():
+            for attr, annotation in hera_class._get_all_annotations().items():
                 if get_origin(annotation) is Annotated and isinstance(
                     get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
                 ):
@@ -973,18 +975,18 @@ class ParseFromYamlMixin(BaseMixin):
                         if mapper.builder is not None
                         else getattr(hera_obj, attr)
                     )
-                    if value:
+                    if value is not None:
                         _model_attr_setter(mapper.model_path, model, value)
 
             return model
 
     @classmethod
-    def _get_all_annotations(cls: ParseableT) -> Dict:
+    def _get_all_annotations(cls) -> ChainMap:
         """Gets all annotations of this class and any parent classes."""
         return ChainMap(*(get_annotations(c) for c in cls.__mro__))
 
     @classmethod
-    def _from_model(cls: ParseableT, model: ModelT) -> ParseableT:
+    def _from_model(cls, model: BaseModel) -> ParseFromYamlMixin:
         """Parse from given model to cls's type."""
         hera_obj = cls()
 
@@ -999,14 +1001,16 @@ class ParseFromYamlMixin(BaseMixin):
         return hera_obj
 
     @classmethod
-    def _from_yaml(cls: ParseableT, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ParseableT:
+    def _from_yaml(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ParseFromYamlMixin:
         """Parse from given yaml_file to cls's type, using the given model type to call its parse_obj."""
+        if not _yaml:
+            raise ImportError("PyYAML is not installed")
         yaml_file = Path(yaml_file)
         model_workflow = model.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
         return cls._from_model(model_workflow)
 
     @classmethod
-    def from_yaml(cls: ParseableT, yaml_file: Union[Path, str]) -> ParseableT:
+    def from_yaml(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
         """Parse from given yaml_file to cls's type."""
         raise NotImplementedError
 

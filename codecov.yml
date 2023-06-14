@@ -2,6 +2,7 @@ ignore:
     - "src/hera/workflows/_task_input.py"  # ignored because it contains a custom implementation to support `with_items`
     - "src/hera/workflows/models/**"  # ignored because it contains auto-generated code
     - "src/hera/workflows/service.py"  # ignored because it contains auto-generated code
+    - "src/hera/workflows/_inspect.py"  # ignored because it's a copy of the inspect module from 3.10
     - "src/hera/events/models/**"  # ignored because it contains auto-generated code
     - "src/hera/events/service.py"  # ignored because it contains auto-generated code
 coverage:

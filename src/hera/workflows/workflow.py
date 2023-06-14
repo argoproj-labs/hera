@@ -9,21 +9,25 @@ from types import ModuleType
 from typing import Any, Dict, List, Optional, Type, Union
 
 try:
-    from typing import Annotated, get_args, get_type_hints
+    from typing import Annotated, get_args
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_type_hints
+    from typing_extensions import Annotated, get_args  # type: ignore
 
 
 from pydantic import validator
 
 from hera.shared import global_config
+from hera.shared._base_model import BaseModel
 from hera.workflows._mixins import (
     ArgumentsMixin,
+    ArgumentsT,
     ContextMixin,
     HookMixin,
     MetricsMixin,
+    MetricsT,
     ParseFromYamlMixin,
     VolumeMixin,
+    VolumesT,
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
@@ -73,10 +77,12 @@ except ImportError:
 
 ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
+
 class _WorkflowModelMapper(ParseFromYamlMixin.ModelMapper):
     @classmethod
-    def _get_model_class(cls) -> Type[_ModelWorkflow]:
+    def _get_model_class(cls) -> Type[BaseModel]:
         return _ModelWorkflow
+
 
 class Workflow(
     ArgumentsMixin,
@@ -234,15 +240,14 @@ class Workflow(
 
     # Override types for mixin fields
     arguments: Annotated[
-        get_type_hints(ArgumentsMixin)["arguments"],
+        ArgumentsT,
         _WorkflowModelMapper("spec.arguments", ArgumentsMixin._build_arguments),
     ]
     metrics: Annotated[
-        get_type_hints(MetricsMixin)["metrics"], _WorkflowModelMapper("spec.metrics", MetricsMixin._build_metrics)
+        MetricsT,
+        _WorkflowModelMapper("spec.metrics", MetricsMixin._build_metrics),
     ]
-    volumes: Annotated[
-        get_type_hints(VolumeMixin)["volumes"], _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)
-    ]
+    volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)]
 
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
@@ -319,7 +324,7 @@ class Workflow(
             metadata=ObjectMeta(),
             spec=_ModelWorkflowSpec(),
         )
-        return _WorkflowModelMapper.build_model(self, model_workflow)
+        return _WorkflowModelMapper.build_model(Workflow, self, model_workflow)
 
     def to_dict(self) -> Any:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
@@ -427,7 +432,7 @@ class Workflow(
         return output_path.absolute()
 
     @classmethod
-    def from_yaml(cls: "Workflow", yaml_file: Union[Path, str]) -> "Workflow":
+    def from_yaml(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
         """Create a Workflow from a Workflow contained in a YAML file.
 
         Usage:
