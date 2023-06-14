@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Union
 from typing_extensions import Protocol, runtime_checkable
 
 from hera.workflows.models import (
+    ClusterWorkflowTemplate,
     ContainerSetTemplate,
     CronWorkflow,
     DAGTemplate,
@@ -26,6 +27,7 @@ TTemplate = Union[
 
 TWorkflow = Union[
     CronWorkflow,
+    ClusterWorkflowTemplate,
     Workflow,
     WorkflowTemplate,
 ]

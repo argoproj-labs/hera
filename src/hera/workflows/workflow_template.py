@@ -3,6 +3,9 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
+
+from typing import Optional
+
 from pydantic import validator
 
 from hera.exceptions import NotFound
@@ -15,13 +18,13 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import Workflow
+from hera.workflows.workflow import _TRUNCATE_LENGTH, Workflow
 
 
 class WorkflowTemplate(Workflow):
-    """WorkflowTemplates are definitions of Workflows that live in your cluster. This allows you
-    to create a library of frequently-used templates and reuse them by referencing them from your
-    Workflows.
+    """WorkflowTemplates are definitions of Workflows that live in your namespace in your cluster.
+    This allows you to create a library of frequently-used templates and reuse them by referencing
+    them from your Workflows.
     """
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
@@ -152,6 +155,40 @@ class WorkflowTemplate(Workflow):
                 workflow_template_ref=self.workflow_template_ref,
             ),
         )
+
+    def _get_as_workflow(self, generate_name: Optional[str]) -> Workflow:
+        workflow = Workflow(**self.dict())
+        workflow.kind = "Workflow"
+
+        if generate_name is not None:
+            workflow.generate_name = generate_name
+        else:
+            # As this function is mainly for improved DevEx when iterating on a WorkflowTemplate, we do a basic
+            # truncation of the WT's name in case it being > _TRUNCATE_LENGTH, to assign to generate_name.
+            assert workflow.name is not None
+            workflow.generate_name = workflow.name[:_TRUNCATE_LENGTH]
+
+        workflow.name = None
+
+        return workflow
+
+    def create_as_workflow(
+        self,
+        generate_name: Optional[str] = None,
+        wait: bool = False,
+        poll_interval: int = 5,
+    ) -> TWorkflow:
+        """Run this WorkflowTemplate instantly as a Workflow.
+
+        If generate_name is given, the workflow created uses generate_name as a prefix, as per the usual for
+        hera.workflows.Workflow.generate_name. If not given, the WorkflowTemplate's name will be used, truncated to 57
+        chars and appended with a hyphen.
+
+        Note: this function does not require the WorkflowTemplate to already exist on the cluster
+        """
+
+        workflow = self._get_as_workflow(generate_name)
+        return workflow.create(wait=wait, poll_interval=poll_interval)
 
 
 __all__ = ["WorkflowTemplate"]
