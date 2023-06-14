@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, Optional, Type, Union
 
 try:
-    from typing import Annotated, get_args, get_origin
+    from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 

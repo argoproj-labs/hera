@@ -9,7 +9,7 @@ from types import ModuleType
 from typing import Any, Dict, List, Optional, Type, Union
 
 try:
-    from typing import Annotated, get_args
+    from typing import Annotated, get_args  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args  # type: ignore
 

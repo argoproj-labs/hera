@@ -4,15 +4,15 @@ import inspect
 from pathlib import Path
 
 try:
-    from inspect import get_annotations
+    from inspect import get_annotations  # type: ignore
 except ImportError:
-    from hera.workflows._inspect import get_annotations
+    from hera.workflows._inspect import get_annotations  # type: ignore
 from collections import ChainMap
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 try:
-    from typing import Annotated, get_args, get_origin
+    from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
