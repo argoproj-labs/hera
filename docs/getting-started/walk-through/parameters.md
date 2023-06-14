@@ -2,7 +2,7 @@
 
 In [Hello World](hello-world.md), a simple use of parameters was introduced, namely a Python function that takes
 kwargs. We'll now explore how Hera exposes other features of Argo's
-[Parameters](https://argoproj.github.io/argo-workflows/fields/#Parameter).
+[Parameters](https://argoproj.github.io/argo-workflows/fields/#parameter).
 
 ## Default Values
 
