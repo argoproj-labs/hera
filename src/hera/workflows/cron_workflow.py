@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from hera.exceptions import NotFound
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
@@ -14,6 +15,7 @@ from hera.workflows.models import (
     CronWorkflowStatus,
     LintCronWorkflowRequest,
     ObjectMeta,
+    UpdateCronWorkflowRequest,
 )
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow
@@ -35,6 +37,54 @@ class CronWorkflow(Workflow):
     cron_suspend: Optional[bool] = None
     timezone: Optional[str] = None
     cron_status: Optional[CronWorkflowStatus] = None
+
+    def create(self) -> TWorkflow:  # type: ignore
+        """Creates the CronWorkflow on the Argo cluster."""
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        return self.workflows_service.create_cron_workflow(
+            CreateCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
+        )
+
+    def get(self) -> TWorkflow:
+        """Attempts to get a cron workflow based on the parameters of this template e.g. name + namespace"""
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        assert self.name, "workflow name not defined"
+        return self.workflows_service.get_cron_workflow(name=self.name, namespace=self.namespace)
+
+    def update(self) -> TWorkflow:
+        """
+        Attempts to perform a workflow template update based on the parameters of this template
+        e.g. name, namespace. Note that this creates the template if it does not exist. In addition, this performs
+        a get prior to updating to get the resource version to update in the first place. If you know the template
+        does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
+        """
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        assert self.name, "workflow name not defined"
+        # we always need to do a get prior to updating to get the resource version to update in the first place
+        # https://github.com/argoproj/argo-workflows/pull/5465#discussion_r597797052
+
+        template = self.build()
+        try:
+            curr = self.get()
+            template.metadata.resource_version = curr.metadata.resource_version
+        except NotFound:
+            return self.create()
+        return self.workflows_service.update_cron_workflow(
+            self.name,
+            UpdateCronWorkflowRequest(template=template),
+            namespace=self.namespace,
+        )
+
+    def lint(self) -> TWorkflow:
+        """Lints the CronWorkflow using the Argo cluster."""
+        assert self.workflows_service, "workflow service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        return self.workflows_service.lint_cron_workflow(
+            LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
+        )
 
     def build(self) -> TWorkflow:
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
@@ -73,22 +123,6 @@ class CronWorkflow(Workflow):
                 workflow_spec=super().build().spec,
             ),
             status=self.cron_status,
-        )
-
-    def create(self) -> TWorkflow:  # type: ignore
-        """Creates the CronWorkflow on the Argo cluster."""
-        assert self.workflows_service, "workflow service not initialized"
-        assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.create_cron_workflow(
-            CreateCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
-        )
-
-    def lint(self) -> TWorkflow:
-        """Lints the CronWorkflow using the Argo cluster."""
-        assert self.workflows_service, "workflow service not initialized"
-        assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.lint_cron_workflow(
-            LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
 
 
