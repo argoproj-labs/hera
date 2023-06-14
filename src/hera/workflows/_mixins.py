@@ -996,7 +996,9 @@ class ParseFromYamlMixin(BaseMixin):
             ):
                 mapper = get_args(annotation)[1]
                 if mapper.model_path:
-                    setattr(hera_obj, attr, _model_attr_getter(mapper.model_path, model))
+                    value = _model_attr_getter(mapper.model_path, model)
+                    if value is not None:
+                        setattr(hera_obj, attr, value)
 
         return hera_obj
 
