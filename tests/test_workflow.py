@@ -107,14 +107,21 @@ def test_hera_output(module_name):
     if _generate_yaml(generated_yaml_path):
         generated_yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
 
+    # Check there have been no regressions from the generated yaml committed in the repo
     assert generated_yaml_path.exists()
     _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
 
     if isinstance(workflow, HeraWorkflowTemplate):
+        assert workflow == HeraWorkflowTemplate.from_dict(workflow.to_dict())
+        assert workflow == HeraWorkflowTemplate.from_yaml(workflow.to_yaml())
         assert workflow == HeraWorkflowTemplate.from_file(generated_yaml_path)
     elif isinstance(workflow, HeraCronWorkflow):
+        assert workflow == HeraCronWorkflow.from_dict(workflow.to_dict())
+        assert workflow == HeraCronWorkflow.from_yaml(workflow.to_yaml())
         assert workflow == HeraCronWorkflow.from_file(generated_yaml_path)
     elif isinstance(workflow, HeraWorkflow):
+        assert workflow == HeraWorkflow.from_dict(workflow.to_dict())
+        assert workflow == HeraWorkflow.from_yaml(workflow.to_yaml())
         assert workflow == HeraWorkflow.from_file(generated_yaml_path)
 
 
