@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 
 try:
     from inspect import get_annotations
 except ImportError:
     from hera.workflows._inspect import get_annotations
 from collections import ChainMap
-from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
@@ -1003,17 +1003,36 @@ class ParseFromYamlMixin(BaseMixin):
         return hera_obj
 
     @classmethod
-    def _from_yaml(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ParseFromYamlMixin:
-        """Parse from given yaml_file to cls's type, using the given model type to call its parse_obj."""
-        if not _yaml:
-            raise ImportError("PyYAML is not installed")
-        yaml_file = Path(yaml_file)
-        model_workflow = model.parse_obj(_yaml.safe_load(yaml_file.read_text(encoding="utf-8")))
+    def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ParseFromYamlMixin:
+        """Parse from given model_dict, using the given model type to call its parse_obj."""
+        model_workflow = model.parse_obj(model_dict)
         return cls._from_model(model_workflow)
 
     @classmethod
-    def from_yaml(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
-        """Parse from given yaml_file to cls's type."""
+    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+        """Parse from given model_dict."""
+        raise NotImplementedError
+
+    @classmethod
+    def _from_yaml(cls, yaml_str: str, model: Type[BaseModel]) -> ParseFromYamlMixin:
+        """Parse from given yaml string, using the given model type to call its parse_obj."""
+        if not _yaml:
+            raise ImportError("PyYAML is not installed")
+        return cls._from_dict(_yaml.safe_load(yaml_str), model)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+        """Parse from given yaml_str."""
+        raise NotImplementedError
+
+    @classmethod
+    def _from_file(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ParseFromYamlMixin:
+        yaml_file = Path(yaml_file)
+        return cls._from_yaml(yaml_file.read_text(encoding="utf-8"), model)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+        """Parse from given yaml_file."""
         raise NotImplementedError
 
 

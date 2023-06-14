@@ -432,13 +432,33 @@ class Workflow(
         return output_path.absolute()
 
     @classmethod
-    def from_yaml(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+        """Create a Workflow from a Workflow contained in a dict.
+
+        Examples:
+            my_workflow = Workflow(...)
+            my_workflow == Workflow.from_dict(my_workflow.to_dict())
+        """
+        return cls._from_dict(model_dict, _ModelWorkflow)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+        """Create a Workflow from a Workflow contained in a YAML string.
+
+        Usage:
+            my_workflow = Workflow.from_yaml(yaml_str)
+        """
+        return cls._from_yaml(yaml_str, _ModelWorkflow)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
         """Create a Workflow from a Workflow contained in a YAML file.
 
         Usage:
-            my_workflow = Workflow.from_yaml(yaml_file)
+            yaml_file = Path(...)
+            my_workflow = Workflow.from_file(yaml_file)
         """
-        return cls._from_yaml(yaml_file, _ModelWorkflow)
+        return cls._from_file(yaml_file, _ModelWorkflow)
 
 
 __all__ = ["Workflow"]

@@ -3,7 +3,8 @@
 See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
-from typing import Optional, Type
+from pathlib import Path
+from typing import Dict, Optional, Type, Union
 
 try:
     from typing import Annotated, get_args, get_origin
@@ -111,6 +112,35 @@ class CronWorkflow(Workflow):
         return self.workflows_service.lint_cron_workflow(
             LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
+
+    @classmethod
+    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+        """Create a CronWorkflow from a CronWorkflow contained in a dict.
+
+        Examples:
+            my_cron_workflow = CronWorkflow(...)
+            my_cron_workflow == CronWorkflow.from_dict(my_cron_workflow.to_dict())
+        """
+        return cls._from_dict(model_dict, _ModelCronWorkflow)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+        """Create a CronWorkflow from a CronWorkflow contained in a YAML string.
+
+        Usage:
+            my_cron_workflow = CronWorkflow.from_yaml(yaml_str)
+        """
+        return cls._from_yaml(yaml_str, _ModelCronWorkflow)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+        """Create a CronWorkflow from a CronWorkflow contained in a YAML file.
+
+        Usage:
+            yaml_file = Path(...)
+            my_workflow_template = CronWorkflow.from_file(yaml_file)
+        """
+        return cls._from_file(yaml_file, _ModelCronWorkflow)
 
 
 __all__ = ["CronWorkflow"]

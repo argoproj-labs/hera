@@ -3,13 +3,13 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
-from typing import Optional, Type, Union
+from pathlib import Path
+from typing import Dict, Optional, Type, Union
 
 try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
-from pathlib import Path
 
 from pydantic import validator
 
@@ -111,13 +111,33 @@ class WorkflowTemplate(Workflow):
         return _WorkflowTemplateModelMapper.build_model(WorkflowTemplate, self, model_workflow)
 
     @classmethod
-    def from_yaml(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+        """Create a WorkflowTemplate from a WorkflowTemplate contained in a dict.
+
+        Examples:
+            my_workflow_template = WorkflowTemplate(...)
+            my_workflow_template == WorkflowTemplate.from_dict(my_workflow_template.to_dict())
+        """
+        return cls._from_dict(model_dict, _ModelWorkflowTemplate)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+        """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML string.
+
+        Usage:
+            my_workflow_template = WorkflowTemplate.from_yaml(yaml_str)
+        """
+        return cls._from_yaml(yaml_str, _ModelWorkflowTemplate)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
 
         Usage:
-            my_workflow = WorkflowTemplate.from_yaml(yaml_file)
+            yaml_file = Path(...)
+            my_workflow_template = WorkflowTemplate.from_file(yaml_file)
         """
-        return cls._from_yaml(yaml_file, _ModelWorkflowTemplate)
+        return cls._from_file(yaml_file, _ModelWorkflowTemplate)
 
 
 __all__ = ["WorkflowTemplate"]
