@@ -114,15 +114,12 @@ def test_hera_output(module_name):
     if isinstance(workflow, HeraWorkflowTemplate):
         assert workflow == HeraWorkflowTemplate.from_dict(workflow.to_dict())
         assert workflow == HeraWorkflowTemplate.from_yaml(workflow.to_yaml())
-        assert workflow == HeraWorkflowTemplate.from_file(generated_yaml_path)
     elif isinstance(workflow, HeraCronWorkflow):
         assert workflow == HeraCronWorkflow.from_dict(workflow.to_dict())
         assert workflow == HeraCronWorkflow.from_yaml(workflow.to_yaml())
-        assert workflow == HeraCronWorkflow.from_file(generated_yaml_path)
     elif isinstance(workflow, HeraWorkflow):
         assert workflow == HeraWorkflow.from_dict(workflow.to_dict())
         assert workflow == HeraWorkflow.from_yaml(workflow.to_yaml())
-        assert workflow == HeraWorkflow.from_file(generated_yaml_path)
 
 
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
@@ -166,4 +163,4 @@ def test_to_file(tmpdir):
 
     # THEN
     assert yaml_path.exists()
-    assert workflow.to_dict() == yaml.safe_load(yaml_path.read_text())
+    assert workflow == HeraWorkflow.from_file(yaml_path)
