@@ -921,7 +921,11 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
 
 
-def _model_attr_setter(attrs: List[str], model: BaseModel, value: Any):
+def _set_model_attr(model: BaseModel, attrs: List[str], value: Any):
+    # The `attrs` list represents a path to an attribute in `model`, whose attributes
+    # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
+    # BaseModel set to `curr`, then call `setattr` on that BaseModel, using the last attribute
+    # name in attrs, and the value passed in.
     curr: BaseModel = model
     for attr in attrs[:-1]:
         curr = getattr(curr, attr)
@@ -929,7 +933,12 @@ def _model_attr_setter(attrs: List[str], model: BaseModel, value: Any):
     setattr(curr, attrs[-1], value)
 
 
-def _model_attr_getter(attrs: List[str], model: BaseModel) -> Any:
+def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
+    # This is almost the same as _set_model_attr.
+    # The `attrs` list represents a path to an attribute in `model`, whose attributes
+    # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
+    # BaseModel set to `curr`, then `getattr` on that BaseModel, using the last attribute
+    # name in attrs.
     curr: BaseModel = model
     for attr in attrs[:-1]:
         curr = getattr(curr, attr)
@@ -976,7 +985,7 @@ class ParseFromYamlMixin(BaseMixin):
                         else getattr(hera_obj, attr)
                     )
                     if value is not None:
-                        _model_attr_setter(mapper.model_path, model, value)
+                        _set_model_attr(model, mapper.model_path, value)
 
             return model
 
@@ -996,7 +1005,7 @@ class ParseFromYamlMixin(BaseMixin):
             ):
                 mapper = get_args(annotation)[1]
                 if mapper.model_path:
-                    value = _model_attr_getter(mapper.model_path, model)
+                    value = _get_model_attr(model, mapper.model_path)
                     if value is not None:
                         setattr(hera_obj, attr, value)
 

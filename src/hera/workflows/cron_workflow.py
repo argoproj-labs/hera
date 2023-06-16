@@ -14,7 +14,7 @@ except ImportError:
 from hera.shared._base_model import BaseModel
 from hera.workflows._mixins import (
     ParseFromYamlMixin,
-    _model_attr_setter,
+    _set_model_attr,
 )
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
@@ -55,7 +55,7 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
                     else getattr(hera_obj, attr)
                 )
                 if value is not None:
-                    _model_attr_setter(mapper.model_path, model, value)
+                    _set_model_attr(model, mapper.model_path, value)
 
         return model
 
