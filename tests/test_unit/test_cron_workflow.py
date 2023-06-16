@@ -28,7 +28,7 @@ def test_cron_workflow_update_existing_cw():
     cw.get.assert_called_once()
     cw.workflows_service.update_cron_workflow.assert_called_once_with(
         "my-cw",
-        UpdateCronWorkflowRequest(template=cw.build()),
+        UpdateCronWorkflowRequest(cron_workflow=cw.build()),
         namespace="my-namespace",
     )
     assert got_cw == cw.build()

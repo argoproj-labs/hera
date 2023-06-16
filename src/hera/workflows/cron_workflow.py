@@ -74,7 +74,7 @@ class CronWorkflow(Workflow):
             return self.create()
         return self.workflows_service.update_cron_workflow(
             self.name,
-            UpdateCronWorkflowRequest(template=template),
+            UpdateCronWorkflowRequest(cron_workflow=template),
             namespace=self.namespace,
         )
 
