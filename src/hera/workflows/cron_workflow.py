@@ -11,12 +11,12 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
+from hera.exceptions import NotFound
 from hera.shared._base_model import BaseModel
 from hera.workflows._mixins import (
     ParseFromYamlMixin,
     _set_model_attr,
 )
-from hera.exceptions import NotFound
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
