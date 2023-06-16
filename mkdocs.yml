@@ -27,6 +27,7 @@ nav:
   - Hera expr transpiler: expr.md
   - Examples:
     - Workflows:
+      - About: examples/workflows-examples.md
       - Hera:
         - ... | flat | examples/workflows/*.md
       - Upstream:
