@@ -10,10 +10,10 @@ Python DSL has been highly requested to overcome the YAML barrier to adoption. I
 we can infer from the job roles for people using Argo Workflows that the DevOps Engineers are likely more comfortable
 using YAML than ML Engineers.
 
-> DevOps Engineers: 41%
-> Software Engineer: 20%
-> Architects: 20%
-> Data Engineer / Data Scientist / ML Engineer: 13%
+> * DevOps Engineers: 41%
+> * Software Engineer: 20%
+> * Architects: 20%
+> * Data Engineer / Data Scientist / ML Engineer: 13%
 
 We hope by providing a more intuitive Python definition language, Data and ML users of Argo Workflows will increase.
 
