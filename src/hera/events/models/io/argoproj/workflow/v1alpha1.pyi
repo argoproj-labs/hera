@@ -1,9 +1,11 @@
+from typing import Any, Dict, List, Optional
+
+from hera.shared._base_model import BaseModel as BaseModel
+
 from ...k8s.api.core import v1 as v1
 from ...k8s.api.policy import v1beta1 as v1beta1
 from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1
 from ...k8s.apimachinery.pkg.util import intstr as intstr
-from hera.shared._base_model import BaseModel as BaseModel
-from typing import Any, Dict, List, Optional
 
 class Amount(BaseModel):
     __root__: float
