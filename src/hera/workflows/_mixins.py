@@ -946,7 +946,7 @@ def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
     return getattr(curr, attrs[-1])
 
 
-class ParseFromYamlMixin(BaseMixin):
+class ModelMapperMixin(BaseMixin):
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
             self.model_path = None
@@ -969,13 +969,13 @@ class ParseFromYamlMixin(BaseMixin):
 
         @classmethod
         def build_model(
-            cls, hera_class: Type[ParseFromYamlMixin], hera_obj: ParseFromYamlMixin, model: TWorkflow
+            cls, hera_class: Type[ModelMapperMixin], hera_obj: ModelMapperMixin, model: TWorkflow
         ) -> TWorkflow:
-            assert isinstance(hera_obj, ParseFromYamlMixin)
+            assert isinstance(hera_obj, ModelMapperMixin)
 
             for attr, annotation in hera_class._get_all_annotations().items():
                 if get_origin(annotation) is Annotated and isinstance(
-                    get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+                    get_args(annotation)[1], ModelMapperMixin.ModelMapper
                 ):
                     mapper = get_args(annotation)[1]
                     # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
@@ -995,13 +995,13 @@ class ParseFromYamlMixin(BaseMixin):
         return ChainMap(*(get_annotations(c) for c in cls.__mro__))
 
     @classmethod
-    def _from_model(cls, model: BaseModel) -> ParseFromYamlMixin:
+    def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
         """Parse from given model to cls's type."""
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+                get_args(annotation)[1], ModelMapperMixin.ModelMapper
             ):
                 mapper = get_args(annotation)[1]
                 if mapper.model_path:
@@ -1012,35 +1012,35 @@ class ParseFromYamlMixin(BaseMixin):
         return hera_obj
 
     @classmethod
-    def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ParseFromYamlMixin:
+    def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ModelMapperMixin:
         """Parse from given model_dict, using the given model type to call its parse_obj."""
         model_workflow = model.parse_obj(model_dict)
         return cls._from_model(model_workflow)
 
     @classmethod
-    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
         """Parse from given model_dict."""
         raise NotImplementedError
 
     @classmethod
-    def _from_yaml(cls, yaml_str: str, model: Type[BaseModel]) -> ParseFromYamlMixin:
+    def _from_yaml(cls, yaml_str: str, model: Type[BaseModel]) -> ModelMapperMixin:
         """Parse from given yaml string, using the given model type to call its parse_obj."""
         if not _yaml:
             raise ImportError("PyYAML is not installed")
         return cls._from_dict(_yaml.safe_load(yaml_str), model)
 
     @classmethod
-    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Parse from given yaml_str."""
         raise NotImplementedError
 
     @classmethod
-    def _from_file(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ParseFromYamlMixin:
+    def _from_file(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ModelMapperMixin:
         yaml_file = Path(yaml_file)
         return cls._from_yaml(yaml_file.read_text(encoding="utf-8"), model)
 
     @classmethod
-    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Parse from given yaml_file."""
         raise NotImplementedError
 

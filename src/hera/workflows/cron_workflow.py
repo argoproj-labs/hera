@@ -14,7 +14,8 @@ except ImportError:
 from hera.exceptions import NotFound
 from hera.shared._base_model import BaseModel
 from hera.workflows._mixins import (
-    ParseFromYamlMixin,
+    ModelMapperMixin,
+    _get_model_attr,
     _set_model_attr,
 )
 from hera.workflows.models import (
@@ -23,7 +24,6 @@ from hera.workflows.models import (
     CronWorkflowSpec,
     CronWorkflowStatus,
     LintCronWorkflowRequest,
-    ObjectMeta,
     UpdateCronWorkflowRequest,
 )
 from hera.workflows.protocol import TWorkflow
@@ -37,13 +37,13 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
 
     @classmethod
     def build_model(
-        cls, hera_class: Type[ParseFromYamlMixin], hera_obj: ParseFromYamlMixin, model: TWorkflow
+        cls, hera_class: Type[ModelMapperMixin], hera_obj: ModelMapperMixin, model: TWorkflow
     ) -> TWorkflow:
-        assert isinstance(hera_obj, ParseFromYamlMixin)
+        assert isinstance(hera_obj, ModelMapperMixin)
 
         for attr, annotation in hera_class._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ParseFromYamlMixin.ModelMapper
+                get_args(annotation)[1], ModelMapperMixin.ModelMapper
             ):
                 mapper = get_args(annotation)[1]
                 if not isinstance(mapper, _CronWorkflowModelMapper) and mapper.model_path[0] == "spec":
@@ -137,18 +137,50 @@ class CronWorkflow(Workflow):
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
-        model_workflow = _ModelCronWorkflow(
-            metadata=ObjectMeta(),
+        model_workflow = super().build()
+        model_cron_workflow = _ModelCronWorkflow(
+            metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(
-                schedule="",
-                workflow_spec=super().build().spec,
+                schedule=self.schedule,
+                workflow_spec=model_workflow.spec,
             ),
         )
 
-        return _CronWorkflowModelMapper.build_model(CronWorkflow, self, model_workflow)
+        return _CronWorkflowModelMapper.build_model(CronWorkflow, self, model_cron_workflow)
 
     @classmethod
-    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+    def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
+        """Parse from given model to cls's type."""
+
+        assert isinstance(model, _ModelCronWorkflow)
+        hera_cron_workflow = CronWorkflow(schedule="")
+
+        for attr, annotation in cls._get_all_annotations().items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], ModelMapperMixin.ModelMapper
+            ):
+                mapper = get_args(annotation)[1]
+                if mapper.model_path:
+                    value = None
+
+                    if (
+                        isinstance(mapper, _CronWorkflowModelMapper)
+                        or isinstance(mapper, _WorkflowModelMapper)
+                        and mapper.model_path[0] == "metadata"
+                    ):
+                        value = _get_model_attr(model, mapper.model_path)
+                    elif isinstance(mapper, _WorkflowModelMapper) and mapper.model_path[0] == "spec":
+                        # We map "spec.workflow_spec" from the model CronWorkflow to "spec" for Hera's Workflow (used
+                        # as the parent class of Hera's CronWorkflow)
+                        value = _get_model_attr(model.spec.workflow_spec, mapper.model_path[1:])
+
+                    if value is not None:
+                        setattr(hera_cron_workflow, attr, value)
+
+        return hera_cron_workflow
+
+    @classmethod
+    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
         """Create a CronWorkflow from a CronWorkflow contained in a dict.
 
         Examples:
@@ -158,7 +190,7 @@ class CronWorkflow(Workflow):
         return cls._from_dict(model_dict, _ModelCronWorkflow)
 
     @classmethod
-    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Create a CronWorkflow from a CronWorkflow contained in a YAML string.
 
         Usage:
@@ -167,7 +199,7 @@ class CronWorkflow(Workflow):
         return cls._from_yaml(yaml_str, _ModelCronWorkflow)
 
     @classmethod
-    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Create a CronWorkflow from a CronWorkflow contained in a YAML file.
 
         Usage:

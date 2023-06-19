@@ -152,6 +152,16 @@ def test_hera_output_upstream(module_name):
     assert upstream_yaml_path.exists()
     _compare_workflows(workflow, output, yaml.safe_load(upstream_yaml_path.read_text()))
 
+    if isinstance(workflow, HeraWorkflowTemplate):
+        assert workflow == HeraWorkflowTemplate.from_dict(workflow.to_dict())
+        assert workflow == HeraWorkflowTemplate.from_yaml(workflow.to_yaml())
+    elif isinstance(workflow, HeraCronWorkflow):
+        assert workflow == HeraCronWorkflow.from_dict(workflow.to_dict())
+        assert workflow == HeraCronWorkflow.from_yaml(workflow.to_yaml())
+    elif isinstance(workflow, HeraWorkflow):
+        assert workflow == HeraWorkflow.from_dict(workflow.to_dict())
+        assert workflow == HeraWorkflow.from_yaml(workflow.to_yaml())
+
 
 def test_to_file(tmpdir):
     # GIVEN

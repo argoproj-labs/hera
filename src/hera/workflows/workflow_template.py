@@ -15,7 +15,7 @@ from pydantic import validator
 
 from hera.exceptions import NotFound
 from hera.shared._base_model import BaseModel
-from hera.workflows._mixins import ParseFromYamlMixin
+from hera.workflows._mixins import ModelMapperMixin
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -111,7 +111,7 @@ class WorkflowTemplate(Workflow):
         return _WorkflowTemplateModelMapper.build_model(WorkflowTemplate, self, model_workflow)
 
     @classmethod
-    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a dict.
 
         Examples:
@@ -121,7 +121,7 @@ class WorkflowTemplate(Workflow):
         return cls._from_dict(model_dict, _ModelWorkflowTemplate)
 
     @classmethod
-    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML string.
 
         Usage:
@@ -130,7 +130,7 @@ class WorkflowTemplate(Workflow):
         return cls._from_yaml(yaml_str, _ModelWorkflowTemplate)
 
     @classmethod
-    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
 
         Usage:

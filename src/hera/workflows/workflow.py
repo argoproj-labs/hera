@@ -25,7 +25,7 @@ from hera.workflows._mixins import (
     HookMixin,
     MetricsMixin,
     MetricsT,
-    ParseFromYamlMixin,
+    ModelMapperMixin,
     VolumeMixin,
     VolumesT,
 )
@@ -87,7 +87,7 @@ _SUFFIX_LEN = 5
 _TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
 
 
-class _WorkflowModelMapper(ParseFromYamlMixin.ModelMapper):
+class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
     @classmethod
     def _get_model_class(cls) -> Type[BaseModel]:
         return _ModelWorkflow
@@ -99,7 +99,7 @@ class Workflow(
     HookMixin,
     VolumeMixin,
     MetricsMixin,
-    ParseFromYamlMixin,
+    ModelMapperMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -453,7 +453,7 @@ class Workflow(
         return output_path.absolute()
 
     @classmethod
-    def from_dict(cls, model_dict: Dict) -> ParseFromYamlMixin:
+    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
         """Create a Workflow from a Workflow contained in a dict.
 
         Examples:
@@ -463,7 +463,7 @@ class Workflow(
         return cls._from_dict(model_dict, _ModelWorkflow)
 
     @classmethod
-    def from_yaml(cls, yaml_str: str) -> ParseFromYamlMixin:
+    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Create a Workflow from a Workflow contained in a YAML string.
 
         Usage:
@@ -472,7 +472,7 @@ class Workflow(
         return cls._from_yaml(yaml_str, _ModelWorkflow)
 
     @classmethod
-    def from_file(cls, yaml_file: Union[Path, str]) -> ParseFromYamlMixin:
+    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Create a Workflow from a Workflow contained in a YAML file.
 
         Usage:
