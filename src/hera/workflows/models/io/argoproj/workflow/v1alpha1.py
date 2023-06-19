@@ -651,13 +651,13 @@ class ContainerSetRetryStrategy(BaseModel):
 
 
 class CronWorkflowStatus(BaseModel):
-    active: Optional[List[v1.ObjectReference]] = Field(
+    active: List[v1.ObjectReference] = Field(
         ..., description="Active is a list of active workflows stemming from this CronWorkflow"
     )
-    conditions: Optional[List[Condition]] = Field(
+    conditions: List[Condition] = Field(
         ..., description="Conditions is a list of conditions the CronWorkflow may have"
     )
-    last_scheduled_time: Optional[v1_1.Time] = Field(
+    last_scheduled_time: v1_1.Time = Field(
         ..., alias="lastScheduledTime", description="LastScheduleTime is the last time the CronWorkflow was scheduled"
     )
 
