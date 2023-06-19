@@ -1,9 +1,7 @@
-from typing import Optional
-
-from hera.shared._base_model import BaseModel as BaseModel
-
 from .io.argoproj.events import v1alpha1 as v1alpha1
 from .io.k8s.apimachinery.pkg.apis.meta import v1 as v1
+from hera.shared._base_model import BaseModel as BaseModel
+from typing import Optional
 
 class EventSourceDeletedResponse(BaseModel): ...
 

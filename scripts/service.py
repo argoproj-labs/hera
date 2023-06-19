@@ -190,7 +190,7 @@ class ServiceEndpoint:
 
         if resp.ok:
             resp_json = resp.json()
-            if "status" in resp_json and resp_json["status"]['active'] is None and resp_json["status"]['lastScheduledTime'] is None and resp_json["status"]['conditions'] is None:
+            if "status" in resp_json or resp_json["status"]['active'] is None or resp_json["status"]['lastScheduledTime'] is None or resp_json["status"]['conditions'] is None:
                 # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
                 # object. So, we overwrite the response with a value that allows the response to pass through safely.
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
