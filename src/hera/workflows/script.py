@@ -205,7 +205,7 @@ class Script(
                 env_from=self._build_env_from(),
                 image=self.image,
                 # `image_pull_policy` in script wants a string not an `ImagePullPolicy` object
-                image_pull_policy=None if image_pull_policy is None else str(image_pull_policy),
+                image_pull_policy=None if image_pull_policy is None else image_pull_policy.value,
                 lifecycle=self.lifecycle,
                 liveness_probe=self.liveness_probe,
                 name=self.container_name,
