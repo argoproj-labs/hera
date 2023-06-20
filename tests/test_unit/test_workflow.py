@@ -1,3 +1,5 @@
+import importlib
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -42,3 +44,24 @@ def test_workflow_create():
     w.workflows_service.create_workflow.assert_called_once_with(
         WorkflowCreateRequest(workflow=built_workflow), namespace="my-namespace"
     )
+
+
+def test_workflow_to_file(tmpdir):
+    # GIVEN
+    workflow = importlib.import_module("examples.workflows.coinflip").w
+    output_dir = Path(tmpdir)
+
+    # WHEN
+    yaml_path = workflow.to_file(output_dir)
+
+    # THEN
+    assert yaml_path.exists()
+    assert workflow == Workflow.from_file(yaml_path)
+
+
+def test_workflow_from_yaml():
+    # GIVEN
+    workflow = importlib.import_module("examples.workflows.coinflip").w
+
+    # THEN
+    assert workflow == Workflow.from_yaml(workflow.to_yaml())

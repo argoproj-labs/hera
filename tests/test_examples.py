@@ -161,16 +161,3 @@ def test_hera_output_upstream(module_name):
     elif isinstance(workflow, HeraWorkflow):
         assert workflow == HeraWorkflow.from_dict(workflow.to_dict())
         assert workflow == HeraWorkflow.from_yaml(workflow.to_yaml())
-
-
-def test_to_file(tmpdir):
-    # GIVEN
-    workflow = importlib.import_module("examples.workflows.coinflip").w
-    output_dir = Path(tmpdir)
-
-    # WHEN
-    yaml_path = workflow.to_file(output_dir)
-
-    # THEN
-    assert yaml_path.exists()
-    assert workflow == HeraWorkflow.from_file(yaml_path)
