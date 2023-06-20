@@ -31,6 +31,32 @@ def set_workflow_default_labels(workflow: Workflow) -> Workflow:
 
 Now, any time `build` is called on the Workflow (e.g. to submit it or dump it to yaml), it will add in the annotation!
 
+## Load YAML from File
+
+Hera's `Workflow` classes offer a collection of `to` and `from` functions for `dict`, `yaml` and `file`. This
+means you can load YAML files and manipulate them as Hera objects!
+
+```py
+    with Workflow.from_file("./workflow.yaml") as w:
+        w.entrypoint = "my-new-dag-entrypoint"
+
+        with DAG(name="my-new-dag-entrypoint"):
+            ...  # Add some tasks!
+
+    w.create()  # And submit to Argo directly from Hera!
+```
+
+The following are all valid assertions:
+
+```py
+with Workflow(name="w") as w:
+    pass
+
+assert w == Workflow.from_dict(w.to_dict())
+assert w == Workflow.from_yaml(w.to_yaml())
+assert w == Workflow.from_file(w.to_file())
+```
+
 ## Experimental Features
 
 From time to time, Hera will release a new feature under the "experimental feature" flag while we develop the feature

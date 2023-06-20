@@ -1,11 +1,25 @@
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, TypeVar, Union, cast
+from pathlib import Path
+
+try:
+    from inspect import get_annotations  # type: ignore
+except ImportError:
+    from hera.workflows._inspect import get_annotations  # type: ignore
+from collections import ChainMap
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+
+try:
+    from typing import Annotated, get_args, get_origin  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 from pydantic import root_validator, validator
 
 from hera.shared import BaseMixin, global_config
+from hera.shared._base_model import BaseModel
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
@@ -54,7 +68,7 @@ from hera.workflows.models import (
     VolumeMount,
 )
 from hera.workflows.parameter import MISSING, Parameter
-from hera.workflows.protocol import Templatable
+from hera.workflows.protocol import Templatable, TWorkflow
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
@@ -63,6 +77,14 @@ if TYPE_CHECKING:
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
+
+_yaml: Optional[ModuleType] = None
+try:
+    import yaml
+
+    _yaml = yaml
+except ImportError:
+    _yaml = None
 
 InputsT = Optional[
     Union[
@@ -83,6 +105,16 @@ ArgumentsT = Optional[
         ModelArguments,
         Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+    ]
+]
+MetricsT = Optional[
+    Union[
+        _BaseMetric,
+        List[_BaseMetric],
+        Metrics,
+        ModelPrometheus,
+        List[ModelPrometheus],
+        ModelMetrics,
     ]
 ]
 EnvT = Optional[
@@ -278,16 +310,7 @@ class EnvMixin(BaseMixin):
 
 
 class MetricsMixin(BaseMixin):
-    metrics: Optional[
-        Union[
-            _BaseMetric,
-            List[_BaseMetric],
-            Metrics,
-            ModelPrometheus,
-            List[ModelPrometheus],
-            ModelMetrics,
-        ]
-    ] = None
+    metrics: MetricsT = None
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         if self.metrics is None or isinstance(self.metrics, ModelMetrics):
@@ -896,6 +919,130 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+
+def _set_model_attr(model: BaseModel, attrs: List[str], value: Any):
+    # The `attrs` list represents a path to an attribute in `model`, whose attributes
+    # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
+    # BaseModel set to `curr`, then call `setattr` on that BaseModel, using the last attribute
+    # name in attrs, and the value passed in.
+    curr: BaseModel = model
+    for attr in attrs[:-1]:
+        curr = getattr(curr, attr)
+
+    setattr(curr, attrs[-1], value)
+
+
+def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
+    # This is almost the same as _set_model_attr.
+    # The `attrs` list represents a path to an attribute in `model`, whose attributes
+    # are BaseModels themselves. Therefore we use `getattr` to get a reference to the final
+    # BaseModel set to `curr`, then `getattr` on that BaseModel, using the last attribute
+    # name in attrs.
+    curr: BaseModel = model
+    for attr in attrs[:-1]:
+        curr = getattr(curr, attr)
+
+    return getattr(curr, attrs[-1])
+
+
+class ModelMapperMixin(BaseMixin):
+    class ModelMapper:
+        def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
+            self.model_path = None
+            self.builder = hera_builder
+
+            if not model_path:
+                # Allows overriding parent attribute annotations to remove the mapping
+                return
+
+            self.model_path = model_path.split(".")
+            curr_class: Type[BaseModel] = self._get_model_class()
+            for key in self.model_path:
+                if key not in curr_class.__fields__:
+                    raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
+                curr_class = curr_class.__fields__[key].outer_type_
+
+        @classmethod
+        def _get_model_class(cls) -> Type[BaseModel]:
+            raise NotImplementedError
+
+        @classmethod
+        def build_model(
+            cls, hera_class: Type[ModelMapperMixin], hera_obj: ModelMapperMixin, model: TWorkflow
+        ) -> TWorkflow:
+            assert isinstance(hera_obj, ModelMapperMixin)
+
+            for attr, annotation in hera_class._get_all_annotations().items():
+                if get_origin(annotation) is Annotated and isinstance(
+                    get_args(annotation)[1], ModelMapperMixin.ModelMapper
+                ):
+                    mapper = get_args(annotation)[1]
+                    # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
+                    value = (
+                        getattr(hera_obj, mapper.builder.__name__)()
+                        if mapper.builder is not None
+                        else getattr(hera_obj, attr)
+                    )
+                    if value is not None:
+                        _set_model_attr(model, mapper.model_path, value)
+
+            return model
+
+    @classmethod
+    def _get_all_annotations(cls) -> ChainMap:
+        """Gets all annotations of this class and any parent classes."""
+        return ChainMap(*(get_annotations(c) for c in cls.__mro__))
+
+    @classmethod
+    def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
+        """Parse from given model to cls's type."""
+        hera_obj = cls()
+
+        for attr, annotation in cls._get_all_annotations().items():
+            if get_origin(annotation) is Annotated and isinstance(
+                get_args(annotation)[1], ModelMapperMixin.ModelMapper
+            ):
+                mapper = get_args(annotation)[1]
+                if mapper.model_path:
+                    value = _get_model_attr(model, mapper.model_path)
+                    if value is not None:
+                        setattr(hera_obj, attr, value)
+
+        return hera_obj
+
+    @classmethod
+    def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ModelMapperMixin:
+        """Parse from given model_dict, using the given model type to call its parse_obj."""
+        model_workflow = model.parse_obj(model_dict)
+        return cls._from_model(model_workflow)
+
+    @classmethod
+    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
+        """Parse from given model_dict."""
+        raise NotImplementedError
+
+    @classmethod
+    def _from_yaml(cls, yaml_str: str, model: Type[BaseModel]) -> ModelMapperMixin:
+        """Parse from given yaml string, using the given model type to call its parse_obj."""
+        if not _yaml:
+            raise ImportError("PyYAML is not installed")
+        return cls._from_dict(_yaml.safe_load(yaml_str), model)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
+        """Parse from given yaml_str."""
+        raise NotImplementedError
+
+    @classmethod
+    def _from_file(cls, yaml_file: Union[Path, str], model: Type[BaseModel]) -> ModelMapperMixin:
+        yaml_file = Path(yaml_file)
+        return cls._from_yaml(yaml_file.read_text(encoding="utf-8"), model)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
+        """Parse from given yaml_file."""
+        raise NotImplementedError
 
 
 class ExperimentalMixin(BaseMixin):

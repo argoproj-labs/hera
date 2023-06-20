@@ -3,18 +3,32 @@
 See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
-from __future__ import annotations
-
 import time
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
+
+try:
+    from typing import Annotated, get_args  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated, get_args  # type: ignore
+
 
 from pydantic import validator
-from typing_extensions import get_args
 
 from hera.shared import global_config
-from hera.workflows._mixins import ArgumentsMixin, ContextMixin, HookMixin, MetricsMixin, VolumeMixin
+from hera.shared._base_model import BaseModel
+from hera.workflows._mixins import (
+    ArgumentsMixin,
+    ArgumentsT,
+    ContextMixin,
+    HookMixin,
+    MetricsMixin,
+    MetricsT,
+    ModelMapperMixin,
+    VolumeMixin,
+    VolumesT,
+)
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
@@ -63,7 +77,6 @@ except ImportError:
 
 ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
-
 NAME_LIMIT = 63
 
 # The length of the random suffix used for generate_name
@@ -74,12 +87,19 @@ _SUFFIX_LEN = 5
 _TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
 
 
+class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
+    @classmethod
+    def _get_model_class(cls) -> Type[BaseModel]:
+        return _ModelWorkflow
+
+
 class Workflow(
     ArgumentsMixin,
     ContextMixin,
     HookMixin,
     VolumeMixin,
     MetricsMixin,
+    ModelMapperMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -92,69 +112,151 @@ class Workflow(
     object.
     """
 
+    def _build_volume_claim_templates(self) -> Optional[List]:
+        return ((self.volume_claim_templates or []) + (self._build_persistent_volume_claims() or [])) or None
+
+    def _build_on_exit(self) -> Optional[str]:
+        if isinstance(self.on_exit, Templatable):
+            return self.on_exit._build_template().name  # type: ignore
+        return self.on_exit
+
+    def _build_templates(self) -> Optional[List[TTemplate]]:
+        """Builds the templates into an Argo schema."""
+        templates = []
+        for template in self.templates:
+            if isinstance(template, HookMixin):
+                template = template._dispatch_hooks()
+
+            if isinstance(template, Templatable):
+                templates.append(template._build_template())
+            elif isinstance(template, get_args(TTemplate)):
+                templates.append(template)
+            else:
+                raise InvalidType(f"{type(template)} is not a valid template type")
+
+            if isinstance(template, VolumeClaimable):
+                claims = template._build_persistent_volume_claims()
+                # If there are no claims, continue, nothing to add
+                if not claims:
+                    continue
+                # If there are no volume claim templates, set them to the constructed claims
+                elif self.volume_claim_templates is None:
+                    self.volume_claim_templates = claims
+                else:
+                    # otherwise, we need to merge the two lists of volume claim templates. This prioritizes the
+                    # already existing volume claim templates under the assumption that the user has already set
+                    # a claim template on the workflow intentionally, or the user is sharing the same volumes across
+                    # different templates
+                    current_volume_claims_map = {}
+                    for claim in self.volume_claim_templates:
+                        assert claim.metadata is not None, "expected a workflow volume claim with metadata"
+                        assert claim.metadata.name is not None, "expected a named workflow volume claim"
+                        current_volume_claims_map[claim.metadata.name] = claim
+
+                    new_volume_claims_map = {}
+                    for claim in claims:
+                        assert claim.metadata is not None, "expected a volume claim with metadata"
+                        assert claim.metadata.name is not None, "expected a named volume claim"
+                        new_volume_claims_map[claim.metadata.name] = claim
+
+                    for claim_name, claim in new_volume_claims_map.items():
+                        if claim_name not in current_volume_claims_map:
+                            self.volume_claim_templates.append(claim)
+        return templates or None
+
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    api_version: Optional[str] = None
-    kind: Optional[str] = None
-    status: Optional[_ModelWorkflowStatus] = None
+    api_version: Annotated[Optional[str], _WorkflowModelMapper("api_version")] = None
+    kind: Annotated[Optional[str], _WorkflowModelMapper("kind")] = None
+    status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowModelMapper("status")] = None
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
-    annotations: Optional[Dict[str, str]] = None
-    cluster_name: Optional[str] = None
-    creation_timestamp: Optional[Time] = None
-    deletion_grace_period_seconds: Optional[int] = None
-    deletion_timestamp: Optional[Time] = None
-    finalizers: Optional[List[str]] = None
-    generate_name: Optional[str] = None
-    generation: Optional[int] = None
-    labels: Optional[Dict[str, str]] = None
-    managed_fields: Optional[List[ManagedFieldsEntry]] = None
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    owner_references: Optional[List[OwnerReference]] = None
-    resource_version: Optional[str] = None
-    self_link: Optional[str] = None
-    uid: Optional[str] = None
+    annotations: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.annotations")] = None
+    cluster_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.cluster_name")] = None
+    creation_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.creation_timestamp")] = None
+    deletion_grace_period_seconds: Annotated[
+        Optional[int], _WorkflowModelMapper("metadata.deletion_grace_period_seconds")
+    ] = None
+    deletion_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.deletion_timestamp")] = None
+    finalizers: Annotated[Optional[List[str]], _WorkflowModelMapper("metadata.finalizers")] = None
+    generate_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.generate_name")] = None
+    generation: Annotated[Optional[int], _WorkflowModelMapper("metadata.generation")] = None
+    labels: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.labels")] = None
+    managed_fields: Annotated[
+        Optional[List[ManagedFieldsEntry]], _WorkflowModelMapper("metadata.managed_fields")
+    ] = None
+    name: Annotated[Optional[str], _WorkflowModelMapper("metadata.name")] = None
+    namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace")] = None
+    owner_references: Annotated[
+        Optional[List[OwnerReference]], _WorkflowModelMapper("metadata.owner_references")
+    ] = None
+    resource_version: Annotated[Optional[str], _WorkflowModelMapper("metadata.resource_version")] = None
+    self_link: Annotated[Optional[str], _WorkflowModelMapper("metadata.self_link")] = None
+    uid: Annotated[Optional[str], _WorkflowModelMapper("metadata.uid")] = None
 
     # WorkflowSpec fields - https://argoproj.github.io/argo-workflows/fields/#workflowspec
-    active_deadline_seconds: Optional[int] = None
-    affinity: Optional[Affinity] = None
-    archive_logs: Optional[bool] = None
-    artifact_gc: Optional[ArtifactGC] = None
-    artifact_repository_ref: Optional[ArtifactRepositoryRef] = None
-    automount_service_account_token: Optional[bool] = None
-    dns_config: Optional[PodDNSConfig] = None
-    dns_policy: Optional[str] = None
-    entrypoint: Optional[str] = None
-    executor: Optional[ExecutorConfig] = None
-    hooks: Optional[Dict[str, LifecycleHook]] = None
-    host_aliases: Optional[List[HostAlias]] = None
-    host_network: Optional[bool] = None
-    image_pull_secrets: ImagePullSecrets = None
-    node_selector: Optional[Dict[str, str]] = None
-    on_exit: Optional[Union[str, Templatable]] = None
-    parallelism: Optional[int] = None
-    pod_disruption_budget: Optional[PodDisruptionBudgetSpec] = None
-    pod_gc: Optional[PodGC] = None
-    pod_metadata: Optional[Metadata] = None
-    pod_priority: Optional[int] = None
-    pod_priority_class_name: Optional[str] = None
-    pod_spec_patch: Optional[str] = None
-    priority: Optional[int] = None
-    retry_strategy: Optional[RetryStrategy] = None
-    scheduler_name: Optional[str] = None
-    security_context: Optional[PodSecurityContext] = None
-    service_account_name: Optional[str] = None
-    shutdown: Optional[str] = None
-    suspend: Optional[bool] = None
-    synchronization: Optional[Synchronization] = None
-    template_defaults: Optional[_ModelTemplate] = None
-    templates: List[Union[_ModelTemplate, Templatable]] = []
-    tolerations: Optional[List[Toleration]] = None
-    ttl_strategy: Optional[TTLStrategy] = None
-    volume_claim_gc: Optional[VolumeClaimGC] = None
-    volume_claim_templates: Optional[List[PersistentVolumeClaim]] = None
-    workflow_metadata: Optional[WorkflowMetadata] = None
-    workflow_template_ref: Optional[WorkflowTemplateRef] = None
+    active_deadline_seconds: Annotated[Optional[int], _WorkflowModelMapper("spec.active_deadline_seconds")] = None
+    affinity: Annotated[Optional[Affinity], _WorkflowModelMapper("spec.affinity")] = None
+    archive_logs: Annotated[Optional[bool], _WorkflowModelMapper("spec.archive_logs")] = None
+    artifact_gc: Annotated[Optional[ArtifactGC], _WorkflowModelMapper("spec.artifact_gc")] = None
+    artifact_repository_ref: Annotated[
+        Optional[ArtifactRepositoryRef], _WorkflowModelMapper("spec.artifact_repository_ref")
+    ] = None
+    automount_service_account_token: Annotated[
+        Optional[bool], _WorkflowModelMapper("spec.automount_service_account_token")
+    ] = None
+    dns_config: Annotated[Optional[PodDNSConfig], _WorkflowModelMapper("spec.dns_config")] = None
+    dns_policy: Annotated[Optional[str], _WorkflowModelMapper("spec.dns_policy")] = None
+    entrypoint: Annotated[Optional[str], _WorkflowModelMapper("spec.entrypoint")] = None
+    executor: Annotated[Optional[ExecutorConfig], _WorkflowModelMapper("spec.executor")] = None
+    hooks: Annotated[Optional[Dict[str, LifecycleHook]], _WorkflowModelMapper("spec.hooks")] = None
+    host_aliases: Annotated[Optional[List[HostAlias]], _WorkflowModelMapper("spec.host_aliases")] = None
+    host_network: Annotated[Optional[bool], _WorkflowModelMapper("spec.host_network")] = None
+    image_pull_secrets: Annotated[ImagePullSecrets, _WorkflowModelMapper("spec.image_pull_secrets")] = None
+    node_selector: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("spec.node_selector")] = None
+    on_exit: Annotated[Optional[Union[str, Templatable]], _WorkflowModelMapper("spec.on_exit", _build_on_exit)] = None
+    parallelism: Annotated[Optional[int], _WorkflowModelMapper("spec.parallelism")] = None
+    pod_disruption_budget: Annotated[
+        Optional[PodDisruptionBudgetSpec], _WorkflowModelMapper("spec.pod_disruption_budget")
+    ] = None
+    pod_gc: Annotated[Optional[PodGC], _WorkflowModelMapper("spec.pod_gc")] = None
+    pod_metadata: Annotated[Optional[Metadata], _WorkflowModelMapper("spec.pod_metadata")] = None
+    pod_priority: Annotated[Optional[int], _WorkflowModelMapper("spec.pod_priority")] = None
+    pod_priority_class_name: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_priority_class_name")] = None
+    pod_spec_patch: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_spec_patch")] = None
+    priority: Annotated[Optional[int], _WorkflowModelMapper("spec.priority")] = None
+    retry_strategy: Annotated[Optional[RetryStrategy], _WorkflowModelMapper("spec.retry_strategy")] = None
+    scheduler_name: Annotated[Optional[str], _WorkflowModelMapper("spec.scheduler_name")] = None
+    security_context: Annotated[Optional[PodSecurityContext], _WorkflowModelMapper("spec.security_context")] = None
+    service_account_name: Annotated[Optional[str], _WorkflowModelMapper("spec.service_account_name")] = None
+    shutdown: Annotated[Optional[str], _WorkflowModelMapper("spec.shutdown")] = None
+    suspend: Annotated[Optional[bool], _WorkflowModelMapper("spec.suspend")] = None
+    synchronization: Annotated[Optional[Synchronization], _WorkflowModelMapper("spec.synchronization")] = None
+    template_defaults: Annotated[Optional[_ModelTemplate], _WorkflowModelMapper("spec.template_defaults")] = None
+    templates: Annotated[
+        List[Union[_ModelTemplate, Templatable]], _WorkflowModelMapper("spec.templates", _build_templates)
+    ] = []
+    tolerations: Annotated[Optional[List[Toleration]], _WorkflowModelMapper("spec.tolerations")] = None
+    ttl_strategy: Annotated[Optional[TTLStrategy], _WorkflowModelMapper("spec.ttl_strategy")] = None
+    volume_claim_gc: Annotated[Optional[VolumeClaimGC], _WorkflowModelMapper("spec.volume_claim_gc")] = None
+    volume_claim_templates: Annotated[
+        Optional[List[PersistentVolumeClaim]],
+        _WorkflowModelMapper("spec.volume_claim_templates", _build_volume_claim_templates),
+    ] = None
+    workflow_metadata: Annotated[Optional[WorkflowMetadata], _WorkflowModelMapper("spec.workflow_metadata")] = None
+    workflow_template_ref: Annotated[
+        Optional[WorkflowTemplateRef], _WorkflowModelMapper("spec.workflow_template_ref")
+    ] = None
+
+    # Override types for mixin fields
+    arguments: Annotated[
+        ArgumentsT,
+        _WorkflowModelMapper("spec.arguments", ArgumentsMixin._build_arguments),
+    ]
+    metrics: Annotated[
+        MetricsT,
+        _WorkflowModelMapper("spec.metrics", MetricsMixin._build_metrics),
+    ]
+    volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)]
 
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
@@ -223,55 +325,6 @@ class Workflow(
                 result.append(secret)
         return result
 
-    def _build_templates(self) -> List[TTemplate]:
-        """Builds the templates into an Argo schema."""
-        templates = []
-        for template in self.templates:
-            if isinstance(template, HookMixin):
-                template = template._dispatch_hooks()
-
-            if isinstance(template, Templatable):
-                templates.append(template._build_template())
-            elif isinstance(template, get_args(TTemplate)):
-                templates.append(template)
-            else:
-                raise InvalidType(f"{type(template)} is not a valid template type")
-
-            if isinstance(template, VolumeClaimable):
-                claims = template._build_persistent_volume_claims()
-                # If there are no claims, continue, nothing to add
-                if not claims:
-                    continue
-                # If there are no volume claim templates, set them to the constructed claims
-                elif self.volume_claim_templates is None:
-                    self.volume_claim_templates = claims
-                else:
-                    # otherwise, we need to merge the two lists of volume claim templates. This prioritizes the
-                    # already existing volume claim templates under the assumption that the user has already set
-                    # a claim template on the workflow intentionally, or the user is sharing the same volumes across
-                    # different templates
-                    current_volume_claims_map = {}
-                    for claim in self.volume_claim_templates:
-                        assert claim.metadata is not None, "expected a workflow volume claim with metadata"
-                        assert claim.metadata.name is not None, "expected a named workflow volume claim"
-                        current_volume_claims_map[claim.metadata.name] = claim
-
-                    new_volume_claims_map = {}
-                    for claim in claims:
-                        assert claim.metadata is not None, "expected a volume claim with metadata"
-                        assert claim.metadata.name is not None, "expected a named volume claim"
-                        new_volume_claims_map[claim.metadata.name] = claim
-
-                    for claim_name, claim in new_volume_claims_map.items():
-                        if claim_name not in current_volume_claims_map:
-                            self.volume_claim_templates.append(claim)
-        return templates
-
-    def _build_on_exit(self) -> Optional[str]:
-        if isinstance(self.on_exit, Templatable):
-            return self.on_exit._build_template().name  # type: ignore
-        return self.on_exit
-
     def get_parameter(self, name: str) -> Parameter:
         arguments = self._build_arguments()
         if arguments is None:
@@ -288,80 +341,21 @@ class Workflow(
         """Builds the Workflow and its components into an Argo schema Workflow object."""
         self = self._dispatch_hooks()
 
-        templates = self._build_templates()
-        workflow_claims = self._build_persistent_volume_claims()
-        volume_claim_templates = (self.volume_claim_templates or []) + (workflow_claims or [])
-        return _ModelWorkflow(
-            api_version=self.api_version,
-            kind=self.kind,
-            metadata=ObjectMeta(
-                annotations=self.annotations,
-                cluster_name=self.cluster_name,
-                creation_timestamp=self.creation_timestamp,
-                deletion_grace_period_seconds=self.deletion_grace_period_seconds,
-                deletion_timestamp=self.deletion_timestamp,
-                finalizers=self.finalizers,
-                generate_name=self.generate_name,
-                generation=self.generation,
-                labels=self.labels,
-                managed_fields=self.managed_fields,
-                name=self.name,
-                namespace=self.namespace,
-                owner_references=self.owner_references,
-                resource_version=self.resource_version,
-                self_link=self.self_link,
-                uid=self.uid,
-            ),
-            spec=_ModelWorkflowSpec(
-                active_deadline_seconds=self.active_deadline_seconds,
-                affinity=self.affinity,
-                archive_logs=self.archive_logs,
-                arguments=self._build_arguments(),
-                artifact_gc=self.artifact_gc,
-                artifact_repository_ref=self.artifact_repository_ref,
-                automount_service_account_token=self.automount_service_account_token,
-                dns_config=self.dns_config,
-                dns_policy=self.dns_policy,
-                entrypoint=self.entrypoint,
-                executor=self.executor,
-                hooks=self.hooks,
-                host_aliases=self.host_aliases,
-                host_network=self.host_network,
-                image_pull_secrets=self.image_pull_secrets,
-                metrics=self._build_metrics(),
-                node_selector=self.node_selector,
-                on_exit=self._build_on_exit(),
-                parallelism=self.parallelism,
-                pod_disruption_budget=self.pod_disruption_budget,
-                pod_gc=self.pod_gc,
-                pod_metadata=self.pod_metadata,
-                pod_priority=self.pod_priority,
-                pod_priority_class_name=self.pod_priority_class_name,
-                pod_spec_patch=self.pod_spec_patch,
-                priority=self.priority,
-                retry_strategy=self.retry_strategy,
-                scheduler_name=self.scheduler_name,
-                security_context=self.security_context,
-                service_account_name=self.service_account_name,
-                shutdown=self.shutdown,
-                suspend=self.suspend,
-                synchronization=self.synchronization,
-                template_defaults=self.template_defaults,
-                templates=templates or None,
-                tolerations=self.tolerations,
-                ttl_strategy=self.ttl_strategy,
-                volume_claim_gc=self.volume_claim_gc,
-                volume_claim_templates=volume_claim_templates or None,
-                volumes=self._build_volumes(),
-                workflow_metadata=self.workflow_metadata,
-                workflow_template_ref=self.workflow_template_ref,
-            ),
-            status=self.status,
+        model_workflow = _ModelWorkflow(
+            metadata=ObjectMeta(),
+            spec=_ModelWorkflowSpec(),
         )
+        return _WorkflowModelMapper.build_model(Workflow, self, model_workflow)
 
     def to_dict(self) -> Any:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
         return self.build().dict(exclude_none=True, by_alias=True)
+
+    def __eq__(self, other) -> bool:
+        if other.__class__ is self.__class__:
+            return self.to_dict() == other.to_dict()
+
+        return False
 
     def to_yaml(self, *args, **kwargs) -> str:
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
@@ -457,6 +451,35 @@ class Workflow(
         output_directory.mkdir(parents=True, exist_ok=True)
         output_path.write_text(self.to_yaml(*args, **kwargs))
         return output_path.absolute()
+
+    @classmethod
+    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
+        """Create a Workflow from a Workflow contained in a dict.
+
+        Examples:
+            my_workflow = Workflow(...)
+            my_workflow == Workflow.from_dict(my_workflow.to_dict())
+        """
+        return cls._from_dict(model_dict, _ModelWorkflow)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
+        """Create a Workflow from a Workflow contained in a YAML string.
+
+        Usage:
+            my_workflow = Workflow.from_yaml(yaml_str)
+        """
+        return cls._from_yaml(yaml_str, _ModelWorkflow)
+
+    @classmethod
+    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
+        """Create a Workflow from a Workflow contained in a YAML file.
+
+        Usage:
+            yaml_file = Path(...)
+            my_workflow = Workflow.from_file(yaml_file)
+        """
+        return cls._from_file(yaml_file, _ModelWorkflow)
 
 
 __all__ = ["Workflow"]
