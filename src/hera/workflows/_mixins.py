@@ -77,7 +77,6 @@ if TYPE_CHECKING:
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
-
 _yaml: Optional[ModuleType] = None
 try:
     import yaml
@@ -176,12 +175,28 @@ class ContainerMixin(BaseMixin):
     termination_message_policy: Optional[TerminationMessagePolicy] = None
     tty: Optional[bool] = None
 
-    def _build_image_pull_policy(self) -> Optional[str]:
+    def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
         if self.image_pull_policy is None:
             return None
         elif isinstance(self.image_pull_policy, ImagePullPolicy):
-            return self.image_pull_policy.value
-        return ImagePullPolicy[self.image_pull_policy.lower()].value
+            return self.image_pull_policy
+
+        # this helps map image pull policy values as a convenience
+        policy_mapper = {
+            # the following 2 are "normal" entries
+            **{ipp.name: ipp for ipp in ImagePullPolicy},
+            **{ipp.value: ipp for ipp in ImagePullPolicy},
+            # some users might submit the policy without underscores
+            **{ipp.value.lower().replace("_", ""): ipp for ipp in ImagePullPolicy},
+            # some users might submit the policy in lowercase
+            **{ipp.name.lower(): ipp for ipp in ImagePullPolicy},
+        }
+        try:
+            return ImagePullPolicy[policy_mapper[self.image_pull_policy].name]
+        except KeyError as e:
+            raise KeyError(
+                f"Supplied image policy {self.image_pull_policy} is not valid. Use one of {ImagePullPolicy.__members__}"
+            ) from e
 
     @validator("image", pre=True, always=True)
     def _set_image(cls, v):
