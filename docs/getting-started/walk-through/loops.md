@@ -5,7 +5,8 @@ this looping, which are "with items" and "with param". These mechanisms function
 name suggests, "with param" lets you use a parameter to loop over, while "with items" is generally for a hard-coded list
 of items. When using loops in Argo, the template will run in parallel for all the items; the items will be launched
 sequentially but the running times may overlap. If you do not want to loop over the items in parallel, you should use a
-[Synchronization](https://argoproj.github.io/argo-workflows/synchronization/) mechanism.
+[Synchronization](https://argoproj.github.io/argo-workflows/synchronization/) mechanism; see the
+[Sequential Steps example](../../examples/workflows/upstream/loops_arbitrary_sequential_steps.md).
 
 ## Loops in Hera
 
