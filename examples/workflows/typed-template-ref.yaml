@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: using-a-typed-template-ref
+spec:
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: cowsay_message
+            value: hello container!
+        name: cowsay-task
+        templateRef:
+          clusterScope: false
+          name: example-workflow-template
+          template: cowsay
+      - arguments:
+          parameters:
+          - name: message
+            value: hello script!
+          - name: a_dict
+            value: '{"test_key": "a value!"}'
+        name: echo-task
+        templateRef:
+          clusterScope: false
+          name: example-workflow-template
+          template: echo
+    name: d

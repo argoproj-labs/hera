@@ -18,6 +18,7 @@ from hera.shared._base_model import BaseModel
 from hera.workflows._mixins import ModelMapperMixin
 from hera.workflows.models import (
     ObjectMeta,
+    TemplateRef,
     WorkflowSpec as _ModelWorkflowSpec,
     WorkflowStatus as _ModelWorkflowStatus,
     WorkflowTemplate as _ModelWorkflowTemplate,
@@ -172,6 +173,9 @@ class WorkflowTemplate(Workflow):
 
         workflow = self._get_as_workflow(generate_name)
         return workflow.create(wait=wait, poll_interval=poll_interval)
+
+    def get_template_ref(self, template: str) -> TemplateRef:
+        return TemplateRef(name=self.name, template=template, cluster_scope=False)
 
 
 __all__ = ["WorkflowTemplate"]
