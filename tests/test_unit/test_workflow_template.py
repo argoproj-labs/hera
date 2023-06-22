@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from hera.exceptions import NotFound
+from hera.shared import global_config
 from hera.workflows import Container, Steps
 from hera.workflows.models import (
     WorkflowCreateRequest,
@@ -14,7 +15,7 @@ from hera.workflows.models import (
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import NAME_LIMIT, Workflow
 from hera.workflows.workflow_template import _TRUNCATE_LENGTH, WorkflowTemplate
-from hera.shared import global_config
+
 
 def test_workflow_template_setting_status_errors():
     with pytest.raises(ValueError) as e:
@@ -78,7 +79,7 @@ def test_workflow_template_create_as_workflow():
         wt.workflows_service.create_workflow.assert_called_once_with(
             WorkflowCreateRequest(workflow=expected_workflow.build()),
             namespace="my-namespace",
-    )
+        )
 
 
 def test_workflow_template_get_as_workflow():
