@@ -4,7 +4,7 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 from pathlib import Path
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union, cast
 
 try:
     from typing import Annotated  # type: ignore
@@ -140,7 +140,7 @@ class WorkflowTemplate(Workflow):
         return cls._from_file(yaml_file, _ModelWorkflowTemplate)
 
     def _get_as_workflow(self, generate_name: Optional[str]) -> Workflow:
-        workflow = Workflow.from_dict(self.to_dict())
+        workflow = cast(Workflow, Workflow.from_dict(self.to_dict()))
         workflow.kind = "Workflow"
 
         if generate_name is not None:
