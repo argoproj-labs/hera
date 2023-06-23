@@ -1,8 +1,10 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from hera.exceptions import NotFound
+from hera.shared import global_config
+from hera.workflows import Container, Steps
 from hera.workflows.models import (
     WorkflowCreateRequest,
     WorkflowStatus,
@@ -24,6 +26,7 @@ def test_workflow_template_setting_status_errors():
 
 
 def test_workflow_template_create():
+    global_config.host = "http://hera.testing"
     ws = WorkflowsService()
     ws.create_workflow_template = MagicMock()
 
@@ -46,28 +49,37 @@ def test_workflow_template_create():
 
 
 def test_workflow_template_create_as_workflow():
-    ws = WorkflowsService(namespace="my-namespace")
-    ws.create_workflow = MagicMock()
+    with patch.object(WorkflowsService, "create_workflow", return_value=MagicMock()) as create_workflow:
+        # We have to patch the function at the class level because create_as_workflow copies the workflows service
+        # from the WorkflowTemplate to the *separate* Workflow object.
 
-    # Note we set the name to None here, otherwise the workflow will take the name from the returned object
-    ws.create_workflow.return_value.metadata.name = None
+        ws = WorkflowsService(namespace="my-namespace")
+        # Note we set the name to None here, otherwise the workflow will take the name from the returned object
+        create_workflow.return_value.metadata.name = None
 
-    # GIVEN
-    with WorkflowTemplate(
-        name="my-wt",
-        namespace="my-namespace",
-        workflows_service=ws,
-    ) as wt:
-        pass
+        # GIVEN
+        with WorkflowTemplate(
+            name="my-wt",
+            namespace="my-namespace",
+            workflows_service=ws,
+        ) as wt:
+            cowsay = Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+            with Steps(name="steps"):
+                cowsay()
 
-    # WHEN
-    wt.create_as_workflow()
+        expected_workflow = Workflow.from_dict(wt.to_dict())
+        expected_workflow.kind = "Workflow"
+        expected_workflow.generate_name = expected_workflow.name
+        expected_workflow.name = None
 
-    # THEN
-    wt.workflows_service.create_workflow.assert_called_once_with(
-        WorkflowCreateRequest(workflow=wt._get_as_workflow(None).build()),
-        namespace="my-namespace",
-    )
+        # WHEN
+        wt.create_as_workflow()
+
+        # THEN
+        wt.workflows_service.create_workflow.assert_called_once_with(
+            WorkflowCreateRequest(workflow=expected_workflow.build()),
+            namespace="my-namespace",
+        )
 
 
 def test_workflow_template_get_as_workflow():

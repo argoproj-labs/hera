@@ -57,6 +57,35 @@ assert w == Workflow.from_yaml(w.to_yaml())
 assert w == Workflow.from_file(w.to_file())
 ```
 
+## Submit WorkflowTemplates and ClusterWorkflowTemplates as Workflows
+
+This feature is available for `WorkflowTemplates` and `ClusterWorkflowTemplates`, and helps you, as a dev, iterate on
+your `WorkflowTemplate` until it's ready to be deployed. Calling `create_as_workflow` on a `WorkflowTemplate` will
+create a `Workflow` on the fly which is submitted to the Argo cluster directly and given a generated name, meaning you
+don't need to first submit the `WorkflowTemplate` itself! What this means is you don't need to keep deleting your
+`WorkflowTemplate` and submitting it again, to then run `argo submit --from WorkflowTemplate/my-wt` while iterating
+on your `WorkflowTemplate`.
+
+```py
+with WorkflowTemplate(
+    name="my-wt",
+    namespace="my-namespace",
+    workflows_service=ws,
+) as wt:
+    cowsay = Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+    with Steps(name="steps"):
+        cowsay()
+
+wt.create_as_workflow(generate_name="my-wt-test-1-")  # submitted and given a generated name by Argo like "my-wt-test-1-abcde"
+wt.create_as_workflow()  # submitted and given a generated name by Argo like "my-wtabcde"
+wt.create_as_workflow()  # submitted and given a generated name by Argo like "my-wtvwxyz"
+```
+
+`generate_name` is an optional parameter in case you want to control the exact value of the generated name, similarly to
+the regular `Workflow`, otherwise the name of the `WorkflowTemplate` will be used verbatim for `generate_name`. The
+Workflow submitted will always use `generate_name` so that you can call it multiple times in a row without naming
+conflicts.
+
 ## Experimental Features
 
 From time to time, Hera will release a new feature under the "experimental feature" flag while we develop the feature
