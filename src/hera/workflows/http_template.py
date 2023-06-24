@@ -10,6 +10,8 @@ from hera.workflows.models import (
 
 
 class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
+    """`HTTP` is an implementation of the HTTP template that supports executing HTTP actions in a step/task"""
+
     url: str
     body: Optional[str] = None
     body_from: Optional[HTTPBodySource] = None
@@ -20,6 +22,7 @@ class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
     timeout_seconds: Optional[int] = None
 
     def _build_http_template(self) -> _ModelHTTP:
+        """Builds the generated HTTP sub-template"""
         return _ModelHTTP(
             url=self.url,
             body=self.body,
@@ -32,6 +35,7 @@ class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
         )
 
     def _build_template(self) -> _ModelTemplate:
+        """Builds the HTTP generated `Template`"""
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,

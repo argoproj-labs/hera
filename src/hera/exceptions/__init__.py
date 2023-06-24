@@ -1,6 +1,7 @@
 """Module that holds Hera specific exceptions.
 
-These are thin wrappers around the core Python `Exception`.
+These are thin wrappers around the core Python `Exception`. Some exceptions are used for indicating any errors
+encountered when communication with the Argo server.
 """
 import json
 from http import HTTPStatus

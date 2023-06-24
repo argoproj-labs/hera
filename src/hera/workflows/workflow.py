@@ -75,7 +75,7 @@ try:
 except ImportError:
     _yaml = None
 
-ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
+ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
 NAME_LIMIT = 63
 
@@ -211,7 +211,7 @@ class Workflow(
     hooks: Annotated[Optional[Dict[str, LifecycleHook]], _WorkflowModelMapper("spec.hooks")] = None
     host_aliases: Annotated[Optional[List[HostAlias]], _WorkflowModelMapper("spec.host_aliases")] = None
     host_network: Annotated[Optional[bool], _WorkflowModelMapper("spec.host_network")] = None
-    image_pull_secrets: Annotated[ImagePullSecrets, _WorkflowModelMapper("spec.image_pull_secrets")] = None
+    image_pull_secrets: Annotated[ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets")] = None
     node_selector: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("spec.node_selector")] = None
     on_exit: Annotated[Optional[Union[str, Templatable]], _WorkflowModelMapper("spec.on_exit", _build_on_exit)] = None
     parallelism: Annotated[Optional[int], _WorkflowModelMapper("spec.parallelism")] = None

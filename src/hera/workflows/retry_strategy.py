@@ -33,14 +33,26 @@ class RetryPolicy(Enum):
 
 
 class RetryStrategy(_BaseModel):
+    """`RetryStrategy` configures how an Argo job should retry"""
+
     affinity: Optional[RetryAffinity] = None
+    """affinity dictates the affinity of the retried jobs"""
+
     backoff: Optional[Backoff] = None
+    """backoff dictates how long should a job wait for before retrying"""
+
     expression: Optional[str] = None
+    """the expression field supports the expression of complex rules regarding retry behavior"""
+
     limit: Optional[Union[str, int, IntOrString]] = None
+    """the hard numeric limit of how many times a jobs should retry"""
+
     retry_policy: Optional[Union[str, RetryPolicy]] = None
+    """the policy dictates, at a high level, under what conditions should a job retry"""
 
     @validator("retry_policy", pre=True)
     def _convert_retry_policy(cls, v):
+        """Converts the `retry_policy` field into a pure `str` from either `str` already or an enum"""
         if v is None or isinstance(v, str):
             return v
 
@@ -49,12 +61,14 @@ class RetryStrategy(_BaseModel):
 
     @validator("limit", pre=True)
     def _convert_limit(cls, v):
+        """Converts the `limit` field from the union specification into a `str`"""
         if v is None or isinstance(v, IntOrString):
             return v
 
         return str(v)  # int or str
 
     def build(self) -> _ModelRetryStrategy:
+        """Builds the generated `RetryStrategy` representation of the retry strategy"""
         return _ModelRetryStrategy(
             affinity=self.affinity,
             backoff=self.backoff,

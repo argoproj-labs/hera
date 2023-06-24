@@ -31,8 +31,9 @@ class Step(
     ItemMixin,
 ):
     """
-    Step is used to run a given template. Must be instantiated under a Steps or Parallel context, or
-    outside a Workflow.
+    Step is used to run a given template.
+
+    Must be instantiated under a Steps or Parallel context, or outside a Workflow.
     """
 
     @property

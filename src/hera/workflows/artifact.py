@@ -1,8 +1,6 @@
-"""The artifact module provides the base Artifact class, along with the various
-types of artifacts as subclasses.
+"""The artifact module provides the base Artifact class, along with the various types of artifacts as subclasses.
 
-See https://argoproj.github.io/argo-workflows/walk-through/artifacts/
-for a tutorial on Artifacts.
+See https://argoproj.github.io/argo-workflows/walk-through/artifacts/ for a tutorial on Artifacts.
 """
 from typing import List, Optional, Union, cast
 

@@ -60,21 +60,21 @@ class ScriptConstructor(BaseMixin):
 
     @abstractmethod
     def generate_source(self, instance: "Script") -> str:
-        """A function that can inspect the Script instance and generate the source field."""
+        """A function that can inspect the Script instance and generate the source field"""
         raise NotImplementedError
 
     def transform_values(self, cls: Type["Script"], values: Any) -> Any:
-        """A function that will be inokved by the root validator of the Script class."""
+        """A function that will be invoked by the root validator of the Script class"""
         return values
 
     def transform_script_template_post_build(
         self, instance: "Script", script: _ModelScriptTemplate
     ) -> _ModelScriptTemplate:
-        """A hook to transform the generated script template."""
+        """A hook to transform the generated script template"""
         return script
 
     def transform_template_post_build(self, instance: "Script", template: _ModelTemplate) -> _ModelTemplate:
-        """A hook to transform the generated template."""
+        """A hook to transform the generated template"""
         return template
 
 
@@ -86,8 +86,10 @@ class Script(
     ResourceMixin,
     VolumeMountMixin,
 ):
-    """A Script acts as a wrapper around a container. In Hera this defaults to a "python:3.8" image
-    specified by global_config.image, which runs a python source specified by `Script.source`.
+    """A Script acts as a wrapper around a container.
+
+    In Hera this defaults to a "python:3.8" image specified by global_config.image, which runs a python source
+    specified by `Script.source`.
     """
 
     container_name: Optional[str] = None

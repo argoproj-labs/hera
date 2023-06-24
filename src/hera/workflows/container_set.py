@@ -105,6 +105,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
     def _build_container_node(self) -> _ModelContainerNode:
+        """Builds the generated `ContainerNode`"""
         return _ModelContainerNode(
             args=self.args,
             command=self.command,
@@ -141,6 +142,17 @@ class ContainerSet(
     VolumeMountMixin,
     ContextMixin,
 ):
+    """`ContainerSet` is the implementation of a set of containers that can be run in parallel on Kubernetes.
+
+    The containers are run within the same pod.
+
+    Examples
+    --------
+    >>> with ContainerSet(...) as cs:
+    >>>     ContainerNode(...)
+    >>>     ContainerNode(...)
+    """
+
     containers: List[Union[ContainerNode, _ModelContainerNode]] = []
     container_set_retry_strategy: Optional[ContainerSetRetryStrategy] = None
 
@@ -151,6 +163,7 @@ class ContainerSet(
         self.containers.append(node)
 
     def _build_container_set(self) -> _ModelContainerSetTemplate:
+        """Builds the generated `ContainerSetTemplate`"""
         containers = [c._build_container_node() if isinstance(c, ContainerNode) else c for c in self.containers]
         return _ModelContainerSetTemplate(
             containers=containers,
@@ -159,6 +172,7 @@ class ContainerSet(
         )
 
     def _build_template(self) -> _ModelTemplate:
+        """Builds the generated `Template` representation of the container set"""
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
