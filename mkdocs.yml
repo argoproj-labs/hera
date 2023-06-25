@@ -118,6 +118,10 @@ plugins:
             filters: ["!^_.*$"]
             show_bases: false
             separate_signature: true
+          selection:
+            docstring_style: numpy
+          rendering:
+            show_source: true
           paths: [src]
           import:
             - https://docs.python.org/3/objects.inv
