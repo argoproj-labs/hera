@@ -140,16 +140,15 @@ See the [examples](./examples/) directory for a collection of Argo workflow cons
 
 # Presentations
 
-- [Argo Workflows and Events Community Meeting 20 Oct 2021 - Hera introductory presentation](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)
-- [Argo Workflows and Events Community Meeting ... 2022](...)
-- [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](...)
-- [How we moved from AWS Glue to Argo Workflows and Hera to reduce operational work from months to a day](https://www.youtube.com/watch?v=sSLFVIIEKcE&amp;t=2045s&amp;ab_channel=DoK.community)
+- [Argo Workflows and Events Community Meeting 20 Oct 2021 - Hera introductory presentation](https://youtu.be/QETfzfVV-GY?t=181)
+- [Argo Workflows and Events Community Meeting 15 June 2022 - Hera project update](https://youtu.be/sdkBDPOdQ-g?t=231)
+- [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](https://www.youtube.com/watch?v=h2TEw8kd1Ds)
+- [Unsticking ourselves from Glue - Migrating PayIt's Data Pipelines to Argo Workflows and Hera](https://youtu.be/sSLFVIIEKcE?t=2088)
 
 # Blogs
 
-- [Hera introduction and motivation](dynotx.com...)
-- [Pipekit](pipekit.io...)
-- [PayIt](...)
+- [Hera introduction and motivation](https://www.dynotx.com/hera-the-missing-argo-workflows-python-sdk/)
+- [Dyno is scaling gene therapy research with cloud-native tools like Argo Workflows and Hera](https://www.dynotx.com/argo-workflows-hera/)
 
 # Contributing
 
