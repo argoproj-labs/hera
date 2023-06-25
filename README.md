@@ -34,9 +34,6 @@ and its crew were specially protected by the goddess Hera.
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
 
-You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 20 Oct
-2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
-
 # Table of content
 
 - [Hera](#hera)
@@ -46,6 +43,7 @@ You can watch the introductory Hera presentation at the "Argo Workflows and Even
 - [Examples](#examples)
     - [Single step script](#single-step-script)
     - [DAG diamond](#dag-diamond)
+- [Presentations](#presentations)
 - [Contributing](#contributing)
 - [Comparison](#comparison)
 
@@ -139,6 +137,19 @@ w.create()
 ```
 
 See the [examples](./examples/) directory for a collection of Argo workflow construction and submission via Hera!
+
+# Presentations
+
+- [Argo Workflows and Events Community Meeting 20 Oct 2021 - Hera introductory presentation](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)
+- [Argo Workflows and Events Community Meeting ... 2022](...)
+- [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](...)
+- [How we moved from AWS Glue to Argo Workflows and Hera to reduce operational work from months to a day](https://www.youtube.com/watch?v=sSLFVIIEKcE&amp;t=2045s&amp;ab_channel=DoK.community)
+
+# Blogs
+
+- [Hera introduction and motivation](dynotx.com...)
+- [Pipekit](pipekit.io...)
+- [PayIt](...)
 
 # Contributing
 

@@ -506,7 +506,7 @@ if __name__ == "__main__":
         now=datetime.datetime.now(tz=datetime.timezone.utc).isoformat(sep="-"),
         module=models_type,
         models_type=models_type.capitalize(),
-        models_doc_type=models_type.lower(),
+        doc_models_type=models_type.lower(),
     )
     result = make_service(service_def, endpoints, models_type)
 
