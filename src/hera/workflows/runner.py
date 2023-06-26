@@ -94,7 +94,7 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
     # convert the kwargs list to a dict
     kwargs = {}
     for kwarg in kwargs_list:
-        if not kwarg.get("name") or not kwarg.get("value"):
+        if "name" not in kwarg or "value" not in kwarg:
             continue
         # sanitize the key for python
         key = serialize(kwarg["name"]).replace("-", "_")
