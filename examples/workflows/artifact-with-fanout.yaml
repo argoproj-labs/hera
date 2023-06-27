@@ -10,12 +10,10 @@ spec:
       - name: writer
         template: writer
       - arguments:
-          parameters:
-          - name: w
-            value: '{"name": "test", "archive": null, "archive_logs": null, "artifact_gc":
-              null, "deleted": null, "from_": "{{tasks.writer.outputs.artifacts.test}}",
-              "from_expression": null, "global_name": null, "mode": null, "path":
-              "/file", "recurse_mode": null, "sub_path": null}'
+          artifacts:
+          - from: '{{tasks.writer.outputs.artifacts.out-art}}'
+            name: in-art
+            path: /tmp/file
         depends: writer
         name: fanout
         template: fanout
@@ -31,27 +29,30 @@ spec:
   - name: writer
     outputs:
       artifacts:
-      - name: test
-        path: /file
+      - archive:
+          none: {}
+        name: out-art
+        path: /tmp/file
     script:
       command:
       - python
       image: python:3.8
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-        with open('/file', 'w+') as f:\n    for i in range(10):\n        f.write(json.dumps(i)\
+        with open('/tmp/file', 'w+') as f:\n    for i in range(10):\n        f.write(json.dumps(i)\
         \ + '\\n')"
   - inputs:
       artifacts:
-      - name: test
-        path: /file
+      - name: in-art
+        path: /tmp/file
     name: fanout
     script:
       command:
       - python
       image: python:3.8
       source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-        import sys\nindices = []\nwith open('/file', 'r') as f:\n    for line in f.readlines():\n\
-        \        indices.append(line.strip())\njson.dump(indices, sys.stdout)"
+        import sys\nindices = []\nwith open('/tmp/file', 'r') as f:\n    for line\
+        \ in f.readlines():\n        indices.append(line.strip())\njson.dump(indices,\
+        \ sys.stdout)"
   - inputs:
       parameters:
       - name: i
