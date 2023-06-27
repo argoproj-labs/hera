@@ -1,5 +1,4 @@
-from hera.workflows import DAG, Artifact, Workflow, script
-from hera.workflows.archive import NoneArchiveStrategy
+from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Workflow, script
 
 
 @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
