@@ -22,7 +22,7 @@ class TokenGenerator:
 class ArgoCLITokenGenerator(TokenGenerator):
     """A token generator that uses the Argo CLI to generate a token.
 
-    Notes
+    Notes:
     -----
     This involves invoking the Argo CLI, which means that the Argo CLI must be installed on the machine.
     An exception is raised if this is not the case.
