@@ -4,7 +4,7 @@ import importlib
 import inspect
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from pydantic import validate_arguments
 
@@ -97,7 +97,7 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
         if "name" not in kwarg or "value" not in kwarg:
             continue
         # sanitize the key for python
-        key = serialize(kwarg["name"]).replace("-", "_")
+        key = cast(str, serialize(kwarg["name"])).replace("-", "_")
         value = kwarg["value"]
         kwargs[key] = value
     function = validate_arguments(function)

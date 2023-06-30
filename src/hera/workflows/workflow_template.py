@@ -37,6 +37,7 @@ class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
 
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your namespace in your cluster.
+
     This allows you to create a library of frequently-used templates and reuse them by referencing
     them from your Workflows.
     """

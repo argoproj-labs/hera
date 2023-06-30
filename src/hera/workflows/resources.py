@@ -43,13 +43,21 @@ class Resources(_BaseModel):
     ephemeral_request: Optional[str] = None
         The amount of ephemeral storage to request.
     ephemeral_limit: Optional[str] = None
-        The emphemeral storage limit of the pod.
-    gpus: Optional[int] = None
+        The ephemeral storage limit of the pod.
+    gpus: Optional[Union[int, str]] = None
         The number of GPUs to request.
     gpu_flag: Optional[str] = "nvidia.com/gpu"
         The GPU flag to use for identifying how many GPUs to mount to a pod. This is dependent on the cloud provider.
     custom_resources: Optional[Dict] = None
         Any custom resources to request. This is dependent on the cloud provider.
+
+    Notes
+    -----
+    Most of the fields that support a union of `int` and `str` support either specifying a number for the resource,
+    such as 1 CPU, 2 GPU, etc., a `str` representation of that numerical resource, such as '1' CPU, '2' GPU, etc., but
+    also supports specifying a *to be computed* value, such as `{{inputs.parameters.cpu_request}}`. This means tasks,
+    steps, etc., can be stitched together in a way to have a task/step that *computes* the resource requirements, and
+    then `outputs` them to the next step/task.
     """
 
     cpu_request: Optional[Union[float, int, str]] = None
@@ -58,7 +66,7 @@ class Resources(_BaseModel):
     memory_limit: Optional[str] = None
     ephemeral_request: Optional[str] = None
     ephemeral_limit: Optional[str] = None
-    gpus: Optional[int] = None
+    gpus: Optional[Union[int, str]] = None
     gpu_flag: Optional[str] = "nvidia.com/gpu"
     custom_resources: Optional[Dict] = None
 

@@ -34,9 +34,6 @@ and its crew were specially protected by the goddess Hera.
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
 
-You can watch the introductory Hera presentation at the "Argo Workflows and Events Community Meeting 20 Oct
-2021" [here](https://www.youtube.com/watch?v=QETfzfVV-GY&t=181s)!
-
 # Table of content
 
 - [Hera](#hera)
@@ -46,6 +43,7 @@ You can watch the introductory Hera presentation at the "Argo Workflows and Even
 - [Examples](#examples)
     - [Single step script](#single-step-script)
     - [DAG diamond](#dag-diamond)
+- [Presentations](#presentations)
 - [Contributing](#contributing)
 - [Comparison](#comparison)
 
@@ -139,6 +137,18 @@ w.create()
 ```
 
 See the [examples](./examples/) directory for a collection of Argo workflow construction and submission via Hera!
+
+# Presentations
+
+- [Argo Workflows and Events Community Meeting 20 Oct 2021 - Hera introductory presentation](https://youtu.be/QETfzfVV-GY?t=181)
+- [Argo Workflows and Events Community Meeting 15 June 2022 - Hera project update](https://youtu.be/sdkBDPOdQ-g?t=231)
+- [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](https://www.youtube.com/watch?v=h2TEw8kd1Ds)
+- [Unsticking ourselves from Glue - Migrating PayIt's Data Pipelines to Argo Workflows and Hera](https://youtu.be/sSLFVIIEKcE?t=2088)
+
+# Blogs
+
+- [Hera introduction and motivation](https://www.dynotx.com/hera-the-missing-argo-workflows-python-sdk/)
+- [Dyno is scaling gene therapy research with cloud-native tools like Argo Workflows and Hera](https://www.dynotx.com/argo-workflows-hera/)
 
 # Contributing
 

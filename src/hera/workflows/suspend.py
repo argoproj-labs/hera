@@ -24,10 +24,11 @@ class Suspend(
     TemplateMixin,
     CallableTemplateMixin,
 ):
-    """The Suspend template allows the user to pause a workflow for a specified length of time
-    given by `duration` or indefinitely (i.e. until manually resumed). The Suspend template also
-    allows you to specify `intermediate_parameters` which will replicate the given parameters to
-    the "inputs" and "outputs" of the template, resulting in a Suspend template that pauses and
+    """The Suspend template allows the user to pause a workflow for a specified length of time.
+
+    The workflow can pause based on the given by `duration` or indefinitely (i.e. until manually resumed).
+    The Suspend template also allows you to specify `intermediate_parameters` which will replicate the given
+    parameters to the "inputs" and "outputs" of the template, resulting in a Suspend template that pauses and
     waits for values from the user for the given list of parameters.
     """
 

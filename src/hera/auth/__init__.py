@@ -1,3 +1,8 @@
+"""The auth module of Hera consists of authentication related implementation.
+
+The module provides basic functionality such as token generation via the Argo CLI, the basis of token generation for
+implementing a client token generator, etc.
+"""
 import shutil
 import subprocess
 
@@ -17,7 +22,9 @@ class TokenGenerator:
 class ArgoCLITokenGenerator(TokenGenerator):
     """A token generator that uses the Argo CLI to generate a token.
 
-    Note that this involves invoking the Argo CLI, which means that the Argo CLI must be installed on the machine.
+    Notes:
+    -----
+    This involves invoking the Argo CLI, which means that the Argo CLI must be installed on the machine.
     An exception is raised if this is not the case.
 
     Raises
