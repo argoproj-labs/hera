@@ -16,9 +16,9 @@ TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]
 
 Hook = Callable[[TBase], TBase]
-"""
-`Hook` is a callable that takes a Hera objects and returns the same, optionally mutated, object. This can be a Workflow,
-a Script, a Container, etc - any Hera object. 
+"""`Hook` is a callable that takes a Hera objects and returns the same, optionally mutated, object. 
+
+This can be a Workflow, a Script, a Container, etc - any Hera object. 
 """
 
 _HookMap = Dict[Type[TBase], List[Hook]]

@@ -190,7 +190,10 @@ class ServiceEndpoint:
 
         if resp.ok:
             resp_json = resp.json()
-            if "status" in resp_json or resp_json["status"]['active'] is None or resp_json["status"]['lastScheduledTime'] is None or resp_json["status"]['conditions'] is None:
+            if "status" in resp_json 
+                or resp_json["status"]['active'] is None 
+                or resp_json["status"]['lastScheduledTime'] is None 
+                or resp_json["status"]['conditions'] is None:
                 # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
                 # object. So, we overwrite the response with a value that allows the response to pass through safely.
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
@@ -311,7 +314,7 @@ def parse_builtin(f: str) -> str:
 
 
 def parse_parameter(parameter: dict, models_type: str) -> Parameter:
-    """Parses the given dictionary representation of a `Parameter` into a proper `Parameter` type based on model type"""
+    """Parses the given dictionary of a `Parameter` into a proper `Parameter` type based on model type"""
     openapi_type_switch = {
         "string": str,
         "number": float,

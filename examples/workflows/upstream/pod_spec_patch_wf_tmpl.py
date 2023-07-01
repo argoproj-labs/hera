@@ -17,5 +17,6 @@ with Workflow(
         image="docker/whalesay:latest",
         command=["cowsay"],
         args=["hello world"],
-        pod_spec_patch='{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}" }}}]}',
+        pod_spec_patch='{"containers":[{"name":"main", "resources":{"limits":{"cpu": '
+        '"{{workflow.parameters.cpu-limit}}" }}}]}',
     )

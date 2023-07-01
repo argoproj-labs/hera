@@ -125,7 +125,8 @@ show-fixes = true
 ignore = ["E501"]
 target-version = "py38"
 extend-select = ["I"]
-
+src = ["src"]
+exclude = ["src/hera/workflows/models", "src/hera/events/models"]
 
 [tool.ruff.per-file-ignores]
 "**/__init__.py" = ["F401"]
@@ -134,3 +135,6 @@ extend-select = ["I"]
 force-wrap-aliases = true
 combine-as-imports = true
 known-first-party = ["hera"]
+
+[tool.ruff.pydocstyle]
+convention = "google"

@@ -14,6 +14,9 @@ from pathlib import Path
 # to sentence case.
 def generate_markdown(path: Path, sub_folder: str):
     py_contents = path.read_text()
+    link = "https://github.com/argoproj/argo-workflows/blob/master/examples/{link}".format(
+        link=path.stem.replace("__", "/").replace("_", "-") + ".yaml"
+    )
     match = re.search(r'^"""(.*?)"""', py_contents, re.DOTALL)
     if match:
         docstring = match.group(1)
@@ -26,7 +29,8 @@ def generate_markdown(path: Path, sub_folder: str):
     upstream_example = Path(str(path).replace(".py", ".upstream.yaml").replace("_", "-")).exists()
     upstream_link = ""
     if upstream_example:
-        upstream_link = f"> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/{path.stem.replace('__', '/').replace('_', '-') + '.yaml'})."
+        upstream_link = "> Note: This example is a replication of an Argo Workflow example in Hera. "
+        f"The upstream example can be [found here]({link})."
     contents = f"""# {title}
 
 {upstream_link}

@@ -440,7 +440,8 @@ class Workflow(
 
         Args:
             output_directory: The directory to write the file to. Defaults to the current working directory.
-            name: The name of the file to write without the file extension. Defaults to the Workflow's name or a generated name.
+            name: The name of the file to write without the file extension.  Defaults to the Workflow's name or a
+            generated name.
             *args: Additional arguments to pass to `yaml.dump`.
             **kwargs: Additional keyword arguments to pass to `yaml.dump`.
         """

@@ -1,4 +1,4 @@
-"""The `env` module provides the implementations of independent environment variable types that can be used with Argo"""
+"""The `env` module provides the implementations of independent env variable types that can be used with Argo"""
 import hashlib
 import json
 import string

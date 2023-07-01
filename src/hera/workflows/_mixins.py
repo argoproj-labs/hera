@@ -96,9 +96,9 @@ InputsT = Optional[
 """`InputsT` is the main type associated with inputs that can be specified in Hera workflows, dags, steps, etc.
 
 This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Inputs`, 
-`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, `hera.workflows.Artifact`),
-dictionary mappings of parameter names to values (auto-converted by Hera to `hera.workflows.Parameter`), or lists of 
-any of the aforementioned objects.
+`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, 
+`hera.workflows.Artifact`), dictionary mappings of parameter names to values (auto-converted by Hera to 
+`hera.workflows.Parameter`), or lists of any of the aforementioned objects.
 """
 
 OutputsT = Optional[
@@ -111,8 +111,8 @@ OutputsT = Optional[
 """`OutputsT` is the main type associated with outputs the can be specified in Hera workflows, dags, steps, etc.
 
 This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Outputs`, 
-`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, `hera.workflows.Artifact`), 
-or lists of the aforementioned objects.
+`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, 
+`hera.workflows.Artifact`),  or lists of the aforementioned objects.
 """
 
 ArgumentsT = Optional[
@@ -256,7 +256,8 @@ class ContainerMixin(BaseMixin):
             return ImagePullPolicy[policy_mapper[self.image_pull_policy].name]
         except KeyError as e:
             raise KeyError(
-                f"Supplied image policy {self.image_pull_policy} is not valid. Use one of {ImagePullPolicy.__members__}"
+                f"Supplied image policy {self.image_pull_policy} is not valid. "
+                "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
     @validator("image", pre=True, always=True)
@@ -1237,7 +1238,8 @@ class ModelMapperMixin(BaseMixin):
 class ExperimentalMixin(BaseMixin):
     _experimental_warning_message: str = (
         "Unable to instantiate {} since it is an experimental feature."
-        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Please turn on experimental features by setting "
+        '`hera.shared.global_config.experimental_features["{}"] = True`.'
         " Note that experimental features are unstable and subject to breaking changes."
     )
 
