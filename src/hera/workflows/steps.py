@@ -30,8 +30,7 @@ class Step(
     ParameterMixin,
     ItemMixin,
 ):
-    """
-    Step is used to run a given template.
+    """Step is used to run a given template.
 
     Must be instantiated under a Steps or Parallel context, or outside a Workflow.
     """

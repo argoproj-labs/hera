@@ -14,7 +14,7 @@ from hera.workflows.volume import _BaseVolume
 
 
 class UserContainer(_ModelUserContainer):
-    """`UserContainer` is a container type that is specifically used as a side container"""
+    """`UserContainer` is a container type that is specifically used as a side container."""
 
     env: Optional[List[Union[_BaseEnv, EnvVar]]] = None  # type: ignore[assignment]
     env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None  # type: ignore[assignment]

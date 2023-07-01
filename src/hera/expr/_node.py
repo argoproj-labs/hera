@@ -63,7 +63,7 @@ class Node:
     def __format__(self, format_spec: str) -> str:
         """Supports easy output formatting to construct variable substitution expressions.
 
-        Examples
+        Examples:
         --------
         f"{g.input.parameters.value:$}" == "{{input.parameters.value}}"
         f"{g.workflow.parameters.config.jsonpath('$.a'):=}" == "{{=jsonpath(workflow.parameters.config, '$.a')}}"
@@ -232,7 +232,7 @@ def _constant_repr(obj):
 class Constant(Node):
     """Supports transpiling inline python constants to expr expressions.
 
-    Examples
+    Examples:
     --------
     str(C(1)) == 1
     str(C(True)) == true
@@ -265,7 +265,7 @@ class Identifier(Node):
 class Parentheses(Node):
     """Supports transpiling groups of Python expressions so that they are parathesized properly in expr.
 
-    Examples
+    Examples:
     --------
     str(P(C(1) + C(2)) + 3) == (1 + 2) + 3
     """

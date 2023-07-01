@@ -60,21 +60,21 @@ class ScriptConstructor(BaseMixin):
 
     @abstractmethod
     def generate_source(self, instance: "Script") -> str:
-        """A function that can inspect the Script instance and generate the source field"""
+        """A function that can inspect the Script instance and generate the source field."""
         raise NotImplementedError
 
     def transform_values(self, cls: Type["Script"], values: Any) -> Any:
-        """A function that will be invoked by the root validator of the Script class"""
+        """A function that will be invoked by the root validator of the Script class."""
         return values
 
     def transform_script_template_post_build(
         self, instance: "Script", script: _ModelScriptTemplate
     ) -> _ModelScriptTemplate:
-        """A hook to transform the generated script template"""
+        """A hook to transform the generated script template."""
         return script
 
     def transform_template_post_build(self, instance: "Script", template: _ModelTemplate) -> _ModelTemplate:
-        """A hook to transform the generated template"""
+        """A hook to transform the generated template."""
         return template
 
 
@@ -293,7 +293,7 @@ def script(**script_kwargs):
     **script_kwargs
         Keyword arguments to be passed to the Script object.
 
-    Returns
+    Returns:
     -------
     Callable
         Function that wraps a given function into a `Script`.
@@ -309,7 +309,7 @@ def script(**script_kwargs):
         func: Callable
             Function to wrap.
 
-        Returns
+        Returns:
         -------
         Callable
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
@@ -327,7 +327,7 @@ def script(**script_kwargs):
 
         @wraps(func)
         def task_wrapper(*args, **kwargs):
-            """Invokes a `Script` object's `__call__` method using the given `task_params`"""
+            """Invokes a `Script` object's `__call__` method using the given `task_params`."""
             if _context.active:
                 return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
@@ -348,7 +348,7 @@ class InlineScriptConstructor(ScriptConstructor):
         script that automatically imports json and loads/adds code to interpret each independent argument into the
         script.
 
-        Returns
+        Returns:
         -------
         str
             The string representation of the script to load.
@@ -371,7 +371,7 @@ class InlineScriptConstructor(ScriptConstructor):
         for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
         through get_param_script_portion.
 
-        Returns
+        Returns:
         -------
         str
             Final formatted script.

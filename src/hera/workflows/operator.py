@@ -6,7 +6,7 @@ class Operator(Enum):
 
     This can be used on tasks that execute conditionally based on the output of another task.
 
-    Notes
+    Notes:
     -----
     The task that outputs its result needs to do so using stdout. See `examples` for a sample workflow.
     """

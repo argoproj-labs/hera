@@ -14,7 +14,7 @@ Label = _ModelMetricLabel
 
 
 class _BaseMetric(BaseMixin):
-    """Base metric wrapper around `hera.workflows.models.Prometheus`"""
+    """Base metric wrapper around `hera.workflows.models.Prometheus`."""
 
     name: str
     help: str
@@ -35,7 +35,7 @@ class _BaseMetric(BaseMixin):
 class Counter(_BaseMetric):
     """Counter metric component used to count specific events based on the given value.
 
-    Notes
+    Notes:
     -----
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
@@ -57,7 +57,7 @@ class Counter(_BaseMetric):
 class Gauge(_BaseMetric, _ModelGauge):
     """Gauge metric component used to record intervals based on the given value.
 
-    Notes
+    Notes:
     -----
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
@@ -80,7 +80,7 @@ class Gauge(_BaseMetric, _ModelGauge):
 class Histogram(_BaseMetric):
     """Histogram metric that records the value at the specified bucket intervals.
 
-    Notes
+    Notes:
     -----
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
@@ -109,7 +109,7 @@ class Histogram(_BaseMetric):
 class Metric(_BaseMetric):
     """Prometheus metric that can be used at the workflow or task/template level.
 
-    Notes
+    Notes:
     -----
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """
@@ -138,7 +138,7 @@ class Metric(_BaseMetric):
 class Metrics(BaseMixin):
     """A collection of Prometheus metrics.
 
-    Notes
+    Notes:
     -----
     See: https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics
     """

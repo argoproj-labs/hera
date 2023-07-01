@@ -53,7 +53,8 @@ _ALL_QUOTES = (*_SINGLE_QUOTES, *_MULTI_QUOTES)
 class _Unparser(ast.NodeVisitor):
     """Methods in this class recursively traverse an AST and
     output source code for the abstract syntax; original formatting
-    is disregarded."""
+    is disregarded.
+    """
 
     def __init__(self, *, _avoid_backslashes=False):
         self._source = []
@@ -65,7 +66,9 @@ class _Unparser(ast.NodeVisitor):
 
     def __call__(self, node):
         """Outputs a source code string that, if converted back to an ast
-        (using ast.parse) will generate an AST equivalent to *node*"""
+        (using ast.parse) will generate an AST equivalent to *node*
+        .
+        """
         self._source = []
         self.traverse(node)
         return "".join(self._source)
@@ -85,7 +88,8 @@ class _Unparser(ast.NodeVisitor):
     def items_view(self, traverser, items):
         """Traverse and separate the given *items* with a comma and append it to
         the buffer. If *items* is a single item sequence, a trailing comma
-        will be added."""
+        will be added.
+        """
         if len(items) == 1:
             traverser(items[0])
             self.write(",")
@@ -93,18 +97,20 @@ class _Unparser(ast.NodeVisitor):
             self.interleave(lambda: self.write(", "), traverser, items)
 
     def maybe_newline(self):
-        """Adds a newline if it isn't the start of generated source"""
+        """Adds a newline if it isn't the start of generated source."""
         if self._source:
             self.write("\n")
 
     def fill(self, text=""):
         """Indent a piece of text and append it, according to the current
-        indentation level"""
+        indentation level
+        .
+        """
         self.maybe_newline()
         self.write("    " * self._indent + text)
 
     def write(self, text):
-        """Append a piece of text"""
+        """Append a piece of text."""
         self._source.append(text)
 
     def buffer_writer(self, text):
@@ -133,8 +139,8 @@ class _Unparser(ast.NodeVisitor):
     @contextmanager
     def delimit(self, start, end):
         """A context manager for preparing the source for expressions. It adds
-        *start* to the buffer and enters, after exit it adds *end*."""
-
+        *start* to the buffer and enters, after exit it adds *end*.
+        """
         self.write(start)
         yield
         self.write(end)
@@ -146,7 +152,7 @@ class _Unparser(ast.NodeVisitor):
             return nullcontext()
 
     def require_parens(self, precedence, node):
-        """Shortcut to adding precedence related parens"""
+        """Shortcut to adding precedence related parens."""
         return self.delimit_if("(", ")", self.get_precedence(node) > precedence)
 
     def get_precedence(self, node):
@@ -160,7 +166,8 @@ class _Unparser(ast.NodeVisitor):
         """If a docstring node is found in the body of the *node* parameter,
         return that docstring node, None otherwise.
 
-        Logic mirrored from ``_PyAST_GetDocString``."""
+        Logic mirrored from ``_PyAST_GetDocString``.
+        """
         if not isinstance(node, (AsyncFunctionDef, FunctionDef, ClassDef, Module)) or len(node.body) < 1:
             return None
         node = node.body[0]

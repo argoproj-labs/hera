@@ -1,4 +1,4 @@
-"""A serialization module that contains utilities for serializing any values passed to the Argo server via Hera"""
+"""A serialization module that contains utilities for serializing any values passed to the Argo server via Hera."""
 import json
 from json import JSONEncoder
 from typing import Any, Optional
@@ -14,7 +14,7 @@ default nullity/None and user-provided `None` on, say, something like the `sourc
 
 
 class PydanticEncoder(JSONEncoder):
-    """Default serializer of Hera objects"""
+    """Default serializer of Hera objects."""
 
     def default(self, o):
         if isinstance(o, BaseModel):

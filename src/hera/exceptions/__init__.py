@@ -56,12 +56,12 @@ status_code_to_exception_map: Dict[int, Type[HeraException]] = {
 
 
 def exception_from_status_code(status_code: int, msg: str) -> HeraException:
-    """Returns a `HeraException` mapped from the given status code initialized with the given message"""
+    """Returns a `HeraException` mapped from the given status code initialized with the given message."""
     return status_code_to_exception_map.get(status_code, HeraException)(msg)
 
 
 def exception_from_server_response(resp: Response) -> HeraException:
-    """Returns a `HeraException` mapped from the given `Response`"""
+    """Returns a `HeraException` mapped from the given `Response`."""
     assert not resp.ok, "This function should only be called with non-2xx responses"
     try:
         return exception_from_status_code(

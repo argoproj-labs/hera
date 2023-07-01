@@ -31,12 +31,12 @@ from hera.shared import global_config
 
 
 def valid_host_scheme(host: str) -> bool:
-    """Validates the the given `host` starts with either `http` or `https`"""
+    """Validates the the given `host` starts with either `http` or `https`."""
     return host.startswith("http://") or host.startswith("https://")
 
 
 class EventsService:
-    """The core events service for interacting with the Argo server"""
+    """The core events service for interacting with the Argo server."""
 
     def __init__(
         self,

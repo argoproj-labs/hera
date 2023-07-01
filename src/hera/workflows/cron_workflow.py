@@ -1,4 +1,4 @@
-"""The cron_workflow module provides the CronWorkflow class
+"""The cron_workflow module provides the CronWorkflow class.
 
 See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
@@ -94,15 +94,14 @@ class CronWorkflow(Workflow):
         )
 
     def get(self) -> TWorkflow:
-        """Attempts to get a cron workflow based on the parameters of this template e.g. name + namespace"""
+        """Attempts to get a cron workflow based on the parameters of this template e.g. name + namespace."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         return self.workflows_service.get_cron_workflow(name=self.name, namespace=self.namespace)
 
     def update(self) -> TWorkflow:
-        """
-        Attempts to perform a workflow template update based on the parameters of this template
+        """Attempts to perform a workflow template update based on the parameters of this template
         e.g. name, namespace. Note that this creates the template if it does not exist. In addition, this performs
         a get prior to updating to get the resource version to update in the first place. If you know the template
         does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
@@ -151,7 +150,6 @@ class CronWorkflow(Workflow):
     @classmethod
     def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
         """Parse from given model to cls's type."""
-
         assert isinstance(model, _ModelCronWorkflow)
         hera_cron_workflow = CronWorkflow(schedule="")
 

@@ -45,7 +45,7 @@ class Container(
     working_dir: Optional[str] = None
 
     def _build_container(self) -> _ModelContainer:
-        """Builds the generated `Container` representation"""
+        """Builds the generated `Container` representation."""
         return _ModelContainer(
             args=self.args,
             command=self.command,
@@ -71,7 +71,7 @@ class Container(
         )
 
     def _build_template(self) -> _ModelTemplate:
-        """Builds the generated `Template` representation of the container"""
+        """Builds the generated `Template` representation of the container."""
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,

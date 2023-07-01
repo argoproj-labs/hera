@@ -1,4 +1,4 @@
-"""This helps parse out the workflow models from the OpenAPI schema and creates an init only for those models"""
+"""This helps parse out the workflow models from the OpenAPI schema and creates an init only for those models."""
 
 # we want the init of `workflows.models` to have a filtered import of Workflow models
 # we can parse out the JSON using the old code and filter on Workflow objects
@@ -12,13 +12,13 @@ model_types = {"workflows", "events"}
 
 
 def get_openapi_spec_url() -> str:
-    """Gets the OpenAPI spec URL from argv and returns it"""
+    """Gets the OpenAPI spec URL from argv and returns it."""
     assert len(sys.argv) == 3, "Expected two argv arguments - the Argo OpenAPI spec URL and [workflows|events]"
     return sys.argv[1]
 
 
 def get_models_type() -> str:
-    """Gets the model type to generate from argv and returns it. This is either `workflows` or `events`"""
+    """Gets the model type to generate from argv and returns it. This is either `workflows` or `events`."""
     assert len(sys.argv) == 3, "Expected two argv arguments - the Argo OpenAPI spec URL and [workflows|events]"
     arg = sys.argv[2]
     assert arg in model_types, f"Unsupported model type {arg}, expected one of {model_types}"
@@ -26,7 +26,7 @@ def get_models_type() -> str:
 
 
 def fetch_openapi_spec(url: str) -> dict:
-    """Fetches the OpenAPI specification at the given URI"""
+    """Fetches the OpenAPI specification at the given URI."""
     response = requests.get(url)
     if response.ok:
         return response.json()
@@ -37,18 +37,18 @@ def fetch_openapi_spec(url: str) -> dict:
 
 
 def get_openapi_definitions(spec: dict) -> dict:
-    """Extracts the OpenAPI definitions from the given OpenAPI spec"""
+    """Extracts the OpenAPI definitions from the given OpenAPI spec."""
     assert "definitions" in spec, "Expected `definitions` to be part of the spec"
     return spec["definitions"]
 
 
 def get_refs_from_openapi_definitions(defs: dict) -> list:
-    """Extracts the OpenAPI references from the given OpenAPI definitions"""
+    """Extracts the OpenAPI references from the given OpenAPI definitions."""
     return list(defs.keys())
 
 
 def filter_refs_on_models_type(refs: list, models_type: str) -> list:
-    """Filters the given list of references using the given model type"""
+    """Filters the given list of references using the given model type."""
     # TODO: maybe this logic can be a bit more sophisticated
     inclusions = ["events", "event", "eventsource", "sensor"]
 
@@ -72,12 +72,12 @@ def filter_refs_on_models_type(refs: list, models_type: str) -> list:
 
 
 def assemble_root_path_from_models_type(m_type: str) -> str:
-    """Assembles the Hera root path from the given models type"""
+    """Assembles the Hera root path from the given models type."""
     return f"hera.{m_type}.models"
 
 
 def get_import_paths_from_refs(refs: list, root_path: str) -> list:
-    """Assembles the Hera import paths from the given list of references"""
+    """Assembles the Hera import paths from the given list of references."""
     result = []
     for ref in refs:
         split = ref.split(".")
@@ -94,7 +94,7 @@ def get_import_paths_from_refs(refs: list, root_path: str) -> list:
 
 
 def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> None:
-    """Writes the given imports to the `root_path` models"""
+    """Writes the given imports to the `root_path` models."""
     path = Path(__name__).parent.parent / "src" / "hera" / models_type / "models" / "__init__.py"
     with open(str(path), "w+") as f:
         f.write(

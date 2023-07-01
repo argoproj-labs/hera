@@ -12,13 +12,13 @@ class _BaseEnvFrom(_BaseModel):
     prefix: Optional[str] = None
 
     def build(self) -> _ModelEnvFromSource:
-        """Constructs and returns the Argo EnvFrom specification"""
+        """Constructs and returns the Argo EnvFrom specification."""
         raise NotImplementedError()
 
 
 class SecretEnvFrom(_BaseEnvFrom, _ModelSecretEnvSource):
     def build(self) -> _ModelEnvFromSource:
-        """Constructs and returns the Argo EnvFrom specification"""
+        """Constructs and returns the Argo EnvFrom specification."""
         return _ModelEnvFromSource(
             prefix=self.prefix,
             secret_ref=_ModelSecretEnvSource(
@@ -30,7 +30,7 @@ class SecretEnvFrom(_BaseEnvFrom, _ModelSecretEnvSource):
 
 class ConfigMapEnvFrom(_BaseEnvFrom, _ModelConfigMapEnvSource):
     def build(self) -> _ModelEnvFromSource:
-        """Constructs and returns the Argo EnvFrom specification"""
+        """Constructs and returns the Argo EnvFrom specification."""
         return _ModelEnvFromSource(
             prefix=self.prefix,
             config_map_ref=_ModelConfigMapEnvSource(

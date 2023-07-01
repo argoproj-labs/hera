@@ -17,7 +17,7 @@ class TokenGenerator:
     """
 
     def __call__(self) -> str:
-        """Generates an authentication token for use with Argo Workflows/Events APIs"""
+        """Generates an authentication token for use with Argo Workflows/Events APIs."""
         raise NotImplementedError("Implement me")
 
 
@@ -29,7 +29,7 @@ class ArgoCLITokenGenerator(TokenGenerator):
     This involves invoking the Argo CLI, which means that the Argo CLI must be installed on the machine.
     An exception is raised if this is not the case.
 
-    Raises
+    Raises:
     ------
     RuntimeError
         If the Argo CLI is not installed.

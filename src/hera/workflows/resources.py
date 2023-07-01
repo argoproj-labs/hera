@@ -1,4 +1,4 @@
-"""Holds the resource specification"""
+"""Holds the resource specification."""
 from typing import Dict, Optional, Union
 
 from pydantic import root_validator
@@ -51,7 +51,7 @@ class Resources(_BaseModel):
     custom_resources: Optional[Dict] = None
         Any custom resources to request. This is dependent on the cloud provider.
 
-    Notes
+    Notes:
     -----
     Most of the fields that support a union of `int` and `str` support either specifying a number for the resource,
     such as 1 CPU, 2 GPU, etc., a `str` representation of that numerical resource, such as '1' CPU, '2' GPU, etc., but
@@ -100,7 +100,7 @@ class Resources(_BaseModel):
         return values
 
     def build(self) -> _ModelResourceRequirements:
-        """Builds the resource requirements of the pod"""
+        """Builds the resource requirements of the pod."""
         resources: Dict = dict()
 
         if self.cpu_limit is not None:

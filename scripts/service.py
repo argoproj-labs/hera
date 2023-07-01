@@ -45,7 +45,7 @@ class Parameter:
 
 
 class Response:
-    """The response type of a request"""
+    """The response type of a request."""
 
     def __init__(self, ref: str) -> None:
         self.ref = ref
@@ -224,7 +224,7 @@ class ServiceEndpoint:
 
 
 def get_models_type() -> str:
-    """Gets the model type to generate from argv and returns it. This is either `workflows` or `events`"""
+    """Gets the model type to generate from argv and returns it. This is either `workflows` or `events`."""
     assert len(sys.argv) == 3, "Expected two argv arguments - the Argo OpenAPI spec URL and [workflows|events]"
     arg = sys.argv[2]
     assert arg in model_types, f"Unsupported model type {arg}, expected one of {model_types}"
@@ -232,13 +232,13 @@ def get_models_type() -> str:
 
 
 def get_openapi_spec_url() -> str:
-    """Gets the OpenAPI spec URL from argv and returns it"""
+    """Gets the OpenAPI spec URL from argv and returns it."""
     assert len(sys.argv) == 3, "Expected a single argv argument - the Argo OpenAPI spec URL"
     return sys.argv[1]
 
 
 def fetch_openapi_spec(url: str) -> dict:
-    """Fetches the OpenAPI specification at the given URI"""
+    """Fetches the OpenAPI specification at the given URI."""
     response = requests.get(url)
     if response.ok:
         return response.json()
@@ -249,7 +249,7 @@ def fetch_openapi_spec(url: str) -> dict:
 
 
 def get_consumes(payload: dict) -> str:
-    """Gets the OpenAPI `consumes` field"""
+    """Gets the OpenAPI `consumes` field."""
     consumes = payload.get("consumes")
     assert isinstance(consumes, list), f"Expected `consumes` to be of list type, received {type(consumes)}"
     assert len(consumes) == 1, "Expected `consumes` payload to contain a single item e.g. 'application/json'"
@@ -257,7 +257,7 @@ def get_consumes(payload: dict) -> str:
 
 
 def get_produces(payload: dict) -> str:
-    """Gets the OpenAPI `produces` field"""
+    """Gets the OpenAPI `produces` field."""
     produces = payload.get("produces")
     assert isinstance(produces, list), f"Expected `produces` to be of list type, received {type(produces)}"
     assert len(produces) == 1, "Expected `produces` payload to contain a single item e.g. 'application/json'"
@@ -265,25 +265,25 @@ def get_produces(payload: dict) -> str:
 
 
 def get_paths(payload: dict) -> dict:
-    """Gets the OpenAPI `paths` field"""
+    """Gets the OpenAPI `paths` field."""
     paths = payload.get("paths")
     assert isinstance(paths, dict), f"Expected `paths` to be of dictionary type, received {type(paths)}"
     return paths
 
 
 def camel_to_snake(s: str) -> str:
-    """Converts the given string from camel case to snake cased"""
+    """Converts the given string from camel case to snake cased."""
     return re.sub(r"(?<!^)(?=[A-Z])", "_", s)
 
 
 def snake_to_camel(s: str) -> str:
-    """Converts the given string from snake case to camel cased"""
+    """Converts the given string from snake case to camel cased."""
     components = s.split("_")
     return components[0] + "".join(x.title() for x in components[1:])
 
 
 def parse_operation_id(operation_id: str) -> str:
-    """Parses the given operation ID into a service endpoint definition"""
+    """Parses the given operation ID into a service endpoint definition."""
     if "UID" in operation_id:
         operation_id = operation_id.replace("UID", "Uid")
     operation = operation_id.split("_")[-1]
@@ -297,7 +297,6 @@ def get_class(cls_name: str, models_type: str) -> type:
     This intentionally has an empty return to catch cases when the class it not found. This will cause dep
     code to fail so users know service generation failed.
     """
-
     switch = {"workflows": workflows_models, "events": events_models}
     modules = inspect.getmembers(switch.get(models_type))
     for module in modules:
@@ -307,14 +306,14 @@ def get_class(cls_name: str, models_type: str) -> type:
 
 
 def parse_builtin(f: str) -> str:
-    """Parses built in statements to dunder representations"""
+    """Parses built in statements to dunder representations."""
     if f in dir(builtins) or f in ["continue", "pass", "in"]:
         return f"{f}_"
     return f
 
 
 def parse_parameter(parameter: dict, models_type: str) -> Parameter:
-    """Parses the given dictionary of a `Parameter` into a proper `Parameter` type based on model type"""
+    """Parses the given dictionary of a `Parameter` into a proper `Parameter` type based on model type."""
     openapi_type_switch = {
         "string": str,
         "number": float,
@@ -354,7 +353,7 @@ def parse_parameter(parameter: dict, models_type: str) -> Parameter:
 
 
 def parse_response(parameter: dict) -> Response:
-    """Parses the return parameter into a proper `Response`"""
+    """Parses the return parameter into a proper `Response`."""
     responses = parameter.get("responses")
     ok_resp = responses.get("200")
 
@@ -378,7 +377,7 @@ def get_endpoints(
     consumes: str = "application/json",
     produces: str = "application/json",
 ) -> List[ServiceEndpoint]:
-    """Assembles a series of endpoints for the service definition"""
+    """Assembles a series of endpoints for the service definition."""
     switch = {
         "workflows": ["events", "event", "eventsource", "sensor"],
         "events": ["workflow", "workflows"],
@@ -429,7 +428,7 @@ def get_endpoints(
 
 
 def get_service_def() -> str:
-    """Assembles the service definition string/code representation"""
+    """Assembles the service definition string/code representation."""
     return """
 # [DO NOT MODIFY] Auto-generated by `hera.scripts.service.py`  
 from urllib.parse import urljoin
@@ -460,7 +459,7 @@ class {models_type}Service:
 
 
 def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type: str) -> str:
-    """Makes the service definitions based on the given endpoints for the given model type"""
+    """Makes the service definitions based on the given endpoints for the given model type."""
     result = service_def
     for endpoint in endpoints:
         result = result + f"{endpoint}\n"
@@ -469,13 +468,13 @@ def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type
 
 
 def write_service(service: str, path: Path) -> None:
-    """Writes the service code to the specified path"""
+    """Writes the service code to the specified path."""
     with open(str(path), "w+") as f:
         f.write(service)
 
 
 def get_imports(endpoints: List[ServiceEndpoint]) -> List[str]:
-    """Assembles a series of imports, which are dependencies of the given endpoints"""
+    """Assembles a series of imports, which are dependencies of the given endpoints."""
     result = []
     builtins = dir(__builtins__)
     for endpoint in endpoints:

@@ -24,7 +24,7 @@ class SubNodeMixin(BaseMixin):
     """
 
     def __hera_init__(self: TNode) -> TNode:
-        """The Hera init that is invoked post object initialization"""
+        """The Hera init that is invoked post object initialization."""
         _context.add_sub_node(self)
         return self
 
@@ -32,14 +32,14 @@ class SubNodeMixin(BaseMixin):
 class _HeraContext:
     """_HeraContext uses a ContextVar under the hood to store the context.
 
-    Notes
+    Notes:
     -----
     To avoid the ContextVar being shared, it must be lazily initialized to an empty list at runtime,
     and not at import time (Context is called at import time if we use the @script decorator for instance).
     """
 
     def enter(self, p: Subbable) -> None:
-        """Adds the given 'subbable' piece to the context of the current parent object"""
+        """Adds the given 'subbable' piece to the context of the current parent object."""
         if not isinstance(p, Subbable):
             raise InvalidType(type(p))
         if self.pieces is None:
@@ -47,7 +47,7 @@ class _HeraContext:
         self.pieces.append(p)
 
     def exit(self) -> None:
-        """Pops the latest 'subbable' piece from the context"""
+        """Pops the latest 'subbable' piece from the context."""
         if self.pieces:
             self.pieces.pop()
 
@@ -61,17 +61,16 @@ class _HeraContext:
 
     @pieces.setter
     def pieces(self, value) -> None:
-        """Sets the given values as the pieces of the context"""
+        """Sets the given values as the pieces of the context."""
         _pieces.set(value)
 
     @property
     def active(self) -> bool:
-        """Tells whether there's an active context"""
+        """Tells whether there's an active context."""
         return bool(self.pieces)
 
     def add_sub_node(self, node: Union[SubNodeMixin, TTemplate]) -> None:
-        """Adds the given node to the active context"""
-
+        """Adds the given node to the active context."""
         pieces = self.pieces
         if not pieces:
             return

@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class WorkflowStatus(str, Enum):
-    """Placeholder for workflow statuses"""
+    """Placeholder for workflow statuses."""
 
     running = "Running"
     succeeded = "Succeeded"
@@ -15,7 +15,7 @@ class WorkflowStatus(str, Enum):
 
     @classmethod
     def from_argo_status(cls, s: str) -> "WorkflowStatus":
-        """Turns an Argo status into a Hera workflow status representation"""
+        """Turns an Argo status into a Hera workflow status representation."""
         switch = {
             "Running": WorkflowStatus.running,
             "Succeeded": WorkflowStatus.succeeded,

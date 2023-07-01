@@ -47,7 +47,7 @@ from hera.workflows.validators import validate_storage_units
 class AccessMode(Enum):
     """A representations of the volume access modes for Kubernetes.
 
-    Notes
+    Notes:
     -----
     See: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
     """

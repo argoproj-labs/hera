@@ -1,4 +1,4 @@
-"""Core collection of Hera mixins that isolate shareable functionality between Hera objects"""
+"""Core collection of Hera mixins that isolate shareable functionality between Hera objects."""
 from __future__ import annotations
 
 import inspect
@@ -181,10 +181,10 @@ THookable = TypeVar("THookable", bound="HookMixin")
 
 
 class HookMixin(BaseMixin):
-    """`HookMixin` provides the ability to dispatch hooks set on the global config to any inheritors"""
+    """`HookMixin` provides the ability to dispatch hooks set on the global config to any inheritors."""
 
     def _dispatch_hooks(self: THookable) -> THookable:
-        """Dispatches the global hooks on the current object"""
+        """Dispatches the global hooks on the current object."""
         output = self
         for hook in global_config._get_pre_build_hooks(output):
             output = hook(output)
@@ -205,17 +205,16 @@ class ContextMixin(BaseMixin):
     """
 
     def __enter__(self: TContext) -> TContext:
-        """Enter the context of the inheritor"""
-
+        """Enter the context of the inheritor."""
         _context.enter(self)
         return self
 
     def __exit__(self, *_) -> None:
-        """Leave the context of the inheritor"""
+        """Leave the context of the inheritor."""
         _context.exit()
 
     def _add_sub(self, node: Any) -> Any:
-        """Adds the supplied node to the context of the inheritor"""
+        """Adds the supplied node to the context of the inheritor."""
         raise NotImplementedError()
 
 
@@ -236,7 +235,7 @@ class ContainerMixin(BaseMixin):
     tty: Optional[bool] = None
 
     def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
-        """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum"""
+        """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
         if self.image_pull_policy is None:
             return None
         elif isinstance(self.image_pull_policy, ImagePullPolicy):
@@ -262,20 +261,20 @@ class ContainerMixin(BaseMixin):
 
     @validator("image", pre=True, always=True)
     def _set_image(cls, v):
-        """Validator that sets the image field to the global image unless the image is specified on the container"""
+        """Validator that sets the image field to the global image unless the image is specified on the container."""
         if v is None:
             return global_config.image
         return v
 
 
 class IOMixin(BaseMixin):
-    """`IOMixin` provides the capabilities of performing I/O between steps via fields such as `inputs`/`outputs`"""
+    """`IOMixin` provides the capabilities of performing I/O between steps via fields such as `inputs`/`outputs`."""
 
     inputs: InputsT = None
     outputs: OutputsT = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
-        """Processes the `inputs` field and returns a generated `ModelInputs`"""
+        """Processes the `inputs` field and returns a generated `ModelInputs`."""
         if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
@@ -310,7 +309,7 @@ class IOMixin(BaseMixin):
         return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
-        """Processes the `outputs` field and returns a generated `ModelOutputs`"""
+        """Processes the `outputs` field and returns a generated `ModelOutputs`."""
         if not self.outputs:
             return None
         elif isinstance(self.outputs, ModelOutputs):
@@ -342,13 +341,13 @@ class IOMixin(BaseMixin):
 
 
 class EnvMixin(BaseMixin):
-    """`EnvMixin` provides the ability to set simple env variables along with env variables that are derived"""
+    """`EnvMixin` provides the ability to set simple env variables along with env variables that are derived."""
 
     env: EnvT = None
     env_from: EnvFromT = None
 
     def _build_env(self) -> Optional[List[EnvVar]]:
-        """Processes the `env` field and returns a list of generated `EnvVar` or `None`"""
+        """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
         if self.env is None:
             return None
 
@@ -368,7 +367,7 @@ class EnvMixin(BaseMixin):
         return result if result else None
 
     def _build_env_from(self) -> Optional[List[EnvFromSource]]:
-        """Processes the `env_from` field and returns a list of generated `EnvFrom` or `None`"""
+        """Processes the `env_from` field and returns a list of generated `EnvFrom` or `None`."""
         if self.env_from is None:
             return None
 
@@ -386,12 +385,12 @@ class EnvMixin(BaseMixin):
 
 
 class MetricsMixin(BaseMixin):
-    """`MetricsMixin` provides the ability to set metrics on a n object"""
+    """`MetricsMixin` provides the ability to set metrics on a n object."""
 
     metrics: MetricsT = None
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
-        """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`"""
+        """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
         if self.metrics is None or isinstance(self.metrics, ModelMetrics):
             return self.metrics
         elif isinstance(self.metrics, ModelPrometheus):
@@ -446,7 +445,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     tolerations: Optional[List[Toleration]] = None
 
     def _build_sidecars(self) -> Optional[List[UserContainer]]:
-        """Builds the `sidecars` field and optionally returns a list of `UserContainer`"""
+        """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""
         if self.sidecars is None:
             return None
 
@@ -456,14 +455,14 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
         return self.sidecars
 
     def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
-        """Builds the `active_deadline_seconds` field and optionally returns a generated `IntOrString`"""
+        """Builds the `active_deadline_seconds` field and optionally returns a generated `IntOrString`."""
         if self.active_deadline_seconds is None:
             return None
 
         return IntOrString(__root__=str(self.active_deadline_seconds))
 
     def _build_metadata(self) -> Optional[Metadata]:
-        """Builds the `metadata` field of the template since the `annotations` and `labels` fields are separated"""
+        """Builds the `metadata` field of the template since the `annotations` and `labels` fields are separated."""
         if self.annotations is None and self.labels is None:
             return None
 
@@ -479,7 +478,7 @@ class ResourceMixin(BaseMixin):
     resources: Optional[Union[ResourceRequirements, Resources]] = None
 
     def _build_resources(self) -> Optional[ResourceRequirements]:
-        """Parses the resources and returns a generated `ResourceRequirements` object"""
+        """Parses the resources and returns a generated `ResourceRequirements` object."""
         if self.resources is None or isinstance(self.resources, ResourceRequirements):
             return self.resources
         return self.resources.build()
@@ -496,7 +495,7 @@ class VolumeMixin(BaseMixin):
     volumes: VolumesT = None
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
-        """Processes the `volumes` and creates an optional list of generates `Volume`s"""
+        """Processes the `volumes` and creates an optional list of generates `Volume`s."""
         if self.volumes is None:
             return None
 
@@ -509,7 +508,7 @@ class VolumeMixin(BaseMixin):
         return result or None
 
     def _build_persistent_volume_claims(self) -> Optional[List[PersistentVolumeClaim]]:
-        """Generates the list of persistent volume claims to associate with the set `volumes`"""
+        """Generates the list of persistent volume claims to associate with the set `volumes`."""
         if self.volumes is None:
             return None
 
@@ -531,7 +530,7 @@ class VolumeMountMixin(VolumeMixin):
     volume_mounts: Optional[List[VolumeMount]] = None
 
     def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
-        """Processes the `volume_mounts` field and generates an optional list of `VolumeMount`s"""
+        """Processes the `volume_mounts` field and generates an optional list of `VolumeMount`s."""
         # while it's possible for `volume_mounts` to be `None`, this has to check that `volumes` is also `None` since
         # it's possible that Hera can find volume mounts to generate for the user if there are any volumes set
         if self.volume_mounts is None and self.volumes is None:
@@ -559,12 +558,12 @@ class VolumeMountMixin(VolumeMixin):
 
 
 class ArgumentsMixin(BaseMixin):
-    """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object"""
+    """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object."""
 
     arguments: ArgumentsT = None
 
     def _build_arguments(self) -> Optional[ModelArguments]:
-        """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments"""
+        """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
         if self.arguments is None:
             return None
         elif isinstance(self.arguments, ModelArguments):
@@ -650,8 +649,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
 
     def _get_arguments(self, **kwargs) -> List:
-        """Returns a list of arguments from the kwargs given to the template call"""
-
+        """Returns a list of arguments from the kwargs given to the template call."""
         # these are the already set parameters. If a user has already set a parameter argument, then Hera
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
@@ -664,12 +662,12 @@ class CallableTemplateMixin(ArgumentsMixin):
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
-        """Returns the set of parameter names that are currently set on the mixin inheritor"""
+        """Returns the set of parameter names that are currently set on the mixin inheritor."""
         parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
         return {p.name for p in parameters}
 
     def _get_artifact_names(self, arguments: List) -> Set[str]:
-        """Returns the set of artifact names that are currently set on the mixin inheritor"""
+        """Returns the set of artifact names that are currently set on the mixin inheritor."""
         artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
         return {a.name for a in artifacts}
 
@@ -693,7 +691,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         source: Callable
             The source function to infer the arguments from.
 
-        Returns
+        Returns:
         -------
         List[Parameter]
             The list of inferred arguments to set.
@@ -721,7 +719,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         items: List[Any]
             The items to infer the arguments from.
 
-        Returns
+        Returns:
         -------
         List[Parameter]
             The list of inferred arguments to set.
@@ -736,13 +734,12 @@ class CallableTemplateMixin(ArgumentsMixin):
 
 
 class ParameterMixin(BaseMixin):
-    """`ParameterMixin` supports the usage of `with_param` on inheritors"""
+    """`ParameterMixin` supports the usage of `with_param` on inheritors."""
 
     with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
 
     def _build_with_param(self) -> Optional[str]:
-        """
-        Builds the `with_param` field and returns the corresponding `str` that encodes what to parallelize a process
+        """Builds the `with_param` field and returns the corresponding `str` that encodes what to parallelize a process
         over.
         """
         if self.with_param is None:
@@ -756,11 +753,10 @@ class ParameterMixin(BaseMixin):
 
 
 class ItemMixin(BaseMixin):
-    """
-    `ItemMixin` implements the `with_items` capability for inheritors, which supports parallelism over
+    """`ItemMixin` implements the `with_items` capability for inheritors, which supports parallelism over
     supplied items.
 
-    Notes
+    Notes:
     -----
     The items passed in `with_items` must be serializable objects
     """
@@ -797,11 +793,10 @@ class ItemMixin(BaseMixin):
 
 
 class EnvIOMixin(EnvMixin, IOMixin):
-    """`EnvIOMixin` provides the capacity to use environment variables"""
+    """`EnvIOMixin` provides the capacity to use environment variables."""
 
     def _build_params_from_env(self) -> Optional[List[Parameter]]:
-        """
-        Processes any environment variables that are set to obtain values from `Parameter`s and returns a list of
+        """Processes any environment variables that are set to obtain values from `Parameter`s and returns a list of
         `Parameter` or `None`.
         """
         if self.env is None:
@@ -824,7 +819,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
         return params if params else None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
-        """Builds the inputs from the combination of env variables that require specific input parameters to be set"""
+        """Builds the inputs from the combination of env variables that require specific input parameters to be set."""
         inputs = super()._build_inputs()
         env_params = self._build_params_from_env()
         if inputs is None and env_params is None:
@@ -849,7 +844,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
 class TemplateInvocatorSubNodeMixin(BaseMixin):
     """Used for classes that form sub nodes of Template invocators - `Steps` and `DAG`.
 
-    See Also
+    See Also:
     --------
     https://argoproj.github.io/argo-workflows/workflow-concepts/#template-invocators for more on template invocators.
     """
@@ -865,58 +860,58 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     with_sequence: Optional[Sequence] = None
 
     def _build_on_exit(self) -> Optional[str]:
-        """Builds the `on_exit` field `str` representation from the set `Templatable` or the specified `str`"""
+        """Builds the `on_exit` field `str` representation from the set `Templatable` or the specified `str`."""
         if isinstance(self.on_exit, Templatable):
             return self.on_exit._build_template().name  # type: ignore
         return self.on_exit
 
     @property
     def _subtype(self) -> str:
-        """Provides the subtype specification of the inheritor"""
+        """Provides the subtype specification of the inheritor."""
         raise NotImplementedError("Implement me")
 
     @property
     def id(self) -> str:
-        """ID of this node"""
+        """ID of this node."""
         return f"{{{{{self._subtype}.{self.name}.id}}}}"
 
     @property
     def ip(self) -> str:
-        """IP of this node"""
+        """IP of this node."""
         return f"{{{{{self._subtype}.{self.name}.ip}}}}"
 
     @property
     def status(self) -> str:
-        """Status of this node"""
+        """Status of this node."""
         return f"{{{{{self._subtype}.{self.name}.status}}}}"
 
     @property
     def exit_code(self) -> str:
-        """ExitCode holds the exit code of a script template"""
+        """ExitCode holds the exit code of a script template."""
         return f"{{{{{self._subtype}.{self.name}.exitCode}}}}"
 
     @property
     def started_at(self) -> str:
-        """Time at which this node started"""
+        """Time at which this node started."""
         return f"{{{{{self._subtype}.{self.name}.startedAt}}}}"
 
     @property
     def finished_at(self) -> str:
-        """Time at which this node completed"""
+        """Time at which this node completed."""
         return f"{{{{{self._subtype}.{self.name}.finishedAt}}}}"
 
     @property
     def result(self) -> str:
-        """Result holds the result (stdout) of a script template"""
+        """Result holds the result (stdout) of a script template."""
         return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
 
     def get_result_as(self, name: str) -> Parameter:
-        """Returns a `Parameter` specification with the given name containing the `results` of `self`"""
+        """Returns a `Parameter` specification with the given name containing the `results` of `self`."""
         return Parameter(name=name, value=self.result)
 
     @root_validator(pre=False)
     def _check_values(cls, values):
-        """Validates that a single field is set between `template`, `template_ref`, and `inline`"""
+        """Validates that a single field is set between `template`, `template_ref`, and `inline`."""
 
         def one(xs: List):
             xs = list(map(bool, xs))
@@ -936,7 +931,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         subtype: str
             The inheritor subtype field, used to construct the output artifact `from_` reference.
 
-        Returns
+        Returns:
         -------
         Parameter
             The parameter, named based on the given `name`, along with a value that references all outputs.
@@ -946,7 +941,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def _get_parameter(self, name: str, subtype: str) -> Parameter:
         """Attempts to find the specified parameter in the outputs for the specified subtype.
 
-        Notes
+        Notes:
         -----
         This is specifically designed to be invoked by inheritors.
 
@@ -957,12 +952,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         subtype: str
             The inheritor subtype field, used to construct the output artifact `from_` reference.
 
-        Returns
+        Returns:
         -------
         Parameter
             The parameter if found.
 
-        Raises
+        Raises:
         ------
         ValueError
             When no outputs can be constructed/no outputs are set.
@@ -998,7 +993,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def _get_artifact(self, name: str, subtype: str) -> Artifact:
         """Attempts to find the specified artifact in the outputs for the specified subtype.
 
-        Notes
+        Notes:
         -----
         This is specifically designed to be invoked by inheritors.
 
@@ -1009,12 +1004,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         subtype: str
             The inheritor subtype field, used to construct the output artifact `from_` reference.
 
-        Returns
+        Returns:
         -------
         Artifact
             The artifact if found.
 
-        Raises
+        Raises:
         ------
         ValueError
             When no outputs can be constructed/no outputs are set.
@@ -1052,7 +1047,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         name: str
             The name of the parameter to search for.
 
-        Returns
+        Returns:
         -------
         Parameter
             The parameter, named based on the given `name`, along with a value that references all outputs.
@@ -1060,18 +1055,18 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameters_as(name=name, subtype=self._subtype)
 
     def get_artifact(self, name: str) -> Artifact:
-        """Gets an artifact from the outputs of this subnode"""
+        """Gets an artifact from the outputs of this subnode."""
         return self._get_artifact(name=name, subtype=self._subtype)
 
     def get_parameter(self, name: str) -> Parameter:
-        """Gets a parameter from the outputs of this subnode"""
+        """Gets a parameter from the outputs of this subnode."""
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
     """Assembles an optional list of `Parameter` from the given `Callable` arguments.
 
-    Notes
+    Notes:
     -----
     If the value of an identified `Callable` keyword argument is found to be empty the value of
     `hera.shared.serialization.MISSING` is used as a placeholder. This is later serialized as `None` -> `null` when
@@ -1181,12 +1176,12 @@ class ModelMapperMixin(BaseMixin):
 
     @classmethod
     def _get_all_annotations(cls) -> ChainMap:
-        """Gets all annotations of this class and any parent classes"""
+        """Gets all annotations of this class and any parent classes."""
         return ChainMap(*(get_annotations(c) for c in cls.__mro__))
 
     @classmethod
     def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
-        """Parse from given model to cls's type"""
+        """Parse from given model to cls's type."""
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
@@ -1203,25 +1198,25 @@ class ModelMapperMixin(BaseMixin):
 
     @classmethod
     def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ModelMapperMixin:
-        """Parse from given model_dict, using the given model type to call its parse_obj"""
+        """Parse from given model_dict, using the given model type to call its parse_obj."""
         model_workflow = model.parse_obj(model_dict)
         return cls._from_model(model_workflow)
 
     @classmethod
     def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
-        """Parse from given model_dict"""
+        """Parse from given model_dict."""
         raise NotImplementedError
 
     @classmethod
     def _from_yaml(cls, yaml_str: str, model: Type[BaseModel]) -> ModelMapperMixin:
-        """Parse from given yaml string, using the given model type to call its parse_obj"""
+        """Parse from given yaml string, using the given model type to call its parse_obj."""
         if not _yaml:
             raise ImportError("PyYAML is not installed")
         return cls._from_dict(_yaml.safe_load(yaml_str), model)
 
     @classmethod
     def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
-        """Parse from given yaml_str"""
+        """Parse from given yaml_str."""
         raise NotImplementedError
 
     @classmethod
@@ -1231,7 +1226,7 @@ class ModelMapperMixin(BaseMixin):
 
     @classmethod
     def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
-        """Parse from given yaml_file"""
+        """Parse from given yaml_file."""
         raise NotImplementedError
 
 

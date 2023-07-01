@@ -27,7 +27,7 @@ from hera.workflows.models import (
 class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, SubNodeMixin):
     """A regular container that can be used as part of a `hera.workflows.ContainerSet`.
 
-    See Also
+    See Also:
     --------
     https://argoproj.github.io/argo-workflows/container-set-template/
     """
@@ -99,7 +99,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
     def _build_container_node(self) -> _ModelContainerNode:
-        """Builds the generated `ContainerNode`"""
+        """Builds the generated `ContainerNode`."""
         return _ModelContainerNode(
             args=self.args,
             command=self.command,
@@ -140,7 +140,7 @@ class ContainerSet(
 
     The containers are run within the same pod.
 
-    Examples
+    Examples:
     --------
     >>> with ContainerSet(...) as cs:
     >>>     ContainerNode(...)
@@ -157,7 +157,7 @@ class ContainerSet(
         self.containers.append(node)
 
     def _build_container_set(self) -> _ModelContainerSetTemplate:
-        """Builds the generated `ContainerSetTemplate`"""
+        """Builds the generated `ContainerSetTemplate`."""
         containers = [c._build_container_node() if isinstance(c, ContainerNode) else c for c in self.containers]
         return _ModelContainerSetTemplate(
             containers=containers,
@@ -166,7 +166,7 @@ class ContainerSet(
         )
 
     def _build_template(self) -> _ModelTemplate:
-        """Builds the generated `Template` representation of the container set"""
+        """Builds the generated `Template` representation of the container set."""
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
