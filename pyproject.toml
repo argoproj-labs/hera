@@ -122,6 +122,7 @@ source = [
 [tool.ruff]
 line-length = 119
 show-fixes = true
+select = ["E", "F"]
 ignore = ["E501"]
 target-version = "py38"
 extend-select = ["I"]
