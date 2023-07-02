@@ -1,3 +1,4 @@
+"""The archive module provides archival behavior strategies for artifacts."""
 from typing import Optional
 
 from hera.shared._base_model import BaseModel
@@ -24,8 +25,9 @@ class NoneArchiveStrategy(ArchiveStrategy):
 
 
 class TarArchiveStrategy(ArchiveStrategy):
-    """`TarArchiveStrategy` indicates artifacts should be serialized using the `tar` strategy with the specified
-    compression level.
+    """`TarArchiveStrategy` indicates artifacts should be serialized using the `tar` strategy.
+
+    Tar archiving is performed using the specified compression level.
     """
 
     compression_level: Optional[int] = None

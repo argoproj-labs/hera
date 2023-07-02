@@ -326,6 +326,7 @@ class Workflow(
         return result
 
     def get_parameter(self, name: str) -> Parameter:
+        """Attempts to find and return a `Parameter` of the specified name."""
         arguments = self._build_arguments()
         if arguments is None:
             raise KeyError("Workflow has no arguments set")
@@ -352,6 +353,7 @@ class Workflow(
         return self.build().dict(exclude_none=True, by_alias=True)
 
     def __eq__(self, other) -> bool:
+        """Verifies equality of `self` with the specified `other`."""
         if other.__class__ is self.__class__:
             return self.to_dict() == other.to_dict()
 
@@ -428,9 +430,7 @@ class Workflow(
         )
 
     def _add_sub(self, node: Any):
-        """Adds any objects instantiated under the Workflow context manager that conform to the `Templatable` protocol
-        or are Argo schema Template objects to the Workflow's list of templates.
-        """
+        """Adds the given node (expected to satisfy the `Templatable` protocol) to the context."""
         if not isinstance(node, (Templatable, _ModelTemplate)):
             raise InvalidType(type(node))
         self.templates.append(node)

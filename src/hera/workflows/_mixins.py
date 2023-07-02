@@ -739,8 +739,9 @@ class ParameterMixin(BaseMixin):
     with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
 
     def _build_with_param(self) -> Optional[str]:
-        """Builds the `with_param` field and returns the corresponding `str` that encodes what to parallelize a process
-        over.
+        """Build the `with_param` field and returns the corresponding `str`.
+
+        The string encodes what to parallelize a process over.
         """
         if self.with_param is None:
             return None
@@ -753,20 +754,19 @@ class ParameterMixin(BaseMixin):
 
 
 class ItemMixin(BaseMixin):
-    """`ItemMixin` implements the `with_items` capability for inheritors, which supports parallelism over
-    supplied items.
+    """Add `with_items` capability for inheritors, which supports parallelism over supplied items.
 
     Notes:
-    -----
-    The items passed in `with_items` must be serializable objects
+        The items passed in `with_items` must be serializable objects
     """
 
     with_items: Optional[List[Any]] = None
 
     def _build_with_items(self) -> Optional[List[Item]]:
-        """Processes the `with_items` field and returns an optional list of corresponding `Item`s.
+        """Process the `with_items` field and returns an optional list of corresponding `Item`s.
 
-        Note that these `Item`s contain the serialized version of the supplied items/values.
+        Notes:
+            Tthese `Item`s contain the serialized version of the supplied items/values.
         """
         if self.with_items is None:
             return None
@@ -796,9 +796,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
     """`EnvIOMixin` provides the capacity to use environment variables."""
 
     def _build_params_from_env(self) -> Optional[List[Parameter]]:
-        """Processes any environment variables that are set to obtain values from `Parameter`s and returns a list of
-        `Parameter` or `None`.
-        """
+        """Assemble a list of any environment variables that are set to obtain values from `Parameter`s."""
         if self.env is None:
             return None
 

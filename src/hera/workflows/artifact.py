@@ -25,18 +25,43 @@ from hera.workflows.models import (
 
 
 class Artifact(BaseModel):
+    """Base artifact representation."""
+
     name: str
+    """name of the artifact"""
+
     archive: Optional[Union[_ModelArchiveStrategy, ArchiveStrategy]] = None
+    """artifact archiving configuration"""
+
     archive_logs: Optional[bool] = None
+    """whether to log the archive object"""
+
     artifact_gc: Optional[ArtifactGC] = None
+    """artifact garbage collection configuration"""
+
     deleted: Optional[bool] = None
+    """whether the artifact is deleted"""
+
     from_: Optional[str] = None
+    """configures the artifact task/step origin"""
+
     from_expression: Optional[str] = None
+    """an expression that dictates where to obtain the artifact from"""
+
     global_name: Optional[str] = None
+    """global workflow artifact name"""
+
     mode: Optional[int] = None
+    """mode bits to use on the artifact, must be a value between 0 and 0777 set when loading input artifacts."""
+
     path: Optional[str] = None
+    """path where the artifact should be placed/loaded from"""
+
     recurse_mode: Optional[str] = None
+    """recursion mode when applying the permissions of the artifact if it is an artifact folder"""
+
     sub_path: Optional[str] = None
+    """allows the specification of an artifact from a subpath within the main source."""
 
     def _build_archive(self) -> Optional[_ModelArchiveStrategy]:
         if self.archive is None:
@@ -67,12 +92,15 @@ class Artifact(BaseModel):
         return _ModelArtifactPaths(**artifact.dict())
 
     def as_name(self, name: str) -> _ModelArtifact:
+        """Returns a copy of the current artifact but named based on the specified `name`."""
         artifact = self._build_artifact()
         artifact.name = name
         return artifact
 
 
 class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
+    """An artifact sourced from Artifactory."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.artifactory = _ModelArtifactoryArtifact(
@@ -82,6 +110,8 @@ class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
 
 
 class AzureArtifact(_ModelAzureArtifact, Artifact):
+    """An artifact sourced from Microsoft Azure."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.azure = _ModelAzureArtifact(
@@ -95,6 +125,8 @@ class AzureArtifact(_ModelAzureArtifact, Artifact):
 
 
 class GCSArtifact(_ModelGCSArtifact, Artifact):
+    """An artifact sourced from Google Cloud Storage."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.gcs = _ModelGCSArtifact(
@@ -106,6 +138,8 @@ class GCSArtifact(_ModelGCSArtifact, Artifact):
 
 
 class GitArtifact(_ModelGitArtifact, Artifact):
+    """An artifact sourced from GitHub."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.git = _ModelGitArtifact(
@@ -125,9 +159,13 @@ class GitArtifact(_ModelGitArtifact, Artifact):
 
 
 class HDFSArtifact(Artifact):
-    # note that `HDFSArtifact` does not inherit from the auto-generated `HDFSArtifact` because there's a
-    # conflict in `path` with the base class `Artifact`. Here, we redefine the HDFS `path` to `hdfs_path` to
-    # differentiate between the parent class and the child class `path`
+    """A Hadoop File System artifact.
+
+    Note that `HDFSArtifact` does not inherit from the auto-generated `HDFSArtifact` because there's a
+    conflict in `path` with the base class `Artifact`. Here, we redefine the HDFS `path` to `hdfs_path` to
+    differentiate between the parent class and the child class `path`.
+    """
+
     hdfs_path: str
     addresses: Optional[List[str]] = None
     force: Optional[bool] = None
@@ -157,6 +195,8 @@ class HDFSArtifact(Artifact):
 
 
 class HTTPArtifact(_ModelHTTPArtifact, Artifact):
+    """An artifact sourced from an HTTP URL."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.http = _ModelHTTPArtifact(
@@ -168,6 +208,8 @@ class HTTPArtifact(_ModelHTTPArtifact, Artifact):
 
 
 class OSSArtifact(_ModelOSSArtifact, Artifact):
+    """An artifact sourced from OSS."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.oss = _ModelOSSArtifact(
@@ -184,6 +226,8 @@ class OSSArtifact(_ModelOSSArtifact, Artifact):
 
 
 class RawArtifact(_ModelRawArtifact, Artifact):
+    """A raw bytes artifact representation."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.raw = _ModelRawArtifact(data=self.data)
@@ -191,6 +235,8 @@ class RawArtifact(_ModelRawArtifact, Artifact):
 
 
 class S3Artifact(_ModelS3Artifact, Artifact):
+    """An artifact sourced from AWS S3."""
+
     def _build_artifact(self) -> _ModelArtifact:
         artifact = super()._build_artifact()
         artifact.s3 = _ModelS3Artifact(

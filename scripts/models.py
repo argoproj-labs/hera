@@ -130,9 +130,11 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
             f.write(f"from hera.{models_type}.models.io.k8s.api.core.v1 import {enum}\n")
 
 
-# Ensure that an init file is present in every folder recursively inside the hera/<models_type>/models folder
-# This is to ensure that stubgen works appropriately
 def ensure_init():
+    """Ensure that an init file is present in every folder.
+
+    This executes recursively inside the hera/<models_type>/models folder to ensure that stubgen worked.
+    """
     for models_type in model_types:
         for root, _, files in os.walk(f"src/hera/{models_type}/models"):
             # ignore __pycache__ folders

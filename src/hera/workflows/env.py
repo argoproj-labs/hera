@@ -32,6 +32,8 @@ class _BaseEnv(_BaseModel):
 
 
 class Env(_BaseEnv):
+    """A variable implementation that can expose a plain `value` or `value from input` as an env variable."""
+
     value: Optional[Any] = None
     """the value of the environment variable"""
 
@@ -40,7 +42,9 @@ class Env(_BaseEnv):
 
     @staticmethod
     def _sanitise_param_for_argo(v: str) -> str:
-        """Argo has some strict parameter validation. To satisfy, we replace all ._ with a dash,
+        """Sanitizes the given `v` value into one that satisfies Argo's parameter rules.
+
+        Argo has some strict parameter validation. To satisfy, we replace all ._ with a dash,
         take only first 32 characters from a-zA-Z0-9-, and append md5 digest of the original string.
         """
         # NOTE move this to some general purpose utils?
@@ -188,6 +192,7 @@ class ResourceEnv(_BaseEnv):
     """Specifies the output format of the exposed resources, defaults to `1` on Argo's side"""
 
     def build(self) -> _ModelEnvVar:
+        """Builds the `ResourceEnv` into a Hera auto-generated environment variable model."""
         return _ModelEnvVar(
             name=self.name,
             value_from=_ModelEnvVarSource(

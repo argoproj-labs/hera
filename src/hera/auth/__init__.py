@@ -36,6 +36,7 @@ class ArgoCLITokenGenerator(TokenGenerator):
     """
 
     def __call__(self) -> str:
+        """Executes the call necessary to generate the token and returns the token as a string."""
         if shutil.which("argo") is None:
             raise RuntimeError(
                 "The Argo CLI is not installed. "

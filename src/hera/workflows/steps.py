@@ -107,8 +107,7 @@ class Steps(
     IOMixin,
     TemplateMixin,
 ):
-    """A Steps template invocator is used to define a sequence of steps which can run
-    sequentially or in parallel.
+    """A Steps template invocator is used to define a sequence of steps which can run sequentially or in parallel.
 
     Steps implements the contextmanager interface so allows usage of `with`, under which any
     `hera.workflows.steps.Step` objects instantiated will be added to the Steps' list of sub_steps.

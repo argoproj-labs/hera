@@ -1,3 +1,4 @@
+"""The user container module provides user container functionality and objects."""
 from typing import List, Optional, Union
 
 from hera.workflows.env import _BaseEnv
@@ -23,6 +24,7 @@ class UserContainer(_ModelUserContainer):
     volumes: Optional[List[_BaseVolume]] = None
 
     def build(self) -> _ModelUserContainer:
+        """Builds the Hera auto-generated model of the user container."""
         return _ModelUserContainer(
             args=self.args,
             command=self.command,

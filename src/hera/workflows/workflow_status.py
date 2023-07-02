@@ -1,3 +1,4 @@
+"""Workflow status is a module that provides functionality for representing and interacting with workflow status."""
 from enum import Enum
 
 
@@ -10,7 +11,8 @@ class WorkflowStatus(str, Enum):
     error = "Error"
     terminated = "Terminated"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns the value representation of the workflow status enum."""
         return str(self.value)
 
     @classmethod

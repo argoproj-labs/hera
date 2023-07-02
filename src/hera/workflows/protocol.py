@@ -1,3 +1,5 @@
+"""Holds protocol implementations that dictate the functionality associated with Hera objects."""
+
 from typing import Any, List, Optional, Union
 
 from typing_extensions import Protocol, runtime_checkable

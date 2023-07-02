@@ -1,3 +1,4 @@
+"""The HTTP template module provides functionality and objects required for executing HTTP calls in workflows."""
 from typing import List, Optional
 
 from hera.workflows._mixins import CallableTemplateMixin, IOMixin, TemplateMixin

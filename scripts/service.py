@@ -1,3 +1,4 @@
+"""A collection of scripts and objects that are used to construct the Hera services for workflows and events."""
 import builtins
 import inspect
 import re
@@ -14,23 +15,18 @@ model_types = {"workflows", "events"}
 
 
 class Parameter:
-    """A representation of a function parameter.
-
-    Parameters
-    ----------
-    name: str
-        The name of the parameter.
-    field: str
-        The body field that this parameter is used on.
-    in_: str
-        The type of request object this parameter is used in - body, query, or path.
-    type_: type
-        The proper `type` of the parameter.
-    required: bool
-        Whether the `Parameter` is required.
-    """
+    """A representation of a function parameter."""
 
     def __init__(self, name: str, field: str, in_: str, type_: type, required: bool) -> None:
+        """Instantiates a parameter.
+
+        Args:
+            name: (str) the name of the parameter.
+            field: (str) the body field that this parameter is used on.
+            in_: (str) the type of request object this parameter is used in - body, query, or path.
+            type_: (type) the proper `type` of the parameter.
+            required: (bool) whether the `Parameter` is required.
+        """
         self.name = name
         self.field = field
         self.in_ = in_  # body, query, path
@@ -38,6 +34,7 @@ class Parameter:
         self.required = required
 
     def __str__(self) -> str:
+        """Returns the string representation of the parameter, with its name + type."""
         if self.required:
             return f"{self.name}: {self.type_.__name__}"
         else:
@@ -48,34 +45,20 @@ class Response:
     """The response type of a request."""
 
     def __init__(self, ref: str) -> None:
+        """Instantiate a response.
+
+        Args:
+            ref: (str) the reference of the return type.
+        """
         self.ref = ref
 
     def __str__(self) -> str:
+        """Return the string representation of the response type."""
         return f"{self.ref}"
 
 
 class ServiceEndpoint:
-    """A response endpoint representation for Argo service endpoints.
-
-    Parameters
-    ----------
-    url: str
-        The relative URL of the endpoint.
-    method: str
-        The method of the endpoint: put, end, post.
-    name: str
-        The name of the endpoint. Used to create the service API definitions.
-    params: List[Parameter]
-        The parameters of the endpoint. Used to create the service API definitions.
-    response: Response
-        The response of the endpoint. Used to create the service API definitions.
-    summary: Optional[str] = None
-        Summary documentation of the endpoint, if available.
-    consumes: str = "application/json"
-        The consumption payload type of the endpoint.
-    produces: str = "application/json"
-        The response payload type of the endpoint.
-    """
+    """A response endpoint representation for Argo service endpoints."""
 
     def __init__(
         self,
@@ -88,6 +71,18 @@ class ServiceEndpoint:
         consumes: str = "application/json",
         produces: str = "application/json",
     ) -> None:
+        """Instantiate a service endpoint.
+
+        Args:
+            url: (str) the relative URL of the endpoint.
+            method: (str) the method of the endpoint: put, end, post.
+            name: (str) the name of the endpoint. Used to create the service API definitions.
+            params: (List[Parameter]) the parameters of the endpoint. Used to create the service API definitions.
+            response: (Response) the response of the endpoint. Used to create the service API definitions.
+            summary: (Optional[str] = None) summary documentation of the endpoint, if available.
+            consumes: (str = "application/json") the consumption payload type of the endpoint.
+            produces: (str = "application/json") the response payload type of the endpoint.
+        """
         self.url = self.parse_url(url)
         self.method = method
         self.name = name
@@ -99,13 +94,14 @@ class ServiceEndpoint:
         self.consumes = consumes
         self.produces = produces
 
-    def parse_url(self, url) -> str:
+    def parse_url(self, url: str) -> str:
+        """Parses the given URL and returns the path only."""
         if url[0] == "/":
             return url[1:]
         return url
 
     def __str__(self) -> str:
-        # signature
+        """Builds the entire string signature of the service endpoints."""
         if len(self.params) == 0:
             signature = f"def {self.name}(self) -> {self.response}:"
         else:

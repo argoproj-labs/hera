@@ -1,3 +1,4 @@
+"""A module that provides retry strategy functionality, along with necessary dependencies such as retry policy."""
 from enum import Enum
 from typing import Optional, Union, cast
 
@@ -13,6 +14,8 @@ from hera.workflows.models import (
 
 
 class RetryPolicy(Enum):
+    """An enum that holds options for retry policy."""
+
     always = "Always"
     """Retry all failed steps"""
 
@@ -28,7 +31,8 @@ class RetryPolicy(Enum):
     Available in version 3.0 and later.
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Assembles the `value` representation of the enum as a string."""
         return str(self.value)
 
 

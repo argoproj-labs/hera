@@ -340,13 +340,23 @@ def script(**script_kwargs):
 
 
 class InlineScriptConstructor(ScriptConstructor):
+    """`InlineScriptConstructor` is a script constructor that submits a script as a `source` to Argo.
+
+    This script constructor is focused on taking a Python script/function "as is" for remote execution. The
+    constructor processes the script to infer what parameters it needs to deserialize so the script can execute.
+    The submitted script will contain prefixes such as new imports, e.g. `import os`, `import json`, etc. and
+    will contain the necessary `json.loads` calls to deserialize the parameters so they are usable by the script just
+    like a normal Python script/function.
+    """
+
     add_cwd_to_sys_path: Optional[bool] = None
 
     def _get_param_script_portion(self, instance: Script) -> str:
-        """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
-        parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
-        script that automatically imports json and loads/adds code to interpret each independent argument into the
-        script.
+        """Constructs and returns a script that loads the parameters of the specified arguments.
+
+        Since Argo passes parameters through `{{input.parameters.name}}` it can be very cumbersome for users to
+        manage that. This creates a script that automatically imports json and loads/adds code to interpret
+        each independent argument into the script.
 
         Returns:
         -------
@@ -366,10 +376,12 @@ class InlineScriptConstructor(ScriptConstructor):
         return textwrap.dedent(extract)
 
     def generate_source(self, instance: Script) -> str:
-        """Assembles and returns a script representation of the given function, along with the extra script material
-        prefixed to the string. The script is expected to be a callable function the client is interested in submitting
-        for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
-        through get_param_script_portion.
+        """Assembles and returns a script representation of the given function.
+
+        This also assembles any extra script material prefixed to the string source.
+        The script is expected to be a callable function the client is interested in submitting
+        for execution on Argo and the `script_extra` material represents the parameter loading part obtained, likely,
+        through `get_param_script_portion`.
 
         Returns:
         -------
@@ -409,9 +421,20 @@ class InlineScriptConstructor(ScriptConstructor):
 
 
 class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
+    """`RunnerScriptConstructor` is a script constructor that runs a script in a container.
+
+    The runner script, also known as "The Hera runner", takes a script/Python function definition, inferts the path
+    to the function (module import), assembles a path to invoke the function, and passes any specified parameters
+    to the function. This helps users "save" on the `source` space required for submitting a function for remote
+    execution on Argo. Execution within the container *requires* the executing container to include the file that
+    contains the submitted script. More specifically, the container must be created in some process (e.g. CI), so that
+    it conains the script to run remotely.
+    """
+
     _flag: str = "script_runner"
 
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
+        """A function that can inspect the Script instance and generate the source field."""
         if not callable(values.get("source")):
             return values
 
@@ -427,6 +450,7 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
         return values
 
     def generate_source(self, instance: Script) -> str:
+        """A function that can inspect the Script instance and generate the source field."""
         return f"{g.inputs.parameters:$}"
 
 
