@@ -435,11 +435,11 @@ from hera.exceptions import exception_from_server_response
 from typing import Optional, cast
 
 def valid_host_scheme(host: str) -> bool:
-    \"\"\"Validates the the given `host` starts with either `http` or `https`\"\"\"
+    \"\"\"Validates the the given `host` starts with either `http` or `https`.\"\"\"
     return host.startswith("http://") or host.startswith("https://")    
 
 class {models_type}Service:
-    \"\"\"The core {doc_models_type} service for interacting with the Argo server\"\"\"
+    \"\"\"The core {doc_models_type} service for interacting with the Argo server.\"\"\"
     def __init__(
         self,
         host: Optional[str] = None,
