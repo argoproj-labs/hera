@@ -1,6 +1,9 @@
 # Artifact Gc Workflow
 
-> Note: This example is a replication of an Argo Workflow example in Hera. 
+## Note
+
+This example is a replication of an Argo Workflow example in Hera.
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/artifact-gc-workflow.yaml).
 
 
 
