@@ -21,11 +21,11 @@ ci: lint test check-codegen
 
 .PHONY: codegen
 codegen: ## Generate all the code (models, services, examples, and init files)
-codegen: models services examples init-files
+codegen: models services examples init-files format
 
 .PHONY: check-codegen
 check-codegen: ## Check if the code is up to date
-check-codegen: codegen
+check-codegen: codegen format
 	git diff --exit-code || "Code is not up-to-date. Please run 'make codegen'"
 
 .PHONY: format
