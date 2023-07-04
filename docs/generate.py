@@ -33,9 +33,11 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
     upstream_example = Path(str(path).replace(".py", ".upstream.yaml").replace("_", "-")).exists()
     upstream_link = ""
     if upstream_example:
-        upstream_link = "## Note\n\n" \
-        "This example is a replication of an Argo Workflow example in Hera.\n" \
-        f"The upstream example can be [found here]({link})."
+        upstream_link = (
+            "## Note\n\n"
+            "This example is a replication of an Argo Workflow example in Hera.\n"
+            f"The upstream example can be [found here]({link})."
+        )
     contents = f"""# {title}
 
 {upstream_link}
