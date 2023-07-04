@@ -25,7 +25,8 @@ codegen: models services examples init-files
 
 .PHONY: check-codegen
 check-codegen: ## Check if the code is up to date
-check-codegen: codegen format
+check-codegen:
+	@$(MAKE) codegen
 	git diff --exit-code || "Code is not up-to-date. Please run 'make codegen'"
 
 .PHONY: format
