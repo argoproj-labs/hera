@@ -147,7 +147,11 @@ class ServiceEndpoint:
             params = "None"
 
         # headers
-        headers = "{'Authorization': f'Bearer {self.token}'}"
+        headers = "{'Authorization': f'Bearer {self.token}'"
+        if self.method == "post" or self.method == "put":
+            headers += f", 'Content-Type': '{self.consumes}'"
+
+        headers += "}"
 
         # body/data
         body_params = [p for p in self.params if p.in_ == "body"]
