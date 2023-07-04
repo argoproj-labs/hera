@@ -5,9 +5,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import Field
-
 from hera.shared._base_model import BaseModel
+from pydantic import Field
 
 from .io.argoproj.events import v1alpha1
 from .io.k8s.apimachinery.pkg.apis.meta import v1
@@ -18,18 +17,20 @@ class DeleteSensorResponse(BaseModel):
 
 
 class LogEntry(BaseModel):
-    dependency_name: Optional[str] = Field(None, alias="dependencyName", title="optional - trigger dependency name")
-    event_context: Optional[str] = Field(None, alias="eventContext", title="optional - Cloud Event context")
+    dependency_name: Optional[str] = Field(
+        default=None, alias="dependencyName", title="optional - trigger dependency name"
+    )
+    event_context: Optional[str] = Field(default=None, alias="eventContext", title="optional - Cloud Event context")
     level: Optional[str] = None
     msg: Optional[str] = None
     namespace: Optional[str] = None
-    sensor_name: Optional[str] = Field(None, alias="sensorName")
+    sensor_name: Optional[str] = Field(default=None, alias="sensorName")
     time: Optional[v1.Time] = None
-    trigger_name: Optional[str] = Field(None, alias="triggerName", title="optional - any trigger name")
+    trigger_name: Optional[str] = Field(default=None, alias="triggerName", title="optional - any trigger name")
 
 
 class CreateSensorRequest(BaseModel):
-    create_options: Optional[v1.CreateOptions] = Field(None, alias="createOptions")
+    create_options: Optional[v1.CreateOptions] = Field(default=None, alias="createOptions")
     namespace: Optional[str] = None
     sensor: Optional[v1alpha1.Sensor] = None
 

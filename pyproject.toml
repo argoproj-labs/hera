@@ -131,10 +131,9 @@ exclude = [
     "examples", 
     "tests",
     "src/hera/workflows/models", 
-    "src/hera/events/models", 
-    "src/hera/events/service.py", 
-    "src/hera/workflows/service.py", 
-    "src/hera/workflows/_unparse.py"]
+    "src/hera/events/models",
+    "src/hera/workflows/_unparse.py",
+]
 
 [tool.ruff.per-file-ignores]
 "**/__init__.py" = ["F401", "D107"]
