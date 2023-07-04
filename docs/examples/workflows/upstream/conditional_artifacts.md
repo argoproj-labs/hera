@@ -1,6 +1,6 @@
 # Conditional Artifacts
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/conditional-artifacts.yaml).
+> Note: This example is a replication of an Argo Workflow example in Hera. 
 
 
 
@@ -71,7 +71,8 @@
             outputs=[
                 Artifact(
                     name="result",
-                    from_expression="steps['flip-coin'].outputs.result == 'heads' ? steps.heads.outputs.artifacts.result : steps.tails.outputs.artifacts.result",
+                    from_expression="steps['flip-coin'].outputs.result == 'heads' ? "
+                    "steps.heads.outputs.artifacts.result : steps.tails.outputs.artifacts.result",
                 ),
             ],
         ) as s:

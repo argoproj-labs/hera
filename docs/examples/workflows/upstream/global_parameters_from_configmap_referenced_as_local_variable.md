@@ -1,6 +1,6 @@
 # Global Parameters From Configmap Referenced As Local Variable
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/global-parameters-from-configmap-referenced-as-local-variable.yaml).
+> Note: This example is a replication of an Argo Workflow example in Hera. 
 
 
 

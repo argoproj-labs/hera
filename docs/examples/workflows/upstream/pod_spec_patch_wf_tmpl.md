@@ -1,6 +1,6 @@
 # Pod Spec Patch Wf Tmpl
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/pod-spec-patch-wf-tmpl.yaml).
+> Note: This example is a replication of an Argo Workflow example in Hera. 
 
 
 
@@ -27,7 +27,8 @@
             image="docker/whalesay:latest",
             command=["cowsay"],
             args=["hello world"],
-            pod_spec_patch='{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}" }}}]}',
+            pod_spec_patch='{"containers":[{"name":"main", "resources":{"limits":{"cpu": '
+            '"{{workflow.parameters.cpu-limit}}" }}}]}',
         )
     ```
 

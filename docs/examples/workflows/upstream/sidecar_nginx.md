@@ -1,6 +1,6 @@
 # Sidecar Nginx
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/sidecar-nginx.yaml).
+> Note: This example is a replication of an Argo Workflow example in Hera. 
 
 This example showcases how one can run an Nginx sidecar container with Hera
 

@@ -1,6 +1,6 @@
 # Timeouts Workflow
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/timeouts-workflow.yaml).
+> Note: This example is a replication of an Argo Workflow example in Hera. 
 
 
 
