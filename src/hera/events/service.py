@@ -99,7 +99,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -139,7 +139,7 @@ class EventsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -194,7 +194,7 @@ class EventsService:
                 discriminator=discriminator, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -270,7 +270,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -308,7 +308,7 @@ class EventsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),

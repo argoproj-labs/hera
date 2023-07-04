@@ -203,7 +203,7 @@ class WorkflowsService:
         resp = requests.put(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -221,7 +221,7 @@ class WorkflowsService:
         resp = requests.put(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -276,7 +276,7 @@ class WorkflowsService:
         resp = requests.post(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates"),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -294,7 +294,7 @@ class WorkflowsService:
         resp = requests.post(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/lint"),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -332,7 +332,7 @@ class WorkflowsService:
         resp = requests.put(
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -435,7 +435,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -466,7 +466,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -530,7 +530,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -598,7 +598,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -631,7 +631,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -752,7 +752,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -774,7 +774,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -816,7 +816,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -913,7 +913,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -933,7 +933,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -953,7 +953,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1083,7 +1083,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1103,7 +1103,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1123,7 +1123,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1143,7 +1143,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1163,7 +1163,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1183,7 +1183,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -1205,7 +1205,7 @@ class WorkflowsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
