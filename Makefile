@@ -48,7 +48,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
-		--target-python-version 3.7 \
+		--target-python-version 3.8 \
 		--output src/hera/workflows/models \
 		--base-class hera.shared._base_model.BaseModel \
 		--wrap-string-literal \
@@ -64,7 +64,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
-		--target-python-version 3.7 \
+		--target-python-version 3.8 \
 		--output src/hera/events/models \
 		--base-class hera.shared._base_model.BaseModel \
 		--wrap-string-literal \

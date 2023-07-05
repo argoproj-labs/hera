@@ -103,16 +103,18 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
             f"OpenAPI spec URL: {openapi_spec_url}\n"
             f'"""\n\n'
         )
-        for imp in imports:
-            f.write(f"{imp}\n")
 
         if models_type == "events":
-            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Item\n")
-            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Event\n")
-            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import EventResponse\n")
-            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import GetUserInfoResponse\n")
-            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import InfoResponse\n")
-            f.write("from hera.events.models.io.argoproj.workflow.v1alpha1 import Version\n")
+            imports.extend(
+                [
+                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import Item",
+                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import Event",
+                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import EventResponse",
+                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import GetUserInfoResponse",
+                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import InfoResponse",
+                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import Version",
+                ]
+            )
         enums = [
             "ImagePullPolicy",
             "TerminationMessagePolicy",
@@ -126,7 +128,10 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
             "OperatorModel",
         ]
         for enum in enums:
-            f.write(f"from hera.{models_type}.models.io.k8s.api.core.v1 import {enum}\n")
+            imports.append(f"from hera.{models_type}.models.io.k8s.api.core.v1 import {enum}")
+
+        for imp in sorted(imports):
+            f.write(f"{imp}\n")
 
 
 def ensure_init():
