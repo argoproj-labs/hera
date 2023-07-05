@@ -141,7 +141,7 @@ class ServiceEndpoint:
             params = "None"
 
         # headers
-        headers = "{'Authorization': f'Bearer {self.token}'"
+        headers = "{'Authorization': f'Bearer {self.token}'}"
         if self.method.lower() == "post" or self.method.lower() == "put":
             headers += f", 'Content-Type': '{self.consumes}'"
         headers += "}"
