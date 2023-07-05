@@ -1,10 +1,10 @@
-"""Holds a collection of validators that are shared in V1"""
+"""Holds a collection of validators that are shared in V1."""
 import re
 from typing import Optional
 
 
 def validate_name(name: str, max_length: Optional[int] = None, generate_name: bool = False) -> str:
-    """Validates a name according to standard argo/kubernetes limitations
+    """Validates a name according to standard argo/kubernetes limitations.
 
     Parameters
     ----------
@@ -17,12 +17,12 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
         Whether the provided name is to be used as a prefix for name generation.
         If set, name is allowed to end in a single dot (.) or any number of hyphens (-).
 
-    Raises
+    Raises:
     ------
     ValueError
         When the name is invalid according to specifications.
 
-    Notes
+    Notes:
     -----
     Official doc on object names in Kubernetes:
     https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
@@ -54,7 +54,7 @@ def validate_storage_units(value: str) -> None:
     value: str
         The value to validate the units of.
 
-    Raises
+    Raises:
     ------
     ValueError
         When the units cannot be extracted from the given value.

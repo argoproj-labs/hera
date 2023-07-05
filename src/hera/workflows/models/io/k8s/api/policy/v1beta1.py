@@ -5,9 +5,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import Field
-
 from hera.shared._base_model import BaseModel
+from pydantic import Field
 
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr
@@ -15,7 +14,7 @@ from ...apimachinery.pkg.util import intstr
 
 class PodDisruptionBudgetSpec(BaseModel):
     max_unavailable: Optional[intstr.IntOrString] = Field(
-        None,
+        default=None,
         alias="maxUnavailable",
         description=(
             'An eviction is allowed if at most "maxUnavailable" pods selected by "selector" are unavailable after the'
@@ -24,7 +23,7 @@ class PodDisruptionBudgetSpec(BaseModel):
         ),
     )
     min_available: Optional[intstr.IntOrString] = Field(
-        None,
+        default=None,
         alias="minAvailable",
         description=(
             'An eviction is allowed if at least "minAvailable" pods selected by "selector" will still be available'
@@ -33,7 +32,7 @@ class PodDisruptionBudgetSpec(BaseModel):
         ),
     )
     selector: Optional[v1.LabelSelector] = Field(
-        None,
+        default=None,
         description=(
             "Label query over pods whose evictions are managed by the disruption budget. A null selector selects no"
             " pods. An empty selector ({}) also selects no pods, which differs from standard behavior of selecting all"

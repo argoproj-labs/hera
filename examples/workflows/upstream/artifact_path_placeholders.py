@@ -18,7 +18,10 @@ with Workflow(
         command=[
             "sh",
             "-c",
-            'mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" "$(dirname "{{outputs.parameters.actual-lines-count.path}}")" ; head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}" | tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"',
+            'mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" '
+            '"$(dirname "{{outputs.parameters.actual-lines-count.path}}")" ; '
+            'head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}" '
+            '| tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"',
         ],
         inputs=[
             Parameter(name="lines-count"),

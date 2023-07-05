@@ -1,3 +1,4 @@
+"""Data module provides Hera objects for Argo data functionality, such as sourcing data + applying transformations."""
 from typing import List, Union
 
 from hera.expr._node import Node
@@ -18,7 +19,7 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     transformations: List[Union[str, Node]] = []
 
     def _build_source(self) -> m.DataSource:
-        """Builds the generated `DataSource`"""
+        """Builds the generated `DataSource`."""
         if isinstance(self.source, m.DataSource):
             return self.source
         elif isinstance(self.source, m.ArtifactPaths):
@@ -26,14 +27,14 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
         return m.DataSource(artifact_paths=self.source._build_artifact_paths())
 
     def _build_data(self) -> m.Data:
-        """Builds the generated `Data` template"""
+        """Builds the generated `Data` template."""
         return m.Data(
             source=self._build_source(),
             transformation=list(map(lambda expr: m.TransformationStep(expression=str(expr)), self.transformations)),
         )
 
     def _build_template(self) -> m.Template:
-        """Builds the generated `Template` from the fields of `Data`"""
+        """Builds the generated `Template` from the fields of `Data`."""
         return m.Template(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,

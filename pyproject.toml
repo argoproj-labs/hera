@@ -122,15 +122,26 @@ source = [
 [tool.ruff]
 line-length = 119
 show-fixes = true
+select = ["E", "F", "D"]
 ignore = ["E501"]
 target-version = "py38"
 extend-select = ["I"]
-
+src = ["src"]
+exclude = [
+    "examples", 
+    "tests",
+    "src/hera/workflows/models", 
+    "src/hera/events/models",
+    "src/hera/workflows/_unparse.py",
+]
 
 [tool.ruff.per-file-ignores]
-"**/__init__.py" = ["F401"]
+"**/__init__.py" = ["F401", "D107"]
 
 [tool.ruff.isort]
 force-wrap-aliases = true
 combine-as-imports = true
 known-first-party = ["hera"]
+
+[tool.ruff.pydocstyle]
+convention = "google"

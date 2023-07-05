@@ -6,14 +6,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import Field
-
 from hera.shared._base_model import BaseModel
+from pydantic import Field
 
 
 class CreateOptions(BaseModel):
     dry_run: Optional[List[str]] = Field(
-        None,
+        default=None,
         alias="dryRun",
         title=(
             "When present, indicates that modifications should not be\npersisted. An invalid or unrecognized dryRun"
@@ -22,7 +21,7 @@ class CreateOptions(BaseModel):
         ),
     )
     field_manager: Optional[str] = Field(
-        None,
+        default=None,
         alias="fieldManager",
         title=(
             "fieldManager is a name associated with the actor or entity\nthat is making these changes. The value must"
@@ -31,7 +30,7 @@ class CreateOptions(BaseModel):
         ),
     )
     field_validation: Optional[str] = Field(
-        None,
+        default=None,
         alias="fieldValidation",
         title=(
             "fieldValidation instructs the server on how to handle\nobjects in the request (POST/PUT/PATCH) containing"
@@ -70,7 +69,7 @@ class LabelSelectorRequirement(BaseModel):
         ),
     )
     values: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty."
             " If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during"
@@ -81,7 +80,7 @@ class LabelSelectorRequirement(BaseModel):
 
 class ListMeta(BaseModel):
     continue_: Optional[str] = Field(
-        None,
+        default=None,
         alias="continue",
         description=(
             "continue may be set if the user set a limit on the number of items returned, and indicates that the"
@@ -93,7 +92,7 @@ class ListMeta(BaseModel):
         ),
     )
     remaining_item_count: Optional[int] = Field(
-        None,
+        default=None,
         alias="remainingItemCount",
         description=(
             "remainingItemCount is the number of subsequent items in the list which are not included in this list"
@@ -106,7 +105,7 @@ class ListMeta(BaseModel):
         ),
     )
     resource_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="resourceVersion",
         description=(
             "String that identifies the server's internal version of this object that can be used by clients to"
@@ -116,7 +115,7 @@ class ListMeta(BaseModel):
         ),
     )
     self_link: Optional[str] = Field(
-        None,
+        default=None,
         alias="selfLink",
         description=(
             "selfLink is a URL representing this object. Populated by the system. Read-only.\n\nDEPRECATED Kubernetes"
@@ -132,7 +131,7 @@ class MicroTime(BaseModel):
 class OwnerReference(BaseModel):
     api_version: str = Field(..., alias="apiVersion", description="API version of the referent.")
     block_owner_deletion: Optional[bool] = Field(
-        None,
+        default=None,
         alias="blockOwnerDeletion",
         description=(
             'If true, AND if the owner has the "foregroundDeletion" finalizer, then the owner cannot be deleted from'
@@ -140,7 +139,9 @@ class OwnerReference(BaseModel):
             ' "delete" permission of the owner, otherwise 422 (Unprocessable Entity) will be returned.'
         ),
     )
-    controller: Optional[bool] = Field(None, description="If true, this reference points to the managing controller.")
+    controller: Optional[bool] = Field(
+        default=None, description="If true, this reference points to the managing controller."
+    )
     kind: str = Field(
         ...,
         description=(
@@ -158,7 +159,7 @@ class OwnerReference(BaseModel):
 
 class StatusCause(BaseModel):
     field: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "The field of the resource that has caused this error, as named by its JSON serialization. May include dot"
             " and postfix notation for nested attributes. Arrays are zero-indexed.  Fields may appear more than once"
@@ -167,13 +168,13 @@ class StatusCause(BaseModel):
         ),
     )
     message: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "A human-readable description of the cause of the error.  This field may be presented as-is to a reader."
         ),
     )
     reason: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "A machine-readable description of the cause of the error. If this value is empty there is no information"
             " available."
@@ -193,12 +194,12 @@ class Time(BaseModel):
 
 class LabelSelector(BaseModel):
     match_expressions: Optional[List[LabelSelectorRequirement]] = Field(
-        None,
+        default=None,
         alias="matchExpressions",
         description="matchExpressions is a list of label selector requirements. The requirements are ANDed.",
     )
     match_labels: Optional[Dict[str, str]] = Field(
-        None,
+        default=None,
         alias="matchLabels",
         description=(
             "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to"
@@ -210,7 +211,7 @@ class LabelSelector(BaseModel):
 
 class ManagedFieldsEntry(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the version of this resource that this field set applies to. The format is"
@@ -219,7 +220,7 @@ class ManagedFieldsEntry(BaseModel):
         ),
     )
     fields_type: Optional[str] = Field(
-        None,
+        default=None,
         alias="fieldsType",
         description=(
             "FieldsType is the discriminator for the different fields format and version. There is currently only one"
@@ -227,20 +228,22 @@ class ManagedFieldsEntry(BaseModel):
         ),
     )
     fields_v1: Optional[FieldsV1] = Field(
-        None,
+        default=None,
         alias="fieldsV1",
         description='FieldsV1 holds the first JSON version format as described in the "FieldsV1" type.',
     )
-    manager: Optional[str] = Field(None, description="Manager is an identifier of the workflow managing these fields.")
+    manager: Optional[str] = Field(
+        default=None, description="Manager is an identifier of the workflow managing these fields."
+    )
     operation: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Operation is the type of operation which lead to this ManagedFieldsEntry being created. The only valid"
             " values for this field are 'Apply' and 'Update'."
         ),
     )
     subresource: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Subresource is the name of the subresource used to update that object, or empty string if the object was"
             " updated through the main resource. The value of this field is used to distinguish between managers, even"
@@ -250,7 +253,7 @@ class ManagedFieldsEntry(BaseModel):
         ),
     )
     time: Optional[Time] = Field(
-        None,
+        default=None,
         description=(
             "Time is timestamp of when these fields were set. It should always be empty if Operation is 'Apply'"
         ),
@@ -259,7 +262,7 @@ class ManagedFieldsEntry(BaseModel):
 
 class ObjectMeta(BaseModel):
     annotations: Optional[Dict[str, str]] = Field(
-        None,
+        default=None,
         description=(
             "Annotations is an unstructured key value map stored with a resource that may be set by external tools to"
             " store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying"
@@ -267,7 +270,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     cluster_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="clusterName",
         description=(
             "The name of the cluster which the object belongs to. This is used to distinguish resources with same name"
@@ -276,7 +279,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     creation_timestamp: Optional[Time] = Field(
-        None,
+        default=None,
         alias="creationTimestamp",
         description=(
             "CreationTimestamp is a timestamp representing the server time when this object was created. It is not"
@@ -286,7 +289,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     deletion_grace_period_seconds: Optional[int] = Field(
-        None,
+        default=None,
         alias="deletionGracePeriodSeconds",
         description=(
             "Number of seconds allowed for this object to gracefully terminate before it will be removed from the"
@@ -294,7 +297,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     deletion_timestamp: Optional[Time] = Field(
-        None,
+        default=None,
         alias="deletionTimestamp",
         description=(
             "DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This field is set by"
@@ -314,7 +317,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     finalizers: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Must be empty before the object is deleted from the registry. Each entry is an identifier for the"
             " responsible component that will remove the entry from the list. If the deletionTimestamp of the object"
@@ -328,7 +331,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     generate_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="generateName",
         description=(
             "GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field"
@@ -344,14 +347,14 @@ class ObjectMeta(BaseModel):
         ),
     )
     generation: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "A sequence number representing a specific generation of the desired state. Populated by the system."
             " Read-only."
         ),
     )
     labels: Optional[Dict[str, str]] = Field(
-        None,
+        default=None,
         description=(
             "Map of string keys and values that can be used to organize and categorize (scope and select) objects. May"
             " match selectors of replication controllers and services. More info:"
@@ -359,7 +362,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     managed_fields: Optional[List[ManagedFieldsEntry]] = Field(
-        None,
+        default=None,
         alias="managedFields",
         description=(
             "ManagedFields maps workflow-id and version to the set of fields that are managed by that workflow. This"
@@ -370,7 +373,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     name: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Name must be unique within a namespace. Is required when creating resources, although some resources may"
             " allow a client to request the generation of an appropriate name automatically. Name is primarily"
@@ -379,7 +382,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     namespace: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Namespace defines the space within which each name must be unique. An empty namespace is equivalent to"
             ' the "default" namespace, but "default" is the canonical representation. Not all objects are required to'
@@ -388,7 +391,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     owner_references: Optional[List[OwnerReference]] = Field(
-        None,
+        default=None,
         alias="ownerReferences",
         description=(
             "List of objects depended by this object. If ALL objects in the list have been deleted, this object will"
@@ -398,7 +401,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     resource_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="resourceVersion",
         description=(
             "An opaque value that represents the internal version of this object that can be used by clients to"
@@ -411,7 +414,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     self_link: Optional[str] = Field(
-        None,
+        default=None,
         alias="selfLink",
         description=(
             "SelfLink is a URL representing this object. Populated by the system. Read-only.\n\nDEPRECATED Kubernetes"
@@ -419,7 +422,7 @@ class ObjectMeta(BaseModel):
         ),
     )
     uid: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "UID is the unique in time and space value for this object. It is typically generated by the server on"
             " successful creation of a resource and is not allowed to change on PUT operations.\n\nPopulated by the"

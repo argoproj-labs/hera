@@ -1,4 +1,4 @@
-"""Global config module supports configuring Hera's behavior based on client requirements"""
+"""Global config module supports configuring Hera's behavior based on client requirements."""
 from __future__ import annotations
 
 import inspect
@@ -16,9 +16,9 @@ TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]
 
 Hook = Callable[[TBase], TBase]
-"""
-`Hook` is a callable that takes a Hera objects and returns the same, optionally mutated, object. This can be a Workflow,
-a Script, a Container, etc - any Hera object. 
+"""`Hook` is a callable that takes a Hera objects and returns the same, optionally mutated, object. 
+
+This can be a Workflow, a Script, a Container, etc - any Hera object. 
 """
 
 _HookMap = Dict[Type[TBase], List[Hook]]
@@ -32,7 +32,7 @@ _Defaults = Dict[TBase, Dict]
 class _GlobalConfig:
     """Hera global configuration holds any user configuration such as global tokens, hooks, etc.
 
-    Notes
+    Notes:
     -----
     This should not be instantiated directly by the user. There is an instance of the `_GlobalConfig` in this module,
     which is what should be used. Access as `hera.shared.global_config` or `hera.shared.GlobalConfig`.
@@ -74,31 +74,31 @@ class _GlobalConfig:
     """an indicator holder for any Hera experimental features to use"""
 
     def reset(self) -> None:
-        """Resets the global config container to its initial state"""
+        """Resets the global config container to its initial state."""
         self.__dict__ = _GlobalConfig().__dict__
 
     @property
     def image(self) -> str:
-        """Return the default image to use for Tasks"""
+        """Return the default image to use for Tasks."""
         if isinstance(self._image, str):
             return self._image
         return self._image()
 
     @image.setter
     def image(self, image: Union[str, Callable[[], str]]) -> None:
-        """Set the default image to use for Tasks"""
+        """Set the default image to use for Tasks."""
         self._image = image
 
     @property
     def token(self) -> Optional[str]:
-        """Returns an Argo Workflows global token"""
+        """Returns an Argo Workflows global token."""
         if self._token is None or isinstance(self._token, str):
             return self._token
         return self._token()
 
     @token.setter
     def token(self, t: Union[Optional[str], TokenGenerator, Callable[[], Optional[str]]]) -> None:
-        """Sets the Argo Workflows token at a global level so services can use it"""
+        """Sets the Argo Workflows token at a global level so services can use it."""
         self._token = t
 
     def register_pre_build_hook(self, hook: Hook) -> Hook:
@@ -140,7 +140,7 @@ class BaseMixin(BaseModel):
     def _init_private_attributes(self):
         """A pydantic private method called after `__init__`.
 
-        Notes
+        Notes:
         -----
         In order to inject `__hera_init__` after `__init__` without destroying the autocomplete, we opted for
         this method. We also tried other ways including creating a metaclass that invokes hera_init after init,
@@ -150,12 +150,12 @@ class BaseMixin(BaseModel):
         self.__hera_init__()
 
     def __hera_init__(self):
-        """A method that is optionally implemented and invoked by `BaseMixin` subclasses to perform some post init"""
+        """A method that is optionally implemented and invoked by `BaseMixin` subclasses to perform some post init."""
         ...
 
     @root_validator(pre=True)
     def _set_defaults(cls, values):
-        """Sets the user-provided defaults of Hera objects"""
+        """Sets the user-provided defaults of Hera objects."""
         defaults = global_config._get_class_defaults(cls)
         for key, value in defaults.items():
             if values.get(key) is None:

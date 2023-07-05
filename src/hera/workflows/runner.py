@@ -1,10 +1,11 @@
+"""The runner module contains the functionality required for the script runner."""
 import argparse
 import functools
 import importlib
 import inspect
 import json
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Callable, cast
 
 from pydantic import validate_arguments
 
@@ -29,13 +30,15 @@ def _ignore_unmatched_kwargs(f):
     return inner
 
 
-def _contains_var_kwarg(f):
+def _contains_var_kwarg(f: Callable) -> bool:
+    """Tells whether the given callable contains a keyword argument."""
     return any(param.kind == inspect.Parameter.VAR_KEYWORD for param in inspect.signature(f).parameters.values())
 
 
-def _is_kwarg_of(key, f):
+def _is_kwarg_of(key: str, f: Callable) -> bool:
+    """Tells whether the given `key` identifies a keyword argument of the given callable."""
     param = inspect.signature(f).parameters.get(key)
-    return param and (
+    return param is not None and (
         param.kind is inspect.Parameter.KEYWORD_ONLY or param.kind is inspect.Parameter.POSITIONAL_OR_KEYWORD
     )
 
@@ -60,8 +63,8 @@ def _parse(value, key, f):
         return value
 
 
-def _is_str_kwarg_of(key, f):
-    # check if param `key` of function `f` has a type annotation of a subclass of str
+def _is_str_kwarg_of(key: str, f: Callable):
+    """Check if param `key` of function `f` has a type annotation of a subclass of str."""
     type_ = inspect.signature(f).parameters[key].annotation
     if not type_:
         return True
@@ -77,6 +80,7 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
     """Run a function with a list of kwargs.
 
     Args:
+        entrypoint: The path to the script within the container to execute.
         module: The module path to import the function from.
         function_name: The name of the function to run.
         kwargs_list: A list of kwargs to pass to the function.
@@ -105,9 +109,11 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
     return function(**kwargs)
 
 
-# write an argparse for the runner function that takes module and function name
-# as flags and a path to a json file as an argument
 def _parse_args():
+    """Creates an argparse for the runner function.
+
+    The returned argparse takes a module and function name as flags and a path to a json file as an argument.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--entrypoint", "-e", type=str, required=True)
     parser.add_argument("args_path", type=Path)
@@ -115,6 +121,11 @@ def _parse_args():
 
 
 def _run():
+    """Runs a function from a specific path using parsed arguments from Argo.
+
+    Note that this prints the result of the function to stdout, which is the normal mode of operation for Argo. Any
+    output of a Python function submitted via a `Script.source` field results in outputs sent to stdout.
+    """
     args = _parse_args()
     kwargs_list = json.loads(args.args_path.read_text() or r"[]")
     result = _runner(args.entrypoint, kwargs_list)

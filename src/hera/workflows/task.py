@@ -26,8 +26,10 @@ from hera.workflows.workflow_status import WorkflowStatus
 
 
 class TaskResult(Enum):
-    """The enumeration of Task Results specified at
-    https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends
+    """The enumeration of Task Results.
+
+    See Also:
+        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends.
     """
 
     failed = "Failed"
@@ -47,90 +49,90 @@ class Task(
     ParameterMixin,
     ItemMixin,
 ):
-    """Task is used to run a given template within a DAG. Must be instantiated under a DAG context.
+    r"""Task is used to run a given template within a DAG. Must be instantiated under a DAG context.
 
-## Dependencies
+    ## Dependencies
 
-Any `Tasks` without a dependency defined will start immediately.
+    Any `Tasks` without a dependency defined will start immediately.
 
-Dependencies between Tasks can be described using the convenience syntax `>>`, for example:
+    Dependencies between Tasks can be described using the convenience syntax `>>`, for example:
 
-```py
+    ```py
     A = Task(...)
     B = Task(...)
     A >> B
-```
+    ```
 
-describes the relationships:
+    describes the relationships:
 
-* "A has no dependencies (so starts immediately)
-* "B depends on A".
+    * "A has no dependencies (so starts immediately)
+    * "B depends on A".
 
-As a diagram:
+    As a diagram:
 
-```
-A
-|
-B
-```
+    ```
+    A
+    |
+    B
+    ```
 
-`A >> B` is equivalent to `A.next(B)`.
+    `A >> B` is equivalent to `A.next(B)`.
 
-## Lists of Tasks
+    ## Lists of Tasks
 
-A list of Tasks used with the rshift syntax describes an "AND" dependency between the single Task on the left of
-`>>` and the list Tasks to the right of `>>` (or vice versa). A list of Tasks on both sides of `>>` is not supported.
+    A list of Tasks used with the rshift syntax describes an "AND" dependency between the single Task on the left of
+    `>>` and the list Tasks to the right of `>>` (or vice versa). A list of Tasks on both sides of `>>` is not supported.
 
-For example:
+    For example:
 
-```
+    ```
     A = Task(...)
     B = Task(...)
     C = Task(...)
     D = Task(...)
     A >> [B, C] >> D
-```
+    ```
 
-describes the relationships:
+    describes the relationships:
 
-* "A has no dependencies
-* "B AND C depend on A"
-* "D depends on B AND C"
+    * "A has no dependencies
+    * "B AND C depend on A"
+    * "D depends on B AND C"
 
-As a diagram:
+    As a diagram:
 
-```
-  A
- / \\
-B   C
- \ /
-  D
-```
+    ```
+     A
+    / \\
+   B   C
+    \ /
+     D
+    ```
 
-Dependencies can be described over multiple statements:
+    Dependencies can be described over multiple statements:
 
-```
+    ```
     A = Task(...)
     B = Task(...)
     C = Task(...)
     D = Task(...)
     A >> [C, D]
     B >> [C, D]
-```
+    ```
 
-describes the relationships:
+    describes the relationships:
 
-* "A and B have no dependencies
-* "C depends on A AND B"
-* "D depends on A AND B"
+    * "A and B have no dependencies
+    * "C depends on A AND B"
+    * "D depends on A AND B"
 
-As a diagram:
+    As a diagram:
 
-```
-A   B
-| X |
-C   D
-```
+    ```
+    A   B
+    | X |
+    C   D
+    ```
     """
 
     dependencies: Optional[List[str]] = None
@@ -198,13 +200,14 @@ C   D
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
     def __or__(self, other: Union[Task, str]) -> str:
-        """Adds a condition of"""
+        """Adds a condition of."""
         if isinstance(other, Task):
             return f"({self.name} || {other.name})"
         assert isinstance(other, str), f"Unknown type {type(other)} specified using `|` operator"
         return f"{self.name} || {other}"
 
     def on_workflow_status(self, status: WorkflowStatus, op: Operator = Operator.equals) -> Task:
+        """Sets the current task to run when the workflow finishes with the specified status."""
         expression = f"{{{{workflow.status}}}} {op} {status}"
         if self.when:
             self.when += f" {Operator.and_} {expression}"
@@ -213,15 +216,19 @@ C   D
         return self
 
     def on_success(self, other: Task) -> Task:
+        """Sets the current task to run when the given `other` task succeeds."""
         return self.next(other, on=TaskResult.succeeded)
 
     def on_failure(self, other: Task) -> Task:
+        """Sets the current task to run when the given `other` task fails."""
         return self.next(other, on=TaskResult.failed)
 
     def on_error(self, other: Task) -> Task:
+        """Sets the current task to run when the given `other` task errors."""
         return self.next(other, on=TaskResult.errored)
 
     def on_other_result(self, other: Task, value: str, operator: Operator = Operator.equals) -> Task:
+        """Sets the current task to run when the given `other` task results in the specified `value` result."""
         expression = f"{other.result} {operator} {value}"
         if self.when:
             self.when += f" {Operator.and_} {expression}"
@@ -231,6 +238,7 @@ C   D
         return self
 
     def when_any_succeeded(self, other: Task) -> Task:
+        """Sets the current task to run when the given `other` task succeedds."""
         assert (self.with_param is not None) or (
             self.with_sequence is not None
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
@@ -238,6 +246,7 @@ C   D
         return self.next(other, on=TaskResult.any_succeeded)
 
     def when_all_failed(self, other: Task) -> Task:
+        """Sets the current task to run when the given `other` task has failed."""
         assert (self.with_param is not None) or (
             self.with_sequence is not None
         ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"

@@ -49,13 +49,13 @@ class Parameter(_ModelParameter):
         return self.value
 
     def with_name(self, name: str) -> Parameter:
-        """Returns a copy of the parameter with the name set to the value"""
+        """Returns a copy of the parameter with the name set to the value."""
         p = self.copy(deep=True)
         p.name = name
         return p
 
     def as_input(self) -> _ModelParameter:
-        """Assembles the parameter for use as an input of a template"""
+        """Assembles the parameter for use as an input of a template."""
         return _ModelParameter(
             name=self.name,
             description=self.description,
@@ -66,7 +66,7 @@ class Parameter(_ModelParameter):
         )
 
     def as_argument(self) -> _ModelParameter:
-        """Assembles the parameter for use as an argument of a step or a task"""
+        """Assembles the parameter for use as an argument of a step or a task."""
         # Setting a default value when used as an argument is a no-op so we exclude it as it would get overwritten by
         # `value` or `value_from` (one of which is required)
         # Overwrite ref: https://github.com/argoproj/argo-workflows/blob/781675ddcf6f1138d697cb9c71dae484daa0548b/workflow/common/util.go#L126-L139
@@ -81,7 +81,7 @@ class Parameter(_ModelParameter):
         )
 
     def as_output(self) -> _ModelParameter:
-        """Assembles the parameter for use as an output of a template"""
+        """Assembles the parameter for use as an output of a template."""
         # Only `value` and `value_from` are valid here
         # see https://github.com/argoproj/argo-workflows/blob/e3254eca115c9dd358e55d16c6a3d41403c29cae/workflow/validate/validate.go#L1067
         return _ModelParameter(

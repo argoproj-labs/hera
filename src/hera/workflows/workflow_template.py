@@ -1,4 +1,4 @@
-"""The workflow_template module provides the WorkflowTemplate class
+"""The workflow_template module provides the WorkflowTemplate class.
 
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
@@ -61,16 +61,16 @@ class WorkflowTemplate(Workflow):
         )
 
     def get(self) -> TWorkflow:
-        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace"""
+        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         return self.workflows_service.get_workflow_template(name=self.name, namespace=self.namespace)
 
     def update(self) -> TWorkflow:
-        """
-        Attempts to perform a workflow template update based on the parameters of this template
-        e.g. name, namespace. Note that this creates the template if it does not exist. In addition, this performs
+        """Attempts to perform a template update based on the parameters of this template.
+
+        This creates the template if it does not exist. In addition, this performs
         a get prior to updating to get the resource version to update in the first place. If you know the template
         does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
         """
@@ -170,7 +170,6 @@ class WorkflowTemplate(Workflow):
 
         Note: this function does not require the WorkflowTemplate to already exist on the cluster
         """
-
         workflow = self._get_as_workflow(generate_name)
         return workflow.create(wait=wait, poll_interval=poll_interval)
 

@@ -1,3 +1,4 @@
+"""Module that provides Hera objects for cluster workflow templates."""
 from pydantic import validator
 
 from hera.exceptions import NotFound
@@ -12,8 +13,9 @@ from hera.workflows.workflow_template import WorkflowTemplate
 
 
 class ClusterWorkflowTemplate(WorkflowTemplate):
-    """ClusterWorkflowTemplates are WorkflowTemplates that are cluster scoped, meaning they are accessible from all
-    namespaces.
+    """ClusterWorkflowTemplates are cluster scoped templates.
+
+    Since cluster workflow templates are scoped at the cluster level, they are available globally in the cluster.
     """
 
     @validator("namespace", pre=True, always=True)
@@ -29,15 +31,15 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
         )
 
     def get(self) -> TWorkflow:
-        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace"""
+        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.name, "workflow name not defined"
         return self.workflows_service.get_cluster_workflow_template(name=self.name)
 
     def update(self) -> TWorkflow:
-        """
-        Attempts to perform a workflow template update based on the parameters of this template
-        e.g. name, namespace. Note that this creates the template if it does not exist. In addition, this performs
+        """Attempts to perform a workflow template update based on the parameters of this template.
+
+        Note that this creates the template if it does not exist. In addition, this performs
         a get prior to updating to get the resource version to update in the first place. If you know the template
         does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
         """

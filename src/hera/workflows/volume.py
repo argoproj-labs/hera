@@ -1,3 +1,4 @@
+"""Volume module provides all Argo volume types that can be used via Hera."""
 import uuid
 from enum import Enum
 from typing import List, Optional, Union, cast
@@ -47,7 +48,7 @@ from hera.workflows.validators import validate_storage_units
 class AccessMode(Enum):
     """A representations of the volume access modes for Kubernetes.
 
-    Notes
+    Notes:
     -----
     See: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
     """
@@ -71,11 +72,14 @@ class AccessMode(Enum):
     volumes and Kubernetes version 1.22+.
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns the value representation of the enum in the form of a string."""
         return str(self.value)
 
 
 class _BaseVolume(_ModelVolumeMount):
+    """Base volume representation."""
+
     name: Optional[str] = None  # type: ignore
     mount_path: Optional[str] = None  # type: ignore
 
@@ -103,6 +107,8 @@ class _BaseVolume(_ModelVolumeMount):
 
 
 class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
+    """Representation of AWS elastic block store volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -113,6 +119,8 @@ class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVo
 
 
 class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
+    """Representation of an Azure disk volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -128,6 +136,8 @@ class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
 
 
 class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
+    """Representation of an Azure file that can be mounted as a volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -138,6 +148,8 @@ class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
 
 
 class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
+    """Representation of a Ceph file system volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -153,6 +165,8 @@ class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
 
 
 class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
+    """Representation of a Cinder volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -166,6 +180,8 @@ class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
 
 
 class ConfigMapVolume(_BaseVolume, _ModelConfigMapVolumeSource):  # type: ignore
+    """Representation of a config map volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -176,6 +192,8 @@ class ConfigMapVolume(_BaseVolume, _ModelConfigMapVolumeSource):  # type: ignore
 
 
 class CSIVolume(_BaseVolume, _ModelCSIVolumeSource):
+    """Representation of a container service interface volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -190,6 +208,8 @@ class CSIVolume(_BaseVolume, _ModelCSIVolumeSource):
 
 
 class DownwardAPIVolume(_BaseVolume, _ModelDownwardAPIVolumeSource):
+    """Representation of a volume passed via the downward API."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -198,6 +218,8 @@ class DownwardAPIVolume(_BaseVolume, _ModelDownwardAPIVolumeSource):
 
 
 class EmptyDirVolume(_BaseVolume, _ModelEmptyDirVolumeSource):
+    """Representation of an empty dir volume from K8s."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name, empty_dir=_ModelEmptyDirVolumeSource(medium=self.medium, size_limit=self.size_limit)
@@ -205,6 +227,8 @@ class EmptyDirVolume(_BaseVolume, _ModelEmptyDirVolumeSource):
 
 
 class EphemeralVolume(_BaseVolume, _ModelEphemeralVolumeSource):
+    """Representation of a volume that uses ephemeral storage shared with the K8s node a pod is scheduled on."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name, ephemeral=_ModelEphemeralVolumeSource(volume_claim_template=self.volume_claim_template)
@@ -212,6 +236,8 @@ class EphemeralVolume(_BaseVolume, _ModelEphemeralVolumeSource):
 
 
 class FCVolume(_BaseVolume, _ModelFCVolumeSource):
+    """An FV volume representation."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -226,6 +252,8 @@ class FCVolume(_BaseVolume, _ModelFCVolumeSource):
 
 
 class FlexVolume(_BaseVolume, _ModelFlexVolumeSource):
+    """A Flex volume representation."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -240,6 +268,8 @@ class FlexVolume(_BaseVolume, _ModelFlexVolumeSource):
 
 
 class FlockerVolume(_BaseVolume, _ModelFlockerVolumeSource):
+    """A Flocker volume representation."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -248,6 +278,12 @@ class FlockerVolume(_BaseVolume, _ModelFlockerVolumeSource):
 
 
 class GCEPersistentDiskVolume(_BaseVolume, _ModelGCEPersistentDiskVolumeSource):
+    """A representation of a Google Cloud Compute Enginer persistent disk.
+
+    Notes:
+        The volume must exist on GCE before a request to mount it to a pod is performed.
+    """
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -258,6 +294,8 @@ class GCEPersistentDiskVolume(_BaseVolume, _ModelGCEPersistentDiskVolumeSource):
 
 
 class GitRepoVolume(_BaseVolume, _ModelGitRepoVolumeSource):
+    """A representation of a Git repo that can be mounted as a volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -268,6 +306,8 @@ class GitRepoVolume(_BaseVolume, _ModelGitRepoVolumeSource):
 
 
 class GlusterfsVolume(_BaseVolume, _ModelGlusterfsVolumeSource):
+    """A representation for a Gluster filesystem volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -276,11 +316,15 @@ class GlusterfsVolume(_BaseVolume, _ModelGlusterfsVolumeSource):
 
 
 class HostPathVolume(_BaseVolume, _ModelHostPathVolumeSource):
+    """Representation for a volume that can be mounted from a host path/node location."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(name=self.name, host_path=_ModelHostPathVolumeSource(path=self.path, type=self.type))
 
 
 class ISCSIVolume(_BaseVolume, _ModelISCSIVolumeSource):
+    """Representation of ISCSI volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -301,11 +345,15 @@ class ISCSIVolume(_BaseVolume, _ModelISCSIVolumeSource):
 
 
 class NFSVolume(_BaseVolume, _ModelNFSVolumeSource):
+    """A network file system volume representation."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(name=self.name, nfs=_ModelNFSVolumeSource(path=self.path, read_only=self.read_only))
 
 
 class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSource):
+    """A Photon Persisten Disk representation."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -314,6 +362,8 @@ class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSo
 
 
 class PortworxVolume(_BaseVolume, _ModelPortworxVolumeSource):
+    """`PortworxVolume` represents a Portworx volume to mount to a container."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -324,6 +374,8 @@ class PortworxVolume(_BaseVolume, _ModelPortworxVolumeSource):
 
 
 class ProjectedVolume(_BaseVolume, _ModelProjectedVolumeSource):
+    """`ProjectedVolume` represents a projected volume to mount to a container."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name, projected=_ModelProjectedVolumeSource(default_mode=self.default_mode, sources=self.sources)
@@ -331,6 +383,8 @@ class ProjectedVolume(_BaseVolume, _ModelProjectedVolumeSource):
 
 
 class QuobyteVolume(_BaseVolume, _ModelQuobyteVolumeSource):
+    """`QuobyteVolume` represents a Quobyte volume to mount to a container."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -346,6 +400,8 @@ class QuobyteVolume(_BaseVolume, _ModelQuobyteVolumeSource):
 
 
 class RBDVolume(_BaseVolume, _ModelRBDVolumeSource):
+    """An RDB volume representation."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -363,6 +419,8 @@ class RBDVolume(_BaseVolume, _ModelRBDVolumeSource):
 
 
 class ScaleIOVolume(_BaseVolume, _ModelScaleIOVolumeSource):
+    """`ScaleIOVolume` represents a ScaleIO volume to mount to the container."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -382,6 +440,8 @@ class ScaleIOVolume(_BaseVolume, _ModelScaleIOVolumeSource):
 
 
 class SecretVolume(_BaseVolume, _ModelSecretVolumeSource):
+    """`SecretVolume` supports mounting a K8s secret as a container volume."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -392,6 +452,8 @@ class SecretVolume(_BaseVolume, _ModelSecretVolumeSource):
 
 
 class StorageOSVolume(_BaseVolume, _ModelStorageOSVolumeSource):
+    """`StorageOSVolume` represents a Storage OS volume to mount."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -406,6 +468,8 @@ class StorageOSVolume(_BaseVolume, _ModelStorageOSVolumeSource):
 
 
 class VsphereVirtualDiskVolume(_BaseVolume, _ModelVsphereVirtualDiskVolumeSource):
+    """`VsphereVirtualDiskVolume` represents a vSphere virtual disk volume to mount."""
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -419,6 +483,12 @@ class VsphereVirtualDiskVolume(_BaseVolume, _ModelVsphereVirtualDiskVolumeSource
 
 
 class ExistingVolume(_BaseVolume, _ModelPersistentVolumeClaimVolumeSource):
+    """`ExistingVolume` is a representation of an existing volume in K8s.
+
+    The existing volume is mounted based on the supplied claim name. This tells K8s that the specified persistent
+    volume claim should be used to mount a volume to a pod.
+    """
+
     def _build_volume(self) -> _ModelVolume:
         return _ModelVolume(
             name=self.name,
@@ -429,6 +499,13 @@ class ExistingVolume(_BaseVolume, _ModelPersistentVolumeClaimVolumeSource):
 
 
 class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
+    """Volume represents a basic, dynamic, volume representation.
+
+    This `Volume` cannot only be instantiated to be used for mounting purposes but also for dynamically privisioning
+    volumes in K8s. When the volume is used a corresponding persistent volume claim is also created on workflow
+    submission.
+    """
+
     size: Optional[str] = None  # type: ignore
     resources: Optional[ResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None

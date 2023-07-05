@@ -1,3 +1,4 @@
+"""A collection of scripts and objects that are used to construct the Hera services for workflows and events."""
 import builtins
 import inspect
 import re
@@ -14,23 +15,18 @@ model_types = {"workflows", "events"}
 
 
 class Parameter:
-    """A representation of a function parameter.
-
-    Parameters
-    ----------
-    name: str
-        The name of the parameter.
-    field: str
-        The body field that this parameter is used on.
-    in_: str
-        The type of request object this parameter is used in - body, query, or path.
-    type_: type
-        The proper `type` of the parameter.
-    required: bool
-        Whether the `Parameter` is required.
-    """
+    """A representation of a function parameter."""
 
     def __init__(self, name: str, field: str, in_: str, type_: type, required: bool) -> None:
+        """Instantiates a parameter.
+
+        Args:
+            name: (str) the name of the parameter.
+            field: (str) the body field that this parameter is used on.
+            in_: (str) the type of request object this parameter is used in - body, query, or path.
+            type_: (type) the proper `type` of the parameter.
+            required: (bool) whether the `Parameter` is required.
+        """
         self.name = name
         self.field = field
         self.in_ = in_  # body, query, path
@@ -38,6 +34,7 @@ class Parameter:
         self.required = required
 
     def __str__(self) -> str:
+        """Returns the string representation of the parameter, with its name + type."""
         if self.required:
             return f"{self.name}: {self.type_.__name__}"
         else:
@@ -45,37 +42,23 @@ class Parameter:
 
 
 class Response:
-    """The response type of a request"""
+    """The response type of a request."""
 
     def __init__(self, ref: str) -> None:
+        """Instantiate a response.
+
+        Args:
+            ref: (str) the reference of the return type.
+        """
         self.ref = ref
 
     def __str__(self) -> str:
+        """Return the string representation of the response type."""
         return f"{self.ref}"
 
 
 class ServiceEndpoint:
-    """A response endpoint representation for Argo service endpoints.
-
-    Parameters
-    ----------
-    url: str
-        The relative URL of the endpoint.
-    method: str
-        The method of the endpoint: put, end, post.
-    name: str
-        The name of the endpoint. Used to create the service API definitions.
-    params: List[Parameter]
-        The parameters of the endpoint. Used to create the service API definitions.
-    response: Response
-        The response of the endpoint. Used to create the service API definitions.
-    summary: Optional[str] = None
-        Summary documentation of the endpoint, if available.
-    consumes: str = "application/json"
-        The consumption payload type of the endpoint.
-    produces: str = "application/json"
-        The response payload type of the endpoint.
-    """
+    """A response endpoint representation for Argo service endpoints."""
 
     def __init__(
         self,
@@ -84,10 +67,22 @@ class ServiceEndpoint:
         name: str,
         params: List[Parameter],
         response: Response,
-        summary: Optional[str] = None,
+        summary: Optional[str] = "API Documentation.",
         consumes: str = "application/json",
         produces: str = "application/json",
     ) -> None:
+        """Instantiate a service endpoint.
+
+        Args:
+            url: (str) the relative URL of the endpoint.
+            method: (str) the method of the endpoint: put, end, post.
+            name: (str) the name of the endpoint. Used to create the service API definitions.
+            params: (List[Parameter]) the parameters of the endpoint. Used to create the service API definitions.
+            response: (Response) the response of the endpoint. Used to create the service API definitions.
+            summary: (Optional[str] = None) summary documentation of the endpoint, if available.
+            consumes: (str = "application/json") the consumption payload type of the endpoint.
+            produces: (str = "application/json") the response payload type of the endpoint.
+        """
         self.url = self.parse_url(url)
         self.method = method
         self.name = name
@@ -99,13 +94,14 @@ class ServiceEndpoint:
         self.consumes = consumes
         self.produces = produces
 
-    def parse_url(self, url) -> str:
+    def parse_url(self, url: str) -> str:
+        """Parses the given URL and returns the path only."""
         if url[0] == "/":
             return url[1:]
         return url
 
     def __str__(self) -> str:
-        # signature
+        """Builds the entire string signature of the service endpoints."""
         if len(self.params) == 0:
             signature = f"def {self.name}(self) -> {self.response}:"
         else:
@@ -115,12 +111,10 @@ class ServiceEndpoint:
                 name=self.name,
                 params=params,
                 ret=str(self.response),
-                summary=self.summary,
             )
 
         # docstring
-        if self.summary is not None:
-            signature = f"""{signature}
+        signature = f"""{signature}
         \"\"\"{self.summary}\"\"\""""
 
         # url
@@ -148,9 +142,8 @@ class ServiceEndpoint:
 
         # headers
         headers = "{'Authorization': f'Bearer {self.token}'"
-        if self.method == "post" or self.method == "put":
+        if self.method.lower() == "post" or self.method.lower() == "put":
             headers += f", 'Content-Type': '{self.consumes}'"
-
         headers += "}"
 
         # body/data
@@ -194,7 +187,10 @@ class ServiceEndpoint:
 
         if resp.ok:
             resp_json = resp.json()
-            if "status" in resp_json or resp_json["status"]['active'] is None or resp_json["status"]['lastScheduledTime'] is None or resp_json["status"]['conditions'] is None:
+            if "status" in resp_json or \
+                resp_json["status"]['active'] is None or \
+                resp_json["status"]['lastScheduledTime'] is None or \
+                resp_json["status"]['conditions'] is None:
                 # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
                 # object. So, we overwrite the response with a value that allows the response to pass through safely.
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
@@ -225,7 +221,7 @@ class ServiceEndpoint:
 
 
 def get_models_type() -> str:
-    """Gets the model type to generate from argv and returns it. This is either `workflows` or `events`"""
+    """Gets the model type to generate from argv and returns it. This is either `workflows` or `events`."""
     assert len(sys.argv) == 3, "Expected two argv arguments - the Argo OpenAPI spec URL and [workflows|events]"
     arg = sys.argv[2]
     assert arg in model_types, f"Unsupported model type {arg}, expected one of {model_types}"
@@ -233,13 +229,13 @@ def get_models_type() -> str:
 
 
 def get_openapi_spec_url() -> str:
-    """Gets the OpenAPI spec URL from argv and returns it"""
+    """Gets the OpenAPI spec URL from argv and returns it."""
     assert len(sys.argv) == 3, "Expected a single argv argument - the Argo OpenAPI spec URL"
     return sys.argv[1]
 
 
 def fetch_openapi_spec(url: str) -> dict:
-    """Fetches the OpenAPI specification at the given URI"""
+    """Fetches the OpenAPI specification at the given URI."""
     response = requests.get(url)
     if response.ok:
         return response.json()
@@ -250,7 +246,7 @@ def fetch_openapi_spec(url: str) -> dict:
 
 
 def get_consumes(payload: dict) -> str:
-    """Gets the OpenAPI `consumes` field"""
+    """Gets the OpenAPI `consumes` field."""
     consumes = payload.get("consumes")
     assert isinstance(consumes, list), f"Expected `consumes` to be of list type, received {type(consumes)}"
     assert len(consumes) == 1, "Expected `consumes` payload to contain a single item e.g. 'application/json'"
@@ -258,7 +254,7 @@ def get_consumes(payload: dict) -> str:
 
 
 def get_produces(payload: dict) -> str:
-    """Gets the OpenAPI `produces` field"""
+    """Gets the OpenAPI `produces` field."""
     produces = payload.get("produces")
     assert isinstance(produces, list), f"Expected `produces` to be of list type, received {type(produces)}"
     assert len(produces) == 1, "Expected `produces` payload to contain a single item e.g. 'application/json'"
@@ -266,25 +262,25 @@ def get_produces(payload: dict) -> str:
 
 
 def get_paths(payload: dict) -> dict:
-    """Gets the OpenAPI `paths` field"""
+    """Gets the OpenAPI `paths` field."""
     paths = payload.get("paths")
     assert isinstance(paths, dict), f"Expected `paths` to be of dictionary type, received {type(paths)}"
     return paths
 
 
 def camel_to_snake(s: str) -> str:
-    """Converts the given string from camel case to snake cased"""
+    """Converts the given string from camel case to snake cased."""
     return re.sub(r"(?<!^)(?=[A-Z])", "_", s)
 
 
 def snake_to_camel(s: str) -> str:
-    """Converts the given string from snake case to camel cased"""
+    """Converts the given string from snake case to camel cased."""
     components = s.split("_")
     return components[0] + "".join(x.title() for x in components[1:])
 
 
 def parse_operation_id(operation_id: str) -> str:
-    """Parses the given operation ID into a service endpoint definition"""
+    """Parses the given operation ID into a service endpoint definition."""
     if "UID" in operation_id:
         operation_id = operation_id.replace("UID", "Uid")
     operation = operation_id.split("_")[-1]
@@ -298,7 +294,6 @@ def get_class(cls_name: str, models_type: str) -> type:
     This intentionally has an empty return to catch cases when the class it not found. This will cause dep
     code to fail so users know service generation failed.
     """
-
     switch = {"workflows": workflows_models, "events": events_models}
     modules = inspect.getmembers(switch.get(models_type))
     for module in modules:
@@ -308,14 +303,14 @@ def get_class(cls_name: str, models_type: str) -> type:
 
 
 def parse_builtin(f: str) -> str:
-    """Parses built in statements to dunder representations"""
+    """Parses built in statements to dunder representations."""
     if f in dir(builtins) or f in ["continue", "pass", "in"]:
         return f"{f}_"
     return f
 
 
 def parse_parameter(parameter: dict, models_type: str) -> Parameter:
-    """Parses the given dictionary representation of a `Parameter` into a proper `Parameter` type based on model type"""
+    """Parses the given dictionary of a `Parameter` into a proper `Parameter` type based on model type."""
     openapi_type_switch = {
         "string": str,
         "number": float,
@@ -355,7 +350,7 @@ def parse_parameter(parameter: dict, models_type: str) -> Parameter:
 
 
 def parse_response(parameter: dict) -> Response:
-    """Parses the return parameter into a proper `Response`"""
+    """Parses the return parameter into a proper `Response`."""
     responses = parameter.get("responses")
     ok_resp = responses.get("200")
 
@@ -379,7 +374,7 @@ def get_endpoints(
     consumes: str = "application/json",
     produces: str = "application/json",
 ) -> List[ServiceEndpoint]:
-    """Assembles a series of endpoints for the service definition"""
+    """Assembles a series of endpoints for the service definition."""
     switch = {
         "workflows": ["events", "event", "eventsource", "sensor"],
         "events": ["workflow", "workflows"],
@@ -404,7 +399,7 @@ def get_endpoints(
                     empty_param = True
                 endpoint_params.append(param)
             response = parse_response(params)
-            summary = params.get("summary")
+            summary = params.get("summary", "API documentation.")
             if empty_param:
                 continue  # skip this endpoint
 
@@ -430,9 +425,9 @@ def get_endpoints(
 
 
 def get_service_def() -> str:
-    """Assembles the service definition string/code representation"""
+    """Assembles the service definition string/code representation."""
     return """
-# [DO NOT MODIFY] Auto-generated by `hera.scripts.service.py`  
+\"\"\"[DO NOT MODIFY] Auto-generated by `hera.scripts.service.py`\"\"\"
 from urllib.parse import urljoin
 import requests
 from hera.{module}.models import {imports}
@@ -441,18 +436,19 @@ from hera.exceptions import exception_from_server_response
 from typing import Optional, cast
 
 def valid_host_scheme(host: str) -> bool:
-    \"\"\"Validates the the given `host` starts with either `http` or `https`\"\"\"
+    \"\"\"Validates the the given `host` starts with either `http` or `https`.\"\"\"
     return host.startswith("http://") or host.startswith("https://")    
 
 class {models_type}Service:
-    \"\"\"The core {doc_models_type} service for interacting with the Argo server\"\"\"
+    \"\"\"The core {doc_models_type} service for interacting with the Argo server.\"\"\"
     def __init__(
         self,
         host: Optional[str] = None,
         verify_ssl: Optional[bool] = None,
         token: Optional[str] = None,
         namespace: Optional[str] = None,
-    ):
+    ) -> None:
+        \"\"\"{models_type} service constructor.\"\"\"
         self.host = cast(str, host or global_config.host)
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
         self.token = token or global_config.token
@@ -461,7 +457,7 @@ class {models_type}Service:
 
 
 def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type: str) -> str:
-    """Makes the service definitions based on the given endpoints for the given model type"""
+    """Makes the service definitions based on the given endpoints for the given model type."""
     result = service_def
     for endpoint in endpoints:
         result = result + f"{endpoint}\n"
@@ -470,13 +466,13 @@ def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type
 
 
 def write_service(service: str, path: Path) -> None:
-    """Writes the service code to the specified path"""
+    """Writes the service code to the specified path."""
     with open(str(path), "w+") as f:
         f.write(service)
 
 
 def get_imports(endpoints: List[ServiceEndpoint]) -> List[str]:
-    """Assembles a series of imports, which are dependencies of the given endpoints"""
+    """Assembles a series of imports, which are dependencies of the given endpoints."""
     result = []
     builtins = dir(__builtins__)
     for endpoint in endpoints:
@@ -514,8 +510,6 @@ if __name__ == "__main__":
 
     if models_type == "workflows":
         result = result.replace("LogEntry", "V1alpha1LogEntry")
-    elif models_type == "events":
-        result = result.replace("LogEntry", "LogEntry")
 
     path = Path(__name__).parent / f"src/hera/{models_type}/service.py"
     write_service(result, path)

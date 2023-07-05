@@ -1,3 +1,4 @@
+"""The operator module holds implementations of objects such as the operator enum."""
 from enum import Enum
 
 
@@ -6,9 +7,8 @@ class Operator(Enum):
 
     This can be used on tasks that execute conditionally based on the output of another task.
 
-    Notes
-    -----
-    The task that outputs its result needs to do so using stdout. See `examples` for a sample workflow.
+    Notes:
+        The task that outputs its result needs to do so using stdout. See `examples` for a sample workflow.
     """
 
     does_not_exist = "DoesNotExist"
@@ -28,7 +28,8 @@ class Operator(Enum):
     and_ = "&&"
     starts_with = "=~"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Assembles the `value` representation of the enum and returns it as a string."""
         return str(self.value)
 
 

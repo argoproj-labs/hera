@@ -61,7 +61,8 @@ with Workflow(
         outputs=[
             Artifact(
                 name="result",
-                from_expression="steps['flip-coin'].outputs.result == 'heads' ? steps.heads.outputs.artifacts.result : steps.tails.outputs.artifacts.result",
+                from_expression="steps['flip-coin'].outputs.result == 'heads' ? "
+                "steps.heads.outputs.artifacts.result : steps.tails.outputs.artifacts.result",
             ),
         ],
     ) as s:

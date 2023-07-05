@@ -1,10 +1,10 @@
-"""Module that holds the underlying base Pydantic models for Hera objects"""
+"""Module that holds the underlying base Pydantic models for Hera objects."""
 from pydantic import BaseModel as PyBaseModel
 
 
 class BaseModel(PyBaseModel):
     class Config:
-        """Config class dictates the behavior of the underlying Pydantic model
+        """Config class dictates the behavior of the underlying Pydantic model.
 
         See Pydantic documentation for more info.
         """
