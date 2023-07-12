@@ -3,14 +3,14 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from hera.workflows.exceptions import InvalidTemplateCall
 
+from hera.workflows.container import Container
+from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.models import WorkflowCreateRequest
+from hera.workflows.parameter import Parameter
+from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import NAME_LIMIT, Workflow
-from hera.workflows.script import script
-from hera.workflows.container import Container
-from hera.workflows.parameter import Parameter
 
 
 def test_workflow_name_validators():
@@ -101,4 +101,4 @@ def test_workflow_callable_container_raises_error():
             whalesay()
 
     # THEN InvalidTemplateCall raised
-    assert "Callable Template 'whalesay' is not under a Workflow, Steps, Parallel, or DAG context" in str(e.value)
+    assert "Callable Template 'whalesay' is not callable under a Workflow" in str(e.value)

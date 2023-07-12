@@ -644,8 +644,9 @@ class CallableTemplateMixin(ArgumentsMixin):
                 # Notes on callable templates under a Workflow:
                 # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
                 #   template to the workflow and return None.
-                # * Containers are already added when initialized under the Workflow context so a called Container doesn't
-                #   make sense in that context, so we will raise the InvalidTemplateCall exception later.
+                # * Containers, ContainerSets and Data objects (i.e. subclasses of CallableTemplateMixin) are already
+                #   added when initialized under the Workflow context so a callable doesn't make sense in that context,
+                #   so we raise an InvalidTemplateCall exception.
                 # * We do not currently validate the added templates to stop a user adding the same template multiple times,
                 #   which can happen if "calling" the same script multiple times to add it to the workflow, or initializing
                 #   a second `Container` exactly like the first.
@@ -653,6 +654,9 @@ class CallableTemplateMixin(ArgumentsMixin):
                     _context.add_sub_node(self)
                     return None
 
+                raise InvalidTemplateCall(
+                    f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
+                )
             if isinstance(_context.pieces[-1], (Steps, Parallel)):
                 return Step(*args, template=self, **kwargs)
 
