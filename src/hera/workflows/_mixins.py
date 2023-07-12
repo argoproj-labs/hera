@@ -639,27 +639,28 @@ class CallableTemplateMixin(ArgumentsMixin):
         from hera.workflows.task import Task
         from hera.workflows.workflow import Workflow
 
-        if isinstance(_context.pieces[-1], Workflow):
-            # Notes on callable templates under a Workflow:
-            # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
-            #   template to the workflow and return None.
-            # * Containers are already added when initialized under the Workflow context so a called Container doesn't
-            #   make sense in that context, so we will raise the InvalidTemplateCall exception later.
-            # * We do not currently validate the added templates to stop a user adding the same template multiple times,
-            #   which can happen if "calling" the same script multiple times to add it to the workflow, or initializing
-            #   a second `Container` exactly like the first.
-            if isinstance(self, Script):
-                _context.add_sub_node(self)
-                return None
+        if _context.pieces:
+            if isinstance(_context.pieces[-1], Workflow):
+                # Notes on callable templates under a Workflow:
+                # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
+                #   template to the workflow and return None.
+                # * Containers are already added when initialized under the Workflow context so a called Container doesn't
+                #   make sense in that context, so we will raise the InvalidTemplateCall exception later.
+                # * We do not currently validate the added templates to stop a user adding the same template multiple times,
+                #   which can happen if "calling" the same script multiple times to add it to the workflow, or initializing
+                #   a second `Container` exactly like the first.
+                if isinstance(self, Script):
+                    _context.add_sub_node(self)
+                    return None
 
-        if isinstance(_context.pieces[-1], (Steps, Parallel)):
-            return Step(*args, template=self, **kwargs)
+            if isinstance(_context.pieces[-1], (Steps, Parallel)):
+                return Step(*args, template=self, **kwargs)
 
-        if isinstance(_context.pieces[-1], DAG):
-            return Task(*args, template=self, **kwargs)
+            if isinstance(_context.pieces[-1], DAG):
+                return Task(*args, template=self, **kwargs)
 
         raise InvalidTemplateCall(
-            f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"
+            f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
         )
 
     def _get_arguments(self, **kwargs) -> List:
