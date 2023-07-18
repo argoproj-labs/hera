@@ -15,7 +15,7 @@ def test_for_missing_examples():
         file["path"] for file in repo_json["tree"] if "examples/" in file["path"] and ".yaml" in file["path"]
     ]
 
-    argo_examples = map(lambda file: file[len("examples/") :][: len(".yaml")], argo_examples)
+    argo_examples = map(lambda file: file[len("examples/") :][: -len(".yaml")], argo_examples)
 
     hera_examples = [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)]
     hera_examples = list(map(lambda file: file.replace("__", "/").replace("_", "-"), hera_examples))
@@ -27,4 +27,6 @@ def test_for_missing_examples():
         for example in missing
     }
 
-    assert len(missing) == 0, f"Missing {len(missing)} examples: {json.dumps(missing_examples, indent=2)}"
+    if len(missing) > 0:
+        print(json.dumps(missing_examples, indent=2))
+        assert False, f"Missing {len(missing)} examples"
