@@ -28,5 +28,8 @@ def test_for_missing_examples():
     }
 
     if len(missing) > 0:
-        print(json.dumps(missing_examples, indent=2))
+        print("| Name | Link |")
+        print("|------|------|")
+        for name, link in missing_examples.items():
+            print(f"| {name} | {link} |")
         assert False, f"Missing {len(missing)} examples"
