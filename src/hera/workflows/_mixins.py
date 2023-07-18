@@ -26,7 +26,7 @@ from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
-from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
+from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
     HTTP,
@@ -600,16 +600,17 @@ class CallableTemplateMixin(ArgumentsMixin):
     """`CallableTemplateMixin` provides the ability to 'call' the template like a regular Python function.
 
     The callable template implements the `__call__` method for the inheritor. The `__call__` method supports invoking
-    the template as a regular Python function. The call must be executed within an active context, such as a `DAG` or
-    `Steps` since the call returns either a `Step` or a `Task` depending on the active context (`Step` for `Steps` and
-    `Task` for `DAG`, respectively). Note that `Steps` also supports calling templates in a parallel steps context
-    via using `Steps(...).parallel()`. When the call is executed and the template does not exist on the active
-    context, i.e. the workflow, it is automatically added for the user. Note that invoking the same template multiple
-    times does *not* result in the creation/addition of the same template to the active context/workflow. Rather, a
-    union is performed, so space is saved for users on the templates field and templates are not duplicated.
+    the template as a regular Python function. The call must be executed within an active context, which is a
+    `Workflow`, `DAG` or `Steps` context since the call optionally returns a `Step` or a `Task` depending on the active
+    context (`None` for `Workflow`, `Step` for `Steps` and `Task` for `DAG`). Note that `Steps` also supports calling
+    templates in a parallel steps context via using `Steps(...).parallel()`. When the call is executed and the template
+    does not exist on the active context, i.e. the workflow, it is automatically added for the user. Note that invoking
+    the same template multiple times does *not* result in the creation/addition of the same template to the active
+    context/workflow. Rather, a union is performed, so space is saved for users on the templates field and templates are
+    not duplicated.
     """
 
-    def __call__(self, *args, **kwargs) -> Union[Step, Task]:
+    def __call__(self, *args, **kwargs) -> Union[None, Step, Task]:
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 
@@ -632,21 +633,39 @@ class CallableTemplateMixin(ArgumentsMixin):
         # the step/task will miss adding them when building the final arguments
         kwargs["arguments"] = arguments
 
-        try:
-            from hera.workflows.steps import Step
+        from hera.workflows.dag import DAG
+        from hera.workflows.script import Script
+        from hera.workflows.steps import Parallel, Step, Steps
+        from hera.workflows.task import Task
+        from hera.workflows.workflow import Workflow
 
-            return Step(*args, template=self, **kwargs)
-        except InvalidType:
-            pass
+        if _context.pieces:
+            if isinstance(_context.pieces[-1], Workflow):
+                # Notes on callable templates under a Workflow:
+                # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
+                #   template to the workflow and return None.
+                # * Containers, ContainerSets and Data objects (i.e. subclasses of CallableTemplateMixin) are already
+                #   added when initialized under the Workflow context so a callable doesn't make sense in that context,
+                #   so we raise an InvalidTemplateCall exception.
+                # * We do not currently validate the added templates to stop a user adding the same template multiple times,
+                #   which can happen if "calling" the same script multiple times to add it to the workflow, or initializing
+                #   a second `Container` exactly like the first.
+                if isinstance(self, Script):
+                    _context.add_sub_node(self)
+                    return None
 
-        try:
-            from hera.workflows.task import Task
+                raise InvalidTemplateCall(
+                    f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
+                )
+            if isinstance(_context.pieces[-1], (Steps, Parallel)):
+                return Step(*args, template=self, **kwargs)
 
-            return Task(*args, template=self, **kwargs)
-        except InvalidType:
-            pass
+            if isinstance(_context.pieces[-1], DAG):
+                return Task(*args, template=self, **kwargs)
 
-        raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
+        raise InvalidTemplateCall(
+            f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
+        )
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call."""

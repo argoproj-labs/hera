@@ -37,8 +37,7 @@ async def abuild_workflow_set(event):
 
 
 def test_async_context():
-    """
-    In this test, we create 2 workflows using async functions and make sure the context isn't leaking.
+    """In this test, we create 2 workflows using async functions and make sure the context isn't leaking.
 
     In the middle of the first one, we pause by waiting thus never calling the context exit() function;
     meanwhile the 2nd function will create another workflow, then unblock the first one which will resume.
@@ -66,9 +65,7 @@ def test_async_context():
 
 
 def test_sync_context():
-    """
-    Context is not leaking between 2 successive sync workflow creations
-    """
+    """Context is not leaking between 2 successive sync workflow creations."""
     with Workflow(
         generate_name="w0-",
         entrypoint="steps",

@@ -1,9 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: task-exit-handler-
+  generateName: hello-world-
 spec:
-  entrypoint: s
+  arguments:
+    parameters:
+    - name: s
+      value: world
+  entrypoint: hello
   templates:
   - inputs:
       parameters:

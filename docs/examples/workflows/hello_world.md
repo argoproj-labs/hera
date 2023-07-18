@@ -16,8 +16,12 @@
         print("Hello, {s}!".format(s=s))
 
 
-    with Workflow(generate_name="task-exit-handler-", entrypoint="s") as w:
-        hello(s="hello")
+    with Workflow(
+        generate_name="hello-world-",
+        entrypoint="hello",
+        arguments={"s": "world"},
+    ) as w:
+        hello()
     ```
 
 === "YAML"
@@ -26,9 +30,13 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: task-exit-handler-
+      generateName: hello-world-
     spec:
-      entrypoint: s
+      arguments:
+        parameters:
+        - name: s
+          value: world
+      entrypoint: hello
       templates:
       - inputs:
           parameters:
