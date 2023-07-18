@@ -1,4 +1,3 @@
-import json
 import pkgutil
 
 import examples.workflows.upstream as hera_upstream_examples
@@ -24,12 +23,28 @@ def test_for_missing_examples():
 
     missing_examples = {
         example: f"https://github.com/argoproj/argo-workflows/blob/master/examples/{example}.yaml"
-        for example in missing
+        for example in sorted(missing)
     }
 
+    missing_examples_header = "## List of missing examples"
+
+    lines = []
+    with open("docs/examples/workflows-examples.md", "r", encoding="utf-8") as examples_file:
+        while True:
+            line = examples_file.readline()
+            if not line or missing_examples_header in line:
+                break
+            lines.append(line)
+
     if len(missing) > 0:
-        print("| Example |")
-        print("|---------|")
+        lines.append(missing_examples_header)
+        lines.append("\n")
+        lines.append("| Example |\n")
+        lines.append("|---------|\n")
         for name, link in missing_examples.items():
-            print(f"| [{name}]({link}) |")
+            lines.append(f"| [{name}]({link}) |\n")
+
+        with open("docs/examples/workflows-examples.md", "w", encoding="utf-8") as examples_file:
+            examples_file.writelines(lines)
+
         assert False, f"Missing {len(missing)} examples"
