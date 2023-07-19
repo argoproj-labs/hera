@@ -17,7 +17,12 @@ from hera.workflows.models import (
 from hera.workflows.task import Task
 
 
-class DAG(IOMixin, TemplateMixin, CallableTemplateMixin, ContextMixin):
+class DAG(
+    IOMixin,
+    TemplateMixin,
+    CallableTemplateMixin,
+    ContextMixin,
+):
     """A DAG template invocator is used to define Task dependencies as an acyclic graph.
 
     DAG implements the contextmanager interface so allows usage of `with`, under which any

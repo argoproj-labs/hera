@@ -7,6 +7,7 @@ from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
+    CallableTemplateMixin,
     ContextMixin,
     IOMixin,
     ItemMixin,
@@ -103,9 +104,10 @@ class Parallel(
 
 
 class Steps(
-    ContextMixin,
     IOMixin,
     TemplateMixin,
+    CallableTemplateMixin,
+    ContextMixin,
 ):
     """A Steps template invocator is used to define a sequence of steps which can run sequentially or in parallel.
 
