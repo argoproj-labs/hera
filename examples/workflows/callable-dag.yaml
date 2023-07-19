@@ -57,6 +57,7 @@ spec:
           parameters:
           - name: my-dag-input
             value: call-2
+        depends: call-1
         name: call-2
         template: my-dag
     name: calling-dag

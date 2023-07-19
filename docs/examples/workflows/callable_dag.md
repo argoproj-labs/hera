@@ -25,8 +25,9 @@
             hello(name="hello-2", arguments={"name": "hello-2-{{inputs.parameters.my-dag-input}}"})
 
         with DAG(name="calling-dag") as d:
-            my_dag(name="call-1", arguments={"my-dag-input": "call-1"})
-            my_dag(name="call-2", arguments={"my-dag-input": "call-2"})
+            t1 = my_dag(name="call-1", arguments={"my-dag-input": "call-1"})
+            t2 = my_dag(name="call-2", arguments={"my-dag-input": "call-2"})
+            t1 >> t2
     ```
 
 === "YAML"
@@ -91,6 +92,7 @@
               parameters:
               - name: my-dag-input
                 value: call-2
+            depends: call-1
             name: call-2
             template: my-dag
         name: calling-dag

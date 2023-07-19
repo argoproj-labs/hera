@@ -15,5 +15,6 @@ with Workflow(
         hello(name="hello-2", arguments={"name": "hello-2-{{inputs.parameters.my-dag-input}}"})
 
     with DAG(name="calling-dag") as d:
-        my_dag(name="call-1", arguments={"my-dag-input": "call-1"})
-        my_dag(name="call-2", arguments={"my-dag-input": "call-2"})
+        t1 = my_dag(name="call-1", arguments={"my-dag-input": "call-1"})
+        t2 = my_dag(name="call-2", arguments={"my-dag-input": "call-2"})
+        t1 >> t2
