@@ -3,23 +3,23 @@ The first task, writer, creates a file located at `/file` containing a message. 
 task, consumer, takes this artifact, places it at its own `/file` path, and print out the content.
 """
 
-from hera.workflows import DAG, Artifact, Workflow, script
+from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Workflow, script
 
 
-@script(outputs=Artifact(name="test", path="/file"))
+@script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
 def writer():
-    with open("/file", "w+") as f:
+    with open("/tmp/file", "w+") as f:
         f.write("Hello, world!")
 
 
-@script(inputs=Artifact(name="test", path="/file"))
+@script(inputs=Artifact(name="in-art", path="/tmp/file"))
 def consumer():
-    with open("/file", "r") as f:
+    with open("/tmp/file", "r") as f:
         print(f.readlines())  # prints `Hello, world!` to `stdout`
 
 
 with Workflow(generate_name="artifact-", entrypoint="d") as w:
     with DAG(name="d"):
         w_ = writer()
-        c = consumer(arguments={"test": w_.get_artifact("test")})
+        c = consumer(arguments=w_.get_artifact("out-art").as_name("in-art"))
         w_ >> c
