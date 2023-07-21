@@ -10,12 +10,10 @@ spec:
       - name: writer
         template: writer
       - arguments:
-          parameters:
-          - name: test
-            value: '{"name": "test", "archive": null, "archive_logs": null, "artifact_gc":
-              null, "deleted": null, "from_": "{{tasks.writer.outputs.artifacts.test}}",
-              "from_expression": null, "global_name": null, "mode": null, "path":
-              "/file", "recurse_mode": null, "sub_path": null}'
+          artifacts:
+          - from: '{{tasks.writer.outputs.artifacts.out-art}}'
+            name: in-art
+            path: /tmp/file
         depends: writer
         name: consumer
         template: consumer
@@ -23,22 +21,24 @@ spec:
   - name: writer
     outputs:
       artifacts:
-      - name: test
-        path: /file
+      - archive:
+          none: {}
+        name: out-art
+        path: /tmp/file
     script:
       command:
       - python
       image: python:3.8
-      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/file',\
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/file',\
         \ 'w+') as f:\n    f.write('Hello, world!')"
   - inputs:
       artifacts:
-      - name: test
-        path: /file
+      - name: in-art
+        path: /tmp/file
     name: consumer
     script:
       command:
       - python
       image: python:3.8
-      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/file',\
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/file',\
         \ 'r') as f:\n    print(f.readlines())"
