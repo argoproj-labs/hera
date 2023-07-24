@@ -114,9 +114,47 @@ global_config.experimental_features["script_runner"] = True
 
 
 #### Script Annotations
-An annotation based system for simplifying script parameter creation, as seen in the [script annotations example](../../examples/workflows/script_annotations_combined_new.md)
+An annotation based system for simplifying script parameter creation, as seen in the [script annotations example](../../examples/workflows/script_annotations_combined_new.md).
 
-It can be enabled by using 
+Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
+parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
+Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
+`hera__script_annotations` will be added to the Script template.
+Script annotations also work with the regular `InlineScriptConstructor` for
+generating valid template parameters in the yaml instead of adding them in the `@script` decorator.
+
+We can avoid duplication of parameter names and default values. See the old version
+
+```python
+@script(
+    inputs=[
+        Parameter(name="an_int", description="an_int parameter", default=1, enum=[1, 2, 3]), 
+        Parameter(name="a_bool", description="a_bool parameter", default=True, enum=[True, False]), 
+        Parameter(name="a_string", description="a_string parameter", default="a", enum=["a", "b", "c"])
+    ]
+)
+def echo_all(an_int=1, a_bool=True, a_string="a"):
+    print(an_int)
+    print(a_bool)
+    print(a_string)
+```
+
+vs the new one:
+
+```python
+@script()
+def echo_all(
+    an_int: Annotated[int, Parameter(description="an_int parameter", default=1, enum=[1, 2, 3])], 
+    a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True, enum=[True, False])], 
+    a_string: Annotated[str, Parameter(description="a_string parameter", default="a", enum=["a", "b", "c"])]
+):
+    print(an_int)
+    print(a_bool)
+    print(a_string)
+```
+
+
+This feature can be enabled by setting the `experimental_feature` flag `script_annotations`
 
 ```py
 global_config.experimental_features["script_annotations"] = True

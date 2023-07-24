@@ -86,7 +86,7 @@ def _is_str_kwarg_of(key: str, f: Callable):
 
 def _map_keys(function: Callable, kwargs: dict):
     """Change the kwargs's keys to use the python name instead of the parameter name which could be kebab case."""
-    if os.environ.get("script_annotations", None) is not None:
+    if os.environ.get("hera__script_annotations", None) is not None:
         return {key.replace("-", "_"): value for key, value in kwargs.items()}
 
     mapped_kwargs = {}

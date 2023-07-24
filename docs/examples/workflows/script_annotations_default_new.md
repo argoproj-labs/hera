@@ -81,9 +81,6 @@
         script:
           command:
           - python
-          env:
-          - name: script_annotations
-            value: ''
           image: python:3.8
           source: 'import os
 
@@ -107,9 +104,6 @@
         script:
           command:
           - python
-          env:
-          - name: script_annotations
-            value: ''
           image: python:3.8
           source: 'import os
 
@@ -133,9 +127,6 @@
         script:
           command:
           - python
-          env:
-          - name: script_annotations
-            value: ''
           image: python:3.8
           source: 'import os
 

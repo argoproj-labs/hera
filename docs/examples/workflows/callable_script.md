@@ -157,7 +157,7 @@
           command:
           - python
           env:
-          - name: script_annotations
+          - name: hera__script_annotations
             value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
@@ -174,7 +174,7 @@
           command:
           - python
           env:
-          - name: script_annotations
+          - name: hera__script_annotations
             value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
@@ -191,7 +191,7 @@
           command:
           - python
           env:
-          - name: script_annotations
+          - name: hera__script_annotations
             value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
@@ -211,7 +211,7 @@
           command:
           - python
           env:
-          - name: script_annotations
+          - name: hera__script_annotations
             value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
@@ -228,7 +228,7 @@
           command:
           - python
           env:
-          - name: script_annotations
+          - name: hera__script_annotations
             value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'

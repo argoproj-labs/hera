@@ -206,10 +206,13 @@ class Script(
         image_pull_policy = self._build_image_pull_policy()
 
         env = self._build_env()
-        if global_config.experimental_features["script_annotations"]:
+        if (
+            isinstance(self.constructor, RunnerScriptConstructor)
+            and global_config.experimental_features["script_annotations"]
+        ):
             if not env:
                 env = []
-            env.append(EnvVar(name="script_annotations", value=""))
+            env.append(EnvVar(name="hera__script_annotations", value=""))
 
         return self.constructor.transform_script_template_post_build(
             self,
