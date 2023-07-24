@@ -1,3 +1,4 @@
+"""Core collection of Hera mixins that isolate shareable functionality between Hera objects."""
 from __future__ import annotations
 
 import inspect
@@ -25,7 +26,7 @@ from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
-from hera.workflows.exceptions import InvalidTemplateCall, InvalidType
+from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
     HTTP,
@@ -92,6 +93,14 @@ InputsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
+"""`InputsT` is the main type associated with inputs that can be specified in Hera workflows, dags, steps, etc.
+
+This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Inputs`, 
+`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, 
+`hera.workflows.Artifact`), dictionary mappings of parameter names to values (auto-converted by Hera to 
+`hera.workflows.Parameter`), or lists of any of the aforementioned objects.
+"""
+
 OutputsT = Optional[
     Union[
         ModelOutputs,
@@ -99,6 +108,13 @@ OutputsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
     ]
 ]
+"""`OutputsT` is the main type associated with outputs the can be specified in Hera workflows, dags, steps, etc.
+
+This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Outputs`, 
+`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, 
+`hera.workflows.Artifact`),  or lists of the aforementioned objects.
+"""
+
 ArgumentsT = Optional[
     Union[
         ModelArguments,
@@ -106,6 +122,13 @@ ArgumentsT = Optional[
         List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
+"""`ArgumentsT` is the main type associated with arguments that can be used on DAG tasks, steps, etc.
+
+This type enables uses of the Hera auto-generated `hera.workflows.models.Arguments` model, Hera managed models such as 
+`hera.workflows.Parameter`, `hera.workflows.Artifact`, a dictionary mapping of parameter names to values, or a list of
+any of the aforementioned objects.
+"""
+
 MetricsT = Optional[
     Union[
         _BaseMetric,
@@ -116,6 +139,12 @@ MetricsT = Optional[
         ModelMetrics,
     ]
 ]
+"""`MetricsT` is the core Hera type for Prometheus metrics. 
+
+This metrics type enables users to use either auto-generated Hera metrics, lists of auto-generated single metrics, or
+the variations of metrics provided by `hera.workflows.metrics.*`  
+"""
+
 EnvT = Optional[
     Union[
         _BaseEnv,
@@ -124,14 +153,38 @@ EnvT = Optional[
         Dict[str, Any],
     ]
 ]
+"""`EnvT` is the core Hera type for environment variables.
+
+The env type enables setting single valued environment variables, lists of environment variables, or dictionary 
+mappings of env variables names to values, which are automatically parsed by Hera.
+"""
+
 EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, EnvFromSource]]]]
+"""`EnvFromT` is the core Hera type for environment variables derived from Argo/Kubernetes sources.
+
+This env type enables specifying environment variables in base form, as `hera.workflows.env` form, or lists of the 
+aforementioned objects.
+"""
+
 VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolume, _BaseVolume]]]]
+"""`VolumesT` is the core Hera type for volumes. 
+
+This volume type is used to specify the configuration of volumes to be automatically created by Argo/K8s and mounted
+by Hera at specific mount paths in containers.
+"""
+
 TContext = TypeVar("TContext", bound="ContextMixin")
+"""`TContext` is the bounded context controlled by the context mixin that enable context management in workflow/dag"""
+
 THookable = TypeVar("THookable", bound="HookMixin")
+"""`THookable` is the type associated with mixins that provide the ability to apply hooks from the global config"""
 
 
 class HookMixin(BaseMixin):
+    """`HookMixin` provides the ability to dispatch hooks set on the global config to any inheritors."""
+
     def _dispatch_hooks(self: THookable) -> THookable:
+        """Dispatches the global hooks on the current object."""
         output = self
         for hook in global_config._get_pre_build_hooks(output):
             output = hook(output)
@@ -144,24 +197,30 @@ class HookMixin(BaseMixin):
 
 
 class ContextMixin(BaseMixin):
-    def __enter__(self: TContext) -> TContext:
-        """Enter the context of the workflow"""
+    """`ContextMixin` provides the ability to implement context management.
 
+    The mixin implements the `__enter__` and `__exit__` functionality that enables the core `with` clause. The mixin
+    expects that inheritors implement the `_add_sub` functionality, which adds a node defined within the context to the
+    main object context such as `Workflow`, `DAG`, or `ContainerSet`.
+    """
+
+    def __enter__(self: TContext) -> TContext:
+        """Enter the context of the inheritor."""
         _context.enter(self)
         return self
 
     def __exit__(self, *_) -> None:
-        """Leave the context of the workflow.
-
-        This supports using `with Workflow(...)`.
-        """
+        """Leave the context of the inheritor."""
         _context.exit()
 
     def _add_sub(self, node: Any) -> Any:
+        """Adds the supplied node to the context of the inheritor."""
         raise NotImplementedError()
 
 
 class ContainerMixin(BaseMixin):
+    """`ContainerMixin` provides a subset of the fields of a container such as image, probes, etc."""
+
     image: Optional[str] = None
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
@@ -176,6 +235,7 @@ class ContainerMixin(BaseMixin):
     tty: Optional[bool] = None
 
     def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
+        """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
         if self.image_pull_policy is None:
             return None
         elif isinstance(self.image_pull_policy, ImagePullPolicy):
@@ -195,21 +255,26 @@ class ContainerMixin(BaseMixin):
             return ImagePullPolicy[policy_mapper[self.image_pull_policy].name]
         except KeyError as e:
             raise KeyError(
-                f"Supplied image policy {self.image_pull_policy} is not valid. Use one of {ImagePullPolicy.__members__}"
+                f"Supplied image policy {self.image_pull_policy} is not valid. "
+                "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
     @validator("image", pre=True, always=True)
     def _set_image(cls, v):
+        """Validator that sets the image field to the global image unless the image is specified on the container."""
         if v is None:
             return global_config.image
         return v
 
 
 class IOMixin(BaseMixin):
+    """`IOMixin` provides the capabilities of performing I/O between steps via fields such as `inputs`/`outputs`."""
+
     inputs: InputsT = None
     outputs: OutputsT = None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
+        """Processes the `inputs` field and returns a generated `ModelInputs`."""
         if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
@@ -237,11 +302,14 @@ class IOMixin(BaseMixin):
             else:
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
 
+        # returning `None` for `ModelInputs` means the submission to the server will not even have the `inputs` field
+        # set, which saves some space
         if result.parameters is None and result.artifacts is None:
             return None
         return result
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
+        """Processes the `outputs` field and returns a generated `ModelOutputs`."""
         if not self.outputs:
             return None
         elif isinstance(self.outputs, ModelOutputs):
@@ -265,16 +333,21 @@ class IOMixin(BaseMixin):
             else:
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
 
+        # returning `None` for `ModelInputs` means the submission to the server will not even have the `outputs` field
+        # set, which saves some space
         if result.parameters is None and result.artifacts is None:
             return None
         return result
 
 
 class EnvMixin(BaseMixin):
+    """`EnvMixin` provides the ability to set simple env variables along with env variables that are derived."""
+
     env: EnvT = None
     env_from: EnvFromT = None
 
     def _build_env(self) -> Optional[List[EnvVar]]:
+        """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
         if self.env is None:
             return None
 
@@ -288,9 +361,13 @@ class EnvMixin(BaseMixin):
             elif isinstance(e, dict):
                 for k, v in e.items():
                     result.append(EnvVar(name=k, value=v))
-        return result
+
+        # returning `None` for `envs` means the submission to the server will not even have the `envs` field
+        # set, which saves some space
+        return result if result else None
 
     def _build_env_from(self) -> Optional[List[EnvFromSource]]:
+        """Processes the `env_from` field and returns a list of generated `EnvFrom` or `None`."""
         if self.env_from is None:
             return None
 
@@ -301,33 +378,19 @@ class EnvMixin(BaseMixin):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnvFrom):
                 result.append(e.build())
-        return result
 
-    def _build_params_from_env(self) -> Optional[List[Parameter]]:
-        if self.env is None:
-            return None
-
-        params: Optional[List[Parameter]] = None
-        for spec in self.env:
-            if isinstance(spec, Env) and spec.value_from_input is not None:
-                value = (
-                    spec.value_from_input.value
-                    if isinstance(spec.value_from_input, Parameter)
-                    else spec.value_from_input
-                )
-                params = (
-                    [Parameter(name=spec.param_name, value=value)]
-                    if params is None
-                    else params + [Parameter(name=spec.param_name, value=value)]
-                )
-
-        return params
+        # returning `None` for `envs` means the submission to the server will not even have the `env_from` field
+        # set, which saves some space
+        return result if result else None
 
 
 class MetricsMixin(BaseMixin):
+    """`MetricsMixin` provides the ability to set metrics on a n object."""
+
     metrics: MetricsT = None
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
+        """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
         if self.metrics is None or isinstance(self.metrics, ModelMetrics):
             return self.metrics
         elif isinstance(self.metrics, ModelPrometheus):
@@ -343,10 +406,15 @@ class MetricsMixin(BaseMixin):
                 metrics.append(m._build_metric())
             else:
                 metrics.append(m)
-        return ModelMetrics(prometheus=metrics)
+        return ModelMetrics(prometheus=metrics) if metrics else None
 
 
 class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
+    """`TemplateMixin` provides the Argo template fields that are shared between different sub-template fields.
+
+    The supported sub-template fields are `Script`, `Data`, `DAG`, `Resource`, `Container`, `ContainerSet`, etc.
+    """
+
     active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
@@ -377,6 +445,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     tolerations: Optional[List[Toleration]] = None
 
     def _build_sidecars(self) -> Optional[List[UserContainer]]:
+        """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""
         if self.sidecars is None:
             return None
 
@@ -386,12 +455,14 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
         return self.sidecars
 
     def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
+        """Builds the `active_deadline_seconds` field and optionally returns a generated `IntOrString`."""
         if self.active_deadline_seconds is None:
             return None
 
         return IntOrString(__root__=str(self.active_deadline_seconds))
 
     def _build_metadata(self) -> Optional[Metadata]:
+        """Builds the `metadata` field of the template since the `annotations` and `labels` fields are separated."""
         if self.annotations is None and self.labels is None:
             return None
 
@@ -402,19 +473,29 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
 
 
 class ResourceMixin(BaseMixin):
+    """`ResourceMixin` provides the capability to set resources such as compute requirements like CPU, GPU, etc."""
+
     resources: Optional[Union[ResourceRequirements, Resources]] = None
 
     def _build_resources(self) -> Optional[ResourceRequirements]:
+        """Parses the resources and returns a generated `ResourceRequirements` object."""
         if self.resources is None or isinstance(self.resources, ResourceRequirements):
             return self.resources
-
         return self.resources.build()
 
 
 class VolumeMixin(BaseMixin):
+    """`VolumeMixin` provides the ability to set volumes on an inheriting resource.
+
+    Note that *any* volumes set on the `volumes` field automatically get an associated persistent volume claim
+    constructed and set on the workflow. This way users do not have to set the PVC themselves. However, clients of the
+    mixin should be careful to *not* generate multiple PVCs for the same volume.
+    """
+
     volumes: VolumesT = None
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
+        """Processes the `volumes` and creates an optional list of generates `Volume`s."""
         if self.volumes is None:
             return None
 
@@ -427,6 +508,7 @@ class VolumeMixin(BaseMixin):
         return result or None
 
     def _build_persistent_volume_claims(self) -> Optional[List[PersistentVolumeClaim]]:
+        """Generates the list of persistent volume claims to associate with the set `volumes`."""
         if self.volumes is None:
             return None
 
@@ -434,16 +516,21 @@ class VolumeMixin(BaseMixin):
         volumes_with_pv_claims = [v for v in volumes if isinstance(v, Volume)]
         if not volumes_with_pv_claims:
             return None
-
-        claims = [v._build_persistent_volume_claim() for v in volumes_with_pv_claims]
-        return claims or None
+        return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims] or None
 
 
 class VolumeMountMixin(VolumeMixin):
+    """`VolumeMountMixin` supports setting `volume_devices` and `volume_mounts` on the inheritor.
+
+    Devices and mounts are approaches for mounting existing volume resources from a cluster on the job that is
+    created via inheriting from this mixin.
+    """
+
     volume_devices: Optional[List[VolumeDevice]] = None
     volume_mounts: Optional[List[VolumeMount]] = None
 
     def _build_volume_mounts(self) -> Optional[List[VolumeMount]]:
+        """Processes the `volume_mounts` field and generates an optional list of `VolumeMount`s."""
         # while it's possible for `volume_mounts` to be `None`, this has to check that `volumes` is also `None` since
         # it's possible that Hera can find volume mounts to generate for the user if there are any volumes set
         if self.volume_mounts is None and self.volumes is None:
@@ -471,9 +558,12 @@ class VolumeMountMixin(VolumeMixin):
 
 
 class ArgumentsMixin(BaseMixin):
+    """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object."""
+
     arguments: ArgumentsT = None
 
     def _build_arguments(self) -> Optional[ModelArguments]:
+        """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
         if self.arguments is None:
             return None
         elif isinstance(self.arguments, ModelArguments):
@@ -499,13 +589,28 @@ class ArgumentsMixin(BaseMixin):
                     [arg.as_argument()] if result.parameters is None else result.parameters + [arg.as_argument()]
                 )
 
+        # returning `None` for `Arguments` means the submission to the server will not even have the
+        # `arguments` field set, which saves some payload
         if result.parameters is None and result.artifacts is None:
             return None
         return result
 
 
 class CallableTemplateMixin(ArgumentsMixin):
-    def __call__(self, *args, **kwargs) -> Union[Step, Task]:
+    """`CallableTemplateMixin` provides the ability to 'call' the template like a regular Python function.
+
+    The callable template implements the `__call__` method for the inheritor. The `__call__` method supports invoking
+    the template as a regular Python function. The call must be executed within an active context, which is a
+    `Workflow`, `DAG` or `Steps` context since the call optionally returns a `Step` or a `Task` depending on the active
+    context (`None` for `Workflow`, `Step` for `Steps` and `Task` for `DAG`). Note that `Steps` also supports calling
+    templates in a parallel steps context via using `Steps(...).parallel()`. When the call is executed and the template
+    does not exist on the active context, i.e. the workflow, it is automatically added for the user. Note that invoking
+    the same template multiple times does *not* result in the creation/addition of the same template to the active
+    context/workflow. Rather, a union is performed, so space is saved for users on the templates field and templates are
+    not duplicated.
+    """
+
+    def __call__(self, *args, **kwargs) -> Union[None, Step, Task]:
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
 
@@ -528,25 +633,42 @@ class CallableTemplateMixin(ArgumentsMixin):
         # the step/task will miss adding them when building the final arguments
         kwargs["arguments"] = arguments
 
-        try:
-            from hera.workflows.steps import Step
+        from hera.workflows.dag import DAG
+        from hera.workflows.script import Script
+        from hera.workflows.steps import Parallel, Step, Steps
+        from hera.workflows.task import Task
+        from hera.workflows.workflow import Workflow
 
-            return Step(*args, template=self, **kwargs)
-        except InvalidType:
-            pass
+        if _context.pieces:
+            if isinstance(_context.pieces[-1], Workflow):
+                # Notes on callable templates under a Workflow:
+                # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
+                #   template to the workflow and return None.
+                # * Containers, ContainerSets and Data objects (i.e. subclasses of CallableTemplateMixin) are already
+                #   added when initialized under the Workflow context so a callable doesn't make sense in that context,
+                #   so we raise an InvalidTemplateCall exception.
+                # * We do not currently validate the added templates to stop a user adding the same template multiple times,
+                #   which can happen if "calling" the same script multiple times to add it to the workflow, or initializing
+                #   a second `Container` exactly like the first.
+                if isinstance(self, Script):
+                    _context.add_sub_node(self)
+                    return None
 
-        try:
-            from hera.workflows.task import Task
+                raise InvalidTemplateCall(
+                    f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
+                )
+            if isinstance(_context.pieces[-1], (Steps, Parallel)):
+                return Step(*args, template=self, **kwargs)
 
-            return Task(*args, template=self, **kwargs)
-        except InvalidType:
-            pass
+            if isinstance(_context.pieces[-1], DAG):
+                return Task(*args, template=self, **kwargs)
 
-        raise InvalidTemplateCall("Container is not under a Steps, Parallel, or DAG context")
+        raise InvalidTemplateCall(
+            f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
+        )
 
     def _get_arguments(self, **kwargs) -> List:
-        """Returns a list of arguments from the kwargs given to the template call"""
-
+        """Returns a list of arguments from the kwargs given to the template call."""
         # these are the already set parameters. If a user has already set a parameter argument, then Hera
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
@@ -559,10 +681,12 @@ class CallableTemplateMixin(ArgumentsMixin):
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
+        """Returns the set of parameter names that are currently set on the mixin inheritor."""
         parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
         return {p.name for p in parameters}
 
     def _get_artifact_names(self, arguments: List) -> Set[str]:
+        """Returns the set of artifact names that are currently set on the mixin inheritor."""
         artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
         return {a.name for a in artifacts}
 
@@ -586,7 +710,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         source: Callable
             The source function to infer the arguments from.
 
-        Returns
+        Returns:
         -------
         List[Parameter]
             The list of inferred arguments to set.
@@ -614,7 +738,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         items: List[Any]
             The items to infer the arguments from.
 
-        Returns
+        Returns:
         -------
         List[Parameter]
             The list of inferred arguments to set.
@@ -629,9 +753,15 @@ class CallableTemplateMixin(ArgumentsMixin):
 
 
 class ParameterMixin(BaseMixin):
+    """`ParameterMixin` supports the usage of `with_param` on inheritors."""
+
     with_param: Optional[Any] = None  # this must be a serializable object, or `hera.workflows.parameter.Parameter`
 
     def _build_with_param(self) -> Optional[str]:
+        """Build the `with_param` field and returns the corresponding `str`.
+
+        The string encodes what to parallelize a process over.
+        """
         if self.with_param is None:
             return None
 
@@ -643,9 +773,20 @@ class ParameterMixin(BaseMixin):
 
 
 class ItemMixin(BaseMixin):
-    with_items: Optional[List[Any]] = None  # this must composed of serializable objects
+    """Add `with_items` capability for inheritors, which supports parallelism over supplied items.
+
+    Notes:
+        The items passed in `with_items` must be serializable objects
+    """
+
+    with_items: Optional[List[Any]] = None
 
     def _build_with_items(self) -> Optional[List[Item]]:
+        """Process the `with_items` field and returns an optional list of corresponding `Item`s.
+
+        Notes:
+            Tthese `Item`s contain the serialized version of the supplied items/values.
+        """
         if self.with_items is None:
             return None
 
@@ -671,7 +812,31 @@ class ItemMixin(BaseMixin):
 
 
 class EnvIOMixin(EnvMixin, IOMixin):
+    """`EnvIOMixin` provides the capacity to use environment variables."""
+
+    def _build_params_from_env(self) -> Optional[List[Parameter]]:
+        """Assemble a list of any environment variables that are set to obtain values from `Parameter`s."""
+        if self.env is None:
+            return None
+
+        params: Optional[List[Parameter]] = None
+        for spec in self.env:
+            if isinstance(spec, Env) and spec.value_from_input is not None:
+                value = (
+                    spec.value_from_input.value
+                    if isinstance(spec.value_from_input, Parameter)
+                    else spec.value_from_input
+                )
+                params = (
+                    [Parameter(name=spec.param_name, value=value)]
+                    if params is None
+                    else params + [Parameter(name=spec.param_name, value=value)]
+                )
+
+        return params if params else None
+
     def _build_inputs(self) -> Optional[ModelInputs]:
+        """Builds the inputs from the combination of env variables that require specific input parameters to be set."""
         inputs = super()._build_inputs()
         env_params = self._build_params_from_env()
         if inputs is None and env_params is None:
@@ -694,10 +859,11 @@ class EnvIOMixin(EnvMixin, IOMixin):
 
 
 class TemplateInvocatorSubNodeMixin(BaseMixin):
-    """Used for classes that form sub nodes of Template Invocators - "Steps" and "DAG".
+    """Used for classes that form sub nodes of Template invocators - `Steps` and `DAG`.
 
-    See https://argoproj.github.io/argo-workflows/workflow-concepts/#template-invocators for
-    more on template invocators
+    See Also:
+    --------
+    https://argoproj.github.io/argo-workflows/workflow-concepts/#template-invocators for more on template invocators.
     """
 
     name: str
@@ -711,13 +877,15 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     with_sequence: Optional[Sequence] = None
 
     def _build_on_exit(self) -> Optional[str]:
+        """Builds the `on_exit` field `str` representation from the set `Templatable` or the specified `str`."""
         if isinstance(self.on_exit, Templatable):
             return self.on_exit._build_template().name  # type: ignore
         return self.on_exit
 
     @property
     def _subtype(self) -> str:
-        raise NotImplementedError
+        """Provides the subtype specification of the inheritor."""
+        raise NotImplementedError("Implement me")
 
     @property
     def id(self) -> str:
@@ -755,16 +923,19 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
 
     def get_result_as(self, name: str) -> Parameter:
+        """Returns a `Parameter` specification with the given name containing the `results` of `self`."""
         return Parameter(name=name, value=self.result)
 
     @root_validator(pre=False)
     def _check_values(cls, values):
+        """Validates that a single field is set between `template`, `template_ref`, and `inline`."""
+
         def one(xs: List):
             xs = list(map(bool, xs))
             return xs.count(True) == 1
 
         if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
-            raise ValueError("exactly one of ['template', 'template_ref', 'inline'] must be present")
+            raise ValueError("Exactly one of ['template', 'template_ref', 'inline'] must be present")
         return values
 
     def _get_parameters_as(self, name: str, subtype: str) -> Parameter:
@@ -777,7 +948,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         subtype: str
             The inheritor subtype field, used to construct the output artifact `from_` reference.
 
-        Returns
+        Returns:
         -------
         Parameter
             The parameter, named based on the given `name`, along with a value that references all outputs.
@@ -787,7 +958,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def _get_parameter(self, name: str, subtype: str) -> Parameter:
         """Attempts to find the specified parameter in the outputs for the specified subtype.
 
-        Notes
+        Notes:
         -----
         This is specifically designed to be invoked by inheritors.
 
@@ -798,12 +969,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         subtype: str
             The inheritor subtype field, used to construct the output artifact `from_` reference.
 
-        Returns
+        Returns:
         -------
         Parameter
             The parameter if found.
 
-        Raises
+        Raises:
         ------
         ValueError
             When no outputs can be constructed/no outputs are set.
@@ -839,7 +1010,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def _get_artifact(self, name: str, subtype: str) -> Artifact:
         """Attempts to find the specified artifact in the outputs for the specified subtype.
 
-        Notes
+        Notes:
         -----
         This is specifically designed to be invoked by inheritors.
 
@@ -850,12 +1021,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         subtype: str
             The inheritor subtype field, used to construct the output artifact `from_` reference.
 
-        Returns
+        Returns:
         -------
         Artifact
             The artifact if found.
 
-        Raises
+        Raises:
         ------
         ValueError
             When no outputs can be constructed/no outputs are set.
@@ -893,7 +1064,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         name: str
             The name of the parameter to search for.
 
-        Returns
+        Returns:
         -------
         Parameter
             The parameter, named based on the given `name`, along with a value that references all outputs.
@@ -901,15 +1072,23 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameters_as(name=name, subtype=self._subtype)
 
     def get_artifact(self, name: str) -> Artifact:
-        """Gets an artifact from the outputs of this subnode"""
+        """Gets an artifact from the outputs of this subnode."""
         return self._get_artifact(name=name, subtype=self._subtype)
 
     def get_parameter(self, name: str) -> Parameter:
-        """Gets a parameter from the outputs of this subnode"""
+        """Gets a parameter from the outputs of this subnode."""
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
 def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
+    """Assembles an optional list of `Parameter` from the given `Callable` arguments.
+
+    Notes:
+    -----
+    If the value of an identified `Callable` keyword argument is found to be empty the value of
+    `hera.shared.serialization.MISSING` is used as a placeholder. This is later serialized as `None` -> `null` when
+    submitted to the Argo server.
+    """
     source_signature: Dict[str, Optional[object]] = {}
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
@@ -925,6 +1104,14 @@ def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
 
 
 def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
+    """Returns an optional list of `Parameter` from the specified list of `with_items`.
+
+    The assembled list of `Parameter` contains all the unique parameters identified from the `with_items` list. For
+    example, if the `with_items` list contains 3 serializable elements such as
+    `[{'a': 1, 'b': 2}, {'a': 3, 'b': 4}, {'a': 5, 'b': 6}]`, then only 2 `Parameter`s are returned. Namely, only
+     `Parameter(name='a')` and `Parameter(name='b')` is returned, with values `{{item.a}}` and `{{item.b}}`,
+     respectively. This helps with the parallel/serial processing of the supplied items.
+    """
     if len(with_items) == 0:
         return None
     elif len(with_items) == 1:
@@ -1063,7 +1250,8 @@ class ModelMapperMixin(BaseMixin):
 class ExperimentalMixin(BaseMixin):
     _experimental_warning_message: str = (
         "Unable to instantiate {} since it is an experimental feature."
-        ' Please turn on experimental features by setting `hera.shared.global_config.experimental_features["{}"] = True`.'
+        " Please turn on experimental features by setting "
+        '`hera.shared.global_config.experimental_features["{}"] = True`.'
         " Note that experimental features are unstable and subject to breaking changes."
     )
 

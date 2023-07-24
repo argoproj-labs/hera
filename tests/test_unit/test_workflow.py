@@ -4,7 +4,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from hera.workflows.container import Container
+from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.models import WorkflowCreateRequest
+from hera.workflows.parameter import Parameter
+from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import NAME_LIMIT, Workflow
 
@@ -65,3 +69,36 @@ def test_workflow_from_yaml():
 
     # THEN
     assert workflow == Workflow.from_yaml(workflow.to_yaml())
+
+
+@script()
+def hello():
+    print("hello")
+
+
+def test_workflow_callable_return_is_none():
+    # GIVEN
+    with Workflow(name="w"):
+        returned_from_script = hello()
+
+    # THEN
+    assert returned_from_script is None
+
+
+def test_workflow_callable_container_raises_error():
+    with pytest.raises(InvalidTemplateCall) as e:
+        # GIVEN
+        with Workflow(name="w"):
+            whalesay = Container(
+                name="whalesay",
+                inputs=[Parameter(name="message")],
+                image="docker/whalesay",
+                command=["cowsay"],
+                args=["{{inputs.parameters.message}}"],
+            )
+
+            # WHEN
+            whalesay()
+
+    # THEN InvalidTemplateCall raised
+    assert "Callable Template 'whalesay' is not callable under a Workflow" in str(e.value)

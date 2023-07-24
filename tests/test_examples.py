@@ -5,12 +5,12 @@ import sys
 from pathlib import Path
 from typing import Dict
 
+import examples.workflows as hera_examples
+import examples.workflows.upstream as hera_upstream_examples
 import pytest
 import requests
 import yaml
 
-import examples.workflows as hera_examples
-import examples.workflows.upstream as hera_upstream_examples
 from hera.shared import global_config
 from hera.workflows import (
     CronWorkflow as HeraCronWorkflow,

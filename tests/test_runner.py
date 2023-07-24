@@ -22,6 +22,16 @@ from hera.workflows.runner import _runner
             [{"name": "input", "value": '{"a": 2, "b": "bar"}'}],
             '{"output": [{"a": 2, "b": "bar"}]}',
         ),
+        (
+            "examples.workflows.callable_script:function_kebab",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
+        ),
+        (
+            "examples.workflows.callable_script:function_kebab_object",
+            [{"name": "input-values", "value": '{"a": 3, "b": "bar"}'}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
+        ),
     ],
 )
 def test(entrypoint, kwargs_list, expected_output):

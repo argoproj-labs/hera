@@ -31,7 +31,12 @@ class Container(
     VolumeMountMixin,
     CallableTemplateMixin,
 ):
-    """The Container template type defines a container to run on Argo."""
+    """The Container template type defines a container to run on Argo.
+
+    The container generally consists of running a Docker container remotely, which is configured via fields such as
+    `command` (the command to run to start the container), `args` (arguments for the container), `working_dir` (for
+    setting the active working directory relative to container execution), etc.
+    """
 
     args: Optional[List[str]] = None
     command: Optional[List[str]] = None
@@ -40,6 +45,7 @@ class Container(
     working_dir: Optional[str] = None
 
     def _build_container(self) -> _ModelContainer:
+        """Builds the generated `Container` representation."""
         return _ModelContainer(
             args=self.args,
             command=self.command,
@@ -65,6 +71,7 @@ class Container(
         )
 
     def _build_template(self) -> _ModelTemplate:
+        """Builds the generated `Template` representation of the container."""
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,

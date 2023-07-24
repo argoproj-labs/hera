@@ -17,11 +17,25 @@ from hera.workflows.models import (
 from hera.workflows.task import Task
 
 
-class DAG(IOMixin, TemplateMixin, CallableTemplateMixin, ContextMixin):
+class DAG(
+    IOMixin,
+    TemplateMixin,
+    CallableTemplateMixin,
+    ContextMixin,
+):
     """A DAG template invocator is used to define Task dependencies as an acyclic graph.
 
     DAG implements the contextmanager interface so allows usage of `with`, under which any
     `hera.workflows.task.Task` objects instantiated will be added to the DAG's list of Tasks.
+
+    Examples:
+    --------
+    >>> @script()
+    >>> def foo() -> None:
+    >>>     print(42)
+    >>>
+    >>> with DAG(...) as dag:
+    >>>     foo()
     """
 
     fail_fast: Optional[bool] = None
@@ -34,6 +48,7 @@ class DAG(IOMixin, TemplateMixin, CallableTemplateMixin, ContextMixin):
         self.tasks.append(node)
 
     def _build_template(self) -> _ModelTemplate:
+        """Builds the auto-generated `Template` representation of the `DAG`."""
         tasks = []
         for task in self.tasks:
             if isinstance(task, Task):

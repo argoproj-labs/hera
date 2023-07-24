@@ -24,6 +24,20 @@ spec:
             value: '[{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]'
         name: another-function
         template: another-function
+    - - arguments:
+          parameters:
+          - name: a-but-kebab
+            value: '3'
+          - name: b-but-kebab
+            value: bar
+        name: function-kebab
+        template: function-kebab
+    - - arguments:
+          parameters:
+          - name: input-values
+            value: '{"a": 3, "b": "bar"}'
+        name: function-kebab-object
+        template: function-kebab-object
   - inputs:
       parameters:
       - name: input
@@ -36,6 +50,9 @@ spec:
       - examples.workflows.callable_script:my_function
       command:
       - python
+      env:
+      - name: script_annotations
+        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - inputs:
@@ -50,6 +67,9 @@ spec:
       - examples.workflows.callable_script:str_function
       command:
       - python
+      env:
+      - name: script_annotations
+        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - inputs:
@@ -64,5 +84,45 @@ spec:
       - examples.workflows.callable_script:another_function
       command:
       - python
+      env:
+      - name: script_annotations
+        value: ''
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - default: '2'
+        name: a-but-kebab
+      - default: foo
+        name: b-but-kebab
+    name: function-kebab
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.callable_script:function_kebab
+      command:
+      - python
+      env:
+      - name: script_annotations
+        value: ''
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: input-values
+    name: function-kebab-object
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.callable_script:function_kebab_object
+      command:
+      - python
+      env:
+      - name: script_annotations
+        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'

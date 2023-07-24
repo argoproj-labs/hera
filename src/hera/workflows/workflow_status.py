@@ -1,8 +1,9 @@
+"""Workflow status is a module that provides functionality for representing and interacting with workflow status."""
 from enum import Enum
 
 
 class WorkflowStatus(str, Enum):
-    """Placeholder for workflow statuses"""
+    """Placeholder for workflow statuses."""
 
     running = "Running"
     succeeded = "Succeeded"
@@ -10,12 +11,13 @@ class WorkflowStatus(str, Enum):
     error = "Error"
     terminated = "Terminated"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns the value representation of the workflow status enum."""
         return str(self.value)
 
     @classmethod
     def from_argo_status(cls, s: str) -> "WorkflowStatus":
-        """Turns an Argo status into a Hera workflow status representation"""
+        """Turns an Argo status into a Hera workflow status representation."""
         switch = {
             "Running": WorkflowStatus.running,
             "Succeeded": WorkflowStatus.succeeded,

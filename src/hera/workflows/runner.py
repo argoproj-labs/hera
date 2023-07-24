@@ -1,14 +1,23 @@
+"""The runner module contains the functionality required for the script runner."""
 import argparse
 import functools
 import importlib
 import inspect
 import json
+import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, cast
 
 from pydantic import validate_arguments
+from typing_extensions import get_args, get_origin
 
 from hera.shared.serialization import serialize
+from hera.workflows import Parameter
+
+try:
+    from typing import Annotated  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated  # type: ignore
 
 
 def _ignore_unmatched_kwargs(f):
@@ -29,13 +38,15 @@ def _ignore_unmatched_kwargs(f):
     return inner
 
 
-def _contains_var_kwarg(f):
+def _contains_var_kwarg(f: Callable) -> bool:
+    """Tells whether the given callable contains a keyword argument."""
     return any(param.kind == inspect.Parameter.VAR_KEYWORD for param in inspect.signature(f).parameters.values())
 
 
-def _is_kwarg_of(key, f):
+def _is_kwarg_of(key: str, f: Callable) -> bool:
+    """Tells whether the given `key` identifies a keyword argument of the given callable."""
     param = inspect.signature(f).parameters.get(key)
-    return param and (
+    return param is not None and (
         param.kind is inspect.Parameter.KEYWORD_ONLY or param.kind is inspect.Parameter.POSITIONAL_OR_KEYWORD
     )
 
@@ -60,8 +71,8 @@ def _parse(value, key, f):
         return value
 
 
-def _is_str_kwarg_of(key, f):
-    # check if param `key` of function `f` has a type annotation of a subclass of str
+def _is_str_kwarg_of(key: str, f: Callable):
+    """Check if param `key` of function `f` has a type annotation of a subclass of str."""
     type_ = inspect.signature(f).parameters[key].annotation
     if not type_:
         return True
@@ -73,10 +84,25 @@ def _is_str_kwarg_of(key, f):
         return False
 
 
+def _map_keys(function: Callable, kwargs: dict):
+    """Change the kwargs's keys to use the python name instead of the parameter name which could be kebab case."""
+    if os.environ.get("script_annotations", None) is not None:
+        return {key.replace("-", "_"): value for key, value in kwargs.items()}
+
+    mapped_kwargs = {}
+    for param_name, param in inspect.signature(function).parameters.items():
+        if get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Parameter):
+            mapped_kwargs[param_name] = kwargs[get_args(param.annotation)[1].name]
+        else:
+            mapped_kwargs[param_name] = kwargs[param_name]
+    return mapped_kwargs
+
+
 def _runner(entrypoint: str, kwargs_list: Any) -> str:
     """Run a function with a list of kwargs.
 
     Args:
+        entrypoint: The path to the script within the container to execute.
         module: The module path to import the function from.
         function_name: The name of the function to run.
         kwargs_list: A list of kwargs to pass to the function.
@@ -94,20 +120,24 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
     # convert the kwargs list to a dict
     kwargs = {}
     for kwarg in kwargs_list:
-        if not kwarg.get("name") or not kwarg.get("value"):
+        if "name" not in kwarg or "value" not in kwarg:
             continue
         # sanitize the key for python
-        key = serialize(kwarg["name"]).replace("-", "_")
+        key = cast(str, serialize(kwarg["name"]))
         value = kwarg["value"]
         kwargs[key] = value
+    kwargs = _map_keys(function, kwargs)
     function = validate_arguments(function)
     function = _ignore_unmatched_kwargs(function)
+
     return function(**kwargs)
 
 
-# write an argparse for the runner function that takes module and function name
-# as flags and a path to a json file as an argument
 def _parse_args():
+    """Creates an argparse for the runner function.
+
+    The returned argparse takes a module and function name as flags and a path to a json file as an argument.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--entrypoint", "-e", type=str, required=True)
     parser.add_argument("args_path", type=Path)
@@ -115,6 +145,11 @@ def _parse_args():
 
 
 def _run():
+    """Runs a function from a specific path using parsed arguments from Argo.
+
+    Note that this prints the result of the function to stdout, which is the normal mode of operation for Argo. Any
+    output of a Python function submitted via a `Script.source` field results in outputs sent to stdout.
+    """
     args = _parse_args()
     kwargs_list = json.loads(args.args_path.read_text() or r"[]")
     result = _runner(args.entrypoint, kwargs_list)

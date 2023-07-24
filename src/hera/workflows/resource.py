@@ -1,3 +1,4 @@
+"""The resource module provides functionality for creating K8s resources via workflows inside task/steps."""
 from typing import List, Optional, Union
 
 from hera.workflows._mixins import CallableTemplateMixin, IOMixin, SubNodeMixin, TemplateMixin
@@ -12,6 +13,15 @@ from hera.workflows.workflow_template import WorkflowTemplate
 
 
 class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
+    """`Resource` is a representation of a K8s resource that can be created by Argo.
+
+    The resource is a callable step that can be invoked in a DAG/Workflow. The resource can create any K8s resource,
+    such as other workflows, workflow templates, daemons, etc, as specified by the `manifest` field of the resource.
+    The manifest field is a canonical YAML that is submitted to K8s by Argo. Note that the manifest is a union of
+    multiple types. The manifest can be a string, in which case it is assume to be YAML. Otherwise, if it's a Hera
+    objects, it is automatically converted to the corresponding YAML representation.
+    """
+
     action: str
     failure_condition: Optional[str] = None
     flags: Optional[List[str]] = None

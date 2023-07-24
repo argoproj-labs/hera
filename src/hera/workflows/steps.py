@@ -7,6 +7,7 @@ from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
+    CallableTemplateMixin,
     ContextMixin,
     IOMixin,
     ItemMixin,
@@ -30,9 +31,9 @@ class Step(
     ParameterMixin,
     ItemMixin,
 ):
-    """
-    Step is used to run a given template. Must be instantiated under a Steps or Parallel context, or
-    outside a Workflow.
+    """Step is used to run a given template.
+
+    Must be instantiated under a Steps or Parallel context, or outside a Workflow.
     """
 
     @property
@@ -103,12 +104,12 @@ class Parallel(
 
 
 class Steps(
-    ContextMixin,
     IOMixin,
     TemplateMixin,
+    CallableTemplateMixin,
+    ContextMixin,
 ):
-    """A Steps template invocator is used to define a sequence of steps which can run
-    sequentially or in parallel.
+    """A Steps template invocator is used to define a sequence of steps which can run sequentially or in parallel.
 
     Steps implements the contextmanager interface so allows usage of `with`, under which any
     `hera.workflows.steps.Step` objects instantiated will be added to the Steps' list of sub_steps.

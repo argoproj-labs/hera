@@ -1,9 +1,14 @@
 from typing import List
 
+try:
+    from typing import Annotated  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated  # type: ignore
+
 from pydantic import BaseModel
 
 from hera.shared import global_config
-from hera.workflows import Script, Steps, Workflow, script
+from hera.workflows import Parameter, Script, Steps, Workflow, script
 
 # Note, setting constructor to runner is only possible if the source code is available
 # along with dependencies include hera in the image.
@@ -15,6 +20,7 @@ global_config.set_class_defaults(Script, constructor="runner")
 # Runner script constructor is still and experimental feature and we need to explicitly opt in to it
 # Note that experimental features are subject to breaking changes in future releases of the same major version
 global_config.experimental_features["script_runner"] = True
+global_config.experimental_features["script_annotations"] = True
 
 
 # An optional pydantic input type
@@ -61,8 +67,25 @@ def str_function(input: str) -> Output:
     return Output(output=[Input.parse_raw(input)])
 
 
+# Use the script_annotations feature to seamlessly enable aliased kebab-case names
+# as your template interface, while using regular snake_case in the Python code
+@script()
+def function_kebab(
+    a_but_kebab: Annotated[int, Parameter(name="a-but-kebab")] = 2,
+    b_but_kebab: Annotated[str, Parameter(name="b-but-kebab")] = "foo",
+) -> Output:
+    return Output(output=[Input(a=a_but_kebab, b=b_but_kebab)])
+
+
+@script()
+def function_kebab_object(input_values: Annotated[Input, Parameter(name="input-values")]) -> Output:
+    return Output(output=[input_values])
+
+
 with Workflow(name="my-workflow") as w:
     with Steps(name="my-steps") as s:
         my_function(arguments={"input": Input(a=2, b="bar")})
         str_function(arguments={"input": Input(a=2, b="bar").json()})
         another_function(arguments={"inputs": [Input(a=2, b="bar"), Input(a=2, b="bar")]})
+        function_kebab(arguments={"a-but-kebab": 3, "b-but-kebab": "bar"})
+        function_kebab_object(arguments={"input-values": Input(a=3, b="bar")})

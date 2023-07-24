@@ -25,7 +25,8 @@ codegen: models services examples init-files
 
 .PHONY: check-codegen
 check-codegen: ## Check if the code is up to date
-check-codegen: codegen
+check-codegen:
+	@$(MAKE) codegen
 	git diff --exit-code || "Code is not up-to-date. Please run 'make codegen'"
 
 .PHONY: format
@@ -48,14 +49,15 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
-		--target-python-version 3.7 \
+		--target-python-version 3.8 \
 		--output src/hera/workflows/models \
 		--base-class hera.shared._base_model.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
-		--disable-timestamp
+		--disable-timestamp \
+		--use-default-kwarg
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
-	@poetry run stubgen -o src -p hera.workflows.models && rm -rf **/__init__.pyi
+	@poetry run stubgen -o src -p hera.workflows.models && find src/hera/workflows/models -name '__init__.pyi' -delete
 	@$(MAKE) format
 
 .PHONY: events-models
@@ -63,14 +65,15 @@ events-models: ## Generate the Events models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--url $(OPENAPI_SPEC_URL) \
 		--snake-case-field \
-		--target-python-version 3.7 \
+		--target-python-version 3.8 \
 		--output src/hera/events/models \
 		--base-class hera.shared._base_model.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
-		--disable-timestamp
+		--disable-timestamp \
+		--use-default-kwarg
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
-	@poetry run stubgen -o src -p hera.events.models && rm -rf **/__init__.pyi
+	@poetry run stubgen -o src -p hera.events.models && find src/hera/events/models -name '__init__.pyi' -delete
 	@$(MAKE) format
 
 .PHONY: models

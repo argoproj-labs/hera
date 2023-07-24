@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from pydantic import Field
-
 from hera.shared._base_model import BaseModel
+from pydantic import Field
 
 
 class Quantity(BaseModel):

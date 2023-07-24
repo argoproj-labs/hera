@@ -1,4 +1,4 @@
-"""The workflow module provides the Workflow class
+"""The workflow module provides the Workflow class.
 
 See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
@@ -75,7 +75,7 @@ try:
 except ImportError:
     _yaml = None
 
-ImagePullSecrets = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
+ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
 NAME_LIMIT = 63
 
@@ -211,7 +211,7 @@ class Workflow(
     hooks: Annotated[Optional[Dict[str, LifecycleHook]], _WorkflowModelMapper("spec.hooks")] = None
     host_aliases: Annotated[Optional[List[HostAlias]], _WorkflowModelMapper("spec.host_aliases")] = None
     host_network: Annotated[Optional[bool], _WorkflowModelMapper("spec.host_network")] = None
-    image_pull_secrets: Annotated[ImagePullSecrets, _WorkflowModelMapper("spec.image_pull_secrets")] = None
+    image_pull_secrets: Annotated[ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets")] = None
     node_selector: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("spec.node_selector")] = None
     on_exit: Annotated[Optional[Union[str, Templatable]], _WorkflowModelMapper("spec.on_exit", _build_on_exit)] = None
     parallelism: Annotated[Optional[int], _WorkflowModelMapper("spec.parallelism")] = None
@@ -326,6 +326,7 @@ class Workflow(
         return result
 
     def get_parameter(self, name: str) -> Parameter:
+        """Attempts to find and return a `Parameter` of the specified name."""
         arguments = self._build_arguments()
         if arguments is None:
             raise KeyError("Workflow has no arguments set")
@@ -352,6 +353,7 @@ class Workflow(
         return self.build().dict(exclude_none=True, by_alias=True)
 
     def __eq__(self, other) -> bool:
+        """Verifies equality of `self` with the specified `other`."""
         if other.__class__ is self.__class__:
             return self.to_dict() == other.to_dict()
 
@@ -428,9 +430,7 @@ class Workflow(
         )
 
     def _add_sub(self, node: Any):
-        """Adds any objects instantiated under the Workflow context manager that conform to the `Templatable` protocol
-        or are Argo schema Template objects to the Workflow's list of templates.
-        """
+        """Adds the given node (expected to satisfy the `Templatable` protocol) to the context."""
         if not isinstance(node, (Templatable, _ModelTemplate)):
             raise InvalidType(type(node))
         self.templates.append(node)
@@ -440,7 +440,8 @@ class Workflow(
 
         Args:
             output_directory: The directory to write the file to. Defaults to the current working directory.
-            name: The name of the file to write without the file extension. Defaults to the Workflow's name or a generated name.
+            name: The name of the file to write without the file extension.  Defaults to the Workflow's name or a
+            generated name.
             *args: Additional arguments to pass to `yaml.dump`.
             **kwargs: Additional keyword arguments to pass to `yaml.dump`.
         """

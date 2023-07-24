@@ -1,9 +1,7 @@
-from typing import Dict, List, Optional
-
-from hera.shared._base_model import BaseModel as BaseModel
-
 from ...k8s.api.core import v1 as v1
 from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1
+from hera.shared._base_model import BaseModel as BaseModel
+from typing import Dict, List, Optional
 
 class AMQPConsumeConfig(BaseModel):
     auto_ack: Optional[bool]

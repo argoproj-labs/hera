@@ -20,6 +20,12 @@ class Parameter(_ModelParameter):
     for Steps and Tasks to assign values.
     """
 
+    name: Optional[str] = None  # type: ignore
+
+    def _check_name(self):
+        if not self.name:
+            raise ValueError("name cannot be `None` or empty when used")
+
     # `MISSING` is the default value so that `Parameter` serialization understands the difference between a
     # missing value and a value of `None`, as set by a user. With this, when something sets a value of `None` it is
     # taken as a proper `None`. By comparison, if a user does not set a value, it is taken as `MISSING` and therefore
@@ -49,13 +55,14 @@ class Parameter(_ModelParameter):
         return self.value
 
     def with_name(self, name: str) -> Parameter:
-        """Returns a copy of the parameter with the name set to the value"""
+        """Returns a copy of the parameter with the name set to the value."""
         p = self.copy(deep=True)
         p.name = name
         return p
 
     def as_input(self) -> _ModelParameter:
-        """Assembles the parameter for use as an input of a template"""
+        """Assembles the parameter for use as an input of a template."""
+        self._check_name()
         return _ModelParameter(
             name=self.name,
             description=self.description,
@@ -66,11 +73,12 @@ class Parameter(_ModelParameter):
         )
 
     def as_argument(self) -> _ModelParameter:
-        """Assembles the parameter for use as an argument of a step or a task"""
+        """Assembles the parameter for use as an argument of a step or a task."""
         # Setting a default value when used as an argument is a no-op so we exclude it as it would get overwritten by
         # `value` or `value_from` (one of which is required)
         # Overwrite ref: https://github.com/argoproj/argo-workflows/blob/781675ddcf6f1138d697cb9c71dae484daa0548b/workflow/common/util.go#L126-L139
         # One of value/value_from required ref: https://github.com/argoproj/argo-workflows/blob/ab178bb0b36a5ce34b4c1302cf4855879a0e8cf5/workflow/validate/validate.go#L794-L798
+        self._check_name()
         return _ModelParameter(
             name=self.name,
             global_name=self.global_name,
@@ -81,9 +89,10 @@ class Parameter(_ModelParameter):
         )
 
     def as_output(self) -> _ModelParameter:
-        """Assembles the parameter for use as an output of a template"""
+        """Assembles the parameter for use as an output of a template."""
         # Only `value` and `value_from` are valid here
         # see https://github.com/argoproj/argo-workflows/blob/e3254eca115c9dd358e55d16c6a3d41403c29cae/workflow/validate/validate.go#L1067
+        self._check_name()
         return _ModelParameter(
             name=self.name,
             global_name=self.global_name,

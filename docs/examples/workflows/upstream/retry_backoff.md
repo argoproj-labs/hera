@@ -1,6 +1,9 @@
 # Retry Backoff
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/retry-backoff.yaml).
+## Note
+
+This example is a replication of an Argo Workflow example in Hera.
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/retry-backoff.yaml).
 
 # This example demonstrates the use of retry back offs
 apiVersion: argoproj.io/v1alpha1

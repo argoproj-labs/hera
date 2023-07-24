@@ -1,6 +1,9 @@
 # Artifact Path Placeholders
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/artifact-path-placeholders.yaml).
+## Note
+
+This example is a replication of an Argo Workflow example in Hera.
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/artifact-path-placeholders.yaml).
 
 
 
@@ -28,7 +31,10 @@
             command=[
                 "sh",
                 "-c",
-                'mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" "$(dirname "{{outputs.parameters.actual-lines-count.path}}")" ; head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}" | tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"',
+                'mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" '
+                '"$(dirname "{{outputs.parameters.actual-lines-count.path}}")" ; '
+                'head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}" '
+                '| tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"',
             ],
             inputs=[
                 Parameter(name="lines-count"),

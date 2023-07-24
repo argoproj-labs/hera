@@ -1,3 +1,4 @@
+"""The archive module provides archival behavior strategies for artifacts."""
 from typing import Optional
 
 from hera.shared._base_model import BaseModel
@@ -10,16 +11,25 @@ from hera.workflows.models import (
 
 
 class ArchiveStrategy(BaseModel):
+    """Base archive strategy model."""
+
     def _build_archive_strategy(self) -> _ModelArchiveStrategy:
         return _ModelArchiveStrategy()
 
 
 class NoneArchiveStrategy(ArchiveStrategy):
+    """`NoneArchiveStrategy` indicates artifacts should skip serialization."""
+
     def _build_archive_strategy(self) -> _ModelArchiveStrategy:
         return _ModelArchiveStrategy(none=_ModelNoneStrategy())
 
 
 class TarArchiveStrategy(ArchiveStrategy):
+    """`TarArchiveStrategy` indicates artifacts should be serialized using the `tar` strategy.
+
+    Tar archiving is performed using the specified compression level.
+    """
+
     compression_level: Optional[int] = None
 
     def _build_archive_strategy(self) -> _ModelArchiveStrategy:
@@ -27,6 +37,8 @@ class TarArchiveStrategy(ArchiveStrategy):
 
 
 class ZipArchiveStrategy(ArchiveStrategy):
+    """`ZipArchiveStrategy` indicates artifacts should be serialized using the `zip` strategy."""
+
     def _build_archive_strategy(self) -> _ModelArchiveStrategy:
         return _ModelArchiveStrategy(zip=_ModelZipStrategy())
 

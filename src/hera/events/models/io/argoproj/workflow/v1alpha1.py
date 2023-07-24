@@ -5,9 +5,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import Field
-
 from hera.shared._base_model import BaseModel
+from pydantic import Field
 
 from ...k8s.api.core import v1
 from ...k8s.api.policy import v1beta1
@@ -25,12 +24,12 @@ class ArchivedWorkflowDeletedResponse(BaseModel):
 
 class ArtGCStatus(BaseModel):
     not_specified: Optional[bool] = Field(
-        None,
+        default=None,
         alias="notSpecified",
         description="if this is true, we already checked to see if we need to do it and we don't",
     )
     pods_recouped: Optional[Dict[str, bool]] = Field(
-        None,
+        default=None,
         alias="podsRecouped",
         description=(
             "have completed Pods been processed? (mapped by Pod name) used to prevent re-processing the Status of a"
@@ -38,7 +37,7 @@ class ArtGCStatus(BaseModel):
         ),
     )
     strategies_processed: Optional[Dict[str, bool]] = Field(
-        None,
+        default=None,
         alias="strategiesProcessed",
         description=(
             "have Pods been started to perform this strategy? (enables us not to re-process what we've already done)"
@@ -48,10 +47,10 @@ class ArtGCStatus(BaseModel):
 
 class ArtifactRepositoryRef(BaseModel):
     config_map: Optional[str] = Field(
-        None, alias="configMap", description='The name of the config map. Defaults to "artifact-repositories".'
+        default=None, alias="configMap", description='The name of the config map. Defaults to "artifact-repositories".'
     )
     key: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             'The config map key. Defaults to the value of the "workflows.argoproj.io/default-artifact-repository"'
             " annotation."
@@ -61,15 +60,17 @@ class ArtifactRepositoryRef(BaseModel):
 
 class ArtifactResult(BaseModel):
     error: Optional[str] = Field(
-        None, description="Error is an optional error message which should be set if Success==false"
+        default=None, description="Error is an optional error message which should be set if Success==false"
     )
     name: str = Field(..., description="Name is the name of the Artifact")
-    success: Optional[bool] = Field(None, description="Success describes whether the deletion succeeded")
+    success: Optional[bool] = Field(default=None, description="Success describes whether the deletion succeeded")
 
 
 class ArtifactResultNodeStatus(BaseModel):
     artifact_results: Optional[Dict[str, ArtifactResult]] = Field(
-        None, alias="artifactResults", description="ArtifactResults maps Artifact name to result of the deletion"
+        default=None,
+        alias="artifactResults",
+        description="ArtifactResults maps Artifact name to result of the deletion",
     )
 
 
@@ -86,9 +87,9 @@ class CollectEventResponse(BaseModel):
 
 
 class Condition(BaseModel):
-    message: Optional[str] = Field(None, description="Message is the condition message")
-    status: Optional[str] = Field(None, description="Status is the status of the condition")
-    type: Optional[str] = Field(None, description="Type is the type of condition")
+    message: Optional[str] = Field(default=None, description="Message is the condition message")
+    status: Optional[str] = Field(default=None, description="Status is the status of the condition")
+    type: Optional[str] = Field(default=None, description="Type is the type of condition")
 
 
 class ContinueOn(BaseModel):
@@ -102,7 +103,7 @@ class Counter(BaseModel):
 
 class CreateS3BucketOptions(BaseModel):
     object_locking: Optional[bool] = Field(
-        None, alias="objectLocking", description="ObjectLocking Enable object locking"
+        default=None, alias="objectLocking", description="ObjectLocking Enable object locking"
     )
 
 
@@ -136,7 +137,7 @@ class EventResponse(BaseModel):
 
 class ExecutorConfig(BaseModel):
     service_account_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="serviceAccountName",
         description="ServiceAccountName specifies the service account name of the executor container.",
     )
@@ -149,11 +150,11 @@ class Gauge(BaseModel):
 
 class GetUserInfoResponse(BaseModel):
     email: Optional[str] = None
-    email_verified: Optional[bool] = Field(None, alias="emailVerified")
+    email_verified: Optional[bool] = Field(default=None, alias="emailVerified")
     groups: Optional[List[str]] = None
     issuer: Optional[str] = None
-    service_account_name: Optional[str] = Field(None, alias="serviceAccountName")
-    service_account_namespace: Optional[str] = Field(None, alias="serviceAccountNamespace")
+    service_account_name: Optional[str] = Field(default=None, alias="serviceAccountName")
+    service_account_namespace: Optional[str] = Field(default=None, alias="serviceAccountNamespace")
     subject: Optional[str] = None
 
 
@@ -208,7 +209,7 @@ class Link(BaseModel):
 
 class LogEntry(BaseModel):
     content: Optional[str] = None
-    pod_name: Optional[str] = Field(None, alias="podName")
+    pod_name: Optional[str] = Field(default=None, alias="podName")
 
 
 class MemoizationStatus(BaseModel):
@@ -228,36 +229,41 @@ class MetricLabel(BaseModel):
 
 
 class Mutex(BaseModel):
-    name: Optional[str] = Field(None, description="name of the mutex")
+    name: Optional[str] = Field(default=None, description="name of the mutex")
 
 
 class MutexHolding(BaseModel):
     holder: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Holder is a reference to the object which holds the Mutex. Holding Scenario:\n  1. Current workflow's"
             " NodeID which is holding the lock.\n     e.g: ${NodeID}\nWaiting Scenario:\n  1. Current workflow or"
             " other workflow NodeID which is holding the lock.\n     e.g: ${WorkflowName}/${NodeID}"
         ),
     )
-    mutex: Optional[str] = Field(None, description="Reference for the mutex e.g: ${namespace}/mutex/${mutexName}")
+    mutex: Optional[str] = Field(
+        default=None, description="Reference for the mutex e.g: ${namespace}/mutex/${mutexName}"
+    )
 
 
 class MutexStatus(BaseModel):
     holding: Optional[List[MutexHolding]] = Field(
-        None,
+        default=None,
         description=(
             "Holding is a list of mutexes and their respective objects that are held by mutex lock for this"
             " io.argoproj.workflow.v1alpha1."
         ),
     )
     waiting: Optional[List[MutexHolding]] = Field(
-        None, description="Waiting is a list of mutexes and their respective objects this workflow is waiting for."
+        default=None,
+        description="Waiting is a list of mutexes and their respective objects this workflow is waiting for.",
     )
 
 
 class NodeSynchronizationStatus(BaseModel):
-    waiting: Optional[str] = Field(None, description="Waiting is the name of the lock that this node is waiting for")
+    waiting: Optional[str] = Field(
+        default=None, description="Waiting is the name of the lock that this node is waiting for"
+    )
 
 
 class NoneStrategy(BaseModel):
@@ -266,17 +272,17 @@ class NoneStrategy(BaseModel):
 
 class OAuth2EndpointParam(BaseModel):
     key: str = Field(..., description="Name is the header name")
-    value: Optional[str] = Field(None, description="Value is the literal value to use for the header")
+    value: Optional[str] = Field(default=None, description="Value is the literal value to use for the header")
 
 
 class OSSLifecycleRule(BaseModel):
     mark_deletion_after_days: Optional[int] = Field(
-        None,
+        default=None,
         alias="markDeletionAfterDays",
         description="MarkDeletionAfterDays is the number of days before we delete objects in the bucket",
     )
     mark_infrequent_access_after_days: Optional[int] = Field(
-        None,
+        default=None,
         alias="markInfrequentAccessAfterDays",
         description=(
             "MarkInfrequentAccessAfterDays is the number of days before we convert the objects in the bucket to"
@@ -290,14 +296,14 @@ class Plugin(BaseModel):
 
 
 class Prometheus(BaseModel):
-    counter: Optional[Counter] = Field(None, description="Counter is a counter metric")
-    gauge: Optional[Gauge] = Field(None, description="Gauge is a gauge metric")
+    counter: Optional[Counter] = Field(default=None, description="Counter is a counter metric")
+    gauge: Optional[Gauge] = Field(default=None, description="Gauge is a gauge metric")
     help: str = Field(..., description="Help is a string that describes the metric")
-    histogram: Optional[Histogram] = Field(None, description="Histogram is a histogram metric")
-    labels: Optional[List[MetricLabel]] = Field(None, description="Labels is a list of metric labels")
+    histogram: Optional[Histogram] = Field(default=None, description="Histogram is a histogram metric")
+    labels: Optional[List[MetricLabel]] = Field(default=None, description="Labels is a list of metric labels")
     name: str = Field(..., description="Name is the name of the metric")
     when: Optional[str] = Field(
-        None, description="When is a conditional statement that decides when to emit the metric"
+        default=None, description="When is a conditional statement that decides when to emit the metric"
     )
 
 
@@ -316,9 +322,9 @@ class ResubmitArchivedWorkflowRequest(BaseModel):
 class RetryArchivedWorkflowRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
-    node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
+    node_field_selector: Optional[str] = Field(default=None, alias="nodeFieldSelector")
     parameters: Optional[List[str]] = None
-    restart_successful: Optional[bool] = Field(None, alias="restartSuccessful")
+    restart_successful: Optional[bool] = Field(default=None, alias="restartSuccessful")
     uid: Optional[str] = None
 
 
@@ -328,17 +334,18 @@ class RetryNodeAntiAffinity(BaseModel):
 
 class SemaphoreHolding(BaseModel):
     holders: Optional[List[str]] = Field(
-        None, description="Holders stores the list of current holder names in the io.argoproj.workflow.v1alpha1."
+        default=None,
+        description="Holders stores the list of current holder names in the io.argoproj.workflow.v1alpha1.",
     )
-    semaphore: Optional[str] = Field(None, description="Semaphore stores the semaphore name.")
+    semaphore: Optional[str] = Field(default=None, description="Semaphore stores the semaphore name.")
 
 
 class SemaphoreStatus(BaseModel):
     holding: Optional[List[SemaphoreHolding]] = Field(
-        None, description="Holding stores the list of resource acquired synchronization lock for workflows."
+        default=None, description="Holding stores the list of resource acquired synchronization lock for workflows."
     )
     waiting: Optional[List[SemaphoreHolding]] = Field(
-        None, description="Waiting indicates the list of current synchronization lock holders."
+        default=None, description="Waiting indicates the list of current synchronization lock holders."
     )
 
 
@@ -348,7 +355,7 @@ class SuppliedValueFrom(BaseModel):
 
 class SuspendTemplate(BaseModel):
     duration: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Duration is the seconds to wait before automatically resuming a template. Must be a string. Default unit"
             ' is seconds. Could also be a Duration, e.g.: "2m", "6h", "1d"'
@@ -357,25 +364,25 @@ class SuspendTemplate(BaseModel):
 
 
 class SynchronizationStatus(BaseModel):
-    mutex: Optional[MutexStatus] = Field(None, description="Mutex stores this workflow's mutex holder details")
+    mutex: Optional[MutexStatus] = Field(default=None, description="Mutex stores this workflow's mutex holder details")
     semaphore: Optional[SemaphoreStatus] = Field(
-        None, description="Semaphore stores this workflow's Semaphore holder details"
+        default=None, description="Semaphore stores this workflow's Semaphore holder details"
     )
 
 
 class TTLStrategy(BaseModel):
     seconds_after_completion: Optional[int] = Field(
-        None,
+        default=None,
         alias="secondsAfterCompletion",
         description="SecondsAfterCompletion is the number of seconds to live after completion",
     )
     seconds_after_failure: Optional[int] = Field(
-        None,
+        default=None,
         alias="secondsAfterFailure",
         description="SecondsAfterFailure is the number of seconds to live after failure",
     )
     seconds_after_success: Optional[int] = Field(
-        None,
+        default=None,
         alias="secondsAfterSuccess",
         description="SecondsAfterSuccess is the number of seconds to live after success",
     )
@@ -383,7 +390,7 @@ class TTLStrategy(BaseModel):
 
 class TarStrategy(BaseModel):
     compression_level: Optional[int] = Field(
-        None,
+        default=None,
         alias="compressionLevel",
         description=(
             "CompressionLevel specifies the gzip compression level to use for the artifact. Defaults to"
@@ -394,12 +401,14 @@ class TarStrategy(BaseModel):
 
 class TemplateRef(BaseModel):
     cluster_scope: Optional[bool] = Field(
-        None,
+        default=None,
         alias="clusterScope",
         description="ClusterScope indicates the referred template is cluster scoped (i.e. a ClusterWorkflowTemplate).",
     )
-    name: Optional[str] = Field(None, description="Name is the resource name of the template.")
-    template: Optional[str] = Field(None, description="Template is the name of referred template in the resource.")
+    name: Optional[str] = Field(default=None, description="Name is the resource name of the template.")
+    template: Optional[str] = Field(
+        default=None, description="Template is the name of referred template in the resource."
+    )
 
 
 class TransformationStep(BaseModel):
@@ -419,7 +428,7 @@ class Version(BaseModel):
 
 class VolumeClaimGC(BaseModel):
     strategy: Optional[str] = Field(
-        None, description='Strategy is the strategy to use. One of "OnWorkflowCompletion", "OnWorkflowSuccess"'
+        default=None, description='Strategy is the strategy to use. One of "OnWorkflowCompletion", "OnWorkflowSuccess"'
     )
 
 
@@ -430,7 +439,7 @@ class WorkflowDeleteResponse(BaseModel):
 class WorkflowMetadata(BaseModel):
     annotations: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
-    labels_from: Optional[Dict[str, LabelValueFrom]] = Field(None, alias="labelsFrom")
+    labels_from: Optional[Dict[str, LabelValueFrom]] = Field(default=None, alias="labelsFrom")
 
 
 class WorkflowResubmitRequest(BaseModel):
@@ -443,23 +452,23 @@ class WorkflowResubmitRequest(BaseModel):
 class WorkflowResumeRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
-    node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
+    node_field_selector: Optional[str] = Field(default=None, alias="nodeFieldSelector")
 
 
 class WorkflowRetryRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
-    node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
+    node_field_selector: Optional[str] = Field(default=None, alias="nodeFieldSelector")
     parameters: Optional[List[str]] = None
-    restart_successful: Optional[bool] = Field(None, alias="restartSuccessful")
+    restart_successful: Optional[bool] = Field(default=None, alias="restartSuccessful")
 
 
 class WorkflowSetRequest(BaseModel):
     message: Optional[str] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
-    node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
-    output_parameters: Optional[str] = Field(None, alias="outputParameters")
+    node_field_selector: Optional[str] = Field(default=None, alias="nodeFieldSelector")
+    output_parameters: Optional[str] = Field(default=None, alias="outputParameters")
     phase: Optional[str] = None
 
 
@@ -467,7 +476,7 @@ class WorkflowStopRequest(BaseModel):
     message: Optional[str] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
-    node_field_selector: Optional[str] = Field(None, alias="nodeFieldSelector")
+    node_field_selector: Optional[str] = Field(default=None, alias="nodeFieldSelector")
 
 
 class WorkflowSuspendRequest(BaseModel):
@@ -481,11 +490,11 @@ class WorkflowTemplateDeleteResponse(BaseModel):
 
 class WorkflowTemplateRef(BaseModel):
     cluster_scope: Optional[bool] = Field(
-        None,
+        default=None,
         alias="clusterScope",
         description="ClusterScope indicates the referred template is cluster scoped (i.e. a ClusterWorkflowTemplate).",
     )
-    name: Optional[str] = Field(None, description="Name is the resource name of the workflow template.")
+    name: Optional[str] = Field(default=None, description="Name is the resource name of the workflow template.")
 
 
 class WorkflowTerminateRequest(BaseModel):
@@ -505,7 +514,7 @@ class ArchiveStrategy(BaseModel):
 
 class ArtifactGC(BaseModel):
     pod_metadata: Optional[Metadata] = Field(
-        None,
+        default=None,
         alias="podMetadata",
         description=(
             "PodMetadata is an optional field for specifying the Labels and Annotations that should be assigned to the"
@@ -513,45 +522,55 @@ class ArtifactGC(BaseModel):
         ),
     )
     service_account_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="serviceAccountName",
         description=(
             "ServiceAccountName is an optional field for specifying the Service Account that should be assigned to the"
             " Pod doing the deletion"
         ),
     )
-    strategy: Optional[str] = Field(None, description="Strategy is the strategy to use.")
+    strategy: Optional[str] = Field(default=None, description="Strategy is the strategy to use.")
 
 
 class ArtifactGCStatus(BaseModel):
     artifact_results_by_node: Optional[Dict[str, ArtifactResultNodeStatus]] = Field(
-        None, alias="artifactResultsByNode", description="ArtifactResultsByNode maps Node name to result"
+        default=None, alias="artifactResultsByNode", description="ArtifactResultsByNode maps Node name to result"
     )
 
 
 class ArtifactoryArtifact(BaseModel):
     password_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
+        default=None,
+        alias="passwordSecret",
+        description="PasswordSecret is the secret selector to the repository password",
     )
     url: str = Field(..., description="URL of the artifact")
     username_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="usernameSecret", description="UsernameSecret is the secret selector to the repository username"
+        default=None,
+        alias="usernameSecret",
+        description="UsernameSecret is the secret selector to the repository username",
     )
 
 
 class ArtifactoryArtifactRepository(BaseModel):
     password_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
+        default=None,
+        alias="passwordSecret",
+        description="PasswordSecret is the secret selector to the repository password",
     )
-    repo_url: Optional[str] = Field(None, alias="repoURL", description="RepoURL is the url for artifactory repo.")
+    repo_url: Optional[str] = Field(
+        default=None, alias="repoURL", description="RepoURL is the url for artifactory repo."
+    )
     username_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="usernameSecret", description="UsernameSecret is the secret selector to the repository username"
+        default=None,
+        alias="usernameSecret",
+        description="UsernameSecret is the secret selector to the repository username",
     )
 
 
 class AzureArtifact(BaseModel):
     account_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="accountKeySecret",
         description="AccountKeySecret is the secret selector to the Azure Blob Storage account access key",
     )
@@ -567,7 +586,7 @@ class AzureArtifact(BaseModel):
         ),
     )
     use_sdk_creds: Optional[bool] = Field(
-        None,
+        default=None,
         alias="useSDKCreds",
         description="UseSDKCreds tells the driver to figure out credentials based on sdk defaults.",
     )
@@ -575,12 +594,12 @@ class AzureArtifact(BaseModel):
 
 class AzureArtifactRepository(BaseModel):
     account_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="accountKeySecret",
         description="AccountKeySecret is the secret selector to the Azure Blob Storage account access key",
     )
     blob_name_format: Optional[str] = Field(
-        None,
+        default=None,
         alias="blobNameFormat",
         description=(
             "BlobNameFormat is defines the format of how to store blob names. Can reference workflow variables"
@@ -595,7 +614,7 @@ class AzureArtifactRepository(BaseModel):
         ),
     )
     use_sdk_creds: Optional[bool] = Field(
-        None,
+        default=None,
         alias="useSDKCreds",
         description="UseSDKCreds tells the driver to figure out credentials based on sdk defaults.",
     )
@@ -603,17 +622,17 @@ class AzureArtifactRepository(BaseModel):
 
 class Backoff(BaseModel):
     duration: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             'Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m",'
             ' "1h")'
         ),
     )
     factor: Optional[intstr.IntOrString] = Field(
-        None, description="Factor is a factor to multiply the base duration after each failed retry"
+        default=None, description="Factor is a factor to multiply the base duration after each failed retry"
     )
     max_duration: Optional[str] = Field(
-        None,
+        default=None,
         alias="maxDuration",
         description="MaxDuration is the maximum amount of time allowed for the backoff strategy",
     )
@@ -621,10 +640,14 @@ class Backoff(BaseModel):
 
 class BasicAuth(BaseModel):
     password_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
+        default=None,
+        alias="passwordSecret",
+        description="PasswordSecret is the secret selector to the repository password",
     )
     username_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="usernameSecret", description="UsernameSecret is the secret selector to the repository username"
+        default=None,
+        alias="usernameSecret",
+        description="UsernameSecret is the secret selector to the repository username",
     )
 
 
@@ -635,13 +658,13 @@ class Cache(BaseModel):
 
 
 class ClientCertAuth(BaseModel):
-    client_cert_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientCertSecret")
-    client_key_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientKeySecret")
+    client_cert_secret: Optional[v1.SecretKeySelector] = Field(default=None, alias="clientCertSecret")
+    client_key_secret: Optional[v1.SecretKeySelector] = Field(default=None, alias="clientKeySecret")
 
 
 class ContainerSetRetryStrategy(BaseModel):
     duration: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             'Duration is the time between each retry, examples values are "300ms", "1s" or "5m". Valid time units are'
             ' "ns", "us" (or "µs"), "ms", "s", "m", "h".'
@@ -663,81 +686,89 @@ class CronWorkflowStatus(BaseModel):
 
 
 class GCSArtifact(BaseModel):
-    bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
+    bucket: Optional[str] = Field(default=None, description="Bucket is the name of the bucket")
     key: str = Field(..., description="Key is the path in the bucket where the artifact resides")
     service_account_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="serviceAccountKeySecret",
         description="ServiceAccountKeySecret is the secret selector to the bucket's service account key",
     )
 
 
 class GCSArtifactRepository(BaseModel):
-    bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
+    bucket: Optional[str] = Field(default=None, description="Bucket is the name of the bucket")
     key_format: Optional[str] = Field(
-        None,
+        default=None,
         alias="keyFormat",
         description="KeyFormat is defines the format of how to store keys. Can reference workflow variables",
     )
     service_account_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="serviceAccountKeySecret",
         description="ServiceAccountKeySecret is the secret selector to the bucket's service account key",
     )
 
 
 class GitArtifact(BaseModel):
-    branch: Optional[str] = Field(None, description="Branch is the branch to fetch when `SingleBranch` is enabled")
+    branch: Optional[str] = Field(
+        default=None, description="Branch is the branch to fetch when `SingleBranch` is enabled"
+    )
     depth: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "Depth specifies clones/fetches should be shallow and include the given number of commits from the"
             " branch tip"
         ),
     )
     disable_submodules: Optional[bool] = Field(
-        None, alias="disableSubmodules", description="DisableSubmodules disables submodules during git clone"
+        default=None, alias="disableSubmodules", description="DisableSubmodules disables submodules during git clone"
     )
     fetch: Optional[List[str]] = Field(
-        None, description="Fetch specifies a number of refs that should be fetched before checkout"
+        default=None, description="Fetch specifies a number of refs that should be fetched before checkout"
     )
     insecure_ignore_host_key: Optional[bool] = Field(
-        None,
+        default=None,
         alias="insecureIgnoreHostKey",
         description="InsecureIgnoreHostKey disables SSH strict host key checking during git clone",
     )
     password_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="passwordSecret", description="PasswordSecret is the secret selector to the repository password"
+        default=None,
+        alias="passwordSecret",
+        description="PasswordSecret is the secret selector to the repository password",
     )
     repo: str = Field(..., description="Repo is the git repository")
-    revision: Optional[str] = Field(None, description="Revision is the git commit, tag, branch to checkout")
+    revision: Optional[str] = Field(default=None, description="Revision is the git commit, tag, branch to checkout")
     single_branch: Optional[bool] = Field(
-        None,
+        default=None,
         alias="singleBranch",
         description="SingleBranch enables single branch clone, using the `branch` parameter",
     )
     ssh_private_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="sshPrivateKeySecret",
         description="SSHPrivateKeySecret is the secret selector to the repository ssh private key",
     )
     username_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="usernameSecret", description="UsernameSecret is the secret selector to the repository username"
+        default=None,
+        alias="usernameSecret",
+        description="UsernameSecret is the secret selector to the repository username",
     )
 
 
 class HDFSArtifact(BaseModel):
-    addresses: Optional[List[str]] = Field(None, description="Addresses is accessible addresses of HDFS name nodes")
-    force: Optional[bool] = Field(None, description="Force copies a file forcibly even if it exists")
+    addresses: Optional[List[str]] = Field(
+        default=None, description="Addresses is accessible addresses of HDFS name nodes"
+    )
+    force: Optional[bool] = Field(default=None, description="Force copies a file forcibly even if it exists")
     hdfs_user: Optional[str] = Field(
-        None,
+        default=None,
         alias="hdfsUser",
         description=(
             "HDFSUser is the user to access HDFS file system. It is ignored if either ccache or keytab is used."
         ),
     )
     krb_c_cache_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="krbCCacheSecret",
         description=(
             "KrbCCacheSecret is the secret selector for Kerberos ccache Either ccache or keytab can be set to use"
@@ -745,7 +776,7 @@ class HDFSArtifact(BaseModel):
         ),
     )
     krb_config_config_map: Optional[v1.ConfigMapKeySelector] = Field(
-        None,
+        default=None,
         alias="krbConfigConfigMap",
         description=(
             "KrbConfig is the configmap selector for Kerberos config as string It must be set if either ccache or"
@@ -753,7 +784,7 @@ class HDFSArtifact(BaseModel):
         ),
     )
     krb_keytab_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="krbKeytabSecret",
         description=(
             "KrbKeytabSecret is the secret selector for Kerberos keytab Either ccache or keytab can be set to use"
@@ -761,12 +792,12 @@ class HDFSArtifact(BaseModel):
         ),
     )
     krb_realm: Optional[str] = Field(
-        None,
+        default=None,
         alias="krbRealm",
         description="KrbRealm is the Kerberos realm used with Kerberos keytab It must be set if keytab is used.",
     )
     krb_service_principal_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="krbServicePrincipalName",
         description=(
             "KrbServicePrincipalName is the principal name of Kerberos service It must be set if either ccache or"
@@ -774,7 +805,7 @@ class HDFSArtifact(BaseModel):
         ),
     )
     krb_username: Optional[str] = Field(
-        None,
+        default=None,
         alias="krbUsername",
         description="KrbUsername is the Kerberos username used with Kerberos keytab It must be set if keytab is used.",
     )
@@ -782,17 +813,19 @@ class HDFSArtifact(BaseModel):
 
 
 class HDFSArtifactRepository(BaseModel):
-    addresses: Optional[List[str]] = Field(None, description="Addresses is accessible addresses of HDFS name nodes")
-    force: Optional[bool] = Field(None, description="Force copies a file forcibly even if it exists")
+    addresses: Optional[List[str]] = Field(
+        default=None, description="Addresses is accessible addresses of HDFS name nodes"
+    )
+    force: Optional[bool] = Field(default=None, description="Force copies a file forcibly even if it exists")
     hdfs_user: Optional[str] = Field(
-        None,
+        default=None,
         alias="hdfsUser",
         description=(
             "HDFSUser is the user to access HDFS file system. It is ignored if either ccache or keytab is used."
         ),
     )
     krb_c_cache_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="krbCCacheSecret",
         description=(
             "KrbCCacheSecret is the secret selector for Kerberos ccache Either ccache or keytab can be set to use"
@@ -800,7 +833,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     )
     krb_config_config_map: Optional[v1.ConfigMapKeySelector] = Field(
-        None,
+        default=None,
         alias="krbConfigConfigMap",
         description=(
             "KrbConfig is the configmap selector for Kerberos config as string It must be set if either ccache or"
@@ -808,7 +841,7 @@ class HDFSArtifactRepository(BaseModel):
         ),
     )
     krb_keytab_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="krbKeytabSecret",
         description=(
             "KrbKeytabSecret is the secret selector for Kerberos keytab Either ccache or keytab can be set to use"
@@ -816,12 +849,12 @@ class HDFSArtifactRepository(BaseModel):
         ),
     )
     krb_realm: Optional[str] = Field(
-        None,
+        default=None,
         alias="krbRealm",
         description="KrbRealm is the Kerberos realm used with Kerberos keytab It must be set if keytab is used.",
     )
     krb_service_principal_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="krbServicePrincipalName",
         description=(
             "KrbServicePrincipalName is the principal name of Kerberos service It must be set if either ccache or"
@@ -829,26 +862,26 @@ class HDFSArtifactRepository(BaseModel):
         ),
     )
     krb_username: Optional[str] = Field(
-        None,
+        default=None,
         alias="krbUsername",
         description="KrbUsername is the Kerberos username used with Kerberos keytab It must be set if keytab is used.",
     )
     path_format: Optional[str] = Field(
-        None,
+        default=None,
         alias="pathFormat",
         description="PathFormat is defines the format of path to store a file. Can reference workflow variables",
     )
 
 
 class HTTPHeaderSource(BaseModel):
-    secret_key_ref: Optional[v1.SecretKeySelector] = Field(None, alias="secretKeyRef")
+    secret_key_ref: Optional[v1.SecretKeySelector] = Field(default=None, alias="secretKeyRef")
 
 
 class InfoResponse(BaseModel):
     links: Optional[List[Link]] = None
-    managed_namespace: Optional[str] = Field(None, alias="managedNamespace")
-    modals: Optional[Dict[str, bool]] = Field(None, title="which modals to show")
-    nav_color: Optional[str] = Field(None, alias="navColor")
+    managed_namespace: Optional[str] = Field(default=None, alias="managedNamespace")
+    modals: Optional[Dict[str, bool]] = Field(default=None, title="which modals to show")
+    nav_color: Optional[str] = Field(default=None, alias="navColor")
 
 
 class Memoize(BaseModel):
@@ -869,36 +902,40 @@ class Metrics(BaseModel):
 
 
 class OAuth2Auth(BaseModel):
-    client_id_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientIDSecret")
-    client_secret_secret: Optional[v1.SecretKeySelector] = Field(None, alias="clientSecretSecret")
-    endpoint_params: Optional[List[OAuth2EndpointParam]] = Field(None, alias="endpointParams")
+    client_id_secret: Optional[v1.SecretKeySelector] = Field(default=None, alias="clientIDSecret")
+    client_secret_secret: Optional[v1.SecretKeySelector] = Field(default=None, alias="clientSecretSecret")
+    endpoint_params: Optional[List[OAuth2EndpointParam]] = Field(default=None, alias="endpointParams")
     scopes: Optional[List[str]] = None
-    token_url_secret: Optional[v1.SecretKeySelector] = Field(None, alias="tokenURLSecret")
+    token_url_secret: Optional[v1.SecretKeySelector] = Field(default=None, alias="tokenURLSecret")
 
 
 class OSSArtifact(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
+        default=None,
+        alias="accessKeySecret",
+        description="AccessKeySecret is the secret selector to the bucket's access key",
     )
-    bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
+    bucket: Optional[str] = Field(default=None, description="Bucket is the name of the bucket")
     create_bucket_if_not_present: Optional[bool] = Field(
-        None,
+        default=None,
         alias="createBucketIfNotPresent",
         description=(
             "CreateBucketIfNotPresent tells the driver to attempt to create the OSS bucket for output artifacts, if it"
             " doesn't exist"
         ),
     )
-    endpoint: Optional[str] = Field(None, description="Endpoint is the hostname of the bucket endpoint")
+    endpoint: Optional[str] = Field(default=None, description="Endpoint is the hostname of the bucket endpoint")
     key: str = Field(..., description="Key is the path in the bucket where the artifact resides")
     lifecycle_rule: Optional[OSSLifecycleRule] = Field(
-        None, alias="lifecycleRule", description="LifecycleRule specifies how to manage bucket's lifecycle"
+        default=None, alias="lifecycleRule", description="LifecycleRule specifies how to manage bucket's lifecycle"
     )
     secret_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="secretKeySecret", description="SecretKeySecret is the secret selector to the bucket's secret key"
+        default=None,
+        alias="secretKeySecret",
+        description="SecretKeySecret is the secret selector to the bucket's secret key",
     )
     security_token: Optional[str] = Field(
-        None,
+        default=None,
         alias="securityToken",
         description=(
             "SecurityToken is the user's temporary security token. For more details, check out:"
@@ -909,31 +946,35 @@ class OSSArtifact(BaseModel):
 
 class OSSArtifactRepository(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
+        default=None,
+        alias="accessKeySecret",
+        description="AccessKeySecret is the secret selector to the bucket's access key",
     )
-    bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
+    bucket: Optional[str] = Field(default=None, description="Bucket is the name of the bucket")
     create_bucket_if_not_present: Optional[bool] = Field(
-        None,
+        default=None,
         alias="createBucketIfNotPresent",
         description=(
             "CreateBucketIfNotPresent tells the driver to attempt to create the OSS bucket for output artifacts, if it"
             " doesn't exist"
         ),
     )
-    endpoint: Optional[str] = Field(None, description="Endpoint is the hostname of the bucket endpoint")
+    endpoint: Optional[str] = Field(default=None, description="Endpoint is the hostname of the bucket endpoint")
     key_format: Optional[str] = Field(
-        None,
+        default=None,
         alias="keyFormat",
         description="KeyFormat is defines the format of how to store keys. Can reference workflow variables",
     )
     lifecycle_rule: Optional[OSSLifecycleRule] = Field(
-        None, alias="lifecycleRule", description="LifecycleRule specifies how to manage bucket's lifecycle"
+        default=None, alias="lifecycleRule", description="LifecycleRule specifies how to manage bucket's lifecycle"
     )
     secret_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="secretKeySecret", description="SecretKeySecret is the secret selector to the bucket's secret key"
+        default=None,
+        alias="secretKeySecret",
+        description="SecretKeySecret is the secret selector to the bucket's secret key",
     )
     security_token: Optional[str] = Field(
-        None,
+        default=None,
         alias="securityToken",
         description=(
             "SecurityToken is the user's temporary security token. For more details, check out:"
@@ -943,36 +984,38 @@ class OSSArtifactRepository(BaseModel):
 
 
 class RetryAffinity(BaseModel):
-    node_anti_affinity: Optional[RetryNodeAntiAffinity] = Field(None, alias="nodeAntiAffinity")
+    node_anti_affinity: Optional[RetryNodeAntiAffinity] = Field(default=None, alias="nodeAntiAffinity")
 
 
 class RetryStrategy(BaseModel):
     affinity: Optional[RetryAffinity] = Field(
-        None, description="Affinity prevents running workflow's step on the same host"
+        default=None, description="Affinity prevents running workflow's step on the same host"
     )
-    backoff: Optional[Backoff] = Field(None, description="Backoff is a backoff strategy")
+    backoff: Optional[Backoff] = Field(default=None, description="Backoff is a backoff strategy")
     expression: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Expression is a condition expression for when a node will be retried. If it evaluates to false, the node"
             " will not be retried and the retry strategy will be ignored"
         ),
     )
     limit: Optional[intstr.IntOrString] = Field(
-        None,
+        default=None,
         description=(
             "Limit is the maximum number of retry attempts when retrying a container. It does not include the original"
             " container; the maximum number of total attempts will be `limit + 1`."
         ),
     )
     retry_policy: Optional[str] = Field(
-        None, alias="retryPolicy", description="RetryPolicy is a policy of NodePhase statuses that will be retried"
+        default=None,
+        alias="retryPolicy",
+        description="RetryPolicy is a policy of NodePhase statuses that will be retried",
     )
 
 
 class S3EncryptionOptions(BaseModel):
     enable_encryption: Optional[bool] = Field(
-        None,
+        default=None,
         alias="enableEncryption",
         description=(
             "EnableEncryption tells the driver to encrypt objects if set to true. If kmsKeyId and"
@@ -980,7 +1023,7 @@ class S3EncryptionOptions(BaseModel):
         ),
     )
     kms_encryption_context: Optional[str] = Field(
-        None,
+        default=None,
         alias="kmsEncryptionContext",
         description=(
             "KmsEncryptionContext is a json blob that contains an encryption context. See"
@@ -988,12 +1031,12 @@ class S3EncryptionOptions(BaseModel):
         ),
     )
     kms_key_id: Optional[str] = Field(
-        None,
+        default=None,
         alias="kmsKeyId",
         description="KMSKeyId tells the driver to encrypt the object using the specified KMS Key.",
     )
     server_side_customer_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None,
+        default=None,
         alias="serverSideCustomerKeySecret",
         description=(
             "ServerSideCustomerKeySecret tells the driver to encrypt the output artifacts using SSE-C with the"
@@ -1004,141 +1047,152 @@ class S3EncryptionOptions(BaseModel):
 
 class SemaphoreRef(BaseModel):
     config_map_key_ref: Optional[v1.ConfigMapKeySelector] = Field(
-        None, alias="configMapKeyRef", description="ConfigMapKeyRef is configmap selector for Semaphore configuration"
+        default=None,
+        alias="configMapKeyRef",
+        description="ConfigMapKeyRef is configmap selector for Semaphore configuration",
     )
 
 
 class Sequence(BaseModel):
     count: Optional[intstr.IntOrString] = Field(
-        None, description="Count is number of elements in the sequence (default: 0). Not to be used with end"
+        default=None, description="Count is number of elements in the sequence (default: 0). Not to be used with end"
     )
     end: Optional[intstr.IntOrString] = Field(
-        None, description="Number at which to end the sequence (default: 0). Not to be used with Count"
+        default=None, description="Number at which to end the sequence (default: 0). Not to be used with Count"
     )
     format: Optional[str] = Field(
-        None, description="Format is a printf format string to format the value in the sequence"
+        default=None, description="Format is a printf format string to format the value in the sequence"
     )
-    start: Optional[intstr.IntOrString] = Field(None, description="Number at which to start the sequence (default: 0)")
+    start: Optional[intstr.IntOrString] = Field(
+        default=None, description="Number at which to start the sequence (default: 0)"
+    )
 
 
 class SubmitOpts(BaseModel):
-    annotations: Optional[str] = Field(None, description="Annotations adds to metadata.labels")
+    annotations: Optional[str] = Field(default=None, description="Annotations adds to metadata.labels")
     dry_run: Optional[bool] = Field(
-        None,
+        default=None,
         alias="dryRun",
         description=(
             "DryRun validates the workflow on the client-side without creating it. This option is not supported in API"
         ),
     )
-    entry_point: Optional[str] = Field(None, alias="entryPoint", description="Entrypoint overrides spec.entrypoint")
+    entry_point: Optional[str] = Field(
+        default=None, alias="entryPoint", description="Entrypoint overrides spec.entrypoint"
+    )
     generate_name: Optional[str] = Field(
-        None, alias="generateName", description="GenerateName overrides metadata.generateName"
+        default=None, alias="generateName", description="GenerateName overrides metadata.generateName"
     )
-    labels: Optional[str] = Field(None, description="Labels adds to metadata.labels")
-    name: Optional[str] = Field(None, description="Name overrides metadata.name")
+    labels: Optional[str] = Field(default=None, description="Labels adds to metadata.labels")
+    name: Optional[str] = Field(default=None, description="Name overrides metadata.name")
     owner_reference: Optional[v1_1.OwnerReference] = Field(
-        None, alias="ownerReference", description="OwnerReference creates a metadata.ownerReference"
+        default=None, alias="ownerReference", description="OwnerReference creates a metadata.ownerReference"
     )
-    parameters: Optional[List[str]] = Field(None, description="Parameters passes input parameters to workflow")
+    parameters: Optional[List[str]] = Field(default=None, description="Parameters passes input parameters to workflow")
     pod_priority_class_name: Optional[str] = Field(
-        None, alias="podPriorityClassName", description="Set the podPriorityClassName of the workflow"
+        default=None, alias="podPriorityClassName", description="Set the podPriorityClassName of the workflow"
     )
     priority: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "Priority is used if controller is configured to process limited number of workflows in parallel, higher"
             " priority workflows are processed first."
         ),
     )
     server_dry_run: Optional[bool] = Field(
-        None,
+        default=None,
         alias="serverDryRun",
         description="ServerDryRun validates the workflow on the server-side without creating it",
     )
     service_account: Optional[str] = Field(
-        None,
+        default=None,
         alias="serviceAccount",
         description="ServiceAccount runs all pods in the workflow using specified ServiceAccount.",
     )
 
 
 class Synchronization(BaseModel):
-    mutex: Optional[Mutex] = Field(None, description="Mutex holds the Mutex lock details")
-    semaphore: Optional[SemaphoreRef] = Field(None, description="Semaphore holds the Semaphore configuration")
+    mutex: Optional[Mutex] = Field(default=None, description="Mutex holds the Mutex lock details")
+    semaphore: Optional[SemaphoreRef] = Field(default=None, description="Semaphore holds the Semaphore configuration")
 
 
 class ValueFrom(BaseModel):
     config_map_key_ref: Optional[v1.ConfigMapKeySelector] = Field(
-        None,
+        default=None,
         alias="configMapKeyRef",
         description="ConfigMapKeyRef is configmap selector for input parameter configuration",
     )
     default: Optional[str] = Field(
-        None,
+        default=None,
         description="Default specifies a value to be used if retrieving the value from the specified source fails",
     )
     event: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Selector (https://github.com/antonmedv/expr) that is evaluated against the event to get the value of the"
             " parameter. E.g. `payload.message`"
         ),
     )
     expression: Optional[str] = Field(
-        None, description="Expression, if defined, is evaluated to specify the value for the parameter"
+        default=None, description="Expression, if defined, is evaluated to specify the value for the parameter"
     )
     jq_filter: Optional[str] = Field(
-        None, alias="jqFilter", description="JQFilter expression against the resource object in resource templates"
+        default=None,
+        alias="jqFilter",
+        description="JQFilter expression against the resource object in resource templates",
     )
     json_path: Optional[str] = Field(
-        None,
+        default=None,
         alias="jsonPath",
         description="JSONPath of a resource to retrieve an output parameter value from in resource templates",
     )
     parameter: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Parameter reference to a step or dag task in which to retrieve an output parameter value from (e.g."
             " '{{steps.mystep.outputs.myparam}}')"
         ),
     )
     path: Optional[str] = Field(
-        None, description="Path in the container to retrieve an output parameter value from in container templates"
+        default=None,
+        description="Path in the container to retrieve an output parameter value from in container templates",
     )
     supplied: Optional[SuppliedValueFrom] = Field(
-        None, description="Supplied value to be filled in directly, either through the CLI, API, etc."
+        default=None, description="Supplied value to be filled in directly, either through the CLI, API, etc."
     )
 
 
 class WorkflowSubmitRequest(BaseModel):
     namespace: Optional[str] = None
-    resource_kind: Optional[str] = Field(None, alias="resourceKind")
-    resource_name: Optional[str] = Field(None, alias="resourceName")
-    submit_options: Optional[SubmitOpts] = Field(None, alias="submitOptions")
+    resource_kind: Optional[str] = Field(default=None, alias="resourceKind")
+    resource_name: Optional[str] = Field(default=None, alias="resourceName")
+    submit_options: Optional[SubmitOpts] = Field(default=None, alias="submitOptions")
 
 
 class HTTPAuth(BaseModel):
-    basic_auth: Optional[BasicAuth] = Field(None, alias="basicAuth")
-    client_cert: Optional[ClientCertAuth] = Field(None, alias="clientCert")
+    basic_auth: Optional[BasicAuth] = Field(default=None, alias="basicAuth")
+    client_cert: Optional[ClientCertAuth] = Field(default=None, alias="clientCert")
     oauth2: Optional[OAuth2Auth] = None
 
 
 class HTTPHeader(BaseModel):
     name: str
     value: Optional[str] = None
-    value_from: Optional[HTTPHeaderSource] = Field(None, alias="valueFrom")
+    value_from: Optional[HTTPHeaderSource] = Field(default=None, alias="valueFrom")
 
 
 class Parameter(BaseModel):
     default: Optional[str] = Field(
-        None, description="Default is the default value to use for an input parameter if a value was not supplied"
+        default=None,
+        description="Default is the default value to use for an input parameter if a value was not supplied",
     )
-    description: Optional[str] = Field(None, description="Description is the parameter description")
+    description: Optional[str] = Field(default=None, description="Description is the parameter description")
     enum: Optional[List[str]] = Field(
-        None, description="Enum holds a list of string values to choose from, for the actual value of the parameter"
+        default=None,
+        description="Enum holds a list of string values to choose from, for the actual value of the parameter",
     )
     global_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="globalName",
         description=(
             "GlobalName exports an output parameter to the global scope, making it available as"
@@ -1147,20 +1201,20 @@ class Parameter(BaseModel):
     )
     name: str = Field(..., description="Name is the parameter name")
     value: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Value is the literal value to use for the parameter. If specified in the context of an input parameter,"
             " the value takes precedence over any passed values"
         ),
     )
     value_from: Optional[ValueFrom] = Field(
-        None, alias="valueFrom", description="ValueFrom is the source for the output parameter's value"
+        default=None, alias="valueFrom", description="ValueFrom is the source for the output parameter's value"
     )
 
 
 class PodGC(BaseModel):
     label_selector: Optional[v1_1.LabelSelector] = Field(
-        None,
+        default=None,
         alias="labelSelector",
         description=(
             "LabelSelector is the label selector to check if the pods match the labels before being added to the pod"
@@ -1168,7 +1222,7 @@ class PodGC(BaseModel):
         ),
     )
     strategy: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             'Strategy is the strategy to use. One of "OnPodCompletion", "OnPodSuccess", "OnWorkflowCompletion",'
             ' "OnWorkflowSuccess"'
@@ -1178,11 +1232,13 @@ class PodGC(BaseModel):
 
 class S3Artifact(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
+        default=None,
+        alias="accessKeySecret",
+        description="AccessKeySecret is the secret selector to the bucket's access key",
     )
-    bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
+    bucket: Optional[str] = Field(default=None, description="Bucket is the name of the bucket")
     create_bucket_if_not_present: Optional[CreateS3BucketOptions] = Field(
-        None,
+        default=None,
         alias="createBucketIfNotPresent",
         description=(
             "CreateBucketIfNotPresent tells the driver to attempt to create the S3 bucket for output artifacts, if it"
@@ -1190,19 +1246,21 @@ class S3Artifact(BaseModel):
             " or SSE-KMS if it is."
         ),
     )
-    encryption_options: Optional[S3EncryptionOptions] = Field(None, alias="encryptionOptions")
-    endpoint: Optional[str] = Field(None, description="Endpoint is the hostname of the bucket endpoint")
-    insecure: Optional[bool] = Field(None, description="Insecure will connect to the service with TLS")
-    key: Optional[str] = Field(None, description="Key is the key in the bucket where the artifact resides")
-    region: Optional[str] = Field(None, description="Region contains the optional bucket region")
+    encryption_options: Optional[S3EncryptionOptions] = Field(default=None, alias="encryptionOptions")
+    endpoint: Optional[str] = Field(default=None, description="Endpoint is the hostname of the bucket endpoint")
+    insecure: Optional[bool] = Field(default=None, description="Insecure will connect to the service with TLS")
+    key: Optional[str] = Field(default=None, description="Key is the key in the bucket where the artifact resides")
+    region: Optional[str] = Field(default=None, description="Region contains the optional bucket region")
     role_arn: Optional[str] = Field(
-        None, alias="roleARN", description="RoleARN is the Amazon Resource Name (ARN) of the role to assume."
+        default=None, alias="roleARN", description="RoleARN is the Amazon Resource Name (ARN) of the role to assume."
     )
     secret_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="secretKeySecret", description="SecretKeySecret is the secret selector to the bucket's secret key"
+        default=None,
+        alias="secretKeySecret",
+        description="SecretKeySecret is the secret selector to the bucket's secret key",
     )
     use_sdk_creds: Optional[bool] = Field(
-        None,
+        default=None,
         alias="useSDKCreds",
         description="UseSDKCreds tells the driver to figure out credentials based on sdk defaults.",
     )
@@ -1210,11 +1268,13 @@ class S3Artifact(BaseModel):
 
 class S3ArtifactRepository(BaseModel):
     access_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="accessKeySecret", description="AccessKeySecret is the secret selector to the bucket's access key"
+        default=None,
+        alias="accessKeySecret",
+        description="AccessKeySecret is the secret selector to the bucket's access key",
     )
-    bucket: Optional[str] = Field(None, description="Bucket is the name of the bucket")
+    bucket: Optional[str] = Field(default=None, description="Bucket is the name of the bucket")
     create_bucket_if_not_present: Optional[CreateS3BucketOptions] = Field(
-        None,
+        default=None,
         alias="createBucketIfNotPresent",
         description=(
             "CreateBucketIfNotPresent tells the driver to attempt to create the S3 bucket for output artifacts, if it"
@@ -1222,73 +1282,79 @@ class S3ArtifactRepository(BaseModel):
             " or SSE-KMS if it is."
         ),
     )
-    encryption_options: Optional[S3EncryptionOptions] = Field(None, alias="encryptionOptions")
-    endpoint: Optional[str] = Field(None, description="Endpoint is the hostname of the bucket endpoint")
-    insecure: Optional[bool] = Field(None, description="Insecure will connect to the service with TLS")
+    encryption_options: Optional[S3EncryptionOptions] = Field(default=None, alias="encryptionOptions")
+    endpoint: Optional[str] = Field(default=None, description="Endpoint is the hostname of the bucket endpoint")
+    insecure: Optional[bool] = Field(default=None, description="Insecure will connect to the service with TLS")
     key_format: Optional[str] = Field(
-        None,
+        default=None,
         alias="keyFormat",
         description="KeyFormat is defines the format of how to store keys. Can reference workflow variables",
     )
     key_prefix: Optional[str] = Field(
-        None,
+        default=None,
         alias="keyPrefix",
         description=(
             "KeyPrefix is prefix used as part of the bucket key in which the controller will store artifacts."
             " DEPRECATED. Use KeyFormat instead"
         ),
     )
-    region: Optional[str] = Field(None, description="Region contains the optional bucket region")
+    region: Optional[str] = Field(default=None, description="Region contains the optional bucket region")
     role_arn: Optional[str] = Field(
-        None, alias="roleARN", description="RoleARN is the Amazon Resource Name (ARN) of the role to assume."
+        default=None, alias="roleARN", description="RoleARN is the Amazon Resource Name (ARN) of the role to assume."
     )
     secret_key_secret: Optional[v1.SecretKeySelector] = Field(
-        None, alias="secretKeySecret", description="SecretKeySecret is the secret selector to the bucket's secret key"
+        default=None,
+        alias="secretKeySecret",
+        description="SecretKeySecret is the secret selector to the bucket's secret key",
     )
     use_sdk_creds: Optional[bool] = Field(
-        None,
+        default=None,
         alias="useSDKCreds",
         description="UseSDKCreds tells the driver to figure out credentials based on sdk defaults.",
     )
 
 
 class ArtifactRepository(BaseModel):
-    archive_logs: Optional[bool] = Field(None, alias="archiveLogs", description="ArchiveLogs enables log archiving")
+    archive_logs: Optional[bool] = Field(
+        default=None, alias="archiveLogs", description="ArchiveLogs enables log archiving"
+    )
     artifactory: Optional[ArtifactoryArtifactRepository] = Field(
-        None, description="Artifactory stores artifacts to JFrog Artifactory"
+        default=None, description="Artifactory stores artifacts to JFrog Artifactory"
     )
     azure: Optional[AzureArtifactRepository] = Field(
-        None, description="Azure stores artifact in an Azure Storage account"
+        default=None, description="Azure stores artifact in an Azure Storage account"
     )
-    gcs: Optional[GCSArtifactRepository] = Field(None, description="GCS stores artifact in a GCS object store")
-    hdfs: Optional[HDFSArtifactRepository] = Field(None, description="HDFS stores artifacts in HDFS")
+    gcs: Optional[GCSArtifactRepository] = Field(default=None, description="GCS stores artifact in a GCS object store")
+    hdfs: Optional[HDFSArtifactRepository] = Field(default=None, description="HDFS stores artifacts in HDFS")
     oss: Optional[OSSArtifactRepository] = Field(
-        None, description="OSS stores artifact in a OSS-compliant object store"
+        default=None, description="OSS stores artifact in a OSS-compliant object store"
     )
-    s3: Optional[S3ArtifactRepository] = Field(None, description="S3 stores artifact in a S3-compliant object store")
+    s3: Optional[S3ArtifactRepository] = Field(
+        default=None, description="S3 stores artifact in a S3-compliant object store"
+    )
 
 
 class ArtifactRepositoryRefStatus(BaseModel):
     artifact_repository: Optional[ArtifactRepository] = Field(
-        None,
+        default=None,
         alias="artifactRepository",
         description="The repository the workflow will use. This maybe empty before v3.1.",
     )
     config_map: Optional[str] = Field(
-        None, alias="configMap", description='The name of the config map. Defaults to "artifact-repositories".'
+        default=None, alias="configMap", description='The name of the config map. Defaults to "artifact-repositories".'
     )
     default: Optional[bool] = Field(
-        None, description="If this ref represents the default artifact repository, rather than a config map."
+        default=None, description="If this ref represents the default artifact repository, rather than a config map."
     )
     key: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             'The config map key. Defaults to the value of the "workflows.argoproj.io/default-artifact-repository"'
             " annotation."
         ),
     )
     namespace: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "The namespace of the config map. Defaults to the workflow's namespace, or the controller's namespace (if"
             " found)."
@@ -1297,26 +1363,26 @@ class ArtifactRepositoryRefStatus(BaseModel):
 
 
 class HTTP(BaseModel):
-    body: Optional[str] = Field(None, description="Body is content of the HTTP Request")
+    body: Optional[str] = Field(default=None, description="Body is content of the HTTP Request")
     body_from: Optional[HTTPBodySource] = Field(
-        None, alias="bodyFrom", description="BodyFrom is  content of the HTTP Request as Bytes"
+        default=None, alias="bodyFrom", description="BodyFrom is  content of the HTTP Request as Bytes"
     )
     headers: Optional[List[HTTPHeader]] = Field(
-        None, description="Headers are an optional list of headers to send with HTTP requests"
+        default=None, description="Headers are an optional list of headers to send with HTTP requests"
     )
     insecure_skip_verify: Optional[bool] = Field(
-        None,
+        default=None,
         alias="insecureSkipVerify",
         description="InsecureSkipVerify is a bool when if set to true will skip TLS verification for the HTTP client",
     )
-    method: Optional[str] = Field(None, description="Method is HTTP methods for HTTP Request")
+    method: Optional[str] = Field(default=None, description="Method is HTTP methods for HTTP Request")
     success_condition: Optional[str] = Field(
-        None,
+        default=None,
         alias="successCondition",
         description="SuccessCondition is an expression if evaluated to true is considered successful",
     )
     timeout_seconds: Optional[int] = Field(
-        None,
+        default=None,
         alias="timeoutSeconds",
         description="TimeoutSeconds is request timeout for HTTP Request. Default is 30 seconds",
     )
@@ -1324,73 +1390,75 @@ class HTTP(BaseModel):
 
 
 class HTTPArtifact(BaseModel):
-    auth: Optional[HTTPAuth] = Field(None, description="Auth contains information for client authentication")
+    auth: Optional[HTTPAuth] = Field(default=None, description="Auth contains information for client authentication")
     headers: Optional[List[Header]] = Field(
-        None, description="Headers are an optional list of headers to send with HTTP requests for artifacts"
+        default=None, description="Headers are an optional list of headers to send with HTTP requests for artifacts"
     )
     url: str = Field(..., description="URL of the artifact")
 
 
 class Artifact(BaseModel):
     archive: Optional[ArchiveStrategy] = Field(
-        None, description="Archive controls how the artifact will be saved to the artifact repository."
+        default=None, description="Archive controls how the artifact will be saved to the artifact repository."
     )
     archive_logs: Optional[bool] = Field(
-        None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
+        default=None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
     )
     artifact_gc: Optional[ArtifactGC] = Field(
-        None,
+        default=None,
         alias="artifactGC",
         description=(
             "ArtifactGC describes the strategy to use when to deleting an artifact from completed or deleted workflows"
         ),
     )
     artifactory: Optional[ArtifactoryArtifact] = Field(
-        None, description="Artifactory contains artifactory artifact location details"
+        default=None, description="Artifactory contains artifactory artifact location details"
     )
-    azure: Optional[AzureArtifact] = Field(None, description="Azure contains Azure Storage artifact location details")
-    deleted: Optional[bool] = Field(None, description="Has this been deleted?")
+    azure: Optional[AzureArtifact] = Field(
+        default=None, description="Azure contains Azure Storage artifact location details"
+    )
+    deleted: Optional[bool] = Field(default=None, description="Has this been deleted?")
     from_: Optional[str] = Field(
-        None, alias="from", description="From allows an artifact to reference an artifact from a previous step"
+        default=None, alias="from", description="From allows an artifact to reference an artifact from a previous step"
     )
     from_expression: Optional[str] = Field(
-        None,
+        default=None,
         alias="fromExpression",
         description="FromExpression, if defined, is evaluated to specify the value for the artifact",
     )
-    gcs: Optional[GCSArtifact] = Field(None, description="GCS contains GCS artifact location details")
-    git: Optional[GitArtifact] = Field(None, description="Git contains git artifact location details")
+    gcs: Optional[GCSArtifact] = Field(default=None, description="GCS contains GCS artifact location details")
+    git: Optional[GitArtifact] = Field(default=None, description="Git contains git artifact location details")
     global_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="globalName",
         description=(
             "GlobalName exports an output artifact to the global scope, making it available as"
             " '{{io.argoproj.workflow.v1alpha1.outputs.artifacts.XXXX}} and in workflow.status.outputs.artifacts"
         ),
     )
-    hdfs: Optional[HDFSArtifact] = Field(None, description="HDFS contains HDFS artifact location details")
-    http: Optional[HTTPArtifact] = Field(None, description="HTTP contains HTTP artifact location details")
+    hdfs: Optional[HDFSArtifact] = Field(default=None, description="HDFS contains HDFS artifact location details")
+    http: Optional[HTTPArtifact] = Field(default=None, description="HTTP contains HTTP artifact location details")
     mode: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "mode bits to use on this file, must be a value between 0 and 0777 set when loading input artifacts."
         ),
     )
     name: str = Field(..., description="name of the artifact. must be unique within a template's inputs/outputs.")
     optional: Optional[bool] = Field(
-        None, description="Make Artifacts optional, if Artifacts doesn't generate or exist"
+        default=None, description="Make Artifacts optional, if Artifacts doesn't generate or exist"
     )
-    oss: Optional[OSSArtifact] = Field(None, description="OSS contains OSS artifact location details")
-    path: Optional[str] = Field(None, description="Path is the container path to the artifact")
-    raw: Optional[RawArtifact] = Field(None, description="Raw contains raw artifact location details")
+    oss: Optional[OSSArtifact] = Field(default=None, description="OSS contains OSS artifact location details")
+    path: Optional[str] = Field(default=None, description="Path is the container path to the artifact")
+    raw: Optional[RawArtifact] = Field(default=None, description="Raw contains raw artifact location details")
     recurse_mode: Optional[bool] = Field(
-        None,
+        default=None,
         alias="recurseMode",
         description="If mode is set, apply the permission recursively into the artifact if it is a folder",
     )
-    s3: Optional[S3Artifact] = Field(None, description="S3 contains S3 artifact location details")
+    s3: Optional[S3Artifact] = Field(default=None, description="S3 contains S3 artifact location details")
     sub_path: Optional[str] = Field(
-        None,
+        default=None,
         alias="subPath",
         description="SubPath allows an artifact to be sourced from a subpath within the specified source",
     )
@@ -1398,92 +1466,96 @@ class Artifact(BaseModel):
 
 class ArtifactLocation(BaseModel):
     archive_logs: Optional[bool] = Field(
-        None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
+        default=None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
     )
     artifactory: Optional[ArtifactoryArtifact] = Field(
-        None, description="Artifactory contains artifactory artifact location details"
+        default=None, description="Artifactory contains artifactory artifact location details"
     )
-    azure: Optional[AzureArtifact] = Field(None, description="Azure contains Azure Storage artifact location details")
-    gcs: Optional[GCSArtifact] = Field(None, description="GCS contains GCS artifact location details")
-    git: Optional[GitArtifact] = Field(None, description="Git contains git artifact location details")
-    hdfs: Optional[HDFSArtifact] = Field(None, description="HDFS contains HDFS artifact location details")
-    http: Optional[HTTPArtifact] = Field(None, description="HTTP contains HTTP artifact location details")
-    oss: Optional[OSSArtifact] = Field(None, description="OSS contains OSS artifact location details")
-    raw: Optional[RawArtifact] = Field(None, description="Raw contains raw artifact location details")
-    s3: Optional[S3Artifact] = Field(None, description="S3 contains S3 artifact location details")
+    azure: Optional[AzureArtifact] = Field(
+        default=None, description="Azure contains Azure Storage artifact location details"
+    )
+    gcs: Optional[GCSArtifact] = Field(default=None, description="GCS contains GCS artifact location details")
+    git: Optional[GitArtifact] = Field(default=None, description="Git contains git artifact location details")
+    hdfs: Optional[HDFSArtifact] = Field(default=None, description="HDFS contains HDFS artifact location details")
+    http: Optional[HTTPArtifact] = Field(default=None, description="HTTP contains HTTP artifact location details")
+    oss: Optional[OSSArtifact] = Field(default=None, description="OSS contains OSS artifact location details")
+    raw: Optional[RawArtifact] = Field(default=None, description="Raw contains raw artifact location details")
+    s3: Optional[S3Artifact] = Field(default=None, description="S3 contains S3 artifact location details")
 
 
 class ArtifactNodeSpec(BaseModel):
     archive_location: Optional[ArtifactLocation] = Field(
-        None,
+        default=None,
         alias="archiveLocation",
         description="ArchiveLocation is the template-level Artifact location specification",
     )
     artifacts: Optional[Dict[str, Artifact]] = Field(
-        None, description="Artifacts maps artifact name to Artifact description"
+        default=None, description="Artifacts maps artifact name to Artifact description"
     )
 
 
 class ArtifactPaths(BaseModel):
     archive: Optional[ArchiveStrategy] = Field(
-        None, description="Archive controls how the artifact will be saved to the artifact repository."
+        default=None, description="Archive controls how the artifact will be saved to the artifact repository."
     )
     archive_logs: Optional[bool] = Field(
-        None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
+        default=None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
     )
     artifact_gc: Optional[ArtifactGC] = Field(
-        None,
+        default=None,
         alias="artifactGC",
         description=(
             "ArtifactGC describes the strategy to use when to deleting an artifact from completed or deleted workflows"
         ),
     )
     artifactory: Optional[ArtifactoryArtifact] = Field(
-        None, description="Artifactory contains artifactory artifact location details"
+        default=None, description="Artifactory contains artifactory artifact location details"
     )
-    azure: Optional[AzureArtifact] = Field(None, description="Azure contains Azure Storage artifact location details")
-    deleted: Optional[bool] = Field(None, description="Has this been deleted?")
+    azure: Optional[AzureArtifact] = Field(
+        default=None, description="Azure contains Azure Storage artifact location details"
+    )
+    deleted: Optional[bool] = Field(default=None, description="Has this been deleted?")
     from_: Optional[str] = Field(
-        None, alias="from", description="From allows an artifact to reference an artifact from a previous step"
+        default=None, alias="from", description="From allows an artifact to reference an artifact from a previous step"
     )
     from_expression: Optional[str] = Field(
-        None,
+        default=None,
         alias="fromExpression",
         description="FromExpression, if defined, is evaluated to specify the value for the artifact",
     )
-    gcs: Optional[GCSArtifact] = Field(None, description="GCS contains GCS artifact location details")
-    git: Optional[GitArtifact] = Field(None, description="Git contains git artifact location details")
+    gcs: Optional[GCSArtifact] = Field(default=None, description="GCS contains GCS artifact location details")
+    git: Optional[GitArtifact] = Field(default=None, description="Git contains git artifact location details")
     global_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="globalName",
         description=(
             "GlobalName exports an output artifact to the global scope, making it available as"
             " '{{io.argoproj.workflow.v1alpha1.outputs.artifacts.XXXX}} and in workflow.status.outputs.artifacts"
         ),
     )
-    hdfs: Optional[HDFSArtifact] = Field(None, description="HDFS contains HDFS artifact location details")
-    http: Optional[HTTPArtifact] = Field(None, description="HTTP contains HTTP artifact location details")
+    hdfs: Optional[HDFSArtifact] = Field(default=None, description="HDFS contains HDFS artifact location details")
+    http: Optional[HTTPArtifact] = Field(default=None, description="HTTP contains HTTP artifact location details")
     mode: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "mode bits to use on this file, must be a value between 0 and 0777 set when loading input artifacts."
         ),
     )
     name: str = Field(..., description="name of the artifact. must be unique within a template's inputs/outputs.")
     optional: Optional[bool] = Field(
-        None, description="Make Artifacts optional, if Artifacts doesn't generate or exist"
+        default=None, description="Make Artifacts optional, if Artifacts doesn't generate or exist"
     )
-    oss: Optional[OSSArtifact] = Field(None, description="OSS contains OSS artifact location details")
-    path: Optional[str] = Field(None, description="Path is the container path to the artifact")
-    raw: Optional[RawArtifact] = Field(None, description="Raw contains raw artifact location details")
+    oss: Optional[OSSArtifact] = Field(default=None, description="OSS contains OSS artifact location details")
+    path: Optional[str] = Field(default=None, description="Path is the container path to the artifact")
+    raw: Optional[RawArtifact] = Field(default=None, description="Raw contains raw artifact location details")
     recurse_mode: Optional[bool] = Field(
-        None,
+        default=None,
         alias="recurseMode",
         description="If mode is set, apply the permission recursively into the artifact if it is a folder",
     )
-    s3: Optional[S3Artifact] = Field(None, description="S3 contains S3 artifact location details")
+    s3: Optional[S3Artifact] = Field(default=None, description="S3 contains S3 artifact location details")
     sub_path: Optional[str] = Field(
-        None,
+        default=None,
         alias="subPath",
         description="SubPath allows an artifact to be sourced from a subpath within the specified source",
     )
@@ -1491,7 +1563,7 @@ class ArtifactPaths(BaseModel):
 
 class ContainerNode(BaseModel):
     args: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Arguments to the entrypoint. The container image's CMD is used if this is not provided. Variable"
             " references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be"
@@ -1503,7 +1575,7 @@ class ContainerNode(BaseModel):
         ),
     )
     command: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Entrypoint array. Not executed within a shell. The container image's ENTRYPOINT is used if this is not"
             " provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable"
@@ -1516,10 +1588,10 @@ class ContainerNode(BaseModel):
     )
     dependencies: Optional[List[str]] = None
     env: Optional[List[v1.EnvVar]] = Field(
-        None, description="List of environment variables to set in the container. Cannot be updated."
+        default=None, description="List of environment variables to set in the container. Cannot be updated."
     )
     env_from: Optional[List[v1.EnvFromSource]] = Field(
-        None,
+        default=None,
         alias="envFrom",
         description=(
             "List of sources to populate environment variables in the container. The keys defined within a source must"
@@ -1529,7 +1601,7 @@ class ContainerNode(BaseModel):
         ),
     )
     image: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images This field is"
             " optional to allow higher level config management to default or override container images in workload"
@@ -1537,7 +1609,7 @@ class ContainerNode(BaseModel):
         ),
     )
     image_pull_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="imagePullPolicy",
         description=(
             "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or"
@@ -1546,14 +1618,14 @@ class ContainerNode(BaseModel):
         ),
     )
     lifecycle: Optional[v1.Lifecycle] = Field(
-        None,
+        default=None,
         description=(
             "Actions that the management system should take in response to container lifecycle events. Cannot be"
             " updated."
         ),
     )
     liveness_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="livenessProbe",
         description=(
             "Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated."
@@ -1568,7 +1640,7 @@ class ContainerNode(BaseModel):
         ),
     )
     ports: Optional[List[v1.ContainerPort]] = Field(
-        None,
+        default=None,
         description=(
             "List of ports to expose from the container. Exposing a port here gives the system additional information"
             " about the network connections a container uses, but is primarily informational. Not specifying a port"
@@ -1577,7 +1649,7 @@ class ContainerNode(BaseModel):
         ),
     )
     readiness_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="readinessProbe",
         description=(
             "Periodic probe of container service readiness. Container will be removed from service endpoints if the"
@@ -1586,14 +1658,14 @@ class ContainerNode(BaseModel):
         ),
     )
     resources: Optional[v1.ResourceRequirements] = Field(
-        None,
+        default=None,
         description=(
             "Compute Resources required by this container. Cannot be updated. More info:"
             " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
         ),
     )
     security_context: Optional[v1.SecurityContext] = Field(
-        None,
+        default=None,
         alias="securityContext",
         description=(
             "SecurityContext defines the security options the container should be run with. If set, the fields of"
@@ -1602,7 +1674,7 @@ class ContainerNode(BaseModel):
         ),
     )
     startup_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="startupProbe",
         description=(
             "StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are"
@@ -1614,14 +1686,14 @@ class ContainerNode(BaseModel):
         ),
     )
     stdin: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Whether this container should allocate a buffer for stdin in the container runtime. If this is not set,"
             " reads from stdin in the container will always result in EOF. Default is false."
         ),
     )
     stdin_once: Optional[bool] = Field(
-        None,
+        default=None,
         alias="stdinOnce",
         description=(
             "Whether the container runtime should close the stdin channel after it has been opened by a single attach."
@@ -1633,7 +1705,7 @@ class ContainerNode(BaseModel):
         ),
     )
     termination_message_path: Optional[str] = Field(
-        None,
+        default=None,
         alias="terminationMessagePath",
         description=(
             "Optional: Path at which the file to which the container's termination message will be written is mounted"
@@ -1644,7 +1716,7 @@ class ContainerNode(BaseModel):
         ),
     )
     termination_message_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="terminationMessagePolicy",
         description=(
             "Indicate how the termination message should be populated. File will use the contents of"
@@ -1655,24 +1727,24 @@ class ContainerNode(BaseModel):
         ),
     )
     tty: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is"
             " false."
         ),
     )
     volume_devices: Optional[List[v1.VolumeDevice]] = Field(
-        None,
+        default=None,
         alias="volumeDevices",
         description="volumeDevices is the list of block devices to be used by the container.",
     )
     volume_mounts: Optional[List[v1.VolumeMount]] = Field(
-        None,
+        default=None,
         alias="volumeMounts",
         description="Pod volumes to mount into the container's filesystem. Cannot be updated.",
     )
     working_dir: Optional[str] = Field(
-        None,
+        default=None,
         alias="workingDir",
         description=(
             "Container's working directory. If not specified, the container runtime's default will be used, which"
@@ -1684,28 +1756,30 @@ class ContainerNode(BaseModel):
 class ContainerSetTemplate(BaseModel):
     containers: List[ContainerNode]
     retry_strategy: Optional[ContainerSetRetryStrategy] = Field(
-        None,
+        default=None,
         alias="retryStrategy",
         description=(
             "RetryStrategy describes how to retry a container nodes in the container set if it fails. Nbr of"
             " retries(default 0) and sleep duration between retries(default 0s, instant retry) can be set."
         ),
     )
-    volume_mounts: Optional[List[v1.VolumeMount]] = Field(None, alias="volumeMounts")
+    volume_mounts: Optional[List[v1.VolumeMount]] = Field(default=None, alias="volumeMounts")
 
 
 class DataSource(BaseModel):
     artifact_paths: Optional[ArtifactPaths] = Field(
-        None,
+        default=None,
         alias="artifactPaths",
         description="ArtifactPaths is a data transformation that collects a list of artifact paths",
     )
 
 
 class Inputs(BaseModel):
-    artifacts: Optional[List[Artifact]] = Field(None, description="Artifact are a list of artifacts passed as inputs")
+    artifacts: Optional[List[Artifact]] = Field(
+        default=None, description="Artifact are a list of artifacts passed as inputs"
+    )
     parameters: Optional[List[Parameter]] = Field(
-        None, description="Parameters are a list of parameters passed as inputs"
+        default=None, description="Parameters are a list of parameters passed as inputs"
     )
 
 
@@ -1715,15 +1789,15 @@ class ManifestFrom(BaseModel):
 
 class Outputs(BaseModel):
     artifacts: Optional[List[Artifact]] = Field(
-        None, description="Artifacts holds the list of output artifacts produced by a step"
+        default=None, description="Artifacts holds the list of output artifacts produced by a step"
     )
     exit_code: Optional[str] = Field(
-        None, alias="exitCode", description="ExitCode holds the exit code of a script template"
+        default=None, alias="exitCode", description="ExitCode holds the exit code of a script template"
     )
     parameters: Optional[List[Parameter]] = Field(
-        None, description="Parameters holds the list of output parameters produced by a step"
+        default=None, description="Parameters holds the list of output parameters produced by a step"
     )
-    result: Optional[str] = Field(None, description="Result holds the result (stdout) of a script template")
+    result: Optional[str] = Field(default=None, description="Result holds the result (stdout) of a script template")
 
 
 class ResourceTemplate(BaseModel):
@@ -1735,7 +1809,7 @@ class ResourceTemplate(BaseModel):
         ),
     )
     failure_condition: Optional[str] = Field(
-        None,
+        default=None,
         alias="failureCondition",
         description=(
             "FailureCondition is a label selector expression which describes the conditions of the k8s resource in"
@@ -1743,18 +1817,18 @@ class ResourceTemplate(BaseModel):
         ),
     )
     flags: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Flags is a set of additional options passed to kubectl before submitting a resource I.e. to disable"
             ' resource validation: flags: [\n\t"--validate=false"  # disable resource validation\n]'
         ),
     )
-    manifest: Optional[str] = Field(None, description="Manifest contains the kubernetes manifest")
+    manifest: Optional[str] = Field(default=None, description="Manifest contains the kubernetes manifest")
     manifest_from: Optional[ManifestFrom] = Field(
-        None, alias="manifestFrom", description="ManifestFrom is the source for a single kubernetes manifest"
+        default=None, alias="manifestFrom", description="ManifestFrom is the source for a single kubernetes manifest"
     )
     merge_strategy: Optional[str] = Field(
-        None,
+        default=None,
         alias="mergeStrategy",
         description=(
             'MergeStrategy is the strategy used to merge a patch. It defaults to "strategic" Must be one of:'
@@ -1762,14 +1836,14 @@ class ResourceTemplate(BaseModel):
         ),
     )
     set_owner_reference: Optional[bool] = Field(
-        None,
+        default=None,
         alias="setOwnerReference",
         description=(
             "SetOwnerReference sets the reference to the workflow on the OwnerReference of generated resource."
         ),
     )
     success_condition: Optional[str] = Field(
-        None,
+        default=None,
         alias="successCondition",
         description=(
             "SuccessCondition is a label selector expression which describes the conditions of the k8s resource in"
@@ -1780,7 +1854,7 @@ class ResourceTemplate(BaseModel):
 
 class ScriptTemplate(BaseModel):
     args: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Arguments to the entrypoint. The container image's CMD is used if this is not provided. Variable"
             " references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be"
@@ -1792,7 +1866,7 @@ class ScriptTemplate(BaseModel):
         ),
     )
     command: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Entrypoint array. Not executed within a shell. The container image's ENTRYPOINT is used if this is not"
             " provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable"
@@ -1804,10 +1878,10 @@ class ScriptTemplate(BaseModel):
         ),
     )
     env: Optional[List[v1.EnvVar]] = Field(
-        None, description="List of environment variables to set in the container. Cannot be updated."
+        default=None, description="List of environment variables to set in the container. Cannot be updated."
     )
     env_from: Optional[List[v1.EnvFromSource]] = Field(
-        None,
+        default=None,
         alias="envFrom",
         description=(
             "List of sources to populate environment variables in the container. The keys defined within a source must"
@@ -1825,7 +1899,7 @@ class ScriptTemplate(BaseModel):
         ),
     )
     image_pull_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="imagePullPolicy",
         description=(
             "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or"
@@ -1834,14 +1908,14 @@ class ScriptTemplate(BaseModel):
         ),
     )
     lifecycle: Optional[v1.Lifecycle] = Field(
-        None,
+        default=None,
         description=(
             "Actions that the management system should take in response to container lifecycle events. Cannot be"
             " updated."
         ),
     )
     liveness_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="livenessProbe",
         description=(
             "Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated."
@@ -1849,14 +1923,14 @@ class ScriptTemplate(BaseModel):
         ),
     )
     name: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name"
             " (DNS_LABEL). Cannot be updated."
         ),
     )
     ports: Optional[List[v1.ContainerPort]] = Field(
-        None,
+        default=None,
         description=(
             "List of ports to expose from the container. Exposing a port here gives the system additional information"
             " about the network connections a container uses, but is primarily informational. Not specifying a port"
@@ -1865,7 +1939,7 @@ class ScriptTemplate(BaseModel):
         ),
     )
     readiness_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="readinessProbe",
         description=(
             "Periodic probe of container service readiness. Container will be removed from service endpoints if the"
@@ -1874,14 +1948,14 @@ class ScriptTemplate(BaseModel):
         ),
     )
     resources: Optional[v1.ResourceRequirements] = Field(
-        None,
+        default=None,
         description=(
             "Compute Resources required by this container. Cannot be updated. More info:"
             " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
         ),
     )
     security_context: Optional[v1.SecurityContext] = Field(
-        None,
+        default=None,
         alias="securityContext",
         description=(
             "SecurityContext defines the security options the container should be run with. If set, the fields of"
@@ -1891,7 +1965,7 @@ class ScriptTemplate(BaseModel):
     )
     source: str = Field(..., description="Source contains the source code of the script to execute")
     startup_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="startupProbe",
         description=(
             "StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are"
@@ -1903,14 +1977,14 @@ class ScriptTemplate(BaseModel):
         ),
     )
     stdin: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Whether this container should allocate a buffer for stdin in the container runtime. If this is not set,"
             " reads from stdin in the container will always result in EOF. Default is false."
         ),
     )
     stdin_once: Optional[bool] = Field(
-        None,
+        default=None,
         alias="stdinOnce",
         description=(
             "Whether the container runtime should close the stdin channel after it has been opened by a single attach."
@@ -1922,7 +1996,7 @@ class ScriptTemplate(BaseModel):
         ),
     )
     termination_message_path: Optional[str] = Field(
-        None,
+        default=None,
         alias="terminationMessagePath",
         description=(
             "Optional: Path at which the file to which the container's termination message will be written is mounted"
@@ -1933,7 +2007,7 @@ class ScriptTemplate(BaseModel):
         ),
     )
     termination_message_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="terminationMessagePolicy",
         description=(
             "Indicate how the termination message should be populated. File will use the contents of"
@@ -1944,24 +2018,24 @@ class ScriptTemplate(BaseModel):
         ),
     )
     tty: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is"
             " false."
         ),
     )
     volume_devices: Optional[List[v1.VolumeDevice]] = Field(
-        None,
+        default=None,
         alias="volumeDevices",
         description="volumeDevices is the list of block devices to be used by the container.",
     )
     volume_mounts: Optional[List[v1.VolumeMount]] = Field(
-        None,
+        default=None,
         alias="volumeMounts",
         description="Pod volumes to mount into the container's filesystem. Cannot be updated.",
     )
     working_dir: Optional[str] = Field(
-        None,
+        default=None,
         alias="workingDir",
         description=(
             "Container's working directory. If not specified, the container runtime's default will be used, which"
@@ -1972,7 +2046,7 @@ class ScriptTemplate(BaseModel):
 
 class UserContainer(BaseModel):
     args: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Arguments to the entrypoint. The container image's CMD is used if this is not provided. Variable"
             " references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be"
@@ -1984,7 +2058,7 @@ class UserContainer(BaseModel):
         ),
     )
     command: Optional[List[str]] = Field(
-        None,
+        default=None,
         description=(
             "Entrypoint array. Not executed within a shell. The container image's ENTRYPOINT is used if this is not"
             " provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable"
@@ -1996,10 +2070,10 @@ class UserContainer(BaseModel):
         ),
     )
     env: Optional[List[v1.EnvVar]] = Field(
-        None, description="List of environment variables to set in the container. Cannot be updated."
+        default=None, description="List of environment variables to set in the container. Cannot be updated."
     )
     env_from: Optional[List[v1.EnvFromSource]] = Field(
-        None,
+        default=None,
         alias="envFrom",
         description=(
             "List of sources to populate environment variables in the container. The keys defined within a source must"
@@ -2009,7 +2083,7 @@ class UserContainer(BaseModel):
         ),
     )
     image: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images This field is"
             " optional to allow higher level config management to default or override container images in workload"
@@ -2017,7 +2091,7 @@ class UserContainer(BaseModel):
         ),
     )
     image_pull_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="imagePullPolicy",
         description=(
             "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or"
@@ -2026,14 +2100,14 @@ class UserContainer(BaseModel):
         ),
     )
     lifecycle: Optional[v1.Lifecycle] = Field(
-        None,
+        default=None,
         description=(
             "Actions that the management system should take in response to container lifecycle events. Cannot be"
             " updated."
         ),
     )
     liveness_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="livenessProbe",
         description=(
             "Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated."
@@ -2041,7 +2115,7 @@ class UserContainer(BaseModel):
         ),
     )
     mirror_volume_mounts: Optional[bool] = Field(
-        None,
+        default=None,
         alias="mirrorVolumeMounts",
         description=(
             "MirrorVolumeMounts will mount the same volumes specified in the main container to the container"
@@ -2057,7 +2131,7 @@ class UserContainer(BaseModel):
         ),
     )
     ports: Optional[List[v1.ContainerPort]] = Field(
-        None,
+        default=None,
         description=(
             "List of ports to expose from the container. Exposing a port here gives the system additional information"
             " about the network connections a container uses, but is primarily informational. Not specifying a port"
@@ -2066,7 +2140,7 @@ class UserContainer(BaseModel):
         ),
     )
     readiness_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="readinessProbe",
         description=(
             "Periodic probe of container service readiness. Container will be removed from service endpoints if the"
@@ -2075,14 +2149,14 @@ class UserContainer(BaseModel):
         ),
     )
     resources: Optional[v1.ResourceRequirements] = Field(
-        None,
+        default=None,
         description=(
             "Compute Resources required by this container. Cannot be updated. More info:"
             " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
         ),
     )
     security_context: Optional[v1.SecurityContext] = Field(
-        None,
+        default=None,
         alias="securityContext",
         description=(
             "SecurityContext defines the security options the container should be run with. If set, the fields of"
@@ -2091,7 +2165,7 @@ class UserContainer(BaseModel):
         ),
     )
     startup_probe: Optional[v1.Probe] = Field(
-        None,
+        default=None,
         alias="startupProbe",
         description=(
             "StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are"
@@ -2103,14 +2177,14 @@ class UserContainer(BaseModel):
         ),
     )
     stdin: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Whether this container should allocate a buffer for stdin in the container runtime. If this is not set,"
             " reads from stdin in the container will always result in EOF. Default is false."
         ),
     )
     stdin_once: Optional[bool] = Field(
-        None,
+        default=None,
         alias="stdinOnce",
         description=(
             "Whether the container runtime should close the stdin channel after it has been opened by a single attach."
@@ -2122,7 +2196,7 @@ class UserContainer(BaseModel):
         ),
     )
     termination_message_path: Optional[str] = Field(
-        None,
+        default=None,
         alias="terminationMessagePath",
         description=(
             "Optional: Path at which the file to which the container's termination message will be written is mounted"
@@ -2133,7 +2207,7 @@ class UserContainer(BaseModel):
         ),
     )
     termination_message_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="terminationMessagePolicy",
         description=(
             "Indicate how the termination message should be populated. File will use the contents of"
@@ -2144,24 +2218,24 @@ class UserContainer(BaseModel):
         ),
     )
     tty: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is"
             " false."
         ),
     )
     volume_devices: Optional[List[v1.VolumeDevice]] = Field(
-        None,
+        default=None,
         alias="volumeDevices",
         description="volumeDevices is the list of block devices to be used by the container.",
     )
     volume_mounts: Optional[List[v1.VolumeMount]] = Field(
-        None,
+        default=None,
         alias="volumeMounts",
         description="Pod volumes to mount into the container's filesystem. Cannot be updated.",
     )
     working_dir: Optional[str] = Field(
-        None,
+        default=None,
         alias="workingDir",
         description=(
             "Container's working directory. If not specified, the container runtime's default will be used, which"
@@ -2172,16 +2246,16 @@ class UserContainer(BaseModel):
 
 class Arguments(BaseModel):
     artifacts: Optional[List[Artifact]] = Field(
-        None, description="Artifacts is the list of artifacts to pass to the template or workflow"
+        default=None, description="Artifacts is the list of artifacts to pass to the template or workflow"
     )
     parameters: Optional[List[Parameter]] = Field(
-        None, description="Parameters is the list of parameters to pass to the template or workflow"
+        default=None, description="Parameters is the list of parameters to pass to the template or workflow"
     )
 
 
 class ArtifactGCSpec(BaseModel):
     artifacts_by_node: Optional[Dict[str, ArtifactNodeSpec]] = Field(
-        None,
+        default=None,
         alias="artifactsByNode",
         description="ArtifactsByNode maps Node name to information pertaining to Artifacts on that Node",
     )
@@ -2195,17 +2269,19 @@ class Data(BaseModel):
 
 
 class LifecycleHook(BaseModel):
-    arguments: Optional[Arguments] = Field(None, description="Arguments hold arguments to the template")
+    arguments: Optional[Arguments] = Field(default=None, description="Arguments hold arguments to the template")
     expression: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Expression is a condition expression for when a node will be retried. If it evaluates to false, the node"
             " will not be retried and the retry strategy will be ignored"
         ),
     )
-    template: Optional[str] = Field(None, description="Template is the name of the template to execute by the hook")
+    template: Optional[str] = Field(
+        default=None, description="Template is the name of the template to execute by the hook"
+    )
     template_ref: Optional[TemplateRef] = Field(
-        None,
+        default=None,
         alias="templateRef",
         description="TemplateRef is the reference to the template resource to execute by the hook",
     )
@@ -2220,27 +2296,29 @@ class NodeResult(BaseModel):
 
 class NodeStatus(BaseModel):
     boundary_id: Optional[str] = Field(
-        None,
+        default=None,
         alias="boundaryID",
         description=(
             "BoundaryID indicates the node ID of the associated template root node in which this node belongs to"
         ),
     )
-    children: Optional[List[str]] = Field(None, description="Children is a list of child node IDs")
+    children: Optional[List[str]] = Field(default=None, description="Children is a list of child node IDs")
     daemoned: Optional[bool] = Field(
-        None, description="Daemoned tracks whether or not this node was daemoned and need to be terminated"
+        default=None, description="Daemoned tracks whether or not this node was daemoned and need to be terminated"
     )
     display_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="displayName",
         description="DisplayName is a human readable representation of the node. Unique within a template boundary",
     )
     estimated_duration: Optional[int] = Field(
-        None, alias="estimatedDuration", description="EstimatedDuration in seconds."
+        default=None, alias="estimatedDuration", description="EstimatedDuration in seconds."
     )
-    finished_at: Optional[v1_1.Time] = Field(None, alias="finishedAt", description="Time at which this node completed")
+    finished_at: Optional[v1_1.Time] = Field(
+        default=None, alias="finishedAt", description="Time at which this node completed"
+    )
     host_node_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="hostNodeName",
         description="HostNodeName name of the Kubernetes node on which the Pod is running, if applicable",
     )
@@ -2252,20 +2330,21 @@ class NodeStatus(BaseModel):
         ),
     )
     inputs: Optional[Inputs] = Field(
-        None,
+        default=None,
         description=(
             "Inputs captures input parameter values and artifact locations supplied to this template invocation"
         ),
     )
     memoization_status: Optional[MemoizationStatus] = Field(
-        None, alias="memoizationStatus", description="MemoizationStatus holds information about cached nodes"
+        default=None, alias="memoizationStatus", description="MemoizationStatus holds information about cached nodes"
     )
     message: Optional[str] = Field(
-        None, description="A human readable message indicating details about why the node is in this condition."
+        default=None,
+        description="A human readable message indicating details about why the node is in this condition.",
     )
     name: str = Field(..., description="Name is unique name in the node tree used to generate the node ID")
     outbound_nodes: Optional[List[str]] = Field(
-        None,
+        default=None,
         alias="outboundNodes",
         description=(
             'OutboundNodes tracks the node IDs which are considered "outbound" nodes to a template invocation. For'
@@ -2281,37 +2360,39 @@ class NodeStatus(BaseModel):
         ),
     )
     outputs: Optional[Outputs] = Field(
-        None,
+        default=None,
         description=(
             "Outputs captures output parameter values and artifact locations produced by this template invocation"
         ),
     )
     phase: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Phase a simple, high-level summary of where the node is in its lifecycle. Can be used as a state machine."
         ),
     )
     pod_ip: Optional[str] = Field(
-        None, alias="podIP", description="PodIP captures the IP of the pod for daemoned steps"
+        default=None, alias="podIP", description="PodIP captures the IP of the pod for daemoned steps"
     )
-    progress: Optional[str] = Field(None, description="Progress to completion")
+    progress: Optional[str] = Field(default=None, description="Progress to completion")
     resources_duration: Optional[Dict[str, int]] = Field(
-        None,
+        default=None,
         alias="resourcesDuration",
         description=(
             "ResourcesDuration is indicative, but not accurate, resource duration. This is populated when the nodes"
             " completes."
         ),
     )
-    started_at: Optional[v1_1.Time] = Field(None, alias="startedAt", description="Time at which this node started")
+    started_at: Optional[v1_1.Time] = Field(
+        default=None, alias="startedAt", description="Time at which this node started"
+    )
     synchronization_status: Optional[NodeSynchronizationStatus] = Field(
-        None,
+        default=None,
         alias="synchronizationStatus",
         description="SynchronizationStatus is the synchronization status of the node",
     )
     template_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="templateName",
         description=(
             "TemplateName is the template name which this node corresponds to. Not applicable to virtual nodes (e.g."
@@ -2319,7 +2400,7 @@ class NodeStatus(BaseModel):
         ),
     )
     template_ref: Optional[TemplateRef] = Field(
-        None,
+        default=None,
         alias="templateRef",
         description=(
             "TemplateRef is the reference to the template resource which this node corresponds to. Not applicable to"
@@ -2327,7 +2408,7 @@ class NodeStatus(BaseModel):
         ),
     )
     template_scope: Optional[str] = Field(
-        None,
+        default=None,
         alias="templateScope",
         description="TemplateScope is the template scope in which the template of this node was retrieved.",
     )
@@ -2336,10 +2417,11 @@ class NodeStatus(BaseModel):
 
 class Submit(BaseModel):
     arguments: Optional[Arguments] = Field(
-        None, description="Arguments extracted from the event and then set as arguments to the workflow created."
+        default=None,
+        description="Arguments extracted from the event and then set as arguments to the workflow created.",
     )
     metadata: Optional[v1_1.ObjectMeta] = Field(
-        None, description="Metadata optional means to customize select fields of the workflow metadata"
+        default=None, description="Metadata optional means to customize select fields of the workflow metadata"
     )
     workflow_template_ref: WorkflowTemplateRef = Field(
         ..., alias="workflowTemplateRef", description="WorkflowTemplateRef the workflow template to submit"
@@ -2348,7 +2430,7 @@ class Submit(BaseModel):
 
 class WorkflowEventBindingSpec(BaseModel):
     event: Event = Field(..., description="Event is the event to bind to")
-    submit: Optional[Submit] = Field(None, description="Submit is the workflow template to submit")
+    submit: Optional[Submit] = Field(default=None, description="Submit is the workflow template to submit")
 
 
 class WorkflowTaskSetStatus(BaseModel):
@@ -2357,7 +2439,7 @@ class WorkflowTaskSetStatus(BaseModel):
 
 class WorkflowEventBinding(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2366,7 +2448,7 @@ class WorkflowEventBinding(BaseModel):
         ),
     )
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2379,7 +2461,7 @@ class WorkflowEventBinding(BaseModel):
 
 class WorkflowEventBindingList(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2389,7 +2471,7 @@ class WorkflowEventBindingList(BaseModel):
     )
     items: List[WorkflowEventBinding]
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2401,7 +2483,7 @@ class WorkflowEventBindingList(BaseModel):
 
 class ClusterWorkflowTemplate(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2410,7 +2492,7 @@ class ClusterWorkflowTemplate(BaseModel):
         ),
     )
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2422,18 +2504,18 @@ class ClusterWorkflowTemplate(BaseModel):
 
 
 class ClusterWorkflowTemplateCreateRequest(BaseModel):
-    create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
+    create_options: Optional[v1_1.CreateOptions] = Field(default=None, alias="createOptions")
     template: Optional[ClusterWorkflowTemplate] = None
 
 
 class ClusterWorkflowTemplateLintRequest(BaseModel):
-    create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
+    create_options: Optional[v1_1.CreateOptions] = Field(default=None, alias="createOptions")
     template: Optional[ClusterWorkflowTemplate] = None
 
 
 class ClusterWorkflowTemplateList(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2443,7 +2525,7 @@ class ClusterWorkflowTemplateList(BaseModel):
     )
     items: List[ClusterWorkflowTemplate]
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2454,19 +2536,19 @@ class ClusterWorkflowTemplateList(BaseModel):
 
 
 class ClusterWorkflowTemplateUpdateRequest(BaseModel):
-    name: Optional[str] = Field(None, description="DEPRECATED: This field is ignored.")
+    name: Optional[str] = Field(default=None, description="DEPRECATED: This field is ignored.")
     template: Optional[ClusterWorkflowTemplate] = None
 
 
 class CreateCronWorkflowRequest(BaseModel):
-    create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
-    cron_workflow: Optional[CronWorkflow] = Field(None, alias="cronWorkflow")
+    create_options: Optional[v1_1.CreateOptions] = Field(default=None, alias="createOptions")
+    cron_workflow: Optional[CronWorkflow] = Field(default=None, alias="cronWorkflow")
     namespace: Optional[str] = None
 
 
 class CronWorkflow(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2475,7 +2557,7 @@ class CronWorkflow(BaseModel):
         ),
     )
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2489,7 +2571,7 @@ class CronWorkflow(BaseModel):
 
 class CronWorkflowList(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2499,7 +2581,7 @@ class CronWorkflowList(BaseModel):
     )
     items: List[CronWorkflow]
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2511,18 +2593,18 @@ class CronWorkflowList(BaseModel):
 
 class CronWorkflowSpec(BaseModel):
     concurrency_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="concurrencyPolicy",
         description="ConcurrencyPolicy is the K8s-style concurrency policy that will be used",
     )
     failed_jobs_history_limit: Optional[int] = Field(
-        None,
+        default=None,
         alias="failedJobsHistoryLimit",
         description="FailedJobsHistoryLimit is the number of failed jobs to be kept at a time",
     )
     schedule: str = Field(..., description="Schedule is a schedule to run the Workflow in Cron format")
     starting_deadline_seconds: Optional[int] = Field(
-        None,
+        default=None,
         alias="startingDeadlineSeconds",
         description=(
             "StartingDeadlineSeconds is the K8s-style deadline that will limit the time a CronWorkflow will be run"
@@ -2530,22 +2612,24 @@ class CronWorkflowSpec(BaseModel):
         ),
     )
     successful_jobs_history_limit: Optional[int] = Field(
-        None,
+        default=None,
         alias="successfulJobsHistoryLimit",
         description="SuccessfulJobsHistoryLimit is the number of successful jobs to be kept at a time",
     )
     suspend: Optional[bool] = Field(
-        None, description="Suspend is a flag that will stop new CronWorkflows from running if set to true"
+        default=None, description="Suspend is a flag that will stop new CronWorkflows from running if set to true"
     )
     timezone: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             'Timezone is the timezone against which the cron schedule will be calculated, e.g. "Asia/Tokyo". Default'
             " is machine's local time."
         ),
     )
     workflow_metadata: Optional[v1_1.ObjectMeta] = Field(
-        None, alias="workflowMetadata", description="WorkflowMetadata contains some metadata of the workflow to be run"
+        default=None,
+        alias="workflowMetadata",
+        description="WorkflowMetadata contains some metadata of the workflow to be run",
     )
     workflow_spec: WorkflowSpec = Field(
         ..., alias="workflowSpec", description="WorkflowSpec is the spec of the workflow to be run"
@@ -2554,10 +2638,10 @@ class CronWorkflowSpec(BaseModel):
 
 class DAGTask(BaseModel):
     arguments: Optional[Arguments] = Field(
-        None, description="Arguments are the parameter and artifact arguments to the template"
+        default=None, description="Arguments are the parameter and artifact arguments to the template"
     )
     continue_on: Optional[ContinueOn] = Field(
-        None,
+        default=None,
         alias="continueOn",
         description=(
             "ContinueOn makes argo to proceed with the following step even if this step fails. Errors and Failed"
@@ -2565,42 +2649,45 @@ class DAGTask(BaseModel):
         ),
     )
     dependencies: Optional[List[str]] = Field(
-        None, description="Dependencies are name of other targets which this depends on"
+        default=None, description="Dependencies are name of other targets which this depends on"
     )
-    depends: Optional[str] = Field(None, description="Depends are name of other targets which this depends on")
+    depends: Optional[str] = Field(default=None, description="Depends are name of other targets which this depends on")
     hooks: Optional[Dict[str, LifecycleHook]] = Field(
-        None,
+        default=None,
         description=(
             "Hooks hold the lifecycle hook which is invoked at lifecycle of task, irrespective of the success,"
             " failure, or error status of the primary task"
         ),
     )
     inline: Optional[Template] = Field(
-        None, description="Inline is the template. Template must be empty if this is declared (and vice-versa)."
+        default=None,
+        description="Inline is the template. Template must be empty if this is declared (and vice-versa).",
     )
     name: str = Field(..., description="Name is the name of the target")
     on_exit: Optional[str] = Field(
-        None,
+        default=None,
         alias="onExit",
         description=(
             "OnExit is a template reference which is invoked at the end of the template, irrespective of the success,"
             " failure, or error of the primary template. DEPRECATED: Use Hooks[exit].Template instead."
         ),
     )
-    template: Optional[str] = Field(None, description="Name of template to execute")
+    template: Optional[str] = Field(default=None, description="Name of template to execute")
     template_ref: Optional[TemplateRef] = Field(
-        None, alias="templateRef", description="TemplateRef is the reference to the template resource to execute."
+        default=None,
+        alias="templateRef",
+        description="TemplateRef is the reference to the template resource to execute.",
     )
     when: Optional[str] = Field(
-        None, description="When is an expression in which the task should conditionally execute"
+        default=None, description="When is an expression in which the task should conditionally execute"
     )
     with_items: Optional[List[Item]] = Field(
-        None,
+        default=None,
         alias="withItems",
         description="WithItems expands a task into multiple parallel tasks from the items in the list",
     )
     with_param: Optional[str] = Field(
-        None,
+        default=None,
         alias="withParam",
         description=(
             "WithParam expands a task into multiple parallel tasks from the value in the parameter, which is expected"
@@ -2608,13 +2695,13 @@ class DAGTask(BaseModel):
         ),
     )
     with_sequence: Optional[Sequence] = Field(
-        None, alias="withSequence", description="WithSequence expands a task into a numeric sequence"
+        default=None, alias="withSequence", description="WithSequence expands a task into a numeric sequence"
     )
 
 
 class DAGTemplate(BaseModel):
     fail_fast: Optional[bool] = Field(
-        None,
+        default=None,
         alias="failFast",
         description=(
             'This flag is for DAG logic. The DAG logic has a built-in "fail fast" feature to stop scheduling new'
@@ -2625,12 +2712,14 @@ class DAGTemplate(BaseModel):
             " https://github.com/argoproj/argo-workflows/issues/1442"
         ),
     )
-    target: Optional[str] = Field(None, description="Target are one or more names of targets to execute in a DAG")
+    target: Optional[str] = Field(
+        default=None, description="Target are one or more names of targets to execute in a DAG"
+    )
     tasks: List[DAGTask] = Field(..., description="Tasks are a list of DAG tasks")
 
 
 class LintCronWorkflowRequest(BaseModel):
-    cron_workflow: Optional[CronWorkflow] = Field(None, alias="cronWorkflow")
+    cron_workflow: Optional[CronWorkflow] = Field(default=None, alias="cronWorkflow")
     namespace: Optional[str] = None
 
 
@@ -2640,7 +2729,7 @@ class ParallelSteps(BaseModel):
 
 class Template(BaseModel):
     active_deadline_seconds: Optional[intstr.IntOrString] = Field(
-        None,
+        default=None,
         alias="activeDeadlineSeconds",
         description=(
             "Optional duration in seconds relative to the StartTime that the pod may be active on a node before the"
@@ -2649,13 +2738,13 @@ class Template(BaseModel):
         ),
     )
     affinity: Optional[v1.Affinity] = Field(
-        None,
+        default=None,
         description=(
             "Affinity sets the pod's scheduling constraints Overrides the affinity set at the workflow level (if any)"
         ),
     )
     archive_location: Optional[ArtifactLocation] = Field(
-        None,
+        default=None,
         alias="archiveLocation",
         description=(
             "Location in which all files related to the step will be stored (logs, artifacts, etc...). Can be"
@@ -2664,7 +2753,7 @@ class Template(BaseModel):
         ),
     )
     automount_service_account_token: Optional[bool] = Field(
-        None,
+        default=None,
         alias="automountServiceAccountToken",
         description=(
             "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted in"
@@ -2672,24 +2761,24 @@ class Template(BaseModel):
         ),
     )
     container: Optional[v1.Container] = Field(
-        None, description="Container is the main container image to run in the pod"
+        default=None, description="Container is the main container image to run in the pod"
     )
     container_set: Optional[ContainerSetTemplate] = Field(
-        None, alias="containerSet", description="ContainerSet groups multiple containers within a single pod."
+        default=None, alias="containerSet", description="ContainerSet groups multiple containers within a single pod."
     )
     daemon: Optional[bool] = Field(
-        None,
+        default=None,
         description=(
             "Deamon will allow a workflow to proceed to the next step so long as the container reaches readiness"
         ),
     )
-    dag: Optional[DAGTemplate] = Field(None, description="DAG template subtype which runs a DAG")
-    data: Optional[Data] = Field(None, description="Data is a data template")
+    dag: Optional[DAGTemplate] = Field(default=None, description="DAG template subtype which runs a DAG")
+    data: Optional[Data] = Field(default=None, description="Data is a data template")
     executor: Optional[ExecutorConfig] = Field(
-        None, description="Executor holds configurations of the executor container."
+        default=None, description="Executor holds configurations of the executor container."
     )
     fail_fast: Optional[bool] = Field(
-        None,
+        default=None,
         alias="failFast",
         description=(
             "FailFast, if specified, will fail this template if any of its child pods has failed. This is useful for"
@@ -2697,29 +2786,31 @@ class Template(BaseModel):
         ),
     )
     host_aliases: Optional[List[v1.HostAlias]] = Field(
-        None,
+        default=None,
         alias="hostAliases",
         description="HostAliases is an optional list of hosts and IPs that will be injected into the pod spec",
     )
-    http: Optional[HTTP] = Field(None, description="HTTP makes a HTTP request")
+    http: Optional[HTTP] = Field(default=None, description="HTTP makes a HTTP request")
     init_containers: Optional[List[UserContainer]] = Field(
-        None,
+        default=None,
         alias="initContainers",
         description="InitContainers is a list of containers which run before the main container.",
     )
     inputs: Optional[Inputs] = Field(
-        None, description="Inputs describe what inputs parameters and artifacts are supplied to this template"
+        default=None, description="Inputs describe what inputs parameters and artifacts are supplied to this template"
     )
     memoize: Optional[Memoize] = Field(
-        None, description="Memoize allows templates to use outputs generated from already executed templates"
+        default=None, description="Memoize allows templates to use outputs generated from already executed templates"
     )
     metadata: Optional[Metadata] = Field(
-        None, description="Metdata sets the pods's metadata, i.e. annotations and labels"
+        default=None, description="Metdata sets the pods's metadata, i.e. annotations and labels"
     )
-    metrics: Optional[Metrics] = Field(None, description="Metrics are a list of metrics emitted from this template")
-    name: Optional[str] = Field(None, description="Name is the name of the template")
+    metrics: Optional[Metrics] = Field(
+        default=None, description="Metrics are a list of metrics emitted from this template"
+    )
+    name: Optional[str] = Field(default=None, description="Name is the name of the template")
     node_selector: Optional[Dict[str, str]] = Field(
-        None,
+        default=None,
         alias="nodeSelector",
         description=(
             "NodeSelector is a selector to schedule this step of the workflow to be run on the selected node(s)."
@@ -2727,46 +2818,50 @@ class Template(BaseModel):
         ),
     )
     outputs: Optional[Outputs] = Field(
-        None, description="Outputs describe the parameters and artifacts that this template produces"
+        default=None, description="Outputs describe the parameters and artifacts that this template produces"
     )
     parallelism: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "Parallelism limits the max total parallel pods that can execute at the same time within the boundaries of"
             " this template invocation. If additional steps/dag templates are invoked, the pods created by those"
             " templates will not be counted towards this total."
         ),
     )
-    plugin: Optional[Plugin] = Field(None, description="Plugin is a plugin template")
+    plugin: Optional[Plugin] = Field(default=None, description="Plugin is a plugin template")
     pod_spec_patch: Optional[str] = Field(
-        None,
+        default=None,
         alias="podSpecPatch",
         description=(
             "PodSpecPatch holds strategic merge patch to apply against the pod spec. Allows parameterization of"
             " container fields which are not strings (e.g. resource limits)."
         ),
     )
-    priority: Optional[int] = Field(None, description="Priority to apply to workflow pods.")
+    priority: Optional[int] = Field(default=None, description="Priority to apply to workflow pods.")
     priority_class_name: Optional[str] = Field(
-        None, alias="priorityClassName", description="PriorityClassName to apply to workflow pods."
+        default=None, alias="priorityClassName", description="PriorityClassName to apply to workflow pods."
     )
     resource: Optional[ResourceTemplate] = Field(
-        None, description="Resource template subtype which can run k8s resources"
+        default=None, description="Resource template subtype which can run k8s resources"
     )
     retry_strategy: Optional[RetryStrategy] = Field(
-        None, alias="retryStrategy", description="RetryStrategy describes how to retry a template when it fails"
+        default=None,
+        alias="retryStrategy",
+        description="RetryStrategy describes how to retry a template when it fails",
     )
     scheduler_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="schedulerName",
         description=(
             "If specified, the pod will be dispatched by specified scheduler. Or it will be dispatched by workflow"
             " scope scheduler if specified. If neither specified, the pod will be dispatched by default scheduler."
         ),
     )
-    script: Optional[ScriptTemplate] = Field(None, description="Script runs a portion of code against an interpreter")
+    script: Optional[ScriptTemplate] = Field(
+        default=None, description="Script runs a portion of code against an interpreter"
+    )
     security_context: Optional[v1.PodSecurityContext] = Field(
-        None,
+        default=None,
         alias="securityContext",
         description=(
             "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to"
@@ -2774,47 +2869,49 @@ class Template(BaseModel):
         ),
     )
     service_account_name: Optional[str] = Field(
-        None, alias="serviceAccountName", description="ServiceAccountName to apply to workflow pods"
+        default=None, alias="serviceAccountName", description="ServiceAccountName to apply to workflow pods"
     )
     sidecars: Optional[List[UserContainer]] = Field(
-        None,
+        default=None,
         description=(
             "Sidecars is a list of containers which run alongside the main container Sidecars are automatically killed"
             " when the main container completes"
         ),
     )
     steps: Optional[List[ParallelSteps]] = Field(
-        None, description="Steps define a series of sequential/parallel workflow steps"
+        default=None, description="Steps define a series of sequential/parallel workflow steps"
     )
     suspend: Optional[SuspendTemplate] = Field(
-        None, description="Suspend template subtype which can suspend a workflow when reaching the step"
+        default=None, description="Suspend template subtype which can suspend a workflow when reaching the step"
     )
     synchronization: Optional[Synchronization] = Field(
-        None, description="Synchronization holds synchronization lock configuration for this template"
+        default=None, description="Synchronization holds synchronization lock configuration for this template"
     )
     timeout: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Timeout allows to set the total node execution timeout duration counting from the node's start time. This"
             " duration also includes time in which the node spends in Pending state. This duration may not be applied"
             " to Step or DAG templates."
         ),
     )
-    tolerations: Optional[List[v1.Toleration]] = Field(None, description="Tolerations to apply to workflow pods.")
+    tolerations: Optional[List[v1.Toleration]] = Field(
+        default=None, description="Tolerations to apply to workflow pods."
+    )
     volumes: Optional[List[v1.Volume]] = Field(
-        None, description="Volumes is a list of volumes that can be mounted by containers in a template."
+        default=None, description="Volumes is a list of volumes that can be mounted by containers in a template."
     )
 
 
 class UpdateCronWorkflowRequest(BaseModel):
-    cron_workflow: Optional[CronWorkflow] = Field(None, alias="cronWorkflow")
-    name: Optional[str] = Field(None, description="DEPRECATED: This field is ignored.")
+    cron_workflow: Optional[CronWorkflow] = Field(default=None, alias="cronWorkflow")
+    name: Optional[str] = Field(default=None, description="DEPRECATED: This field is ignored.")
     namespace: Optional[str] = None
 
 
 class Workflow(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2823,7 +2920,7 @@ class Workflow(BaseModel):
         ),
     )
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2836,10 +2933,10 @@ class Workflow(BaseModel):
 
 
 class WorkflowCreateRequest(BaseModel):
-    create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
-    instance_id: Optional[str] = Field(None, alias="instanceID", description="This field is no longer used.")
+    create_options: Optional[v1_1.CreateOptions] = Field(default=None, alias="createOptions")
+    instance_id: Optional[str] = Field(default=None, alias="instanceID", description="This field is no longer used.")
     namespace: Optional[str] = None
-    server_dry_run: Optional[bool] = Field(None, alias="serverDryRun")
+    server_dry_run: Optional[bool] = Field(default=None, alias="serverDryRun")
     workflow: Optional[Workflow] = None
 
 
@@ -2850,7 +2947,7 @@ class WorkflowLintRequest(BaseModel):
 
 class WorkflowList(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -2860,7 +2957,7 @@ class WorkflowList(BaseModel):
     )
     items: List[Workflow]
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -2872,7 +2969,7 @@ class WorkflowList(BaseModel):
 
 class WorkflowSpec(BaseModel):
     active_deadline_seconds: Optional[int] = Field(
-        None,
+        default=None,
         alias="activeDeadlineSeconds",
         description=(
             "Optional duration in seconds relative to the workflow start time which the workflow is allowed to run"
@@ -2881,17 +2978,17 @@ class WorkflowSpec(BaseModel):
         ),
     )
     affinity: Optional[v1.Affinity] = Field(
-        None,
+        default=None,
         description=(
             "Affinity sets the scheduling constraints for all pods in the io.argoproj.workflow.v1alpha1. Can be"
             " overridden by an affinity specified in the template"
         ),
     )
     archive_logs: Optional[bool] = Field(
-        None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
+        default=None, alias="archiveLogs", description="ArchiveLogs indicates if the container logs should be archived"
     )
     arguments: Optional[Arguments] = Field(
-        None,
+        default=None,
         description=(
             "Arguments contain the parameters and artifacts sent to the workflow entrypoint Parameters are"
             " referencable globally using the 'workflow' variable prefix. e.g."
@@ -2899,7 +2996,7 @@ class WorkflowSpec(BaseModel):
         ),
     )
     artifact_gc: Optional[ArtifactGC] = Field(
-        None,
+        default=None,
         alias="artifactGC",
         description=(
             "ArtifactGC describes the strategy to use when deleting artifacts from completed or deleted workflows"
@@ -2907,14 +3004,14 @@ class WorkflowSpec(BaseModel):
         ),
     )
     artifact_repository_ref: Optional[ArtifactRepositoryRef] = Field(
-        None,
+        default=None,
         alias="artifactRepositoryRef",
         description=(
             "ArtifactRepositoryRef specifies the configMap name and key containing the artifact repository config."
         ),
     )
     automount_service_account_token: Optional[bool] = Field(
-        None,
+        default=None,
         alias="automountServiceAccountToken",
         description=(
             "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted in"
@@ -2922,12 +3019,12 @@ class WorkflowSpec(BaseModel):
         ),
     )
     dns_config: Optional[v1.PodDNSConfig] = Field(
-        None,
+        default=None,
         alias="dnsConfig",
         description="PodDNSConfig defines the DNS parameters of a pod in addition to those generated from DNSPolicy.",
     )
     dns_policy: Optional[str] = Field(
-        None,
+        default=None,
         alias="dnsPolicy",
         description=(
             "Set DNS policy for the pod. Defaults to \"ClusterFirst\". Valid values are 'ClusterFirstWithHostNet',"
@@ -2937,25 +3034,28 @@ class WorkflowSpec(BaseModel):
         ),
     )
     entrypoint: Optional[str] = Field(
-        None,
+        default=None,
         description="Entrypoint is a template reference to the starting point of the io.argoproj.workflow.v1alpha1.",
     )
     executor: Optional[ExecutorConfig] = Field(
-        None, description="Executor holds configurations of executor containers of the io.argoproj.workflow.v1alpha1."
+        default=None,
+        description="Executor holds configurations of executor containers of the io.argoproj.workflow.v1alpha1.",
     )
     hooks: Optional[Dict[str, LifecycleHook]] = Field(
-        None,
+        default=None,
         description=(
             "Hooks holds the lifecycle hook which is invoked at lifecycle of step, irrespective of the success,"
             " failure, or error status of the primary step"
         ),
     )
-    host_aliases: Optional[List[v1.HostAlias]] = Field(None, alias="hostAliases")
+    host_aliases: Optional[List[v1.HostAlias]] = Field(default=None, alias="hostAliases")
     host_network: Optional[bool] = Field(
-        None, alias="hostNetwork", description="Host networking requested for this workflow pod. Default to false."
+        default=None,
+        alias="hostNetwork",
+        description="Host networking requested for this workflow pod. Default to false.",
     )
     image_pull_secrets: Optional[List[v1.LocalObjectReference]] = Field(
-        None,
+        default=None,
         alias="imagePullSecrets",
         description=(
             "ImagePullSecrets is a list of references to secrets in the same namespace to use for pulling any images"
@@ -2964,9 +3064,11 @@ class WorkflowSpec(BaseModel):
             " https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod"
         ),
     )
-    metrics: Optional[Metrics] = Field(None, description="Metrics are a list of metrics emitted from this Workflow")
+    metrics: Optional[Metrics] = Field(
+        default=None, description="Metrics are a list of metrics emitted from this Workflow"
+    )
     node_selector: Optional[Dict[str, str]] = Field(
-        None,
+        default=None,
         alias="nodeSelector",
         description=(
             "NodeSelector is a selector which will result in all pods of the workflow to be scheduled on the selected"
@@ -2974,7 +3076,7 @@ class WorkflowSpec(BaseModel):
         ),
     )
     on_exit: Optional[str] = Field(
-        None,
+        default=None,
         alias="onExit",
         description=(
             "OnExit is a template reference which is invoked at the end of the workflow, irrespective of the success,"
@@ -2982,11 +3084,11 @@ class WorkflowSpec(BaseModel):
         ),
     )
     parallelism: Optional[int] = Field(
-        None,
+        default=None,
         description="Parallelism limits the max total parallel pods that can execute at the same time in a workflow",
     )
     pod_disruption_budget: Optional[v1beta1.PodDisruptionBudgetSpec] = Field(
-        None,
+        default=None,
         alias="podDisruptionBudget",
         description=(
             "PodDisruptionBudget holds the number of concurrent disruptions that you allow for Workflow's Pods."
@@ -2995,23 +3097,23 @@ class WorkflowSpec(BaseModel):
         ),
     )
     pod_gc: Optional[PodGC] = Field(
-        None, alias="podGC", description="PodGC describes the strategy to use when deleting completed pods"
+        default=None, alias="podGC", description="PodGC describes the strategy to use when deleting completed pods"
     )
     pod_metadata: Optional[Metadata] = Field(
-        None,
+        default=None,
         alias="podMetadata",
         description="PodMetadata defines additional metadata that should be applied to workflow pods",
     )
     pod_priority: Optional[int] = Field(
-        None,
+        default=None,
         alias="podPriority",
         description="Priority to apply to workflow pods. DEPRECATED: Use PodPriorityClassName instead.",
     )
     pod_priority_class_name: Optional[str] = Field(
-        None, alias="podPriorityClassName", description="PriorityClassName to apply to workflow pods."
+        default=None, alias="podPriorityClassName", description="PriorityClassName to apply to workflow pods."
     )
     pod_spec_patch: Optional[str] = Field(
-        None,
+        default=None,
         alias="podSpecPatch",
         description=(
             "PodSpecPatch holds strategic merge patch to apply against the pod spec. Allows parameterization of"
@@ -3019,19 +3121,19 @@ class WorkflowSpec(BaseModel):
         ),
     )
     priority: Optional[int] = Field(
-        None,
+        default=None,
         description=(
             "Priority is used if controller is configured to process limited number of workflows in parallel."
             " Workflows with higher priority are processed first."
         ),
     )
     retry_strategy: Optional[RetryStrategy] = Field(
-        None,
+        default=None,
         alias="retryStrategy",
         description="RetryStrategy for all templates in the io.argoproj.workflow.v1alpha1.",
     )
     scheduler_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="schedulerName",
         description=(
             "Set scheduler name for all pods. Will be overridden if container/script template's scheduler name is set."
@@ -3039,7 +3141,7 @@ class WorkflowSpec(BaseModel):
         ),
     )
     security_context: Optional[v1.PodSecurityContext] = Field(
-        None,
+        default=None,
         alias="securityContext",
         description=(
             "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to"
@@ -3047,21 +3149,22 @@ class WorkflowSpec(BaseModel):
         ),
     )
     service_account_name: Optional[str] = Field(
-        None,
+        default=None,
         alias="serviceAccountName",
         description="ServiceAccountName is the name of the ServiceAccount to run all pods of the workflow as.",
     )
     shutdown: Optional[str] = Field(
-        None, description="Shutdown will shutdown the workflow according to its ShutdownStrategy"
+        default=None, description="Shutdown will shutdown the workflow according to its ShutdownStrategy"
     )
     suspend: Optional[bool] = Field(
-        None, description="Suspend will suspend the workflow and prevent execution of any future steps in the workflow"
+        default=None,
+        description="Suspend will suspend the workflow and prevent execution of any future steps in the workflow",
     )
     synchronization: Optional[Synchronization] = Field(
-        None, description="Synchronization holds synchronization lock configuration for this Workflow"
+        default=None, description="Synchronization holds synchronization lock configuration for this Workflow"
     )
     template_defaults: Optional[Template] = Field(
-        None,
+        default=None,
         alias="templateDefaults",
         description=(
             "TemplateDefaults holds default template values that will apply to all templates in the Workflow, unless"
@@ -3069,11 +3172,13 @@ class WorkflowSpec(BaseModel):
         ),
     )
     templates: Optional[List[Template]] = Field(
-        None, description="Templates is a list of workflow templates used in a workflow"
+        default=None, description="Templates is a list of workflow templates used in a workflow"
     )
-    tolerations: Optional[List[v1.Toleration]] = Field(None, description="Tolerations to apply to workflow pods.")
+    tolerations: Optional[List[v1.Toleration]] = Field(
+        default=None, description="Tolerations to apply to workflow pods."
+    )
     ttl_strategy: Optional[TTLStrategy] = Field(
-        None,
+        default=None,
         alias="ttlStrategy",
         description=(
             "TTLStrategy limits the lifetime of a Workflow that has finished execution depending on if it Succeeded or"
@@ -3082,12 +3187,12 @@ class WorkflowSpec(BaseModel):
         ),
     )
     volume_claim_gc: Optional[VolumeClaimGC] = Field(
-        None,
+        default=None,
         alias="volumeClaimGC",
         description="VolumeClaimGC describes the strategy to use when deleting volumes from completed workflows",
     )
     volume_claim_templates: Optional[List[v1.PersistentVolumeClaim]] = Field(
-        None,
+        default=None,
         alias="volumeClaimTemplates",
         description=(
             "VolumeClaimTemplates is a list of claims that containers are allowed to reference. The Workflow"
@@ -3096,18 +3201,18 @@ class WorkflowSpec(BaseModel):
         ),
     )
     volumes: Optional[List[v1.Volume]] = Field(
-        None,
+        default=None,
         description=(
             "Volumes is a list of volumes that can be mounted by containers in a io.argoproj.workflow.v1alpha1."
         ),
     )
     workflow_metadata: Optional[WorkflowMetadata] = Field(
-        None,
+        default=None,
         alias="workflowMetadata",
         description="WorkflowMetadata contains some metadata of the workflow to refer to",
     )
     workflow_template_ref: Optional[WorkflowTemplateRef] = Field(
-        None,
+        default=None,
         alias="workflowTemplateRef",
         description="WorkflowTemplateRef holds a reference to a WorkflowTemplate for execution",
     )
@@ -3115,12 +3220,12 @@ class WorkflowSpec(BaseModel):
 
 class WorkflowStatus(BaseModel):
     artifact_gc_status: Optional[ArtGCStatus] = Field(
-        None,
+        default=None,
         alias="artifactGCStatus",
         description="ArtifactGCStatus maintains the status of Artifact Garbage Collection",
     )
     artifact_repository_ref: Optional[ArtifactRepositoryRefStatus] = Field(
-        None,
+        default=None,
         alias="artifactRepositoryRef",
         description=(
             "ArtifactRepositoryRef is used to cache the repository to use so we do not need to determine it everytime"
@@ -3128,25 +3233,26 @@ class WorkflowStatus(BaseModel):
         ),
     )
     compressed_nodes: Optional[str] = Field(
-        None, alias="compressedNodes", description="Compressed and base64 decoded Nodes map"
+        default=None, alias="compressedNodes", description="Compressed and base64 decoded Nodes map"
     )
     conditions: Optional[List[Condition]] = Field(
-        None, description="Conditions is a list of conditions the Workflow may have"
+        default=None, description="Conditions is a list of conditions the Workflow may have"
     )
     estimated_duration: Optional[int] = Field(
-        None, alias="estimatedDuration", description="EstimatedDuration in seconds."
+        default=None, alias="estimatedDuration", description="EstimatedDuration in seconds."
     )
     finished_at: Optional[v1_1.Time] = Field(
-        None, alias="finishedAt", description="Time at which this workflow completed"
+        default=None, alias="finishedAt", description="Time at which this workflow completed"
     )
     message: Optional[str] = Field(
-        None, description="A human readable message indicating details about why the workflow is in this condition."
+        default=None,
+        description="A human readable message indicating details about why the workflow is in this condition.",
     )
     nodes: Optional[Dict[str, NodeStatus]] = Field(
-        None, description="Nodes is a mapping between a node ID and the node's status."
+        default=None, description="Nodes is a mapping between a node ID and the node's status."
     )
     offload_node_status_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="offloadNodeStatusVersion",
         description=(
             "Whether on not node status has been offloaded to a database. If exists, then Nodes and CompressedNodes"
@@ -3154,13 +3260,13 @@ class WorkflowStatus(BaseModel):
         ),
     )
     outputs: Optional[Outputs] = Field(
-        None,
+        default=None,
         description=(
             "Outputs captures output values and artifact locations produced by the workflow via global outputs"
         ),
     )
     persistent_volume_claims: Optional[List[v1.Volume]] = Field(
-        None,
+        default=None,
         alias="persistentVolumeClaims",
         description=(
             "PersistentVolumeClaims tracks all PVCs that were created as part of the io.argoproj.workflow.v1alpha1."
@@ -3168,32 +3274,34 @@ class WorkflowStatus(BaseModel):
         ),
     )
     phase: Optional[str] = Field(
-        None, description="Phase a simple, high-level summary of where the workflow is in its lifecycle."
+        default=None, description="Phase a simple, high-level summary of where the workflow is in its lifecycle."
     )
-    progress: Optional[str] = Field(None, description="Progress to completion")
+    progress: Optional[str] = Field(default=None, description="Progress to completion")
     resources_duration: Optional[Dict[str, int]] = Field(
-        None, alias="resourcesDuration", description="ResourcesDuration is the total for the workflow"
+        default=None, alias="resourcesDuration", description="ResourcesDuration is the total for the workflow"
     )
-    started_at: Optional[v1_1.Time] = Field(None, alias="startedAt", description="Time at which this workflow started")
+    started_at: Optional[v1_1.Time] = Field(
+        default=None, alias="startedAt", description="Time at which this workflow started"
+    )
     stored_templates: Optional[Dict[str, Template]] = Field(
-        None,
+        default=None,
         alias="storedTemplates",
         description="StoredTemplates is a mapping between a template ref and the node's status.",
     )
     stored_workflow_template_spec: Optional[WorkflowSpec] = Field(
-        None,
+        default=None,
         alias="storedWorkflowTemplateSpec",
         description="StoredWorkflowSpec stores the WorkflowTemplate spec for future execution.",
     )
     synchronization: Optional[SynchronizationStatus] = Field(
-        None, description="Synchronization stores the status of synchronization locks"
+        default=None, description="Synchronization stores the status of synchronization locks"
     )
 
 
 class WorkflowStep(BaseModel):
-    arguments: Optional[Arguments] = Field(None, description="Arguments hold arguments to the template")
+    arguments: Optional[Arguments] = Field(default=None, description="Arguments hold arguments to the template")
     continue_on: Optional[ContinueOn] = Field(
-        None,
+        default=None,
         alias="continueOn",
         description=(
             "ContinueOn makes argo to proceed with the following step even if this step fails. Errors and Failed"
@@ -3201,40 +3309,43 @@ class WorkflowStep(BaseModel):
         ),
     )
     hooks: Optional[Dict[str, LifecycleHook]] = Field(
-        None,
+        default=None,
         description=(
             "Hooks holds the lifecycle hook which is invoked at lifecycle of step, irrespective of the success,"
             " failure, or error status of the primary step"
         ),
     )
     inline: Optional[Template] = Field(
-        None, description="Inline is the template. Template must be empty if this is declared (and vice-versa)."
+        default=None,
+        description="Inline is the template. Template must be empty if this is declared (and vice-versa).",
     )
-    name: Optional[str] = Field(None, description="Name of the step")
+    name: Optional[str] = Field(default=None, description="Name of the step")
     on_exit: Optional[str] = Field(
-        None,
+        default=None,
         alias="onExit",
         description=(
             "OnExit is a template reference which is invoked at the end of the template, irrespective of the success,"
             " failure, or error of the primary template. DEPRECATED: Use Hooks[exit].Template instead."
         ),
     )
-    template: Optional[str] = Field(None, description="Template is the name of the template to execute as the step")
+    template: Optional[str] = Field(
+        default=None, description="Template is the name of the template to execute as the step"
+    )
     template_ref: Optional[TemplateRef] = Field(
-        None,
+        default=None,
         alias="templateRef",
         description="TemplateRef is the reference to the template resource to execute as the step.",
     )
     when: Optional[str] = Field(
-        None, description="When is an expression in which the step should conditionally execute"
+        default=None, description="When is an expression in which the step should conditionally execute"
     )
     with_items: Optional[List[Item]] = Field(
-        None,
+        default=None,
         alias="withItems",
         description="WithItems expands a step into multiple parallel steps from the items in the list",
     )
     with_param: Optional[str] = Field(
-        None,
+        default=None,
         alias="withParam",
         description=(
             "WithParam expands a step into multiple parallel steps from the value in the parameter, which is expected"
@@ -3242,7 +3353,7 @@ class WorkflowStep(BaseModel):
         ),
     )
     with_sequence: Optional[Sequence] = Field(
-        None, alias="withSequence", description="WithSequence expands a step into a numeric sequence"
+        default=None, alias="withSequence", description="WithSequence expands a step into a numeric sequence"
     )
 
 
@@ -3252,7 +3363,7 @@ class WorkflowTaskSetSpec(BaseModel):
 
 class WorkflowTemplate(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -3261,7 +3372,7 @@ class WorkflowTemplate(BaseModel):
         ),
     )
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -3273,20 +3384,20 @@ class WorkflowTemplate(BaseModel):
 
 
 class WorkflowTemplateCreateRequest(BaseModel):
-    create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
+    create_options: Optional[v1_1.CreateOptions] = Field(default=None, alias="createOptions")
     namespace: Optional[str] = None
     template: Optional[WorkflowTemplate] = None
 
 
 class WorkflowTemplateLintRequest(BaseModel):
-    create_options: Optional[v1_1.CreateOptions] = Field(None, alias="createOptions")
+    create_options: Optional[v1_1.CreateOptions] = Field(default=None, alias="createOptions")
     namespace: Optional[str] = None
     template: Optional[WorkflowTemplate] = None
 
 
 class WorkflowTemplateList(BaseModel):
     api_version: Optional[str] = Field(
-        None,
+        default=None,
         alias="apiVersion",
         description=(
             "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
@@ -3296,7 +3407,7 @@ class WorkflowTemplateList(BaseModel):
     )
     items: List[WorkflowTemplate]
     kind: Optional[str] = Field(
-        None,
+        default=None,
         description=(
             "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
             " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
@@ -3307,14 +3418,14 @@ class WorkflowTemplateList(BaseModel):
 
 
 class WorkflowTemplateUpdateRequest(BaseModel):
-    name: Optional[str] = Field(None, description="DEPRECATED: This field is ignored.")
+    name: Optional[str] = Field(default=None, description="DEPRECATED: This field is ignored.")
     namespace: Optional[str] = None
     template: Optional[WorkflowTemplate] = None
 
 
 class WorkflowWatchEvent(BaseModel):
-    object: Optional[Workflow] = Field(None, title="the workflow")
-    type: Optional[str] = Field(None, title="the type of change")
+    object: Optional[Workflow] = Field(default=None, title="the workflow")
+    type: Optional[str] = Field(default=None, title="the type of change")
 
 
 ClusterWorkflowTemplate.update_forward_refs()

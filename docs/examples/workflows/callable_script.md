@@ -10,10 +10,15 @@
     ```python linenums="1"
     from typing import List
 
+    try:
+        from typing import Annotated  # type: ignore
+    except ImportError:
+        from typing_extensions import Annotated  # type: ignore
+
     from pydantic import BaseModel
 
     from hera.shared import global_config
-    from hera.workflows import Script, Steps, Workflow, script
+    from hera.workflows import Parameter, Script, Steps, Workflow, script
 
     # Note, setting constructor to runner is only possible if the source code is available
     # along with dependencies include hera in the image.
@@ -25,6 +30,7 @@
     # Runner script constructor is still and experimental feature and we need to explicitly opt in to it
     # Note that experimental features are subject to breaking changes in future releases of the same major version
     global_config.experimental_features["script_runner"] = True
+    global_config.experimental_features["script_annotations"] = True
 
 
     # An optional pydantic input type
@@ -71,11 +77,28 @@
         return Output(output=[Input.parse_raw(input)])
 
 
+    # Use the script_annotations feature to seamlessly enable aliased kebab-case names
+    # as your template interface, while using regular snake_case in the Python code
+    @script()
+    def function_kebab(
+        a_but_kebab: Annotated[int, Parameter(name="a-but-kebab")] = 2,
+        b_but_kebab: Annotated[str, Parameter(name="b-but-kebab")] = "foo",
+    ) -> Output:
+        return Output(output=[Input(a=a_but_kebab, b=b_but_kebab)])
+
+
+    @script()
+    def function_kebab_object(input_values: Annotated[Input, Parameter(name="input-values")]) -> Output:
+        return Output(output=[input_values])
+
+
     with Workflow(name="my-workflow") as w:
         with Steps(name="my-steps") as s:
             my_function(arguments={"input": Input(a=2, b="bar")})
             str_function(arguments={"input": Input(a=2, b="bar").json()})
             another_function(arguments={"inputs": [Input(a=2, b="bar"), Input(a=2, b="bar")]})
+            function_kebab(arguments={"a-but-kebab": 3, "b-but-kebab": "bar"})
+            function_kebab_object(arguments={"input-values": Input(a=3, b="bar")})
     ```
 
 === "YAML"
@@ -107,6 +130,20 @@
                 value: '[{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]'
             name: another-function
             template: another-function
+        - - arguments:
+              parameters:
+              - name: a-but-kebab
+                value: '3'
+              - name: b-but-kebab
+                value: bar
+            name: function-kebab
+            template: function-kebab
+        - - arguments:
+              parameters:
+              - name: input-values
+                value: '{"a": 3, "b": "bar"}'
+            name: function-kebab-object
+            template: function-kebab-object
       - inputs:
           parameters:
           - name: input
@@ -119,6 +156,9 @@
           - examples.workflows.callable_script:my_function
           command:
           - python
+          env:
+          - name: script_annotations
+            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - inputs:
@@ -133,6 +173,9 @@
           - examples.workflows.callable_script:str_function
           command:
           - python
+          env:
+          - name: script_annotations
+            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - inputs:
@@ -147,6 +190,46 @@
           - examples.workflows.callable_script:another_function
           command:
           - python
+          env:
+          - name: script_annotations
+            value: ''
+          image: my-image-with-python-source-code-and-dependencies
+          source: '{{inputs.parameters}}'
+      - inputs:
+          parameters:
+          - default: '2'
+            name: a-but-kebab
+          - default: foo
+            name: b-but-kebab
+        name: function-kebab
+        script:
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.callable_script:function_kebab
+          command:
+          - python
+          env:
+          - name: script_annotations
+            value: ''
+          image: my-image-with-python-source-code-and-dependencies
+          source: '{{inputs.parameters}}'
+      - inputs:
+          parameters:
+          - name: input-values
+        name: function-kebab-object
+        script:
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.callable_script:function_kebab_object
+          command:
+          - python
+          env:
+          - name: script_annotations
+            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
     ```

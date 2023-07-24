@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-types-
+spec:
+  entrypoint: my_steps
+  templates:
+  - name: my_steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: a_name
+            value: hello there
+        name: echo
+        template: echo
+  - inputs:
+      parameters:
+      - name: another_name
+    name: echo
+    script:
+      command:
+      - python
+      env:
+      - name: script_annotations
+        value: ''
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: another_name = json.loads(r''''''{{inputs.parameters.another_name}}'''''')
+
+        except: another_name = r''''''{{inputs.parameters.another_name}}''''''
+
+
+        print(a_name)'

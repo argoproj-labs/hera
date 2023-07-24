@@ -12,7 +12,6 @@ from functools import wraps
 from typing import (
     Any,
     Callable,
-    Dict,
     List,
     Optional,
     Type,
@@ -22,7 +21,7 @@ from typing import (
 )
 
 from pydantic import root_validator, validator
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, get_args, get_origin
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
@@ -38,6 +37,7 @@ from hera.workflows._mixins import (
 )
 from hera.workflows._unparse import roundtrip
 from hera.workflows.models import (
+    EnvVar,
     Inputs as ModelInputs,
     Lifecycle,
     ScriptTemplate as _ModelScriptTemplate,
@@ -47,6 +47,11 @@ from hera.workflows.models import (
 from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
+
+try:
+    from typing import Annotated  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated  # type: ignore
 
 
 class ScriptConstructor(BaseMixin):
@@ -64,7 +69,7 @@ class ScriptConstructor(BaseMixin):
         raise NotImplementedError
 
     def transform_values(self, cls: Type["Script"], values: Any) -> Any:
-        """A function that will be inokved by the root validator of the Script class."""
+        """A function that will be invoked by the root validator of the Script class."""
         return values
 
     def transform_script_template_post_build(
@@ -86,8 +91,10 @@ class Script(
     ResourceMixin,
     VolumeMountMixin,
 ):
-    """A Script acts as a wrapper around a container. In Hera this defaults to a "python:3.8" image
-    specified by global_config.image, which runs a python source specified by `Script.source`.
+    """A Script acts as a wrapper around a container.
+
+    In Hera this defaults to a "python:3.8" image specified by global_config.image, which runs a python source
+    specified by `Script.source`.
     """
 
     container_name: Optional[str] = None
@@ -148,9 +155,11 @@ class Script(
 
         already_set_params = {p.name for p in inputs.parameters or []}
         already_set_artifacts = {p.name for p in inputs.artifacts or []}
+
         for param in func_parameters:
             if param.name not in already_set_params and param.name not in already_set_artifacts:
                 inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
+
         return inputs
 
     def _build_template(self) -> _ModelTemplate:
@@ -196,12 +205,18 @@ class Script(
         assert isinstance(self.constructor, ScriptConstructor)
         image_pull_policy = self._build_image_pull_policy()
 
+        env = self._build_env()
+        if global_config.experimental_features["script_annotations"]:
+            if not env:
+                env = []
+            env.append(EnvVar(name="script_annotations", value=""))
+
         return self.constructor.transform_script_template_post_build(
             self,
             _ModelScriptTemplate(
                 args=self.args,
                 command=self.command,
-                env=self._build_env(),
+                env=env,
                 env_from=self._build_env_from(),
                 image=self.image,
                 # `image_pull_policy` in script wants a string not an `ImagePullPolicy` object
@@ -230,16 +245,36 @@ class Script(
 def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]:
     # If there are any kwargs arguments associated with the function signature,
     # we store these as we can set them as default values for argo arguments
-    source_signature: Dict[str, Optional[object]] = {}
+    parameters = []
+
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            source_signature[p.name] = p.default
+            default = p.default
         else:
-            source_signature[p.name] = MISSING
+            default = MISSING
 
-    if len(source_signature) == 0:
-        return None
-    return [Parameter(name=n, default=v) for n, v in source_signature.items()]
+        param = Parameter(name=p.name, default=default)
+        parameters.append(param)
+
+        if not global_config.experimental_features["script_annotations"]:
+            continue
+
+        if get_origin(p.annotation) is not Annotated or not isinstance(get_args(p.annotation)[1], Parameter):
+            continue
+
+        annotation = get_args(p.annotation)[1]
+        for attr in ["enum", "description", "default", "name"]:
+            if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
+                continue
+
+            if attr == "default" and param.default is not None:
+                raise ValueError(
+                    "The default cannot be set via both the function parameter default and the annotation's default"
+                )
+
+            setattr(param, attr, getattr(annotation, attr))
+
+    return parameters or None
 
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
@@ -291,7 +326,7 @@ def script(**script_kwargs):
     **script_kwargs
         Keyword arguments to be passed to the Script object.
 
-    Returns
+    Returns:
     -------
     Callable
         Function that wraps a given function into a `Script`.
@@ -307,7 +342,7 @@ def script(**script_kwargs):
         func: Callable
             Function to wrap.
 
-        Returns
+        Returns:
         -------
         Callable
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
@@ -325,7 +360,7 @@ def script(**script_kwargs):
 
         @wraps(func)
         def task_wrapper(*args, **kwargs):
-            """Invokes a `Script` object's `__call__` method using the given `task_params`"""
+            """Invokes a `Script` object's `__call__` method using the given `task_params`."""
             if _context.active:
                 return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
@@ -338,15 +373,25 @@ def script(**script_kwargs):
 
 
 class InlineScriptConstructor(ScriptConstructor):
+    """`InlineScriptConstructor` is a script constructor that submits a script as a `source` to Argo.
+
+    This script constructor is focused on taking a Python script/function "as is" for remote execution. The
+    constructor processes the script to infer what parameters it needs to deserialize so the script can execute.
+    The submitted script will contain prefixes such as new imports, e.g. `import os`, `import json`, etc. and
+    will contain the necessary `json.loads` calls to deserialize the parameters so they are usable by the script just
+    like a normal Python script/function.
+    """
+
     add_cwd_to_sys_path: Optional[bool] = None
 
     def _get_param_script_portion(self, instance: Script) -> str:
-        """Constructs and returns a script that loads the parameters of the specified arguments. Since Argo passes
-        parameters through {{input.parameters.name}} it can be very cumbersome for users to manage that. This creates a
-        script that automatically imports json and loads/adds code to interpret each independent argument into the
-        script.
+        """Constructs and returns a script that loads the parameters of the specified arguments.
 
-        Returns
+        Since Argo passes parameters through `{{input.parameters.name}}` it can be very cumbersome for users to
+        manage that. This creates a script that automatically imports json and loads/adds code to interpret
+        each independent argument into the script.
+
+        Returns:
         -------
         str
             The string representation of the script to load.
@@ -364,12 +409,14 @@ class InlineScriptConstructor(ScriptConstructor):
         return textwrap.dedent(extract)
 
     def generate_source(self, instance: Script) -> str:
-        """Assembles and returns a script representation of the given function, along with the extra script material
-        prefixed to the string. The script is expected to be a callable function the client is interested in submitting
-        for execution on Argo and the script_extra material represents the parameter loading part obtained, likely,
-        through get_param_script_portion.
+        """Assembles and returns a script representation of the given function.
 
-        Returns
+        This also assembles any extra script material prefixed to the string source.
+        The script is expected to be a callable function the client is interested in submitting
+        for execution on Argo and the `script_extra` material represents the parameter loading part obtained, likely,
+        through `get_param_script_portion`.
+
+        Returns:
         -------
         str
             Final formatted script.
@@ -407,9 +454,20 @@ class InlineScriptConstructor(ScriptConstructor):
 
 
 class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
+    """`RunnerScriptConstructor` is a script constructor that runs a script in a container.
+
+    The runner script, also known as "The Hera runner", takes a script/Python function definition, inferts the path
+    to the function (module import), assembles a path to invoke the function, and passes any specified parameters
+    to the function. This helps users "save" on the `source` space required for submitting a function for remote
+    execution on Argo. Execution within the container *requires* the executing container to include the file that
+    contains the submitted script. More specifically, the container must be created in some process (e.g. CI), so that
+    it conains the script to run remotely.
+    """
+
     _flag: str = "script_runner"
 
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
+        """A function that can inspect the Script instance and generate the source field."""
         if not callable(values.get("source")):
             return values
 
@@ -425,6 +483,7 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
         return values
 
     def generate_source(self, instance: Script) -> str:
+        """A function that can inspect the Script instance and generate the source field."""
         return f"{g.inputs.parameters:$}"
 
 

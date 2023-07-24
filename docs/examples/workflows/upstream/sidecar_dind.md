@@ -1,6 +1,9 @@
 # Sidecar Dind
 
-> Note: This example is a replication of an Argo Workflow example in Hera. The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/sidecar-dind.yaml).
+## Note
+
+This example is a replication of an Argo Workflow example in Hera.
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/sidecar-dind.yaml).
 
 This example showcases how one can run Docker in Docker with a sidecar container with Hera
 

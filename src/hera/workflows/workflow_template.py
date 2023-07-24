@@ -1,10 +1,10 @@
-"""The workflow_template module provides the WorkflowTemplate class
+"""The workflow_template module provides the WorkflowTemplate class.
 
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 from pathlib import Path
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union, cast
 
 try:
     from typing import Annotated  # type: ignore
@@ -18,7 +18,6 @@ from hera.shared._base_model import BaseModel
 from hera.workflows._mixins import ModelMapperMixin
 from hera.workflows.models import (
     ObjectMeta,
-    TemplateRef,
     WorkflowSpec as _ModelWorkflowSpec,
     WorkflowStatus as _ModelWorkflowStatus,
     WorkflowTemplate as _ModelWorkflowTemplate,
@@ -38,6 +37,7 @@ class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
 
 class WorkflowTemplate(Workflow):
     """WorkflowTemplates are definitions of Workflows that live in your namespace in your cluster.
+
     This allows you to create a library of frequently-used templates and reuse them by referencing
     them from your Workflows.
     """
@@ -61,16 +61,16 @@ class WorkflowTemplate(Workflow):
         )
 
     def get(self) -> TWorkflow:
-        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace"""
+        """Attempts to get a workflow template based on the parameters of this template e.g. name + namespace."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         return self.workflows_service.get_workflow_template(name=self.name, namespace=self.namespace)
 
     def update(self) -> TWorkflow:
-        """
-        Attempts to perform a workflow template update based on the parameters of this template
-        e.g. name, namespace. Note that this creates the template if it does not exist. In addition, this performs
+        """Attempts to perform a template update based on the parameters of this template.
+
+        This creates the template if it does not exist. In addition, this performs
         a get prior to updating to get the resource version to update in the first place. If you know the template
         does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
         """
@@ -141,7 +141,7 @@ class WorkflowTemplate(Workflow):
         return cls._from_file(yaml_file, _ModelWorkflowTemplate)
 
     def _get_as_workflow(self, generate_name: Optional[str]) -> Workflow:
-        workflow = Workflow(**self.dict())
+        workflow = cast(Workflow, Workflow.from_dict(self.to_dict()))
         workflow.kind = "Workflow"
 
         if generate_name is not None:
@@ -170,12 +170,8 @@ class WorkflowTemplate(Workflow):
 
         Note: this function does not require the WorkflowTemplate to already exist on the cluster
         """
-
         workflow = self._get_as_workflow(generate_name)
         return workflow.create(wait=wait, poll_interval=poll_interval)
-
-    def get_template_ref(self, template: str) -> TemplateRef:
-        return TemplateRef(name=self.name, template=template, cluster_scope=False)
 
 
 __all__ = ["WorkflowTemplate"]
