@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-types-
+spec:
+  entrypoint: my_steps
+  templates:
+  - name: my_steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: an_int
+            value: '1'
+        name: echo-new
+        template: echo-new
+    - - arguments:
+          parameters:
+          - name: an_int
+            value: '1'
+        name: echo-old
+        template: echo-old
+  - inputs:
+      parameters:
+      - default: '1'
+        name: an_int
+    name: echo-new
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: an_int = json.loads(r''''''{{inputs.parameters.an_int}}'''''')
+
+        except: an_int = r''''''{{inputs.parameters.an_int}}''''''
+
+
+        print(an_int)'
+  - inputs:
+      parameters:
+      - default: '1'
+        name: another_name
+    name: echo-old
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: another_name = json.loads(r''''''{{inputs.parameters.another_name}}'''''')
+
+        except: another_name = r''''''{{inputs.parameters.another_name}}''''''
+
+
+        print(an_int)'

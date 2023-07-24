@@ -4,12 +4,20 @@ import functools
 import importlib
 import inspect
 import json
+import os
 from pathlib import Path
 from typing import Any, Callable, cast
 
 from pydantic import validate_arguments
+from typing_extensions import get_args, get_origin
 
 from hera.shared.serialization import serialize
+from hera.workflows import Parameter
+
+try:
+    from typing import Annotated  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated  # type: ignore
 
 
 def _ignore_unmatched_kwargs(f):
@@ -76,6 +84,20 @@ def _is_str_kwarg_of(key: str, f: Callable):
         return False
 
 
+def _map_keys(function: Callable, kwargs: dict):
+    """Change the kwargs's keys to use the python name instead of the parameter name which could be kebab case."""
+    if os.environ.get("hera__script_annotations", None) is not None:
+        return {key.replace("-", "_"): value for key, value in kwargs.items()}
+
+    mapped_kwargs = {}
+    for param_name, param in inspect.signature(function).parameters.items():
+        if get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Parameter):
+            mapped_kwargs[param_name] = kwargs[get_args(param.annotation)[1].name]
+        else:
+            mapped_kwargs[param_name] = kwargs[param_name]
+    return mapped_kwargs
+
+
 def _runner(entrypoint: str, kwargs_list: Any) -> str:
     """Run a function with a list of kwargs.
 
@@ -101,11 +123,13 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
         if "name" not in kwarg or "value" not in kwarg:
             continue
         # sanitize the key for python
-        key = cast(str, serialize(kwarg["name"])).replace("-", "_")
+        key = cast(str, serialize(kwarg["name"]))
         value = kwarg["value"]
         kwargs[key] = value
+    kwargs = _map_keys(function, kwargs)
     function = validate_arguments(function)
     function = _ignore_unmatched_kwargs(function)
+
     return function(**kwargs)
 
 
