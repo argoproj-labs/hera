@@ -123,7 +123,7 @@ Python function parameter. When using a `RunnerScriptConstructor`, an environmen
 Script annotations also work with the regular `InlineScriptConstructor` for
 generating valid template parameters in the yaml instead of adding them in the `@script` decorator.
 
-We can avoid duplication of parameter names and default values. See the old version
+This allows us to avoid duplication of parameter names and default values. See the old version
 
 ```python
 @script(
