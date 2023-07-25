@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from hera.exceptions import NotFound
-from hera.shared import global_config
 from hera.workflows import Container, Steps
 from hera.workflows.models import (
     WorkflowCreateRequest,
@@ -25,8 +24,8 @@ def test_workflow_template_setting_status_errors():
     assert "status is not a valid field on a WorkflowTemplate" in str(e.value)
 
 
-def test_workflow_template_create():
-    global_config.host = "http://hera.testing"
+def test_workflow_template_create(global_config_fixture):
+    global_config_fixture.host = "http://hera.testing"
     ws = WorkflowsService()
     ws.create_workflow_template = MagicMock()
 

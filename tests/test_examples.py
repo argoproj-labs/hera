@@ -11,7 +11,6 @@ import pytest
 import requests
 import yaml
 
-from hera.shared import global_config
 from hera.workflows import (
     CronWorkflow as HeraCronWorkflow,
     Workflow as HeraWorkflow,
@@ -93,10 +92,9 @@ def _compare_workflows(hera_workflow, w1: Dict, w2: Dict):
 @pytest.mark.parametrize(
     "module_name", [name for _, name, _ in pkgutil.iter_modules(hera_examples.__path__) if name != "upstream"]
 )
-def test_hera_output(module_name):
+def test_hera_output(module_name, global_config_fixture):
     # GIVEN
-    global_config.reset()
-    global_config.host = "http://hera.testing"
+    global_config_fixture.host = "http://hera.testing"
     workflow = importlib.import_module(f"examples.workflows.{module_name}").w
     generated_yaml_path = Path(hera_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
 
@@ -123,10 +121,9 @@ def test_hera_output(module_name):
 
 
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
-def test_hera_output_upstream(module_name):
+def test_hera_output_upstream(module_name, global_config_fixture):
     # GIVEN
-    global_config.reset()
-    global_config.host = "http://hera.testing"
+    global_config_fixture.host = "http://hera.testing"
     workflow = importlib.import_module(f"examples.workflows.upstream.{module_name}").w
     generated_yaml_path = Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
     upstream_yaml_path = (
