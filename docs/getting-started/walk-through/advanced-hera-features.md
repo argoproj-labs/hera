@@ -89,12 +89,73 @@ conflicts.
 ## Experimental Features
 
 From time to time, Hera will release a new feature under the "experimental feature" flag while we develop the feature
-and ensure stability. Currently this is used for the `RunnerScriptConstructor` seen in the
-[runner script example](../../examples/workflows/callable_script.md).
+and ensure stability. 
 
 To enable experimental features you must set the feature by name to `True` in the `global_config.experimental_features`
 dictionary before using the feature:
 
 ```py
+global_config.experimental_features["NAME_OF_FEATURE"] = True
+```
+
+### Currently supported experimental features:
+
+#### `RunnerScriptConstructor`
+The `RunnerScriptConstructor` found in `hera.workflows.script` and seen in the
+[callable script example](../../examples/workflows/callable_script.md) is a robust way to run Python functions on Argo.
+The image used by the script should be built from the source code package itself and its dependencies, so that the
+source code's functions, dependencies, and Hera itself are available to run. The `RunnerScriptConstructor` is also
+compatible with Pydantic so supports deserializing inputs to Python objects and serializing outputs to json strings. It
+must be enabled with the `script_runner` feature flag as below.
+
+```py
 global_config.experimental_features["script_runner"] = True
+```
+
+
+#### Script Annotations
+An annotation based system for simplifying script parameter creation, as seen in the [script annotations example](../../examples/workflows/script_annotations_combined_new.md).
+
+Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
+parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
+Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
+`hera__script_annotations` will be added to the Script template.
+Script annotations also work with the regular `InlineScriptConstructor` for
+generating valid template parameters in the yaml instead of adding them in the `@script` decorator.
+
+This allows us to avoid duplication of parameter names and default values. See the old version
+
+```python
+@script(
+    inputs=[
+        Parameter(name="an_int", description="an_int parameter", default=1, enum=[1, 2, 3]), 
+        Parameter(name="a_bool", description="a_bool parameter", default=True, enum=[True, False]), 
+        Parameter(name="a_string", description="a_string parameter", default="a", enum=["a", "b", "c"])
+    ]
+)
+def echo_all(an_int=1, a_bool=True, a_string="a"):
+    print(an_int)
+    print(a_bool)
+    print(a_string)
+```
+
+vs the new one:
+
+```python
+@script()
+def echo_all(
+    an_int: Annotated[int, Parameter(description="an_int parameter", default=1, enum=[1, 2, 3])], 
+    a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True, enum=[True, False])], 
+    a_string: Annotated[str, Parameter(description="a_string parameter", default="a", enum=["a", "b", "c"])]
+):
+    print(an_int)
+    print(a_bool)
+    print(a_string)
+```
+
+
+This feature can be enabled by setting the `experimental_feature` flag `script_annotations`
+
+```py
+global_config.experimental_features["script_annotations"] = True
 ```

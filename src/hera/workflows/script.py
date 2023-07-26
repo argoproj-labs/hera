@@ -12,7 +12,6 @@ from functools import wraps
 from typing import (
     Any,
     Callable,
-    Dict,
     List,
     Optional,
     Type,
@@ -22,7 +21,7 @@ from typing import (
 )
 
 from pydantic import root_validator, validator
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, get_args, get_origin
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
@@ -38,6 +37,7 @@ from hera.workflows._mixins import (
 )
 from hera.workflows._unparse import roundtrip
 from hera.workflows.models import (
+    EnvVar,
     Inputs as ModelInputs,
     Lifecycle,
     ScriptTemplate as _ModelScriptTemplate,
@@ -47,6 +47,11 @@ from hera.workflows.models import (
 from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
+
+try:
+    from typing import Annotated  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated  # type: ignore
 
 
 class ScriptConstructor(BaseMixin):
@@ -150,9 +155,11 @@ class Script(
 
         already_set_params = {p.name for p in inputs.parameters or []}
         already_set_artifacts = {p.name for p in inputs.artifacts or []}
+
         for param in func_parameters:
             if param.name not in already_set_params and param.name not in already_set_artifacts:
                 inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
+
         return inputs
 
     def _build_template(self) -> _ModelTemplate:
@@ -198,12 +205,21 @@ class Script(
         assert isinstance(self.constructor, ScriptConstructor)
         image_pull_policy = self._build_image_pull_policy()
 
+        env = self._build_env()
+        if (
+            isinstance(self.constructor, RunnerScriptConstructor)
+            and global_config.experimental_features["script_annotations"]
+        ):
+            if not env:
+                env = []
+            env.append(EnvVar(name="hera__script_annotations", value=""))
+
         return self.constructor.transform_script_template_post_build(
             self,
             _ModelScriptTemplate(
                 args=self.args,
                 command=self.command,
-                env=self._build_env(),
+                env=env,
                 env_from=self._build_env_from(),
                 image=self.image,
                 # `image_pull_policy` in script wants a string not an `ImagePullPolicy` object
@@ -232,16 +248,36 @@ class Script(
 def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]:
     # If there are any kwargs arguments associated with the function signature,
     # we store these as we can set them as default values for argo arguments
-    source_signature: Dict[str, Optional[object]] = {}
+    parameters = []
+
     for p in inspect.signature(source).parameters.values():
         if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            source_signature[p.name] = p.default
+            default = p.default
         else:
-            source_signature[p.name] = MISSING
+            default = MISSING
 
-    if len(source_signature) == 0:
-        return None
-    return [Parameter(name=n, default=v) for n, v in source_signature.items()]
+        param = Parameter(name=p.name, default=default)
+        parameters.append(param)
+
+        if not global_config.experimental_features["script_annotations"]:
+            continue
+
+        if get_origin(p.annotation) is not Annotated or not isinstance(get_args(p.annotation)[1], Parameter):
+            continue
+
+        annotation = get_args(p.annotation)[1]
+        for attr in ["enum", "description", "default", "name"]:
+            if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
+                continue
+
+            if attr == "default" and param.default is not None:
+                raise ValueError(
+                    "The default cannot be set via both the function parameter default and the annotation's default"
+                )
+
+            setattr(param, attr, getattr(annotation, attr))
+
+    return parameters or None
 
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
