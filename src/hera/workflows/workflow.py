@@ -405,6 +405,13 @@ class Workflow(
         assert self.namespace is not None, "workflow namespace not defined"
         assert self.name is not None, "workflow name not defined"
 
+        # here we use the sleep interval to wait for the workflow post creation. This is to address a potential
+        # race conditions such as:
+        # 1. Argo server says "workflow was accepted" but the workflow is not yet created
+        # 2. Hera wants to verify the status of the workflow, but it's not yet defined because it's not created
+        # 3. Argo finally creates the workflow
+        # 4. Hera throws an `AssertionError` because the phase assertion fails
+        time.sleep(poll_interval)
         wf = self.workflows_service.get_workflow(self.name, namespace=self.namespace)
         assert wf.metadata.name is not None, f"workflow name not defined for workflow {self.name}"
 
