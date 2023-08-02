@@ -29,13 +29,11 @@ class DAG(
     `hera.workflows.task.Task` objects instantiated will be added to the DAG's list of Tasks.
 
     Examples:
-    --------
-    >>> @script()
-    >>> def foo() -> None:
-    >>>     print(42)
-    >>>
-    >>> with DAG(...) as dag:
-    >>>     foo()
+        >>> @script()
+        >>> def foo() -> None:
+        >>>     print(42)
+        >>> with DAG(...) as dag:
+        >>>     foo()
     """
 
     fail_fast: Optional[bool] = None
