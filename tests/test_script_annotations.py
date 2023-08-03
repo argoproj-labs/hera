@@ -1,7 +1,6 @@
 import importlib
+
 import pytest
-
-
 from test_examples import _compare_workflows
 
 try:
@@ -10,16 +9,42 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from hera.workflows import Workflow, script
-from hera.workflows.steps import Steps
 from hera.workflows.parameter import Parameter
+from hera.workflows.steps import Steps
 
 
 @pytest.mark.parametrize("module_name", ["combined", "default", "description", "enum"])
-def test_hera_output(module_name, global_config_fixture):
+def test_new_parameter_annotations(module_name, global_config_fixture):
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-    workflow_old = importlib.import_module(f"examples.workflows.script_annotations_{module_name}_old").w
-    workflow_new = importlib.import_module(f"examples.workflows.script_annotations_{module_name}_new").w
+    workflow_old = importlib.import_module(
+        f"tests.annotation_regression_examples.script_annotations_parameters_{module_name}_old"
+    ).w
+    workflow_new = importlib.import_module(
+        f"tests.annotation_regression_examples.script_annotations_parameters_{module_name}_new"
+    ).w
+
+    # WHEN
+    output_old = workflow_old.to_dict()
+    output_new = workflow_new.to_dict()
+
+    # THEN
+    _compare_workflows(workflow_old, output_old, output_new)
+
+
+@pytest.mark.parametrize(
+    "module_name",
+    ["artifactory", "azure", "gcs", "git", "hdfs", "optional", "mode", "mode_recurse", "oss", "raw", "subpath", "s3"],
+)
+def test_new_artifact_annotations(module_name, global_config_fixture):
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    workflow_old = importlib.import_module(
+        f"tests.annotation_regression_examples.script_annotations_artifacts_{module_name}_old"
+    ).w
+    workflow_new = importlib.import_module(
+        f"tests.annotation_regression_examples.script_annotations_artifacts_{module_name}_new"
+    ).w
 
     # WHEN
     output_old = workflow_old.to_dict()

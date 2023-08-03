@@ -8,6 +8,9 @@ spec:
   - name: my_steps
     steps:
     - - arguments:
+          artifacts:
+          - from: somewhere
+            name: my-artifact
           parameters:
           - name: an_int
             value: '1'
@@ -18,26 +21,18 @@ spec:
         name: echo-all
         template: echo-all
   - inputs:
+      artifacts:
+      - name: my-artifact
+        path: tmp/file
       parameters:
       - default: '1'
         description: an_int parameter
-        enum:
-        - '1'
-        - '2'
-        - '3'
         name: an_int
       - default: 'true'
         description: a_bool parameter
-        enum:
-        - 'True'
-        - 'False'
         name: a_bool
       - default: a
         description: a_string parameter
-        enum:
-        - a
-        - b
-        - c
         name: a_string
     name: echo-all
     script:
@@ -69,4 +64,6 @@ spec:
 
         print(a_bool)
 
-        print(a_string)'
+        print(a_string)
+
+        print(an_artifact)'

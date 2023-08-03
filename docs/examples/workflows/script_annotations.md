@@ -1,4 +1,4 @@
-# Script Annotations Combined New
+# Script Annotations
 
 
 
@@ -14,27 +14,36 @@
         from typing_extensions import Annotated  # type: ignore
 
     from hera.shared import global_config
-    from hera.workflows import Workflow, script
-    from hera.workflows.parameter import Parameter
-    from hera.workflows.steps import Steps
+    from hera.workflows import Artifact, Parameter, Workflow, script, Steps, ArtifactLoader
 
     global_config.experimental_features["script_annotations"] = True
+    global_config.experimental_features["script_runner"] = True
 
 
     @script()
     def echo_all(
-        an_int: Annotated[int, Parameter(description="an_int parameter", default=1, enum=[1, 2, 3])],
-        a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True, enum=[True, False])],
-        a_string: Annotated[str, Parameter(description="a_string parameter", default="a", enum=["a", "b", "c"])],
+        an_int: Annotated[int, Parameter(description="an_int parameter", default=1)],
+        a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],
+        a_string: Annotated[str, Parameter(description="a_string parameter", default="a")],
+        # note that this artifact is loaded from tmp/file into an_artifact as a string
+        an_artifact: Annotated[str, Artifact(name="my-artifact", path="tmp/file", loader=ArtifactLoader.file)],
     ):
         print(an_int)
         print(a_bool)
         print(a_string)
+        print(an_artifact)
 
 
     with Workflow(generate_name="test-types-", entrypoint="my_steps") as w:
         with Steps(name="my_steps") as s:
-            echo_all(arguments={"an_int": 1, "a_bool": True, "a_string": "a"})
+            echo_all(
+                arguments=[
+                    Parameter(name="an_int", value=1),
+                    Parameter(name="a_bool", value=True),
+                    Parameter(name="a_string", value="a"),
+                    Artifact(name="my-artifact", from_="somewhere"),
+                ]
+            )
     ```
 
 === "YAML"
@@ -50,6 +59,9 @@
       - name: my_steps
         steps:
         - - arguments:
+              artifacts:
+              - from: somewhere
+                name: my-artifact
               parameters:
               - name: an_int
                 value: '1'
@@ -60,26 +72,18 @@
             name: echo-all
             template: echo-all
       - inputs:
+          artifacts:
+          - name: my-artifact
+            path: tmp/file
           parameters:
           - default: '1'
             description: an_int parameter
-            enum:
-            - '1'
-            - '2'
-            - '3'
             name: an_int
           - default: 'true'
             description: a_bool parameter
-            enum:
-            - 'True'
-            - 'False'
             name: a_bool
           - default: a
             description: a_string parameter
-            enum:
-            - a
-            - b
-            - c
             name: a_string
         name: echo-all
         script:
@@ -111,6 +115,8 @@
 
             print(a_bool)
 
-            print(a_string)'
+            print(a_string)
+
+            print(an_artifact)'
     ```
 

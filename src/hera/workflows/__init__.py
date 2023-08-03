@@ -9,6 +9,7 @@
 from hera.workflows.archive import ArchiveStrategy, NoneArchiveStrategy, TarArchiveStrategy, ZipArchiveStrategy
 from hera.workflows.artifact import (
     Artifact,
+    ArtifactLoader,
     ArtifactoryArtifact,
     AzureArtifact,
     GCSArtifact,
@@ -82,6 +83,7 @@ __all__ = [
     "AccessMode",
     "ArchiveStrategy",
     "Artifact",
+    "ArtifactLoader",
     "ArtifactoryArtifact",
     "AzureArtifact",
     "AzureDiskVolumeVolume",
