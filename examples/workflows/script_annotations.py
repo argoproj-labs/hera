@@ -12,9 +12,9 @@ global_config.experimental_features["script_runner"] = True
 
 @script()
 def echo_all(
-    an_int: Annotated[int, Parameter(description="an_int parameter", default=1, enum=[1, 2, 3])],
-    a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True, enum=[True, False])],
-    a_string: Annotated[str, Parameter(description="a_string parameter", default="a", enum=["a", "b", "c"])],
+    an_int: Annotated[int, Parameter(description="an_int parameter", default=1)],
+    a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],
+    a_string: Annotated[str, Parameter(description="a_string parameter", default="a")],
     # note that this artifact is loaded from tmp/file into an_artifact as a string
     an_artifact: Annotated[str, Artifact(name="my-artifact", path="tmp/file", loader=ArtifactLoader.file)],
 ):
