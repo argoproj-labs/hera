@@ -38,5 +38,5 @@ spec:
       command:
       - python
       image: python:3.8
-      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\n\
-        import pickle\nwith open('/tmp/i', 'rb') as f:\n    i = pickle.load(f)\nprint(i)"
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport pickle\n\
+        with open('/tmp/i', 'rb') as f:\n    i = pickle.load(f)\nprint(i)"
