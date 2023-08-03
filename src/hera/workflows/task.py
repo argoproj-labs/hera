@@ -29,7 +29,7 @@ class TaskResult(Enum):
     """The enumeration of Task Results.
 
     See Also:
-        https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends.
+        [Argo Depends Docs](https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends)
     """
 
     failed = "Failed"

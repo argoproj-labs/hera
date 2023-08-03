@@ -65,9 +65,10 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
 class CronWorkflow(Workflow):
     """CronWorkflow allows a user to run a Workflow on a recurring basis.
 
-    NB: Hera's CronWorkflow is a subclass of Workflow which means certain fields are renamed
-    for compatibility, see `cron_suspend` and `cron_status` which are different from the Argo
-    spec. See https://argoproj.github.io/argo-workflows/fields/#cronworkflow
+    Note:
+        Hera's CronWorkflow is a subclass of Workflow which means certain fields are renamed
+        for compatibility, see `cron_suspend` and `cron_status` which are different from the Argo
+        spec. See [CronWorkflowSpec](https://argoproj.github.io/argo-workflows/fields/#cronworkflow) for more details.
     """
 
     concurrency_policy: Annotated[Optional[str], _CronWorkflowModelMapper("spec.concurrency_policy")] = None
@@ -194,7 +195,7 @@ class CronWorkflow(Workflow):
         """Create a CronWorkflow from a CronWorkflow contained in a YAML string.
 
         Usage:
-            my_cron_workflow = CronWorkflow.from_yaml(yaml_str)
+            >>> my_cron_workflow = CronWorkflow.from_yaml(yaml_str)
         """
         return cls._from_yaml(yaml_str, _ModelCronWorkflow)
 
@@ -203,8 +204,8 @@ class CronWorkflow(Workflow):
         """Create a CronWorkflow from a CronWorkflow contained in a YAML file.
 
         Usage:
-            yaml_file = Path(...)
-            my_workflow_template = CronWorkflow.from_file(yaml_file)
+            >>> yaml_file = Path(...)
+            >>> my_workflow_template = CronWorkflow.from_file(yaml_file)
         """
         return cls._from_file(yaml_file, _ModelCronWorkflow)
 

@@ -49,8 +49,8 @@ class AccessMode(Enum):
     """A representations of the volume access modes for Kubernetes.
 
     Notes:
-    -----
-    See: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes for more information.
+        See: [access modes docs](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) for
+        more information.
     """
 
     read_write_once = "ReadWriteOnce"
