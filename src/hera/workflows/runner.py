@@ -12,7 +12,8 @@ from pydantic import validate_arguments
 from typing_extensions import get_args, get_origin
 
 from hera.shared.serialization import serialize
-from hera.workflows import Parameter
+from hera.workflows import Artifact, Parameter
+from hera.workflows.artifact import ArtifactLoader
 
 try:
     from typing import Annotated  # type: ignore
@@ -63,7 +64,7 @@ def _parse(value, key, f):
         The parsed value.
 
     """
-    if _is_str_kwarg_of(key, f):
+    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f):
         return value
     try:
         return json.loads(value)
@@ -84,15 +85,38 @@ def _is_str_kwarg_of(key: str, f: Callable):
         return False
 
 
-def _map_keys(function: Callable, kwargs: dict):
-    """Change the kwargs's keys to use the python name instead of the parameter name which could be kebab case."""
-    if os.environ.get("hera__script_annotations", None) is not None:
+def _is_artifact_loaded(key, f):
+    """Check if param `key` of function `f` is actually an Artifact that has already been loaded."""
+    param = inspect.signature(f).parameters[key]
+    return (
+        get_origin(param.annotation) is Annotated
+        and isinstance(get_args(param.annotation)[1], Artifact)
+        and get_args(param.annotation)[1].loader == ArtifactLoader.json.value
+    )
+
+
+def _map_keys(function: Callable, kwargs: dict) -> dict:
+    """Change the kwargs's keys to use the Python name instead of the parameter name which could be kebab case.
+
+    For Parameters, update their name to not contain kebab-case in Python but allow it in YAML.
+    For Artifacts, load the Artifact according to the given ArtifactLoader.
+    """
+    if os.environ.get("hera__script_annotations", None) is None:
         return {key.replace("-", "_"): value for key, value in kwargs.items()}
 
     mapped_kwargs = {}
     for param_name, param in inspect.signature(function).parameters.items():
         if get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Parameter):
             mapped_kwargs[param_name] = kwargs[get_args(param.annotation)[1].name]
+        elif get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Artifact):
+            if get_args(param.annotation)[1].loader == ArtifactLoader.json.value:
+                path = Path(get_args(param.annotation)[1].path)
+                mapped_kwargs[param_name] = json.load(path.open())
+            elif get_args(param.annotation)[1].loader == ArtifactLoader.file.value:
+                path = Path(get_args(param.annotation)[1].path)
+                mapped_kwargs[param_name] = path.read_text()
+            elif get_args(param.annotation)[1].loader is None:
+                mapped_kwargs[param_name] = get_args(param.annotation)[1].path
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
     return mapped_kwargs

@@ -14,6 +14,7 @@ from typing import (
     Callable,
     List,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -36,6 +37,9 @@ from hera.workflows._mixins import (
     VolumeMountMixin,
 )
 from hera.workflows._unparse import roundtrip
+from hera.workflows.artifact import (
+    Artifact,
+)
 from hera.workflows.models import (
     EnvVar,
     Inputs as ModelInputs,
@@ -144,21 +148,37 @@ class Script(
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         inputs = super()._build_inputs()
-        func_parameters = _get_parameters_from_callable(self.source) if callable(self.source) else None
+        func_parameters: List[Parameter] = []
+        func_artifacts: List[Artifact] = []
+        if callable(self.source):
+            if global_config.experimental_features["script_annotations"]:
+                func_parameters, func_artifacts = _get_parameters_and_artifacts_from_callable(self.source)
+            else:
+                func_parameters = _get_parameters_from_callable(self.source)
 
-        if inputs is None and func_parameters is None:
+        if inputs is None and not func_parameters and not func_artifacts:
             return None
-        elif func_parameters is None:
+        elif not func_parameters and not func_artifacts:
             return inputs
         elif inputs is None:
-            inputs = ModelInputs(parameters=func_parameters)
+            inputs = ModelInputs(
+                parameters=func_parameters or None, artifacts=[a._build_artifact() for a in func_artifacts] or None
+            )
 
         already_set_params = {p.name for p in inputs.parameters or []}
         already_set_artifacts = {p.name for p in inputs.artifacts or []}
 
         for param in func_parameters:
             if param.name not in already_set_params and param.name not in already_set_artifacts:
-                inputs.parameters = [param] if inputs.parameters is None else inputs.parameters + [param]
+                if inputs.parameters is None:
+                    inputs.parameters = []
+                inputs.parameters.append(param)
+
+        for artifact in func_artifacts:
+            if artifact.name not in already_set_params and artifact.name not in already_set_artifacts:
+                if inputs.artifacts is None:
+                    inputs.artifacts = []
+                inputs.artifacts.append(artifact._build_artifact())
 
         return inputs
 
@@ -245,7 +265,7 @@ class Script(
         )
 
 
-def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]:
+def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     # If there are any kwargs arguments associated with the function signature,
     # we store these as we can set them as default values for argo arguments
     parameters = []
@@ -259,25 +279,55 @@ def _get_parameters_from_callable(source: Callable) -> Optional[List[Parameter]]
         param = Parameter(name=p.name, default=default)
         parameters.append(param)
 
-        if not global_config.experimental_features["script_annotations"]:
-            continue
+    return parameters
 
-        if get_origin(p.annotation) is not Annotated or not isinstance(get_args(p.annotation)[1], Parameter):
-            continue
 
-        annotation = get_args(p.annotation)[1]
-        for attr in ["enum", "description", "default", "name"]:
-            if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
+def _get_parameters_and_artifacts_from_callable(
+    source: Callable,
+) -> Tuple[List[Parameter], List[Artifact]]:
+    # If there are any kwargs arguments associated with the function signature,
+    # we store these as we can set them as default values for argo arguments
+    parameters = []
+    artifacts = []
+
+    for p in inspect.signature(source).parameters.values():
+        if get_origin(p.annotation) is Annotated and isinstance(get_args(p.annotation)[1], Artifact):
+            annotation = get_args(p.annotation)[1]
+            mytype = type(annotation)
+            kwargs = {}
+            for attr in mytype.get_input_attributes():
+                if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
+                    kwargs[attr] = getattr(annotation, attr)
+
+            artifact = mytype(**kwargs)
+            artifacts.append(artifact)
+        else:
+            if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                default = p.default
+            else:
+                default = MISSING
+
+            param = Parameter(name=p.name, default=default)
+            parameters.append(param)
+
+            if get_origin(p.annotation) is not Annotated:
                 continue
 
-            if attr == "default" and param.default is not None:
-                raise ValueError(
-                    "The default cannot be set via both the function parameter default and the annotation's default"
-                )
+            annotation = get_args(p.annotation)[1]
+            if not isinstance(annotation, Parameter):
+                continue
 
-            setattr(param, attr, getattr(annotation, attr))
+            for attr in Parameter.get_input_attributes():
+                if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
+                    continue
 
-    return parameters or None
+                if attr == "default" and param.default is not None:
+                    raise ValueError(
+                        "The default cannot be set via both the function parameter default and the annotation's default"
+                    )
+                setattr(param, attr, getattr(annotation, attr))
+
+    return parameters, artifacts
 
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
