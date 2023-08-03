@@ -29,14 +29,11 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
 
 Notice the `>>` (rshift) syntax used with the returned objects from the `echo` calls; it specifies the left-hand-side of
 the operator is a dependency of the right-hand-side, i.e. `A >> B` means "B depends on A". This is syntactic sugar for
-`A.next(B)`, see the
-[Task - Dependencies](https://hera.readthedocs.io/en/stable/api/workflows/hera/#hera.workflows.Task--dependencies)
-section for more examples.
+`A.next(B)`, see the [Task dependencies explained](#task-dependencies-explained) section for more examples.
 
-The `echo` calls are
-returning `Task` objects as the function is being called under a `DAG` context. Then, we can specify dependencies
-between `Tasks` and lists of `Tasks` using the `>>` syntax. A list acts as a boolean `and` of the elements, and it is
-important to note that a list cannot appear first in the chain or on both sides of a `>>`.
+The `echo` calls are returning `Task` objects as the function is being called under a `DAG` context. Then, we can
+specify dependencies between `Tasks` and lists of `Tasks` using the `>>` syntax. A list acts as a boolean `and` of the
+elements, and it is important to note that a list cannot appear first in the chain or on both sides of a `>>`.
 
 ```py
         A >> [B, C] >> D
@@ -104,4 +101,94 @@ Finally, we need to specify the dependencies, which will look very similar to th
         post = echo(name="post-parallel", arguments={"message": "Goodbye world!"})
 
         pre >> [parallel_1, parallel_2, parallel_3] >> post
+```
+
+## Task dependencies explained
+
+Any `Tasks` without a dependency defined will start immediately.
+
+Dependencies between Tasks can be described using the convenience syntax `>>`, which follows the default
+[depends logic](https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends) of Argo, for example:
+
+```py
+A = Task(...)
+B = Task(...)
+A >> B
+```
+
+describes the relationships:
+
+* "A has no dependencies (so starts immediately)
+* "B depends on `A.Succeeded || A.Skipped || A.Daemoned`.
+
+As a diagram:
+
+```
+A
+|
+B
+```
+
+`A >> B` is equivalent to `A.next(B)`.
+
+## Lists of Tasks
+
+A list of Tasks used with the rshift syntax helps to describe multiple dependencies at once.
+
+* A single Task on the left side of `>>` and a list Tasks on the right side is shorthand for specifying that each Task
+  in the list independently depends on the single left-side Task and will all start once that Task has a task result of
+  `Succeeded || Skipped || Daemoned`
+* A list of Tasks on the left of `>>` and a single Task on the right describes that the single Task will only run once
+  _all_ the Tasks in the list have the task result of `Succeeded || Skipped || Daemoned`
+* A list of Tasks on both sides of `>>` is not supported, and multiple dependency statements should be used
+
+For example:
+
+```py
+A = Task(...)
+B = Task(...)
+C = Task(...)
+D = Task(...)
+A >> [B, C] >> D
+```
+
+describes the relationships:
+
+* "A has no dependencies
+* "B depends on A; C depends on A"
+* "D depends on B AND C"
+
+As a diagram:
+
+```
+  A
+ / \
+B   C
+ \ /
+  D
+```
+
+Dependencies can be described over multiple statements:
+
+```py
+A = Task(...)
+B = Task(...)
+C = Task(...)
+D = Task(...)
+A >> [C, D]
+B >> [C, D]
+```
+
+describes the relationships:
+
+* "A and B have no dependencies
+* "C depends on A AND B"
+* "D depends on A AND B"
+
+As a diagram:
+
+```
+A   B
+| X |
+C   D
 ```

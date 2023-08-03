@@ -465,8 +465,9 @@ class Workflow(
         """Create a Workflow from a Workflow contained in a dict.
 
         Examples:
-            my_workflow = Workflow(...)
-            my_workflow == Workflow.from_dict(my_workflow.to_dict())
+            >>> my_workflow = Workflow(name="my-workflow")
+            >>> my_workflow == Workflow.from_dict(my_workflow.to_dict())
+            True
         """
         return cls._from_dict(model_dict, _ModelWorkflow)
 
