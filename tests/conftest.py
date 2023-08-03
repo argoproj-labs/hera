@@ -1,6 +1,6 @@
-from hera.shared import global_config
-
 import pytest
+
+from hera.shared import global_config
 
 
 @pytest.fixture

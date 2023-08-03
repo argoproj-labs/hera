@@ -114,16 +114,19 @@ global_config.experimental_features["script_runner"] = True
 
 
 #### Script Annotations
-An annotation based system for simplifying script parameter creation, as seen in the [script annotations example](../../examples/workflows/script_annotations_combined_new.md).
+Annotations are supported for input `Parameter`s and `Artifact`s. They can be added using `typing.Annotated` in the function parameters. 
 
-Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
-parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
-Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
-`hera__script_annotations` will be added to the Script template.
-Script annotations also work with the regular `InlineScriptConstructor` for
-generating valid template parameters in the yaml instead of adding them in the `@script` decorator.
+```python
+@script()
+def func(a_param: Annotated[str, Parameter(name="a-param", default="param")]):
+    ...
+```
 
-This allows us to avoid duplication of parameter names and default values. See the old version
+This allows us to simplify writing scripts with parameters and artifacts that require additional fields. 
+
+##### Parameters
+
+In normal Hera, we can specify inputs inside the `@script` decorator as follows:
 
 ```python
 @script(
@@ -139,7 +142,7 @@ def echo_all(an_int=1, a_bool=True, a_string="a"):
     print(a_string)
 ```
 
-vs the new one:
+Notice how `Parameter` `name`s and `default` values are duplicated. Using annotations, we can do:
 
 ```python
 @script()
@@ -153,6 +156,47 @@ def echo_all(
     print(a_string)
 ```
 
+The fields allowed in the `Parameter` annotations are: `name`, `default`, `enum`, and `description`.
+
+##### Artifacts
+
+The improvement is even more noticeable for `Artifact`s. In old Hera we have:
+
+```python
+@script(inputs=Artifact(name="my-artifact", path="/tmp/file"))
+def read_artifact():
+    with open("/tmp/file") as a_file:
+        print(a_file.read())
+```
+
+and with annotations we can do:
+
+```python
+@script()
+def read_artifact(an_artifact: Annotated[Path, Artifact(name="my-artifact", path="/tmp/file")]):
+    print(an_artifact.read_text())
+```
+
+The path duplication is no longer necessary since `an_artifact` is a `Path` object.
+
+The fields allowed in the `Artifact` annotations are: `name`, `path`, and `loader`.
+
+For `Artifact`s, we allow three types of loaders. Using `ArtifactLoader`, we have `file`, `json`, 
+and `None`.
+
+With no loader, the `path` attribute of `Artifact` is extracted and can be subsequently used in 
+the function body by referring to the function parameter. This can be seen above.
+
+When the loader is set to `file`, the function parameter will be the contents of the file 
+stored at `path`. When the loader is set to `json`, the contents of the file at `path` are 
+read and parsed to `json`.
+
+Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
+parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
+Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
+`hera__script_annotations` will be added to the Script template.
+Script annotations also work with the regular `InlineScriptConstructor` for
+generating valid template parameters in the yaml instead of adding them in the `@script` decorator.
 
 This feature can be enabled by setting the `experimental_feature` flag `script_annotations`
 

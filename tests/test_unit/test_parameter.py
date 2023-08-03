@@ -1,5 +1,6 @@
-from hera.workflows.parameter import Parameter
 import pytest
+
+from hera.workflows.parameter import Parameter
 
 
 def test_parameter_no_value_fails_to_string():
