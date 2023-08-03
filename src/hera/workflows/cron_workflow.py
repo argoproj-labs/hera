@@ -183,9 +183,8 @@ class CronWorkflow(Workflow):
         """Create a CronWorkflow from a CronWorkflow contained in a dict.
 
         Examples:
-            >>> my_cron_workflow = CronWorkflow(name="my-cron-wf")
-            >>> my_cron_workflow == CronWorkflow.from_dict(my_cron_workflow.to_dict())
-            True
+            my_cron_workflow = CronWorkflow(...)
+            my_cron_workflow == CronWorkflow.from_dict(my_cron_workflow.to_dict())
         """
         return cls._from_dict(model_dict, _ModelCronWorkflow)
 

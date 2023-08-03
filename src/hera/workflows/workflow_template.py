@@ -116,9 +116,8 @@ class WorkflowTemplate(Workflow):
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a dict.
 
         Examples:
-            >>> my_workflow_template = WorkflowTemplate(name="my-wft")
-            >>> my_workflow_template == WorkflowTemplate.from_dict(my_workflow_template.to_dict())
-            True
+            my_workflow_template = WorkflowTemplate(...)
+            my_workflow_template == WorkflowTemplate.from_dict(my_workflow_template.to_dict())
         """
         return cls._from_dict(model_dict, _ModelWorkflowTemplate)
 

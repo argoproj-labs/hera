@@ -2,6 +2,7 @@
 
 See https://argoproj.github.io/argo-workflows/walk-through/artifacts/ for a tutorial on Artifacts.
 """
+from enum import Enum
 from typing import List, Optional, Union, cast
 
 from hera.shared._base_model import BaseModel
@@ -22,6 +23,13 @@ from hera.workflows.models import (
     S3Artifact as _ModelS3Artifact,
     SecretKeySelector,
 )
+
+
+class ArtifactLoader(Enum):
+    """Enum for artifact loader options."""
+
+    json = "json"
+    file = "file"
 
 
 class Artifact(BaseModel):
@@ -63,6 +71,9 @@ class Artifact(BaseModel):
     sub_path: Optional[str] = None
     """allows the specification of an artifact from a subpath within the main source."""
 
+    loader: Optional[ArtifactLoader] = None
+    """used in Artifact annotations for determining how to load the data"""
+
     def _build_archive(self) -> Optional[_ModelArchiveStrategy]:
         if self.archive is None:
             return None
@@ -97,6 +108,18 @@ class Artifact(BaseModel):
         artifact.name = name
         return artifact
 
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return [
+            "mode",
+            "name",
+            "optional",
+            "path",
+            "recurseMode",
+            "subPath",
+        ]
+
 
 class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
     """An artifact sourced from Artifactory."""
@@ -107,6 +130,11 @@ class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
             url=self.url, password_secret=self.password_secret, username_secret=self.username_secret
         )
         return artifact
+
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + ["url", "password_secret", "username_secret"]
 
 
 class AzureArtifact(_ModelAzureArtifact, Artifact):
@@ -123,6 +151,17 @@ class AzureArtifact(_ModelAzureArtifact, Artifact):
         )
         return artifact
 
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + [
+            "endpoint",
+            "container",
+            "blob",
+            "account_key_secret",
+            "use_sdk_creds",
+        ]
+
 
 class GCSArtifact(_ModelGCSArtifact, Artifact):
     """An artifact sourced from Google Cloud Storage."""
@@ -135,6 +174,11 @@ class GCSArtifact(_ModelGCSArtifact, Artifact):
             service_account_key_secret=self.service_account_key_secret,
         )
         return artifact
+
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + ["bucket", "key", "service_account_key_secret"]
 
 
 class GitArtifact(_ModelGitArtifact, Artifact):
@@ -156,6 +200,23 @@ class GitArtifact(_ModelGitArtifact, Artifact):
             username_secret=self.username_secret,
         )
         return artifact
+
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + [
+            "branch",
+            "depth",
+            "disable_submodules",
+            "fetch",
+            "insecure_ignore_host_key",
+            "password_secret",
+            "repo",
+            "revision",
+            "single_branch",
+            "ssh_private_key_secret",
+            "username_secret",
+        ]
 
 
 class HDFSArtifact(Artifact):
@@ -193,6 +254,22 @@ class HDFSArtifact(Artifact):
         )
         return artifact
 
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + [
+            "addresses",
+            "force",
+            "hdfs_path",
+            "hdfs_user",
+            "krb_c_cache_secret",
+            "krb_config_config_map",
+            "krb_keytab_secret",
+            "krb_realm",
+            "krb_service_principal_name",
+            "krb_username",
+        ]
+
 
 class HTTPArtifact(_ModelHTTPArtifact, Artifact):
     """An artifact sourced from an HTTP URL."""
@@ -205,6 +282,11 @@ class HTTPArtifact(_ModelHTTPArtifact, Artifact):
             url=self.url,
         )
         return artifact
+
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + ["auth", "headers", "url"]
 
 
 class OSSArtifact(_ModelOSSArtifact, Artifact):
@@ -224,6 +306,20 @@ class OSSArtifact(_ModelOSSArtifact, Artifact):
         )
         return artifact
 
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + [
+            "access_key_secret",
+            "bucket",
+            "create_bucket_if_not_present",
+            "endpoint",
+            "key",
+            "lifecycle_rule",
+            "secret_key_secret",
+            "security_token",
+        ]
+
 
 class RawArtifact(_ModelRawArtifact, Artifact):
     """A raw bytes artifact representation."""
@@ -232,6 +328,11 @@ class RawArtifact(_ModelRawArtifact, Artifact):
         artifact = super()._build_artifact()
         artifact.raw = _ModelRawArtifact(data=self.data)
         return artifact
+
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + ["data"]
 
 
 class S3Artifact(_ModelS3Artifact, Artifact):
@@ -254,8 +355,26 @@ class S3Artifact(_ModelS3Artifact, Artifact):
         )
         return artifact
 
+    @classmethod
+    def get_input_attributes(cls):
+        """Return the attributes used for input artifact annotations."""
+        return super().get_input_attributes() + [
+            "access_key_secret",
+            "bucket",
+            "create_bucket_if_not_present",
+            "encryption_options",
+            "endpoint",
+            "insecure",
+            "key",
+            "region",
+            "role_arn",
+            "secret_key_secret",
+            "use_sdk_creds",
+        ]
+
 
 __all__ = [
     "Artifact",
     *[c.__name__ for c in Artifact.__subclasses__()],
+    "ArtifactLoader",
 ]
