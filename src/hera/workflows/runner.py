@@ -96,10 +96,10 @@ def _is_artifact_loaded(key, f):
 
 
 def _map_keys(function: Callable, kwargs: dict) -> dict:
-    """Change the kwargs's keys to use the python name instead of the parameter name which could be kebab case.
+    """Change the kwargs's keys to use the Python name instead of the parameter name which could be kebab case.
 
     For Parameters, update their name to not contain kebab-case in Python but allow it in YAML.
-    For Artifacts, parse the contained info to get the path or object as needed.
+    For Artifacts, load the Artifact according to the given ArtifactLoader.
     """
     if os.environ.get("hera__script_annotations", None) is None:
         return {key.replace("-", "_"): value for key, value in kwargs.items()}

@@ -126,7 +126,7 @@ This allows us to simplify writing scripts with parameters and artifacts that re
 
 ##### Parameters
 
-In normal Hera, we can specify inputs inside the `@script` decorator as follows:
+In Hera, we can specify inputs inside the `@script` decorator as follows:
 
 ```python
 @script(
@@ -160,7 +160,7 @@ The fields allowed in the `Parameter` annotations are: `name`, `default`, `enum`
 
 ##### Artifacts
 
-The improvement is even more noticeable for `Artifact`s. In old Hera we have:
+The improvement is even more noticeable for `Artifact`s. In Hera we are able to specify `Artifact`s in `inputs`:
 
 ```python
 @script(inputs=Artifact(name="my-artifact", path="/tmp/file"))
@@ -169,7 +169,7 @@ def read_artifact():
         print(a_file.read())
 ```
 
-and with annotations we can do:
+But by using annotations we can avoid repeating the `path` of the file, and access the artifact as if it's a regular Python argument of the given type:
 
 ```python
 @script()
@@ -188,13 +188,42 @@ With no loader, the `path` attribute of `Artifact` is extracted and can be subse
 the function body by referring to the function parameter. This can be seen above.
 
 When the loader is set to `file`, the function parameter will be the contents of the file 
-stored at `path`. When the loader is set to `json`, the contents of the file at `path` are 
+stored at `path`. 
+
+```python
+@script()
+def read_artifact(
+    an_artifact: Annotated[str, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=ArtifactLoader.file)]
+) -> str:
+    return an_artifact
+```
+
+This loads the contents of the file at `ARTIFACT_PATH` to the argument `an_artifact` and subsequently 
+can be used as a string inside the function.
+
+When the loader is set to `json`, the contents of the file at `path` are 
 read and parsed to `json`.
+
+```python
+class MyArtifact(BaseModel):
+    a = "a"
+    b = "b"
+
+
+@script()
+def read_artifact(
+    an_artifact: Annotated[MyArtifact, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=ArtifactLoader.json)]
+) -> str:
+    return an_artifact.a + an_artifact.b
+```
+
+Here, we have a json representation of `MyArtifact` stored at `ARTIFACT_PATH`. We can load it with `ArtifactLoader.json`
+and then use `an_artifact` as an instance of `MyArtifact` inside the function.
 
 Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
 parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
 Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
-`hera__script_annotations` will be added to the Script template.
+`hera__script_annotations` will be added to the Script template (visible in the exported YAML file).
 Script annotations also work with the regular `InlineScriptConstructor` for
 generating valid template parameters in the yaml instead of adding them in the `@script` decorator.
 

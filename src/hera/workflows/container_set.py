@@ -45,11 +45,11 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         """Sets the given container as a dependency of this container and returns the given container.
 
         Examples:
-            from hera.workflows import ContainerNode
-            # normally, you use the following within a `hera.workflows.ContainerSet` context.
-            a, b = ContainerNode(name="a"), ContainerNode(name="b")
-            a.next(b)
-            b.dependencies  # prints ['a']
+            >>> from hera.workflows import ContainerNode
+            >>> a, b = ContainerNode(name="a"), ContainerNode(name="b")
+            >>> a.next(b)
+            >>> b.dependencies
+            ['a']
         """
         assert issubclass(other.__class__, ContainerNode)
         if other.dependencies is None:
@@ -65,11 +65,11 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         Practically, the `__rrshift__` allows us to express statements such as `[a, b, c] >> d`, where `d` is `self.`
 
         Examples:
-            from hera.workflows import ContainerNode
-            # normally, you use the following within a `hera.workflows.ContainerSet` context.
-            a, b, c = ContainerNode(name="a"), ContainerNode(name="b"), ContainerNode(name="c")
-            [a, b] >> c
-            c.dependencies  # prints ['a', 'b']
+            >>> from hera.workflows import ContainerNode
+            >>> a, b, c = ContainerNode(name="a"), ContainerNode(name="b"), ContainerNode(name="c")
+            >>> [a, b] >> c
+            >>> c.dependencies
+            ['a', 'b']
         """
         assert isinstance(other, list), f"Unknown type {type(other)} specified using reverse right bitshift operator"
         for o in other:
@@ -82,11 +82,11 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
         """Sets the given container as a dependency of this container and returns the given container.
 
         Examples:
-            from hera.workflows import ContainerNode
-            # normally, you use the following within a `hera.workflows.ContainerSet` context.
-            a, b = ContainerNode(name="a"), ContainerNode(name="b")
-            a >> b
-            b.dependencies  # prints ['a']
+            >>> from hera.workflows import ContainerNode
+            >>> a, b = ContainerNode(name="a"), ContainerNode(name="b")
+            >>> a >> b
+            >>> b.dependencies
+            ['a']
         """
         if isinstance(other, ContainerNode):
             return self.next(other)
@@ -101,6 +101,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
 
     def _build_container_node(self) -> _ModelContainerNode:
         """Builds the generated `ContainerNode`."""
+        image_pull_policy = self._build_image_pull_policy()
         return _ModelContainerNode(
             args=self.args,
             command=self.command,
@@ -108,7 +109,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
             env=self._build_env(),
             env_from=self._build_env_from(),
             image=self.image,
-            image_pull_policy=self._build_image_pull_policy(),
+            image_pull_policy=None if image_pull_policy is None else image_pull_policy.value,
             lifecycle=self.lifecycle,
             liveness_probe=self.liveness_probe,
             name=self.name,
@@ -142,10 +143,9 @@ class ContainerSet(
     The containers are run within the same pod.
 
     Examples:
-    --------
-    >>> with ContainerSet(...) as cs:
-    >>>     ContainerNode(...)
-    >>>     ContainerNode(...)
+        >>> with ContainerSet(...) as cs:
+        >>>     ContainerNode(...)
+        >>>     ContainerNode(...)
     """
 
     containers: List[Union[ContainerNode, _ModelContainerNode]] = []
