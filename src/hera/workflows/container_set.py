@@ -29,8 +29,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
     """A regular container that can be used as part of a `hera.workflows.ContainerSet`.
 
     See Also:
-    --------
-    https://argoproj.github.io/argo-workflows/container-set-template/
+        [Container Set Template](https://argoproj.github.io/argo-workflows/container-set-template/)
     """
 
     name: str
