@@ -127,7 +127,7 @@ class WorkflowTemplate(Workflow):
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML string.
 
         Usage:
-            my_workflow_template = WorkflowTemplate.from_yaml(yaml_str)
+            >>> my_workflow_template = WorkflowTemplate.from_yaml(yaml_str)
         """
         return cls._from_yaml(yaml_str, _ModelWorkflowTemplate)
 
@@ -136,8 +136,8 @@ class WorkflowTemplate(Workflow):
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
 
         Usage:
-            yaml_file = Path(...)
-            my_workflow_template = WorkflowTemplate.from_file(yaml_file)
+            >>> yaml_file = Path(...)
+            >>> my_workflow_template = WorkflowTemplate.from_file(yaml_file)
         """
         return cls._from_file(yaml_file, _ModelWorkflowTemplate)
 
