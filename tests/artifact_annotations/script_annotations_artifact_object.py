@@ -20,7 +20,7 @@ class MyArtifact(BaseModel):
     b = "b"
 
 
-@script()
+@script(constructor="runner")
 def read_artifact(
     an_artifact: Annotated[MyArtifact, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=ArtifactLoader.json)]
 ) -> str:
