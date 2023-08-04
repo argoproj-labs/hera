@@ -9,7 +9,6 @@ from hera.workflows.artifact import Artifact, ArtifactoryArtifact
 from hera.workflows.steps import Steps
 
 global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_runner"] = True
 
 
 @script()

@@ -4,7 +4,6 @@ from hera.workflows.artifact import Artifact
 from hera.workflows.steps import Steps
 
 global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_runner"] = True
 
 
 @script(inputs=[Artifact(name="my_artifact", path="tmp/file", mode=123, recurseMode=True)])

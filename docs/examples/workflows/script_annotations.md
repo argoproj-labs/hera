@@ -20,7 +20,7 @@
     global_config.experimental_features["script_runner"] = True
 
 
-    @script()
+    @script(constructor="runner")
     def echo_all(
         an_int: Annotated[int, Parameter(description="an_int parameter", default=1)],
         a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],
@@ -87,36 +87,17 @@
             name: a_string
         name: echo-all
         script:
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.script_annotations:echo_all
           command:
           - python
+          env:
+          - name: hera__script_annotations
+            value: ''
           image: python:3.8
-          source: 'import os
-
-            import sys
-
-            sys.path.append(os.getcwd())
-
-            import json
-
-            try: a_bool = json.loads(r''''''{{inputs.parameters.a_bool}}'''''')
-
-            except: a_bool = r''''''{{inputs.parameters.a_bool}}''''''
-
-            try: a_string = json.loads(r''''''{{inputs.parameters.a_string}}'''''')
-
-            except: a_string = r''''''{{inputs.parameters.a_string}}''''''
-
-            try: an_int = json.loads(r''''''{{inputs.parameters.an_int}}'''''')
-
-            except: an_int = r''''''{{inputs.parameters.an_int}}''''''
-
-
-            print(an_int)
-
-            print(a_bool)
-
-            print(a_string)
-
-            print(an_artifact)'
+          source: '{{inputs.parameters}}'
     ```
 
