@@ -10,7 +10,7 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_runner"] = True
 
 
-@script()
+@script(constructor="runner")
 def echo_all(
     an_int: Annotated[int, Parameter(description="an_int parameter", default=1)],
     a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],

@@ -16,7 +16,7 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_runner"] = True
 
 
-@script()
+@script(constructor="runner")
 def read_artifact(an_artifact: Annotated[Path, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=None)]) -> str:
     return an_artifact.read_text()
 
