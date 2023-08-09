@@ -62,6 +62,7 @@ The "Hera" collection shows off features and idiomatic usage of Hera such as the
 | [http-hello-world](https://github.com/argoproj/argo-workflows/blob/master/examples/http-hello-world.yaml) |
 | [http-success-condition](https://github.com/argoproj/argo-workflows/blob/master/examples/http-success-condition.yaml) |
 | [influxdb-ci](https://github.com/argoproj/argo-workflows/blob/master/examples/influxdb-ci.yaml) |
+| [intermediate-parameters](https://github.com/argoproj/argo-workflows/blob/master/examples/intermediate-parameters.yaml) |
 | [k8s-jobs](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-jobs.yaml) |
 | [k8s-orchestration](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-orchestration.yaml) |
 | [k8s-owner-reference](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-owner-reference.yaml) |
