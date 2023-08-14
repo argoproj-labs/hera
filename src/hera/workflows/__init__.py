@@ -20,6 +20,7 @@ from hera.workflows.artifact import (
     RawArtifact,
     S3Artifact,
 )
+from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.container import Container
 from hera.workflows.container_set import ContainerNode, ContainerSet
 from hera.workflows.cron_workflow import CronWorkflow
@@ -91,6 +92,7 @@ __all__ = [
     "CSIVolume",
     "CephFSVolumeVolume",
     "CinderVolume",
+    "ClusterWorkflowTemplate",
     "ConfigMapEnv",
     "ConfigMapEnvFrom",
     "ConfigMapVolume",
