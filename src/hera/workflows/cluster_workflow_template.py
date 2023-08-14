@@ -73,3 +73,6 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
         # should specify cluster_scope=True, but that is an intrinsic property of ClusterWorkflowTemplates from our
         # perspective.
         return _ModelClusterWorkflowTemplate(**super().build().dict())
+
+
+__all__ = ["ClusterWorkflowTemplate"]
