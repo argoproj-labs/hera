@@ -22,6 +22,9 @@ class Parameter(_ModelParameter):
 
     name: Optional[str] = None  # type: ignore
 
+    output: Optional[bool] = False
+    """used in output annotations in function signatures"""
+
     def _check_name(self):
         if not self.name:
             raise ValueError("name cannot be `None` or empty when used")

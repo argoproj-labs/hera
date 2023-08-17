@@ -35,7 +35,7 @@ class ArtifactLoader(Enum):
 class Artifact(BaseModel):
     """Base artifact representation."""
 
-    name: str
+    name: Optional[str]
     """name of the artifact"""
 
     archive: Optional[Union[_ModelArchiveStrategy, ArchiveStrategy]] = None
@@ -74,6 +74,13 @@ class Artifact(BaseModel):
     loader: Optional[ArtifactLoader] = None
     """used in Artifact annotations for determining how to load the data"""
 
+    output: bool = False
+    """used in output annotations in function signatures"""
+
+    def _check_name(self):
+        if not self.name:
+            raise ValueError("name cannot be `None` or empty when used")
+
     def _build_archive(self) -> Optional[_ModelArchiveStrategy]:
         if self.archive is None:
             return None
@@ -83,6 +90,7 @@ class Artifact(BaseModel):
         return cast(ArchiveStrategy, self.archive)._build_archive_strategy()
 
     def _build_artifact(self) -> _ModelArtifact:
+        self._check_name()
         return _ModelArtifact(
             name=self.name,
             archive=self._build_archive(),
@@ -99,6 +107,7 @@ class Artifact(BaseModel):
         )
 
     def _build_artifact_paths(self) -> _ModelArtifactPaths:
+        self._check_name()
         artifact = self._build_artifact()
         return _ModelArtifactPaths(**artifact.dict())
 
