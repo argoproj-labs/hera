@@ -1,3 +1,5 @@
+"""The unit tests of the Parameter class, covering the name: Optional[str] behaviour."""
+
 import pytest
 
 from hera.workflows.parameter import Parameter
