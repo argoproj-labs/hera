@@ -1,13 +1,10 @@
-import importlib
 import os
 from pathlib import Path
 
 import pytest
 import tests.helper as test_module
-from unittest.mock import patch
 
 from hera.shared.serialization import serialize
-from hera.workflows.script import RunnerScriptConstructor
 from hera.workflows.runner import _runner
 
 
@@ -96,20 +93,16 @@ def test(entrypoint, kwargs_list, expected_output, global_config_fixture, enviro
         ),
     ],
 )
-# @patch("hera.workflows.runner.importlib")
 def test_script_annotations_outputs(
-    # mock_importlib,
     entrypoint,
     kwargs_list,
     expected_files,
     global_config_fixture,
     environ_annotations_fixture,
     tmp_path_fixture,
-    # tmp_path,
     monkeypatch,
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
-
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
@@ -150,7 +143,6 @@ def test_script_annotations_outputs_exceptions(
     entrypoint, kwargs_list, exception, global_config_fixture, environ_annotations_fixture
 ):
     """Test that the output annotations throw the expected exceptions."""
-
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
@@ -174,7 +166,6 @@ def test_script_annotations_outputs_exceptions(
 )
 def test_script_annotations_outputs_no_global_config(entrypoint, kwargs_list, expected_output):
     """Test that the output annotations are ignored when global_config is not set."""
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
 
@@ -211,7 +202,6 @@ def test_script_annotations_artifacts(
     entrypoint, file_contents, expected_output, tmp_path, monkeypatch, global_config_fixture
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
-
     # GIVEN
     if not tmp_path.is_file():
         tmp_path = tmp_path / "my_file.txt"
@@ -238,7 +228,6 @@ def test_script_annotations_artifacts(
 )
 def test_script_annotations_artifacts_wrong_loader(entrypoint, global_config_fixture):
     """Test that the input artifact annotation with no loader throws an exception."""
-
     # GIVEN
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True

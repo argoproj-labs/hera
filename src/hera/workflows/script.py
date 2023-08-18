@@ -153,9 +153,9 @@ class Script(
 
     def _build_template(self) -> _ModelTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
-        hera_outputs_used = self._check_new_volumes()
+        hera_outputs_used = self._check_hera_outputs_used()
         if hera_outputs_used:
-            self._extract_new_volume()
+            self._create_new_volume()
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
@@ -309,17 +309,15 @@ class Script(
 
         return current_io
 
-    def _check_new_volumes(self):
+    def _check_hera_outputs_used(self) -> bool:
+        """Check if hera outputs are used. This is needed to know if we need to create a volume."""
         if not callable(self.source):
             return False
         outputs = extract_output_annotations(cast(Callable, self.source))
         return outputs is not None
 
-    def _extract_new_volume(self):
-        outputs = extract_output_annotations(cast(Callable, self.source))
-        if not outputs:
-            return
-
+    def _create_new_volume(self) -> None:
+        """Create the new volume as an EmptyDirVolume if needed."""
         new_volume = EmptyDirVolume(name="hera__outputs_directory", mount_path=self._get_outputs_directory())
 
         if not isinstance(self.volumes, list) and self.volumes is not None:
@@ -330,12 +328,12 @@ class Script(
         if new_volume not in self.volumes:
             self.volumes.append(new_volume)
 
-    def _get_outputs_directory(self):
+    def _get_outputs_directory(self) -> str:
         """Get the outputs directory from the constructor, provide a default if not set."""
         if isinstance(self.constructor, RunnerScriptConstructor):
             if self.constructor.outputs_directory is not None:
                 return self.constructor.outputs_directory
-        return ("/hera/outputs",)
+        return "/hera/outputs"
 
 
 def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
@@ -358,8 +356,7 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
 def _get_outputs_from_callable(
     source: Callable,
 ) -> Tuple[List[Parameter], List[Artifact]]:
-    # Look through the function signature return and find all the parameters
-    # and artifacts defined there
+    """Look through the function signature return and find all the output Parameters and Artifacts defined there."""
     parameters = []
     artifacts = []
 
@@ -381,7 +378,7 @@ def _get_outputs_from_callable(
 
 
 def _get_outputs_from_callable_signature(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
-    # Look through the function signature and find all parameters and artifacts annotated as output
+    """Look through the function signature parameters and find all Parameters and Artifacts annotated as output."""
     parameters: List[Parameter] = []
     artifacts: List[Artifact] = []
 
@@ -418,7 +415,7 @@ def _get_outputs_from_callable_signature(source: Callable) -> Tuple[List[Paramet
 
 
 def _get_parameters_and_artifacts_from_callable(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
-    # Look through the function signature and find all parameters and artifacts not annotated as output
+    """Look through the function signature and find all Parameters and Artifacts *not* annotated as output."""
     parameters = []
     artifacts = []
 
@@ -672,7 +669,9 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     """
 
     _flag: str = "script_runner"
+
     outputs_directory: str = "hera/outputs"
+    """Used for saving outputs when defined using annotations."""
 
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
         """A function that can inspect the Script instance and generate the source field."""

@@ -20,7 +20,6 @@ def test_script_annotations_parameter_regression(module_name, global_config_fixt
     Check if the workflow created using the new syntax is equivalent
     to one created using the old syntax.
     """
-
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     workflow_old = importlib.import_module(
@@ -48,7 +47,6 @@ def test_script_annotations_artifact_regression(module_name, global_config_fixtu
     Check if the workflow created using the new syntax is equivalent
     to one created using the old syntax.
     """
-
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     workflow_old = importlib.import_module(
@@ -73,7 +71,6 @@ def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
 
 def test_double_default_throws_a_value_error(global_config_fixture):
     """Test asserting that it is not possible to define default in the annotation and normal Python."""
-
     global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
         with Workflow(generate_name="test-default-", entrypoint="my_steps") as w:

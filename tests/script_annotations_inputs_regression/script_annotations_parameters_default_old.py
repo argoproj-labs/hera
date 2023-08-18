@@ -1,4 +1,4 @@
-"""Regression test: compare the new Annotated style inputs declaration with the old version"""
+"""Regression test: compare the new Annotated style inputs declaration with the old version."""
 
 from hera.workflows import Workflow, script
 from hera.workflows.steps import Steps

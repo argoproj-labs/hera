@@ -10,10 +10,9 @@ from typing import Tuple
 
 from tests.helper import ARTIFACT_PATH
 
-from hera.workflows import Artifact, Parameter, Workflow, script
 from hera.shared import global_config
+from hera.workflows import Artifact, Parameter, Workflow, script
 from hera.workflows.steps import Steps
-
 
 global_config.experimental_features["script_runner"] = True
 

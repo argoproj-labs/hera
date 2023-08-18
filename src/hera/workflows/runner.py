@@ -129,8 +129,10 @@ def _save_outputs(
     """Save the results of the function to the specified output destinations.
 
     The results are matched with the specified outputs and saved using the schema:
-
+    <parent_directory>/artifacts/<name>
+    <parent_directory>/parameters/<name>
     If the artifact path is specified, that is used instead.
+    <parent_directory> can be provided by the user or is set to /hera/outputs by default
     """
     if not isinstance(function_results, tuple):
         function_results = [function_results]
@@ -163,6 +165,7 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
 
 
 def _write_to_path(path: Path, file) -> None:
+    """Write the file contents to the provided path. Create the necessary parent directories."""
     directory = path.parent
     directory.mkdir(parents=True, exist_ok=True)
     path.touch(exist_ok=True)

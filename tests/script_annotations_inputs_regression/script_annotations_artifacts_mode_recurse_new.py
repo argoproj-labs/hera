@@ -1,4 +1,4 @@
-"""Regression test: compare the new Annotated style inputs declaration with the old version"""
+"""Regression test: compare the new Annotated style inputs declaration with the old version."""
 
 try:
     from typing import Annotated  # type: ignore

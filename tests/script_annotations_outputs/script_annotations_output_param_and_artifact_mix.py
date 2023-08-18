@@ -1,4 +1,4 @@
-"""Test the correctness of the Output annotations. The test inspects the inputs and outputs of the workflow"""
+"""Test the correctness of the Output annotations. The test inspects the inputs and outputs of the workflow."""
 
 try:
     from typing import Annotated  # type: ignore
@@ -8,10 +8,9 @@ except ImportError:
 from pathlib import Path
 from typing import Tuple
 
+from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, Workflow, script
 from hera.workflows.steps import Steps
-from hera.shared import global_config
-
 
 global_config.experimental_features["script_runner"] = True
 
