@@ -51,7 +51,11 @@ More details can be found here: https://github.com/argoproj-labs/hera-workflows/
           tasks:
           - name: generate
             template: generate
-          - depends: generate
+          - arguments:
+              parameters:
+              - name: value
+                value: '{{item.value}}'
+            depends: generate
             name: fanout
             template: fanout
             withParam: '{{tasks.generate.outputs.result}}'
