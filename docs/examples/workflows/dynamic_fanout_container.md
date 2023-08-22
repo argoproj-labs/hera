@@ -74,7 +74,6 @@ More details can be found here: https://github.com/argoproj-labs/hera-workflows/
         inputs:
           parameters:
           - name: value
-            value: '{{item.value}}'
         name: fanout
     ```
 
