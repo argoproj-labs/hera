@@ -68,7 +68,7 @@
           - arguments:
               parameters:
               - name: values
-                value: '{{tasks.fanout.outputs.parameters}}'
+                value: '{{tasks.fanout.outputs.parameters.value}}'
             depends: fanout
             name: fanin
             template: fanin
