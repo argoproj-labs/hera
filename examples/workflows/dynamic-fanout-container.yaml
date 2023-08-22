@@ -32,5 +32,4 @@ spec:
     inputs:
       parameters:
       - name: value
-        value: '{{item.value}}'
     name: fanout
