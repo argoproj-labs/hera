@@ -108,7 +108,12 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return WorkflowList(**resp.json())
+            # this is a special case for items that are returned in a list response. The upstream server returns a
+            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
+            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
+            resp_json = resp.json()
+            resp_json["items"] = resp_json.get("items", [])
+            return WorkflowList(**resp_json)
 
         raise exception_from_server_response(resp)
 
@@ -266,7 +271,12 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return ClusterWorkflowTemplateList(**resp.json())
+            # this is a special case for items that are returned in a list response. The upstream server returns a
+            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
+            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
+            resp_json = resp.json()
+            resp_json["items"] = resp_json.get("items", [])
+            return ClusterWorkflowTemplateList(**resp_json)
 
         raise exception_from_server_response(resp)
 
@@ -738,7 +748,12 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return WorkflowTemplateList(**resp.json())
+            # this is a special case for items that are returned in a list response. The upstream server returns a
+            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
+            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
+            resp_json = resp.json()
+            resp_json["items"] = resp_json.get("items", [])
+            return WorkflowTemplateList(**resp_json)
 
         raise exception_from_server_response(resp)
 
@@ -901,7 +916,12 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            return WorkflowList(**resp.json())
+            # this is a special case for items that are returned in a list response. The upstream server returns a
+            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
+            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
+            resp_json = resp.json()
+            resp_json["items"] = resp_json.get("items", [])
+            return WorkflowList(**resp_json)
 
         raise exception_from_server_response(resp)
 

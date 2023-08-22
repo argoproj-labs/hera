@@ -199,6 +199,37 @@ class ServiceEndpoint:
         
         raise exception_from_server_response(resp)
             """
+        # this is a special case for items that are returned in a list response. The upstream server returns a `None`
+        # instead of an empty list when something is not found but the OpenAPI specification lists the respective
+        # fields as required. Until the upstream is fixed, this applies a patch to handle the `None` case
+        elif self.response.ref in [
+            "ClusterWorkflowTemplateList",
+            "CronWorkflowList",
+            "WorkflowList",
+            "WorkflowTemplateList",
+            "WorkflowEventBindingList",
+        ]:
+            return f"""
+    {signature}
+        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
+        resp = requests.{self.method}(
+            url={req_url},
+            params={params},
+            headers={headers},
+            data={body},
+            verify=self.verify_ssl
+        )
+
+        if resp.ok:
+            # this is a special case for items that are returned in a list response. The upstream server returns a 
+            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the 
+            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None` 
+            resp_json = resp.json()
+            resp_json['items'] = resp_json.get('items', [])
+            return {self.response}(**resp_json)
+
+        raise exception_from_server_response(resp)
+            """
         else:
             ret_val = f"{self.response}(**resp.json())"
 
