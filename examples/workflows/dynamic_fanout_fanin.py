@@ -29,5 +29,5 @@ with Workflow(generate_name="dynamic-fanout-fanin", entrypoint="d") as w:
     with DAG(name="d"):
         g = generate()
         fout = fanout(with_param=g.result)
-        fin = fanin(arguments=fout.get_parameters_as("values"))
+        fin = fanin(arguments=fout.get_parameter("value").with_name("values"))
         g >> fout >> fin
