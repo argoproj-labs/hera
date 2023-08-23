@@ -15,7 +15,8 @@ generate = Container(
 
 fanout = Container(
     name="fanout",
-    inputs=[Parameter(name="value", value="{{item.value}}")],
+    inputs=[Parameter(name="value")],
+    arguments=[Parameter(name="value", value="{{item.value}}")],
     image="alpine:latest",
     command=["echo", "{{inputs.parameters.value}}"],
 )

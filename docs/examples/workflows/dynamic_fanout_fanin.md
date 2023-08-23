@@ -39,7 +39,7 @@
         with DAG(name="d"):
             g = generate()
             fout = fanout(with_param=g.result)
-            fin = fanin(arguments=fout.get_parameters_as("values"))
+            fin = fanin(arguments=fout.get_parameter("value").with_name("values"))
             g >> fout >> fin
     ```
 
@@ -68,7 +68,7 @@
           - arguments:
               parameters:
               - name: values
-                value: '{{tasks.fanout.outputs.parameters}}'
+                value: '{{tasks.fanout.outputs.parameters.value}}'
             depends: fanout
             name: fanin
             template: fanin

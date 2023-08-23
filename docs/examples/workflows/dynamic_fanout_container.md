@@ -21,7 +21,8 @@ More details can be found here: https://github.com/argoproj-labs/hera-workflows/
 
     fanout = Container(
         name="fanout",
-        inputs=[Parameter(name="value", value="{{item.value}}")],
+        inputs=[Parameter(name="value")],
+        arguments=[Parameter(name="value", value="{{item.value}}")],
         image="alpine:latest",
         command=["echo", "{{inputs.parameters.value}}"],
     )
@@ -50,7 +51,11 @@ More details can be found here: https://github.com/argoproj-labs/hera-workflows/
           tasks:
           - name: generate
             template: generate
-          - depends: generate
+          - arguments:
+              parameters:
+              - name: value
+                value: '{{item.value}}'
+            depends: generate
             name: fanout
             template: fanout
             withParam: '{{tasks.generate.outputs.result}}'
@@ -69,7 +74,6 @@ More details can be found here: https://github.com/argoproj-labs/hera-workflows/
         inputs:
           parameters:
           - name: value
-            value: '{{item.value}}'
         name: fanout
     ```
 
