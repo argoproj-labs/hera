@@ -13,6 +13,7 @@ from hera.workflows import Artifact, Parameter, Workflow, script
 from hera.workflows.steps import Steps
 
 global_config.experimental_features["script_runner"] = True
+global_config.experimental_features["script_annotations"] = True
 
 
 @script(constructor="runner")
@@ -20,10 +21,7 @@ def script_param_artifact_mixed(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],
     successor2: Annotated[Path, Artifact(name="successor2", output=True)],
-) -> Tuple[
-    Annotated[int, Parameter(name="successor3", output=True)],
-    Annotated[int, Artifact(name="successor4", output=True)],
-]:
+) -> Tuple[Annotated[int, Parameter(name="successor3")], Annotated[int, Artifact(name="successor4")],]:
     successor.write_text(a_number + 1)
     successor2.write_text(a_number + 2)
     return a_number + 3, a_number + 4

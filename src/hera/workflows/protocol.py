@@ -74,6 +74,6 @@ class Inputable(Protocol):
     """This runtime protocol indicates that an object supports being used as an input annotation."""
 
     @classmethod
-    def get_input_attributes(cls) -> List[str]:
+    def _get_input_attributes(cls) -> List[str]:
         """Return the attributes used for input annotations."""
         ...

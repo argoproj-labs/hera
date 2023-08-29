@@ -14,7 +14,7 @@ from typing_extensions import get_args, get_origin
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.script import extract_output_annotations
+from hera.workflows.script import _extract_output_annotations
 
 try:
     from typing import Annotated  # type: ignore
@@ -153,24 +153,24 @@ def _save_outputs(
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     """Get the path from the destination annotation using the defined outputs directory."""
-    outputs_dir = Path(os.environ.get("hera__outputs_directory", "hera/outputs"))
-    if isinstance(destination, Parameter):
-        path = outputs_dir / f"parameters/{cast(str, destination.name)}"
-    elif isinstance(destination, Artifact):
-        if destination.path:
-            path = Path(destination.path)
-        else:
-            path = outputs_dir / f"artifacts/{cast(str, destination.name)}"
+    path = Path(os.environ.get("hera__outputs_directory", "hera/outputs"))
+    if destination.name:
+        if isinstance(destination, Parameter):
+            path = path / f"parameters/{destination.name}"
+        elif isinstance(destination, Artifact):
+            if destination.path:
+                path = Path(destination.path)
+            else:
+                path = path / f"artifacts/{destination.name}"
     return path
 
 
-def _write_to_path(path: Path, file) -> None:
+def _write_to_path(path: Path, file: Any) -> None:
     """Write the file contents to the provided path. Create the necessary parent directories."""
-    directory = path.parent
-    directory.mkdir(parents=True, exist_ok=True)
-    path.touch(exist_ok=True)
     result = serialize(file)
-    path.write_text(result if result else "")
+    if result:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(result)
 
 
 def _runner(entrypoint: str, kwargs_list: Any) -> Any:
@@ -206,7 +206,7 @@ def _runner(entrypoint: str, kwargs_list: Any) -> Any:
     function = _ignore_unmatched_kwargs(function)
 
     if os.environ.get("hera__script_annotations", None) is not None:
-        output_annotations = extract_output_annotations(function)
+        output_annotations = _extract_output_annotations(function)
 
         if output_annotations:
             _save_outputs(function(**kwargs), output_annotations)

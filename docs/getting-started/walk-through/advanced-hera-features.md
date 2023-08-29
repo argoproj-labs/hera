@@ -256,11 +256,11 @@ def func() -> Annotated[str, Artifact(name="hello-art", path="/tmp/hello_world.t
 The idea is to save the returned value in a file according to this schema:
 `/hera/outputs/parameters/<name>`
 `/hera/outputs/artifacts/<name>`
-for easy access in subsequent Steps. The output is also exposed in the `outputs` section of the resulting yaml. 
+for easy access in subsequent `Steps`/`Tasks`. The output is also exposed in the `outputs` section of the resulting yaml. 
 
-The item returned from the function can be of any serialisable pydantic type. That arbitrary type needs to be 
-`Annotated` with an `Artifact` or `Parameter` which we refer to with the “`OutputItem`” alias here. One of 
-these is needed because we have to know where to save it to file at the end. The `OutputItem`’s `name` will 
+The item returned from the function can be of any serialisable Pydantic type. That arbitrary type needs to be 
+`Annotated` with an `Artifact` or `Parameter`. One of 
+these is needed because we have to know where to save it to file at the end. The `Parameter`/`Artifact`'s `name` will 
 be taken and used for creating the path for saving the item. If the annotation is `Artifact` and it contains a `path`, 
 we use that `path` to save the output.
 
@@ -270,14 +270,14 @@ def func(...) -> Annotated[arbitrary_pydantic_type, OutputItem]:
     return output
 ```
 
-We also allow the return type to be a `Tuple` of arbitrary pydantic types with `OutputItem` annotations.
+We also allow the return type to be a `Tuple` of arbitrary Pydantic types with `Parameter`/`Artifact` annotations.
 ```python
 @script()
-def func(...) -> Tuple[Annotated[arbitrary_pydantic_type_a, OutputItem1], Annotated[arbitrary_pydantic_type_b, OutputItem2], ...]:
+def func(...) -> Tuple[Annotated[arbitrary_pydantic_type_a, Artifact/Parameter], Annotated[arbitrary_pydantic_type_b, Artifact/Parameter], ...]:
     return output_a, output_b
 ```
 
-We also want to allow `OutputItem`s as part of the function signature, allowing users to access/write to the 
+We also want to allow `Parameter`/`Artifact`s as part of the function signature, allowing users to access/write to the 
 output path as if it were a `Path` object. They will require an additional field `output=True` to distinguish 
 them from the input parameters but will otherwise behave in the same way.
 
@@ -292,4 +292,4 @@ The parent outputs directory `/hera/outputs` can be overwritten by the user. Thi
 ```python
 global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="user/chosen/outputs")
 ```
-in the script using the outputs. Notice, this is only done for scripts using the runner constructor.
+in the script using the outputs. Note, this is only done for scripts using the runner constructor.

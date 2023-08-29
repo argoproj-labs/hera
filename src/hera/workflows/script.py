@@ -153,9 +153,7 @@ class Script(
 
     def _build_template(self) -> _ModelTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
-        hera_outputs_used = self._check_hera_outputs_used()
-        if hera_outputs_used:
-            self._create_new_volume()
+
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
@@ -182,7 +180,7 @@ class Script(
                 priority_class_name=self.priority_class_name,
                 retry_strategy=self.retry_strategy,
                 scheduler_name=self.scheduler_name,
-                script=self._build_script(hera_outputs_used),
+                script=self._build_script(),
                 security_context=self.pod_security_context,
                 service_account_name=self.service_account_name,
                 sidecars=self._build_sidecars(),
@@ -193,27 +191,22 @@ class Script(
             ),
         )
 
-    def _build_script(self, hera_outputs_used: bool = False) -> _ModelScriptTemplate:
+    def _build_script(self) -> _ModelScriptTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
         image_pull_policy = self._build_image_pull_policy()
-
-        env = self._build_env()
-        if (
-            isinstance(self.constructor, RunnerScriptConstructor)
-            and global_config.experimental_features["script_annotations"]
+        if _output_annotations_used(cast(Callable, self.source)) and isinstance(
+            self.constructor, RunnerScriptConstructor
         ):
-            if not env:
-                env = []
-            env.append(EnvVar(name="hera__script_annotations", value=""))
-            if hera_outputs_used:
-                env.append(EnvVar(name="hera__outputs_directory", value=self._get_outputs_directory()))
+            if not self.constructor.outputs_directory:
+                self.constructor.outputs_directory = self.constructor.DEFAULT_HERA_OUTPUTS_DIRECTORY
+            self._create_hera_outputs_volume()
 
         return self.constructor.transform_script_template_post_build(
             self,
             _ModelScriptTemplate(
                 args=self.args,
                 command=self.command,
-                env=env,
+                env=self._build_env(),
                 env_from=self._build_env_from(),
                 image=self.image,
                 # `image_pull_policy` in script wants a string not an `ImagePullPolicy` object
@@ -248,7 +241,7 @@ class Script(
             else:
                 func_parameters = _get_parameters_from_callable(self.source)
 
-        return cast(Optional[ModelInputs], self._process_io(inputs, func_parameters, func_artifacts, False))
+        return cast(Optional[ModelInputs], self._aggregate_callable_io(inputs, func_parameters, func_artifacts, False))
 
     def _build_outputs(self) -> Optional[ModelOutputs]:
         outputs = super()._build_outputs()
@@ -264,17 +257,18 @@ class Script(
         func_parameters.extend(out_parameters)
         func_artifacts.extend(out_artifacts)
 
-        return cast(Optional[ModelOutputs], self._process_io(outputs, func_parameters, func_artifacts, True))
+        return cast(
+            Optional[ModelOutputs], self._aggregate_callable_io(outputs, func_parameters, func_artifacts, True)
+        )
 
-    def _process_io(
+    def _aggregate_callable_io(
         self,
         current_io: Optional[Union[ModelInputs, ModelOutputs]],
         func_parameters: List[Parameter],
         func_artifacts: List[Artifact],
         output: bool,
     ) -> Union[ModelOutputs, ModelInputs, None]:
-        if current_io is None and not func_parameters and not func_artifacts:
-            return None
+        """Aggregate the Inputs/Outputs with parameters and artifacts extracted from a callable."""
         if not func_parameters and not func_artifacts:
             return current_io
         if current_io is None:
@@ -289,11 +283,11 @@ class Script(
                     artifacts=[a._build_artifact() for a in func_artifacts] or None,
                 )
 
-        already_set_params = {p.name for p in current_io.parameters or []}
-        already_set_artifacts = {a.name for a in current_io.artifacts or []}
+        seen_params = {p.name for p in current_io.parameters or []}
+        seen_artifacts = {a.name for a in current_io.artifacts or []}
 
         for param in func_parameters:
-            if param.name not in already_set_params and param.name not in already_set_artifacts:
+            if param.name not in seen_params and param.name not in seen_artifacts:
                 if current_io.parameters is None:
                     current_io.parameters = []
                 if output:
@@ -302,23 +296,17 @@ class Script(
                     current_io.parameters.append(param.as_input())
 
         for artifact in func_artifacts:
-            if artifact.name not in already_set_params and artifact.name not in already_set_artifacts:
+            if artifact.name not in seen_artifacts:
                 if current_io.artifacts is None:
                     current_io.artifacts = []
                 current_io.artifacts.append(artifact._build_artifact())
 
         return current_io
 
-    def _check_hera_outputs_used(self) -> bool:
-        """Check if hera outputs are used. This is needed to know if we need to create a volume."""
-        if not callable(self.source):
-            return False
-        outputs = extract_output_annotations(cast(Callable, self.source))
-        return outputs is not None
-
-    def _create_new_volume(self) -> None:
-        """Create the new volume as an EmptyDirVolume if needed."""
-        new_volume = EmptyDirVolume(name="hera__outputs_directory", mount_path=self._get_outputs_directory())
+    def _create_hera_outputs_volume(self) -> None:
+        """Create the new volume as an EmptyDirVolume if needed for the automatic saving of the hera outputs."""
+        assert isinstance(self.constructor, RunnerScriptConstructor)
+        new_volume = EmptyDirVolume(name="hera__outputs_directory", mount_path=self.constructor.outputs_directory)
 
         if not isinstance(self.volumes, list) and self.volumes is not None:
             self.volumes = [self.volumes]
@@ -327,13 +315,6 @@ class Script(
 
         if new_volume not in self.volumes:
             self.volumes.append(new_volume)
-
-    def _get_outputs_directory(self) -> str:
-        """Get the outputs directory from the constructor, provide a default if not set."""
-        if isinstance(self.constructor, RunnerScriptConstructor):
-            if self.constructor.outputs_directory is not None:
-                return self.constructor.outputs_directory
-        return "/hera/outputs"
 
 
 def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
@@ -394,7 +375,7 @@ def _get_outputs_from_callable_signature(source: Callable) -> Tuple[List[Paramet
 
         kwargs: Dict[str, Any] = {}
         if isinstance(output_type, Inputable):
-            for attr in output_type.get_input_attributes():
+            for attr in output_type._get_input_attributes():
                 if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
                     kwargs[attr] = getattr(annotation, attr)
         else:
@@ -426,7 +407,7 @@ def _get_parameters_and_artifacts_from_callable(source: Callable) -> Tuple[List[
                 continue
             mytype = type(annotation)
             kwargs = {}
-            for attr in mytype.get_input_attributes():
+            for attr in mytype._get_input_attributes():
                 if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
                     kwargs[attr] = getattr(annotation, attr)
 
@@ -453,7 +434,7 @@ def _get_parameters_and_artifacts_from_callable(source: Callable) -> Tuple[List[
             if not isinstance(annotation, Parameter):
                 continue
 
-            for attr in Parameter.get_input_attributes():
+            for attr in Parameter._get_input_attributes():
                 if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
                     continue
 
@@ -464,6 +445,15 @@ def _get_parameters_and_artifacts_from_callable(source: Callable) -> Tuple[List[
                 setattr(param, attr, getattr(annotation, attr))
 
     return parameters, artifacts
+
+
+def _output_annotations_used(source: Callable) -> bool:
+    """Check if output annotations are used."""
+    if not global_config.experimental_features["script_annotations"]:
+        return False
+    if not callable(source):
+        return False
+    return _extract_output_annotations(cast(Callable, source)) is not None
 
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
@@ -561,7 +551,7 @@ def script(**script_kwargs):
     return script_wrapper
 
 
-def extract_output_annotations(function: Callable) -> Optional[List]:
+def _extract_output_annotations(function: Callable) -> Optional[List]:
     """Extract the output annotations out of the function signature."""
     output = []
     origin_type = get_origin(inspect.signature(function).return_annotation)
@@ -670,8 +660,11 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
 
     _flag: str = "script_runner"
 
-    outputs_directory: str = "hera/outputs"
+    outputs_directory: Optional[str] = None
     """Used for saving outputs when defined using annotations."""
+
+    DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/hera/outputs"
+    """Used as the default value for when the outputs_directory is not set"""
 
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
         """A function that can inspect the Script instance and generate the source field."""
@@ -692,6 +685,18 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     def generate_source(self, instance: Script) -> str:
         """A function that can inspect the Script instance and generate the source field."""
         return f"{g.inputs.parameters:$}"
+
+    def transform_script_template_post_build(
+        self, instance: "Script", script: _ModelScriptTemplate
+    ) -> _ModelScriptTemplate:
+        """A hook to transform the generated script template."""
+        if global_config.experimental_features["script_annotations"]:
+            if not script.env:
+                script.env = []
+            script.env.append(EnvVar(name="hera__script_annotations", value=""))
+            if self.outputs_directory:
+                script.env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
+        return script
 
 
 __all__ = ["Script", "script", "ScriptConstructor", "InlineScriptConstructor", "RunnerScriptConstructor"]

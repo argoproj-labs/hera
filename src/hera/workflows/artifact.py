@@ -75,7 +75,7 @@ class Artifact(BaseModel):
     """used in Artifact annotations for determining how to load the data"""
 
     output: bool = False
-    """used in output annotations in function signatures"""
+    """used to specify artifact as an output in function signature annotations"""
 
     def _check_name(self):
         if not self.name:
@@ -118,7 +118,7 @@ class Artifact(BaseModel):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
         return [
             "mode",
@@ -141,9 +141,9 @@ class ArtifactoryArtifact(_ModelArtifactoryArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + ["url", "password_secret", "username_secret"]
+        return super()._get_input_attributes() + ["url", "password_secret", "username_secret"]
 
 
 class AzureArtifact(_ModelAzureArtifact, Artifact):
@@ -161,9 +161,9 @@ class AzureArtifact(_ModelAzureArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + [
+        return super()._get_input_attributes() + [
             "endpoint",
             "container",
             "blob",
@@ -185,9 +185,9 @@ class GCSArtifact(_ModelGCSArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + ["bucket", "key", "service_account_key_secret"]
+        return super()._get_input_attributes() + ["bucket", "key", "service_account_key_secret"]
 
 
 class GitArtifact(_ModelGitArtifact, Artifact):
@@ -211,9 +211,9 @@ class GitArtifact(_ModelGitArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + [
+        return super()._get_input_attributes() + [
             "branch",
             "depth",
             "disable_submodules",
@@ -264,9 +264,9 @@ class HDFSArtifact(Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + [
+        return super()._get_input_attributes() + [
             "addresses",
             "force",
             "hdfs_path",
@@ -293,9 +293,9 @@ class HTTPArtifact(_ModelHTTPArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + ["auth", "headers", "url"]
+        return super()._get_input_attributes() + ["auth", "headers", "url"]
 
 
 class OSSArtifact(_ModelOSSArtifact, Artifact):
@@ -316,9 +316,9 @@ class OSSArtifact(_ModelOSSArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + [
+        return super()._get_input_attributes() + [
             "access_key_secret",
             "bucket",
             "create_bucket_if_not_present",
@@ -339,9 +339,9 @@ class RawArtifact(_ModelRawArtifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + ["data"]
+        return super()._get_input_attributes() + ["data"]
 
 
 class S3Artifact(_ModelS3Artifact, Artifact):
@@ -365,9 +365,9 @@ class S3Artifact(_ModelS3Artifact, Artifact):
         return artifact
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input artifact annotations."""
-        return super().get_input_attributes() + [
+        return super()._get_input_attributes() + [
             "access_key_secret",
             "bucket",
             "create_bucket_if_not_present",

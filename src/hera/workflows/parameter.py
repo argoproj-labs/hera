@@ -23,7 +23,7 @@ class Parameter(_ModelParameter):
     name: Optional[str] = None  # type: ignore
 
     output: Optional[bool] = False
-    """used in output annotations in function signatures"""
+    """used to specify parameter as an output in function signature annotations"""
 
     def _check_name(self):
         if not self.name:
@@ -105,7 +105,7 @@ class Parameter(_ModelParameter):
         )
 
     @classmethod
-    def get_input_attributes(cls):
+    def _get_input_attributes(cls):
         """Return the attributes used for input parameter annotations."""
         return ["enum", "description", "default", "name", "value_from"]
 
