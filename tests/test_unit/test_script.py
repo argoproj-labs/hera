@@ -50,7 +50,7 @@ def test_get_parameters_and_artifacts_from_callable_simple_artifact(tmp_path, mo
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
-    entrypoint = "tests.artifact_annotations.script_annotations_artifact_path:read_artifact"
+    entrypoint = "tests.script_annotations_artifacts.script_annotations_artifact_path:read_artifact"
     module, function_name = entrypoint.split(":")
     md = importlib.import_module(module)
     importlib.reload(md)

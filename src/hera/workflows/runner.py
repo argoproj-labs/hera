@@ -6,7 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, cast
+from typing import Any, Callable, List, Tuple, Union, cast
 
 from pydantic import validate_arguments
 from typing_extensions import get_args, get_origin
@@ -14,6 +14,7 @@ from typing_extensions import get_args, get_origin
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
+from hera.workflows.script import _extract_output_annotations
 
 try:
     from typing import Annotated  # type: ignore
@@ -122,7 +123,57 @@ def _map_keys(function: Callable, kwargs: dict) -> dict:
     return mapped_kwargs
 
 
-def _runner(entrypoint: str, kwargs_list: Any) -> str:
+def _save_outputs(
+    function_results: Union[Tuple[Any], Any], output_destinations: List[Tuple[type, Union[Parameter, Artifact]]]
+) -> None:
+    """Save the results of the function to the specified output destinations.
+
+    The results are matched with the specified outputs and saved using the schema:
+    <parent_directory>/artifacts/<name>
+    <parent_directory>/parameters/<name>
+    If the artifact path is specified, that is used instead.
+    <parent_directory> can be provided by the user or is set to /hera/outputs by default
+    """
+    if not isinstance(function_results, tuple):
+        function_results = [function_results]
+    if len(function_results) != len(output_destinations):
+        raise ValueError("The number of outputs does not match the annotation")
+
+    for res, dest in zip(function_results, output_destinations):
+        if not isinstance(res, dest[0]):
+            raise ValueError(
+                f"The type of output `{dest[1].name}`, `{type(res)}` does not match the annotated type `{dest[0]}`"
+            )
+        if not dest[1].name:
+            raise ValueError("The name was not provided for one of the outputs.")
+
+        path = _get_outputs_path(dest[1])
+        _write_to_path(path, res)
+
+
+def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
+    """Get the path from the destination annotation using the defined outputs directory."""
+    path = Path(os.environ.get("hera__outputs_directory", "hera/outputs"))
+    if destination.name:
+        if isinstance(destination, Parameter):
+            path = path / f"parameters/{destination.name}"
+        elif isinstance(destination, Artifact):
+            if destination.path:
+                path = Path(destination.path)
+            else:
+                path = path / f"artifacts/{destination.name}"
+    return path
+
+
+def _write_to_path(path: Path, file: Any) -> None:
+    """Write the file contents to the provided path. Create the necessary parent directories."""
+    result = serialize(file)
+    if result:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(result)
+
+
+def _runner(entrypoint: str, kwargs_list: Any) -> Any:
     """Run a function with a list of kwargs.
 
     Args:
@@ -132,7 +183,7 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
         kwargs_list: A list of kwargs to pass to the function.
 
     Returns:
-        The result of the function as a string.
+        The result of the function or `None` if the outputs are to be saved.
     """
     # import the module and get the function
     module, function_name = entrypoint.split(":")
@@ -153,6 +204,13 @@ def _runner(entrypoint: str, kwargs_list: Any) -> str:
     kwargs = _map_keys(function, kwargs)
     function = validate_arguments(function)
     function = _ignore_unmatched_kwargs(function)
+
+    if os.environ.get("hera__script_annotations", None) is not None:
+        output_annotations = _extract_output_annotations(function)
+
+        if output_annotations:
+            _save_outputs(function(**kwargs), output_annotations)
+            return None
 
     return function(**kwargs)
 

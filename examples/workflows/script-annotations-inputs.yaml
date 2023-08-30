@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-input-annotations-
+spec:
+  entrypoint: my_steps
+  templates:
+  - name: my_steps
+    steps:
+    - - arguments:
+          artifacts:
+          - from: somewhere
+            name: my-artifact
+          parameters:
+          - name: an_int
+            value: '1'
+          - name: a_bool
+            value: 'true'
+          - name: a_string
+            value: a
+        name: echo-all
+        template: echo-all
+  - inputs:
+      artifacts:
+      - name: my-artifact
+        path: tmp/file
+      parameters:
+      - default: '1'
+        description: an_int parameter
+        name: an_int
+      - default: 'true'
+        description: a_bool parameter
+        name: a_bool
+      - default: a
+        description: a_string parameter
+        name: a_string
+    name: echo-all
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_inputs:echo_all
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'

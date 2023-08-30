@@ -43,7 +43,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             action="delete",
             flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
             inputs=m.Inputs(
-                parameters=[Parameter(name="selector")],
+                parameters=[m.Parameter(name="selector")],
             ),
         )
 
