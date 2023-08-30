@@ -47,7 +47,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             a = Task(name="a", template=group)
             b = Task(
                 name="b",
-                arguments=m.Arguments(parameters=[Parameter(name="x", value=f"{g.tasks.a.outputs.result:$}")]),
+                arguments=m.Arguments(parameters=[m.Parameter(name="x", value=f"{g.tasks.a.outputs.result:$}")]),
                 template=verify,
                 dependencies=["a"],
             )

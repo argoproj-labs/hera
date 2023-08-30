@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-output-annotations-
+spec:
+  entrypoint: my_steps
+  templates:
+  - name: my_steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: a_number
+            value: '3'
+        name: script-param-artifact-in-function-signature-and-return-type
+        template: script-param-artifact-in-function-signature-and-return-type
+  - inputs:
+      parameters:
+      - name: a_number
+    name: script-param-artifact-in-function-signature-and-return-type
+    outputs:
+      artifacts:
+      - name: successor2
+      - name: successor4
+      parameters:
+      - name: successor
+      - name: successor3
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_outputs:script_param_artifact_in_function_signature_and_return_type
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: user/chosen/outputs
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+      volumeMounts:
+      - mountPath: user/chosen/outputs
+        name: hera__outputs_directory
+    volumes:
+    - emptyDir: {}
+      name: hera__outputs_directory

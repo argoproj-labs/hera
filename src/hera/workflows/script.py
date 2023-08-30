@@ -12,12 +12,14 @@ from functools import wraps
 from typing import (
     Any,
     Callable,
+    Dict,
     List,
     Optional,
     Tuple,
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -44,13 +46,16 @@ from hera.workflows.models import (
     EnvVar,
     Inputs as ModelInputs,
     Lifecycle,
+    Outputs as ModelOutputs,
     ScriptTemplate as _ModelScriptTemplate,
     SecurityContext,
     Template as _ModelTemplate,
 )
 from hera.workflows.parameter import MISSING, Parameter
+from hera.workflows.protocol import Inputable
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
+from hera.workflows.volume import EmptyDirVolume
 
 try:
     from typing import Annotated  # type: ignore
@@ -146,44 +151,9 @@ class Script(
         assert isinstance(constructor, ScriptConstructor)
         return constructor.transform_values(cls, values)
 
-    def _build_inputs(self) -> Optional[ModelInputs]:
-        inputs = super()._build_inputs()
-        func_parameters: List[Parameter] = []
-        func_artifacts: List[Artifact] = []
-        if callable(self.source):
-            if global_config.experimental_features["script_annotations"]:
-                func_parameters, func_artifacts = _get_parameters_and_artifacts_from_callable(self.source)
-            else:
-                func_parameters = _get_parameters_from_callable(self.source)
-
-        if inputs is None and not func_parameters and not func_artifacts:
-            return None
-        elif not func_parameters and not func_artifacts:
-            return inputs
-        elif inputs is None:
-            inputs = ModelInputs(
-                parameters=func_parameters or None, artifacts=[a._build_artifact() for a in func_artifacts] or None
-            )
-
-        already_set_params = {p.name for p in inputs.parameters or []}
-        already_set_artifacts = {p.name for p in inputs.artifacts or []}
-
-        for param in func_parameters:
-            if param.name not in already_set_params and param.name not in already_set_artifacts:
-                if inputs.parameters is None:
-                    inputs.parameters = []
-                inputs.parameters.append(param)
-
-        for artifact in func_artifacts:
-            if artifact.name not in already_set_params and artifact.name not in already_set_artifacts:
-                if inputs.artifacts is None:
-                    inputs.artifacts = []
-                inputs.artifacts.append(artifact._build_artifact())
-
-        return inputs
-
     def _build_template(self) -> _ModelTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
+
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
@@ -224,22 +194,19 @@ class Script(
     def _build_script(self) -> _ModelScriptTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
         image_pull_policy = self._build_image_pull_policy()
-
-        env = self._build_env()
-        if (
-            isinstance(self.constructor, RunnerScriptConstructor)
-            and global_config.experimental_features["script_annotations"]
+        if _output_annotations_used(cast(Callable, self.source)) and isinstance(
+            self.constructor, RunnerScriptConstructor
         ):
-            if not env:
-                env = []
-            env.append(EnvVar(name="hera__script_annotations", value=""))
+            if not self.constructor.outputs_directory:
+                self.constructor.outputs_directory = self.constructor.DEFAULT_HERA_OUTPUTS_DIRECTORY
+            self._create_hera_outputs_volume()
 
         return self.constructor.transform_script_template_post_build(
             self,
             _ModelScriptTemplate(
                 args=self.args,
                 command=self.command,
-                env=env,
+                env=self._build_env(),
                 env_from=self._build_env_from(),
                 image=self.image,
                 # `image_pull_policy` in script wants a string not an `ImagePullPolicy` object
@@ -264,6 +231,91 @@ class Script(
             ),
         )
 
+    def _build_inputs(self) -> Optional[ModelInputs]:
+        inputs = super()._build_inputs()
+        func_parameters: List[Parameter] = []
+        func_artifacts: List[Artifact] = []
+        if callable(self.source):
+            if global_config.experimental_features["script_annotations"]:
+                func_parameters, func_artifacts = _get_parameters_and_artifacts_from_callable(self.source)
+            else:
+                func_parameters = _get_parameters_from_callable(self.source)
+
+        return cast(Optional[ModelInputs], self._aggregate_callable_io(inputs, func_parameters, func_artifacts, False))
+
+    def _build_outputs(self) -> Optional[ModelOutputs]:
+        outputs = super()._build_outputs()
+
+        if not callable(self.source):
+            return outputs
+
+        if not global_config.experimental_features["script_annotations"]:
+            return outputs
+
+        out_parameters, out_artifacts = _get_outputs_from_callable(self.source)
+        func_parameters, func_artifacts = _get_outputs_from_callable_signature(self.source)
+        func_parameters.extend(out_parameters)
+        func_artifacts.extend(out_artifacts)
+
+        return cast(
+            Optional[ModelOutputs], self._aggregate_callable_io(outputs, func_parameters, func_artifacts, True)
+        )
+
+    def _aggregate_callable_io(
+        self,
+        current_io: Optional[Union[ModelInputs, ModelOutputs]],
+        func_parameters: List[Parameter],
+        func_artifacts: List[Artifact],
+        output: bool,
+    ) -> Union[ModelOutputs, ModelInputs, None]:
+        """Aggregate the Inputs/Outputs with parameters and artifacts extracted from a callable."""
+        if not func_parameters and not func_artifacts:
+            return current_io
+        if current_io is None:
+            if output:
+                current_io = ModelOutputs(
+                    parameters=[p.as_output() for p in func_parameters] or None,
+                    artifacts=[a._build_artifact() for a in func_artifacts] or None,
+                )
+            else:
+                current_io = ModelInputs(
+                    parameters=[p.as_input() for p in func_parameters] or None,
+                    artifacts=[a._build_artifact() for a in func_artifacts] or None,
+                )
+
+        seen_params = {p.name for p in current_io.parameters or []}
+        seen_artifacts = {a.name for a in current_io.artifacts or []}
+
+        for param in func_parameters:
+            if param.name not in seen_params and param.name not in seen_artifacts:
+                if current_io.parameters is None:
+                    current_io.parameters = []
+                if output:
+                    current_io.parameters.append(param.as_output())
+                else:
+                    current_io.parameters.append(param.as_input())
+
+        for artifact in func_artifacts:
+            if artifact.name not in seen_artifacts:
+                if current_io.artifacts is None:
+                    current_io.artifacts = []
+                current_io.artifacts.append(artifact._build_artifact())
+
+        return current_io
+
+    def _create_hera_outputs_volume(self) -> None:
+        """Create the new volume as an EmptyDirVolume if needed for the automatic saving of the hera outputs."""
+        assert isinstance(self.constructor, RunnerScriptConstructor)
+        new_volume = EmptyDirVolume(name="hera__outputs_directory", mount_path=self.constructor.outputs_directory)
+
+        if not isinstance(self.volumes, list) and self.volumes is not None:
+            self.volumes = [self.volumes]
+        elif self.volumes is None:
+            self.volumes = []
+
+        if new_volume not in self.volumes:
+            self.volumes.append(new_volume)
+
 
 def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     # If there are any kwargs arguments associated with the function signature,
@@ -282,20 +334,80 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     return parameters
 
 
-def _get_parameters_and_artifacts_from_callable(
+def _get_outputs_from_callable(
     source: Callable,
 ) -> Tuple[List[Parameter], List[Artifact]]:
-    # If there are any kwargs arguments associated with the function signature,
-    # we store these as we can set them as default values for argo arguments
+    """Look through the function signature return and find all the output Parameters and Artifacts defined there."""
+    parameters = []
+    artifacts = []
+
+    if get_origin(inspect.signature(source).return_annotation) is Annotated:
+        annotation = get_args(inspect.signature(source).return_annotation)[1]
+        if isinstance(annotation, Artifact):
+            artifacts.append(annotation)
+        elif isinstance(annotation, Parameter):
+            parameters.append(annotation)
+    elif get_origin(inspect.signature(source).return_annotation) is tuple:
+        for a in get_args(inspect.signature(source).return_annotation):
+            annotation = get_args(a)[1]
+            if isinstance(annotation, Artifact):
+                artifacts.append(annotation)
+            elif isinstance(annotation, Parameter):
+                parameters.append(annotation)
+
+    return parameters, artifacts
+
+
+def _get_outputs_from_callable_signature(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
+    """Look through the function signature parameters and find all Parameters and Artifacts annotated as output."""
+    parameters: List[Parameter] = []
+    artifacts: List[Artifact] = []
+
+    for name, p in inspect.signature(source).parameters.items():
+        if get_origin(p.annotation) is not Annotated:
+            continue
+        annotation = get_args(p.annotation)[1]
+        if not hasattr(annotation, "output") or not annotation.output:
+            continue
+
+        output_type = type(annotation)
+        assert output_type is Artifact or output_type is Parameter
+
+        kwargs: Dict[str, Any] = {}
+        if isinstance(output_type, Inputable):
+            for attr in output_type._get_input_attributes():
+                if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
+                    kwargs[attr] = getattr(annotation, attr)
+        else:
+            raise ValueError(f"The output {output_type} cannot be an input annotation.")
+
+        # use the function parameter name when not provided by user
+        if "name" not in kwargs:
+            kwargs["name"] = name
+
+        new_object = output_type(**kwargs)
+
+        if isinstance(get_args(p.annotation)[1], Artifact):
+            artifacts.append(new_object)
+        elif isinstance(get_args(p.annotation)[1], Parameter):
+            parameters.append(new_object)
+
+    return parameters, artifacts
+
+
+def _get_parameters_and_artifacts_from_callable(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
+    """Look through the function signature and find all Parameters and Artifacts *not* annotated as output."""
     parameters = []
     artifacts = []
 
     for p in inspect.signature(source).parameters.values():
         if get_origin(p.annotation) is Annotated and isinstance(get_args(p.annotation)[1], Artifact):
             annotation = get_args(p.annotation)[1]
+            if hasattr(annotation, "output") and annotation.output:
+                continue
             mytype = type(annotation)
             kwargs = {}
-            for attr in mytype.get_input_attributes():
+            for attr in mytype._get_input_attributes():
                 if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
                     kwargs[attr] = getattr(annotation, attr)
 
@@ -314,10 +426,15 @@ def _get_parameters_and_artifacts_from_callable(
                 continue
 
             annotation = get_args(p.annotation)[1]
+
+            if hasattr(annotation, "output") and annotation.output:
+                parameters.pop()
+                continue
+
             if not isinstance(annotation, Parameter):
                 continue
 
-            for attr in Parameter.get_input_attributes():
+            for attr in Parameter._get_input_attributes():
                 if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
                     continue
 
@@ -328,6 +445,15 @@ def _get_parameters_and_artifacts_from_callable(
                 setattr(param, attr, getattr(annotation, attr))
 
     return parameters, artifacts
+
+
+def _output_annotations_used(source: Callable) -> bool:
+    """Check if output annotations are used."""
+    if not global_config.experimental_features["script_annotations"]:
+        return False
+    if not callable(source):
+        return False
+    return _extract_output_annotations(cast(Callable, source)) is not None
 
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
@@ -425,6 +551,20 @@ def script(**script_kwargs):
     return script_wrapper
 
 
+def _extract_output_annotations(function: Callable) -> Optional[List]:
+    """Extract the output annotations out of the function signature."""
+    output = []
+    origin_type = get_origin(inspect.signature(function).return_annotation)
+    annotation_args = get_args(inspect.signature(function).return_annotation)
+    if origin_type is Annotated:
+        output.append(annotation_args)
+    elif origin_type is tuple:
+        for annotation in annotation_args:
+            output.append(get_args(annotation))
+
+    return output or None
+
+
 class InlineScriptConstructor(ScriptConstructor):
     """`InlineScriptConstructor` is a script constructor that submits a script as a `source` to Argo.
 
@@ -520,6 +660,12 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
 
     _flag: str = "script_runner"
 
+    outputs_directory: Optional[str] = None
+    """Used for saving outputs when defined using annotations."""
+
+    DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/hera/outputs"
+    """Used as the default value for when the outputs_directory is not set"""
+
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
         """A function that can inspect the Script instance and generate the source field."""
         if not callable(values.get("source")):
@@ -539,6 +685,18 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     def generate_source(self, instance: Script) -> str:
         """A function that can inspect the Script instance and generate the source field."""
         return f"{g.inputs.parameters:$}"
+
+    def transform_script_template_post_build(
+        self, instance: "Script", script: _ModelScriptTemplate
+    ) -> _ModelScriptTemplate:
+        """A hook to transform the generated script template."""
+        if global_config.experimental_features["script_annotations"]:
+            if not script.env:
+                script.env = []
+            script.env.append(EnvVar(name="hera__script_annotations", value=""))
+            if self.outputs_directory:
+                script.env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
+        return script
 
 
 __all__ = ["Script", "script", "ScriptConstructor", "InlineScriptConstructor", "RunnerScriptConstructor"]

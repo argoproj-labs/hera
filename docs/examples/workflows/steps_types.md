@@ -71,7 +71,7 @@
                 m.WorkflowStep(
                     name="model-workflow-step",
                     template="whalesay",
-                    arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model1")]),
+                    arguments=m.Arguments(parameters=[m.Parameter(name="message", value="hello-model1")]),
                 )
             )
 
@@ -88,7 +88,7 @@
                     m.WorkflowStep(
                         name="parallel-step-2-model-workflow-step",
                         template="whalesay",
-                        arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model2b")]),
+                        arguments=m.Arguments(parameters=[m.Parameter(name="message", value="hello-model2b")]),
                     )
                 )
 
@@ -101,7 +101,7 @@
                         m.WorkflowStep(
                             name="model-template-workflow-step",
                             template="whalesay",
-                            arguments=m.Arguments(parameters=[Parameter(name="message", value="hello-model-template")]),
+                            arguments=m.Arguments(parameters=[m.Parameter(name="message", value="hello-model-template")]),
                         )
                     ]
                 ],

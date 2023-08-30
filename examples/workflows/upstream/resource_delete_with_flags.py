@@ -30,7 +30,7 @@ data:
         action="delete",
         flags=["configmap", "--selector", "{{inputs.parameters.selector}}"],
         inputs=m.Inputs(
-            parameters=[Parameter(name="selector")],
+            parameters=[m.Parameter(name="selector")],
         ),
     )
 

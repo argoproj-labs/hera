@@ -575,20 +575,23 @@ class ArgumentsMixin(BaseMixin):
             if isinstance(arg, dict):
                 for k, v in arg.items():
                     value = Parameter(name=k, value=v)
-                    result.parameters = [value] if result.parameters is None else result.parameters + [value]
+                    result.parameters = (
+                        [value.as_argument()]
+                        if result.parameters is None
+                        else result.parameters + [value.as_argument()]
+                    )
             elif isinstance(arg, ModelArtifact):
                 result.artifacts = [arg] if result.artifacts is None else result.artifacts + [arg]
             elif isinstance(arg, Artifact):
                 result.artifacts = (
                     [arg._build_artifact()] if result.artifacts is None else result.artifacts + [arg._build_artifact()]
                 )
-            elif isinstance(arg, ModelParameter):
-                result.parameters = [arg] if result.parameters is None else result.parameters + [arg]
             elif isinstance(arg, Parameter):
                 result.parameters = (
                     [arg.as_argument()] if result.parameters is None else result.parameters + [arg.as_argument()]
                 )
-
+            elif isinstance(arg, ModelParameter):
+                result.parameters = [arg] if result.parameters is None else result.parameters + [arg]
         # returning `None` for `Arguments` means the submission to the server will not even have the
         # `arguments` field set, which saves some payload
         if result.parameters is None and result.artifacts is None:
@@ -688,7 +691,7 @@ class CallableTemplateMixin(ArgumentsMixin):
     def _get_artifact_names(self, arguments: List) -> Set[str]:
         """Returns the set of artifact names that are currently set on the mixin inheritor."""
         artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
-        return {a.name for a in artifacts}
+        return {a.name for a in artifacts if a.name}
 
     def _get_deduped_params_from_source(
         self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
@@ -833,7 +836,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
                     else params + [Parameter(name=spec.param_name, value=value)]
                 )
 
-        return params if params else None
+        return params or None
 
     def _build_inputs(self) -> Optional[ModelInputs]:
         """Builds the inputs from the combination of env variables that require specific input parameters to be set."""
