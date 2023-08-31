@@ -108,8 +108,10 @@ def _map_keys(function: Callable, kwargs: dict) -> dict:
     mapped_kwargs = {}
     for param_name, param in inspect.signature(function).parameters.items():
         if get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Parameter):
+            # TODO: What about parameters marked as output? Do we automatically add a value_from?
             mapped_kwargs[param_name] = kwargs[get_args(param.annotation)[1].name]
         elif get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Artifact):
+            # TODO: What about artifacts marked as output? Do we automatically add a path?
             if get_args(param.annotation)[1].loader == ArtifactLoader.json.value:
                 path = Path(get_args(param.annotation)[1].path)
                 mapped_kwargs[param_name] = json.load(path.open())
