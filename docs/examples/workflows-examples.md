@@ -15,7 +15,10 @@ recreate in Hera.
 The "Hera" collection shows off features and idiomatic usage of Hera such as the
 [Coinflip example](workflows/coinflip.md) using the script decorator.
 
-## List of missing examples
+Explore the examples through the side bar!
+
+## List of **missing** examples
+*You can help by contributing these examples!*
 | Example |
 |---------|
 | [artifacts-workflowtemplate](https://github.com/argoproj/argo-workflows/blob/master/examples/artifacts-workflowtemplate.yaml) |

@@ -24,13 +24,16 @@ nav:
         - getting-started/walk-through/advanced-template-features.md
         - getting-started/walk-through/advanced-hera-features.md
         - getting-started/walk-through/pydantic-support.md
-  - Hera expr transpiler: expr.md
+  - Contributing: CONTRIBUTING.md
+  - User Guides:
+    - Core Concepts: user-guides/core-concepts.md
+    - Expr Transpiler: user-guides/expr.md
   - Examples:
     - Workflows:
       - About: examples/workflows-examples.md
-      - Hera:
+      - Hera Examples:
         - ... | flat | examples/workflows/*.md
-      - Upstream:
+      - Upstream Examples:
         - ... | flat | examples/workflows/upstream/*.md
   - API Reference:
     - Shared: api/shared.md
