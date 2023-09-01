@@ -168,12 +168,21 @@ The fields allowed in the `Parameter` annotations are: `name`, `default`, `enum`
 
 
 The feature is even more powerful for `Artifact`s. In Hera we are currently able to specify `Artifact`s in `inputs`, but
-have no way to programmatically link the given path to the code within the function:
+the given path is not programmatically linked to the code within the function unless defined outside the scope of the
+function:
 
 ```python
 @script(inputs=Artifact(name="my-artifact", path="/tmp/file"))
 def read_artifact():
     with open("/tmp/file") as a_file:  # Repeating "/tmp/file" is prone to human error!
+        print(a_file.read())
+
+# or
+
+MY_PATH = "/tmp/file"  # Now accessible outside of the function scope!
+@script(inputs=Artifact(name="my-artifact", path=MY_PATH))
+def read_artifact():
+    with open(MY_PATH) as a_file:
         print(a_file.read())
 ```
 
