@@ -70,7 +70,9 @@ def test_for_missing_examples():
         examples_file.writelines(lines)
 
 
-@pytest.mark.xfail(reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types.")
+@pytest.mark.xfail(
+    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types."
+)
 @pytest.mark.parametrize(
     "file_name",
     [
