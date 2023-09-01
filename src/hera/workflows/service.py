@@ -108,12 +108,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            # this is a special case for items that are returned in a list response. The upstream server returns a
-            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
-            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
-            resp_json = resp.json()
-            resp_json["items"] = resp_json.get("items", [])
-            return WorkflowList(**resp_json)
+            return WorkflowList(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -271,12 +266,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            # this is a special case for items that are returned in a list response. The upstream server returns a
-            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
-            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
-            resp_json = resp.json()
-            resp_json["items"] = resp_json.get("items", [])
-            return ClusterWorkflowTemplateList(**resp_json)
+            return ClusterWorkflowTemplateList(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -422,18 +412,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflowList(**resp_json)
+            return CronWorkflowList(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -453,18 +432,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflow(**resp_json)
+            return CronWorkflow(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -484,18 +452,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflow(**resp_json)
+            return CronWorkflow(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -515,18 +472,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflow(**resp_json)
+            return CronWorkflow(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -548,18 +494,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflow(**resp_json)
+            return CronWorkflow(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -616,18 +551,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflow(**resp_json)
+            return CronWorkflow(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -649,18 +573,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            resp_json = resp.json()
-            if (
-                "status" in resp_json
-                or resp_json["status"]["active"] is None
-                or resp_json["status"]["lastScheduledTime"] is None
-                or resp_json["status"]["conditions"] is None
-            ):
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json["status"] = None
-            return CronWorkflow(**resp_json)
+            return CronWorkflow(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -748,12 +661,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            # this is a special case for items that are returned in a list response. The upstream server returns a
-            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
-            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
-            resp_json = resp.json()
-            resp_json["items"] = resp_json.get("items", [])
-            return WorkflowTemplateList(**resp_json)
+            return WorkflowTemplateList(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -916,12 +824,7 @@ class WorkflowsService:
         )
 
         if resp.ok:
-            # this is a special case for items that are returned in a list response. The upstream server returns a
-            # `None` instead of an empty list when something is not found but the OpenAPI specification lists the
-            # respective fields as required. Until the upstream is fixed, this applies a patch to handle `None`
-            resp_json = resp.json()
-            resp_json["items"] = resp_json.get("items", [])
-            return WorkflowList(**resp_json)
+            return WorkflowList(**resp.json())
 
         raise exception_from_server_response(resp)
 
