@@ -348,7 +348,9 @@ class NFSVolume(_BaseVolume, _ModelNFSVolumeSource):
     """A network file system volume representation."""
 
     def _build_volume(self) -> _ModelVolume:
-        return _ModelVolume(name=self.name, nfs=_ModelNFSVolumeSource(path=self.path, read_only=self.read_only))
+        return _ModelVolume(
+            name=self.name, nfs=_ModelNFSVolumeSource(server=self.server, path=self.path, read_only=self.read_only)
+        )
 
 
 class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSource):
