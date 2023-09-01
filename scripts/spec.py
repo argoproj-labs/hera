@@ -27,7 +27,11 @@ response = requests.get(
 # get the spec into a dictionary
 spec = response.json()
 
-optional_fields_map: Dict[str, List[str]] = {
+# these are specifications of objects with fields that are marked as required. However, it is possible for the Argo
+# Server to not return anything for those fields. In those cases, Pydantic fails type validation for those objects.
+# Here, we maintain a map of objects specifications whose fields must be marked as optional i.e. removed from the
+# `required` list in the OpenAPI specification.
+DEFINITION_TO_OPTIONAL_FIELDS: Dict[str, List[str]] = {
     "io.argoproj.workflow.v1alpha1.CronWorkflowStatus": ["active", "lastScheduledTime", "conditions"],
     "io.argoproj.workflow.v1alpha1.CronWorkflowList": ["items"],
     "io.argoproj.workflow.v1alpha1.ClusterWorkflowTemplateList": ["items"],
@@ -36,7 +40,7 @@ optional_fields_map: Dict[str, List[str]] = {
     "io.argoproj.workflow.v1alpha1.WorkflowEventBindingList": ["items"],
     "io.argoproj.workflow.v1alpha1.Metrics": ["prometheus"],
 }
-for definition, optional_fields in optional_fields_map.items():
+for definition, optional_fields in DEFINITION_TO_OPTIONAL_FIELDS.items():
     try:
         curr_required: Set[str] = set(spec["definitions"][definition]["required"])
     except KeyError as e:
@@ -53,5 +57,7 @@ for definition, optional_fields in optional_fields_map.items():
             )
     spec["definitions"][definition]["required"] = list(curr_required)
 
+# finally, we write the spec to the output file that is passed to use assuming the client wants to perform
+# something with this file
 with open(output_file, "w+") as f:
     json.dump(spec, f, indent=2)
