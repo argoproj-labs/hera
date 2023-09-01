@@ -2,7 +2,6 @@
 
 import json
 import logging
-import re
 import sys
 from typing import Dict, List, Set
 
@@ -10,7 +9,7 @@ import requests
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-# get the version from the command line, along with the output file
+# get the OpenAPI spec URI from the command line, along with the output file
 open_api_spec_url = sys.argv[1]
 assert open_api_spec_url is not None, "Expected the OpenAPI spec URL to be passed as the first argument"
 
@@ -41,7 +40,8 @@ for definition, optional_fields in DEFINITION_TO_OPTIONAL_FIELDS.items():
         curr_required: Set[str] = set(spec["definitions"][definition]["required"])
     except KeyError as e:
         raise KeyError(
-            f"Could not find definition {definition} in Argo specification for version {version}, caught error: {e}"
+            f"Could not find definition {definition} in Argo specification for OpenAPI URI {open_api_spec_url}, "
+            f"caught error: {e}"
         )
     for optional_field in optional_fields:
         if optional_field in curr_required:
