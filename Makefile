@@ -1,6 +1,6 @@
 OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.4/api/openapi-spec/swagger.json"
 ARGO_WORKFLOWS_VERSION="3.4.4"
-SPEC_PATH="$(shell pwd)/$(ARGO_WORKFLOWS_VERSION).json"
+SPEC_PATH="$(shell pwd)/argo-workflows-$(ARGO_WORKFLOWS_VERSION).json"
 
 .PHONY: help
 help: ## Showcase the help instructions for all the available `make` commands

@@ -29,7 +29,6 @@ spec = response.json()
 
 optional_fields_map: Dict[str, List[str]] = {
     "io.argoproj.workflow.v1alpha1.CronWorkflowStatus": ["active", "lastScheduledTime", "conditions"],
-    "io.argoproj.workflow.v1alpha1.CronWorkflow": ["status"],
     "io.argoproj.workflow.v1alpha1.CronWorkflowList": ["items"],
     "io.argoproj.workflow.v1alpha1.ClusterWorkflowTemplateList": ["items"],
     "io.argoproj.workflow.v1alpha1.WorkflowList": ["items"],
