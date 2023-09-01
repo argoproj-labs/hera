@@ -72,11 +72,13 @@ def script_param_no_name(a_number) -> Annotated[int, Parameter()]:
 
 
 @script(constructor="runner")
-def script_param_in_function_signature(
+def script_outputs_in_function_signature(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],
+    successor2: Annotated[Path, Artifact(name="successor2", output=True)],
 ):
-    successor.write_text(a_number + 1)
+    successor.write_text(str(a_number + 1))
+    successor2.write_text(str(a_number + 2))
 
 
 with Workflow(generate_name="test-outputs-", entrypoint="my_steps") as w:
