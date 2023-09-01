@@ -177,7 +177,7 @@ def read_artifact():
         print(a_file.read())
 ```
 
-By using annotations we can avoid repeating the `path` of the file, and your function can use the variable directly as a
+By using annotations we can avoid repeating the `path` of the file, and the function can use the variable directly as a
 `Path` object, with its value already set to the given path:
 
 ```python
@@ -302,7 +302,7 @@ def func(...) -> Annotated[arbitrary_pydantic_type, Artifact(name="my-output")]:
 ```
 
 For multiple outputs, the return type should be a `Tuple` of arbitrary Pydantic types with individual
-`Parameter`/`Artifact` annotations, and you should return a tuple from the function matching these types:
+`Parameter`/`Artifact` annotations, and the function must return a tuple from the function matching these types:
 ```python
 @script()
 def func(...) -> Tuple[
@@ -314,7 +314,7 @@ def func(...) -> Tuple[
 ```
 
 Hera also allows output `Parameter`/`Artifact`s as part of the function signature when specified as a `Path` type,
-allowing users to write to the output path, without needing an explicit return. They require an additional field
+allowing users to write to the path as an output, without needing an explicit return. They require an additional field
 `output=True` to distinguish them from the input parameters and must have an underlying `Path` type (or another type
 that will write to disk). For `Parameters`, they will have the path of `/hera/outputs/parameters/<name>`, which can be
 changed by setting the parameter's `value_from` argument. For `Artifacts`, they will have a path of
