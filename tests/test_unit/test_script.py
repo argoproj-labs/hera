@@ -1,6 +1,8 @@
 import importlib
 
+from hera.workflows import script
 from hera.workflows.script import _get_parameters_and_artifacts_from_callable
+from hera.workflows.workflow import Workflow
 
 
 def test_get_parameters_and_artifacts_from_callable_simple_params():
@@ -69,3 +71,18 @@ def test_get_parameters_and_artifacts_from_callable_simple_artifact(tmp_path, mo
 
     assert an_artifact.name == "my-artifact"
     assert an_artifact.path == str(tmp_path)
+
+
+@script(name="my-alt-name")
+def my_func():
+    print("Hello world!")
+
+
+def test_script_name_kwarg_in_decorator():
+    # GIVEN my_func above
+    # WHEN
+    with Workflow(name="test-script") as w:
+        my_func()
+
+    # THEN
+    assert w.templates[0].name == "my-alt-name"
