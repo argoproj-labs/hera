@@ -20,10 +20,16 @@ spec:
     outputs:
       artifacts:
       - name: successor2
+        path: user/chosen/outputs/artifacts/successor2
       - name: successor4
+        path: user/chosen/outputs/artifacts/successor4
       parameters:
       - name: successor
+        valueFrom:
+          path: user/chosen/outputs/parameters/successor
       - name: successor3
+        valueFrom:
+          path: user/chosen/outputs/parameters/successor3
     script:
       args:
       - -m
