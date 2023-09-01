@@ -26,7 +26,7 @@ def test_for_missing_examples():
         for example in sorted(missing)
     }
 
-    missing_examples_header = "## List of missing examples"
+    missing_examples_header = "## List of **missing** examples"
 
     lines = []
     with open("docs/examples/workflows-examples.md", "r", encoding="utf-8") as examples_file:
@@ -39,6 +39,7 @@ def test_for_missing_examples():
     if len(missing) > 0:
         lines.append(missing_examples_header)
         lines.append("\n")
+        lines.append("*You can help by contributing these examples!*\n")
         lines.append("| Example |\n")
         lines.append("|---------|\n")
         for name, link in missing_examples.items():

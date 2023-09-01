@@ -1,7 +1,11 @@
 # Contributing to Hera
 
-**Thank you for considering a contribution to Hera! Your time is the ultimate currency, and the community highly
-appreciates your willingness to dedicate some time to Hera for the benefit of everyone!**
+**Thank you for considering a contribution to Hera!**
+
+Your time is the ultimate currency, and the community highly appreciates your willingness to dedicate some time to Hera
+for the benefit of everyone! Remember to star the repo on GitHub and share Hera with your colleagues to grow our community!
+
+## Contributing checklist
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
 
