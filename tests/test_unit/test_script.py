@@ -3,6 +3,7 @@ import importlib
 from hera.workflows import script, Workflow
 from hera.workflows.script import _get_inputs_from_callable
 
+
 def test_get_inputs_from_callable_simple_params():
     # GIVEN
     entrypoint = "tests.helper:my_function"
