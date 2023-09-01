@@ -195,6 +195,7 @@ class ServiceEndpoint:
                 # object. So, we overwrite the response with a value that allows the response to pass through safely.
                 # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
                 resp_json['status'] = None
+            resp_json['items'] = resp_json.get('items', [])
             return {self.response}(**resp_json)
         
         raise exception_from_server_response(resp)
@@ -204,7 +205,6 @@ class ServiceEndpoint:
         # fields as required. Until the upstream is fixed, this applies a patch to handle the `None` case
         elif self.response.ref in [
             "ClusterWorkflowTemplateList",
-            "CronWorkflowList",
             "WorkflowList",
             "WorkflowTemplateList",
             "WorkflowEventBindingList",
