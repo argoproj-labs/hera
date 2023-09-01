@@ -1,4 +1,6 @@
 OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.4/api/openapi-spec/swagger.json"
+ARGO_WORKFLOWS_VERSION="3.4.4"
+SPEC_PATH="$(shell pwd)/$(ARGO_WORKFLOWS_VERSION).json"
 
 .PHONY: help
 help: ## Showcase the help instructions for all the available `make` commands
@@ -46,8 +48,10 @@ test:  ## Run tests for Hera
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
+	@touch $(SPEC_PATH)
+	@poetry run python scripts/spec.py $(ARGO_WORKFLOWS_VERSION) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
-		--url $(OPENAPI_SPEC_URL) \
+		--input $(SPEC_PATH) \
 		--snake-case-field \
 		--target-python-version 3.8 \
 		--output src/hera/workflows/models \
@@ -58,12 +62,15 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 		--use-default-kwarg
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
 	@poetry run stubgen -o src -p hera.workflows.models && find src/hera/workflows/models -name '__init__.pyi' -delete
+	@rm $(SPEC_PATH)
 	@$(MAKE) format
 
 .PHONY: events-models
 events-models: ## Generate the Events models portion of Argo Workflows
+	@touch $(SPEC_PATH)
+	@poetry run python scripts/spec.py $(ARGO_WORKFLOWS_VERSION) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
-		--url $(OPENAPI_SPEC_URL) \
+		--input $(SPEC_PATH) \
 		--snake-case-field \
 		--target-python-version 3.8 \
 		--output src/hera/events/models \
@@ -74,6 +81,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 		--use-default-kwarg
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
 	@poetry run stubgen -o src -p hera.events.models && find src/hera/events/models -name '__init__.pyi' -delete
+	@rm $(SPEC_PATH)
 	@$(MAKE) format
 
 .PHONY: models

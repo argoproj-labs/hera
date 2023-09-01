@@ -339,9 +339,9 @@ class ContainerSetRetryStrategy(BaseModel):
     retries: intstr.IntOrString
 
 class CronWorkflowStatus(BaseModel):
-    active: List[v1.ObjectReference]
-    conditions: List[Condition]
-    last_scheduled_time: v1_1.Time
+    active: Optional[List[v1.ObjectReference]]
+    conditions: Optional[List[Condition]]
+    last_scheduled_time: Optional[v1_1.Time]
 
 class GCSArtifact(BaseModel):
     bucket: Optional[str]
@@ -405,7 +405,7 @@ class Memoize(BaseModel):
     max_age: str
 
 class Metrics(BaseModel):
-    prometheus: List[Prometheus]
+    prometheus: Optional[List[Prometheus]]
 
 class OAuth2Auth(BaseModel):
     client_id_secret: Optional[v1.SecretKeySelector]
@@ -814,7 +814,7 @@ class WorkflowEventBinding(BaseModel):
 
 class WorkflowEventBindingList(BaseModel):
     api_version: Optional[str]
-    items: List[WorkflowEventBinding]
+    items: Optional[List[WorkflowEventBinding]]
     kind: Optional[str]
     metadata: v1_1.ListMeta
 
@@ -834,7 +834,7 @@ class ClusterWorkflowTemplateLintRequest(BaseModel):
 
 class ClusterWorkflowTemplateList(BaseModel):
     api_version: Optional[str]
-    items: List[ClusterWorkflowTemplate]
+    items: Optional[List[ClusterWorkflowTemplate]]
     kind: Optional[str]
     metadata: v1_1.ListMeta
 
@@ -856,7 +856,7 @@ class CronWorkflow(BaseModel):
 
 class CronWorkflowList(BaseModel):
     api_version: Optional[str]
-    items: List[CronWorkflow]
+    items: Optional[List[CronWorkflow]]
     kind: Optional[str]
     metadata: v1_1.ListMeta
 
@@ -965,7 +965,7 @@ class WorkflowLintRequest(BaseModel):
 
 class WorkflowList(BaseModel):
     api_version: Optional[str]
-    items: List[Workflow]
+    items: Optional[List[Workflow]]
     kind: Optional[str]
     metadata: v1_1.ListMeta
 
@@ -1068,7 +1068,7 @@ class WorkflowTemplateLintRequest(BaseModel):
 
 class WorkflowTemplateList(BaseModel):
     api_version: Optional[str]
-    items: List[WorkflowTemplate]
+    items: Optional[List[WorkflowTemplate]]
     kind: Optional[str]
     metadata: v1_1.ListMeta
 
