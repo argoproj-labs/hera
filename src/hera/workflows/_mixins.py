@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import inspect
+from copy import deepcopy
 from pathlib import Path
 
 try:
@@ -613,23 +614,25 @@ class CallableTemplateMixin(ArgumentsMixin):
     not duplicated.
     """
 
+    directly_callable: bool = False
+
     def __call__(self, *args, **kwargs) -> Union[None, Step, Task]:
+        print("CALL", args, kwargs)
         if "name" not in kwargs:
             kwargs["name"] = self.name  # type: ignore
-
-        arguments = self._get_arguments(**kwargs)
-        parameter_names = self._get_parameter_names(arguments)
-        artifact_names = self._get_artifact_names(arguments)
 
         # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
         # set it here in order for the following logic to capture it
         if "source" not in kwargs and hasattr(self, "source"):
             kwargs["source"] = self.source  # type: ignore
 
-        if "source" in kwargs and "with_param" in kwargs:
-            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-        elif "source" in kwargs and "with_items" in kwargs:
-            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+        if hasattr(self, "directly_callable") and self.directly_callable:
+            function_kwargs = {k: v for k, v in kwargs.items() if k not in ["source", "name"]}
+            arguments = self._extract_arguments_directly_callable(args, function_kwargs)
+            if args and len(args) > 0:
+                args = []
+        else:
+            arguments = self._extract_arguments(args, kwargs)
 
         # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
         # additional parameters are inferred and have to be added to the `kwargs['arguments']`, otherwise
@@ -669,6 +672,113 @@ class CallableTemplateMixin(ArgumentsMixin):
         raise InvalidTemplateCall(
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
         )
+
+    def _extract_arguments(self, args, kwargs):
+        print("NORM", args, kwargs)
+        arguments = self._get_arguments(**kwargs)
+        parameter_names = self._get_parameter_names(arguments)
+        artifact_names = self._get_artifact_names(arguments)
+
+        print("PRE NORM", arguments)
+
+        if "source" in kwargs and "with_param" in kwargs:
+            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+        elif "source" in kwargs and "with_items" in kwargs:
+            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+
+        print("POST NORM", arguments)
+
+        return arguments
+
+    def _extract_arguments_directly_callable(self, args, kwargs):
+        print("NEW", args, kwargs)
+        arguments = []
+        print("PRE NEW", arguments)
+
+        input_names = []
+        if self.inputs:
+            if isinstance(self.inputs, list):
+                for input_ in self.inputs:
+                    input_names.append(input_.name)
+            elif isinstance(self.inputs, (Parameter, Artifact)):
+                input_names.append(self.inputs.name)
+
+        if hasattr(self, "source"):
+            if global_config.experimental_features["script_annotations"]:
+                from hera.workflows.script import _get_parameters_and_artifacts_from_callable
+
+                function_params, function_artifacts = _get_parameters_and_artifacts_from_callable(self.source)
+                function_params = _process_params_and_artifacts(function_params, function_artifacts)
+            else:
+                function_params = _get_params_from_source(self.source)
+            if function_params:
+                input_names += [p.name for p in function_params]
+
+        print("INPUTS", input_names)
+        index = 0
+        arguments = []
+
+        for name in input_names:
+            if name in kwargs:
+                print("KWARGS")
+                arguments.append(_item_to_arg(kwargs[name], name))
+                del kwargs[name]
+            elif index < len(args):
+                print("ARGS")
+                arguments.append(_item_to_arg(args[index], name))
+                index += 1
+
+        print("POST NEW", arguments)
+
+        return arguments
+
+    def _extract_arguments_directly_callable_old(self, args, kwargs):
+        # print("ARGS", args, "KWARGS", kwargs)
+
+        simple_values = []
+        for a in args:
+            if isinstance(a, (Artifact, Parameter)):
+                kwargs[a.name] = a
+            else:
+                simple_values.append(a)
+
+        inputs = []
+        if self.inputs:
+            if isinstance(self.inputs, list):
+                for input_ in self.inputs:
+                    inputs.append(deepcopy(input_))
+            elif isinstance(self.inputs, (Parameter, Artifact)):
+                inputs.append(deepcopy(self.inputs))
+
+        if hasattr(self, "source"):
+            if global_config.experimental_features["script_annotations"]:
+                from hera.workflows.script import _get_parameters_and_artifacts_from_callable
+
+                function_params, function_artifacts = _get_parameters_and_artifacts_from_callable(self.source)
+                function_params = _process_params_and_artifacts(function_params, function_artifacts)
+            else:
+                function_params = _get_params_from_source(self.source)
+            if function_params:
+                inputs += function_params
+        index = 0
+        print("ARGUMENTS PRE", inputs)
+
+        arguments = []
+
+        for input_ in inputs:
+            name = input_.name
+            if name in kwargs:
+                # print("KWARGS")
+                arguments.append(_item_to_arg(kwargs[name], input_))
+                del kwargs[name]
+            elif index < len(simple_values):
+                # print("ARGS")
+                arguments.append(_item_to_arg(simple_values[index], input_))
+                index += 1
+
+        print("ARGUMENTS POST", arguments)
+
+        return arguments
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call."""
@@ -878,6 +988,15 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
+
+    def with_(self, **kwargs):
+        if not hasattr(self.template, "directly_callable") or not self.template.directly_callable:
+            raise ValueError("directly_callable is not set")
+        for attribute, value in kwargs.items():
+            if not hasattr(self, attribute):
+                raise ValueError(f"{type(self)} does not have a {attribute} attribute")
+            setattr(self, attribute, value)
+        return self
 
     def _build_on_exit(self) -> Optional[str]:
         """Builds the `on_exit` field `str` representation from the set `Templatable` or the specified `str`."""
@@ -1124,6 +1243,26 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
         else:
             return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+
+def _process_params_and_artifacts(params, artifacts):
+    if len(params) == 1:
+        params = [Parameter(name=p.name, value="{{item}}") for p in params]
+    else:
+        params = [Parameter(name=p.name, value=f"{{{{item.{p.name}}}}}") for p in params]
+    params.extend(artifacts)
+    return params
+
+
+def _item_to_arg(item, name):
+    if isinstance(item, Artifact):
+        return item._build_artifact()
+    elif isinstance(item, ModelArtifact):
+        return item  # ?
+    elif isinstance(item, Parameter):
+        return item.as_argument()
+    else:
+        return Parameter(name=name, value=serialize(item))
 
 
 def _set_model_attr(model: BaseModel, attrs: List[str], value: Any):
