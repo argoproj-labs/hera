@@ -38,8 +38,8 @@ def test_for_missing_examples():
 
     if len(missing) > 0:
         lines.append(missing_examples_header)
-        lines.append("\n")
-        lines.append("*You can help by contributing these examples!*\n")
+        lines.append("\n\n")
+        lines.append("*You can help by contributing these examples!*\n\n")
         lines.append("| Example |\n")
         lines.append("|---------|\n")
         for name, link in missing_examples.items():
