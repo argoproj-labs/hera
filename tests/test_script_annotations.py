@@ -1,7 +1,7 @@
 import importlib
 
 import pytest
-from test_examples import _compare_workflows
+from .test_examples import _compare_workflows
 
 try:
     from typing import Annotated  # type: ignore
@@ -21,16 +21,16 @@ def test_script_annotations_parameter_regression(module_name, global_config_fixt
     to one created using the old syntax.
     """
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_annotations"] = False
     workflow_old = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_parameters_{module_name}_old"
     ).w
+    output_old = workflow_old.to_dict()
+
+    global_config_fixture.experimental_features["script_annotations"] = True
     workflow_new = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_parameters_{module_name}_new"
     ).w
-
-    # WHEN
-    output_old = workflow_old.to_dict()
     output_new = workflow_new.to_dict()
 
     # THEN
@@ -48,16 +48,16 @@ def test_script_annotations_artifact_regression(module_name, global_config_fixtu
     to one created using the old syntax.
     """
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_annotations"] = False
     workflow_old = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_artifacts_{module_name}_old"
     ).w
+    output_old = workflow_old.to_dict()
+
+    global_config_fixture.experimental_features["script_annotations"] = True
     workflow_new = importlib.import_module(
         f"tests.script_annotations_inputs_regression.script_annotations_artifacts_{module_name}_new"
     ).w
-
-    # WHEN
-    output_old = workflow_old.to_dict()
     output_new = workflow_new.to_dict()
 
     # THEN
@@ -79,73 +79,94 @@ def test_double_default_throws_a_value_error(global_config_fixture):
 
         w.to_dict()
 
-    assert "The default cannot be set via both the function parameter default and the annotation's default" in str(
-        e.value
-    )
+    assert "default cannot be set via both the function parameter default and the Parameter's default" in str(e.value)
 
 
 @pytest.mark.parametrize(
-    "module,expected_output,expected_input",
+    "module,expected_input,expected_output",
     [
         (
             "script_annotations_output_param_in_func",
-            {"parameters": [{"name": "successor"}]},
             {"parameters": [{"name": "a_number"}]},
+            {"parameters": [{"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}}]},
         ),
         (
             "script_annotations_output_artifact_in_func",
-            {"artifacts": [{"name": "successor"}]},
             {"parameters": [{"name": "a_number"}]},
+            {"artifacts": [{"name": "successor", "path": "/hera/outputs/artifacts/successor"}]},
         ),
         (
             "script_annotations_output_param_and_artifact_in_func",
-            {"parameters": [{"name": "successor"}], "artifacts": [{"name": "successor2"}]},
             {"parameters": [{"name": "a_number"}]},
+            {
+                "parameters": [{"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}}],
+                "artifacts": [{"name": "successor2", "path": "/hera/outputs/artifacts/successor2"}],
+            },
         ),
         (
             "script_annotations_output_param_and_artifact_mix",
-            {
-                "parameters": [{"name": "successor"}, {"name": "successor3"}],
-                "artifacts": [{"name": "successor2"}, {"name": "successor4"}],
-            },
             {"parameters": [{"name": "a_number"}]},
+            {
+                "parameters": [
+                    {"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}},
+                    {"name": "successor3", "valueFrom": {"path": "/hera/outputs/parameters/successor3"}},
+                ],
+                "artifacts": [
+                    {"name": "successor2", "path": "/hera/outputs/artifacts/successor2"},
+                    {"name": "successor4", "path": "/hera/outputs/artifacts/successor4"},
+                ],
+            },
         ),
         (
             "script_annotations_output_in_func_no_name",
-            {
-                "parameters": [{"name": "successor"}],
-                "artifacts": [{"name": "successor2"}],
-            },
             {"parameters": [{"name": "a_number"}]},
+            {
+                "parameters": [{"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}}],
+                "artifacts": [{"name": "successor2", "path": "/hera/outputs/artifacts/successor2"}],
+            },
+        ),
+        (
+            "script_annotations_output_custom_output_directory",
+            {"parameters": [{"name": "a_number"}]},
+            {
+                "parameters": [
+                    {"name": "successor", "valueFrom": {"path": "/user/chosen/outputs/parameters/successor"}}
+                ],
+            },
         ),
     ],
 )
-def test_script_annotations_outputs(module, expected_output, expected_input, global_config_fixture):
+def test_script_annotations_outputs(module, expected_input, expected_output, global_config_fixture):
     """Test that output annotations work correctly by asserting correct inputs and outputs."""
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     workflow = importlib.import_module(f"tests.script_annotations_outputs.{module}").w
 
     # WHEN
-    assert workflow.to_dict() == Workflow.from_dict(workflow.to_dict()).to_dict()
+    workflow_dict = workflow.to_dict()
+    assert workflow == Workflow.from_dict(workflow_dict)
     assert workflow == Workflow.from_yaml(workflow.to_yaml())
 
-    outputs = workflow.to_dict()["spec"]["templates"][1]["outputs"]
-    inputs = workflow.to_dict()["spec"]["templates"][1]["inputs"]
+    inputs = workflow_dict["spec"]["templates"][1]["inputs"]
+    outputs = workflow_dict["spec"]["templates"][1]["outputs"]
 
     # THEN
-    assert outputs == expected_output
     assert inputs == expected_input
+    assert outputs == expected_output
 
 
 def test_configmap(global_config_fixture):
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    workflow_old = importlib.import_module("script_annotations_inputs_regression.script_annotations_configmap_old").w
-    workflow_new = importlib.import_module("script_annotations_inputs_regression.script_annotations_configmap_new").w
-
-    # WHEN
+    global_config_fixture.experimental_features["script_annotations"] = False
+    workflow_old = importlib.import_module(
+        "tests.script_annotations_inputs_regression.script_annotations_configmap_old"
+    ).w
     output_old = workflow_old.to_dict()
+
+    global_config_fixture.experimental_features["script_annotations"] = True
+    workflow_new = importlib.import_module(
+        "tests.script_annotations_inputs_regression.script_annotations_configmap_new"
+    ).w
     output_new = workflow_new.to_dict()
 
     # THEN

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
+from hera.workflows.script import RunnerScriptConstructor
 import tests.helper as test_module
 
 from hera.shared.serialization import serialize
@@ -91,6 +92,14 @@ def test(entrypoint, kwargs_list, expected_output, global_config_fixture, enviro
                 {"path": "hera/outputs/artifacts/successor2", "value": "5"},
             ],
         ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:script_outputs_in_function_signature",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"path": "hera/outputs/parameters/successor", "value": "4"},
+                {"path": "hera/outputs/artifacts/successor2", "value": "5"},
+            ],
+        ),
     ],
 )
 def test_script_annotations_outputs(
@@ -107,8 +116,11 @@ def test_script_annotations_outputs(
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
 
+    outputs_directory = str(tmp_path_fixture / "hera/outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path_fixture))
-    os.environ["hera__outputs_directory"] = str(tmp_path_fixture / "hera/outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -203,14 +215,12 @@ def test_script_annotations_artifacts(
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
-    if not tmp_path.is_file():
-        tmp_path = tmp_path / "my_file.txt"
+    filepath = tmp_path / "my_file.txt"
 
-    tmp_path.touch()
-    tmp_path.write_text(file_contents)
+    filepath.write_text(file_contents)
     import tests.helper as test_module
 
-    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(filepath))
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     os.environ["hera__script_annotations"] = ""

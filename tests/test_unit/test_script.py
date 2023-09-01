@@ -1,18 +1,16 @@
 import importlib
 
-from hera.workflows import script
-from hera.workflows.script import _get_parameters_and_artifacts_from_callable
-from hera.workflows.workflow import Workflow
+from hera.workflows import script, Workflow
+from hera.workflows.script import _get_inputs_from_callable
 
-
-def test_get_parameters_and_artifacts_from_callable_simple_params():
+def test_get_inputs_from_callable_simple_params():
     # GIVEN
     entrypoint = "tests.helper:my_function"
     module, function_name = entrypoint.split(":")
     function = getattr(importlib.import_module(module), function_name)
 
     # WHEN
-    params, artifacts = _get_parameters_and_artifacts_from_callable(function)
+    params, artifacts = _get_inputs_from_callable(function)
 
     # THEN
     assert params is not None
@@ -27,21 +25,21 @@ def test_get_parameters_and_artifacts_from_callable_simple_params():
     assert b.name == "b"
 
 
-def test_get_parameters_and_artifacts_from_callable_no_params():
+def test_get_inputs_from_callable_no_params():
     # GIVEN
     entrypoint = "tests.helper:no_param_function"
     module, function_name = entrypoint.split(":")
     function = getattr(importlib.import_module(module), function_name)
 
     # WHEN
-    params, artifacts = _get_parameters_and_artifacts_from_callable(function)
+    params, artifacts = _get_inputs_from_callable(function)
 
     # THEN
     assert params == []
     assert artifacts == []
 
 
-def test_get_parameters_and_artifacts_from_callable_simple_artifact(tmp_path, monkeypatch):
+def test_get_inputs_from_callable_simple_artifact(tmp_path, monkeypatch):
     # GIVEN
     if not tmp_path.is_file():
         tmp_path = tmp_path / "my_file.txt"
@@ -59,7 +57,7 @@ def test_get_parameters_and_artifacts_from_callable_simple_artifact(tmp_path, mo
     function = getattr(md, function_name)
 
     # WHEN
-    params, artifacts = _get_parameters_and_artifacts_from_callable(function)
+    params, artifacts = _get_inputs_from_callable(function)
 
     # THEN
     assert params == []

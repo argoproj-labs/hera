@@ -34,7 +34,7 @@ and its crew were specially protected by the goddess Hera.
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
 
-# Table of content
+# Table of contents
 
 - [Hera](#hera)
 - [Table of content](#table-of-content)

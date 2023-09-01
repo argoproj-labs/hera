@@ -107,7 +107,7 @@ class Parameter(_ModelParameter):
     @classmethod
     def _get_input_attributes(cls):
         """Return the attributes used for input parameter annotations."""
-        return ["enum", "description", "default", "name", "value_from"]
+        return ["enum", "description", "default", "name", "value", "value_from"]
 
 
 __all__ = ["Parameter"]
