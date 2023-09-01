@@ -11,18 +11,14 @@ import requests
 logger: logging.Logger = logging.getLogger(__name__)
 
 # get the version from the command line, along with the output file
-version = sys.argv[1]
-
-# ensure that the version satisfies the pattern v1.2.3
-if not re.match(r"\d+\.\d+\.\d+", version):
-    raise ValueError(f"Invalid version {version}, expected pattern `1.2.3`")
+open_api_spec_url = sys.argv[1]
+assert open_api_spec_url is not None, "Expected the OpenAPI spec URL to be passed as the first argument"
 
 output_file = sys.argv[2]
+assert output_file is not None, "Expected the output file to be passed as the second argument"
 
 # download the spec
-response = requests.get(
-    f"https://raw.githubusercontent.com/argoproj/argo-workflows/v{version}/api/openapi-spec/swagger.json"
-)
+response = requests.get(open_api_spec_url)
 
 # get the spec into a dictionary
 spec = response.json()

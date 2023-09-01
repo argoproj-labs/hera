@@ -1,5 +1,5 @@
-OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v3.4.4/api/openapi-spec/swagger.json"
 ARGO_WORKFLOWS_VERSION="3.4.4"
+OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v$(ARGO_WORKFLOWS_VERSION)/api/openapi-spec/swagger.json"
 SPEC_PATH="$(shell pwd)/argo-workflows-$(ARGO_WORKFLOWS_VERSION).json"
 
 .PHONY: help
@@ -49,7 +49,7 @@ test:  ## Run tests for Hera
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@touch $(SPEC_PATH)
-	@poetry run python scripts/spec.py $(ARGO_WORKFLOWS_VERSION) $(SPEC_PATH)
+	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
@@ -68,7 +68,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 .PHONY: events-models
 events-models: ## Generate the Events models portion of Argo Workflows
 	@touch $(SPEC_PATH)
-	@poetry run python scripts/spec.py $(ARGO_WORKFLOWS_VERSION) $(SPEC_PATH)
+	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
