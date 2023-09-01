@@ -527,7 +527,7 @@ def script(**script_kwargs):
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
             otherwise return the callable function unchanged.
         """
-        s = Script(name=script_kwargs.get('name', func.__name__).replace("_", "-"), source=func, **script_kwargs)
+        s = Script(name=script_kwargs.get("name", func.__name__).replace("_", "-"), source=func, **script_kwargs)
 
         @overload
         def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
