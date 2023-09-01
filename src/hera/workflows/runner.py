@@ -6,7 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, List, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from pydantic import validate_arguments
 from typing_extensions import get_args, get_origin
@@ -14,7 +14,7 @@ from typing_extensions import get_args, get_origin
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.script import _extract_output_annotations
+from hera.workflows.script import _extract_return_annotation_output
 
 try:
     from typing import Annotated  # type: ignore
@@ -65,7 +65,7 @@ def _parse(value, key, f):
         The parsed value.
 
     """
-    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f):
+    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
         return value
     try:
         return json.loads(value)
@@ -81,8 +81,8 @@ def _is_str_kwarg_of(key: str, f: Callable):
     try:
         return issubclass(type_, str)
     except TypeError:
-        # If this happens then it means that the annotation is complex type annotation
-        # and may
+        # If this happens then it means that the annotation is a more complex type annotation
+        # and may be interpretable by the Hera runner
         return False
 
 
@@ -96,6 +96,16 @@ def _is_artifact_loaded(key, f):
     )
 
 
+def _is_output_kwarg(key, f):
+    """Check if param `key` of function `f` is an output Artifact/Parameter."""
+    param = inspect.signature(f).parameters[key]
+    return (
+        get_origin(param.annotation) is Annotated
+        and isinstance(get_args(param.annotation)[1], (Artifact, Parameter))
+        and get_args(param.annotation)[1].output
+    )
+
+
 def _map_keys(function: Callable, kwargs: dict) -> dict:
     """Change the kwargs's keys to use the Python name instead of the parameter name which could be kebab case.
 
@@ -105,26 +115,47 @@ def _map_keys(function: Callable, kwargs: dict) -> dict:
     if os.environ.get("hera__script_annotations", None) is None:
         return {key.replace("-", "_"): value for key, value in kwargs.items()}
 
-    mapped_kwargs = {}
-    for param_name, param in inspect.signature(function).parameters.items():
-        if get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Parameter):
-            mapped_kwargs[param_name] = kwargs[get_args(param.annotation)[1].name]
-        elif get_origin(param.annotation) is Annotated and isinstance(get_args(param.annotation)[1], Artifact):
-            if get_args(param.annotation)[1].loader == ArtifactLoader.json.value:
-                path = Path(get_args(param.annotation)[1].path)
-                mapped_kwargs[param_name] = json.load(path.open())
-            elif get_args(param.annotation)[1].loader == ArtifactLoader.file.value:
-                path = Path(get_args(param.annotation)[1].path)
-                mapped_kwargs[param_name] = path.read_text()
-            elif get_args(param.annotation)[1].loader is None:
-                mapped_kwargs[param_name] = get_args(param.annotation)[1].path
+    mapped_kwargs: Dict[str, Any] = {}
+    for param_name, func_param in inspect.signature(function).parameters.items():
+        if get_origin(func_param.annotation) is Annotated:
+            annotated_type = get_args(func_param.annotation)[1]
+
+            if isinstance(annotated_type, Parameter):
+                if annotated_type.output:
+                    if annotated_type.value_from and annotated_type.value_from.path:
+                        mapped_kwargs[param_name] = Path(annotated_type.value_from.path)
+                    else:
+                        mapped_kwargs[param_name] = _get_outputs_path(annotated_type)
+                    # Automatically create the parent directory (if required)
+                    mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
+                else:
+                    mapped_kwargs[param_name] = kwargs[annotated_type.name]
+            elif isinstance(annotated_type, Artifact):
+                if annotated_type.output:
+                    if annotated_type.path:
+                        mapped_kwargs[param_name] = Path(annotated_type.path)
+                    else:
+                        mapped_kwargs[param_name] = _get_outputs_path(annotated_type)
+                    # Automatically create the parent directory (if required)
+                    mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
+                elif annotated_type.path:
+                    if annotated_type.loader == ArtifactLoader.json.value:
+                        path = Path(annotated_type.path)
+                        mapped_kwargs[param_name] = json.load(path.open())
+                    elif annotated_type.loader == ArtifactLoader.file.value:
+                        path = Path(annotated_type.path)
+                        mapped_kwargs[param_name] = path.read_text()
+                    elif annotated_type.loader is None:
+                        mapped_kwargs[param_name] = annotated_type.path
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
+
     return mapped_kwargs
 
 
-def _save_outputs(
-    function_results: Union[Tuple[Any], Any], output_destinations: List[Tuple[type, Union[Parameter, Artifact]]]
+def _save_annotated_return_outputs(
+    function_results: Union[Tuple[Any], Any],
+    output_destinations: List[Tuple[type, Union[Parameter, Artifact]]],
 ) -> None:
     """Save the results of the function to the specified output destinations.
 
@@ -206,10 +237,12 @@ def _runner(entrypoint: str, kwargs_list: Any) -> Any:
     function = _ignore_unmatched_kwargs(function)
 
     if os.environ.get("hera__script_annotations", None) is not None:
-        output_annotations = _extract_output_annotations(function)
+        output_annotations = _extract_return_annotation_output(function)
 
         if output_annotations:
-            _save_outputs(function(**kwargs), output_annotations)
+            # This will save outputs returned from the function only. Any function parameters/artifacts marked as
+            # outputs should be written to within the function itself.
+            _save_annotated_return_outputs(function(**kwargs), output_annotations)
             return None
 
     return function(**kwargs)
