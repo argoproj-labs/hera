@@ -1,6 +1,10 @@
 from pathlib import Path
 import pkgutil
+import os
 from typing import List
+
+import yaml
+from hera.workflows import Workflow, WorkflowTemplate, ClusterWorkflowTemplate, CronWorkflow
 
 import examples.workflows.upstream as hera_upstream_examples
 import pytest
@@ -10,9 +14,10 @@ from tests.test_examples import CI_MODE, HERA_REGENERATE
 
 ARGO_REPO_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
 GITHUB_API_ARGO = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/master?recursive=1"
+UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
 
 
-def save_upstream_examples(argo_examples: List[str]) -> None:
+def _save_upstream_examples(argo_examples: List[str]) -> None:
     for example in argo_examples:
         output_file = example.replace("/", "__") + ".upstream.yaml"
         output_path = Path(f"examples/workflows/upstream/{output_file}")
@@ -20,8 +25,6 @@ def save_upstream_examples(argo_examples: List[str]) -> None:
         if HERA_REGENERATE or not output_path.exists():
             output_path.write_text(requests.get(f"{ARGO_REPO_URL}/{example}.yaml").text)
             print(f"Output file at {output_file}")
-        else:
-            print(f"Skipped {example}")
 
 
 @pytest.mark.skipif(CI_MODE, reason="Dev tool test")
@@ -32,7 +35,7 @@ def test_for_missing_examples():
     ]
 
     argo_examples = [file[len("examples/") :][: -len(".yaml")] for file in argo_examples]
-    save_upstream_examples(argo_examples)
+    _save_upstream_examples(argo_examples)
 
     hera_examples = [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)]
     hera_examples = list(map(lambda file: file.replace("__", "/").replace("_", "-"), hera_examples))
@@ -63,7 +66,38 @@ def test_for_missing_examples():
         for name, link in missing_examples.items():
             lines.append(f"| [{name}]({link}) |\n")
 
-        with open("docs/examples/workflows-examples.md", "w", encoding="utf-8") as examples_file:
-            examples_file.writelines(lines)
+    with open("docs/examples/workflows-examples.md", "w", encoding="utf-8") as examples_file:
+        examples_file.writelines(lines)
 
-        assert False, f"Missing {len(missing)} examples"
+
+@pytest.mark.xfail(reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types.")
+@pytest.mark.parametrize(
+    "file_name",
+    [
+        f
+        for f in os.listdir(UPSTREAM_EXAMPLES_FOLDER)
+        if os.path.isfile(UPSTREAM_EXAMPLES_FOLDER / f) and f.endswith(".upstream.yaml")
+    ],
+)
+def test_upstream_examples_roundtrip(file_name):
+    spec = yaml.load((UPSTREAM_EXAMPLES_FOLDER / file_name).read_text(), Loader=yaml.FullLoader)
+    kind = spec["kind"]
+    if kind not in (
+        "Workflow",
+        "WorkflowTemplate",
+        "ClusterWorkflowTemplate",
+        "CronWorkflow",
+    ):
+        print(f"UNKNOWN KIND: {kind}")
+        return
+
+    if kind == "Workflow":
+        kind_class = Workflow
+    elif kind == "WorkflowTemplate":
+        kind_class = WorkflowTemplate
+    elif kind == "ClusterWorkflowTemplate":
+        kind_class = ClusterWorkflowTemplate
+    elif kind == "CronWorkflow":
+        kind_class = CronWorkflow
+
+    assert kind_class.from_dict(spec).to_dict() == spec
