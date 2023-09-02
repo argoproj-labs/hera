@@ -169,36 +169,6 @@ class ServiceEndpoint:
             ret_val = "str(resp.content)"
         elif "Response" in self.response.ref:
             ret_val = f"{self.response}()"
-        elif "CronWorkflow" in self.response.ref:
-            # when users schedule cron workflows that have not executed the moment they are scheduled, the response
-            # does contain `CronWorkflowStatus` but its fields are empty. However, the `CronWorkflowStatus` object,
-            # while optional on `CronWorkflow`, has *required* fields. Here, we overwrite the response with a special
-            # case that handles setting the `CronWorkflowStatus` to `None` if the response is empty.
-            return f"""
-    {signature}
-        assert valid_host_scheme(self.host), "The host scheme is required for service usage"
-        resp = requests.{self.method}(
-            url={req_url},
-            params={params},
-            headers={headers},
-            data={body},
-            verify=self.verify_ssl
-        )
-
-        if resp.ok:
-            resp_json = resp.json()
-            if "status" in resp_json or \
-                resp_json["status"]['active'] is None or \
-                resp_json["status"]['lastScheduledTime'] is None or \
-                resp_json["status"]['conditions'] is None:
-                # this is a necessary special case as the status fields cannot be empty on the `CronWorkflowStatus`
-                # object. So, we overwrite the response with a value that allows the response to pass through safely.
-                # See `hera.scripts.service.ServiceEndpoint.__str__` for more details.
-                resp_json['status'] = None
-            return {self.response}(**resp_json)
-        
-        raise exception_from_server_response(resp)
-            """
         else:
             ret_val = f"{self.response}(**resp.json())"
 
