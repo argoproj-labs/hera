@@ -12,7 +12,6 @@ from functools import wraps
 from typing import (
     Any,
     Callable,
-    Dict,
     List,
     Optional,
     Tuple,
@@ -50,9 +49,9 @@ from hera.workflows.models import (
     ScriptTemplate as _ModelScriptTemplate,
     SecurityContext,
     Template as _ModelTemplate,
+    ValueFrom,
 )
 from hera.workflows.parameter import MISSING, Parameter
-from hera.workflows.protocol import Inputable
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 from hera.workflows.volume import EmptyDirVolume
@@ -237,7 +236,7 @@ class Script(
         func_artifacts: List[Artifact] = []
         if callable(self.source):
             if global_config.experimental_features["script_annotations"]:
-                func_parameters, func_artifacts = _get_parameters_and_artifacts_from_callable(self.source)
+                func_parameters, func_artifacts = _get_inputs_from_callable(self.source)
             else:
                 func_parameters = _get_parameters_from_callable(self.source)
 
@@ -252,8 +251,12 @@ class Script(
         if not global_config.experimental_features["script_annotations"]:
             return outputs
 
-        out_parameters, out_artifacts = _get_outputs_from_callable(self.source)
-        func_parameters, func_artifacts = _get_outputs_from_callable_signature(self.source)
+        outputs_directory = None
+        if isinstance(self.constructor, RunnerScriptConstructor):
+            outputs_directory = self.constructor.outputs_directory or self.constructor.DEFAULT_HERA_OUTPUTS_DIRECTORY
+
+        out_parameters, out_artifacts = _get_outputs_from_return_annotation(self.source, outputs_directory)
+        func_parameters, func_artifacts = _get_outputs_from_parameter_annotations(self.source, outputs_directory)
         func_parameters.extend(out_parameters)
         func_artifacts.extend(out_artifacts)
 
@@ -273,15 +276,15 @@ class Script(
             return current_io
         if current_io is None:
             if output:
-                current_io = ModelOutputs(
+                return ModelOutputs(
                     parameters=[p.as_output() for p in func_parameters] or None,
                     artifacts=[a._build_artifact() for a in func_artifacts] or None,
                 )
-            else:
-                current_io = ModelInputs(
-                    parameters=[p.as_input() for p in func_parameters] or None,
-                    artifacts=[a._build_artifact() for a in func_artifacts] or None,
-                )
+
+            return ModelInputs(
+                parameters=[p.as_input() for p in func_parameters] or None,
+                artifacts=[a._build_artifact() for a in func_artifacts] or None,
+            )
 
         seen_params = {p.name for p in current_io.parameters or []}
         seen_artifacts = {a.name for a in current_io.artifacts or []}
@@ -334,32 +337,37 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     return parameters
 
 
-def _get_outputs_from_callable(
+def _get_outputs_from_return_annotation(
     source: Callable,
+    outputs_directory: Optional[str],
 ) -> Tuple[List[Parameter], List[Artifact]]:
-    """Look through the function signature return and find all the output Parameters and Artifacts defined there."""
+    """Returns a tuple of output Parameters and Artifacts defined in the function signature's return annotation."""
     parameters = []
     artifacts = []
 
-    if get_origin(inspect.signature(source).return_annotation) is Annotated:
-        annotation = get_args(inspect.signature(source).return_annotation)[1]
+    def append_annotation(annotation: Union[Artifact, Parameter]):
         if isinstance(annotation, Artifact):
+            if annotation.path is None and outputs_directory is not None:
+                annotation.path = outputs_directory + f"/artifacts/{annotation.name}"
             artifacts.append(annotation)
         elif isinstance(annotation, Parameter):
+            if annotation.value_from is None and outputs_directory is not None:
+                annotation.value_from = ValueFrom(path=outputs_directory + f"/parameters/{annotation.name}")
             parameters.append(annotation)
-    elif get_origin(inspect.signature(source).return_annotation) is tuple:
-        for a in get_args(inspect.signature(source).return_annotation):
-            annotation = get_args(a)[1]
-            if isinstance(annotation, Artifact):
-                artifacts.append(annotation)
-            elif isinstance(annotation, Parameter):
-                parameters.append(annotation)
 
+    if get_origin(inspect.signature(source).return_annotation) is Annotated:
+        append_annotation(get_args(inspect.signature(source).return_annotation)[1])
+    elif get_origin(inspect.signature(source).return_annotation) is tuple:
+        for annotation in get_args(inspect.signature(source).return_annotation):
+            append_annotation(get_args(annotation)[1])
     return parameters, artifacts
 
 
-def _get_outputs_from_callable_signature(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
-    """Look through the function signature parameters and find all Parameters and Artifacts annotated as output."""
+def _get_outputs_from_parameter_annotations(
+    source: Callable,
+    outputs_directory: Optional[str],
+) -> Tuple[List[Parameter], List[Artifact]]:
+    """Returns a tuple of output Parameters and Artifacts defined in the function signature parameters."""
     parameters: List[Parameter] = []
     artifacts: List[Artifact] = []
 
@@ -367,93 +375,124 @@ def _get_outputs_from_callable_signature(source: Callable) -> Tuple[List[Paramet
         if get_origin(p.annotation) is not Annotated:
             continue
         annotation = get_args(p.annotation)[1]
-        if not hasattr(annotation, "output") or not annotation.output:
+
+        if not isinstance(annotation, (Artifact, Parameter)):
+            raise ValueError(f"The output {type(annotation)} cannot be used as an annotation.")
+
+        if not annotation.output:
             continue
 
-        output_type = type(annotation)
-        assert output_type is Artifact or output_type is Parameter
-
-        kwargs: Dict[str, Any] = {}
-        if isinstance(output_type, Inputable):
-            for attr in output_type._get_input_attributes():
-                if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
-                    kwargs[attr] = getattr(annotation, attr)
-        else:
-            raise ValueError(f"The output {output_type} cannot be an input annotation.")
+        new_object = annotation.copy()
 
         # use the function parameter name when not provided by user
-        if "name" not in kwargs:
-            kwargs["name"] = name
+        if not new_object.name:
+            new_object.name = name
 
-        new_object = output_type(**kwargs)
+        if isinstance(new_object, Parameter) and new_object.value_from is None and outputs_directory is not None:
+            new_object.value_from = ValueFrom(path=outputs_directory + f"/parameters/{new_object.name}")
+        elif isinstance(new_object, Artifact) and new_object.path is None and outputs_directory is not None:
+            new_object.path = outputs_directory + f"/artifacts/{new_object.name}"
 
-        if isinstance(get_args(p.annotation)[1], Artifact):
+        if isinstance(new_object, Artifact):
             artifacts.append(new_object)
-        elif isinstance(get_args(p.annotation)[1], Parameter):
+        elif isinstance(new_object, Parameter):
             parameters.append(new_object)
 
     return parameters, artifacts
 
 
-def _get_parameters_and_artifacts_from_callable(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
-    """Look through the function signature and find all Parameters and Artifacts *not* annotated as output."""
+def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[Artifact]]:
+    """Return all inputs from the function.
+
+    This includes all basic Python function parameters, and all parameters with a Parameter or Artifact annotation.
+    """
     parameters = []
     artifacts = []
 
-    for p in inspect.signature(source).parameters.values():
-        if get_origin(p.annotation) is Annotated and isinstance(get_args(p.annotation)[1], Artifact):
-            annotation = get_args(p.annotation)[1]
-            if hasattr(annotation, "output") and annotation.output:
-                continue
-            mytype = type(annotation)
-            kwargs = {}
-            for attr in mytype._get_input_attributes():
-                if hasattr(annotation, attr) and getattr(annotation, attr) is not None:
-                    kwargs[attr] = getattr(annotation, attr)
-
-            artifact = mytype(**kwargs)
-            artifacts.append(artifact)
-        else:
-            if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-                default = p.default
+    for func_param in inspect.signature(source).parameters.values():
+        if get_origin(func_param.annotation) is not Annotated:
+            if (
+                func_param.default != inspect.Parameter.empty
+                and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+            ):
+                default = func_param.default
             else:
                 default = MISSING
 
-            param = Parameter(name=p.name, default=default)
-            parameters.append(param)
+            parameters.append(Parameter(name=func_param.name, default=default))
+        else:
+            annotation = get_args(func_param.annotation)[1]
 
-            if get_origin(p.annotation) is not Annotated:
+            if not isinstance(annotation, (Artifact, Parameter)):
+                raise ValueError(f"The output {type(annotation)} cannot be used as an annotation.")
+
+            if annotation.output:
                 continue
 
-            annotation = get_args(p.annotation)[1]
+            # Create a new object so we don't modify the Workflow itself
+            new_object = annotation.copy()
+            if not new_object.name:
+                new_object.name = func_param.name
 
-            if hasattr(annotation, "output") and annotation.output:
-                parameters.pop()
-                continue
-
-            if not isinstance(annotation, Parameter):
-                continue
-
-            for attr in Parameter._get_input_attributes():
-                if not hasattr(annotation, attr) or getattr(annotation, attr) is None:
-                    continue
-
-                if attr == "default" and param.default is not None:
-                    raise ValueError(
-                        "The default cannot be set via both the function parameter default and the annotation's default"
-                    )
-                setattr(param, attr, getattr(annotation, attr))
+            if isinstance(new_object, Artifact):
+                artifacts.append(new_object)
+            elif isinstance(new_object, Parameter):
+                if func_param.default != inspect.Parameter.empty:
+                    if new_object.default is not None:
+                        raise ValueError(
+                            "default cannot be set via both the function parameter default and the Parameter's default"
+                        )
+                    new_object.default = str(func_param.default)
+                parameters.append(new_object)
 
     return parameters, artifacts
 
 
+def _extract_return_annotation_output(source: Callable) -> List:
+    """Extract the output annotations from the return annotation of the function signature."""
+    output = []
+
+    origin_type = get_origin(inspect.signature(source).return_annotation)
+    annotation_args = get_args(inspect.signature(source).return_annotation)
+    if origin_type is Annotated:
+        output.append(annotation_args)
+    elif origin_type is tuple:
+        for annotated_type in annotation_args:
+            output.append(get_args(annotated_type))
+
+    return output
+
+
+def _extract_all_output_annotations(source: Callable) -> List:
+    """Extract the output annotations out of the function signature.
+
+    This includes parameters marked as outputs and the return annotation of `source`.
+    """
+    output = []
+
+    for _, func_param in inspect.signature(source).parameters.items():
+        if get_origin(func_param.annotation) is Annotated:
+            annotation_args = get_args(func_param.annotation)
+            annotated_type = annotation_args[1]
+            if isinstance(annotated_type, (Artifact, Parameter)) and annotated_type.output:
+                output.append(annotation_args)
+
+    output.extend(_extract_return_annotation_output(source))
+
+    return output
+
+
 def _output_annotations_used(source: Callable) -> bool:
-    """Check if output annotations are used."""
+    """Check if any output annotations are used.
+
+    This includes parameters marked as outputs and the return annotation of `source`.
+    """
     if not global_config.experimental_features["script_annotations"]:
         return False
     if not callable(source):
         return False
-    return _extract_output_annotations(cast(Callable, source)) is not None
+
+    return bool(_extract_all_output_annotations(source))
 
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
@@ -527,7 +566,14 @@ def script(**script_kwargs):
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
             otherwise return the callable function unchanged.
         """
-        s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
+        if "name" in script_kwargs:
+            # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
+            # kwargs called `name`
+            name = script_kwargs.pop("name")
+            s = Script(name=name, source=func, **script_kwargs)
+        else:
+            # otherwise populate the `name` from the function name
+            s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
 
         @overload
         def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
@@ -549,20 +595,6 @@ def script(**script_kwargs):
         return task_wrapper
 
     return script_wrapper
-
-
-def _extract_output_annotations(function: Callable) -> Optional[List]:
-    """Extract the output annotations out of the function signature."""
-    output = []
-    origin_type = get_origin(inspect.signature(function).return_annotation)
-    annotation_args = get_args(inspect.signature(function).return_annotation)
-    if origin_type is Annotated:
-        output.append(annotation_args)
-    elif origin_type is tuple:
-        for annotation in annotation_args:
-            output.append(get_args(annotation))
-
-    return output or None
 
 
 class InlineScriptConstructor(ScriptConstructor):

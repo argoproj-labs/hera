@@ -1,7 +1,15 @@
-## Contributing to Hera
+# Contributing to Hera
 
-**Thank you for considering a contribution to Hera! Your time is the ultimate currency, and the community highly
-appreciates your willingness to dedicate some time to Hera for the benefit of everyone!**
+**Thank you for considering a contribution to Hera!**
+
+Your time is the ultimate currency, and the community highly appreciates your willingness to dedicate some time to Hera
+for the benefit of everyone! Remember to star the repo on GitHub and share Hera with your colleagues to grow our community!
+
+[![Contributors](https://img.shields.io/github/contributors/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
+[![Stars](https://img.shields.io/github/stars/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
+[![Last commit](https://img.shields.io/github/last-commit/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
+
+## Contributing checklist
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
 
@@ -16,11 +24,11 @@ Please keep in mind the following guidelines and practices when contributing to 
 1. Add unit tests for any new code you write.
 1. Add an example, or extend an existing example, with any new features you may add. Use `make examples` to ensure that the documentation and examples are in sync.
 
-### Adding new Workflow tests
+## Adding new Workflow tests
 
 Hera has an automated-test harness that is coupled with our documentation. In order to add new tests, please follow these steps - 
 
-#### Local Hera examples
+### Local Hera examples
 
 Tests that do not correspond to any upstream Argo Workflow examples should live in `examples/workflows/*.py`
 
@@ -31,7 +39,7 @@ In order to add a new workflow test to test Hera functionality, do the following
 - If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
 - The golden copies must be checked in to ensure that regressions may be caught in the future
 
-#### Upstream Hera examples
+### Upstream Hera examples
 
 Tests that correspond to any [upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/master/examples) should live in `examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and also to catch any regressions that might happen.
 
@@ -42,7 +50,24 @@ In order to add a new workflow test to test Hera functionality, do the following
 - If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
 - The golden copies must be checked in to ensure that regressions may be caught in the future
 
-### Code of Conduct
+## Working in VSCode
+
+If your preferred IDE is VSCode, you may have an issue using the integrated Testing extension where breakpoints are not
+respected. To solve this, add the following as a config in your `.vscode/launch.json` file:
+
+```json
+{
+   "name": "Debug Tests",
+   "type": "python",
+   "request": "launch",
+   "purpose": ["debug-test"],
+   "console": "integratedTerminal",
+   "justMyCode": false,
+   "env": {"PYTEST_ADDOPTS": "--no-cov"}
+}
+```
+
+## Code of Conduct
 
 Please be mindful of and adhere to the CNCF's
 [Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) when contributing to hera.
