@@ -82,3 +82,147 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         # We can use the `>>` or `.next()` operators to define dependencies between tasks.
         A >> [B, C] >> D
 ```
+
+## Comparison
+
+There have been other libraries available for structuring and submitting Argo Workflows:
+
+- [Couler](https://github.com/couler-proj/couler), which aimed to provide a unified interface for constructing and
+  managing workflows on different workflow engines. It has now been unmaintained since its last commit in April 2022.
+- [Argo Python DSL](https://github.com/argoproj-labs/argo-python-dsl), which allows you to programmatically define Argo
+  worfklows using Python. It was archived in October 2021.
+
+While the aforementioned libraries provided amazing functionality for Argo workflow construction and submission, they
+required an advanced understanding of Argo concepts. When [Dyno Therapeutics](https://dynotx.com) started using Argo
+Workflows, it was challenging to construct and submit experimental machine learning workflows. Scientists and engineers
+at [Dyno Therapeutics](https://dynotx.com) used a lot of time for workflow definition rather than the implementation of
+the atomic unit of execution - the Python function - that performed, for instance, model training.
+
+Hera presents an intuitive Python interface to the underlying API of Argo, with custom classes making use of context
+managers and callables, empowering users to focus on their own executable payloads rather than workflow setup.
+
+<details><summary>Here's a side by side comparison of Hera, Couler, and Argo Python DSL</summary>
+
+
+You will see how Hera has focused on reducing the complexity of Argo concepts while also reducing the total lines of
+code required to construct the `diamond` example, which can
+be <a href="https://github.com/argoproj/argo-workflows/blob/2a9bd6c83601990259fd5162edeb425741757484/examples/dag-diamond.yaml">
+found in the upstream Argo repository</a>.
+
+
+<table>
+<tr><th>Hera</th><th>Couler</th><th>Argo Python DSL</th></tr>
+<tr>
+
+<td valign="top"><p>
+
+```python
+from hera.workflows import DAG, Container, Parameter, Workflow
+
+with Workflow(
+    generate_name="dag-diamond-",
+    entrypoint="diamond",
+) as w:
+    echo = Container(
+        name="echo",
+        image="alpine:3.7",
+        command=["echo", "{{inputs.parameters.message}}"],
+        inputs=[Parameter(name="message")],
+    )
+    with DAG(name="diamond"):
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
+        A >> [B, C] >> D
+
+w.create()
+```
+
+</p></td>
+
+<td valign="top"><p>
+
+```python
+import couler.argo as couler
+from couler.argo_submitter import ArgoSubmitter
+
+
+def job(name):
+    couler.run_container(
+        image="docker/whalesay:latest",
+        command=["cowsay"],
+        args=[name],
+        step_name=name,
+    )
+
+
+def diamond():
+    couler.dag(
+        [
+            [lambda: job(name="A")],
+            [lambda: job(name="A"), lambda: job(name="B")],  # A -> B
+            [lambda: job(name="A"), lambda: job(name="C")],  # A -> C
+            [lambda: job(name="B"), lambda: job(name="D")],  # B -> D
+            [lambda: job(name="C"), lambda: job(name="D")],  # C -> D
+        ]
+    )
+
+
+diamond()
+submitter = ArgoSubmitter()
+couler.run(submitter=submitter)
+```
+
+</p></td>
+
+<td valign="top"><p>
+
+```python
+from argo.workflows.dsl import Workflow
+
+from argo.workflows.dsl.tasks import *
+from argo.workflows.dsl.templates import *
+
+
+class DagDiamond(Workflow):
+
+    @task
+    @parameter(name="message", value="A")
+    def A(self, message: V1alpha1Parameter) -> V1alpha1Template:
+        return self.echo(message=message)
+
+    @task
+    @parameter(name="message", value="B")
+    @dependencies(["A"])
+    def B(self, message: V1alpha1Parameter) -> V1alpha1Template:
+        return self.echo(message=message)
+
+    @task
+    @parameter(name="message", value="C")
+    @dependencies(["A"])
+    def C(self, message: V1alpha1Parameter) -> V1alpha1Template:
+        return self.echo(message=message)
+
+    @task
+    @parameter(name="message", value="D")
+    @dependencies(["B", "C"])
+    def D(self, message: V1alpha1Parameter) -> V1alpha1Template:
+        return self.echo(message=message)
+
+    @template
+    @inputs.parameter(name="message")
+    def echo(self, message: V1alpha1Parameter) -> V1Container:
+        container = V1Container(
+            image="alpine:3.7",
+            name="echo",
+            command=["echo", "{{inputs.parameters.message}}"],
+        )
+
+        return container
+```
+
+</p></td>
+</tr>
+</table>
+</details>

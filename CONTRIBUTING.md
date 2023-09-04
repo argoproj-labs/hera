@@ -9,6 +9,34 @@ for the benefit of everyone! Remember to star the repo on GitHub and share Hera 
 [![Stars](https://img.shields.io/github/stars/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
 [![Last commit](https://img.shields.io/github/last-commit/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
 
+## Setting up
+
+If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry`:
+
+```shell
+poetry install
+```
+
+Once the dependencies are installed, you can use the various `make` targets to replicate the `CI` jobs.
+
+```
+make help
+check-codegen                  Check if the code is up to date
+ci                             Run all the CI checks
+codegen                        Generate all the code
+events-models                  Generate the Events models portion of Argo Workflows
+events-service                 Generate the events service option of Hera
+examples                       Generate all the examples
+format                         Format and sort imports for source, tests, examples, etc.
+help                           Showcase the help instructions for all the available `make` commands
+lint                           Run a `lint` process on Hera and report problems
+models                         Generate all the Argo Workflows models
+services                       Generate the services of Hera
+test                           Run tests for Hera
+workflows-models               Generate the Workflows models portion of Argo Workflows
+workflows-service              Generate the Workflows service option of Hera
+```
+
 ## Contributing checklist
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
