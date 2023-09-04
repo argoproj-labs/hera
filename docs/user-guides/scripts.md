@@ -46,6 +46,152 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
 > resolving to `C.Succeeded || C.Skipped || C.Daemoned` due to Argo's default
 > [depends logic](https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends).
 
+## Script Constructors
+
+### InlineScriptConstructor
+
+Script templates submitted to Argo typically run the given Python function in a Python image. By default, the Python
+function itself is dumped to the YAML, and the Argo cluster will run that code. For the code below, we will see it
+directly in the output YAML.
+
+```py
+from hera.workflows import Workflow, script
+
+@script(add_cwd_to_sys_path=False)
+def hello(s: str):
+    print("Hello, {s}!".format(s=s))
+
+
+with Workflow(
+    generate_name="hello-world-",
+    entrypoint="hello",
+    arguments={"s": "world"},
+) as w:
+    hello()
+```
+
+We added `add_cwd_to_sys_path=False` to remove some boilerplate from the `source` below. You will see Hera adds a
+`json.loads` to bridge the YAML input to a Python variable:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-world-
+spec:
+  arguments:
+    parameters:
+    - name: s
+      value: world
+  entrypoint: hello
+  templates:
+  - inputs:
+      parameters:
+      - name: s
+    name: hello
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import json
+
+        try: s = json.loads(r''''''{{inputs.parameters.s}}'''''')
+
+        except: s = r''''''{{inputs.parameters.s}}''''''
+
+
+        print(''Hello, {s}!''.format(s=s))'
+```
+
+This method of running the function is handled by the `InlineScriptConstructor`, called such because it constructs the
+Script template to run the function "inline" in the YAML.
+
+#### Importing modules
+
+A caveat of the `InlineScriptConstructor` is that it is quite limited - as the `InlineScriptConstructor` dumps your code
+to the `source` field as-is, you must also `import` (within the function itself) any modules you use in the function:
+
+```py
+@script(image="python:3.10")
+def my_matcher(string: str):
+    import re
+
+    print(bool(re.match("test", string)))
+```
+
+> **Note** This also applies to other functions in your code - you will not be able to call functions defined outside of
+> the scope of the script-decorated function!
+
+If your function uses standard library imports from Python, you will be able to run your function with any standard
+Python image, specified by the `image` argument of the decorator. Therefore, if you use non-standard imports, such as
+`numpy`, you will need to use an image that includes `numpy`, or build your own (e.g. as a Docker image on DockerHub).
+
+### RunnerScriptConstructor
+
+The `RunnerScriptConstructor` is an alternative `ScriptConstructor` that uses the "Hera Runner" (think of this as being
+like the PyTest Runner) to run your function on Argo. This avoids dumping the function to the `source` of a template,
+keeping the YAML manageable and small, and allows you to arrange your code in natural Python fashion: imports can be
+anywhere in the package, the script-decorated function can call other functions in the package, and the function itself
+can take Pydantic objects as arguments. The use of the RunnerScriptConstructor necessitates building your own image, as
+the Hera Runner runs the function by referencing it as an entrypoint of your module. The image used by the script should
+be built from the source code package itself and its dependencies, so that the source code's functions, dependencies,
+and Hera itself are available to run.
+
+The `RunnerScriptConstructor` is an experimental feature and must be enabled with the `script_runner` feature flag, as
+described in
+[the experimental features section](../getting-started/walk-through/advanced-hera-features.md#experimental-features).
+
+```py
+global_config.experimental_features["script_runner"] = True
+```
+
+A function can set its `constructor` to `"runner"` to use the `RunnerScriptConstructor`, or use the
+`global_config.set_class_defaults` function to set it once for all script-decorated functions. We can write a script
+template function using Pydantic objects such as:
+
+```py
+global_config.set_class_defaults(Script, constructor="runner")
+
+class Input(BaseModel):
+    a: int
+    b: str = "foo"
+
+class Output(BaseModel):
+    output: List[Input]
+
+@script()
+def my_function(input: Input) -> Output:
+    return Output(output=[input])
+```
+
+This creates a template in YAML that looks like:
+
+```yaml
+- name: my-function
+  inputs:
+    parameters:
+    - name: input
+  script:
+    command:
+    - python
+    args:
+    - -m
+    - hera.workflows.runner
+    - -e
+    - examples.workflows.callable_script:my_function
+    image: my-image-with-python-source-code-and-dependencies
+    source: '{{inputs.parameters}}'
+```
+
+You will notice some pecularities of this template. Firstly, it is running the `hera.workflows.runner` module, rather
+than a user-module such as `examples.workflows.callable_script`. Instead, the `-e` arg specifies the `--entrypoint` to
+be called by the runner, in this case the `my_function` of the `examples.workflows.callable_script` module. We do not
+give a real `image` here, but we assume it exists in this example. Finally, the `source` parameter is passed the
+`inputs.parameters` of the template. This is because the Hera Runner relies on a mechanism in Argo where the value
+passed to `source` is dumped to a file, and then the filename is passed as the final `arg` to the `command`. Therefore,
+the `source` will actually contain a list of parameters as dictionaries, which are dumped to a file which is passed to
+`hera.workflows.runner`. Of course, this is all handled for you!
+
 ## Script Annotations
 
 Annotation syntax is an experimental feature using `typing.Annotated` for `Parameter`s and `Artifact`s to declare inputs
@@ -53,9 +199,7 @@ and outputs for functions decorated as `scripts`. They use `Annotated` as the ty
 us to simplify writing scripts with parameters and artifacts that require additional fields such as a `description` or
 alternative `name`.
 
-This feature must be enabled by setting the `experimental_feature` flag `script_annotations` on the global config, as
-described in
-[the experimental features section](../getting-started/walk-through/advanced-hera-features.md#experimental-features).
+This feature must be enabled by setting the `experimental_feature` flag `script_annotations` on the global config.
 
 ```py
 global_config.experimental_features["script_annotations"] = True
