@@ -66,6 +66,9 @@ def echo_twice(message: str):
     print(message)
 ```
 
+For an in-depth explanation of the mechanics of the script decorator, see the
+[script decorator section](../../user-guides/core-concepts.md#script-decorator) in the core concept user guide.
+
 ## The Workflow Context Manager
 
 The Workflow context manager acts as a scope under which `template` Hera objects can be declared, which include
@@ -100,17 +103,12 @@ with Steps(name="steps"):
 
 To invoke the `echo` template, you can call it, passing values to its arguments through the `arguments` kwarg, which is
 a dictionary of the _function_ kwargs to values. This is because under a `Steps` or `DAG` context manager, the `script`
-decorator converts a call of the function into a `Script` object, to which you must pass `Script` initialization kwargs.
+decorator converts a call of the function into a `Step` or `Task` object, to which you must pass `Step` or `Task`
+initialization kwargs.
 
 ```py
 echo(arguments={"message": "Hello world!"})
 ```
-
-> For advanced users: the exact mechanism of the `script` decorator is to create a `Script` object when declared, so
-> that when your function is invoked you have to pass its arguments through the `arguments` kwarg as a dictionary, and
-> the `Script` objects `__call__` function is invoked with the `arguments` kwarg. The `__call__` function on a
-> `CallableTemplateMixin` automatically creates a `Step` or a `Task` depending on whether the context manager is a
-> `Steps` or a `DAG`.
 
 ## Submitting the Workflow
 

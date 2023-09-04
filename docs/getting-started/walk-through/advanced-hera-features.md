@@ -12,8 +12,8 @@ processing on any type of `template` or `Workflow`. For example, it can be used 
 To use this feature, you can write a function that takes an object of type `template` or `Workflow`, does some
 processing on the object, then returns it.
 
-For a simple example, we'll write a function that adds an annotation with key "hera", value "This workflow was submitted
-through Hera!"
+For a simple example, we'll write a function that adds an annotation with a key of "hera", and value of "This workflow
+was written in Hera!"
 
 ```py
 from hera.shared import register_pre_build_hook
@@ -24,7 +24,7 @@ def set_workflow_default_labels(workflow: Workflow) -> Workflow:
     if workflow.annotations is None:
         workflow.annotations = {}
 
-    workflow.annotations["hera-annotation"] = "This workflow was submitted through Hera!"
+    workflow.annotations["hera-annotation"] = "This workflow was written in Hera!"
     return workflow
 
 ```

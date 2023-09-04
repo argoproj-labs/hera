@@ -73,7 +73,6 @@ Explore the examples through the side bar!
 | [k8s-owner-reference](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-owner-reference.yaml) |
 | [k8s-patch](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-patch.yaml) |
 | [k8s-patch-basic](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-patch-basic.yaml) |
-| [k8s-set-owner-reference](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-set-owner-reference.yaml) |
 | [k8s-wait-wf](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-wait-wf.yaml) |
 | [label-value-from-workflow](https://github.com/argoproj/argo-workflows/blob/master/examples/label-value-from-workflow.yaml) |
 | [life-cycle-hooks-tmpl-level](https://github.com/argoproj/argo-workflows/blob/master/examples/life-cycle-hooks-tmpl-level.yaml) |

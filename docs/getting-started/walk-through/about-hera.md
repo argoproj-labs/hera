@@ -40,7 +40,7 @@ before moving to Python.
 You will notice many classes in Hera implement the context manager interface. This was designed to mirror the YAML
 syntax of Argo, helping existing users come to Hera from YAML, and for users new to both Argo and Hera, who will be able
 to interpret and understand most of the existing YAML documentation and resources online from familiar naming and
-functionality in Hera.
+functionality in Hera. Read more in the [user guides](../../user-guides/core-concepts.md) section!
 
 ## Orchestrating Scripts
 
