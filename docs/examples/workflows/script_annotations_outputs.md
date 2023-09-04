@@ -34,8 +34,8 @@
         successor: Annotated[Path, Parameter(name="successor", output=True)],
         successor2: Annotated[Path, Artifact(name="successor2", output=True)],
     ) -> Tuple[Annotated[int, Parameter(name="successor3")], Annotated[int, Artifact(name="successor4")]]:
-        successor.write_text(a_number + 1)
-        successor2.write_text(a_number + 2)
+        successor.write_text(str(a_number + 1))
+        successor2.write_text(str(a_number + 2))
         return a_number + 3, a_number + 4
 
 
@@ -69,10 +69,16 @@
         outputs:
           artifacts:
           - name: successor2
+            path: user/chosen/outputs/artifacts/successor2
           - name: successor4
+            path: user/chosen/outputs/artifacts/successor4
           parameters:
           - name: successor
+            valueFrom:
+              path: user/chosen/outputs/parameters/successor
           - name: successor3
+            valueFrom:
+              path: user/chosen/outputs/parameters/successor3
         script:
           args:
           - -m

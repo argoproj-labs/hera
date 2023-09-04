@@ -416,7 +416,9 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     The supported sub-template fields are `Script`, `Data`, `DAG`, `Resource`, `Container`, `ContainerSet`, etc.
     """
 
-    active_deadline_seconds: Optional[Union[int, str, IntOrString]] = None
+    active_deadline_seconds: Optional[
+        Union[int, str, IntOrString]
+    ] = None  # TODO: This type blocks YAML roundtrip. Consider using type: Optional[int]
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
     automount_service_account_token: Optional[bool] = None

@@ -67,13 +67,3 @@ class Steppable(Protocol):
 
     def _build_step(self) -> Any:
         ...
-
-
-@runtime_checkable
-class Inputable(Protocol):
-    """This runtime protocol indicates that an object supports being used as an input annotation."""
-
-    @classmethod
-    def _get_input_attributes(cls) -> List[str]:
-        """Return the attributes used for input annotations."""
-        ...

@@ -1,5 +1,8 @@
 # Hera
 
+Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
+ecosystem accessible by simplifying workflow construction and submission.
+
 [See the Quick Start guide](https://hera.readthedocs.io/en/latest/getting-started/quick-start/) to start using Hera
 to orchestrate your Argo Workflows!
 
@@ -7,6 +10,8 @@ to orchestrate your Argo Workflows!
 The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/argoproj-labs/hera)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
 
@@ -16,28 +21,30 @@ and its crew were specially protected by the goddess Hera.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [![Pypi](https://img.shields.io/pypi/v/hera.svg)](https://pypi.python.org/pypi/hera)
-[![CondaForge](https://anaconda.org/conda-forge/hera-workflows/badges/version.svg)](https://anaconda.org/conda-forge/hera-workflows)
 [![Versions](https://img.shields.io/pypi/pyversions/hera.svg)](https://github.com/argoproj-labs/hera)
 
-### Stats after the [rename to Hera](https://github.com/argoproj-labs/hera/discussions/532)
+[![CondaForge](https://anaconda.org/conda-forge/hera-workflows/badges/version.svg)](https://anaconda.org/conda-forge/hera-workflows)
+
+### PyPi stats for `hera`
 
 [![Downloads](https://static.pepy.tech/badge/hera)](https://pepy.tech/project/hera)
 [![Downloads/month](https://static.pepy.tech/badge/hera/month)](https://pepy.tech/project/hera)
 [![Downloads/week](https://static.pepy.tech/badge/hera/week)](https://pepy.tech/project/hera)
 
-### Stats before the [rename to Hera](https://github.com/argoproj-labs/hera/discussions/532)
+### PyPi stats for `hera-workflows`
+
+> **⚠ Note ⚠** The `hera-workflows` package is **deprecated** since the project
+> [renamed to Hera](https://github.com/argoproj-labs/hera/discussions/532) for V5. Please install from the `hera` PyPi
+> package.
 
 [![Downloads](https://static.pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
 [![Downloads/month](https://static.pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://static.pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
 
-Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
-ecosystem accessible by simplifying workflow construction and submission.
-
-# Table of content
+# Table of contents
 
 - [Hera](#hera)
-- [Table of content](#table-of-content)
+- [Table of contents](#table-of-contents)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Examples](#examples)
@@ -85,7 +92,7 @@ publishes releases to both `hera` and `hera-workflows` for backwards compatibili
 
 - Install via `hera[yaml]`
 - [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via  
-  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging
+  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
 
 # Examples
 
@@ -136,7 +143,7 @@ with Workflow(
 w.create()
 ```
 
-See the [examples](./examples/) directory for a collection of Argo workflow construction and submission via Hera!
+See the [examples](./examples/workflows-examples) for a collection of Argo workflow construction and submission via Hera!
 
 # Presentations
 
