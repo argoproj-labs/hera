@@ -43,7 +43,7 @@ In Hera, the [WorkflowTemplate](../api/workflows/hera/#hera.workflows.WorkflowTe
 be a drop-in replacement of your `Workflow`. Usually in YAML, you would need to change the `kind` and set `generateName`
 instead of `name`. However, for this developer workflow of iterating on a `Workflow` to eventually create a
 `WorkflowTemplate`, we provide a simple `create_as_workflow` convenience function, which will submit your
-`WorkflowTemplate` as a `Workflow` to Argo, with the randomly-generated name.
+`WorkflowTemplate` as a `Workflow` to Argo, using generate_name automatically.
 
 ```py
 from hera.workflows import Steps, WorkflowTemplate, WorkflowsService, script
