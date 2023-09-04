@@ -45,56 +45,16 @@ and its crew were specially protected by the goddess Hera.
 
 - [Hera](#hera)
 - [Table of contents](#table-of-contents)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Examples](#examples)
+- [Example Hera Code](#example-hera-code)
     - [Single step script](#single-step-script)
     - [DAG diamond](#dag-diamond)
+- [Requirements](#requirements)
+- [Installation](#installation)
 - [Presentations](#presentations)
 - [Blogs](#blogs)
 - [Contributing](#contributing)
 
-# Requirements
-
-Hera requires an Argo server to be deployed to a Kubernetes cluster. Currently, Hera assumes that the Argo server sits
-behind an authentication layer that can authenticate workflow submission requests by using the Bearer token on the
-request. To learn how to deploy Argo to your own Kubernetes cluster you can follow
-the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
-
-Another option for workflow submission without the authentication layer is using port forwarding to your Argo server
-deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to use yours). Please
-refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the
-command for port forward!
-
-> **Note**
-> Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens in place,
-> it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes v1.24+
-> in order for hera to communicate to the Argo Server.
-
-# Installation
-
-## Note
-
-Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published
-Python package. If you'd like to install versions prior to `5.0.0`, you have to use `hera-workflows`. Hera currently
-publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
-
-| Source                                                   | Command                                                                                              |
-|----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| [PyPi](https://pypi.org/project/hera/)                   | `pip install hera`                                                                                   |
-| [PyPi](https://pypi.org/project/hera-workflows/)         | `pip install hera-workflows`                                                                         |
-| [Conda](https://anaconda.org/conda-forge/hera-workflows) | `conda install -c conda-forge hera-workflows`                                                        |
-| [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
-
-## Optional dependencies
-
-### yaml
-
-- Install via `hera[yaml]`
-- [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via  
-  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
-
-# Examples
+# Example Hera Code
 
 ### Single step script
 
@@ -144,6 +104,46 @@ w.create()
 ```
 
 See the [examples](./examples/workflows-examples) for a collection of Argo workflow construction and submission via Hera!
+
+# Requirements
+
+Hera requires an Argo server to be deployed to a Kubernetes cluster. Currently, Hera assumes that the Argo server sits
+behind an authentication layer that can authenticate workflow submission requests by using the Bearer token on the
+request. To learn how to deploy Argo to your own Kubernetes cluster you can follow
+the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
+
+Another option for workflow submission without the authentication layer is using port forwarding to your Argo server
+deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to use yours). Please
+refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the
+command for port forward!
+
+> **Note**
+> Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens in place,
+> it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes v1.24+
+> in order for hera to communicate to the Argo Server.
+
+# Installation
+
+## Note
+
+Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published
+Python package. If you'd like to install versions prior to `5.0.0`, you have to use `hera-workflows`. Hera currently
+publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
+
+| Source                                                   | Command                                                                                              |
+|----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| [PyPi](https://pypi.org/project/hera/)                   | `pip install hera`                                                                                   |
+| [PyPi](https://pypi.org/project/hera-workflows/)         | `pip install hera-workflows`                                                                         |
+| [Conda](https://anaconda.org/conda-forge/hera-workflows) | `conda install -c conda-forge hera-workflows`                                                        |
+| [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
+
+## Optional dependencies
+
+### yaml
+
+- Install via `hera[yaml]`
+- [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via
+  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
 
 # Presentations
 
