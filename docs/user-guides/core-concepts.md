@@ -105,7 +105,7 @@ def hello(s: str):
     print("Hello, {s}!".format(s=s))
 ```
 
-Read more in the [Script decorator section](#script-decorator).
+Read more in the [Script decorator section](./scripts.md#script-decorator).
 
 
 ### Resource
@@ -204,19 +204,19 @@ with Workflow(
         Step(
             name="hello1",
             template="whalesay",
-            arguments=[Parameter(name="message", value="hello1")],
+            arguments={"message": "hello1"},
         )
 
         with s.parallel():
             Step(
                 name="hello2a",
                 template="whalesay",
-                arguments=[Parameter(name="message", value="hello2a")],
+                arguments={"message": "hello2a"},
             )
             Step(
                 name="hello2b",
                 template="whalesay",
-                arguments=[Parameter(name="message", value="hello2b")],
+                arguments={"message": "hello2b"},
             )
 ```
 
@@ -264,46 +264,3 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
 ```
 
 Read more about `DAG`s in the [walk-through](../getting-started/walk-through/dag.md)!
-
-## Script Decorator
-
-The `script` decorator function is a key offering of Hera in offering native Python function orchestration. It allows
-you to call the function under a Hera context manager such as a `Workflow` or `Steps` context, and it will be treated as
-the intended sub-object, which would be a `template` when under a `Workflow`, or a `Step` when under a `Steps`. The
-function will still behave as normal outside of any Hera contexts, meaning you can write unit tests on the given
-function.
-
-> **For advanced users**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the
-> decoration, so that when your function is invoked under a Hera context, the call is redirected to the
-> `Script.__call__` function. This takes the kwargs of a `Step` or `Task` depending on whether the context manager is a
-> `Steps` or a `DAG`. Under a Workflow itself, your function is not expected to take arguments, so the call will add the
-> function as a template.
-
-When decorating a function, you should pass `Script` parameters to the `script` decorator. This includes values such as
-the `image` to use, and `resources` to request.
-
-```py
-from hera.workflows import Resources, script
-
-@script(image="python:3.11", resources=Resources(memory_request="5Gi"))
-def echo(message: str):
-    print(message)
-```
-
-When calling the function under a `Steps` or `DAG` context, you should pass `Step` or `Task` kwargs, such as the `name`
-of the `Step`/`Task`, a `when` clause, a `with_param` list to loop over a given template, or `arguments` for the
-function.
-
-```py
-with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
-    with DAG(name="diamond"):
-        A = echo(name="A", arguments={"message": "A"})
-        B = echo(name="B", arguments={"message": "B"}, when=f"{A.result == 'A'}")
-        C = echo(name="C", arguments={"message": "C"}, when=f"{A.result != 'A'}")
-        D = echo(name="D", arguments={"message": "D"})
-        A >> [B, C] >> D
-```
-
-> **Note** in the DAG above, `D` will still run, even though `C` will be skipped. This is because of the `depends` logic
-> resolving to `C.Succeeded || C.Skipped || C.Daemoned` due to Argo's default
-> [depends logic](https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends).
