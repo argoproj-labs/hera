@@ -5,11 +5,11 @@ become the standard template, which is reflected by the greater feature set prov
 
 ## Script Decorator
 
-The `script` decorator function is a key offering of Hera in offering native Python function orchestration. It allows
-you to call the function under a Hera context manager such as a `Workflow` or `Steps` context, and it will be treated as
-the intended sub-object, which would be a `template` when under a `Workflow`, or a `Step` when under a `Steps`. The
-function will still behave as normal outside of any Hera contexts, meaning you can write unit tests on the given
-function.
+The `script` decorator function is a key offering of Hera to achieve near-native Python function orchestration. It
+allows you to call the function under a Hera context manager such as a `Workflow` or `Steps` context, and it will be
+treated as the intended sub-object, which would be a `template` when under a `Workflow`, or a `Step` when under a
+`Steps`. The function will still behave as normal outside of any Hera contexts, meaning you can write unit tests on the
+given function.
 
 > **For advanced users**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the
 > decoration, so that when your function is invoked under a Hera context, the call is redirected to the
