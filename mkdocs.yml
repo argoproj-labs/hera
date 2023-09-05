@@ -13,11 +13,11 @@ nav:
     - walk-through/steps.md
     - walk-through/dag.md
     - walk-through/artifacts.md
-    - walk-through/authentication.md
     - walk-through/loops.md
     - walk-through/conditionals.md
     - walk-through/suspending.md
     - Advanced Features:
+      - walk-through/authentication.md
       - walk-through/advanced-workflow-features.md
       - walk-through/advanced-template-features.md
       - walk-through/advanced-hera-features.md
