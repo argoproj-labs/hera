@@ -45,26 +45,27 @@ and its crew were specially protected by the goddess Hera.
 
 ## Hera at a glance
 
-### Single step script
+### Steps diamond
 
 ```python
 from hera.workflows import Steps, Workflow, script
-
 
 @script()
 def echo(message: str):
     print(message)
 
-
 with Workflow(
     generate_name="single-script-",
     entrypoint="steps",
 ) as w:
-    with Steps(name="steps"):
-        echo(arguments={"message": "A"})
+    with Steps(name="steps") as s:
+        echo(name="A", arguments={"message": "I'm a step"})
+        with s.parallel():
+            echo(name="B", arguments={"message": "We're steps"})
+            echo(name="C", arguments={"message": "in parallel!"})
+        echo(name="D", arguments={"message": "I'm another step!"})
 
 w.create()
-
 ```
 
 ### DAG diamond
@@ -72,11 +73,9 @@ w.create()
 ```python
 from hera.workflows import DAG, Workflow, script
 
-
 @script()
 def echo(message: str):
     print(message)
-
 
 with Workflow(
     generate_name="dag-diamond-",
