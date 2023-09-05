@@ -20,10 +20,10 @@ We hope by providing a more intuitive Python definition language, Data and ML us
 ## Feature Parity
 
 A natural concern about an abstraction layer on top of another technology is whether it can function the same as the
-original lower layer. In this case, Hera generates a [library of model classes](../../api/workflows/models.md) using
+original lower layer. In this case, Hera generates a [library of model classes](../api/workflows/models.md) using
 Argo's OpenAPI spec which are wrapped up by Hera's feature-rich classes, while the model classes are available as a
 fallback mechanism. You can check out the extensive
-["upstream" examples](../../examples/workflows/upstream/dag_diamond.md) that contain side-by-side Python and YAML
+["upstream" examples](../examples/workflows/upstream/dag_diamond.md) that contain side-by-side Python and YAML
 definitions for Workflows in
 [the Argo examples folder on GitHub](https://github.com/argoproj/argo-workflows/tree/master/examples). Our CI/CD runs
 through the Argo examples folder to check that we are able to reproduce them using Hera Workflows written by hand (note:
@@ -40,7 +40,7 @@ before moving to Python.
 You will notice many classes in Hera implement the context manager interface. This was designed to mirror the YAML
 syntax of Argo, helping existing users come to Hera from YAML, and for users new to both Argo and Hera, who will be able
 to interpret and understand most of the existing YAML documentation and resources online from familiar naming and
-functionality in Hera. Read more in the [user guides](../../user-guides/core-concepts.md) section!
+functionality in Hera. Read more in the [user guides](../user-guides/core-concepts.md) section!
 
 ## Orchestrating Scripts
 

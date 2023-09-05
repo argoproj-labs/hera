@@ -27,7 +27,7 @@ w.create()
 
 As we are using Argo Workflows, we import specialized classes from `hera.workflows`. You will see Argo concepts from the
 Argo spec have been transformed into powerful Python classes, explore them at the
-[Hera Workflows API reference](../../api/workflows/hera.md).
+[Hera Workflows API reference](../api/workflows/hera.md).
 
 
 ## Using Any Function on Argo
@@ -67,7 +67,7 @@ def echo_twice(message: str):
 ```
 
 For an in-depth explanation of the mechanics of the script decorator, see the
-[script decorator section](../../user-guides/core-concepts.md#script-decorator) in the core concept user guide.
+[script decorator section](../user-guides/core-concepts.md#script-decorator) in the core concept user guide.
 
 ## The Workflow Context Manager
 
