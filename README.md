@@ -92,7 +92,7 @@ with Workflow(
 w.create()
 ```
 
-See the [examples](./examples/workflows-examples) for a collection of Argo workflow construction and submission via Hera!
+See the [examples](./examples/workflows-examples.md) for a collection of Argo workflow construction and submission via Hera!
 
 ## Requirements
 
