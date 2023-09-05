@@ -43,7 +43,7 @@ and its crew were specially protected by the goddess Hera.
 [![Downloads/month](https://static.pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://static.pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
 
-## Example Hera Code
+## Hera at a glance
 
 ### Single step script
 
@@ -102,7 +102,7 @@ request. To learn how to deploy Argo to your own Kubernetes cluster you can foll
 the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
 
 Another option for workflow submission without the authentication layer is using port forwarding to your Argo server
-deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to use yours). Please
+deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to change it). Please
 refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the
 command for port forward!
 
