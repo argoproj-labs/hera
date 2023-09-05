@@ -11,6 +11,8 @@ The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
 
+## Links
+
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/argoproj-labs/hera)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
@@ -41,20 +43,7 @@ and its crew were specially protected by the goddess Hera.
 [![Downloads/month](https://static.pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
 [![Downloads/week](https://static.pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
 
-# Table of contents
-
-- [Hera](#hera)
-- [Table of contents](#table-of-contents)
-- [Example Hera Code](#example-hera-code)
-    - [Single step script](#single-step-script)
-    - [DAG diamond](#dag-diamond)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Presentations](#presentations)
-- [Blogs](#blogs)
-- [Contributing](#contributing)
-
-# Example Hera Code
+## Example Hera Code
 
 ### Single step script
 
@@ -105,7 +94,7 @@ w.create()
 
 See the [examples](./examples/workflows-examples) for a collection of Argo workflow construction and submission via Hera!
 
-# Requirements
+## Requirements
 
 Hera requires an Argo server to be deployed to a Kubernetes cluster. Currently, Hera assumes that the Argo server sits
 behind an authentication layer that can authenticate workflow submission requests by using the Bearer token on the
@@ -121,7 +110,7 @@ command for port forward!
 > in place, it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes
 > v1.24+ in order for hera to communicate to the Argo Server.
 
-# Installation
+## Installation
 
 > **Note** Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published Python
 > package. If you'd like to install versions prior to `5.0.0`, you have to use `hera-workflows`. Hera currently
@@ -134,26 +123,26 @@ command for port forward!
 | [Conda](https://anaconda.org/conda-forge/hera-workflows) | `conda install -c conda-forge hera-workflows`                                                        |
 | [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
 
-## Optional dependencies
+### Optional dependencies
 
-### yaml
+#### yaml
 
 - Install via `hera[yaml]`
 - [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via
   `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
 
-# Presentations
+## Presentations
 
 - [Argo Workflows and Events Community Meeting 20 Oct 2021 - Hera introductory presentation](https://youtu.be/QETfzfVV-GY?t=181)
 - [Argo Workflows and Events Community Meeting 15 June 2022 - Hera project update](https://youtu.be/sdkBDPOdQ-g?t=231)
 - [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](https://www.youtube.com/watch?v=h2TEw8kd1Ds)
 - [Unsticking ourselves from Glue - Migrating PayIt's Data Pipelines to Argo Workflows and Hera](https://youtu.be/sSLFVIIEKcE?t=2088)
 
-# Blogs
+## Blogs
 
 - [Hera introduction and motivation](https://www.dynotx.com/hera-the-missing-argo-workflows-python-sdk/)
 - [Dyno is scaling gene therapy research with cloud-native tools like Argo Workflows and Hera](https://www.dynotx.com/argo-workflows-hera/)
 
-# Contributing
+## Contributing
 
 See the [contributing guide](./CONTRIBUTING.md)!
