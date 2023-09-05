@@ -37,6 +37,23 @@ workflows-models               Generate the Workflows models portion of Argo Wor
 workflows-service              Generate the Workflows service option of Hera
 ```
 
+### Working in VSCode
+
+If your preferred IDE is VSCode, you may have an issue using the integrated Testing extension where breakpoints are not
+respected. To solve this, add the following as a config in your `.vscode/launch.json` file:
+
+```json
+{
+   "name": "Debug Tests",
+   "type": "python",
+   "request": "launch",
+   "purpose": ["debug-test"],
+   "console": "integratedTerminal",
+   "justMyCode": false,
+   "env": {"PYTEST_ADDOPTS": "--no-cov"}
+}
+```
+
 ## Contributing checklist
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
@@ -61,41 +78,33 @@ Hera has an automated-test harness that is coupled with our documentation. In or
 Tests that do not correspond to any upstream Argo Workflow examples should live in `examples/workflows/*.py`
 
 In order to add a new workflow test to test Hera functionality, do the following -
-- Create a new file under `examples/workflows`, for example - `my_test.py`
-- Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
-- Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name `my-test.yaml` if it does not exist already
-- If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
-- The golden copies must be checked in to ensure that regressions may be caught in the future
+
+* Create a new file under `examples/workflows`, for example - `my_test.py`
+* Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
+* Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name `my-test.yaml` if
+  it does not exist already
+* If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
+* The golden copies must be checked in to ensure that regressions may be caught in the future
 
 ### Upstream Hera examples
 
 Tests that correspond to any [upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/master/examples) should live in `examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and also to catch any regressions that might happen.
 
 In order to add a new workflow test to test Hera functionality, do the following -
-- Create a new file under `examples/workflows/upstream` that corresponds with the name of the upstream example yaml file. If the yaml file has a hyphen, your python file name should replace those with an underscore. eg. if you are trying to replicate [archive-location.yaml](https://github.com/argoproj/argo-workflows/blob/master/examples/archive-location.yaml) your python file should be called `archive_location.py`
-- Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
-- Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name `archive-location.yaml` and also generate a local copy of the upstream yaml file with the name `archive-location.upstream.yaml`
-- If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
-- The golden copies must be checked in to ensure that regressions may be caught in the future
 
-## Working in VSCode
-
-If your preferred IDE is VSCode, you may have an issue using the integrated Testing extension where breakpoints are not
-respected. To solve this, add the following as a config in your `.vscode/launch.json` file:
-
-```json
-{
-   "name": "Debug Tests",
-   "type": "python",
-   "request": "launch",
-   "purpose": ["debug-test"],
-   "console": "integratedTerminal",
-   "justMyCode": false,
-   "env": {"PYTEST_ADDOPTS": "--no-cov"}
-}
-```
+* Create a new file under `examples/workflows/upstream` that corresponds with the name of the upstream example yaml
+  file. If the yaml file has a hyphen, your python file name should replace those with an underscore. eg. if you are
+  trying to replicate
+  [archive-location.yaml](https://github.com/argoproj/argo-workflows/blob/master/examples/archive-location.yaml) your
+  python file should be called `archive_location.py`
+* Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
+* Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name
+  `archive-location.yaml` and also generate a local copy of the upstream yaml file with the name
+  `archive-location.upstream.yaml`
+* If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
+* The golden copies must be checked in to ensure that regressions may be caught in the future
 
 ## Code of Conduct
 
-Please be mindful of and adhere to the CNCF's
+Please be mindful of, and adhere to, the CNCF's
 [Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md) when contributing to hera.
