@@ -23,7 +23,7 @@ nav:
       - walk-through/advanced-hera-features.md
       - walk-through/pydantic-support.md
   - Contributing:
-    - Contributing Guide: contributing/CONTRIBUTING.md
+    - Contributing Guide: CONTRIBUTING.md
     - History of Hera: contributing/history.md
   - User Guides:
     - Core Concepts: user-guides/core-concepts.md

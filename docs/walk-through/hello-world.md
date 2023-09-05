@@ -1,6 +1,6 @@
 # Hello World
 
-Let's take a look at the `hello_world.py` from the [Quick Start](../quick-start.md) guide.
+Let's take a look at the `hello_world.py` from the [Quick Start](./quick-start.md) guide.
 
 ```py
 from hera.workflows import Steps, Workflow, WorkflowsService, script

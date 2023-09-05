@@ -140,7 +140,7 @@ dependencies, and Hera itself are available to run.
 
 The `RunnerScriptConstructor` is an experimental feature and must be enabled with the `script_runner` feature flag, as
 described in
-[the experimental features section](../getting-started/walk-through/advanced-hera-features.md#experimental-features).
+[the experimental features section](../walk-through/advanced-hera-features.md#experimental-features).
 
 ```py
 global_config.experimental_features["script_runner"] = True
@@ -350,7 +350,7 @@ There are two ways to specify output Artifacts and Parameters.
 
 Function return annotations can be used to specify the output type information for output Artifacts and Parameters, and
 the function should return a value or tuple. An example can be seen
-[here](../../examples/workflows/script_annotations_outputs).
+[here](../examples/workflows/script_annotations_outputs.md).
 
 For a simple hello world output artifact example we currently have:
 ```python

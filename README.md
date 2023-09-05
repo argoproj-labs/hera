@@ -3,7 +3,7 @@
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
 
-[See the Quick Start guide](https://hera.readthedocs.io/en/latest/getting-started/quick-start/) to start using Hera
+[See the Quick Start guide](https://hera.readthedocs.io/en/latest/quick-start/) to start using Hera
 to orchestrate your Argo Workflows!
 
 ```text
@@ -17,7 +17,7 @@ and its crew were specially protected by the goddess Hera.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
 
-[![Build](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml/badge.svg)](./.github/workflows/cicd.yaml)
+[![CICD](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml)
 [![Docs](https://readthedocs.org/projects/hera/badge/?version=latest)](https://hera.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/argoproj-labs/hera/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

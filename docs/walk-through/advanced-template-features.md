@@ -87,5 +87,5 @@ Invocators. You must ensure there is a break condition, and you should *NOT* mak
 `Steps` or `DAG` without a condition, otherwise the Argo controller will expand the definition indefinitely until it
 crashes.
 
-See the [recursive coinflip](../examples/workflows/upstream/coinflip-recursive.md) example for a recursive `Steps`
+See the [recursive coinflip](../examples/workflows/upstream/coinflip_recursive.md) example for a recursive `Steps`
 template.

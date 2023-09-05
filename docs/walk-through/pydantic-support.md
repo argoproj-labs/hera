@@ -1,3 +1,7 @@
 # Integrated Pydantic Support
 
-<!-- TODO -->
+## Why
+## What
+## How
+## Script runner
+## Script annotations

@@ -49,7 +49,7 @@ run_script(
 
 If you want to use more complex `when` clauses than simple comparisons, involving Argo expression functions such as
 `filter` or `map` or even [sprig functions](http://masterminds.github.io/sprig/), you should check out Hera's
-[`expr` module documentation](../expr.md).
+[`expr` module documentation](../user-guides/expr.md).
 
 ## Improved Task Conditionals
 

@@ -10,7 +10,7 @@ These examples are generated and compared in Hera's CI/CD pipeline to ensure tha
 recreate in Hera.
 
 > If you'd like to contribute missing examples, please see the table below and follow the
-> [Contributing Guide](/CONTRIBUTING.md)!
+> [Contributing Guide](../CONTRIBUTING.md)!
 
 The "Hera" collection shows off features and idiomatic usage of Hera such as the
 [Coinflip example](workflows/coinflip.md) using the script decorator.

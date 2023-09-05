@@ -5,7 +5,7 @@ in the context of Hera.
 
 ## The `Workflow` class
 
-The main resource in Argo, and the key class of Hera, the [Workflow](../api/workflows/hera/#hera.workflows.Workflow) is
+The main resource in Argo, and the key class of Hera, the [Workflow](../api/workflows/hera.md#hera.workflows.Workflow) is
 responsible for holding your templates, setting an entrypoint and running the templates. In Hera, the `Workflow`
 implements the context manager interface, so it loosely mirrors the YAML dictionary structure and as we are using a
 Python class, there are fewer fields you need to specify, such as the `apiVersion` and `kind` seen in YAML. The
@@ -34,15 +34,15 @@ with Workflow(
 w.create()
 ```
 
-Learn more about basics of Hera Workflows in the [walk-through](../getting-started/walk-through/hello-world.md#the-workflow-context-manager)!
+Learn more about basics of Hera Workflows in the [walk-through](../walk-through/hello-world.md#the-workflow-context-manager)!
 
 ### The `WorkflowTemplate`
 
-In Hera, the [WorkflowTemplate](../api/workflows/hera/#hera.workflows.WorkflowTemplate) is a subclass of `Workflow`, so
-[in a similar way to Argo](https://argoproj.github.io/argo-workflows/workflow-templates/#workflowtemplate-spec), it can
-be a drop-in replacement of your `Workflow`. Usually in YAML, you would need to change the `kind` and set `generateName`
-instead of `name`. However, for this developer workflow of iterating on a `Workflow` to eventually create a
-`WorkflowTemplate`, we provide a simple `create_as_workflow` convenience function, which will submit your
+In Hera, the [WorkflowTemplate](../api/workflows/hera.md#hera.workflows.WorkflowTemplate) is a subclass of `Workflow`,
+so [in a similar way to Argo](https://argoproj.github.io/argo-workflows/workflow-templates/#workflowtemplate-spec), it
+can be a drop-in replacement of your `Workflow`. Usually in YAML, you would need to change the `kind` and set
+`generateName` instead of `name`. However, for this developer workflow of iterating on a `Workflow` to eventually create
+a `WorkflowTemplate`, we provide a simple `create_as_workflow` convenience function, which will submit your
 `WorkflowTemplate` as a `Workflow` to Argo, using generate_name automatically.
 
 ```py
@@ -173,7 +173,7 @@ with Workflow(generate_name="workflow-of-workflows-", entrypoint="main") as w:
 Suspend is a simple template that halts execution of the Workflow for a specified `duration`, or a manual resume.
 Suspend templates are used for
 [intermediate parameters](https://argoproj.github.io/argo-workflows/intermediate-inputs/), which in Hera are simplified
-and easier to use. Read more in the [suspending walk-through](../getting-started/walk-through/suspending.md)!
+and easier to use. Read more in the [suspending walk-through](../walk-through/suspending.md)!
 
 
 ## Template invocators
@@ -238,7 +238,7 @@ with Workflow(
         echo(name="echo2", arguments={"message": "Hello 2"})
 ```
 
-Read more about `Steps` in the [walk-through](../getting-started/walk-through/steps.md)!
+Read more about `Steps` in the [walk-through](../walk-through/steps.md)!
 
 
 ### DAG
@@ -263,4 +263,4 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
 
 ```
 
-Read more about `DAG`s in the [walk-through](../getting-started/walk-through/dag.md)!
+Read more about `DAG`s in the [walk-through](../walk-through/dag.md)!
