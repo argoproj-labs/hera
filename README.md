@@ -117,18 +117,15 @@ deployment and submitting workflows to `localhost:2746` (2746 is the default, bu
 refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the
 command for port forward!
 
-> **Note**
-> Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens in place,
-> it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes v1.24+
-> in order for hera to communicate to the Argo Server.
+> **Note** Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens
+> in place, it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes
+> v1.24+ in order for hera to communicate to the Argo Server.
 
 # Installation
 
-## Note
-
-Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published
-Python package. If you'd like to install versions prior to `5.0.0`, you have to use `hera-workflows`. Hera currently
-publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
+> **Note** Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published Python
+> package. If you'd like to install versions prior to `5.0.0`, you have to use `hera-workflows`. Hera currently
+> publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
 
 | Source                                                   | Command                                                                                              |
 |----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
