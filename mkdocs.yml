@@ -23,11 +23,11 @@ nav:
       - walk-through/advanced-hera-features.md
       - walk-through/pydantic-support.md
   - Contributing:
-    - Contributing: contributing/CONTRIBUTING.md
+    - Contributing Guide: contributing/CONTRIBUTING.md
     - History of Hera: contributing/history.md
   - User Guides:
     - Core Concepts: user-guides/core-concepts.md
-    - Script Templates: user-guides/scripts.md
+    - Scripts: user-guides/scripts.md
     - Expr Transpiler: user-guides/expr.md
   - Examples:
     - Workflows:

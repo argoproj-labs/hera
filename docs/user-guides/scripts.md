@@ -1,7 +1,8 @@
 # Scripts
 
-Scripts are an essential part of Hera's extension on top of Argo. As Hera is a Python library, Python Script templates
-become the standard template, which is reflected by the greater feature set provided for writing them.
+The `Script` class is an essential part of Hera's extension on top of Argo. As Hera is a Python library,
+[Script templates](https://argoproj.github.io/argo-workflows/fields/#scripttemplate) running Python become the standard
+template, which is reflected by the greater feature set provided for writing them.
 
 ## Script Decorator
 
