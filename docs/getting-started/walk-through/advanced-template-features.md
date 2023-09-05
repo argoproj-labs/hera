@@ -2,6 +2,14 @@
 
 This section exemplifies `template` features found in Argo, but are beyond the scope of the Walk Through.
 
+## Template-Level Lifecycle Hooks
+
+Lifecycle hooks at the template level are typically used to run a given template, according to a given condition on a
+`Step` or `Task`, such as when it has a `Running` or `Succeeded` status.
+
+* [Read more about Lifecycle Hooks on the Argo docs](https://argoproj.github.io/argo-workflows/lifecyclehook/)
+* [See the template-level lifecycle hook example](../../examples/workflows/upstream/life_cycle_hooks_tmpl_level.md)
+
 ## Secrets
 
 To access secrets stored in your Kubernetes/Argo cluster, you should use the `env` or `env_from` members of
