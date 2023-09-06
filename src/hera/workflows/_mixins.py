@@ -1094,7 +1094,7 @@ def _get_param_items_from_source(source: Callable) -> Optional[List[Parameter]]:
 
     This infers that each non-keyword, positional, argument of the given source is a parameter that stems from a
     fanout. Therefore, each parameter value takes the form of `{{item}}` when there's a single argument or
-    `{{item.[argument name]}}` when there are other arguments.
+    `{{item.<argument name>}}` when there are other arguments.
 
     Returns:
     -------
