@@ -15,6 +15,7 @@ from hera.workflows._mixins import (
     SubNodeMixin,
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
+    EasyOutputsMixin,
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
@@ -30,6 +31,7 @@ class Step(
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
+    EasyOutputsMixin,
 ):
     """Step is used to run a given template.
 

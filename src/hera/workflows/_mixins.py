@@ -17,7 +17,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from pydantic import root_validator, validator
+from pydantic import root_validator, validator, create_model
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._base_model import BaseModel
@@ -663,7 +663,9 @@ class CallableTemplateMixin(ArgumentsMixin):
                     f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
                 )
             if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                return Step(*args, template=self, **kwargs)
+                step = Step(*args, template=self, **kwargs)
+                step._build_outputs()
+                return step
 
             if isinstance(_context.pieces[-1], DAG):
                 return Task(*args, template=self, **kwargs)
@@ -1267,3 +1269,24 @@ class ExperimentalMixin(BaseMixin):
         if not global_config.experimental_features[cls._flag]:
             raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
         return values
+
+
+class EasyOutputsMixin(BaseMixin):
+    outputs: BaseModel = None
+
+    # this needs to be called when the step is built
+    def _build_outputs(self):
+        if hasattr(self.template, "outputs"):
+            kwargs = {}
+            outputs = self.template.outputs
+            if isinstance(outputs, list):
+                for o in outputs:
+                    kwargs[o.name.replace("-", "_")] = o
+            elif isinstance(outputs, (Artifact, ModelArtifact, Parameter, ModelParameter)):
+                kwargs[outputs.name.replace("-", "_")] = outputs
+
+            print(kwargs)
+
+            self.outputs = create_model("DynamicOutputModel", **kwargs)
+            print(self.outputs)
+            print(self.outputs.__fields__)
