@@ -27,5 +27,3 @@ with Workflow(generate_name="dynamic-fanout-", entrypoint="d") as w:
         g = generate()
         c = consume(with_param=g.result)
         g >> c
-
-w.create()

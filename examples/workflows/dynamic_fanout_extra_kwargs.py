@@ -45,4 +45,3 @@ with Workflow(generate_name="dynamic-fanout-", entrypoint="d") as w:
         )
         g >> c1
         g >> c2
-w.create()
