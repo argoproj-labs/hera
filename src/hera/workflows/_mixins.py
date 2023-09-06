@@ -691,7 +691,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
         keys = [arg for arg in arguments if isinstance(arg, dict)]
         return {p.name for p in parameters}.union(
-            set(functools.reduce(lambda x, y: cast(list[str], x) + list(y.keys()), keys, []))
+            set(functools.reduce(lambda x, y: cast(List[str], x) + list(y.keys()), keys, []))
         )
 
     def _get_artifact_names(self, arguments: List) -> Set[str]:
