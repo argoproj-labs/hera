@@ -682,7 +682,7 @@ class InlineScriptConstructor(ScriptConstructor):
 class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     """`RunnerScriptConstructor` is a script constructor that runs a script in a container.
 
-    The runner script, also known as "The Hera runner", takes a script/Python function definition, inferts the path
+    The runner script, also known as "The Hera runner", takes a script/Python function definition, infers the path
     to the function (module import), assembles a path to invoke the function, and passes any specified parameters
     to the function. This helps users "save" on the `source` space required for submitting a function for remote
     execution on Argo. Execution within the container *requires* the executing container to include the file that

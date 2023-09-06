@@ -5,25 +5,27 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - name: w1-res
+  - name: w1-resource
     resource:
       action: create
       failureCondition: status.phase in (Failed, Error)
       manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
-        \ workflow-of-workflows-1-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
-        \      image: docker/whalesay:latest\n    name: s\n"
+        \ sub-workflow-1-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
+        \      args:\n      - I'm workflow 1\n      command:\n      - whalesay\n \
+        \     image: docker/whalesay:latest\n    name: echo\n"
       successCondition: status.phase == Succeeded
-  - name: w2-res
+  - name: w2-resource
     resource:
       action: create
       failureCondition: status.phase in (Failed, Error)
       manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
-        \ workflow-of-workflows-2-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
-        \      image: docker/whalesay:latest\n    name: s\n"
+        \ sub-workflow-2-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
+        \      args:\n      - I'm workflow 2\n      command:\n      - whalesay\n \
+        \     image: docker/whalesay:latest\n    name: echo\n"
       successCondition: status.phase == Succeeded
   - name: main
     steps:
-    - - name: workflow1
-        template: w1-res
-    - - name: workflow2
-        template: w2-res
+    - - name: sub-workflow-1
+        template: w1-resource
+    - - name: sub-workflow-2
+        template: w2-resource

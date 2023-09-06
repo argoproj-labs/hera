@@ -448,7 +448,7 @@ class Workflow(
         Args:
             output_directory: The directory to write the file to. Defaults to the current working directory.
             name: The name of the file to write without the file extension.  Defaults to the Workflow's name or a
-            generated name.
+                  generated name.
             *args: Additional arguments to pass to `yaml.dump`.
             **kwargs: Additional keyword arguments to pass to `yaml.dump`.
         """
@@ -475,7 +475,7 @@ class Workflow(
     def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Create a Workflow from a Workflow contained in a YAML string.
 
-        Usage:
+        Examples:
             >>> my_workflow = Workflow.from_yaml(yaml_str)
         """
         return cls._from_yaml(yaml_str, _ModelWorkflow)
@@ -484,7 +484,7 @@ class Workflow(
     def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Create a Workflow from a Workflow contained in a YAML file.
 
-        Usage:
+        Examples:
             >>> yaml_file = Path(...)
             >>> my_workflow = Workflow.from_file(yaml_file)
         """

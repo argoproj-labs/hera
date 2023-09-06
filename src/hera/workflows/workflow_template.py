@@ -126,7 +126,7 @@ class WorkflowTemplate(Workflow):
     def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML string.
 
-        Usage:
+        Examples:
             >>> my_workflow_template = WorkflowTemplate.from_yaml(yaml_str)
         """
         return cls._from_yaml(yaml_str, _ModelWorkflowTemplate)
@@ -135,7 +135,7 @@ class WorkflowTemplate(Workflow):
     def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
 
-        Usage:
+        Examples:
             >>> yaml_file = Path(...)
             >>> my_workflow_template = WorkflowTemplate.from_file(yaml_file)
         """
