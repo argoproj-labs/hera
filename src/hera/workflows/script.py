@@ -570,10 +570,19 @@ def script(**script_kwargs):
             # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
             # kwargs called `name`
             name = script_kwargs.pop("name")
-            s = Script(name=name, source=func, **script_kwargs)
         else:
             # otherwise populate the `name` from the function name
-            s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
+            name = func.__name__.replace("_", "-")
+
+        # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
+        # function for remote submission since it does not depend on any class or instance attributes, so it is
+        # submittable
+        if isinstance(func, staticmethod):
+            source = func.__func__
+        else:
+            source = func
+
+        s = Script(name=name, source=source, **script_kwargs)
 
         @overload
         def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
@@ -669,7 +678,7 @@ class InlineScriptConstructor(ScriptConstructor):
         # in order to have consistent looking functions and getting rid of any comments
         # parsing issues.
         # See https://github.com/argoproj-labs/hera/issues/572
-        content = roundtrip(inspect.getsource(instance.source)).splitlines()
+        content = roundtrip(textwrap.dedent(inspect.getsource(instance.source))).splitlines()
         for i, line in enumerate(content):
             if line.startswith("def") or line.startswith("async def"):
                 break
