@@ -1,6 +1,7 @@
 """Core collection of Hera mixins that isolate shareable functionality between Hera objects."""
 from __future__ import annotations
 
+import functools
 import inspect
 from pathlib import Path
 
@@ -68,7 +69,7 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
-from hera.workflows.parameter import MISSING, Parameter
+from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TWorkflow
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
@@ -687,13 +688,14 @@ class CallableTemplateMixin(ArgumentsMixin):
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
         """Returns the set of parameter names that are currently set on the mixin inheritor."""
-        parameters = [arg for arg in arguments if isinstance(arg, ModelParameter) or isinstance(arg, Parameter)]
-        return {p.name for p in parameters}
+        parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
+        keys = [arg for arg in arguments if isinstance(arg, dict)]
+        return {p.name for p in parameters}.union(set(functools.reduce(lambda x, y: x + list(y.keys()), keys, [])))
 
     def _get_artifact_names(self, arguments: List) -> Set[str]:
         """Returns the set of artifact names that are currently set on the mixin inheritor."""
-        artifacts = [arg for arg in arguments if isinstance(arg, ModelArtifact) or isinstance(arg, Artifact)]
-        return {a.name for a in artifacts if a.name}
+        artifacts = [arg for arg in arguments if isinstance(arg, (ModelArtifact, Artifact))]
+        return {a if isinstance(a, str) else a.name for a in artifacts if a.name}
 
     def _get_deduped_params_from_source(
         self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
@@ -1094,18 +1096,19 @@ def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
     `hera.shared.serialization.MISSING` is used as a placeholder. This is later serialized as `None` -> `null` when
     submitted to the Argo server.
     """
-    source_signature: Dict[str, Optional[object]] = {}
+    source_signature: List[str] = []
     for p in inspect.signature(source).parameters.values():
-        if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            source_signature[p.name] = p.default
-        else:
-            source_signature[p.name] = MISSING
+        if p.default == inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            # only add positional or keyword arguments that are not set to a default value
+            # as the default value ones are captured by the automatically generated `Parameter` fields for positional
+            # kwargs. Otherwise, we assume that the user sets the value of the parameter via the `with_param` field
+            source_signature.append(p.name)
 
     if len(source_signature) == 0:
         return None
     elif len(source_signature) == 1:
-        return [Parameter(name=n, value="{{item}}") for n in source_signature.keys()]
-    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in source_signature.keys()]
+        return [Parameter(name=n, value="{{item}}") for n in source_signature]
+    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in source_signature]
 
 
 def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
