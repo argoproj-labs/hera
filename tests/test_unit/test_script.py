@@ -85,3 +85,27 @@ def test_script_name_kwarg_in_decorator():
 
     # THEN
     assert w.templates[0].name == "my-alt-name"
+
+
+def test_script_parses_static_method():
+    class Test:
+        @script()
+        @staticmethod
+        def my_func():
+            print(42)
+
+        @script(name="test")
+        @staticmethod
+        def my_func2():
+            print(42)
+
+    # GIVEN my_func above
+    # WHEN
+    with Workflow(name="test-script") as w:
+        Test.my_func()
+        Test.my_func2()
+
+    # THEN
+    assert len(w.templates) == 2
+    assert w.templates[0].name == "my-func"
+    assert w.templates[1].name == "test"

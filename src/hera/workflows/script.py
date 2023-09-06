@@ -566,21 +566,21 @@ def script(**script_kwargs):
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
             otherwise return the callable function unchanged.
         """
+        # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
+        # function for remote submission since it does not depend on any class or instance attributes, so it is
+        # submittable
+        if isinstance(func, staticmethod):
+            source: Callable = func.__func__
+        else:
+            source = func
+
         if "name" in script_kwargs:
             # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
             # kwargs called `name`
             name = script_kwargs.pop("name")
         else:
             # otherwise populate the `name` from the function name
-            name = func.__name__.replace("_", "-")
-
-        # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
-        # function for remote submission since it does not depend on any class or instance attributes, so it is
-        # submittable
-        if isinstance(func, staticmethod):
-            source = func.__func__
-        else:
-            source = func
+            name = source.__name__.replace("_", "-")
 
         s = Script(name=name, source=source, **script_kwargs)
 
