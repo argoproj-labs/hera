@@ -687,7 +687,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
-        """Returns the set of parameter names that are currently set on the mixin inheritor."""
+        """Returns the union of parameter names from the given arguments' parameter objects and dictionary keys."""
         parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
         keys = [arg for arg in arguments if isinstance(arg, dict)]
         return {p.name for p in parameters}.union(
@@ -726,10 +726,9 @@ class CallableTemplateMixin(ArgumentsMixin):
         """
         new_arguments = []
         new_parameters = _get_param_items_from_source(source)
-        if new_parameters is not None:
-            for p in new_parameters:
-                if p.name not in parameter_names and p.name not in artifact_names:
-                    new_arguments.append(p)
+        for p in new_parameters:
+            if p.name not in parameter_names and p.name not in artifact_names:
+                new_arguments.append(p)
         return new_arguments
 
     def _get_deduped_params_from_items(self, parameter_names: Set[str], items: List[Any]) -> List[Parameter]:
@@ -1089,7 +1088,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
-def _get_param_items_from_source(source: Callable) -> Optional[List[Parameter]]:
+def _get_param_items_from_source(source: Callable) -> List[Parameter]:
     """Returns an optional list of `Parameter` from the specified `source`.
 
     This infers that each non-keyword, positional, argument of the given source is a parameter that stems from a
@@ -1109,9 +1108,7 @@ def _get_param_items_from_source(source: Callable) -> Optional[List[Parameter]]:
             # kwargs. Otherwise, we assume that the user sets the value of the parameter via the `with_param` field
             source_signature.append(p.name)
 
-    if len(source_signature) == 0:
-        return None
-    elif len(source_signature) == 1:
+    if len(source_signature) == 1:
         return [Parameter(name=n, value="{{item}}") for n in source_signature]
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in source_signature]
 
