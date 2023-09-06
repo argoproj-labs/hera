@@ -10,7 +10,7 @@ except ImportError:
     from hera.workflows._inspect import get_annotations  # type: ignore
 from collections import ChainMap
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
@@ -673,7 +673,9 @@ class CallableTemplateMixin(ArgumentsMixin):
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
         )
 
-    def _extract_arguments(self, kwargs: dict) -> List[Union[Parameter, Artifact, Dict]]:
+    def _extract_arguments(
+        self, kwargs: Dict
+    ) -> List[Union[Parameter, Artifact, ModelArtifact, ModelParameter, Dict]]:
         """Extract the arguments from kwargs, with_param and with_items."""
         arguments = self._get_arguments(**kwargs)
         parameter_names = self._get_parameter_names(arguments)
@@ -687,39 +689,43 @@ class CallableTemplateMixin(ArgumentsMixin):
         return arguments
 
     def _extract_arguments_directly_callable(
-        self, args: tuple, kwargs: dict
-    ) -> List[Union[Parameter, Artifact, Dict]]:
+        self, args: Tuple, kwargs: Dict
+    ) -> List[Union[Parameter, Artifact, ModelArtifact, ModelParameter, Dict]]:
         """Extract the arguments from args and kwargs, assuming self is a Script and is directly_callable.
 
         The inputs are taken from the function definition and then matched with args and kwargs.
         """
-        arguments: List[Union[Parameter, Artifact, Dict]] = []
-        input_names = []
+        arguments: List[Union[Parameter, Artifact, ModelArtifact, ModelParameter, Dict]] = []
+        input_names: List[str] = []
 
         if hasattr(self, "inputs") and self.inputs:
             if isinstance(self.inputs, list):
                 for input_ in self.inputs:
-                    input_names.append(input_.name)
+                    if input_.name:
+                        input_names.append(input_.name)
             elif isinstance(self.inputs, (Parameter, Artifact)):
-                input_names.append(self.inputs.name)
+                if self.inputs.name:
+                    input_names.append(self.inputs.name)
 
         if hasattr(self, "source"):
+            function_items: List[Union[Artifact, Parameter]] = []
             if global_config.experimental_features["script_annotations"]:
                 from hera.workflows.script import _get_inputs_from_callable
 
-                function_params, function_artifacts = _get_inputs_from_callable(self.source)
-                function_params = _process_params_and_artifacts(function_params, function_artifacts)
+                function_p, function_artifacts = _get_inputs_from_callable(self.source)
+                function_items.extend(_process_params_and_artifacts(function_p, function_artifacts))
             else:
-                function_params = (
-                    cast(List[Parameter], _get_params_from_source(self.source))
-                    if _get_params_from_source(self.source)
-                    else []
+                function_items.extend(
+                    (
+                        cast(List[Parameter], _get_params_from_source(self.source))
+                        if _get_params_from_source(self.source)
+                        else []
+                    )
                 )
 
-            input_names += [p.name for p in function_params]
+            input_names += [p.name for p in function_items if p.name]
 
         index = 0
-        arguments = []
 
         for name in input_names:
             if name in kwargs:
@@ -756,7 +762,7 @@ class CallableTemplateMixin(ArgumentsMixin):
 
     def _get_deduped_params_from_source(
         self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
-    ) -> List[Parameter]:
+    ) -> List[Union[Parameter, Artifact]]:
         """Infer arguments from the given source and deduplicates based on the given params and artifacts.
 
         Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
@@ -780,15 +786,18 @@ class CallableTemplateMixin(ArgumentsMixin):
             The list of inferred arguments to set.
         """
         new_arguments = []
+        new_inputs: List[Union[Parameter, Artifact]] = []
         if global_config.experimental_features["script_annotations"]:
             from hera.workflows.script import _get_inputs_from_callable
 
             function_params, function_artifacts = _get_inputs_from_callable(source)
-            new_parameters = _process_params_and_artifacts(function_params, function_artifacts)
+            new_inputs.extend(_process_params_and_artifacts(function_params, function_artifacts))
         else:
-            new_parameters = _get_params_from_source(source)
-        if new_parameters is not None:
-            for p in new_parameters:
+            possible_function_params = _get_params_from_source(source)
+            if possible_function_params:
+                new_inputs.extend(cast(List[Parameter], possible_function_params))
+        if new_inputs is not None:
+            for p in new_inputs:
                 if p.name not in parameter_names and p.name not in artifact_names:
                     new_arguments.append(p)
         return new_arguments
@@ -946,17 +955,13 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
-    def with_(self, **kwargs: dict) -> TemplateInvocatorSubNodeMixin:
+    def with_(self, **kwargs: Dict) -> TemplateInvocatorSubNodeMixin:
         """Update the created Step/Task object with the attributes you want to pass.
 
         Used for setting the attributes such as name, when, or with_param. Setting with_param
         and with_items triggers a recalculation of arguments.
         """
-        if (
-            self.template is None
-            or not hasattr(self.template, "directly_callable")
-            or not self.template.directly_callable
-        ):
+        if not isinstance(self.template, CallableTemplateMixin) or not self.template.directly_callable:
             raise ValueError("directly_callable is not set")
         for attribute, value in kwargs.items():
             if not hasattr(self, attribute):
@@ -1225,24 +1230,27 @@ def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
     return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
 
 
-def _process_params_and_artifacts(params, artifacts):
+def _process_params_and_artifacts(
+    params: List[Parameter], artifacts: List[Artifact]
+) -> List[Union[Parameter, Artifact]]:
     if len(params) == 1:
-        params = [Parameter(name=p.name, value="{{item}}") for p in params]
+        params = [Parameter(name=params[0].name, value="{{item}}")]
     else:
         params = [Parameter(name=p.name, value=f"{{{{item.{p.name}}}}}") for p in params]
-    params.extend(artifacts)
-    return params
+    inputs: List[Union[Parameter, Artifact]] = []
+    inputs.extend(params)
+    inputs.extend(artifacts)
+    return inputs
 
 
-def _item_to_arg(item, name):
+def _item_to_arg(item: Any, name: str) -> Union[ModelArtifact, ModelParameter, Parameter, Artifact]:
     if isinstance(item, Artifact):
         return item._build_artifact()
-    elif isinstance(item, ModelArtifact):
+    if isinstance(item, ModelArtifact):
         return item  # ?
-    elif isinstance(item, Parameter):
+    if isinstance(item, Parameter):
         return item.as_argument()
-    else:
-        return Parameter(name=name, value=serialize(item))
+    return Parameter(name=name, value=serialize(item))
 
 
 def _set_model_attr(model: BaseModel, attrs: List[str], value: Any):
