@@ -725,7 +725,7 @@ class CallableTemplateMixin(ArgumentsMixin):
             The list of inferred arguments to set.
         """
         new_arguments = []
-        new_parameters = _get_params_from_source(source)
+        new_parameters = _get_param_items_from_source(source)
         if new_parameters is not None:
             for p in new_parameters:
                 if p.name not in parameter_names and p.name not in artifact_names:
@@ -1089,14 +1089,17 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
-def _get_params_from_source(source: Callable) -> Optional[List[Parameter]]:
-    """Assembles an optional list of `Parameter` from the given `Callable` arguments.
+def _get_param_items_from_source(source: Callable) -> Optional[List[Parameter]]:
+    """Returns an optional list of `Parameter` from the specified `source`.
 
-    Notes:
-    -----
-    If the value of an identified `Callable` keyword argument is found to be empty the value of
-    `hera.shared.serialization.MISSING` is used as a placeholder. This is later serialized as `None` -> `null` when
-    submitted to the Argo server.
+    This infers that each non-keyword, positional, argument of the given source is a parameter that stems from a
+    fanout. Therefore, each parameter value takes the form of `{{item}}` when there's a single argument or
+    `{{item.[argument name]}}` when there are other arguments.
+
+    Returns:
+    -------
+    Optional[List[Parameter]]
+        An optional list of identified parameters or `None` when none are identified.
     """
     source_signature: List[str] = []
     for p in inspect.signature(source).parameters.values():
