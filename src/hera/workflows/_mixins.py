@@ -690,7 +690,9 @@ class CallableTemplateMixin(ArgumentsMixin):
         """Returns the set of parameter names that are currently set on the mixin inheritor."""
         parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
         keys = [arg for arg in arguments if isinstance(arg, dict)]
-        return {p.name for p in parameters}.union(set(functools.reduce(lambda x, y: x + list(y.keys()), keys, [])))
+        return {p.name for p in parameters}.union(
+            set(functools.reduce(lambda x, y: cast(list[str], x) + list(y.keys()), keys, []))
+        )
 
     def _get_artifact_names(self, arguments: List) -> Set[str]:
         """Returns the set of artifact names that are currently set on the mixin inheritor."""
