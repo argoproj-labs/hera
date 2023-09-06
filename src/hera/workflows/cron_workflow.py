@@ -194,7 +194,7 @@ class CronWorkflow(Workflow):
     def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
         """Create a CronWorkflow from a CronWorkflow contained in a YAML string.
 
-        Usage:
+        Examples:
             >>> my_cron_workflow = CronWorkflow.from_yaml(yaml_str)
         """
         return cls._from_yaml(yaml_str, _ModelCronWorkflow)
@@ -203,7 +203,7 @@ class CronWorkflow(Workflow):
     def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
         """Create a CronWorkflow from a CronWorkflow contained in a YAML file.
 
-        Usage:
+        Examples:
             >>> yaml_file = Path(...)
             >>> my_workflow_template = CronWorkflow.from_file(yaml_file)
         """

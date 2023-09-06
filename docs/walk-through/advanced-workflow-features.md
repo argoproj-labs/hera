@@ -2,9 +2,18 @@
 
 This section exemplifies Workflow features found in Argo, but are beyond the scope of the Walk Through.
 
-## Exit Handlers
+## Workflow-Level Lifecycle Hooks
 
-Exit handlers are templates that always execute (regardless of success or failure) at the end of a workflow.
+Lifecycle hooks are typically used to run a given template, according to the given condition, such as on workflow exit,
+or when the workflow has a `Running` status.
+
+* [Read more about Lifecycle Hooks on the Argo docs](https://argoproj.github.io/argo-workflows/lifecyclehook/)
+* [See the Workflow-level lifecycle hook example](../examples/workflows/upstream/life_cycle_hooks_wf_level.md)
+
+## Exit Handlers (deprecated)
+
+Exit handlers are templates that always execute (regardless of success or failure) at the end of a workflow. They were
+replaced by workflow-level ([above](#workflow-level-lifecycle-hooks)) and [template-level hooks](./advanced-template-features.md#lifecycle-hooks).
 
 Some use cases listed from [Argo Workflows](https://argoproj.github.io/argo-workflows/walk-through/exit-handlers/)
 include:
@@ -48,4 +57,4 @@ with Workflow(
 
 Volume Claim Templates can be used to copy a large amount data from one step to another in a Workflow.
 
-See the [Empty Volume](../../examples/workflows/upstream/volumes_emptydir.md) example for creating a volume dynamically for the Workflow, or the [Existing Volumes](../../examples/workflows/upstream/volumes_existing.md) example for using an existing volume.
+See the [Empty Volume](../examples/workflows/upstream/volumes_emptydir.md) example for creating a volume dynamically for the Workflow, or the [Existing Volumes](../examples/workflows/upstream/volumes_existing.md) example for using an existing volume.

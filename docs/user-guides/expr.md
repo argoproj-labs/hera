@@ -28,7 +28,9 @@ The transpiler supports constant literals via the class `C`:
 * **booleans** - `true` and `false` can be represented as `C(True)` and `C(False)`
 * **nil** - `nil` can be represented as `C(None)`
 
-Note: `hera` is smart enough to transpile python constants used in conjunction with a literal directly to a literal. This helps with brevity. For eg: `C(1) + C(2)` is the same as writing `C(1) + 2`. This however only works if the left operand is a literal or an identifier. If in doubt, always define literals via `C(...)`
+> Note: `hera` is smart enough to transpile python constants used in conjunction with a literal directly to a literal.
+> This helps with brevity. For eg: `C(1) + C(2)` is the same as writing `C(1) + 2`. This however only works if the left
+> operand is a literal or an identifier. If in doubt, always define literals via `C(...)`
 
 ### Reference
 
@@ -80,7 +82,7 @@ Map elements can be accessed used the `[]` syntax.
 
 Slices can work with arrays or strings. Python slices are transpiled appropriately to expr slices.
 
-Note: Only slices with step-size of 1 are supported.
+> Note: Only slices with step-size of 1 are supported.
 
 Example:
 
@@ -190,7 +192,7 @@ Example:
 
 * `1..9` (range) can be represented as `C(range(1, 10))`
 
-Note: `range` in `expr` is inclusive i.e. `C(range(1, 3)) == C([1, 2]) == 1..2`
+> Note: `range` in `expr` is inclusive i.e. `C(range(1, 3)) == C([1, 2]) == 1..2`
 
 ### Ternary Operators
 
@@ -237,7 +239,9 @@ In case users want to add parantheses around an expression, you can use the clas
 * `toJson([1, 2])` (convert to a JSON string) can be represented as `C([1, 2]).to_json()`
 * `jsonpath(test, 'test')` (extract the element from JSON using JSON Path) can be represented as `g.test.jsonpath("test")`
 
-Note: `jsonpath(path)` the `path` variable in the `jsonpath` method may either be a string or a [programmatic JSONPath expression](https://github.com/h2non/jsonpath-ng#programmatic-jsonpath) built using the `jsonpath-ng` library.
+> Note: `jsonpath(path)` the `path` variable in the `jsonpath` method may either be a string or a
+> [programmatic JSONPath expression](https://github.com/h2non/jsonpath-ng#programmatic-jsonpath) built using the
+> `jsonpath-ng` library.
 
 
 There are also some functional programming related functions which accept a list of items and a predicate. The iterable inside the predicate can be accessed via a special variable `it`. The following functions are supported
@@ -294,7 +298,8 @@ transpiles to
 one(Participants, {#.Winner})
 ```
 
-Note: `expr` allows you to omit `#` when accessing attributes in the predicate. In order to ensure consistency, `hera` always includes `#` in the output closure, even though it can be omitted.
+> Note: `expr` allows you to omit `#` when accessing attributes in the predicate. In order to ensure consistency, `hera`
+> always includes `#` in the output closure, even though it can be omitted.
 
 
 ### Reference

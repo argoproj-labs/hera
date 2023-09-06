@@ -5,28 +5,29 @@ copyright: Copyright &copy; 2023 Flaviu Vadan, Sambhav Kothari, Elliot Gunton
 
 nav:
   - Home: README.md
-  - Getting Started:
-    - getting-started/introduction.md
-    - getting-started/quick-start.md
-    - Walk Through:
-      - getting-started/walk-through/about-hera.md
-      - getting-started/walk-through/hello-world.md
-      - getting-started/walk-through/parameters.md
-      - getting-started/walk-through/steps.md
-      - getting-started/walk-through/dag.md
-      - getting-started/walk-through/artifacts.md
-      - getting-started/walk-through/authentication.md
-      - getting-started/walk-through/loops.md
-      - getting-started/walk-through/conditionals.md
-      - getting-started/walk-through/suspending.md
-      - Advanced Features:
-        - getting-started/walk-through/advanced-workflow-features.md
-        - getting-started/walk-through/advanced-template-features.md
-        - getting-started/walk-through/advanced-hera-features.md
-        - getting-started/walk-through/pydantic-support.md
-  - Contributing: CONTRIBUTING.md
+  - Walk Through:
+    - walk-through/quick-start.md
+    - walk-through/about-hera.md
+    - walk-through/hello-world.md
+    - walk-through/parameters.md
+    - walk-through/steps.md
+    - walk-through/dag.md
+    - walk-through/artifacts.md
+    - walk-through/loops.md
+    - walk-through/conditionals.md
+    - walk-through/suspending.md
+    - Advanced Features:
+      - walk-through/authentication.md
+      - walk-through/advanced-workflow-features.md
+      - walk-through/advanced-template-features.md
+      - walk-through/advanced-hera-features.md
+      - walk-through/pydantic-support.md
+  - Contributing:
+    - Contributing Guide: CONTRIBUTING.md
+    - History of Hera: contributing/history.md
   - User Guides:
     - Core Concepts: user-guides/core-concepts.md
+    - Scripts: user-guides/scripts.md
     - Expr Transpiler: user-guides/expr.md
   - Examples:
     - Workflows:
