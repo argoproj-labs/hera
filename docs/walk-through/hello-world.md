@@ -30,7 +30,7 @@ Argo spec have been transformed into powerful Python classes, explore them at th
 [Hera Workflows API reference](../api/workflows/hera.md).
 
 
-## Using Any Function on Argo
+## Using **Any Function** on Argo
 
 For this Workflow, we want to echo using Python's `print` function, which is wrapped in our convenience `echo` function
 so that we can decorate it. We use Hera's `script` decorator to turn the `echo` function into what's known as a
@@ -67,7 +67,8 @@ def echo_twice(message: str):
 ```
 
 For an in-depth explanation of the mechanics of the script decorator, see the
-[script decorator section](../user-guides/core-concepts.md#script-decorator) in the core concept user guide.
+[script decorator section](../user-guides/scripts.md#script-decorator) in the scripts user guide, and read about
+building your own image in the [script constructors section](../user-guides/scripts.md#script-constructors).
 
 ## The Workflow Context Manager
 

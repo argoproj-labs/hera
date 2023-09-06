@@ -1,7 +1,8 @@
 # About Hera
 
-Hera is a Python library that allows you to construct and submit Argo Workflows. It is designed to be intuitive and easy
-to use, while also providing a powerful interface to the underlying Argo API.
+Hera is a Python library that allows you to construct and submit Argo Workflows. **Anything you can write in YAML for
+Argo Workflows you can express in Hera!** It is designed to be intuitive and easy to use, while also providing a
+powerful interface to the underlying Argo API.
 
 Hera acts as a domain-specific-language on top of Argo, so it is primarily a way to define Workflows. In previous Argo
 Workflows surveys such as [2021](https://blog.argoproj.io/argo-workflows-2021-survey-results-d6fa890030ee), a better

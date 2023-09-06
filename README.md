@@ -109,6 +109,27 @@ command for port forward!
 > in place, it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes
 > v1.24+ in order for hera to communicate to the Argo Server.
 
+### Authenticating in Hera
+
+<!-- This link only works on the readthedocs website, i.e. when viewing docs/README.md -->
+There are a few ways to authenticate in Hera - read more in the
+[authentication walk through](./walk-through/authentication.md) - for now, with the `argo` cli tool installed, this
+example will get you up and running:
+
+```py
+from hera.workflows import Workflow, Container
+from hera.shared import global_config
+from hera.auth import ArgoCLITokenGenerator
+
+global_config.host = "http://localhost:2746"
+global_config.token = ArgoCLITokenGenerator
+
+with Workflow(generate_name="local-test-", entrypoint="c") as w:
+    Container( name="c", image="docker/whalesay", command=["cowsay", "hello"])
+
+w.create()
+```
+
 ## Installation
 
 > **Note** Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published Python
