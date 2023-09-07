@@ -17,9 +17,7 @@ def print_message():
 with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
     with Steps(name="artifact-example") as s:
         step = whalesay(name="generate-artifact")
-        print(type(step))
-        print(step)
         print_message(
             name="consume-artifact",
-            arguments=[Artifact(name="message", from_=step.outputs.__fields__["hello_art"])], # how to access that field directly?
+            arguments=[Artifact(name="message", from_=step.outputs.hello_art)],
         )

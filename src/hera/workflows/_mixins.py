@@ -1282,16 +1282,27 @@ class EasyOutputsMixin(BaseMixin):
     # this needs to be called when the step is built
     def _build_outputs(self):
         if hasattr(self.template, "outputs"):
-            kwargs = {}
+            field_specification = {}
+            field_values = {}
             outputs = self.template.outputs
             if isinstance(outputs, list):
-                for o in outputs:
-                    kwargs[o.name.replace("-", "_")] = o
+                for output in outputs:
+                    name = output.name.replace("-", "_")
+                    if isinstance(output, (Artifact, ModelArtifact)):
+                        type_ = "artifacts"
+                    else:
+                        type_ = "parameters"
+                    field_specification[name] = (str, ...)
+                    field_values[name] = f"{{{{steps.{self.name}.outputs.{type_}.{output.name}}}}}"
             elif isinstance(outputs, (Artifact, ModelArtifact, Parameter, ModelParameter)):
-                kwargs[outputs.name.replace("-", "_")] = outputs
+                name = outputs.name.replace("-", "_")
+                if isinstance(outputs, (Artifact, ModelArtifact)):
+                    type_ = "artifacts"
+                else:
+                    type_ = "parameters"
+                field_specification[name] = (str, ...)
+                field_values[name] = f"{{{{steps.{self.name}.outputs.{type_}.{outputs.name}}}}}"
 
-            print(kwargs)
-
-            self.outputs = create_model("DynamicOutputModel", **kwargs)
-            print(self.outputs)
-            print(self.outputs.__fields__)
+            self.outputs = create_model("DynamicOutputModel", **field_specification)
+            for name, val in field_values.items():
+                setattr(self.outputs, name, val)
