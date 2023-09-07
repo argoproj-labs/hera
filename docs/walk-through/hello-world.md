@@ -1,6 +1,6 @@
 # Hello World
 
-Let's take a look at the `hello_world.py` from the [Quick Start](../quick-start.md) guide.
+Let's take a look at the `hello_world.py` from the [Quick Start](./quick-start.md) guide.
 
 ```py
 from hera.workflows import Steps, Workflow, WorkflowsService, script
@@ -27,10 +27,10 @@ w.create()
 
 As we are using Argo Workflows, we import specialized classes from `hera.workflows`. You will see Argo concepts from the
 Argo spec have been transformed into powerful Python classes, explore them at the
-[Hera Workflows API reference](../../api/workflows/hera.md).
+[Hera Workflows API reference](../api/workflows/hera.md).
 
 
-## Using Any Function on Argo
+## Using **Any Function** on Argo
 
 For this Workflow, we want to echo using Python's `print` function, which is wrapped in our convenience `echo` function
 so that we can decorate it. We use Hera's `script` decorator to turn the `echo` function into what's known as a
@@ -66,6 +66,10 @@ def echo_twice(message: str):
     print(message)
 ```
 
+For an in-depth explanation of the mechanics of the script decorator, see the
+[script decorator section](../user-guides/scripts.md#script-decorator) in the scripts user guide, and read about
+building your own image in the [script constructors section](../user-guides/scripts.md#script-constructors).
+
 ## The Workflow Context Manager
 
 The Workflow context manager acts as a scope under which `template` Hera objects can be declared, which include
@@ -100,17 +104,12 @@ with Steps(name="steps"):
 
 To invoke the `echo` template, you can call it, passing values to its arguments through the `arguments` kwarg, which is
 a dictionary of the _function_ kwargs to values. This is because under a `Steps` or `DAG` context manager, the `script`
-decorator converts a call of the function into a `Script` object, to which you must pass `Script` initialization kwargs.
+decorator converts a call of the function into a `Step` or `Task` object, to which you must pass `Step` or `Task`
+initialization kwargs.
 
 ```py
 echo(arguments={"message": "Hello world!"})
 ```
-
-> For advanced users: the exact mechanism of the `script` decorator is to create a `Script` object when declared, so
-> that when your function is invoked you have to pass its arguments through the `arguments` kwarg as a dictionary, and
-> the `Script` objects `__call__` function is invoked with the `arguments` kwarg. The `__call__` function on a
-> `CallableTemplateMixin` automatically creates a `Step` or a `Task` depending on whether the context manager is a
-> `Steps` or a `DAG`.
 
 ## Submitting the Workflow
 

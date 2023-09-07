@@ -67,7 +67,7 @@ could run in any order, but `pre-parallel` will always run before the parallel s
 ## `when` Clauses
 
 A `when` clause specifies the conditions under which the step or task will run. Examples of `when` clauses can be found
-throughout the examples, such as [the Argo coinflip example](../../examples/workflows/upstream/coinflip.md).
+throughout the examples, such as [the Argo coinflip example](../examples/workflows/upstream/coinflip.md).
 
 If we consider features offered by Hera along with what we've learned about parameters and parallel steps, we
 can form a Workflow with identical behaviour to the upstream coinflip, but using only Python scripts and syntactic sugar

@@ -18,8 +18,10 @@ from tests.test_examples import _compare_workflows
         "dag_with_script_output_param_passing",
         "dag_with_script_param_passing",
         "default_param_overwrite",
+        "dynamic_fanout_extra_kwargs",
         "dynamic_fanout_fanin",  # -> with_param
         "dynamic_fanout",  # -> with_param
+        "dynamic_fanout_json_payload",
         "on_exit",
         "script_annotations",
         "script_annotations_outputs",

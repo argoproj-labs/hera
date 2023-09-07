@@ -566,14 +566,23 @@ def script(**script_kwargs):
             Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
             otherwise return the callable function unchanged.
         """
+        # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
+        # function for remote submission since it does not depend on any class or instance attributes, so it is
+        # submittable
+        if isinstance(func, staticmethod):
+            source: Callable = func.__func__
+        else:
+            source = func
+
         if "name" in script_kwargs:
             # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
             # kwargs called `name`
             name = script_kwargs.pop("name")
-            s = Script(name=name, source=func, **script_kwargs)
         else:
             # otherwise populate the `name` from the function name
-            s = Script(name=func.__name__.replace("_", "-"), source=func, **script_kwargs)
+            name = source.__name__.replace("_", "-")
+
+        s = Script(name=name, source=source, **script_kwargs)
 
         @overload
         def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
@@ -669,7 +678,7 @@ class InlineScriptConstructor(ScriptConstructor):
         # in order to have consistent looking functions and getting rid of any comments
         # parsing issues.
         # See https://github.com/argoproj-labs/hera/issues/572
-        content = roundtrip(inspect.getsource(instance.source)).splitlines()
+        content = roundtrip(textwrap.dedent(inspect.getsource(instance.source))).splitlines()
         for i, line in enumerate(content):
             if line.startswith("def") or line.startswith("async def"):
                 break
@@ -682,7 +691,7 @@ class InlineScriptConstructor(ScriptConstructor):
 class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     """`RunnerScriptConstructor` is a script constructor that runs a script in a container.
 
-    The runner script, also known as "The Hera runner", takes a script/Python function definition, inferts the path
+    The runner script, also known as "The Hera runner", takes a script/Python function definition, infers the path
     to the function (module import), assembles a path to invoke the function, and passes any specified parameters
     to the function. This helps users "save" on the `source` space required for submitting a function for remote
     execution on Argo. Execution within the container *requires* the executing container to include the file that

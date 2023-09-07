@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: k8s-set-owner-reference-
+spec:
+  entrypoint: k8s-set-owner-reference
+  templates:
+  - name: k8s-set-owner-reference
+    resource:
+      action: create
+      manifest: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  generateName: owned-eg-\n\
+        data:\n  some: value\n"
+      setOwnerReference: true

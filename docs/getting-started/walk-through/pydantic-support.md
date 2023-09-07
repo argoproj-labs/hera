@@ -1,3 +1,0 @@
-# Integrated Pydantic Support
-
-<!-- TODO -->
