@@ -3,8 +3,8 @@
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
 
-[See the Quick Start guide](https://hera.readthedocs.io/en/latest/quick-start/) to start using Hera
-to orchestrate your Argo Workflows!
+[See the Quick Start guide](https://hera.readthedocs.io/en/stable/walk-through/quick-start/) to start using Hera to
+orchestrate your Argo Workflows!
 
 ```text
 The Argo was constructed by the shipwright Argus,
