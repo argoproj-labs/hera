@@ -6,7 +6,7 @@ name suggests, "with param" lets you use a parameter to loop over, while "with i
 of items. When using loops in Argo, the template will run in parallel for all the items; the items will be launched
 sequentially but the running times may overlap. If you do not want to loop over the items in parallel, you should use a
 [Synchronization](https://argoproj.github.io/argo-workflows/synchronization/) mechanism; see the
-[Sequential Steps example](../../examples/workflows/upstream/loops_arbitrary_sequential_steps.md).
+[Sequential Steps example](../examples/workflows/upstream/loops_arbitrary_sequential_steps.md).
 
 ## Loops in Hera
 
@@ -177,7 +177,7 @@ def create_orders():
 > **Note:** we must import any modules used within the function itself, as Hera currently only passes the source lines
 > of the function to Argo. If you need to import modules not in the standard Python image, use a custom image as
 > described in [the `script` decorator](hello-world.md#the-script-decorator) section, or see the **experimental**
-> [callable script](../../examples/workflows/callable_script.md) example.
+> [callable script](../examples/workflows/callable_script.md) example.
 
 Now we can construct a Workflow that calls `create_orders`, and passes its `result` to `make_bubble_tea`. We'll need to
 hold onto the `Step` returned from the `create_orders` call, and change `with_items` to `with_param` to use `.result`.

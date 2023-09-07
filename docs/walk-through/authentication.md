@@ -5,11 +5,10 @@ unique organization setup. If you submit workflows through Hera directly you hav
 the Argo server.
 
 Note that the follow examples combine a global config with a workflow submission for illustration purposes. You can
-write your own organization thin wrapper, such as `myorg.workflows`, that provides an `__init__.py` to set these
+write a thin wrapper for your own organization, such as `myorg.workflows`, that provides an `__init__.py` to set these
 global configurations, along with a `from hera.workflows import *`! Then, if users import everything from your own
 module all the configs will apply, and only the workflow definition and submission will be central to a user's
-experience. This greatly simplifies the experience, and allows your users to focus on workflow
-definition + submission.
+experience. This greatly simplifies the experience, and allows your users to focus on workflow definition + submission.
 
 ## Bearer token
 
@@ -84,7 +83,7 @@ with Workflow(
 w.create()
 ```
 
-#### A [TokenGenerator](https://github.com/argoproj-labs/hera/blob/1762bbfcb9b186b62a152b69e04675434a4e76ea/src/hera/auth/__init__.py#L5)
+#### A [TokenGenerator](https://github.com/argoproj-labs/hera/blob/1762bbfcb9b186b62a152b69e04675434a4e76ea/src/hera/auth/__init__.py#L22)
 
 ```python
 from hera.auth import TokenGenerator

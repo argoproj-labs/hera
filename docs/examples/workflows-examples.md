@@ -10,7 +10,7 @@ These examples are generated and compared in Hera's CI/CD pipeline to ensure tha
 recreate in Hera.
 
 > If you'd like to contribute missing examples, please see the table below and follow the
-> [Contributing Guide](/CONTRIBUTING.md)!
+> [Contributing Guide](../CONTRIBUTING.md)!
 
 The "Hera" collection shows off features and idiomatic usage of Hera such as the
 [Coinflip example](workflows/coinflip.md) using the script decorator.
@@ -73,10 +73,8 @@ Explore the examples through the side bar!
 | [k8s-owner-reference](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-owner-reference.yaml) |
 | [k8s-patch](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-patch.yaml) |
 | [k8s-patch-basic](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-patch-basic.yaml) |
-| [k8s-set-owner-reference](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-set-owner-reference.yaml) |
 | [k8s-wait-wf](https://github.com/argoproj/argo-workflows/blob/master/examples/k8s-wait-wf.yaml) |
 | [label-value-from-workflow](https://github.com/argoproj/argo-workflows/blob/master/examples/label-value-from-workflow.yaml) |
-| [life-cycle-hooks-tmpl-level](https://github.com/argoproj/argo-workflows/blob/master/examples/life-cycle-hooks-tmpl-level.yaml) |
 | [loops-param-argument](https://github.com/argoproj/argo-workflows/blob/master/examples/loops-param-argument.yaml) |
 | [loops-sequence](https://github.com/argoproj/argo-workflows/blob/master/examples/loops-sequence.yaml) |
 | [map-reduce](https://github.com/argoproj/argo-workflows/blob/master/examples/map-reduce.yaml) |
