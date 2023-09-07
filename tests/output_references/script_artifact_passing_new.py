@@ -21,5 +21,5 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
         print(step)
         print_message(
             name="consume-artifact",
-            arguments=[step.outputs.__fields__["hello_art"].default.as_name("message")], # how to access that field directly?
+            arguments=[Artifact(name="message", from_=step.outputs.__fields__["hello_art"])], # how to access that field directly?
         )
