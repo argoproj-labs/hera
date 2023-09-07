@@ -1089,7 +1089,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
 
 def _get_param_items_from_source(source: Callable) -> List[Parameter]:
-    """Returns an optional list of `Parameter` from the specified `source`.
+    """Returns a list (possibly empty) of `Parameter` from the specified `source`.
 
     This infers that each non-keyword, positional, argument of the given source is a parameter that stems from a
     fanout. Therefore, each parameter value takes the form of `{{item}}` when there's a single argument or
@@ -1097,8 +1097,8 @@ def _get_param_items_from_source(source: Callable) -> List[Parameter]:
 
     Returns:
     -------
-    Optional[List[Parameter]]
-        An optional list of identified parameters or `None` when none are identified.
+    List[Parameter]
+        A list of identified parameters (possibly empty).
     """
     source_signature: List[str] = []
     for p in inspect.signature(source).parameters.values():
