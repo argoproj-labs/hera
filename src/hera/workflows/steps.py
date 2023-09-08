@@ -9,13 +9,13 @@ from hera.workflows._mixins import (
     ArgumentsMixin,
     CallableTemplateMixin,
     ContextMixin,
+    EasyOutputsMixin,
     IOMixin,
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
-    EasyOutputsMixin,
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (

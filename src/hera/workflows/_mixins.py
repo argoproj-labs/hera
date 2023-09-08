@@ -11,14 +11,19 @@ except ImportError:
     from hera.workflows._inspect import get_annotations  # type: ignore
 from collections import ChainMap
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from pydantic import root_validator, validator, create_model
+from pydantic import (
+    BaseModel as PyBaseModel,
+    create_model,
+    root_validator,
+    validator,
+)
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._base_model import BaseModel
@@ -1277,32 +1282,47 @@ class ExperimentalMixin(BaseMixin):
 
 
 class EasyOutputsMixin(BaseMixin):
-    outputs: BaseModel = None
+    outputs: Optional[PyBaseModel] = None
 
     # this needs to be called when the step is built
     def _build_outputs(self):
-        if hasattr(self.template, "outputs"):
-            field_specification = {}
-            field_values = {}
+        if hasattr(self, "template") and hasattr(self.template, "outputs"):
+            field_specification: Dict[str, Tuple[type, Any]] = {}
+            field_values: Dict[str, str] = {}
             outputs = self.template.outputs
             if isinstance(outputs, list):
                 for output in outputs:
-                    name = output.name.replace("-", "_")
-                    if isinstance(output, (Artifact, ModelArtifact)):
-                        type_ = "artifacts"
-                    else:
-                        type_ = "parameters"
-                    field_specification[name] = (str, ...)
-                    field_values[name] = f"{{{{steps.{self.name}.outputs.{type_}.{output.name}}}}}"
+                    output_name, output_path_string = self._generate_new_output(output)
+                    field_specification[output_name] = (
+                        str,
+                        output_path_string,
+                    )  # this is not really necessary, it's the default value
+                    field_values[output_name] = output_path_string
             elif isinstance(outputs, (Artifact, ModelArtifact, Parameter, ModelParameter)):
-                name = outputs.name.replace("-", "_")
-                if isinstance(outputs, (Artifact, ModelArtifact)):
-                    type_ = "artifacts"
-                else:
-                    type_ = "parameters"
-                field_specification[name] = (str, ...)
-                field_values[name] = f"{{{{steps.{self.name}.outputs.{type_}.{outputs.name}}}}}"
-
-            self.outputs = create_model("DynamicOutputModel", **field_specification)
+                output_name, output_path_string = self._generate_new_output(outputs)
+                field_specification[output_name] = (
+                    str,
+                    output_path_string,
+                )  # this is not really necessary, it's the default value
+                field_values[output_name] = output_path_string
+            DynamicOutputModel = create_model("DynamicOutputModel", **field_specification)
+            self.outputs = DynamicOutputModel()
             for name, val in field_values.items():
                 setattr(self.outputs, name, val)
+
+    def _generate_new_output(
+        self,
+        output: Union[Artifact, ModelArtifact, Parameter, ModelParameter],
+    ) -> Tuple[str, str]:
+        """Generate the new output by generating the output_name and the output_path_string."""
+        if not hasattr(output, "name") or not output.name:
+            raise ValueError(f"The output {output} has no name.")
+        name = output.name.replace("-", "_")
+        if isinstance(output, (Artifact, ModelArtifact)):
+            type_ = "artifacts"
+        else:
+            type_ = "parameters"
+        if not hasattr(self, "name") or not self.name:
+            raise ValueError(f"The step {self} has no name.")
+        output_path_string = f"{{{{steps.{self.name}.outputs.{type_}.{output.name}}}}}"
+        return name, output_path_string

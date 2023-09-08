@@ -3,6 +3,7 @@ import importlib
 import pytest
 from .test_examples import _compare_workflows
 
+
 @pytest.mark.parametrize("module_name", ["script_artifact_passing"])
 def test_script_annotations_parameter_regression(module_name):
     # GIVEN
