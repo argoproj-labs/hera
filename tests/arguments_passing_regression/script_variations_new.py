@@ -6,7 +6,7 @@ def hello_world():  # pragma: no cover
     print("Hello World!")
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def multiline_function(test: str, another_test: str):  # pragma: no cover
     print(test)
     print(another_test)

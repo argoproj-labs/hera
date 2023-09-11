@@ -18,7 +18,7 @@ global_config.experimental_features["script_runner"] = True
 global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="user/chosen/outputs")
 
 
-@script(constructor="runner", directly_callable=True)
+@script(constructor="runner", use_func_params_in_call=True)
 def script_param_artifact_in_function_signature_and_return_type(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],

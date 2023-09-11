@@ -44,7 +44,7 @@ class Output(BaseModel):
     output: List[Input]
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def my_function(input: Input) -> Output:
     return Output(output=[input])
 
@@ -52,7 +52,7 @@ def my_function(input: Input) -> Output:
 # Note that the input type is a list of Input
 # hera can also automatically de-serialize
 # composite types like lists and dicts
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def another_function(inputs: List[Input]) -> Output:
     return Output(output=inputs)
 
@@ -60,7 +60,7 @@ def another_function(inputs: List[Input]) -> Output:
 # it also works with raw json strings
 # but those must be explicitly marked as
 # a string type
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def str_function(input: str) -> Output:
     # Example function to ensure we are not json parsing
     # string types before passing it to the function
@@ -69,7 +69,7 @@ def str_function(input: str) -> Output:
 
 # Use the script_annotations feature to seamlessly enable aliased kebab-case names
 # as your template interface, while using regular snake_case in the Python code
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def function_kebab(
     a_but_kebab: Annotated[int, Parameter(name="a-but-kebab")] = 2,
     b_but_kebab: Annotated[str, Parameter(name="b-but-kebab")] = "foo",
@@ -77,7 +77,7 @@ def function_kebab(
     return Output(output=[Input(a=a_but_kebab, b=b_but_kebab)])
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def function_kebab_object(input_values: Annotated[Input, Parameter(name="input-values")]) -> Output:
     return Output(output=[input_values])
 

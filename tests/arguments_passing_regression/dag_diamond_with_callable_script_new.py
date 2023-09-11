@@ -18,7 +18,7 @@ def get_script(callable):
         source=callable,
         add_cwd_to_sys_path=False,
         image="python:alpine3.6",
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
 

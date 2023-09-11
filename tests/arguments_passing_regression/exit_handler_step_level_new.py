@@ -16,7 +16,7 @@ with Workflow(
         image="docker/whalesay",
         command=["cowsay"],
         args=["{{inputs.parameters.message}}"],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with Steps(name="main") as s:
         whalesay(

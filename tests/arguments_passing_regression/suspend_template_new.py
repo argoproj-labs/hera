@@ -5,7 +5,11 @@ with Workflow(
     entrypoint="suspend",
 ) as w:
     whalesay = Container(
-        name="whalesay", image="docker/whalesay", command=["cowsay"], args=["hello world"], directly_callable=True
+        name="whalesay",
+        image="docker/whalesay",
+        command=["cowsay"],
+        args=["hello world"],
+        use_func_params_in_call=True,
     )
 
     approve = Suspend(name="approve")

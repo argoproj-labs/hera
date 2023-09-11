@@ -11,7 +11,7 @@ from hera.workflows import (
 @script(
     inputs=Parameter(name="vol"),
     volume_mounts=[m.VolumeMount(name="{{inputs.parameters.vol}}", mount_path="/mnt/vol")],
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 def foo():
     import os

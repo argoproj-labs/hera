@@ -14,7 +14,7 @@ def out():
         f_out.write("test")
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def in_(a):
     print(a)
 

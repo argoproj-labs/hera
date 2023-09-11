@@ -10,7 +10,7 @@ def writer():
             f.write(json.dumps(i) + "\n")
 
 
-@script(inputs=Artifact(name="in-art", path="/tmp/file"), directly_callable=True)
+@script(inputs=Artifact(name="in-art", path="/tmp/file"), use_func_params_in_call=True)
 def fanout():
     import json
     import sys
@@ -22,7 +22,7 @@ def fanout():
     json.dump(indices, sys.stdout)
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def consumer(i: int):
     print(i)
 

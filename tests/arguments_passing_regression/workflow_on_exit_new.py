@@ -1,7 +1,7 @@
 from hera.workflows import DAG, Workflow, WorkflowStatus, script
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def echo(s: str):
     print(s)
 

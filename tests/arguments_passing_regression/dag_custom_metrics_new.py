@@ -34,7 +34,7 @@ echo = Container(
             value="1",
         ),
     ],
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 
 with Workflow(

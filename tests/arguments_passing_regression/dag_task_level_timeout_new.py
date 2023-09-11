@@ -10,7 +10,7 @@ with Workflow(
         image="alpine:3.7",
         command=["sleep", "15s"],
         inputs=Parameter(name="timeout"),
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with DAG(name="diamond"):
         a = echo("20s").with_(name="A")

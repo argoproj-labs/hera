@@ -11,7 +11,7 @@ def generator():
     print("Another message for the world!")
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def consumer(message: str = "Hello, world!"):
     print(message)
 

@@ -6,11 +6,11 @@ one_job = Container(
     image="alpine",
     command=["/bin/sh", "-c"],
     args=["echo {{inputs.parameters.msg}}; sleep 10"],
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 
 with Workflow(generate_name="parallelism-nested-dag-", entrypoint="A") as w:
-    with DAG(name="B", inputs=Parameter(name="msg"), directly_callable=True) as B:
+    with DAG(name="B", inputs=Parameter(name="msg"), use_func_params_in_call=True) as B:
         c1 = one_job("{{inputs.parameters.msg}} c1").with_(name="c1")
         c2 = one_job("{{inputs.parameters.msg}} c2").with_(name="c2")
         c3 = one_job("{{inputs.parameters.msg}} c3").with_(name="c3")

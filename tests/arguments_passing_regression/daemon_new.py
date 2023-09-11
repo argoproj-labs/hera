@@ -21,7 +21,7 @@ def server():
     webServer.serve_forever()
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def consumer(ip):
     import http.client
     import os

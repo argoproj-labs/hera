@@ -5,11 +5,13 @@ echo = Container(
     inputs=Parameter(name="message"),
     image="alpine:3.7",
     command=["echo", "{{inputs.parameters.message}}"],
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 
 with Workflow(generate_name="dag-nested-", entrypoint="diamond") as w:
-    with DAG(name="nested-diamond", inputs=[Parameter(name="message")], directly_callable=True) as nested_diamond:
+    with DAG(
+        name="nested-diamond", inputs=[Parameter(name="message")], use_func_params_in_call=True
+    ) as nested_diamond:
         A = echo("{{inputs.parameters.message}}A").with_(name="A")
         B = echo("{{inputs.parameters.message}}B").with_(name="B")
         C = echo("{{inputs.parameters.message}}C").with_(name="C")

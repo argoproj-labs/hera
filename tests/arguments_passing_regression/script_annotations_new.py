@@ -9,7 +9,7 @@ from hera.workflows import Artifact, Parameter, Workflow, script, Steps, Artifac
 global_config.experimental_features["script_annotations"] = True
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def echo_all(
     an_int: Annotated[int, Parameter(description="an_int parameter", default=1)],
     a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],

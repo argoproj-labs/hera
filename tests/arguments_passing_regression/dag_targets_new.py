@@ -10,7 +10,7 @@ with Workflow(
         inputs=Parameter(name="message"),
         image="alpine:3.7",
         command=["echo", "{{inputs.parameters.message}}"],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
     with DAG(

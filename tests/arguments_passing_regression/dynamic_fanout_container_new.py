@@ -19,7 +19,7 @@ fanout = Container(
     arguments=[Parameter(name="value", value="{{item.value}}")],
     image="alpine:latest",
     command=["echo", "{{inputs.parameters.value}}"],
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 
 # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted

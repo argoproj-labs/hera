@@ -1,7 +1,7 @@
 from hera.workflows import DAG, Workflow, script
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def foo(p):
     if p < 0.5:
         raise Exception(p)

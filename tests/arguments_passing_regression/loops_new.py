@@ -7,7 +7,7 @@ with Workflow(generate_name="loops-", entrypoint="loop-example") as w:
         image="docker/whalesay:latest",
         command=["cowsay"],
         args=["{{inputs.parameters.message}}"],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
     with Steps(name="loop-example"):

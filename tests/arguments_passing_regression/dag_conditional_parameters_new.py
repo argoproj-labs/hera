@@ -2,17 +2,17 @@ from hera.expr import g
 from hera.workflows import DAG, Parameter, Workflow, script
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6", directly_callable=True)
+@script(add_cwd_to_sys_path=False, image="python:alpine3.6", use_func_params_in_call=True)
 def heads():
     print("heads")
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6", directly_callable=True)
+@script(add_cwd_to_sys_path=False, image="python:alpine3.6", use_func_params_in_call=True)
 def tails():
     print("tails")
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6", directly_callable=True)
+@script(add_cwd_to_sys_path=False, image="python:alpine3.6", use_func_params_in_call=True)
 def flip_coin():
     import random
 

@@ -1,12 +1,12 @@
 from hera.workflows import Container, Steps, Workflow
 
 with Workflow(generate_name="timeouts-workflow-", entrypoint="bunch-of-sleeps", active_deadline_seconds=30) as w:
-    sleep = Container(name="sleep", image="debian:9.5-slim", command=["sleep", "1d"], directly_callable=True)
+    sleep = Container(name="sleep", image="debian:9.5-slim", command=["sleep", "1d"], use_func_params_in_call=True)
     unschedule = Container(
         name="unschedulable",
         image="alpine:latest",
         node_selector={"beta.kubernetes.io/arch": "no-such-arch"},
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with Steps(name="bunch-of-sleeps") as s:
         with s.parallel():

@@ -8,7 +8,7 @@ with Workflow(generate_name="volumes-pvc-", entrypoint="volumes-pvc-example") as
         command=["sh", "-c"],
         args=["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
         volumes=v,
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     print_message = Container(
         name="print-message",
@@ -16,7 +16,7 @@ with Workflow(generate_name="volumes-pvc-", entrypoint="volumes-pvc-example") as
         command=["sh", "-c"],
         args=["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
         volumes=v,
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with Steps(name="volumes-pvc-example") as s:
         whalesay().with_(name="generate")

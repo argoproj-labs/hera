@@ -12,7 +12,7 @@ def writer():
         f.write("Hello, world!")
 
 
-@script(inputs=Artifact(name="in-art", path="/tmp/file"), directly_callable=True)
+@script(inputs=Artifact(name="in-art", path="/tmp/file"), use_func_params_in_call=True)
 def consumer():
     with open("/tmp/file", "r") as f:
         print(f.readlines())  # prints `Hello, world!` to `stdout`

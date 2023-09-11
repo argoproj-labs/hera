@@ -6,7 +6,7 @@ def out():
     print(42)
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def in_(a):
     print(a)
 

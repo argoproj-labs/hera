@@ -16,7 +16,7 @@ def generate():
     json.dump([i for i in range(10)], sys.stdout)
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def consume(value: int):
     print("Received value: {value}!".format(value=value))
 

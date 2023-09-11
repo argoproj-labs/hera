@@ -19,7 +19,7 @@ with Workflow(generate_name="output-parameter-", entrypoint="output-parameter") 
                 path="/tmp/hello_world.txt",
             ),
         ),
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     print_message = Container(
         name="print-message",
@@ -27,7 +27,7 @@ with Workflow(generate_name="output-parameter-", entrypoint="output-parameter") 
         command=["cowsay"],
         args=["{{inputs.parameters.message}}"],
         inputs=Parameter(name="message"),
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with Steps(name="output-parameter"):
         g = whalesay().with_(name="generate-parameter")

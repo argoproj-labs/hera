@@ -5,7 +5,9 @@ with Workflow(
     entrypoint="parallelism-limit",
     parallelism=2,
 ) as w:
-    sleep = Container(name="sleep", image="alpine:latest", command=["sh", "-c", "sleep 10"], directly_callable=True)
+    sleep = Container(
+        name="sleep", image="alpine:latest", command=["sh", "-c", "sleep 10"], use_func_params_in_call=True
+    )
 
     with Steps(name="parallelism-limit") as steps:
         sleep().with_(

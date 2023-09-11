@@ -13,7 +13,7 @@ with WorkflowTemplate(
             Parameter(name="appellation"),
         ],
         args=["echo", "{{inputs.parameters.salutation}} {{inputs.parameters.appellation}}"],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with Steps(name="main"):
         say(

@@ -1,7 +1,7 @@
 from hera.workflows import DAG, Script, Workflow, script
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def hello(s: str):
     print("Hello Hera, {s}".format(s=s))
 

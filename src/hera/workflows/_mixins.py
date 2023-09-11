@@ -616,29 +616,13 @@ class CallableTemplateMixin(ArgumentsMixin):
     not duplicated.
     """
 
-    directly_callable: bool = False
+    use_func_params_in_call: bool = False
 
     def __call__(self, *args, **kwargs) -> Union[None, Step, Task]:
-        if "name" not in kwargs:
-            kwargs["name"] = self.name  # type: ignore
-
-        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
-        # set it here in order for the following logic to capture it
-        if "source" not in kwargs and hasattr(self, "source"):
-            kwargs["source"] = self.source  # type: ignore
-
-        if hasattr(self, "directly_callable") and self.directly_callable:
-            function_kwargs = {k: v for k, v in kwargs.items() if k not in ["source", "name"]}
-            arguments = self._extract_arguments_directly_callable(args, function_kwargs)
-            if args and len(args) > 0:
-                args = tuple()
+        if self.use_func_params_in_call:
+            args, kwargs = self._process_func_args_and_kwargs_for_callable(args, kwargs)
         else:
-            arguments = self._extract_arguments(kwargs)
-
-        # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-        # additional parameters are inferred and have to be added to the `kwargs['arguments']`, otherwise
-        # the step/task will miss adding them when building the final arguments
-        kwargs["arguments"] = arguments
+            kwargs = self._process_kwargs_for_callable(kwargs)
 
         from hera.workflows.dag import DAG
         from hera.workflows.script import Script
@@ -674,10 +658,19 @@ class CallableTemplateMixin(ArgumentsMixin):
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
         )
 
-    def _extract_arguments(
-        self, kwargs: Dict
-    ) -> List[Union[Parameter, Artifact, ModelArtifact, ModelParameter, Dict]]:
-        """Extract the arguments from kwargs, with_param and with_items."""
+    def _process_kwargs_for_callable(self, kwargs: Dict) -> Dict:
+        """Process the kwargs for a CallableTemplate call.
+
+        Extract the function arguments and CallableTemplate attributes.
+        """
+        if "name" not in kwargs:
+            kwargs["name"] = self.name  # type: ignore
+
+        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
+        # set it here in order for the following logic to capture it
+        if "source" not in kwargs and hasattr(self, "source"):
+            kwargs["source"] = self.source  # type: ignore
+
         arguments = self._get_arguments(**kwargs)
         parameter_names = self._get_parameter_names(arguments)
         artifact_names = self._get_artifact_names(arguments)
@@ -687,17 +680,22 @@ class CallableTemplateMixin(ArgumentsMixin):
         elif "source" in kwargs and "with_items" in kwargs:
             arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
 
-        return arguments
+        kwargs["arguments"] = arguments
 
-    def _extract_arguments_directly_callable(
-        self, args: Tuple, kwargs: Dict
-    ) -> List[Union[Parameter, Artifact, ModelArtifact, ModelParameter, Dict]]:
-        """Extract the arguments from args and kwargs, assuming self is a Script and is directly_callable.
+        return kwargs
 
-        The inputs are taken from the function definition and then matched with args and kwargs.
+    def _process_func_args_and_kwargs_for_callable(self, args: Tuple, kwargs: Dict) -> Tuple[Tuple, Dict]:
+        """Process args and kwargs for a CallableTemplate where the call is to the underlying function.
+
+        The inputs are taken from the self.inputs and function definition and then matched with args and kwargs.
         """
         arguments: List[Union[Parameter, Artifact, ModelArtifact, ModelParameter, Dict]] = []
         input_names: List[str] = []
+        new_kwargs = {}
+        if hasattr(self, "name"):
+            new_kwargs["name"] = self.name
+        if hasattr(self, "source"):
+            new_kwargs["source"] = self.source  # type: ignore
 
         if hasattr(self, "inputs") and self.inputs:
             if isinstance(self.inputs, list):
@@ -730,7 +728,9 @@ class CallableTemplateMixin(ArgumentsMixin):
                 arguments.append(_item_to_arg(args[index], name))
                 index += 1
 
-        return arguments
+        args = tuple()
+        new_kwargs["arguments"] = arguments
+        return args, new_kwargs
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call."""
@@ -957,8 +957,8 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         Used for setting the attributes such as name, when, or with_param. Setting with_param
         and with_items triggers a recalculation of arguments.
         """
-        if not isinstance(self.template, CallableTemplateMixin) or not self.template.directly_callable:
-            raise ValueError("directly_callable is not set")
+        if not isinstance(self.template, CallableTemplateMixin) or not self.template.use_func_params_in_call:
+            raise ValueError("use_func_params_in_call is not set")
         for attribute, value in kwargs.items():
             if not hasattr(self, attribute):
                 raise ValueError(f"{type(self)} does not have a {attribute} attribute")
@@ -972,8 +972,8 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
                 new_kwargs["with_param"] = kwargs["with_param"]
             if "with_items" in kwargs:
                 new_kwargs["with_items"] = kwargs["with_items"]
-            if hasattr(self.template, "_extract_arguments") and hasattr(self, "arguments"):
-                new_args = self.template._extract_arguments(new_kwargs)
+            if hasattr(self.template, "_process_kwargs_for_callable") and hasattr(self, "arguments"):
+                new_args = self.template._process_kwargs_for_callable(new_kwargs)["arguments"]
                 current_arg_names_and_types = [(a.name, type(a)) for a in self.arguments]
                 for arg in new_args:
                     if (arg.name, type(arg)) not in current_arg_names_and_types:

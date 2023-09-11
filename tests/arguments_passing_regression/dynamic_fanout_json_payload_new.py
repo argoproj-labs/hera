@@ -16,7 +16,7 @@ def generate():
     json.dump([{"p1": i + 1, "p2": i + 2, "p3": i + 3} for i in range(10)], sys.stdout)
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def consume(p1: str, p2: str, p3: str):
     print("Received p1={p1}, p2={p2}, p3={p3}".format(p1=p1, p2=p2, p3=p3))
 

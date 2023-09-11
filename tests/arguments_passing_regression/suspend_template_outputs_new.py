@@ -11,7 +11,7 @@ with Workflow(
         command=["cowsay"],
         inputs=[Parameter(name="message")],
         args=["{{inputs.parameters.message}}"],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
     with Steps(name="suspend"):

@@ -5,7 +5,7 @@ from hera.workflows import (
 )
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6", directly_callable=True)
+@script(add_cwd_to_sys_path=False, image="python:alpine3.6", use_func_params_in_call=True)
 def echo(message):
     print(message)
 

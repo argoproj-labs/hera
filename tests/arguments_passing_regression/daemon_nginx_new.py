@@ -32,7 +32,7 @@ with Workflow(
             "echo curl --silent -G http://{{inputs.parameters.server-ip}}:80/ && curl "
             "--silent -G http://{{inputs.parameters.server-ip}}:80/"
         ],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with Steps(name="daemon-nginx-example"):
         s = nginx_server()

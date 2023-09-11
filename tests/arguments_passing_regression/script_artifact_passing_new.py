@@ -1,13 +1,13 @@
 from hera.workflows import Artifact, Steps, Workflow, script
 
 
-@script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"), directly_callable=True)
+@script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"), use_func_params_in_call=True)
 def whalesay():
     with open("/tmp/hello_world.txt", "w") as f:
         f.write("hello world")
 
 
-@script(inputs=Artifact(name="message", path="/tmp/message"), directly_callable=True)
+@script(inputs=Artifact(name="message", path="/tmp/message"), use_func_params_in_call=True)
 def print_message():
     with open("/tmp/message", "r") as f:
         message = f.readline()

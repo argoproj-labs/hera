@@ -1,12 +1,12 @@
 from hera.workflows import DAG, Workflow, script
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def foo(a):
     print(a)
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def random_fail(a):
     import random
 
@@ -15,7 +15,7 @@ def random_fail(a):
         raise Exception("Oh, no!")
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def fail(a):
     raise Exception(a)
 

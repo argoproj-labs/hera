@@ -1,7 +1,7 @@
 from hera.workflows import Steps, Workflow, script
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def test_key_mapping(key_1: str, key_2: str):  # pragma: no cover
     print("{key_1}, {key_2}".format(key_1=key_1, key_2=key_2))
 

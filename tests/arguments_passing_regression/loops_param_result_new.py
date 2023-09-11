@@ -1,7 +1,7 @@
 from hera.workflows import Container, Parameter, Steps, Workflow, script
 
 
-@script(image="python:alpine3.6", command=["python"], add_cwd_to_sys_path=False, directly_callable=True)
+@script(image="python:alpine3.6", command=["python"], add_cwd_to_sys_path=False, use_func_params_in_call=True)
 def gen_number_list():
     import json
     import sys
@@ -21,7 +21,7 @@ with Workflow(
         args=[
             "echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}}; echo done"
         ],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
     with Steps(name="loop-param-result-example"):

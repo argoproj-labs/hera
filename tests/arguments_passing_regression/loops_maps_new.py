@@ -10,7 +10,7 @@ with Workflow(
         image="{{inputs.parameters.image}}:{{inputs.parameters.tag}}",
         command=["cat"],
         args=["/etc/os-release"],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
     with Steps(name="loop-map-example") as loop_map_example:

@@ -10,7 +10,7 @@ def generate():
     json.dump([{"value": i} for i in range(10)], sys.stdout)
 
 
-@script(outputs=[Parameter(name="value", value_from=ValueFrom(path="/tmp/value"))], directly_callable=True)
+@script(outputs=[Parameter(name="value", value_from=ValueFrom(path="/tmp/value"))], use_func_params_in_call=True)
 def fanout(object: dict):
     print("Received object: {object}!".format(object=object))
     # Output the content of the "value" key in the object
@@ -19,7 +19,7 @@ def fanout(object: dict):
         f.write(str(value))
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def fanin(values: list):
     print("Received values: {values}!".format(values=values))
 

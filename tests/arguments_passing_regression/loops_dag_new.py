@@ -10,7 +10,7 @@ with Workflow(
         command=["cowsay"],
         args=["{{inputs.parameters.message}}"],
         inputs=[Parameter(name="message")],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
     with DAG(name="loops-dag"):
         A = echo("A").with_(name="A")

@@ -10,7 +10,7 @@ def produce():
         pickle.dump(result, f)
 
 
-@script(inputs=Artifact(name="i", path="/tmp/i"), directly_callable=True)
+@script(inputs=Artifact(name="i", path="/tmp/i"), use_func_params_in_call=True)
 def consume(i):
     import pickle
 

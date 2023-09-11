@@ -5,12 +5,12 @@ from hera.workflows import DAG, Workflow, script
 from hera.workflows.models import Sequence
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def gen_num():
     print(3)
 
 
-@script(directly_callable=True)
+@script(use_func_params_in_call=True)
 def say(message: str):
     print(message)
 

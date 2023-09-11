@@ -10,7 +10,7 @@ from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Parameter, S3Arti
 @script(
     image="python:alpine3.6",
     outputs=S3Artifact(name="parts", path="/mnt/out", archive=NoneArchiveStrategy(), key="{{workflow.name}}/parts"),
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 def split(num_parts: int) -> None:
     import json
@@ -35,7 +35,7 @@ def split(num_parts: int) -> None:
         archive=NoneArchiveStrategy(),
         key="{{workflow.name}}/results/{{inputs.parameters.part_id}}.json",
     ),
-    directly_callable=True,
+    use_func_params_in_call=True,
 )
 def map_() -> None:
     import json

@@ -14,7 +14,7 @@ with Workflow(
         command=["/bin/sh", "-c"],
         args=["echo {{inputs.parameters.parallel-id}} {{inputs.parameters.seq-id}}; sleep 10"],
         inputs=[Parameter(name="seq-id"), Parameter(name="parallel-id")],
-        directly_callable=True,
+        use_func_params_in_call=True,
     )
 
     with Steps(
