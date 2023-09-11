@@ -39,8 +39,8 @@
         return a_number + 3, a_number + 4
 
 
-    with Workflow(generate_name="test-output-annotations-", entrypoint="my_steps") as w:
-        with Steps(name="my_steps") as s:
+    with Workflow(generate_name="test-output-annotations-", entrypoint="my-steps") as w:
+        with Steps(name="my-steps") as s:
             script_param_artifact_in_function_signature_and_return_type(arguments={"a_number": 3})
     ```
 
@@ -52,9 +52,9 @@
     metadata:
       generateName: test-output-annotations-
     spec:
-      entrypoint: my_steps
+      entrypoint: my-steps
       templates:
-      - name: my_steps
+      - name: my-steps
         steps:
         - - arguments:
               parameters:
@@ -96,9 +96,9 @@
           source: '{{inputs.parameters}}'
           volumeMounts:
           - mountPath: user/chosen/outputs
-            name: hera__outputs_directory
+            name: hera-outputs-directory
         volumes:
         - emptyDir: {}
-          name: hera__outputs_directory
+          name: hera-outputs-directory
     ```
 

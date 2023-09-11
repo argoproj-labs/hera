@@ -22,9 +22,9 @@ def script_param_in_fun_sig(
     successor2: Annotated[Path, Artifact(name="successor2", output=True)],
 ):
     successor.write_text(a_number + 1)
-    successor.write_text(a_number + 2)
+    successor2.write_text(a_number + 2)
 
 
-with Workflow(generate_name="test-outputs-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-outputs-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         script_param_in_fun_sig(arguments={"a_number": 3})

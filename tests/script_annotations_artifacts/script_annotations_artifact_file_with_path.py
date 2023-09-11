@@ -22,6 +22,6 @@ def read_artifact(
     return an_artifact
 
 
-with Workflow(generate_name="test-artifacts-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         read_artifact(arguments=[Artifact(name="my-artifact", from_="somewhere")])

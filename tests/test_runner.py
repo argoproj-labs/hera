@@ -100,6 +100,16 @@ def test(entrypoint, kwargs_list, expected_output, global_config_fixture, enviro
                 {"path": "hera/outputs/artifacts/successor2", "value": "5"},
             ],
         ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:script_param_artifact_in_function_signature_and_return_type",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"path": "hera/outputs/parameters/successor", "value": "4"},
+                {"path": "hera/outputs/artifacts/successor2", "value": "5"},
+                {"path": "hera/outputs/parameters/successor3", "value": "6"},
+                {"path": "hera/outputs/artifacts/successor4", "value": "7"},
+            ],
+        ),
     ],
 )
 def test_script_annotations_outputs(
@@ -112,6 +122,8 @@ def test_script_annotations_outputs(
     monkeypatch,
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
+    for file in expected_files:
+        assert not Path(tmp_path_fixture / file["path"]).is_file()
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True

@@ -20,6 +20,6 @@ def echo(
     print(a_name)
 
 
-with Workflow(generate_name="test-artifacts-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         echo(arguments={"a_name": "hello there"})

@@ -24,6 +24,6 @@ def echo_all(
     print(a_string)
 
 
-with Workflow(generate_name="test-artifacts-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         echo_all(arguments={"an_int": 1, "a_bool": True, "a_string": "a"})

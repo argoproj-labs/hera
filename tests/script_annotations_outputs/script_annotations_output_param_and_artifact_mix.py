@@ -27,6 +27,6 @@ def script_param_artifact_mixed(
     return a_number + 3, a_number + 4
 
 
-with Workflow(generate_name="test-outputs-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-outputs-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         script_param_artifact_mixed(arguments={"a_number": 3})

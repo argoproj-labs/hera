@@ -28,8 +28,8 @@ def echo_string(a_string: Annotated[str, Parameter(default="a")]):
     print(a_string)
 
 
-with Workflow(generate_name="test-artifacts-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         echo_int(arguments={"an_int": 1})
         echo_boolean(arguments={"a_bool": True})
         echo_string(arguments={"a_string": "a"})
