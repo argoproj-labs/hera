@@ -21,6 +21,6 @@ def read_artifact(an_artifact: Annotated[Path, Artifact(name="my-artifact", path
     return an_artifact.read_text()
 
 
-with Workflow(generate_name="test-artifacts-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         read_artifact(arguments=[Artifact(name="my-artifact", from_="somewhere")])

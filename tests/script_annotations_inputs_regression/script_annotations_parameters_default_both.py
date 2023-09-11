@@ -24,7 +24,7 @@ def echo_old(an_int: Annotated[int, Parameter(name="another_name")] = 1):
     print(an_int)
 
 
-with Workflow(generate_name="test-artifacts-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         echo_new(arguments={"an_int": 1})
         echo_old(arguments={"an_int": 1})

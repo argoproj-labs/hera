@@ -24,6 +24,6 @@ def script_param_in_fun_sig(
     successor.write_text(str(a_number + 1))
 
 
-with Workflow(generate_name="test-outputs-", entrypoint="my_steps") as w:
-    with Steps(name="my_steps") as s:
+with Workflow(generate_name="test-outputs-", entrypoint="my-steps") as w:
+    with Steps(name="my-steps") as s:
         script_param_in_fun_sig(arguments={"a_number": 3})

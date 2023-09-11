@@ -73,8 +73,8 @@ def test_double_default_throws_a_value_error(global_config_fixture):
     """Test asserting that it is not possible to define default in the annotation and normal Python."""
     global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
-        with Workflow(generate_name="test-default-", entrypoint="my_steps") as w:
-            with Steps(name="my_steps"):
+        with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
+            with Steps(name="my-steps"):
                 echo_int()
 
         w.to_dict()

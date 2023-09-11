@@ -3,9 +3,9 @@ kind: Workflow
 metadata:
   generateName: test-input-annotations-
 spec:
-  entrypoint: my_steps
+  entrypoint: my-steps
   templates:
-  - name: my_steps
+  - name: my-steps
     steps:
     - - arguments:
           artifacts:

@@ -309,7 +309,7 @@ class Script(
     def _create_hera_outputs_volume(self) -> None:
         """Create the new volume as an EmptyDirVolume if needed for the automatic saving of the hera outputs."""
         assert isinstance(self.constructor, RunnerScriptConstructor)
-        new_volume = EmptyDirVolume(name="hera__outputs_directory", mount_path=self.constructor.outputs_directory)
+        new_volume = EmptyDirVolume(name="hera-outputs-directory", mount_path=self.constructor.outputs_directory)
 
         if not isinstance(self.volumes, list) and self.volumes is not None:
             self.volumes = [self.volumes]
