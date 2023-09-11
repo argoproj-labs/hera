@@ -9,6 +9,7 @@ from hera.workflows._mixins import (
     ArgumentsMixin,
     CallableTemplateMixin,
     ContextMixin,
+    EasyOutputsMixin,
     IOMixin,
     ItemMixin,
     ParameterMixin,
@@ -30,6 +31,7 @@ class Step(
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
+    EasyOutputsMixin,
 ):
     """Step is used to run a given template.
 

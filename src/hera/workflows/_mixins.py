@@ -11,14 +11,19 @@ except ImportError:
     from hera.workflows._inspect import get_annotations  # type: ignore
 from collections import ChainMap
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union, cast
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from pydantic import root_validator, validator
+from pydantic import (
+    BaseModel as PyBaseModel,
+    create_model,
+    root_validator,
+    validator,
+)
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._base_model import BaseModel
@@ -1272,3 +1277,82 @@ class ExperimentalMixin(BaseMixin):
         if not global_config.experimental_features[cls._flag]:
             raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
         return values
+
+
+class EasyOutputsMixin(BaseMixin):
+    outputs: Optional[PyBaseModel] = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._build_outputs()
+
+    # this needs to be called when the step is built
+    def _build_outputs(self) -> None:
+        from hera.workflows import Step, Task
+
+        if (
+            not hasattr(self, "template")
+            or not hasattr(self.template, "outputs")
+            or not isinstance(self, (Step, Task))
+        ):
+            return
+
+        field_spec: Dict[str, Dict[str, Tuple[type, Any]]] = {"parameters": {}, "artifacts": {}}
+        field_values: Dict[str, Dict[str, str]] = {"parameters": {}, "artifacts": {}}
+        # clearly line 1293 should make the linter happy, but it doesn't
+        outputs = self.template.outputs  # type: ignore
+
+        if isinstance(outputs, list):
+            for output in outputs:
+                self._populate_fields(output, field_spec, field_values)
+        elif isinstance(outputs, (Artifact, ModelArtifact, Parameter, ModelParameter)):
+            self._populate_fields(outputs, field_spec, field_values)
+
+        # For some reason the unpacking of field_spec seems to break the linter here
+        DynamicParams = create_model("DynamicParams", **field_spec["parameters"])  # type: ignore
+        dynamic_params = DynamicParams()
+        for name, val in field_values["parameters"].items():
+            setattr(dynamic_params, name, val)
+
+        DynamicArts = create_model("DynamicArts", **field_spec["artifacts"])  # type: ignore
+        dynamic_arts = DynamicArts()
+        for name, val in field_values["artifacts"].items():
+            setattr(dynamic_arts, name, val)
+
+        self.outputs = create_model(
+            "DynamicOutput",
+            artifacts=(Optional[DynamicArts], dynamic_arts),
+            parameters=(Optional[DynamicParams], dynamic_params),
+        )()
+        # The linter thinks that self.outputs doesn't have artifacts or parameters even though it's set above
+        self.outputs.artifacts = dynamic_arts  # type: ignore
+        self.outputs.parameters = dynamic_params  # type: ignore
+
+    def _generate_output_string(self, output: Union[Artifact, ModelArtifact, Parameter, ModelParameter]) -> str:
+        """Generate the new output by generating the output_name and the output_path_string."""
+        if not hasattr(self, "name") or not self.name:
+            raise ValueError(f"{self} has no name.")
+        from hera.workflows import Step
+
+        if isinstance(self, Step):
+            return f"{{{{steps.{self.name}.outputs.{self._generate_output_type(output)}.{output.name}}}}}"
+        return f"{{{{tasks.{self.name}.outputs.{self._generate_output_type(output)}.{output.name}}}}}"
+
+    def _generate_output_type(self, output: Union[Artifact, ModelArtifact, Parameter, ModelParameter]) -> str:
+        if isinstance(output, (Artifact, ModelArtifact)):
+            return "artifacts"
+        return "parameters"
+
+    def _generate_output_name(self, output: Union[Artifact, ModelArtifact, Parameter, ModelParameter]) -> str:
+        if not hasattr(output, "name") or not output.name:
+            raise ValueError(f"The output {output} has no name.")
+        return output.name.replace("-", "_")
+
+    def _populate_fields(self, output, field_spec, field_values):
+        field_spec[self._generate_output_type(output)][self._generate_output_name(output)] = (
+            str,
+            self._generate_output_string(output),
+        )
+        field_values[self._generate_output_type(output)][
+            self._generate_output_name(output)
+        ] = self._generate_output_string(output)
