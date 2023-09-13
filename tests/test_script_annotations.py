@@ -73,8 +73,8 @@ def test_double_default_throws_a_value_error(global_config_fixture):
     """Test asserting that it is not possible to define default in the annotation and normal Python."""
     global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
-        with Workflow(generate_name="test-default-", entrypoint="my_steps") as w:
-            with Steps(name="my_steps"):
+        with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
+            with Steps(name="my-steps"):
                 echo_int()
 
         w.to_dict()
@@ -88,19 +88,19 @@ def test_double_default_throws_a_value_error(global_config_fixture):
         (
             "script_annotations_output_param_in_func",
             {"parameters": [{"name": "a_number"}]},
-            {"parameters": [{"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}}]},
+            {"parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}]},
         ),
         (
             "script_annotations_output_artifact_in_func",
             {"parameters": [{"name": "a_number"}]},
-            {"artifacts": [{"name": "successor", "path": "/hera/outputs/artifacts/successor"}]},
+            {"artifacts": [{"name": "successor", "path": "/tmp/hera/outputs/artifacts/successor"}]},
         ),
         (
             "script_annotations_output_param_and_artifact_in_func",
             {"parameters": [{"name": "a_number"}]},
             {
-                "parameters": [{"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}}],
-                "artifacts": [{"name": "successor2", "path": "/hera/outputs/artifacts/successor2"}],
+                "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}],
+                "artifacts": [{"name": "successor2", "path": "/tmp/hera/outputs/artifacts/successor2"}],
             },
         ),
         (
@@ -108,12 +108,12 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             {"parameters": [{"name": "a_number"}]},
             {
                 "parameters": [
-                    {"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}},
-                    {"name": "successor3", "valueFrom": {"path": "/hera/outputs/parameters/successor3"}},
+                    {"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}},
+                    {"name": "successor3", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor3"}},
                 ],
                 "artifacts": [
-                    {"name": "successor2", "path": "/hera/outputs/artifacts/successor2"},
-                    {"name": "successor4", "path": "/hera/outputs/artifacts/successor4"},
+                    {"name": "successor2", "path": "/tmp/hera/outputs/artifacts/successor2"},
+                    {"name": "successor4", "path": "/tmp/hera/outputs/artifacts/successor4"},
                 ],
             },
         ),
@@ -121,8 +121,8 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             "script_annotations_output_in_func_no_name",
             {"parameters": [{"name": "a_number"}]},
             {
-                "parameters": [{"name": "successor", "valueFrom": {"path": "/hera/outputs/parameters/successor"}}],
-                "artifacts": [{"name": "successor2", "path": "/hera/outputs/artifacts/successor2"}],
+                "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}],
+                "artifacts": [{"name": "successor2", "path": "/tmp/hera/outputs/artifacts/successor2"}],
             },
         ),
         (
