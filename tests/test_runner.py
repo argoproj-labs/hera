@@ -56,12 +56,12 @@ def test(entrypoint, kwargs_list, expected_output, global_config_fixture, enviro
         (
             "tests.script_annotations_outputs.script_annotations_output:script_param",
             [{"name": "a_number", "value": "3"}],
-            [{"path": "hera/outputs/parameters/successor", "value": "4"}],
+            [{"path": "tmp/hera/outputs/parameters/successor", "value": "4"}],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_artifact",
             [{"name": "a_number", "value": "3"}],
-            [{"path": "hera/outputs/artifacts/successor", "value": "4"}],
+            [{"path": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_artifact_path",
@@ -72,42 +72,42 @@ def test(entrypoint, kwargs_list, expected_output, global_config_fixture, enviro
             "tests.script_annotations_outputs.script_annotations_output:script_artifact_and_param",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "hera/outputs/parameters/successor", "value": "4"},
-                {"path": "hera/outputs/artifacts/successor", "value": "5"},
+                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"path": "tmp/hera/outputs/artifacts/successor", "value": "5"},
             ],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_two_params",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "hera/outputs/parameters/successor", "value": "4"},
-                {"path": "hera/outputs/parameters/successor2", "value": "5"},
+                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"path": "tmp/hera/outputs/parameters/successor2", "value": "5"},
             ],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_two_artifacts",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "hera/outputs/artifacts/successor", "value": "4"},
-                {"path": "hera/outputs/artifacts/successor2", "value": "5"},
+                {"path": "tmp/hera/outputs/artifacts/successor", "value": "4"},
+                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
             ],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_outputs_in_function_signature",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "hera/outputs/parameters/successor", "value": "4"},
-                {"path": "hera/outputs/artifacts/successor2", "value": "5"},
+                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
             ],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_param_artifact_in_function_signature_and_return_type",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "hera/outputs/parameters/successor", "value": "4"},
-                {"path": "hera/outputs/artifacts/successor2", "value": "5"},
-                {"path": "hera/outputs/parameters/successor3", "value": "6"},
-                {"path": "hera/outputs/artifacts/successor4", "value": "7"},
+                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"path": "tmp/hera/outputs/parameters/successor3", "value": "6"},
+                {"path": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
             ],
         ),
     ],
@@ -128,7 +128,7 @@ def test_script_annotations_outputs(
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
 
-    outputs_directory = str(tmp_path_fixture / "hera/outputs")
+    outputs_directory = str(tmp_path_fixture / "tmp/hera/outputs")
     global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path_fixture))
