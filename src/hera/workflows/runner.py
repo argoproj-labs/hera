@@ -184,15 +184,14 @@ def _save_annotated_return_outputs(
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     """Get the path from the destination annotation using the defined outputs directory."""
-    path = Path(os.environ.get("hera__outputs_directory", "hera/outputs"))
-    if destination.name:
-        if isinstance(destination, Parameter):
-            path = path / f"parameters/{destination.name}"
-        elif isinstance(destination, Artifact):
-            if destination.path:
-                path = Path(destination.path)
-            else:
-                path = path / f"artifacts/{destination.name}"
+    path = Path(os.environ.get("hera__outputs_directory", "tmp/hera/outputs"))
+    if isinstance(destination, Parameter) and destination.name:
+        path = path / f"parameters/{destination.name}"
+    elif isinstance(destination, Artifact):
+        if destination.path:
+            path = Path(destination.path)
+        elif destination.name:
+            path = path / f"artifacts/{destination.name}"
     return path
 
 
