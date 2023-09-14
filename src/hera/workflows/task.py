@@ -10,6 +10,7 @@ from typing import List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
+    EasyOutputsMixin,
     ItemMixin,
     ParameterMixin,
     SubNodeMixin,
@@ -48,6 +49,7 @@ class Task(
     SubNodeMixin,
     ParameterMixin,
     ItemMixin,
+    EasyOutputsMixin,
 ):
     """Task is used to run a given template within a DAG. Must be instantiated under a DAG context."""
 

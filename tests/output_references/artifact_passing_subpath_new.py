@@ -1,0 +1,49 @@
+from hera.workflows import (
+    Artifact,
+    Container,
+    NoneArchiveStrategy,
+    Step,
+    Steps,
+    Workflow,
+)
+
+with Workflow(generate_name="artifact-passing-subpath-", entrypoint="artifact-example") as w:
+    whalesay = Container(
+        name="whalesay",
+        image="docker/whalesay:latest",
+        command=["sh", "-c"],
+        args=["sleep 1; cowsay hello world | tee /tmp/hello_world.txt"],
+        outputs=[Artifact(name="hello-art", path="/tmp/", archive=NoneArchiveStrategy())],
+    )
+    print_message_dir = Container(
+        name="print-message-dir",
+        image="alpine:latest",
+        command=["sh", "-c"],
+        args=["ls /tmp/message"],
+        inputs=[Artifact(name="message", path="/tmp/message")],
+    )
+    print_message = Container(
+        name="print-message",
+        image="alpine:latest",
+        command=["sh", "-c"],
+        args=["cat /tmp/message"],
+        inputs=[Artifact(name="message", path="/tmp/message")],
+    )
+    with Steps(name="artifact-example") as s:
+        generator = Step(name="generate-artifact", template=whalesay)
+        Step(
+            name="list-artifact",
+            template=print_message_dir,
+            arguments=[Artifact(name="message", from_=generator.outputs.artifacts.hello_art)],
+        )
+        Step(
+            name="consume-artifact",
+            template=print_message,
+            arguments=[
+                Artifact(
+                    name="message",
+                    from_=generator.outputs.artifacts.hello_art,
+                    sub_path="hello_world.txt",
+                )
+            ],
+        )
