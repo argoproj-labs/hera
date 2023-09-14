@@ -1280,14 +1280,17 @@ class ExperimentalMixin(BaseMixin):
 
 
 class EasyOutputsMixin(BaseMixin):
+    """This mixin allows for the easy output access in subsequent `Step`s/`Task`s."""
+
     outputs: Optional[PyBaseModel] = None
 
     def __init__(self, *args, **kwargs):
+        """We initialize the inputs when this object is created."""
         super().__init__(*args, **kwargs)
         self._build_outputs()
 
-    # this needs to be called when the step is built
     def _build_outputs(self) -> None:
+        """We build the outputs for the Step/Task based on the outputs from `self.template`."""
         from hera.workflows import Step, Task
 
         if (
@@ -1329,7 +1332,7 @@ class EasyOutputsMixin(BaseMixin):
         self.outputs.parameters = dynamic_params  # type: ignore
 
     def _generate_output_string(self, output: Union[Artifact, ModelArtifact, Parameter, ModelParameter]) -> str:
-        """Generate the new output by generating the output_name and the output_path_string."""
+        """Generate the new output_string."""
         if not hasattr(self, "name") or not self.name:
             raise ValueError(f"{self} has no name.")
         from hera.workflows import Step
@@ -1339,20 +1342,28 @@ class EasyOutputsMixin(BaseMixin):
         return f"{{{{tasks.{self.name}.outputs.{self._generate_output_type(output)}.{output.name}}}}}"
 
     def _generate_output_type(self, output: Union[Artifact, ModelArtifact, Parameter, ModelParameter]) -> str:
+        """Generate the new output type."""
         if isinstance(output, (Artifact, ModelArtifact)):
             return "artifacts"
         return "parameters"
 
     def _generate_output_name(self, output: Union[Artifact, ModelArtifact, Parameter, ModelParameter]) -> str:
+        """Generate the new output name."""
         if not hasattr(output, "name") or not output.name:
             raise ValueError(f"The output {output} has no name.")
         return output.name.replace("-", "_")
 
     def _populate_fields(self, output, field_spec, field_values):
-        field_spec[self._generate_output_type(output)][self._generate_output_name(output)] = (
-            str,
-            self._generate_output_string(output),
-        )
-        field_values[self._generate_output_type(output)][
-            self._generate_output_name(output)
-        ] = self._generate_output_string(output)
+        """Populate the dictionaries used for creating the pydantic model."""
+        name_ = self._generate_output_name(output)
+        type_ = self._generate_output_type(output)
+        output_string = self._generate_output_string(output)
+
+        # For now, we raise an error if there are names that differ only by "-" and "_"
+        # This can possibly be fixed with https://docs.pydantic.dev/latest/usage/fields/#field-aliases
+        # but this is a Pydantic 2 feature.
+        if name_ in field_spec[type_]:
+            raise ValueError(f"The name {name_} clashes with another output. Consider renaming.")
+
+        field_spec[type_][name_] = (str, output_string)
+        field_values[type_][name_] = output_string
