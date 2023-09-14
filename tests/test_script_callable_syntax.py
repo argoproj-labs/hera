@@ -36,13 +36,13 @@ from tests.test_examples import _compare_workflows
         "workflow_on_exit",
     ],
 )
-def test_regression_arguments_passing_scripts(module_name):
+def test_regression_arguments_passing_scripts(module_name, global_config_fixture):
     # GIVEN
     workflow_old = importlib.import_module(f"tests.arguments_passing_regression.{module_name}_old").w
-    workflow_new = importlib.import_module(f"tests.arguments_passing_regression.{module_name}_new").w
-
-    # WHEN
     output_old = workflow_old.to_dict()
+
+    global_config_fixture.experimental_features["use_func_params_in_call"] = True
+    workflow_new = importlib.import_module(f"tests.arguments_passing_regression.{module_name}_new").w
     output_new = workflow_new.to_dict()
 
     # don't care about file names for the runner
@@ -94,13 +94,13 @@ def test_regression_arguments_passing_scripts(module_name):
     ],
 )
 # @pytest.mark.xfail
-def test_regression_arguments_passing_containers(module_name):
+def test_regression_arguments_passing_containers(module_name, global_config_fixture):
     # GIVEN
     workflow_old = importlib.import_module(f"tests.arguments_passing_regression.{module_name}_old").w
-    workflow_new = importlib.import_module(f"tests.arguments_passing_regression.{module_name}_new").w
-
-    # WHEN
     output_old = workflow_old.to_dict()
+
+    global_config_fixture.experimental_features["use_func_params_in_call"] = True
+    workflow_new = importlib.import_module(f"tests.arguments_passing_regression.{module_name}_new").w
     output_new = workflow_new.to_dict()
 
     # don't care about file names for the runner

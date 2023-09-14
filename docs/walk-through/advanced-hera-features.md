@@ -128,3 +128,82 @@ global_config.experimental_features["script_annotations"] = True
 ```
 
 Read the full guide on script annotations in [the script user guide](../user-guides/scripts.md#script-annotations).
+
+
+### Use function parameters in call for Callable 
+
+In Hera, you can use `Callable` `Script`s and `Container`s in a context of a `DAG` or `Steps`. This syntax allows you
+to skip defining a `Step` or a `Task` with a template because Hera can infer what object it will be. For example:
+
+```python
+@script()
+def echo(message):
+    print(message)
+
+
+with Workflow(
+    generate_name="dag-diamond-",
+    entrypoint="diamond",
+) as w:
+    with DAG(name="diamond"):
+        A = Task(name="A", template=echo, arguments={"message": "A"})
+        B = Task(name="B", template=echo, arguments={"message": "B"})
+        C = Task(name="C", template=echo, arguments={"message": "C"})
+        D = Task(name="D", template=echo, arguments={"message": "D"})
+        A >> [B, C] >> D
+```
+
+can be written as
+
+```python
+@script()
+def echo(message):
+    print(message)
+
+
+with Workflow(
+    generate_name="dag-diamond-",
+    entrypoint="diamond",
+) as w:
+    with DAG(name="diamond"):
+        A = echo(name="A", arguments={"message": "A"})
+        B = echo(name="B", arguments={"message": "B"})
+        C = echo(name="C", arguments={"message": "C"})
+        D = echo(name="D", arguments={"message": "D"})
+        A >> [B, C] >> D
+```
+
+This syntax is convenient but it breaks the illusion of a python function. `echo` does not 
+have a keyword argument `name` or `arguments`. How can we make this more Pythonic?
+
+```python
+@script()
+def foo(a, b=42, c=None):
+    print(a, b, c)
+
+
+with Workflow(generate_name="script-default-params-", entrypoint="d") as w:
+    with DAG(name="d"):
+        foo(name="b-unset-c-unset", arguments={"a": 1})
+```
+
+```python
+@script(use_func_params_in_call=True)
+def foo(a, b=42, c=None):
+    print(a, b, c)
+
+
+with Workflow(generate_name="script-default-params-", entrypoint="d") as w:
+    with DAG(name="d"):
+        foo(1).with_(name="b-unset-c-unset")
+```
+
+In the new syntax, you can call the `foo` function as you would normally in Python and then provide
+the additional `Task`/`Step` attributes using the additional `with_` call.
+
+
+This feature can be enabled by setting the `experimental_feature` flag `use_func_params_in_call`
+
+```python
+global_config.experimental_features["use_func_params_in_call"] = True
+```

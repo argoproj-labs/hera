@@ -619,7 +619,7 @@ class CallableTemplateMixin(ArgumentsMixin):
     use_func_params_in_call: bool = False
 
     def __call__(self, *args, **kwargs) -> Union[None, Step, Task]:
-        if self.use_func_params_in_call:
+        if self.use_func_params_in_call and global_config.experimental_features["use_func_params_in_call"]:
             args, kwargs = self._process_func_args_and_kwargs_for_callable(args, kwargs)
         else:
             kwargs = self._process_kwargs_for_callable(kwargs)
@@ -707,17 +707,12 @@ class CallableTemplateMixin(ArgumentsMixin):
                     input_names.append(self.inputs.name)
 
         if hasattr(self, "source"):
-            function_items: List[Union[Artifact, Parameter]] = []
-            if global_config.experimental_features["script_annotations"]:
-                from hera.workflows.script import _get_inputs_from_callable
+            from hera.workflows.script import _get_inputs_from_callable
 
-                function_p, function_artifacts = _get_inputs_from_callable(self.source)
-                function_items.extend(_process_params_and_artifacts(function_p, function_artifacts))
-            else:
-                function_items.extend(_get_param_items_from_source(self.source))
+            function_p, function_artifacts = _get_inputs_from_callable(self.source)
+            function_items = _process_params_and_artifacts(function_p, function_artifacts)
 
             input_names += [p.name for p in function_items if p.name]
-
         index = 0
 
         for name in input_names:
@@ -1247,7 +1242,7 @@ def _item_to_arg(item: Any, name: str) -> Union[ModelArtifact, ModelParameter, P
     if isinstance(item, Artifact):
         return item._build_artifact()
     if isinstance(item, ModelArtifact):
-        return item  # ?
+        return item
     if isinstance(item, Parameter):
         return item.as_argument()
     return Parameter(name=name, value=serialize(item))
