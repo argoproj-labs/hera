@@ -63,7 +63,6 @@
               artifacts:
               - from: '{{tasks.writer.outputs.artifacts.out-art}}'
                 name: in-art
-                path: /tmp/file
             depends: writer
             name: fanout
             template: fanout

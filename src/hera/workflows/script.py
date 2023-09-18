@@ -198,7 +198,8 @@ class Script(
         ):
             if not self.constructor.outputs_directory:
                 self.constructor.outputs_directory = self.constructor.DEFAULT_HERA_OUTPUTS_DIRECTORY
-            self._create_hera_outputs_volume()
+            if self.constructor.use_volume_for_outputs is None:
+                self._create_hera_outputs_volume()
 
         return self.constructor.transform_script_template_post_build(
             self,
@@ -307,7 +308,7 @@ class Script(
         return current_io
 
     def _create_hera_outputs_volume(self) -> None:
-        """Create the new volume as an EmptyDirVolume if needed for the automatic saving of the hera outputs."""
+        """Create a new EmptyDirVolume at the template level, if needed for the automatic saving of the hera outputs."""
         assert isinstance(self.constructor, RunnerScriptConstructor)
         new_volume = EmptyDirVolume(name="hera-outputs-directory", mount_path=self.constructor.outputs_directory)
 
@@ -704,7 +705,10 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     outputs_directory: Optional[str] = None
     """Used for saving outputs when defined using annotations."""
 
-    DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/tmp/hera/outputs"
+    use_volume_for_outputs: Optional[str] = None
+    """Volume to use if saving outputs when defined using annotations."""
+
+    DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/hera/outputs"
     """Used as the default value for when the outputs_directory is not set"""
 
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
