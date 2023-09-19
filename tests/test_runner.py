@@ -14,13 +14,13 @@ from hera.workflows.runner import _runner
     [
         (
             "examples.workflows.callable_script:my_function",
-            [{"name": "input", "value": '{"a": 2, "b": "bar"}'}],
-            '{"output": [{"a": 2, "b": "bar"}]}',
+            [{"name": "input", "value": '{"a": 2, "b": "bar", "c": 42}'}],
+            '{"output": [{"a": 2, "b": "bar", "c": 42}]}',
         ),
         (
             "examples.workflows.callable_script:another_function",
-            [{"name": "inputs", "value": '[{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]'}],
-            '{"output": [{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]}',
+            [{"name": "inputs", "value": '[{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]'}],
+            '{"output": [{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]}',
         ),
         (
             "examples.workflows.callable_script:str_function",
@@ -29,13 +29,17 @@ from hera.workflows.runner import _runner
         ),
         (
             "examples.workflows.callable_script:function_kebab",
-            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
-            '{"output": [{"a": 3, "b": "bar"}]}',
+            [
+                {"name": "a-but-kebab", "value": "3"},
+                {"name": "b-but-kebab", "value": "bar"},
+                {"name": "c-but-kebab", "value": "42.0"},
+            ],
+            '{"output": [{"a": 3, "b": "bar", "c": 42.0}]}',
         ),
         (
             "examples.workflows.callable_script:function_kebab_object",
-            [{"name": "input-values", "value": '{"a": 3, "b": "bar"}'}],
-            '{"output": [{"a": 3, "b": "bar"}]}',
+            [{"name": "input-values", "value": '{"a": 3, "b": "bar", "c": "abc"}'}],
+            '{"output": [{"a": 3, "b": "bar", "c": "abc"}]}',
         ),
     ],
 )
