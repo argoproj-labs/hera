@@ -1,6 +1,6 @@
 # Authentication
 
-The way you authenticate generally depends on your unique organization setup. If you submit workflows through Hera 
+The way you authenticate generally depends on your unique organization setup. If you submit workflows through Hera
 directly you have multiple ways to authenticate with the Argo server.
 
 Note that the follow examples combine a global config with a workflow submission for illustration purposes. You can
