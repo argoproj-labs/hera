@@ -101,9 +101,6 @@ class MyTokenGenerator(TokenGenerator):
 global_config.host = "https://my-argo-server.com"
 global_config.token = MyTokenGenerator
 
-
-# the workflow automatically creates a workflow service, which uses the global config
-# host and token generator for authentication
 with Workflow(
     generate_name="test-",
     entrypoint="c",
@@ -121,6 +118,7 @@ import errno
 import os
 from typing import Optional
 
+# note: you need to install the `kubernetes` dependency as Hera does not provide this
 from kubernetes import client, config
 
 from hera.auth import TokenGenerator
