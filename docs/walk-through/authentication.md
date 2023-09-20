@@ -121,6 +121,7 @@ import errno
 import os
 from typing import Optional
 
+# note: you need to install the `kubernetes` dependency as Hera does not provide this
 from kubernetes import client, config
 
 from hera.auth import TokenGenerator
