@@ -1,8 +1,7 @@
 # Authentication
 
-There are multiple ways you can authenticate with Argo Workflows. The way you authenticate generally depends on your
-unique organization setup. If you submit workflows through Hera directly you have multiple ways to authenticate with
-the Argo server.
+The way you authenticate generally depends on your unique organization setup. If you submit workflows through Hera 
+directly you have multiple ways to authenticate with the Argo server.
 
 Note that the follow examples combine a global config with a workflow submission for illustration purposes. You can
 write a thin wrapper for your own organization, such as `myorg.workflows`, that provides an `__init__.py` to set these
@@ -85,6 +84,8 @@ w.create()
 
 #### A [TokenGenerator](https://github.com/argoproj-labs/hera/blob/1762bbfcb9b186b62a152b69e04675434a4e76ea/src/hera/auth/__init__.py#L22)
 
+##### Generating a plain string token via a `TokenGenerator`
+
 ```python
 from hera.auth import TokenGenerator
 from hera.shared import global_config
@@ -100,6 +101,56 @@ class MyTokenGenerator(TokenGenerator):
 global_config.host = "https://my-argo-server.com"
 global_config.token = MyTokenGenerator
 
+
+# the workflow automatically creates a workflow service, which uses the global config
+# host and token generator for authentication
+with Workflow(
+    generate_name="test-",
+    entrypoint="c",
+) as w:
+    Container(name="c", image="alpine:3.13", command=["sh", "-c", "echo hello world"])
+
+w.create()
+```
+
+##### Generating a K8s token via `TokenGenerator`
+
+```python
+import base64
+import errno
+import os
+from typing import Optional
+
+# note: you need to install the `kubernetes` dependency as Hera does not provide this
+from kubernetes import client, config
+
+from hera.auth import TokenGenerator
+from hera.shared import global_config
+from hera.workflows import Workflow, Container
+
+
+class K8sTokenGenerator(TokenGenerator):
+    def __init__(self, service_account: str, namespace: str = "default", config_file: Optional[str] = None) -> None:
+        self.service_account = service_account
+        self.namespace = namespace
+        self.config_file = config_file
+
+    def __call__(self) -> str:
+        if self.config_file is not None and not os.path.isfile(self.config_file):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), self.config_file)
+
+        config.load_kube_config(config_file=self.config_file)
+        v1 = client.CoreV1Api()
+        secret_name = v1.read_namespaced_service_account(self.service_account, self.namespace).secrets[0].name
+        sec = v1.read_namespaced_secret(secret_name, self.namespace).data
+        return base64.b64decode(sec["token"]).decode()
+
+
+global_config.host = "https://my-argo-server.com"
+global_config.token = K8sTokenGenerator("my-service-account")
+
+# the workflow automatically creates a workflow service, which uses the global config
+# host and token generator for authentication
 with Workflow(
     generate_name="test-",
     entrypoint="c",
