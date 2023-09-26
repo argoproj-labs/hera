@@ -1061,7 +1061,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
         obj = next((output for output in artifacts if output.name == name), None)
         if obj is not None:
-            return Artifact(name=name, path=obj.path, from_=f"{{{{{subtype}.{self.name}.outputs.artifacts.{name}}}}}")
+            return Artifact(name=name, from_=f"{{{{{subtype}.{self.name}.outputs.artifacts.{name}}}}}")
         raise KeyError(f"No output artifact named `{name}` found")
 
     def get_parameters_as(self, name: str) -> Parameter:

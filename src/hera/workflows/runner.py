@@ -163,7 +163,7 @@ def _save_annotated_return_outputs(
     <parent_directory>/artifacts/<name>
     <parent_directory>/parameters/<name>
     If the artifact path is specified, that is used instead.
-    <parent_directory> can be provided by the user or is set to /hera/outputs by default
+    <parent_directory> can be provided by the user or is set to /tmp/hera/outputs by default
     """
     if not isinstance(function_results, tuple):
         function_results = [function_results]

@@ -54,7 +54,7 @@ from hera.workflows.models import (
 from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
-from hera.workflows.volume import EmptyDirVolume
+from hera.workflows.volume import _BaseVolume
 
 try:
     from typing import Annotated  # type: ignore
@@ -198,7 +198,10 @@ class Script(
         ):
             if not self.constructor.outputs_directory:
                 self.constructor.outputs_directory = self.constructor.DEFAULT_HERA_OUTPUTS_DIRECTORY
-            self._create_hera_outputs_volume()
+            if self.constructor.volume_for_outputs is not None:
+                if self.constructor.volume_for_outputs.mount_path is None:
+                    self.constructor.volume_for_outputs.mount_path = self.constructor.outputs_directory
+                self._create_hera_outputs_volume(self.constructor.volume_for_outputs)
 
         return self.constructor.transform_script_template_post_build(
             self,
@@ -306,18 +309,17 @@ class Script(
 
         return current_io
 
-    def _create_hera_outputs_volume(self) -> None:
-        """Create the new volume as an EmptyDirVolume if needed for the automatic saving of the hera outputs."""
+    def _create_hera_outputs_volume(self, volume: _BaseVolume) -> None:
+        """Add given volume to the script template for the automatic saving of the hera outputs."""
         assert isinstance(self.constructor, RunnerScriptConstructor)
-        new_volume = EmptyDirVolume(name="hera-outputs-directory", mount_path=self.constructor.outputs_directory)
 
         if not isinstance(self.volumes, list) and self.volumes is not None:
             self.volumes = [self.volumes]
         elif self.volumes is None:
             self.volumes = []
 
-        if new_volume not in self.volumes:
-            self.volumes.append(new_volume)
+        if volume not in self.volumes:
+            self.volumes.append(volume)
 
 
 def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
@@ -703,6 +705,9 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
 
     outputs_directory: Optional[str] = None
     """Used for saving outputs when defined using annotations."""
+
+    volume_for_outputs: Optional[_BaseVolume] = None
+    """Volume to use if saving outputs when defined using annotations."""
 
     DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/tmp/hera/outputs"
     """Used as the default value for when the outputs_directory is not set"""

@@ -24,9 +24,9 @@ with WorkflowTemplate(
     generate_name="volumes-",
     entrypoint="d",
     volumes=[
-        Volume(name="v1", mount_path="/mnt/v1", size="1Gi"),
-        Volume(name="v2", mount_path="/mnt/v2", size="3Gi"),
-        Volume(name="v3", mount_path="/mnt/v3", size="5Gi"),
+        Volume(name="v1", size="1Gi"),
+        Volume(name="v2", size="3Gi"),
+        Volume(name="v3", size="5Gi"),
     ],
 ) as w:
     with DAG(name="d"):
