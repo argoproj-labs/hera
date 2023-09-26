@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from typing import Literal
+from typing import Literal, Dict, List
 
 import pytest
 from hera.workflows.script import RunnerScriptConstructor
@@ -50,7 +50,7 @@ def test(
         "examples.workflows.callable_script:function_kebab",
         "examples.workflows.callable_script:function_kebab_…",
     ],
-    kwargs_list: list[dict[str, str]],
+    kwargs_list: List[Dict[str, str]],
     expected_output: Literal[
         '{"output": [{"a": 2, "b": "bar"}]}',
         '{"output": [{"a": 2, "b": "bar"}, {"a": 2, "b": "b…',
@@ -133,8 +133,8 @@ def test(
 )
 def test_script_annotations_outputs(
     entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
-    kwargs_list: list[dict[str, str]],
-    expected_files: list[dict[str, str]],
+    kwargs_list: List[Dict[str, str]],
+    expected_files: List[Dict[str, str]],
     global_config_fixture: GlobalConfig,
     environ_annotations_fixture: None,
     tmp_path_fixture: Path,
@@ -184,7 +184,7 @@ def test_script_annotations_outputs(
 )
 def test_script_annotations_outputs_exceptions(
     entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
-    kwargs_list: list[dict[str, str]],
+    kwargs_list: List[Dict[str, str]],
     exception: Literal[
         "The number of outputs does not match the annotatio…",
         "The type of output `successor`, `<class 'str'>` do…",
@@ -217,7 +217,7 @@ def test_script_annotations_outputs_exceptions(
 )
 def test_script_annotations_outputs_no_global_config(
     entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
-    kwargs_list: dict[str, str],
+    kwargs_list: Dict[str, str],
     expected_output: Literal["4"],
 ):
     """Test that the output annotations are ignored when global_config is not set."""
