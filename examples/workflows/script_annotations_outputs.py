@@ -15,7 +15,7 @@ from hera.workflows import Artifact, Parameter, Workflow, script, Steps, RunnerS
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_runner"] = True
 
-global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="/user/chosen/outputs")
+global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="/tmp/user/chosen/outputs")
 
 
 @script(constructor="runner")

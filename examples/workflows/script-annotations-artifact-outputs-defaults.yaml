@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: annotations-artifact-passing
+  generateName: test-output-annotations-
 spec:
   entrypoint: my-steps
   templates:
@@ -32,7 +32,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_artifact_passing:output_artifact
+      - examples.workflows.script_annotations_artifact_outputs_defaults:output_artifact
       command:
       - python
       env:
@@ -51,7 +51,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_artifact_passing:use_artifact
+      - examples.workflows.script_annotations_artifact_outputs_defaults:use_artifact
       command:
       - python
       env:
@@ -59,3 +59,12 @@ spec:
         value: ''
       image: python:3.8
       source: '{{inputs.parameters}}'
+  volumeClaimTemplates:
+  - metadata:
+      name: my-vol
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
