@@ -50,7 +50,6 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
               artifacts:
               - from: '{{tasks.writer.outputs.artifacts.out-art}}'
                 name: in-art
-                path: /tmp/file
             depends: writer
             name: consumer
             template: consumer

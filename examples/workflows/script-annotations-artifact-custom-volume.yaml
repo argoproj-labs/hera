@@ -1,0 +1,131 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-output-annotations-
+spec:
+  entrypoint: my-steps
+  templates:
+  - name: my-steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: a_number
+            value: '3'
+        name: output-artifact-empty-dir
+        template: output-artifact-empty-dir
+    - - arguments:
+          artifacts:
+          - from: '{{steps.output-artifact-empty-dir.outputs.artifacts.successor_out}}'
+            name: successor_in
+        name: use-artifact
+        template: use-artifact
+    - - arguments:
+          parameters:
+          - name: a_number
+            value: '3'
+        name: output-artifact-existing-vol
+        template: output-artifact-existing-vol
+    - - name: use-artifact-existing-vol
+        template: use-artifact-existing-vol
+  - inputs:
+      parameters:
+      - name: a_number
+    name: output-artifact-empty-dir
+    outputs:
+      artifacts:
+      - name: successor_out
+        path: /mnt/empty/dir/artifacts/successor_out
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_artifact_custom_volume:output_artifact_empty_dir
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /mnt/empty/dir
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+      volumeMounts:
+      - mountPath: /mnt/empty/dir
+        name: my-empty-dir
+    volumes:
+    - emptyDir: {}
+      name: my-empty-dir
+  - inputs:
+      artifacts:
+      - name: successor_in
+    name: use-artifact
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_artifact_custom_volume:use_artifact
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: a_number
+    name: output-artifact-existing-vol
+    outputs:
+      artifacts:
+      - name: successor_out
+        path: /mnt/here/artifacts/successor_out
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_artifact_custom_volume:output_artifact_existing_vol
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /mnt/here
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+      volumeMounts:
+      - mountPath: /mnt/here
+        name: my-vol
+  - inputs:
+      artifacts:
+      - name: successor_in
+        path: /mnt/here/artifacts/successor_out
+    name: use-artifact-existing-vol
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_artifact_custom_volume:use_artifact_existing_vol
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+      volumeMounts:
+      - mountPath: /mnt/here
+        name: my-vol
+  volumeClaimTemplates:
+  - metadata:
+      name: my-vol
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

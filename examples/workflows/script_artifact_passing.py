@@ -16,8 +16,8 @@ def print_message():
 
 with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
     with Steps(name="artifact-example") as s:
-        whalesay(name="generate-artifact")
+        whale_step = whalesay(name="generate-artifact")
         print_message(
             name="consume-artifact",
-            arguments=[Artifact(name="message", from_="{{steps.generate-artifact.outputs.artifacts.hello-art}}")],
+            arguments=whale_step.get_artifact("hello-art").as_name("message"),
         )
