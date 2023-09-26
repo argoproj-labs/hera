@@ -1,12 +1,15 @@
 import os
 from pathlib import Path
+from unittest.mock import patch, MagicMock
+from typing import Literal
 
 import pytest
 from hera.workflows.script import RunnerScriptConstructor
+from hera.shared import GlobalConfig
 import tests.helper as test_module
 
 from hera.shared.serialization import serialize
-from hera.workflows.runner import _runner
+from hera.workflows.runner import _runner, _run
 
 
 @pytest.mark.parametrize(
@@ -39,7 +42,23 @@ from hera.workflows.runner import _runner
         ),
     ],
 )
-def test(entrypoint, kwargs_list, expected_output, global_config_fixture, environ_annotations_fixture):
+def test(
+    entrypoint: Literal[
+        "examples.workflows.callable_script:my_function",
+        "examples.workflows.callable_script:another_functio…",
+        "examples.workflows.callable_script:str_function",
+        "examples.workflows.callable_script:function_kebab",
+        "examples.workflows.callable_script:function_kebab_…",
+    ],
+    kwargs_list: list[dict[str, str]],
+    expected_output: Literal[
+        '{"output": [{"a": 2, "b": "bar"}]}',
+        '{"output": [{"a": 2, "b": "bar"}, {"a": 2, "b": "b…',
+        '{"output": [{"a": 3, "b": "bar"}]}',
+    ],
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+):
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
@@ -113,12 +132,12 @@ def test(entrypoint, kwargs_list, expected_output, global_config_fixture, enviro
     ],
 )
 def test_script_annotations_outputs(
-    entrypoint,
-    kwargs_list,
-    expected_files,
-    global_config_fixture,
-    environ_annotations_fixture,
-    tmp_path_fixture,
+    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    kwargs_list: list[dict[str, str]],
+    expected_files: list[dict[str, str]],
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    tmp_path_fixture: Path,
     monkeypatch,
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
@@ -164,7 +183,15 @@ def test_script_annotations_outputs(
     ],
 )
 def test_script_annotations_outputs_exceptions(
-    entrypoint, kwargs_list, exception, global_config_fixture, environ_annotations_fixture
+    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    kwargs_list: list[dict[str, str]],
+    exception: Literal[
+        "The number of outputs does not match the annotatio…",
+        "The type of output `successor`, `<class 'str'>` do…",
+        "The name was not provided for one of the outputs.",
+    ],
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
 ):
     """Test that the output annotations throw the expected exceptions."""
     # GIVEN
@@ -188,7 +215,11 @@ def test_script_annotations_outputs_exceptions(
         )
     ],
 )
-def test_script_annotations_outputs_no_global_config(entrypoint, kwargs_list, expected_output):
+def test_script_annotations_outputs_no_global_config(
+    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    kwargs_list: dict[str, str],
+    expected_output: Literal["4"],
+):
     """Test that the output annotations are ignored when global_config is not set."""
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -223,7 +254,12 @@ def test_script_annotations_outputs_no_global_config(entrypoint, kwargs_list, ex
     ],
 )
 def test_script_annotations_artifacts(
-    entrypoint, file_contents, expected_output, tmp_path, monkeypatch, global_config_fixture
+    entrypoint: Literal["tests.script_annotations_artifacts.script_annotati…"],
+    file_contents: Literal["Hello there!", '{"a": "Hello ", "b": "there!"}', "/this/is/a/path"],
+    expected_output: Literal["Hello there!", "/this/is/a/path"],
+    tmp_path: Path,
+    monkeypatch,
+    global_config_fixture: GlobalConfig,
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
@@ -248,7 +284,9 @@ def test_script_annotations_artifacts(
     "entrypoint",
     ["tests.script_annotations_artifacts.script_annotations_artifact_wrong_loader:read_artifact"],
 )
-def test_script_annotations_artifacts_wrong_loader(entrypoint, global_config_fixture):
+def test_script_annotations_artifacts_wrong_loader(
+    entrypoint: Literal["tests.script_annotations_artifacts.script_annotati…"], global_config_fixture: GlobalConfig
+):
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
     kwargs_list = []
@@ -261,3 +299,41 @@ def test_script_annotations_artifacts_wrong_loader(entrypoint, global_config_fix
 
     # THEN
     assert "value is not a valid enumeration member" in str(e.value)
+
+
+@patch("hera.workflows.runner._runner")
+@patch("hera.workflows.runner._parse_args")
+def test_run_empty_file(mock_parse_args, mock_runner, tmp_path: Path):
+    # GIVEN
+    file_path = Path(tmp_path / "test_params")
+    file_path.write_text("")
+
+    args = MagicMock(entrypoint="my_entrypoint", args_path=file_path)
+    mock_parse_args.return_value = args
+    mock_runner.return_value = None
+
+    # WHEN
+    _run()
+
+    # THEN
+    mock_parse_args.assert_called_once()
+    mock_runner.assert_called_once_with("my_entrypoint", [])
+
+
+@patch("hera.workflows.runner._runner")
+@patch("hera.workflows.runner._parse_args")
+def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
+    # GIVEN
+    file_path = Path(tmp_path / "test_params")
+    file_path.write_text("null")
+
+    args = MagicMock(entrypoint="my_entrypoint", args_path=file_path)
+    mock_parse_args.return_value = args
+    mock_runner.return_value = None
+
+    # WHEN
+    _run()
+
+    # THEN
+    mock_parse_args.assert_called_once()
+    mock_runner.assert_called_once_with("my_entrypoint", [])
