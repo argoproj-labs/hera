@@ -301,6 +301,32 @@ def test_script_annotations_artifacts_wrong_loader(
     assert "value is not a valid enumeration member" in str(e.value)
 
 
+@pytest.mark.parametrize(
+    "kwargs_list",
+    [
+        [{"name": "a_string", "value": 123}],
+        [{"name": "a_number", "value": 123}],
+    ],
+)
+@patch("hera.workflows.runner._runner")
+@patch("hera.workflows.runner._parse_args")
+def test_run(mock_parse_args, mock_runner, kwargs_list, tmp_path: Path):
+    # GIVEN
+    file_path = Path(tmp_path / "test_params")
+    file_path.write_text(serialize(kwargs_list))
+
+    args = MagicMock(entrypoint="my_entrypoint", args_path=file_path)
+    mock_parse_args.return_value = args
+    mock_runner.return_value = kwargs_list
+
+    # WHEN
+    _run()
+
+    # THEN
+    mock_parse_args.assert_called_once()
+    mock_runner.assert_called_once_with("my_entrypoint", kwargs_list)
+
+
 @patch("hera.workflows.runner._runner")
 @patch("hera.workflows.runner._parse_args")
 def test_run_empty_file(mock_parse_args, mock_runner, tmp_path: Path):
