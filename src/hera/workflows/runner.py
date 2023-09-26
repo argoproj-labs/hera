@@ -265,7 +265,10 @@ def _run():
     output of a Python function submitted via a `Script.source` field results in outputs sent to stdout.
     """
     args = _parse_args()
-    kwargs_list = json.loads(args.args_path.read_text() or r"[]")
+    # 1. Protect against trying to json.loads on empty files with inner `or r"[]`
+    # 2. Protect against files containing `null` as text with outer `or []` (as a result of using
+    #    `{{inputs.parameters}}` where the parameters key doesn't exist in `inputs`)
+    kwargs_list = json.loads(args.args_path.read_text() or r"[]") or []
     result = _runner(args.entrypoint, kwargs_list)
     if not result:
         return
