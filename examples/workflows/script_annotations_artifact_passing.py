@@ -1,21 +1,20 @@
 """This example will reuse the outputs volume across script steps."""
 
 
-from hera.workflows.volume import Volume
-
 try:
     from typing import Annotated  # type: ignore
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 
+from pathlib import Path
 from hera.shared import global_config
 from hera.workflows import (
     Artifact,
+    ArtifactLoader,
     Parameter,
     Steps,
     Workflow,
-    models as m,
     script,
 )
 
@@ -31,8 +30,14 @@ def output_artifact(
 
 
 @script(constructor="runner")
-def use_artifact(successor_in: Annotated[int, Artifact(name="successor_in")]):
+def use_artifact(
+    successor_in: Annotated[
+        int,
+        Artifact(name="successor_in", path="/my-path", loader=ArtifactLoader.json),
+    ]
+):
     print(successor_in)
+    print(Path("/my-path").read_text())  # if you still need the actual path, it is still mounted where you specify
 
 
 with Workflow(
