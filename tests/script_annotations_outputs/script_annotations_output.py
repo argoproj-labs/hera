@@ -19,6 +19,16 @@ global_config.experimental_features["script_annotations"] = True
 
 
 @script()
+def empty_str_param() -> Annotated[str, Parameter(name="empty-str")]:
+    return ""
+
+
+@script()
+def none_param() -> Annotated[type(None), Parameter(name="empty-str")]:
+    return None
+
+
+@script()
 def script_param(a_number) -> Annotated[int, Parameter(name="successor")]:
     return a_number + 1
 
@@ -94,6 +104,8 @@ def script_param_artifact_in_function_signature_and_return_type(
 
 with Workflow(generate_name="test-outputs-", entrypoint="my-steps") as w:
     with Steps(name="my-steps") as s:
+        empty_str_param()
+        none_param()
         script_param(arguments={"a_number": 3})
         script_artifact(arguments={"a_number": 3})
         script_artifact_path(arguments={"a_number": 3})

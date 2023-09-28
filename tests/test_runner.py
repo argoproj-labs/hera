@@ -43,19 +43,9 @@ from hera.workflows.runner import _runner, _run
     ],
 )
 def test(
-    entrypoint: Literal[
-        "examples.workflows.callable_script:my_function",
-        "examples.workflows.callable_script:another_functio…",
-        "examples.workflows.callable_script:str_function",
-        "examples.workflows.callable_script:function_kebab",
-        "examples.workflows.callable_script:function_kebab_…",
-    ],
+    entrypoint,
     kwargs_list: List[Dict[str, str]],
-    expected_output: Literal[
-        '{"output": [{"a": 2, "b": "bar"}]}',
-        '{"output": [{"a": 2, "b": "bar"}, {"a": 2, "b": "b…',
-        '{"output": [{"a": 3, "b": "bar"}]}',
-    ],
+    expected_output,
     global_config_fixture: GlobalConfig,
     environ_annotations_fixture: None,
 ):
@@ -72,6 +62,16 @@ def test(
 @pytest.mark.parametrize(
     "entrypoint,kwargs_list,expected_files",
     [
+        (
+            "tests.script_annotations_outputs.script_annotations_output:empty_str_param",
+            [],
+            [{"path": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
+        ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:none_param",
+            [],
+            [{"path": "tmp/hera/outputs/parameters/empty-str", "value": "null"}],
+        ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_param",
             [{"name": "a_number", "value": "3"}],
@@ -132,7 +132,7 @@ def test(
     ],
 )
 def test_script_annotations_outputs(
-    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_files: List[Dict[str, str]],
     global_config_fixture: GlobalConfig,
@@ -156,7 +156,7 @@ def test_script_annotations_outputs(
     # WHEN
     output = _runner(entrypoint, kwargs_list)
     # THEN
-    assert serialize(output) == "null"
+    assert output is None, "Runner should not return values directly when using return Annotations"
     for file in expected_files:
         assert Path(tmp_path_fixture / file["path"]).is_file()
         assert Path(tmp_path_fixture / file["path"]).read_text() == file["value"]
