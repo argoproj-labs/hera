@@ -70,7 +70,7 @@ def test(
         (
             "tests.script_annotations_outputs.script_annotations_output:none_param",
             [],
-            [{"path": "tmp/hera/outputs/parameters/empty-str", "value": "null"}],
+            [{"path": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_param",
