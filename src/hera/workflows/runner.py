@@ -154,32 +154,32 @@ def _map_keys(function: Callable, kwargs: dict) -> dict:
 
 
 def _save_annotated_return_outputs(
-    function_results: Union[Tuple[Any], Any],
+    function_outputs: Union[Tuple[Any], Any],
     output_destinations: List[Tuple[type, Union[Parameter, Artifact]]],
 ) -> None:
-    """Save the results of the function to the specified output destinations.
+    """Save the outputs of the function to the specified output destinations.
 
-    The results are matched with the specified outputs and saved using the schema:
+    The output values are matched with the output annotations and saved using the schema:
     <parent_directory>/artifacts/<name>
     <parent_directory>/parameters/<name>
-    If the artifact path is specified, that is used instead.
+    If the artifact path or parameter value_from.path is specified, that is used instead.
     <parent_directory> can be provided by the user or is set to /tmp/hera/outputs by default
     """
-    if not isinstance(function_results, tuple):
-        function_results = [function_results]
-    if len(function_results) != len(output_destinations):
+    if not isinstance(function_outputs, tuple):
+        function_outputs = [function_outputs]
+    if len(function_outputs) != len(output_destinations):
         raise ValueError("The number of outputs does not match the annotation")
 
-    for res, dest in zip(function_results, output_destinations):
-        if not isinstance(res, dest[0]):
+    for output_value, dest in zip(function_outputs, output_destinations):
+        if not isinstance(output_value, dest[0]):
             raise ValueError(
-                f"The type of output `{dest[1].name}`, `{type(res)}` does not match the annotated type `{dest[0]}`"
+                f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
             )
         if not dest[1].name:
             raise ValueError("The name was not provided for one of the outputs.")
 
         path = _get_outputs_path(dest[1])
-        _write_to_path(path, res)
+        _write_to_path(path, output_value)
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
@@ -195,12 +195,12 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
-def _write_to_path(path: Path, file: Any) -> None:
-    """Write the file contents to the provided path. Create the necessary parent directories."""
-    result = serialize(file)
-    if result:
+def _write_to_path(path: Path, output_value: Any) -> None:
+    """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
+    output_string = serialize(output_value)
+    if output_string is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(result)
+        path.write_text(output_string)
 
 
 def _runner(entrypoint: str, kwargs_list: Any) -> Any:
