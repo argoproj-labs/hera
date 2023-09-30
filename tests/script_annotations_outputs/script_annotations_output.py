@@ -72,8 +72,13 @@ def script_two_params_one_output(
 
 
 @script()
-def script_param_incorrect_type(a_number) -> Annotated[int, Parameter(name="successor")]:
+def script_param_incorrect_basic_type(a_number) -> Annotated[int, Parameter(name="successor")]:
     return "1 + a_number"
+
+
+@script()
+def script_param_incorrect_generic_type(a_number) -> Annotated[Dict[str, str], Parameter(name="successor")]:
+    return a_number + 1
 
 
 @script()
