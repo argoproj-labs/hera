@@ -170,10 +170,20 @@ def _save_annotated_return_outputs(
         raise ValueError("The number of outputs does not match the annotation")
 
     for output_value, dest in zip(function_outputs, output_destinations):
-        if not isinstance(output_value, get_origin(dest[0])):
-            raise ValueError(
-                f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-            )
+        if get_origin(dest[0]) is None:
+            # Built-in types return None from get_origin, so we can check isinstance directly
+            if not isinstance(output_value, dest[0]):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
+        else:
+            # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
+            origin_type = cast(type, get_origin(dest[0]))
+            if not isinstance(output_value, origin_type):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
+
         if not dest[1].name:
             raise ValueError("The name was not provided for one of the outputs.")
 
