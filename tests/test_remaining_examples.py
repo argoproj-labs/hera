@@ -15,6 +15,23 @@ from tests.test_examples import CI_MODE, HERA_REGENERATE
 ARGO_REPO_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
 GITHUB_API_ARGO = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/master?recursive=1"
 UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
+# A subset of the upstream examples are known to fail, but a majority pass. We'll
+# selectively xfail these examples rather than all until they can be fixed.
+UPSTREAM_EXAMPLE_XFAIL_FILES = [
+    "cluster-workflow-template__clustertemplates.upstream.yaml",
+    "cron-backfill.upstream.yaml",
+    "daemon-nginx.upstream.yaml",
+    "daemon-step.upstream.yaml",
+    "dag-daemon-task.upstream.yaml",
+    "default-pdb-support.upstream.yaml",
+    "influxdb-ci.upstream.yaml",
+    "memoize-simple.upstream.yaml",
+    "pod-gc-strategy-with-label-selector.upstream.yaml",
+    "pod-gc-strategy.upstream.yaml",
+    "timeouts-step.upstream.yaml",
+    "webhdfs-input-output-artifacts.upstream.yaml",
+    "workflow-template__templates.upstream.yaml",
+]
 
 
 def _save_upstream_examples(argo_examples: List[str]) -> None:
@@ -70,13 +87,19 @@ def test_for_missing_examples():
         examples_file.writelines(lines)
 
 
-@pytest.mark.xfail(
-    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types."
-)
 @pytest.mark.parametrize(
     "file_name",
     [
-        f
+        pytest.param(
+            f,
+            marks=(
+                pytest.mark.xfail(
+                    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types."
+                )
+                if f in UPSTREAM_EXAMPLE_XFAIL_FILES
+                else ()
+            ),
+        )
         for f in os.listdir(UPSTREAM_EXAMPLES_FOLDER)
         if os.path.isfile(UPSTREAM_EXAMPLES_FOLDER / f) and f.endswith(".upstream.yaml")
     ],
