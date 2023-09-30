@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from pydantic import validate_arguments
-from typing_extensions import get_args, get_origin
 
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
@@ -17,9 +16,9 @@ from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
-    from typing import Annotated  # type: ignore
+    from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated  # type: ignore
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
 def _ignore_unmatched_kwargs(f):
@@ -171,7 +170,7 @@ def _save_annotated_return_outputs(
         raise ValueError("The number of outputs does not match the annotation")
 
     for output_value, dest in zip(function_outputs, output_destinations):
-        if not isinstance(output_value, dest[0]):
+        if not isinstance(output_value, get_origin(dest[0])):
             raise ValueError(
                 f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
             )

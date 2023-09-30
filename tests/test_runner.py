@@ -129,6 +129,16 @@ def test(
                 {"path": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
             ],
         ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:return_list_str",
+            [],
+            [{"path": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
+        ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:return_dict",
+            [],
+            [{"path": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
+        ),
     ],
 )
 def test_script_annotations_outputs(
