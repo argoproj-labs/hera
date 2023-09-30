@@ -59,7 +59,7 @@ spec:
   - inputs:
       artifacts:
       - name: successor_in
-        path: /anywhere
+        path: /tmp/hera/inputs/artifacts/successor_in
     name: use-artifact
     script:
       args:

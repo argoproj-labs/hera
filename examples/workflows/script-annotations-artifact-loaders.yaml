@@ -49,11 +49,11 @@ spec:
   - inputs:
       artifacts:
       - name: my-artifact-path
-        path: /tmp/file
+        path: /tmp/hera/inputs/artifacts/my-artifact-path
       - name: my-artifact-as-str
-        path: /tmp/file
+        path: /tmp/hera/inputs/artifacts/my-artifact-as-str
       - name: my-artifact-as-json
-        path: /tmp/file
+        path: /tmp/hera/inputs/artifacts/my-artifact-as-json
     name: artifact-loaders
     script:
       args:

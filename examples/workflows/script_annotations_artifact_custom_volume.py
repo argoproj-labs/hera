@@ -44,11 +44,7 @@ def output_artifact_empty_dir(
 def use_artifact(
     successor_in: Annotated[
         int,
-        Artifact(
-            name="successor_in",
-            path="/anywhere",
-            loader=ArtifactLoader.json,
-        ),
+        Artifact(name="successor_in", loader=ArtifactLoader.json),
     ]
 ):
     print(successor_in)
@@ -87,7 +83,7 @@ with Workflow(
 ) as w:
     with Steps(name="my-steps") as s:
         out_to_empty_dir = output_artifact_empty_dir(arguments={"a_number": 3})
-        use_artifact(arguments=[out_to_empty_dir.get_artifact("successor_out").as_name("successor_in")])
+        use_artifact(arguments=[out_to_empty_dir.get_artifact("successor_out").with_name("successor_in")])
 
         out_to_my_vol = output_artifact_existing_vol(arguments={"a_number": 3})
         use_artifact_existing_vol()

@@ -8,9 +8,17 @@ spec:
   - name: my-steps
     steps:
     - - arguments:
+          parameters:
+          - name: a_number
+            value: '3'
+        name: output-dict-artifact
+        template: output-dict-artifact
+    - - arguments:
           artifacts:
-          - from: somewhere
+          - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
             name: my-artifact
+          - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+            name: my-artifact-no-path
           parameters:
           - name: an_int
             value: '1'
@@ -21,9 +29,34 @@ spec:
         name: echo-all
         template: echo-all
   - inputs:
+      parameters:
+      - name: a_number
+    name: output-dict-artifact
+    outputs:
+      artifacts:
+      - name: a_dict
+        path: /tmp/hera/outputs/artifacts/a_dict
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_inputs:output_dict_artifact
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera/outputs
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+  - inputs:
       artifacts:
       - name: my-artifact
         path: /tmp/file
+      - name: my-artifact-no-path
+        path: /tmp/hera/inputs/artifacts/my-artifact-no-path
       parameters:
       - default: '1'
         description: an_int parameter

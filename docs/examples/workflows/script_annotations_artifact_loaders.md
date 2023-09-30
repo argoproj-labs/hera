@@ -33,11 +33,9 @@
 
     @script(constructor="runner")
     def artifact_loaders(
-        a_file_as_path: Annotated[Path, Artifact(name="my-artifact-path", path="/tmp/file", loader=None)],
-        a_file_as_str: Annotated[str, Artifact(name="my-artifact-as-str", path="/tmp/file", loader=ArtifactLoader.file)],
-        a_file_as_json: Annotated[
-            Dict, Artifact(name="my-artifact-as-json", path="/tmp/file", loader=ArtifactLoader.json)
-        ],
+        a_file_as_path: Annotated[Path, Artifact(name="my-artifact-path", loader=None)],
+        a_file_as_str: Annotated[str, Artifact(name="my-artifact-as-str", loader=ArtifactLoader.file)],
+        a_file_as_json: Annotated[Dict, Artifact(name="my-artifact-as-json", loader=ArtifactLoader.json)],
     ):
         assert a_file_as_path.read_text() == a_file_as_str
         assert json.loads(a_file_as_str) == a_file_as_json
@@ -51,9 +49,9 @@
             out = output_dict_artifact(arguments={"a_number": 3})
             artifact_loaders(
                 arguments=[
-                    out.get_artifact("a_dict").as_name("my-artifact-path"),
-                    out.get_artifact("a_dict").as_name("my-artifact-as-str"),
-                    out.get_artifact("a_dict").as_name("my-artifact-as-json"),
+                    out.get_artifact("a_dict").with_name("my-artifact-path"),
+                    out.get_artifact("a_dict").with_name("my-artifact-as-str"),
+                    out.get_artifact("a_dict").with_name("my-artifact-as-json"),
                 ]
             )
     ```
@@ -112,11 +110,11 @@
       - inputs:
           artifacts:
           - name: my-artifact-path
-            path: /tmp/file
+            path: /tmp/hera/inputs/artifacts/my-artifact-path
           - name: my-artifact-as-str
-            path: /tmp/file
+            path: /tmp/hera/inputs/artifacts/my-artifact-as-str
           - name: my-artifact-as-json
-            path: /tmp/file
+            path: /tmp/hera/inputs/artifacts/my-artifact-as-json
         name: artifact-loaders
         script:
           args:
