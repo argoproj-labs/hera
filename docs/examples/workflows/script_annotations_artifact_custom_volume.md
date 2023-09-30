@@ -48,7 +48,16 @@ This example will reuse the outputs volume across script steps.
     @script(
         constructor=RunnerScriptConstructor(),  # Has no outputs
     )
-    def use_artifact(successor_in: Annotated[int, Artifact(name="successor_in", loader=ArtifactLoader.json)]):
+    def use_artifact(
+        successor_in: Annotated[
+            int,
+            Artifact(
+                name="successor_in",
+                path="/anywhere",
+                loader=ArtifactLoader.json,
+            ),
+        ]
+    ):
         print(successor_in)
 
 
@@ -155,6 +164,7 @@ This example will reuse the outputs volume across script steps.
       - inputs:
           artifacts:
           - name: successor_in
+            path: /anywhere
         name: use-artifact
         script:
           args:

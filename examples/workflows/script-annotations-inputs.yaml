@@ -23,7 +23,7 @@ spec:
   - inputs:
       artifacts:
       - name: my-artifact
-        path: tmp/file
+        path: /tmp/file
       parameters:
       - default: '1'
         description: an_int parameter

@@ -41,7 +41,16 @@ def output_artifact_empty_dir(
 @script(
     constructor=RunnerScriptConstructor(),  # Has no outputs
 )
-def use_artifact(successor_in: Annotated[int, Artifact(name="successor_in", loader=ArtifactLoader.json)]):
+def use_artifact(
+    successor_in: Annotated[
+        int,
+        Artifact(
+            name="successor_in",
+            path="/anywhere",
+            loader=ArtifactLoader.json,
+        ),
+    ]
+):
     print(successor_in)
 
 

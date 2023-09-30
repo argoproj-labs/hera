@@ -59,6 +59,7 @@ spec:
   - inputs:
       artifacts:
       - name: successor_in
+        path: /anywhere
     name: use-artifact
     script:
       args:

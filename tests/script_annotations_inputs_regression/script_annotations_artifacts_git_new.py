@@ -19,7 +19,7 @@ def read_artifact(
         str,
         GitArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             branch="my-branch",
             depth=1,
             disable_submodules=True,

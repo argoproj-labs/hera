@@ -16,7 +16,7 @@ def echo_all(
     a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],
     a_string: Annotated[str, Parameter(description="a_string parameter", default="a")],
     # note that this artifact is loaded from tmp/file into an_artifact as a string
-    an_artifact: Annotated[str, Artifact(name="my-artifact", path="tmp/file", loader=ArtifactLoader.file)],
+    an_artifact: Annotated[str, Artifact(name="my-artifact", path="/tmp/file", loader=ArtifactLoader.file)],
 ):
     print(an_int)
     print(a_bool)

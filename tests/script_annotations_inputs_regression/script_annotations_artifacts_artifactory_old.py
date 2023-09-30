@@ -9,7 +9,7 @@ from hera.workflows.steps import Steps
     inputs=[
         ArtifactoryArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             url="http://artifactory:8081/artifactory/generic-local/hello_world.tgz",
             password_secret={"name": "my-artifactory-credentials", "key": "secretPassword"},
             username_secret={"name": "my-artifactory-credentials", "key": "secretUsername"},

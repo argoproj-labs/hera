@@ -19,7 +19,7 @@ def read_artifact(
         str,
         RawArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             data="""this is
             the raw file
             contents""",

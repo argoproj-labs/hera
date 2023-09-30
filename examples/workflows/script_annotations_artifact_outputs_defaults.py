@@ -32,7 +32,16 @@ def output_artifact(
 
 
 @script(constructor="runner")
-def use_artifact(successor_in: Annotated[int, Artifact(name="successor_in", loader=ArtifactLoader.json)]):
+def use_artifact(
+    successor_in: Annotated[
+        int,
+        Artifact(
+            name="successor_in",
+            path="/tmp/file",
+            loader=ArtifactLoader.json,
+        ),
+    ]
+):
     print(successor_in)
 
 
