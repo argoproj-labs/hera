@@ -23,7 +23,6 @@ This example will reuse the outputs volume across script steps.
         Parameter,
         Steps,
         Workflow,
-        models as m,
         script,
     )
 

@@ -10,8 +10,8 @@
     ```python linenums="1"
     from hera.workflows import (
         DAG,
-        Parameter,
         NFSVolume,
+        Parameter,
         Workflow,
         models as m,
         script,
