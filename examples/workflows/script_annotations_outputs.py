@@ -1,5 +1,3 @@
-import os
-
 try:
     from typing import Annotated  # type: ignore
 except ImportError:
