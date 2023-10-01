@@ -1,7 +1,7 @@
 from hera.workflows import (
     Container,
-    Workflow,
     EmptyDirVolume,
+    Workflow,
     models as m,
 )
 

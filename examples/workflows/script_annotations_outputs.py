@@ -4,11 +4,10 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from pathlib import Path
-
 from typing import Tuple
 
 from hera.shared import global_config
-from hera.workflows import Artifact, Parameter, Workflow, script, Steps, RunnerScriptConstructor
+from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Steps, Workflow, script
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_runner"] = True

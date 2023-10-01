@@ -1,6 +1,6 @@
 import importlib
 
-from hera.workflows import script, Workflow
+from hera.workflows import Workflow, script
 from hera.workflows.script import _get_inputs_from_callable
 
 
