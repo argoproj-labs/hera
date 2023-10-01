@@ -3,7 +3,7 @@ import json
 from json import JSONEncoder
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from hera.shared._pydantic import BaseModel
 
 MISSING = object()
 """`MISSING` is a placeholder that indicates field value nullity. 

@@ -6,11 +6,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
-from pydantic import root_validator
-
 from hera.auth import TokenGenerator
-
-from ._base_model import BaseModel
+from hera.shared._pydantic import BaseModel, root_validator
 
 TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]

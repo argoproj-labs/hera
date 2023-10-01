@@ -7,8 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from pydantic import root_validator
-
+from hera.shared._pydantic import root_validator
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
 

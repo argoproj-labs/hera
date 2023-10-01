@@ -5,10 +5,10 @@ except ImportError:
 
 from pathlib import Path
 
-from pydantic import BaseModel
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
+from hera.shared._pydantic import BaseModel
 from hera.workflows import script
 from hera.workflows.artifact import Artifact, ArtifactLoader
 

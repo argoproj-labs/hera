@@ -1,6 +1,9 @@
 from typing import Optional
 
-from hera.shared._base_model import BaseModel as BaseModel
+from hera.shared._pydantic import (
+    BaseModel as BaseModel,
+    Field as Field,
+)
 
 from .io.argoproj.events import v1alpha1 as v1alpha1
 from .io.k8s.apimachinery.pkg.apis.meta import v1 as v1

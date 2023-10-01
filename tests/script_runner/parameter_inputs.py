@@ -6,9 +6,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated
 
-from pydantic import BaseModel
-
 from hera.shared import global_config
+from hera.shared._pydantic import BaseModel
 from hera.workflows import Parameter, script
 
 global_config.experimental_features["script_annotations"] = True

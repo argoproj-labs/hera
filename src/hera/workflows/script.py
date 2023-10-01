@@ -22,11 +22,11 @@ from typing import (
     overload,
 )
 
-from pydantic import root_validator, validator
 from typing_extensions import ParamSpec, get_args, get_origin
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
+from hera.shared._pydantic import root_validator, validator
 from hera.workflows._context import _context
 from hera.workflows._mixins import (
     CallableTemplateMixin,

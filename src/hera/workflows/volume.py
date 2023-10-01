@@ -3,8 +3,7 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union, cast
 
-from pydantic import root_validator, validator
-
+from hera.shared._pydantic import root_validator, validator
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
     AzureDiskVolumeSource as _ModelAzureDiskVolumeSource,

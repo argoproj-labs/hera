@@ -12,10 +12,10 @@ from typing import Dict, List
 from unittest.mock import MagicMock, patch
 
 import pytest
-from pydantic import ValidationError
 
 import tests.helper as test_module
 from hera.shared import GlobalConfig
+from hera.shared._pydantic import ValidationError
 from hera.shared.serialization import serialize
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor

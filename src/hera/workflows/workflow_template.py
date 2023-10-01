@@ -11,10 +11,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
-from pydantic import validator
-
 from hera.exceptions import NotFound
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel, validator
 from hera.workflows._mixins import ModelMapperMixin
 from hera.workflows.models import (
     ObjectMeta,

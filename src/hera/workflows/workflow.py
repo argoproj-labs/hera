@@ -13,11 +13,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args  # type: ignore
 
-
-from pydantic import validator
-
 from hera.shared import global_config
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel, validator
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,

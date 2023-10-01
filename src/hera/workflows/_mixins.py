@@ -18,10 +18,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from pydantic import root_validator, validator
-
 from hera.shared import BaseMixin, global_config
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel, root_validator, validator
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact

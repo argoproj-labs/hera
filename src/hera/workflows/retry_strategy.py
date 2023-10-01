@@ -2,9 +2,10 @@
 from enum import Enum
 from typing import Optional, Union, cast
 
-from pydantic import validator
-
-from hera.shared._base_model import BaseModel as _BaseModel
+from hera.shared._pydantic import (
+    BaseModel as _BaseModel,
+    validator,
+)
 from hera.workflows.models import (
     Backoff,
     IntOrString,

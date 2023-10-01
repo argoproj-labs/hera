@@ -1,7 +1,7 @@
 """The archive module provides archival behavior strategies for artifacts."""
 from typing import Optional
 
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel
 from hera.workflows.models import (
     ArchiveStrategy as _ModelArchiveStrategy,
     NoneStrategy as _ModelNoneStrategy,

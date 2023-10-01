@@ -8,7 +8,7 @@ import logging
 from enum import Enum
 from typing import List, Optional, Union, cast
 
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel
 from hera.workflows.archive import ArchiveStrategy
 from hera.workflows.models import (
     ArchiveStrategy as _ModelArchiveStrategy,
