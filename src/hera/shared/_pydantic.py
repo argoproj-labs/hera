@@ -1,8 +1,38 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
-from pydantic import BaseModel as PyBaseModel
+
+# The pydantic v1 interface is used for both pydantic v1 and v2 in order to support
+# users across both versions.
+try:
+    from pydantic.v1 import (
+        BaseModel as PydanticBaseModel,
+        Field,
+        ValidationError,
+        root_validator,
+        validate_arguments,
+        validator,
+    )
+except ImportError:
+    from pydantic import (  # type: ignore[assignment,no-redef]
+        BaseModel as PydanticBaseModel,
+        Field,
+        ValidationError,
+        root_validator,
+        validate_arguments,
+        validator,
+    )
 
 
-class BaseModel(PyBaseModel):
+__all__ = [
+    "BaseModel",
+    "Field",
+    "ValidationError",
+    "root_validator",
+    "validate_arguments",
+    "validator",
+]
+
+
+class BaseModel(PydanticBaseModel):
     class Config:
         """Config class dictates the behavior of the underlying Pydantic model.
 
