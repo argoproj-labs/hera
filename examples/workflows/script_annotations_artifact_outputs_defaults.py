@@ -16,7 +16,6 @@ from hera.workflows import (
     Parameter,
     Steps,
     Workflow,
-    models as m,
     script,
 )
 

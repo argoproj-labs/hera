@@ -1,15 +1,14 @@
-from pathlib import Path
-import pkgutil
 import os
+import pkgutil
+from pathlib import Path
 from typing import List
-
-import yaml
-from hera.workflows import Workflow, WorkflowTemplate, ClusterWorkflowTemplate, CronWorkflow
 
 import examples.workflows.upstream as hera_upstream_examples
 import pytest
 import requests
+import yaml
 
+from hera.workflows import ClusterWorkflowTemplate, CronWorkflow, Workflow, WorkflowTemplate
 from tests.test_examples import CI_MODE, HERA_REGENERATE
 
 ARGO_REPO_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
