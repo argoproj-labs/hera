@@ -5,8 +5,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from hera.shared._base_model import BaseModel
 from pydantic import Field
+
+from hera.shared._base_model import BaseModel
 
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr

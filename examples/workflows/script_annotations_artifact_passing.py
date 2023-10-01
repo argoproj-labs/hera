@@ -8,6 +8,7 @@ except ImportError:
 
 
 from pathlib import Path
+
 from hera.shared import global_config
 from hera.workflows import (
     Artifact,

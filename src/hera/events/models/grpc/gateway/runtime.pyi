@@ -1,6 +1,8 @@
-from ...google import protobuf as protobuf
-from hera.shared._base_model import BaseModel as BaseModel
 from typing import List, Optional
+
+from hera.shared._base_model import BaseModel as BaseModel
+
+from ...google import protobuf as protobuf
 
 class Error(BaseModel):
     code: Optional[int]
