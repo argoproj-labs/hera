@@ -15,7 +15,10 @@
     except ImportError:
         from typing_extensions import Annotated  # type: ignore
 
-    from pydantic import BaseModel
+    try:
+        from pydantic.v1 import BaseModel
+    except ImportError:
+        from pydantic import BaseModel
 
     from hera.shared import global_config
     from hera.workflows import Parameter, Script, Steps, Workflow, script
