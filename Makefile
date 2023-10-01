@@ -55,6 +55,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 		--snake-case-field \
 		--target-python-version 3.8 \
 		--output src/hera/workflows/models \
+		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._base_model.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
@@ -74,6 +75,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 		--snake-case-field \
 		--target-python-version 3.8 \
 		--output src/hera/events/models \
+		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._base_model.BaseModel \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
