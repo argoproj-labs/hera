@@ -129,6 +129,16 @@ def test(
                 {"path": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
             ],
         ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:return_list_str",
+            [],
+            [{"path": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
+        ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:return_dict",
+            [],
+            [{"path": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
+        ),
     ],
 )
 def test_script_annotations_outputs(
@@ -171,9 +181,14 @@ def test_script_annotations_outputs(
             "The number of outputs does not match the annotation",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_type",
+            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_basic_type",
             [{"name": "a_number", "value": "3"}],
             "The type of output `successor`, `<class 'str'>` does not match the annotated type `<class 'int'>`",
+        ),
+        (
+            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_generic_type",
+            [{"name": "a_number", "value": "3"}],
+            "The type of output `successor`, `<class 'int'>` does not match the annotated type `typing.Dict[str, str]`",
         ),
         (
             "tests.script_annotations_outputs.script_annotations_output:script_param_no_name",
