@@ -6,7 +6,7 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, List, Tuple
 
 from tests.helper import ARTIFACT_PATH
 
@@ -72,8 +72,13 @@ def script_two_params_one_output(
 
 
 @script()
-def script_param_incorrect_type(a_number) -> Annotated[int, Parameter(name="successor")]:
+def script_param_incorrect_basic_type(a_number) -> Annotated[int, Parameter(name="successor")]:
     return "1 + a_number"
+
+
+@script()
+def script_param_incorrect_generic_type(a_number) -> Annotated[Dict[str, str], Parameter(name="successor")]:
+    return a_number + 1
 
 
 @script()
@@ -89,6 +94,16 @@ def script_outputs_in_function_signature(
 ):
     successor.write_text(str(a_number + 1))
     successor2.write_text(str(a_number + 2))
+
+
+@script()
+def return_list_str() -> Annotated[List[str], Parameter(name="list-of-str")]:
+    return ["my", "list"]
+
+
+@script()
+def return_dict() -> Annotated[Dict[str, str], Parameter(name="dict-of-str")]:
+    return {"my-key": "my-value"}
 
 
 @script(constructor="runner")
