@@ -453,9 +453,9 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
             return None
 
         if isinstance(self.sidecars, UserContainer):
-            return [self.sidecars]
+            return [self.sidecars.build()]
 
-        return self.sidecars
+        return [s.build() for s in self.sidecars]
 
     def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
         """Builds the `active_deadline_seconds` field and optionally returns a generated `IntOrString`."""
