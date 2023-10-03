@@ -447,7 +447,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
 
-    def _build_sidecars(self) -> Optional[List[UserContainer]]:
+    def _build_sidecars(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""
         if self.sidecars is None:
             return None

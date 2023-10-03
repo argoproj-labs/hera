@@ -23,7 +23,7 @@ class UserContainer(_ModelUserContainer):
     resources: Optional[Union[Resources, ResourceRequirements]] = None  # type: ignore[assignment]
     volumes: Optional[List[_BaseVolume]] = None
 
-    def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
+    def _build_image_pull_policy(self) -> Optional[str]:
         """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
         if self.image_pull_policy is None:
             return None
