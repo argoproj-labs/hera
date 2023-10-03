@@ -1,15 +1,15 @@
 import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-from typing import Literal, Dict, List
+from typing import Dict, List, Literal
+from unittest.mock import MagicMock, patch
 
 import pytest
-from hera.workflows.script import RunnerScriptConstructor
-from hera.shared import GlobalConfig
-import tests.helper as test_module
 
+import tests.helper as test_module
+from hera.shared import GlobalConfig
 from hera.shared.serialization import serialize
-from hera.workflows.runner import _runner, _run
+from hera.workflows.runner import _run, _runner
+from hera.workflows.script import RunnerScriptConstructor
 
 
 @pytest.mark.parametrize(

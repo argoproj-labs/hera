@@ -29,7 +29,7 @@ from hera.workflows import (
         ),
     ]
 )
-def echo():
+def echo(message):
     print(message)
 
 

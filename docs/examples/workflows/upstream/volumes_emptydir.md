@@ -13,8 +13,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ```python linenums="1"
     from hera.workflows import (
         Container,
-        Workflow,
         EmptyDirVolume,
+        Workflow,
         models as m,
     )
 

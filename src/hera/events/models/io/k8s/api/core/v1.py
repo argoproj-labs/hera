@@ -6,8 +6,9 @@ from __future__ import annotations
 from enum import Enum
 from typing import Dict, List, Optional
 
-from hera.shared._base_model import BaseModel
 from pydantic import Field
+
+from hera.shared._base_model import BaseModel
 
 from ...apimachinery.pkg.api import resource
 from ...apimachinery.pkg.apis.meta import v1

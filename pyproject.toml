@@ -127,16 +127,14 @@ ignore = ["E501"]
 target-version = "py38"
 extend-select = ["I"]
 src = ["src"]
-exclude = [
-    "examples", 
-    "tests",
-    "src/hera/workflows/models", 
-    "src/hera/events/models",
-    "src/hera/workflows/_unparse.py",
-]
 
 [tool.ruff.per-file-ignores]
 "**/__init__.py" = ["F401", "D107"]
+"examples/**" = ["D"]
+"src/hera/events/models/**" = ["D"]
+"src/hera/workflows/_unparse.py" = ["D"]
+"src/hera/workflows/models/**" = ["D"]
+"tests/**" = ["D"]
 
 [tool.ruff.isort]
 force-wrap-aliases = true
