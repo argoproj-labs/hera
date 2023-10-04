@@ -19,7 +19,7 @@ def read_artifact(
         str,
         AzureArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             endpoint="https://myazurestorageaccountname.blob.core.windows.net",
             container="my-container",
             blob="path/in/container",

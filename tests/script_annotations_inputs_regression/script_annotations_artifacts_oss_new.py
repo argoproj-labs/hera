@@ -19,7 +19,7 @@ def read_artifact(
         str,
         OSSArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             access_key_secret={"name": "my-oss-credentials", "key": "secretKey"},
             bucket="test-bucket-name",
             create_bucket_if_not_present=True,

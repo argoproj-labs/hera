@@ -9,7 +9,7 @@ from hera.workflows.steps import Steps
     inputs=[
         AzureArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             endpoint="https://myazurestorageaccountname.blob.core.windows.net",
             container="my-container",
             blob="path/in/container",

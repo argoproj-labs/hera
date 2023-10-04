@@ -9,7 +9,7 @@ from hera.workflows.steps import Steps
     inputs=[
         GCSArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             bucket="my-bucket-name",
             key="path/in/bucket",
             service_account_key_secret={"name": "my-gcs-credentials", "key": "serviceAccountKey"},
