@@ -9,7 +9,7 @@ from hera.workflows.steps import Steps
     inputs=[
         HTTPArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             url="https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl",
             auth={"name": "http-auth", "key": "http-key"},
             headers=[{"name": "header1", "value": "value1"}, {"name": "header2", "value": "value1"}],

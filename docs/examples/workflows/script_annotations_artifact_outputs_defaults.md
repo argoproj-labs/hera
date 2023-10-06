@@ -38,7 +38,16 @@ This example will reuse the outputs volume across script steps.
 
 
     @script(constructor="runner")
-    def use_artifact(successor_in: Annotated[int, Artifact(name="successor_in", loader=ArtifactLoader.json)]):
+    def use_artifact(
+        successor_in: Annotated[
+            int,
+            Artifact(
+                name="successor_in",
+                path="/tmp/file",
+                loader=ArtifactLoader.json,
+            ),
+        ]
+    ):
         print(successor_in)
 
 
@@ -49,7 +58,7 @@ This example will reuse the outputs volume across script steps.
     ) as w:
         with Steps(name="my-steps") as s:
             out = output_artifact(arguments={"a_number": 3})
-            use_artifact(arguments=[out.get_artifact("successor_out").as_name("successor_in")])
+            use_artifact(arguments=[out.get_artifact("successor_out").with_name("successor_in")])
     ```
 
 === "YAML"
@@ -102,6 +111,7 @@ This example will reuse the outputs volume across script steps.
       - inputs:
           artifacts:
           - name: successor_in
+            path: /tmp/file
         name: use-artifact
         script:
           args:

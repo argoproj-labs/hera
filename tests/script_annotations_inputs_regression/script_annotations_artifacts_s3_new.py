@@ -19,7 +19,7 @@ def read_artifact(
         str,
         S3Artifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             access_key_secret={"name": "my-oss-credentials", "key": "secretKey"},
             bucket="my-bucket-name",
             create_bucket_if_not_present={"value": "true"},

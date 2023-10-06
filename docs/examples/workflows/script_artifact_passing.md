@@ -29,7 +29,7 @@
             whale_step = whalesay(name="generate-artifact")
             print_message(
                 name="consume-artifact",
-                arguments=whale_step.get_artifact("hello-art").as_name("message"),
+                arguments=whale_step.get_artifact("hello-art").with_name("message"),
             )
     ```
 
