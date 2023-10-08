@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from pydantic import validate_arguments
-from typing_extensions import get_args, get_origin
 
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
@@ -17,9 +16,9 @@ from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
-    from typing import Annotated  # type: ignore
+    from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated  # type: ignore
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
 def _ignore_unmatched_kwargs(f):
@@ -171,10 +170,20 @@ def _save_annotated_return_outputs(
         raise ValueError("The number of outputs does not match the annotation")
 
     for output_value, dest in zip(function_outputs, output_destinations):
-        if not isinstance(output_value, dest[0]):
-            raise ValueError(
-                f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-            )
+        if get_origin(dest[0]) is None:
+            # Built-in types return None from get_origin, so we can check isinstance directly
+            if not isinstance(output_value, dest[0]):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
+        else:
+            # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
+            origin_type = cast(type, get_origin(dest[0]))
+            if not isinstance(output_value, origin_type):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
+
         if not dest[1].name:
             raise ValueError("The name was not provided for one of the outputs.")
 

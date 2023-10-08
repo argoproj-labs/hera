@@ -2,6 +2,9 @@
 
 See https://argoproj.github.io/argo-workflows/walk-through/artifacts/ for a tutorial on Artifacts.
 """
+from __future__ import annotations
+
+import logging
 from enum import Enum
 from typing import List, Optional, Union, cast
 
@@ -23,6 +26,9 @@ from hera.workflows.models import (
     S3Artifact as _ModelS3Artifact,
     SecretKeySelector,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
 class ArtifactLoader(Enum):
@@ -112,8 +118,18 @@ class Artifact(BaseModel):
         return _ModelArtifactPaths(**artifact.dict())
 
     def as_name(self, name: str) -> _ModelArtifact:
-        """Returns a copy of the current artifact but named based on the specified `name`."""
+        """DEPRECATED, use with_name.
+
+        Returns a 'built' copy of the current artifact, renamed using the specified `name`.
+        """
+        logger.warning("'as_name' is deprecated, use 'with_name'")
         artifact = self._build_artifact()
+        artifact.name = name
+        return artifact
+
+    def with_name(self, name: str) -> Artifact:
+        """Returns a copy of the current artifact, renamed using the specified `name`."""
+        artifact = self.copy(deep=True)
         artifact.name = name
         return artifact
 
