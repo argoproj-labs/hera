@@ -57,6 +57,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 		--output src/hera/workflows/models \
 		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._pydantic.BaseModel \
+		--input-file-type jsonschema \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
 		--disable-timestamp \
@@ -79,6 +80,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 		--output src/hera/events/models \
 		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._pydantic.BaseModel \
+		--input-file-type jsonschema \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
 		--disable-timestamp \

@@ -159,3 +159,4 @@ if __name__ == "__main__":
     root_path = assemble_root_path_from_models_type(models_type)
     imports = get_import_paths_from_refs(filtered_refs, root_path)
     write_imports(imports, models_type, openapi_spec_url)
+    ensure_init()
