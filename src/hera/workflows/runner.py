@@ -127,8 +127,10 @@ def _map_keys(function: Callable, kwargs: dict) -> dict:
                         mapped_kwargs[param_name] = _get_outputs_path(annotated_type)
                     # Automatically create the parent directory (if required)
                     mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-                else:
+                elif annotated_type.name:
                     mapped_kwargs[param_name] = kwargs[annotated_type.name]
+                else:
+                    mapped_kwargs[param_name] = param_name.replace("-", "_")
             elif isinstance(annotated_type, Artifact):
                 if annotated_type.output:
                     if annotated_type.path:
