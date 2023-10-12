@@ -8,24 +8,21 @@
 === "Hera"
 
     ```python linenums="1"
-    import os
-
     try:
         from typing import Annotated  # type: ignore
     except ImportError:
         from typing_extensions import Annotated  # type: ignore
 
     from pathlib import Path
-
     from typing import Tuple
 
     from hera.shared import global_config
-    from hera.workflows import Artifact, Parameter, Workflow, script, Steps, RunnerScriptConstructor
+    from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Steps, Workflow, script
 
     global_config.experimental_features["script_annotations"] = True
     global_config.experimental_features["script_runner"] = True
 
-    global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="user/chosen/outputs")
+    global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="/tmp/user/chosen/outputs")
 
 
     @script(constructor="runner")
@@ -69,16 +66,16 @@
         outputs:
           artifacts:
           - name: successor2
-            path: user/chosen/outputs/artifacts/successor2
+            path: /tmp/user/chosen/outputs/artifacts/successor2
           - name: successor4
-            path: user/chosen/outputs/artifacts/successor4
+            path: /tmp/user/chosen/outputs/artifacts/successor4
           parameters:
           - name: successor
             valueFrom:
-              path: user/chosen/outputs/parameters/successor
+              path: /tmp/user/chosen/outputs/parameters/successor
           - name: successor3
             valueFrom:
-              path: user/chosen/outputs/parameters/successor3
+              path: /tmp/user/chosen/outputs/parameters/successor3
         script:
           args:
           - -m
@@ -91,14 +88,8 @@
           - name: hera__script_annotations
             value: ''
           - name: hera__outputs_directory
-            value: user/chosen/outputs
+            value: /tmp/user/chosen/outputs
           image: python:3.8
           source: '{{inputs.parameters}}'
-          volumeMounts:
-          - mountPath: user/chosen/outputs
-            name: hera-outputs-directory
-        volumes:
-        - emptyDir: {}
-          name: hera-outputs-directory
     ```
 

@@ -13,6 +13,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ```python linenums="1"
     from hera.workflows import (
         Container,
+        EmptyDirVolume,
         Workflow,
         models as m,
     )
@@ -20,7 +21,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     with Workflow(
         generate_name="volumes-emptydir-",
         entrypoint="volumes-emptydir-example",
-        volumes=[m.Volume(name="workdir", empty_dir=m.EmptyDirVolumeSource())],
+        volumes=[EmptyDirVolume(name="workdir")],
     ) as w:
         empty_dir = Container(
             name="volumes-emptydir-example",

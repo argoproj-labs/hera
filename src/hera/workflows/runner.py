@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from pydantic import validate_arguments
-from typing_extensions import get_args, get_origin
 
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
@@ -17,9 +16,9 @@ from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
-    from typing import Annotated  # type: ignore
+    from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated  # type: ignore
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
 def _ignore_unmatched_kwargs(f):
@@ -154,32 +153,42 @@ def _map_keys(function: Callable, kwargs: dict) -> dict:
 
 
 def _save_annotated_return_outputs(
-    function_results: Union[Tuple[Any], Any],
+    function_outputs: Union[Tuple[Any], Any],
     output_destinations: List[Tuple[type, Union[Parameter, Artifact]]],
 ) -> None:
-    """Save the results of the function to the specified output destinations.
+    """Save the outputs of the function to the specified output destinations.
 
-    The results are matched with the specified outputs and saved using the schema:
+    The output values are matched with the output annotations and saved using the schema:
     <parent_directory>/artifacts/<name>
     <parent_directory>/parameters/<name>
-    If the artifact path is specified, that is used instead.
-    <parent_directory> can be provided by the user or is set to /hera/outputs by default
+    If the artifact path or parameter value_from.path is specified, that is used instead.
+    <parent_directory> can be provided by the user or is set to /tmp/hera/outputs by default
     """
-    if not isinstance(function_results, tuple):
-        function_results = [function_results]
-    if len(function_results) != len(output_destinations):
+    if not isinstance(function_outputs, tuple):
+        function_outputs = [function_outputs]
+    if len(function_outputs) != len(output_destinations):
         raise ValueError("The number of outputs does not match the annotation")
 
-    for res, dest in zip(function_results, output_destinations):
-        if not isinstance(res, dest[0]):
-            raise ValueError(
-                f"The type of output `{dest[1].name}`, `{type(res)}` does not match the annotated type `{dest[0]}`"
-            )
+    for output_value, dest in zip(function_outputs, output_destinations):
+        if get_origin(dest[0]) is None:
+            # Built-in types return None from get_origin, so we can check isinstance directly
+            if not isinstance(output_value, dest[0]):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
+        else:
+            # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
+            origin_type = cast(type, get_origin(dest[0]))
+            if not isinstance(output_value, origin_type):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
+
         if not dest[1].name:
             raise ValueError("The name was not provided for one of the outputs.")
 
         path = _get_outputs_path(dest[1])
-        _write_to_path(path, res)
+        _write_to_path(path, output_value)
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
@@ -195,12 +204,12 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
-def _write_to_path(path: Path, file: Any) -> None:
-    """Write the file contents to the provided path. Create the necessary parent directories."""
-    result = serialize(file)
-    if result:
+def _write_to_path(path: Path, output_value: Any) -> None:
+    """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
+    output_string = serialize(output_value)
+    if output_string is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(result)
+        path.write_text(output_string)
 
 
 def _runner(entrypoint: str, kwargs_list: Any) -> Any:
@@ -265,7 +274,10 @@ def _run():
     output of a Python function submitted via a `Script.source` field results in outputs sent to stdout.
     """
     args = _parse_args()
-    kwargs_list = json.loads(args.args_path.read_text() or r"[]")
+    # 1. Protect against trying to json.loads on empty files with inner `or r"[]`
+    # 2. Protect against files containing `null` as text with outer `or []` (as a result of using
+    #    `{{inputs.parameters}}` where the parameters key doesn't exist in `inputs`)
+    kwargs_list = json.loads(args.args_path.read_text() or r"[]") or []
     result = _runner(args.entrypoint, kwargs_list)
     if not result:
         return

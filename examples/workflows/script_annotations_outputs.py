@@ -1,21 +1,18 @@
-import os
-
 try:
     from typing import Annotated  # type: ignore
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from pathlib import Path
-
 from typing import Tuple
 
 from hera.shared import global_config
-from hera.workflows import Artifact, Parameter, Workflow, script, Steps, RunnerScriptConstructor
+from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Steps, Workflow, script
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_runner"] = True
 
-global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="user/chosen/outputs")
+global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="/tmp/user/chosen/outputs")
 
 
 @script(constructor="runner")

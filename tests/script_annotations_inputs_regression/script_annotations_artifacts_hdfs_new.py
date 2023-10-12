@@ -19,7 +19,7 @@ def read_artifact(
         str,
         HDFSArtifact(
             name="my_artifact",
-            path="tmp/file",
+            path="/tmp/file",
             addresses=[
                 "my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020",
                 "my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020",

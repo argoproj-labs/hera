@@ -1,5 +1,6 @@
 from hera.workflows import (
     Container,
+    EmptyDirVolume,
     Workflow,
     models as m,
 )
@@ -7,7 +8,7 @@ from hera.workflows import (
 with Workflow(
     generate_name="volumes-emptydir-",
     entrypoint="volumes-emptydir-example",
-    volumes=[m.Volume(name="workdir", empty_dir=m.EmptyDirVolumeSource())],
+    volumes=[EmptyDirVolume(name="workdir")],
 ) as w:
     empty_dir = Container(
         name="volumes-emptydir-example",

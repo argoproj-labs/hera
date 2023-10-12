@@ -14,7 +14,7 @@ global_config.experimental_features["script_annotations"] = True
 
 
 @script()
-def read_artifact(my_artifact: Annotated[str, Artifact(name="my_artifact", path="tmp/file", optional=True)]) -> str:
+def read_artifact(my_artifact: Annotated[str, Artifact(name="my_artifact", path="/tmp/file", optional=True)]) -> str:
     return my_artifact
 
 

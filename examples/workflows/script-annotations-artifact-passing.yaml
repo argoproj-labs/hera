@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: annotations-artifact-passing
+spec:
+  entrypoint: my-steps
+  templates:
+  - name: my-steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: a_number
+            value: '3'
+        name: output-artifact
+        template: output-artifact
+    - - arguments:
+          artifacts:
+          - from: '{{steps.output-artifact.outputs.artifacts.successor_out}}'
+            name: successor_in
+        name: use-artifact
+        template: use-artifact
+  - inputs:
+      parameters:
+      - name: a_number
+    name: output-artifact
+    outputs:
+      artifacts:
+      - name: successor_out
+        path: /tmp/hera/outputs/artifacts/successor_out
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_artifact_passing:output_artifact
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera/outputs
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+  - inputs:
+      artifacts:
+      - name: successor_in
+        path: /my-path
+    name: use-artifact
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.script_annotations_artifact_passing:use_artifact
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'

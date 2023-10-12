@@ -17,9 +17,9 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
     )
 
     with Steps(name="artifact-example") as s:
-        Step(name="generate-artifact", template=whalesay)
+        gen_step = Step(name="generate-artifact", template=whalesay)
         Step(
             name="consume-artifact",
             template=print_message,
-            arguments=[Artifact(name="message", from_="{{steps.generate-artifact.outputs.artifacts.hello-art}}")],
+            arguments=gen_step.get_artifact("hello-art").with_name("message"),
         )

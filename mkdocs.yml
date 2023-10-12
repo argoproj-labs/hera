@@ -118,11 +118,10 @@ plugins:
           options:
             # show_category_heading: true
             show_if_no_docstring: true
-            show_inherited_members: true
+            inherited_members: true
             filters: ["!^_.*$"]
             show_bases: false
             separate_signature: true
-          selection:
             docstring_style: google
           rendering:
             show_source: true

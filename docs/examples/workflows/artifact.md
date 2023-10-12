@@ -28,7 +28,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
     with Workflow(generate_name="artifact-", entrypoint="d") as w:
         with DAG(name="d"):
             w_ = writer()
-            c = consumer(arguments=w_.get_artifact("out-art").as_name("in-art"))
+            c = consumer(arguments=w_.get_artifact("out-art").with_name("in-art"))
             w_ >> c
     ```
 
@@ -50,7 +50,6 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
               artifacts:
               - from: '{{tasks.writer.outputs.artifacts.out-art}}'
                 name: in-art
-                path: /tmp/file
             depends: writer
             name: consumer
             template: consumer

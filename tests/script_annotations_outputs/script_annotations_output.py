@@ -6,7 +6,7 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, List, Tuple
 
 from tests.helper import ARTIFACT_PATH
 
@@ -16,6 +16,16 @@ from hera.workflows.steps import Steps
 
 global_config.experimental_features["script_runner"] = True
 global_config.experimental_features["script_annotations"] = True
+
+
+@script()
+def empty_str_param() -> Annotated[str, Parameter(name="empty-str")]:
+    return ""
+
+
+@script()
+def none_param() -> Annotated[type(None), Parameter(name="null-str")]:
+    return None
 
 
 @script()
@@ -62,8 +72,13 @@ def script_two_params_one_output(
 
 
 @script()
-def script_param_incorrect_type(a_number) -> Annotated[int, Parameter(name="successor")]:
+def script_param_incorrect_basic_type(a_number) -> Annotated[int, Parameter(name="successor")]:
     return "1 + a_number"
+
+
+@script()
+def script_param_incorrect_generic_type(a_number) -> Annotated[Dict[str, str], Parameter(name="successor")]:
+    return a_number + 1
 
 
 @script()
@@ -81,6 +96,16 @@ def script_outputs_in_function_signature(
     successor2.write_text(str(a_number + 2))
 
 
+@script()
+def return_list_str() -> Annotated[List[str], Parameter(name="list-of-str")]:
+    return ["my", "list"]
+
+
+@script()
+def return_dict() -> Annotated[Dict[str, str], Parameter(name="dict-of-str")]:
+    return {"my-key": "my-value"}
+
+
 @script(constructor="runner")
 def script_param_artifact_in_function_signature_and_return_type(
     a_number: Annotated[int, Parameter(name="a_number")],
@@ -94,6 +119,8 @@ def script_param_artifact_in_function_signature_and_return_type(
 
 with Workflow(generate_name="test-outputs-", entrypoint="my-steps") as w:
     with Steps(name="my-steps") as s:
+        empty_str_param()
+        none_param()
         script_param(arguments={"a_number": 3})
         script_artifact(arguments={"a_number": 3})
         script_artifact_path(arguments={"a_number": 3})

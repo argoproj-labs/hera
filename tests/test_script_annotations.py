@@ -1,6 +1,7 @@
 import importlib
 
 import pytest
+
 from .test_examples import _compare_workflows
 
 try:

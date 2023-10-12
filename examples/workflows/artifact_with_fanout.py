@@ -30,6 +30,6 @@ def consumer(i: int):
 with Workflow(generate_name="artifact-with-fanout-", entrypoint="d") as w:
     with DAG(name="d"):
         w_ = writer()
-        f = fanout(arguments=w_.get_artifact("out-art").as_name("in-art"))
+        f = fanout(arguments=w_.get_artifact("out-art").with_name("in-art"))
         c = consumer(with_param=f.result)
         w_ >> f >> c
