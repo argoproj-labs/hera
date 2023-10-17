@@ -105,5 +105,15 @@ def test_workflow_callable_container_raises_error():
 
 
 def test_returns_expected_workflow_link():
+    with pytest.raises(AssertionError) as e:
+        w = Workflow(name="test")
+        w.workflows_service = None
+        w.get_workflow_link()
+    assert str(e.value) == "Cannot fetch a workflow link without a service"
+
+    with pytest.raises(AssertionError) as e:
+        Workflow(workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace")).get_workflow_link()
+    assert str(e.value) == "Cannot fetch a workflow link without a cron workflow name"
+
     w = Workflow(name="test", workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"))
     assert w.get_workflow_link() == "hera.test/workflows/my-namespace/test?tab=workflow"

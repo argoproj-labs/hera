@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from hera.exceptions import NotFound
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import CreateCronWorkflowRequest, UpdateCronWorkflowRequest
@@ -64,6 +66,18 @@ def test_cron_workflow_update_non_existent():
 
 
 def test_returns_expected_workflow_link():
+    with pytest.raises(AssertionError) as e:
+        cw = CronWorkflow(name="test", schedule="* * * * *")
+        cw.workflows_service = None
+        cw.get_workflow_link()
+    assert str(e.value) == "Cannot fetch a cron workflow link without a service"
+
+    with pytest.raises(AssertionError) as e:
+        CronWorkflow(
+            schedule="* * * * *", workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace")
+        ).get_workflow_link()
+    assert str(e.value) == "Cannot fetch a cron workflow link without a cron workflow name"
+
     w = CronWorkflow(
         name="test",
         schedule="* * * * *",

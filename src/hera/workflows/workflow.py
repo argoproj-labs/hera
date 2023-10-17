@@ -492,6 +492,8 @@ class Workflow(
 
     def get_workflow_link(self) -> str:
         """Returns the workflow link for the workflow."""
+        assert self.workflows_service is not None, "Cannot fetch a workflow link without a service"
+        assert self.name is not None, "Cannot fetch a workflow link without a cron workflow name"
         return self.workflows_service.get_workflow_link(self.name)
 
 
