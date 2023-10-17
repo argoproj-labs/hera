@@ -456,8 +456,9 @@ def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type
     for endpoint in endpoints:
         result = result + f"{endpoint}\n"
 
-    result = add_get_workflow_link(result)
-    result = add_get_cron_workflow_link(result)
+    if models_type in {"workflows"}:
+        result = add_get_workflow_link(result)
+        result = add_get_cron_workflow_link(result)
     result += f"\n\n__all__ = ['{models_type.capitalize()}Service']"
     return result
 
