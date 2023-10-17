@@ -42,7 +42,7 @@ class Parameter:
 
 
 class Response:
-    """The response type of a request."""
+    """The request response type."""
 
     def __init__(self, ref: str) -> None:
         """Instantiate a response.
@@ -426,12 +426,40 @@ class {models_type}Service:
 """
 
 
+def add_get_workflow_link(service_def: str) -> str:
+    """Adds a custom method to the service for fetching a workflow link."""
+    return (
+        service_def
+        + """
+    def get_workflow_link(self, name: str) -> str:
+        \"\"\"Returns the workflow link for the given workflow name.\"\"\"
+        return f\"{self.host}/workflows/{self.namespace}/{name}?tab=workflow\"
+"""
+    )
+
+
+def add_get_cron_workflow_link(service_def: str) -> str:
+    """Adds a custom method to the service for fetching a cron workflow link."""
+    return (
+        service_def
+        + """
+    def get_cron_workflow_link(self, name: str) -> str:
+        \"\"\"Returns the link for the given cron workflow name.\"\"\"
+        return f\"{self.host}/cron-workflows/{self.namespace}/{name}\"
+"""
+    )
+
+
 def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type: str) -> str:
     """Makes the service definitions based on the given endpoints for the given model type."""
     result = service_def
     for endpoint in endpoints:
         result = result + f"{endpoint}\n"
-    result = result + f"\n\n__all__ = ['{models_type.capitalize()}Service']"
+
+    if models_type in {"workflows"}:
+        result = add_get_workflow_link(result)
+        result = add_get_cron_workflow_link(result)
+    result += f"\n\n__all__ = ['{models_type.capitalize()}Service']"
     return result
 
 

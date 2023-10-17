@@ -1300,5 +1300,13 @@ class WorkflowsService:
 
         raise exception_from_server_response(resp)
 
+    def get_workflow_link(self, name: str) -> str:
+        """Returns the workflow link for the given workflow name."""
+        return f"{self.host}/workflows/{self.namespace}/{name}?tab=workflow"
+
+    def get_cron_workflow_link(self, name: str) -> str:
+        """Returns the link for the given cron workflow name."""
+        return f"{self.host}/cron-workflows/{self.namespace}/{name}"
+
 
 __all__ = ["WorkflowsService"]
