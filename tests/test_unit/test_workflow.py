@@ -102,3 +102,8 @@ def test_workflow_callable_container_raises_error():
 
     # THEN InvalidTemplateCall raised
     assert "Callable Template 'whalesay' is not callable under a Workflow" in str(e.value)
+
+
+def test_returns_expected_workflow_link():
+    w = Workflow(name="test", workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"))
+    assert w.get_workflow_link() == "hera.test/workflows/my-namespace/test?tab=workflow"

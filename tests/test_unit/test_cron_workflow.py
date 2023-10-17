@@ -61,3 +61,12 @@ def test_cron_workflow_update_non_existent():
         CreateCronWorkflowRequest(cron_workflow=cw.build()), namespace="my-namespace"
     )
     cw.workflows_service.update_cron_workflow.assert_not_called()
+
+
+def test_returns_expected_workflow_link():
+    w = CronWorkflow(
+        name="test",
+        schedule="* * * * *",
+        workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"),
+    )
+    assert w.get_workflow_link() == "hera.test/cron-workflows/my-namespace/test"

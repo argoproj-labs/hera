@@ -209,5 +209,9 @@ class CronWorkflow(Workflow):
         """
         return cls._from_file(yaml_file, _ModelCronWorkflow)
 
+    def get_workflow_link(self) -> str:
+        """Returns the workflow link for the workflow."""
+        return self.workflows_service.get_cron_workflow_link(self.name)
+
 
 __all__ = ["CronWorkflow"]
