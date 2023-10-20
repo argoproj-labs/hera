@@ -113,7 +113,7 @@ def test_returns_expected_workflow_link():
 
     with pytest.raises(AssertionError) as e:
         Workflow(workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace")).get_workflow_link()
-    assert str(e.value) == "Cannot fetch a workflow link without a cron workflow name"
+    assert str(e.value) == "Cannot fetch a workflow link without a workflow name"
 
     w = Workflow(name="test", workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"))
     assert w.get_workflow_link() == "hera.test/workflows/my-namespace/test?tab=workflow"
