@@ -109,79 +109,87 @@ def test_runner_annotated_parameter_inputs(
         (
             "empty_str_param",
             [],
-            [{"path": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
+            [{"subpath": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
         ),
         (
             "none_param",
             [],
-            [{"path": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
+            [{"subpath": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
         ),
         (
             "script_param",
             [{"name": "a_number", "value": "3"}],
-            [{"path": "tmp/hera/outputs/parameters/successor", "value": "4"}],
+            [{"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"}],
         ),
         (
             "script_artifact",
             [{"name": "a_number", "value": "3"}],
-            [{"path": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
+            [{"subpath": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
         ),
         (
             "script_artifact_path",
             [{"name": "a_number", "value": "3"}],
-            [{"path": "file.txt", "value": "4"}],
+            [{"subpath": "file.txt", "value": "4"}],
         ),
         (
             "script_artifact_and_param",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor", "value": "5"},
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor", "value": "5"},
             ],
         ),
         (
             "script_two_params",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/parameters/successor2", "value": "5"},
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/parameters/successor2", "value": "5"},
             ],
         ),
         (
             "script_two_artifacts",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "tmp/hera/outputs/artifacts/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
             ],
         ),
         (
             "script_outputs_in_function_signature",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+            ],
+        ),
+        (
+            "script_outputs_in_function_signature_with_path",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "successor", "value": "4"},
+                {"subpath": "successor2", "value": "5"},
             ],
         ),
         (
             "script_param_artifact_in_function_signature_and_return_type",
             [{"name": "a_number", "value": "3"}],
             [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
-                {"path": "tmp/hera/outputs/parameters/successor3", "value": "6"},
-                {"path": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera/outputs/parameters/successor3", "value": "6"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
             ],
         ),
         (
             "return_list_str",
             [],
-            [{"path": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
+            [{"subpath": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
         ),
         (
             "return_dict",
             [],
-            [{"path": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
+            [{"subpath": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
         ),
     ],
 )
@@ -191,35 +199,35 @@ def test_script_annotations_outputs(
     expected_files: List[Dict[str, str]],
     global_config_fixture: GlobalConfig,
     environ_annotations_fixture: None,
-    tmp_path_fixture: Path,
+    tmp_path: Path,
     monkeypatch,
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
     for file in expected_files:
-        assert not Path(tmp_path_fixture / file["path"]).is_file()
+        assert not Path(tmp_path / file["subpath"]).is_file()
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
 
-    outputs_directory = str(tmp_path_fixture / "tmp/hera/outputs")
+    outputs_directory = str(tmp_path / "tmp/hera/outputs")
     global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
 
-    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path_fixture))
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
     os.environ["hera__outputs_directory"] = outputs_directory
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
-    import tests.script_runner.annotated_outputs as module
+    import tests.script_runner.annotated_outputs as output_tests_module
 
-    importlib.reload(module)
+    importlib.reload(output_tests_module)
 
     # WHEN
-    output = _runner(f"{module.__name__}:{function_name}", kwargs_list)
+    output = _runner(f"{output_tests_module.__name__}:{function_name}", kwargs_list)
     # THEN
     assert output is None, "Runner should not return values directly when using return Annotations"
     for file in expected_files:
-        assert Path(tmp_path_fixture / file["path"]).is_file()
-        assert Path(tmp_path_fixture / file["path"]).read_text() == file["value"]
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
 @pytest.mark.parametrize(

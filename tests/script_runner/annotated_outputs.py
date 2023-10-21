@@ -85,11 +85,23 @@ def script_param_no_name(a_number) -> Annotated[int, Parameter()]:
     return a_number + 1
 
 
-@script(constructor="runner")
+@script()
 def script_outputs_in_function_signature(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],
     successor2: Annotated[Path, Artifact(name="successor2", output=True)],
+):
+    successor.write_text(str(a_number + 1))
+    successor2.write_text(str(a_number + 2))
+
+
+@script()
+def script_outputs_in_function_signature_with_path(
+    a_number: Annotated[int, Parameter(name="a_number")],
+    successor: Annotated[
+        Path, Parameter(name="successor", value_from={"path": ARTIFACT_PATH + "/successor"}, output=True)
+    ],
+    successor2: Annotated[Path, Artifact(name="successor2", path=ARTIFACT_PATH + "/successor2", output=True)],
 ):
     successor.write_text(str(a_number + 1))
     successor2.write_text(str(a_number + 2))
