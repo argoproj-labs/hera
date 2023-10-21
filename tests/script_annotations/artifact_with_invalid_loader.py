@@ -1,3 +1,5 @@
+"""This file causes a pydantic validation error when imported, so must be tested separately."""
+
 try:
     from typing import Annotated  # type: ignore
 except ImportError:

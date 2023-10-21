@@ -1,3 +1,9 @@
+"""Test the runner with local functions.
+
+The functions should behave in the same way on the Argo cluster, meaning annotations
+and import logic should be taken into account. The functions are not required to be a
+part of a Workflow when running locally.
+"""
 import importlib
 import os
 from pathlib import Path
@@ -98,35 +104,35 @@ def test_runner_annotated_parameter_inputs(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,expected_files",
+    "function_name,kwargs_list,expected_files",
     [
         (
-            "tests.script_annotations_outputs.script_annotations_output:empty_str_param",
+            "empty_str_param",
             [],
             [{"path": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:none_param",
+            "none_param",
             [],
             [{"path": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param",
+            "script_param",
             [{"name": "a_number", "value": "3"}],
             [{"path": "tmp/hera/outputs/parameters/successor", "value": "4"}],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_artifact",
+            "script_artifact",
             [{"name": "a_number", "value": "3"}],
             [{"path": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_artifact_path",
+            "script_artifact_path",
             [{"name": "a_number", "value": "3"}],
             [{"path": "file.txt", "value": "4"}],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_artifact_and_param",
+            "script_artifact_and_param",
             [{"name": "a_number", "value": "3"}],
             [
                 {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
@@ -134,7 +140,7 @@ def test_runner_annotated_parameter_inputs(
             ],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_two_params",
+            "script_two_params",
             [{"name": "a_number", "value": "3"}],
             [
                 {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
@@ -142,7 +148,7 @@ def test_runner_annotated_parameter_inputs(
             ],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_two_artifacts",
+            "script_two_artifacts",
             [{"name": "a_number", "value": "3"}],
             [
                 {"path": "tmp/hera/outputs/artifacts/successor", "value": "4"},
@@ -150,7 +156,7 @@ def test_runner_annotated_parameter_inputs(
             ],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_outputs_in_function_signature",
+            "script_outputs_in_function_signature",
             [{"name": "a_number", "value": "3"}],
             [
                 {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
@@ -158,7 +164,7 @@ def test_runner_annotated_parameter_inputs(
             ],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_artifact_in_function_signature_and_return_type",
+            "script_param_artifact_in_function_signature_and_return_type",
             [{"name": "a_number", "value": "3"}],
             [
                 {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
@@ -168,19 +174,19 @@ def test_runner_annotated_parameter_inputs(
             ],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:return_list_str",
+            "return_list_str",
             [],
             [{"path": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:return_dict",
+            "return_dict",
             [],
             [{"path": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
         ),
     ],
 )
 def test_script_annotations_outputs(
-    entrypoint,
+    function_name,
     kwargs_list: List[Dict[str, str]],
     expected_files: List[Dict[str, str]],
     global_config_fixture: GlobalConfig,
@@ -201,8 +207,14 @@ def test_script_annotations_outputs(
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path_fixture))
     os.environ["hera__outputs_directory"] = outputs_directory
 
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_runner.annotated_outputs as module
+
+    importlib.reload(module)
+
     # WHEN
-    output = _runner(entrypoint, kwargs_list)
+    output = _runner(f"{module.__name__}:{function_name}", kwargs_list)
     # THEN
     assert output is None, "Runner should not return values directly when using return Annotations"
     for file in expected_files:
@@ -211,32 +223,32 @@ def test_script_annotations_outputs(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,exception",
+    "function_name,kwargs_list,exception",
     [
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_two_params_one_output",
+            "script_two_params_one_output",
             [{"name": "a_number", "value": "3"}],
             "The number of outputs does not match the annotation",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_basic_type",
+            "script_param_incorrect_basic_type",
             [{"name": "a_number", "value": "3"}],
             "The type of output `successor`, `<class 'str'>` does not match the annotated type `<class 'int'>`",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_generic_type",
+            "script_param_incorrect_generic_type",
             [{"name": "a_number", "value": "3"}],
             "The type of output `successor`, `<class 'int'>` does not match the annotated type `typing.Dict[str, str]`",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_no_name",
+            "script_param_no_name",
             [{"name": "a_number", "value": "3"}],
             "The name was not provided for one of the outputs.",
         ),
     ],
 )
 def test_script_annotations_outputs_exceptions(
-    entrypoint,
+    function_name,
     kwargs_list: List[Dict[str, str]],
     exception,
     global_config_fixture: GlobalConfig,
@@ -249,7 +261,7 @@ def test_script_annotations_outputs_exceptions(
 
     # WHEN
     with pytest.raises(ValueError) as e:
-        _ = _runner(entrypoint, kwargs_list)
+        _ = _runner(f"tests.script_runner.annotated_outputs:{function_name}", kwargs_list)
     # THEN
     assert exception in str(e.value)
 
@@ -258,7 +270,7 @@ def test_script_annotations_outputs_exceptions(
     "entrypoint,kwargs_list,expected_output",
     [
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param",
+            "tests.script_runner.annotated_outputs:script_param",
             [{"name": "a_number", "value": "3"}],
             "4",
         )
@@ -319,7 +331,7 @@ def test_script_annotations_artifact_inputs(
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
-    import tests.script_annotations.artifact_inputs as module
+    import tests.script_runner.artifact_loaders as module
 
     importlib.reload(module)
 
@@ -338,7 +350,7 @@ def test_script_annotations_artifact_inputs(
     "entrypoint,artifact_name,file_contents,expected_output",
     [
         (
-            "tests.script_annotations.artifact_inputs:file_loader_default_path",
+            "tests.script_runner.artifact_loaders:file_loader_default_path",
             "my-artifact",
             "Hello there!",
             "Hello there!",

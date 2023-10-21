@@ -8,7 +8,7 @@ except ImportError:
 from pydantic import BaseModel
 
 from hera.shared import global_config
-from hera.workflows import Parameter, Script, Steps, Workflow, script
+from hera.workflows import Parameter, script
 
 global_config.experimental_features["script_runner"] = True
 global_config.experimental_features["script_annotations"] = True
@@ -35,6 +35,9 @@ def annotated_basic_types(
 def annotated_object(annotated_input_value: Annotated[Input, Parameter(name="input-value")]) -> Output:
     return Output(output=[annotated_input_value])
 
+
 @script()
-def annotated_parameter_no_name(annotated_input_value: Annotated[Input, Parameter(description="a value to input")]) -> Output:
+def annotated_parameter_no_name(
+    annotated_input_value: Annotated[Input, Parameter(description="a value to input")]
+) -> Output:
     return Output(output=[annotated_input_value])
