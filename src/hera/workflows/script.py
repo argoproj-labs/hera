@@ -62,9 +62,6 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 
-_DEFAULT_ARTIFACT_INPUT_DIRECTORY = "/tmp/hera/inputs/artifacts/"
-
-
 class ScriptConstructor(BaseMixin):
     """A ScriptConstructor is responsible for generating the source code for a Script given a python callable.
 
@@ -441,7 +438,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
             if isinstance(new_object, Artifact):
                 if new_object.path is None:
-                    new_object.path = _DEFAULT_ARTIFACT_INPUT_DIRECTORY + f"{new_object.name}"
+                    new_object.path = new_object._get_default_inputs_path()
 
                 artifacts.append(new_object)
             elif isinstance(new_object, Parameter):
