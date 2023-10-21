@@ -61,6 +61,43 @@ def test_runner_parameter_inputs(
 
 
 @pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_output",
+    [
+        (
+            "tests.script_annotations.parameter_inputs:annotated_basic_types",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
+        ),
+        (
+            "tests.script_annotations.parameter_inputs:annotated_object",
+            [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
+        ),
+        (
+            "tests.script_annotations.parameter_inputs:annotated_parameter_no_name",
+            [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
+        ),
+    ],
+)
+def test_runner_annotated_parameter_inputs(
+    entrypoint,
+    kwargs_list: List[Dict[str, str]],
+    expected_output,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+):
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_runner"] = True
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
     "entrypoint,kwargs_list,expected_files",
     [
         (
