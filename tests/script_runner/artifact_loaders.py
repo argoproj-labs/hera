@@ -34,6 +34,22 @@ def no_loader(an_artifact: Annotated[Path, Artifact(name="my-artifact", path=ART
 
 
 @script(constructor="runner")
+def no_loader_as_string(
+    an_artifact: Annotated[str, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=None)]
+) -> str:
+    """Getting the path as a string is allowed because the path in the Artifact class is a string"""
+    return Path(an_artifact).read_text()
+
+
+@script(constructor="runner")
+def no_loader_wrong_type(
+    an_artifact: Annotated[int, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=None)]
+) -> str:
+    # Type must not be allowed to become a Path - the function code should not be reachable
+    pass
+
+
+@script(constructor="runner")
 def file_loader(
     an_artifact: Annotated[str, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=ArtifactLoader.file)]
 ) -> str:

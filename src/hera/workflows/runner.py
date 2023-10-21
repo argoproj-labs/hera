@@ -105,8 +105,8 @@ def _is_output_kwarg(key, f):
     )
 
 
-def _map_kwargs_to_function_annotations(function: Callable, kwargs: Dict) -> Dict:
-    """Map kwargs to the function parameters using the function's parameter annotations.
+def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
+    """Map kwargs from Argo to the function parameters using the function's parameter annotations.
 
     For Parameter inputs:
     * if the Parameter has a "name", replace it with the function parameter name
@@ -263,7 +263,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         # Do a simple replacement for hyphens to get valid Python parameter names.
         kwargs = {key.replace("-", "_"): value for key, value in kwargs.items()}
     else:
-        kwargs = _map_kwargs_to_function_annotations(function, kwargs)
+        kwargs = _map_argo_inputs_to_function(function, kwargs)
 
     function = validate_arguments(function)
     function = _ignore_unmatched_kwargs(function)

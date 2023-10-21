@@ -11,6 +11,7 @@ from typing import Dict, List
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
 
 import tests.helper as test_module
 from hera.shared import GlobalConfig
@@ -306,6 +307,11 @@ def test_script_annotations_outputs_no_global_config(
             "First test!",
         ),
         (
+            "no_loader_as_string",
+            "Another test",
+            "Another test",
+        ),
+        (
             "json_object_loader",
             """{"a": "Hello ", "b": "there!"}""",
             "Hello there!",
@@ -354,6 +360,31 @@ def test_script_annotations_artifact_inputs(
     assert serialize(output) == expected_output
 
 
+def test_script_annotations_artifact_input_loader_error(
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+):
+    """Test that the input artifact loaded with wrong type throws the expected exception."""
+    # GIVEN
+    function_name = "no_loader_wrong_type"
+    kwargs_list = []
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_runner"] = True
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_runner.artifact_loaders as module
+
+    importlib.reload(module)
+
+    # WHEN
+    with pytest.raises(ValidationError) as e:
+        _ = _runner(f"{module.__name__}:{function_name}", kwargs_list)
+
+    # THEN
+    assert "value is not a valid integer" in str(e.value)
+
+
 @pytest.mark.parametrize(
     "entrypoint,artifact_name,file_contents,expected_output",
     [
@@ -398,7 +429,7 @@ def test_script_annotations_artifacts_wrong_loader(
 ):
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
-    entrypoint = "tests.script_annotations.artifact_with_invalid_loader:invalid_loader"
+    entrypoint = "tests.script_runner.artifact_with_invalid_loader:invalid_loader"
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     os.environ["hera__script_annotations"] = ""
@@ -409,6 +440,7 @@ def test_script_annotations_artifacts_wrong_loader(
 
     # THEN
     assert "value is not a valid enumeration member" in str(e.value)
+
 
 def test_script_annotations_unknown_type(global_config_fixture: GlobalConfig):
     # GIVEN
@@ -423,6 +455,7 @@ def test_script_annotations_unknown_type(global_config_fixture: GlobalConfig):
 
     # THEN
     assert serialize(output) == expected_output
+
 
 @pytest.mark.parametrize(
     "kwargs_list",
