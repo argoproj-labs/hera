@@ -51,7 +51,7 @@ def test_get_inputs_from_callable_simple_artifact(tmp_path, monkeypatch):
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
-    entrypoint = "tests.script_annotations_artifacts.script_annotations_artifact_path:read_artifact"
+    entrypoint = "tests.script_annotations.artifact_inputs:no_loader"
     module, function_name = entrypoint.split(":")
     md = importlib.import_module(module)
     importlib.reload(md)

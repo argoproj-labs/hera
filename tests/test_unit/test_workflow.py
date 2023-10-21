@@ -50,13 +50,12 @@ def test_workflow_create():
     )
 
 
-def test_workflow_to_file(tmpdir):
+def test_workflow_to_file(tmp_path: Path):
     # GIVEN
     workflow = importlib.import_module("examples.workflows.coinflip").w
-    output_dir = Path(tmpdir)
 
     # WHEN
-    yaml_path = workflow.to_file(output_dir)
+    yaml_path = workflow.to_file(tmp_path)
 
     # THEN
     assert yaml_path.exists()

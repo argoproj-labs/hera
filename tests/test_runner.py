@@ -1,6 +1,7 @@
+import importlib
 import os
 from pathlib import Path
-from typing import Dict, List, Literal
+from typing import Dict, List
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -37,12 +38,12 @@ from hera.workflows.script import RunnerScriptConstructor
         ),
         (
             "examples.workflows.callable_script:function_kebab_object",
-            [{"name": "input-values", "value": '{"a": 3, "b": "bar"}'}],
+            [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
         ),
     ],
 )
-def test(
+def test_runner_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
@@ -198,13 +199,9 @@ def test_script_annotations_outputs(
     ],
 )
 def test_script_annotations_outputs_exceptions(
-    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    entrypoint,
     kwargs_list: List[Dict[str, str]],
-    exception: Literal[
-        "The number of outputs does not match the annotatio…",
-        "The type of output `successor`, `<class 'str'>` do…",
-        "The name was not provided for one of the outputs.",
-    ],
+    exception,
     global_config_fixture: GlobalConfig,
     environ_annotations_fixture: None,
 ):
@@ -231,9 +228,9 @@ def test_script_annotations_outputs_exceptions(
     ],
 )
 def test_script_annotations_outputs_no_global_config(
-    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    entrypoint,
     kwargs_list: Dict[str, str],
-    expected_output: Literal["4"],
+    expected_output,
 ):
     """Test that the output annotations are ignored when global_config is not set."""
     # WHEN
@@ -244,34 +241,34 @@ def test_script_annotations_outputs_no_global_config(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,file_contents,expected_output",
+    "function,file_contents,expected_output",
     [
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_path:read_artifact",
-            "Hello there!",
-            "Hello there!",
+            "no_loader",
+            "First test!",
+            "First test!",
         ),
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_object:read_artifact",
+            "json_object_loader",
             """{"a": "Hello ", "b": "there!"}""",
             "Hello there!",
         ),
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_file:read_artifact",
-            "Hello there!",
-            "Hello there!",
+            "file_loader",
+            "This file had a path",
+            "This file had a path",
         ),
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_file_with_path:read_artifact",
-            "/this/is/a/path",
-            "/this/is/a/path",
+            "file_loader",
+            "/this/file/contains/a/path",  # A file containing a path as a string (we should not do any further processing)
+            "/this/file/contains/a/path",
         ),
     ],
 )
-def test_script_annotations_artifacts(
-    entrypoint: Literal["tests.script_annotations_artifacts.script_annotati…"],
-    file_contents: Literal["Hello there!", '{"a": "Hello ", "b": "there!"}', "/this/is/a/path"],
-    expected_output: Literal["Hello there!", "/this/is/a/path"],
+def test_script_annotations_artifact_inputs(
+    function,
+    file_contents,
+    expected_output,
     tmp_path: Path,
     monkeypatch,
     global_config_fixture: GlobalConfig,
@@ -279,11 +276,55 @@ def test_script_annotations_artifacts(
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
     filepath = tmp_path / "my_file.txt"
-
     filepath.write_text(file_contents)
-    import tests.helper as test_module
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(filepath))
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_annotations.artifact_inputs as module
+
+    importlib.reload(module)
+
+    kwargs_list = []
+    global_config_fixture.experimental_features["script_annotations"] = True
+    os.environ["hera__script_annotations"] = ""
+
+    # WHEN
+    output = _runner(f"{module.__name__}:{function}", kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "entrypoint,artifact_name,file_contents,expected_output",
+    [
+        (
+            "tests.script_annotations.artifact_inputs:file_loader_default_path",
+            "my-artifact",
+            "Hello there!",
+            "Hello there!",
+        ),
+    ],
+)
+def test_script_annotations_artifacts_no_path(
+    entrypoint,
+    artifact_name,
+    file_contents,
+    expected_output,
+    tmp_path: Path,
+    monkeypatch,
+    global_config_fixture: GlobalConfig,
+):
+    """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
+    # GIVEN
+    filepath = tmp_path / f"{artifact_name}"
+    filepath.write_text(file_contents)
+
+    # Trailing slash required
+    monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
+
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     os.environ["hera__script_annotations"] = ""
@@ -295,15 +336,12 @@ def test_script_annotations_artifacts(
     assert serialize(output) == expected_output
 
 
-@pytest.mark.parametrize(
-    "entrypoint",
-    ["tests.script_annotations_artifacts.script_annotations_artifact_wrong_loader:read_artifact"],
-)
 def test_script_annotations_artifacts_wrong_loader(
-    entrypoint: Literal["tests.script_annotations_artifacts.script_annotati…"], global_config_fixture: GlobalConfig
+    global_config_fixture: GlobalConfig,
 ):
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
+    entrypoint = "tests.script_annotations.artifact_with_invalid_loader:invalid_loader"
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     os.environ["hera__script_annotations"] = ""
