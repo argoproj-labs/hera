@@ -410,6 +410,19 @@ def test_script_annotations_artifacts_wrong_loader(
     # THEN
     assert "value is not a valid enumeration member" in str(e.value)
 
+def test_script_annotations_unknown_type(global_config_fixture: GlobalConfig):
+    # GIVEN
+    expected_output = "a string"
+    entrypoint = "tests.script_runner.unknown_annotation_types:unknown_annotations_ignored"
+    kwargs_list = [{"name": "my_string", "value": expected_output}]
+    global_config_fixture.experimental_features["script_annotations"] = True
+    os.environ["hera__script_annotations"] = ""
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
 
 @pytest.mark.parametrize(
     "kwargs_list",

@@ -164,6 +164,8 @@ def _map_kwargs_to_function_annotations(function: Callable, kwargs: Dict) -> Dic
                 map_annotated_param(param_name, func_param_annotation)
             elif isinstance(func_param_annotation, Artifact):
                 map_annotated_artifact(param_name, func_param_annotation)
+            else:
+                mapped_kwargs[param_name] = kwargs[param_name]
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
 
