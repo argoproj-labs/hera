@@ -80,9 +80,9 @@ class Artifact(BaseModel):
     """allows the specification of an artifact from a subpath within the main source."""
 
     loader: Optional[ArtifactLoader] = None
-    """used in Artifact annotations for determining how to load the data.
+    """used for input Artifact annotations for determining how to load the data.
 
-    Note: A value of 'None' must be used with a type of 'Path'."""
+    Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
 
     output: bool = False
     """used to specify artifact as an output in function signature annotations"""

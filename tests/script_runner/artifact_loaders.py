@@ -42,10 +42,11 @@ def no_loader_as_string(
 
 
 @script(constructor="runner")
-def no_loader_wrong_type(
+def no_loader_invalid_type(
     an_artifact: Annotated[int, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader=None)]
 ) -> str:
-    # Type must not be allowed to become a Path - the function code should not be reachable
+    # Type of an_artifact must fail validation and not be allowed to become a Path
+    # The function code should not be reachable
     pass
 
 

@@ -412,7 +412,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if get_origin(func_param.annotation) is not Annotated:
+        if get_origin(func_param.annotation) is not Annotated or not isinstance(
+            get_args(func_param.annotation)[1], (Artifact, Parameter)
+        ):
             if (
                 func_param.default != inspect.Parameter.empty
                 and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
@@ -424,9 +426,6 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             parameters.append(Parameter(name=func_param.name, default=default))
         else:
             annotation = get_args(func_param.annotation)[1]
-
-            if not isinstance(annotation, (Artifact, Parameter)):
-                raise ValueError(f"The output {type(annotation)} cannot be used as an annotation.")
 
             if annotation.output:
                 continue

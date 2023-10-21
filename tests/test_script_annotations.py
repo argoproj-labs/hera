@@ -66,13 +66,14 @@ def test_script_annotations_artifact_regression(module_name, global_config_fixtu
     _compare_workflows(workflow_old, output_old, output_new)
 
 
-@script()
-def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
-    print(an_int)
-
-
 def test_double_default_throws_a_value_error(global_config_fixture):
     """Test asserting that it is not possible to define default in the annotation and normal Python."""
+
+    # GIVEN
+    @script()
+    def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
+        print(an_int)
+
     global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
         with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:

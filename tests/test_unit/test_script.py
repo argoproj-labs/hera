@@ -54,8 +54,6 @@ def test_get_artifact_input():
 
     # THEN
     assert params == []
-    assert artifacts is not None
-
     assert isinstance(artifacts, list)
     assert len(artifacts) == 1
     an_artifact = artifacts[0]
@@ -100,3 +98,22 @@ def test_script_parses_static_method():
     assert len(w.templates) == 2
     assert w.templates[0].name == "my-func"
     assert w.templates[1].name == "test"
+
+
+def test_script_ignores_unknown_annotations():
+    # GIVEN
+    @script()
+    def unknown_annotations_ignored(my_string: Annotated[str, "some metadata"]) -> str:
+        return my_string
+
+    # WHEN
+    params, artifacts = _get_inputs_from_callable(unknown_annotations_ignored)
+
+    # THEN
+    assert artifacts == []
+    assert isinstance(params, list)
+    assert len(params) == 1
+    parameter = params[0]
+
+    assert parameter.name == "my_string"
+    assert parameter.default is None

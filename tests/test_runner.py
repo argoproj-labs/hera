@@ -71,17 +71,17 @@ def test_runner_parameter_inputs(
     "entrypoint,kwargs_list,expected_output",
     [
         (
-            "tests.script_annotations.parameter_inputs:annotated_basic_types",
+            "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
             '{"output": [{"a": 3, "b": "bar"}]}',
         ),
         (
-            "tests.script_annotations.parameter_inputs:annotated_object",
+            "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
         ),
         (
-            "tests.script_annotations.parameter_inputs:annotated_parameter_no_name",
+            "tests.script_runner.parameter_inputs:annotated_parameter_no_name",
             [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
         ),
@@ -366,7 +366,7 @@ def test_script_annotations_artifact_input_loader_error(
 ):
     """Test that the input artifact loaded with wrong type throws the expected exception."""
     # GIVEN
-    function_name = "no_loader_wrong_type"
+    function_name = "no_loader_invalid_type"
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
