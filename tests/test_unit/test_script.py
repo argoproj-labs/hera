@@ -1,17 +1,22 @@
-import importlib
+try:
+    from typing import Annotated  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated  # type: ignore
+
+from pathlib import Path
 
 from hera.workflows import Workflow, script
+from hera.workflows.artifact import Artifact
 from hera.workflows.script import _get_inputs_from_callable
 
 
 def test_get_inputs_from_callable_simple_params():
     # GIVEN
-    entrypoint = "tests.helper:my_function"
-    module, function_name = entrypoint.split(":")
-    function = getattr(importlib.import_module(module), function_name)
+    def my_function(a: int, b: str):
+        return a + b
 
     # WHEN
-    params, artifacts = _get_inputs_from_callable(function)
+    params, artifacts = _get_inputs_from_callable(my_function)
 
     # THEN
     assert params is not None
@@ -28,57 +33,41 @@ def test_get_inputs_from_callable_simple_params():
 
 def test_get_inputs_from_callable_no_params():
     # GIVEN
-    entrypoint = "tests.helper:no_param_function"
-    module, function_name = entrypoint.split(":")
-    function = getattr(importlib.import_module(module), function_name)
+    def no_param_function():
+        return "Hello there!"
 
     # WHEN
-    params, artifacts = _get_inputs_from_callable(function)
+    params, artifacts = _get_inputs_from_callable(no_param_function)
 
     # THEN
     assert params == []
     assert artifacts == []
 
 
-def test_get_inputs_from_callable_simple_artifact(tmp_path, monkeypatch):
+def test_get_artifact_input():
     # GIVEN
-    if not tmp_path.is_file():
-        tmp_path = tmp_path / "my_file.txt"
-
-    tmp_path.touch()
-    tmp_path.write_text("Hello there")
-    import tests.helper as test_module
-
-    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
-
-    entrypoint = "tests.script_annotations_artifacts.script_annotations_artifact_path:read_artifact"
-    module, function_name = entrypoint.split(":")
-    md = importlib.import_module(module)
-    importlib.reload(md)
-    function = getattr(md, function_name)
+    def input_artifact_function(an_artifact: Annotated[Path, Artifact(name="my-artifact", path="my-file.txt")]) -> str:
+        return an_artifact.read_text()
 
     # WHEN
-    params, artifacts = _get_inputs_from_callable(function)
+    params, artifacts = _get_inputs_from_callable(input_artifact_function)
 
     # THEN
     assert params == []
-    assert artifacts is not None
-
     assert isinstance(artifacts, list)
     assert len(artifacts) == 1
     an_artifact = artifacts[0]
 
     assert an_artifact.name == "my-artifact"
-    assert an_artifact.path == str(tmp_path)
-
-
-@script(name="my-alt-name")
-def my_func():
-    print("Hello world!")
+    assert an_artifact.path == "my-file.txt"
 
 
 def test_script_name_kwarg_in_decorator():
-    # GIVEN my_func above
+    # GIVEN
+    @script(name="my-alt-name")
+    def my_func():
+        print("Hello world!")
+
     # WHEN
     with Workflow(name="test-script") as w:
         my_func()
@@ -109,3 +98,22 @@ def test_script_parses_static_method():
     assert len(w.templates) == 2
     assert w.templates[0].name == "my-func"
     assert w.templates[1].name == "test"
+
+
+def test_script_ignores_unknown_annotations():
+    # GIVEN
+    @script()
+    def unknown_annotations_ignored(my_string: Annotated[str, "some metadata"]) -> str:
+        return my_string
+
+    # WHEN
+    params, artifacts = _get_inputs_from_callable(unknown_annotations_ignored)
+
+    # THEN
+    assert artifacts == []
+    assert isinstance(params, list)
+    assert len(params) == 1
+    parameter = params[0]
+
+    assert parameter.name == "my_string"
+    assert parameter.default is None

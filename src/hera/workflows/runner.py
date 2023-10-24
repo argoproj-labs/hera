@@ -105,47 +105,67 @@ def _is_output_kwarg(key, f):
     )
 
 
-def _map_keys(function: Callable, kwargs: dict) -> dict:
-    """Change the kwargs's keys to use the Python name instead of the parameter name which could be kebab case.
+def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
+    """Map kwargs from Argo to the function parameters using the function's parameter annotations.
 
-    For Parameters, update their name to not contain kebab-case in Python but allow it in YAML.
-    For Artifacts, load the Artifact according to the given ArtifactLoader.
+    For Parameter inputs:
+    * if the Parameter has a "name", replace it with the function parameter name
+    * otherwise use the function parameter name as-is
+    For Parameter outputs:
+    * update value to a Path object from the value_from.path value, or the default if not provided
+
+    For Artifact inputs:
+    * load the Artifact according to the given ArtifactLoader
+    For Artifact outputs:
+    * update value to a Path object
     """
-    if os.environ.get("hera__script_annotations", None) is None:
-        return {key.replace("-", "_"): value for key, value in kwargs.items()}
-
     mapped_kwargs: Dict[str, Any] = {}
+
+    def map_annotated_param(param_name: str, param_annotation: Parameter) -> None:
+        if param_annotation.output:
+            if param_annotation.value_from and param_annotation.value_from.path:
+                mapped_kwargs[param_name] = Path(param_annotation.value_from.path)
+            else:
+                mapped_kwargs[param_name] = _get_outputs_path(param_annotation)
+            # Automatically create the parent directory (if required)
+            mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
+        elif param_annotation.name:
+            mapped_kwargs[param_name] = kwargs[param_annotation.name]
+        else:
+            mapped_kwargs[param_name] = kwargs[param_name]
+
+    def map_annotated_artifact(param_name: str, artifact_annotation: Artifact) -> None:
+        if artifact_annotation.output:
+            if artifact_annotation.path:
+                mapped_kwargs[param_name] = Path(artifact_annotation.path)
+            else:
+                mapped_kwargs[param_name] = _get_outputs_path(artifact_annotation)
+            # Automatically create the parent directory (if required)
+            mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
+        else:
+            if not artifact_annotation.path:
+                # Path was added to yaml automatically, we need to add it back in for the runner
+                artifact_annotation.path = artifact_annotation._get_default_inputs_path()
+
+            if artifact_annotation.loader == ArtifactLoader.json.value:
+                path = Path(artifact_annotation.path)
+                mapped_kwargs[param_name] = json.load(path.open())
+            elif artifact_annotation.loader == ArtifactLoader.file.value:
+                path = Path(artifact_annotation.path)
+                mapped_kwargs[param_name] = path.read_text()
+            elif artifact_annotation.loader is None:
+                mapped_kwargs[param_name] = artifact_annotation.path
+
     for param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:
-            annotated_type = get_args(func_param.annotation)[1]
+            func_param_annotation = get_args(func_param.annotation)[1]
 
-            if isinstance(annotated_type, Parameter):
-                if annotated_type.output:
-                    if annotated_type.value_from and annotated_type.value_from.path:
-                        mapped_kwargs[param_name] = Path(annotated_type.value_from.path)
-                    else:
-                        mapped_kwargs[param_name] = _get_outputs_path(annotated_type)
-                    # Automatically create the parent directory (if required)
-                    mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-                else:
-                    mapped_kwargs[param_name] = kwargs[annotated_type.name]
-            elif isinstance(annotated_type, Artifact):
-                if annotated_type.output:
-                    if annotated_type.path:
-                        mapped_kwargs[param_name] = Path(annotated_type.path)
-                    else:
-                        mapped_kwargs[param_name] = _get_outputs_path(annotated_type)
-                    # Automatically create the parent directory (if required)
-                    mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-                elif annotated_type.path:
-                    if annotated_type.loader == ArtifactLoader.json.value:
-                        path = Path(annotated_type.path)
-                        mapped_kwargs[param_name] = json.load(path.open())
-                    elif annotated_type.loader == ArtifactLoader.file.value:
-                        path = Path(annotated_type.path)
-                        mapped_kwargs[param_name] = path.read_text()
-                    elif annotated_type.loader is None:
-                        mapped_kwargs[param_name] = annotated_type.path
+            if isinstance(func_param_annotation, Parameter):
+                map_annotated_param(param_name, func_param_annotation)
+            elif isinstance(func_param_annotation, Artifact):
+                map_annotated_artifact(param_name, func_param_annotation)
+            else:
+                mapped_kwargs[param_name] = kwargs[param_name]
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
 
@@ -212,14 +232,12 @@ def _write_to_path(path: Path, output_value: Any) -> None:
         path.write_text(output_string)
 
 
-def _runner(entrypoint: str, kwargs_list: Any) -> Any:
-    """Run a function with a list of kwargs.
+def _runner(entrypoint: str, kwargs_list: List) -> Any:
+    """Run the function defined by the entrypoint with the given list of kwargs.
 
     Args:
-        entrypoint: The path to the script within the container to execute.
-        module: The module path to import the function from.
-        function_name: The name of the function to run.
-        kwargs_list: A list of kwargs to pass to the function.
+        entrypoint: The module path to the script within the container to execute. "package.submodule:function"
+        kwargs_list: A list of dicts with "name" and "value" keys, representing the kwargs of the function.
 
     Returns:
         The result of the function or `None` if the outputs are to be saved.
@@ -240,7 +258,13 @@ def _runner(entrypoint: str, kwargs_list: Any) -> Any:
         key = cast(str, serialize(kwarg["name"]))
         value = kwarg["value"]
         kwargs[key] = value
-    kwargs = _map_keys(function, kwargs)
+
+    if os.environ.get("hera__script_annotations", None) is None:
+        # Do a simple replacement for hyphens to get valid Python parameter names.
+        kwargs = {key.replace("-", "_"): value for key, value in kwargs.items()}
+    else:
+        kwargs = _map_argo_inputs_to_function(function, kwargs)
+
     function = validate_arguments(function)
     function = _ignore_unmatched_kwargs(function)
 
@@ -278,6 +302,7 @@ def _run():
     # 2. Protect against files containing `null` as text with outer `or []` (as a result of using
     #    `{{inputs.parameters}}` where the parameters key doesn't exist in `inputs`)
     kwargs_list = json.loads(args.args_path.read_text() or r"[]") or []
+    assert isinstance(kwargs_list, List)
     result = _runner(args.entrypoint, kwargs_list)
     if not result:
         return

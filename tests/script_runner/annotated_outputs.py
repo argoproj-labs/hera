@@ -11,8 +11,7 @@ from typing import Dict, List, Tuple
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
-from hera.workflows import Artifact, Parameter, Workflow, script
-from hera.workflows.steps import Steps
+from hera.workflows import Artifact, Parameter, script
 
 global_config.experimental_features["script_runner"] = True
 global_config.experimental_features["script_annotations"] = True
@@ -86,11 +85,23 @@ def script_param_no_name(a_number) -> Annotated[int, Parameter()]:
     return a_number + 1
 
 
-@script(constructor="runner")
+@script()
 def script_outputs_in_function_signature(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],
     successor2: Annotated[Path, Artifact(name="successor2", output=True)],
+):
+    successor.write_text(str(a_number + 1))
+    successor2.write_text(str(a_number + 2))
+
+
+@script()
+def script_outputs_in_function_signature_with_path(
+    a_number: Annotated[int, Parameter(name="a_number")],
+    successor: Annotated[
+        Path, Parameter(name="successor", value_from={"path": ARTIFACT_PATH + "/successor"}, output=True)
+    ],
+    successor2: Annotated[Path, Artifact(name="successor2", path=ARTIFACT_PATH + "/successor2", output=True)],
 ):
     successor.write_text(str(a_number + 1))
     successor2.write_text(str(a_number + 2))
@@ -115,16 +126,3 @@ def script_param_artifact_in_function_signature_and_return_type(
     successor.write_text(str(a_number + 1))
     successor2.write_text(str(a_number + 2))
     return a_number + 3, a_number + 4
-
-
-with Workflow(generate_name="test-outputs-", entrypoint="my-steps") as w:
-    with Steps(name="my-steps") as s:
-        empty_str_param()
-        none_param()
-        script_param(arguments={"a_number": 3})
-        script_artifact(arguments={"a_number": 3})
-        script_artifact_path(arguments={"a_number": 3})
-        script_artifact_and_param(arguments={"a_number": 3})
-        script_two_params(arguments={"a_number": 3})
-        script_two_artifacts(arguments={"a_number": 3})
-        script_param_artifact_in_function_signature_and_return_type(arguments={"a_number": 3})
