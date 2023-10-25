@@ -30,6 +30,8 @@ from hera.workflows.models import (
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
+_DEFAULT_ARTIFACT_INPUT_DIRECTORY = "/tmp/hera/inputs/artifacts/"
+
 
 class ArtifactLoader(Enum):
     """Enum for artifact loader options."""
@@ -78,7 +80,14 @@ class Artifact(BaseModel):
     """allows the specification of an artifact from a subpath within the main source."""
 
     loader: Optional[ArtifactLoader] = None
-    """used in Artifact annotations for determining how to load the data"""
+    """used for input Artifact annotations for determining how to load the data.
+
+    Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
+
+    optional: Optional[bool] = None
+    """whether the Artifact is optional. For an input Artifact, this means it may possibly not
+    exist at the specified path during the template's runtime. For an output Artifact, it may
+    possibly not be generated during the step/task and available as an output to subsequent steps/tasks."""
 
     output: bool = False
     """used to specify artifact as an output in function signature annotations"""
@@ -86,6 +95,9 @@ class Artifact(BaseModel):
     def _check_name(self):
         if not self.name:
             raise ValueError("name cannot be `None` or empty when used")
+
+    def _get_default_inputs_path(self) -> str:
+        return _DEFAULT_ARTIFACT_INPUT_DIRECTORY + f"{self.name}"
 
     def _build_archive(self) -> Optional[_ModelArchiveStrategy]:
         if self.archive is None:
@@ -107,6 +119,7 @@ class Artifact(BaseModel):
             from_expression=self.from_expression,
             global_name=self.global_name,
             mode=self.mode,
+            optional=self.optional,
             path=self.path,
             recurse_mode=self.recurse_mode,
             sub_path=self.sub_path,

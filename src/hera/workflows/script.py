@@ -62,9 +62,6 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 
-_DEFAULT_ARTIFACT_INPUT_DIRECTORY = "/tmp/hera/inputs/artifacts/"
-
-
 class ScriptConstructor(BaseMixin):
     """A ScriptConstructor is responsible for generating the source code for a Script given a python callable.
 
@@ -415,7 +412,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if get_origin(func_param.annotation) is not Annotated:
+        if get_origin(func_param.annotation) is not Annotated or not isinstance(
+            get_args(func_param.annotation)[1], (Artifact, Parameter)
+        ):
             if (
                 func_param.default != inspect.Parameter.empty
                 and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
@@ -428,9 +427,6 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
         else:
             annotation = get_args(func_param.annotation)[1]
 
-            if not isinstance(annotation, (Artifact, Parameter)):
-                raise ValueError(f"The output {type(annotation)} cannot be used as an annotation.")
-
             if annotation.output:
                 continue
 
@@ -441,7 +437,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
             if isinstance(new_object, Artifact):
                 if new_object.path is None:
-                    new_object.path = _DEFAULT_ARTIFACT_INPUT_DIRECTORY + f"{new_object.name}"
+                    new_object.path = new_object._get_default_inputs_path()
 
                 artifacts.append(new_object)
             elif isinstance(new_object, Parameter):

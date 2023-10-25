@@ -1,9 +1,17 @@
+"""Test the runner with local functions.
+
+The functions should behave in the same way on the Argo cluster, meaning annotations
+and import logic should be taken into account. The functions are not required to be a
+part of a Workflow when running locally.
+"""
+import importlib
 import os
 from pathlib import Path
-from typing import Dict, List, Literal
+from typing import Dict, List
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
 
 import tests.helper as test_module
 from hera.shared import GlobalConfig
@@ -41,12 +49,12 @@ from hera.workflows.script import RunnerScriptConstructor
         ),
         (
             "examples.workflows.callable_script:function_kebab_object",
-            [{"name": "input-values", "value": '{"a": 3, "b": "bar", "c": "abc"}'}],
+            [{"name": "input-value", "value": '{"a": 3, "b": "bar", "c": "abc"}'}],
             '{"output": [{"a": 3, "b": "bar", "c": "abc"}]}',
         ),
     ],
 )
-def test(
+def test_runner_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
@@ -64,151 +72,198 @@ def test(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,expected_files",
+    "entrypoint,kwargs_list,expected_output",
     [
         (
-            "tests.script_annotations_outputs.script_annotations_output:empty_str_param",
-            [],
-            [{"path": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
+            "tests.script_runner.parameter_inputs:annotated_basic_types",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:none_param",
-            [],
-            [{"path": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
+            "tests.script_runner.parameter_inputs:annotated_object",
+            [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param",
-            [{"name": "a_number", "value": "3"}],
-            [{"path": "tmp/hera/outputs/parameters/successor", "value": "4"}],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_artifact",
-            [{"name": "a_number", "value": "3"}],
-            [{"path": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_artifact_path",
-            [{"name": "a_number", "value": "3"}],
-            [{"path": "file.txt", "value": "4"}],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_artifact_and_param",
-            [{"name": "a_number", "value": "3"}],
-            [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor", "value": "5"},
-            ],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_two_params",
-            [{"name": "a_number", "value": "3"}],
-            [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/parameters/successor2", "value": "5"},
-            ],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_two_artifacts",
-            [{"name": "a_number", "value": "3"}],
-            [
-                {"path": "tmp/hera/outputs/artifacts/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
-            ],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_outputs_in_function_signature",
-            [{"name": "a_number", "value": "3"}],
-            [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
-            ],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_artifact_in_function_signature_and_return_type",
-            [{"name": "a_number", "value": "3"}],
-            [
-                {"path": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"path": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
-                {"path": "tmp/hera/outputs/parameters/successor3", "value": "6"},
-                {"path": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
-            ],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:return_list_str",
-            [],
-            [{"path": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
-        ),
-        (
-            "tests.script_annotations_outputs.script_annotations_output:return_dict",
-            [],
-            [{"path": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
+            "tests.script_runner.parameter_inputs:annotated_parameter_no_name",
+            [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
         ),
     ],
 )
-def test_script_annotations_outputs(
+def test_runner_annotated_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
-    expected_files: List[Dict[str, str]],
+    expected_output,
     global_config_fixture: GlobalConfig,
     environ_annotations_fixture: None,
-    tmp_path_fixture: Path,
-    monkeypatch,
 ):
-    """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
-    for file in expected_files:
-        assert not Path(tmp_path_fixture / file["path"]).is_file()
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_runner"] = True
 
-    outputs_directory = str(tmp_path_fixture / "tmp/hera/outputs")
-    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
-
-    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path_fixture))
-    os.environ["hera__outputs_directory"] = outputs_directory
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
     # THEN
-    assert output is None, "Runner should not return values directly when using return Annotations"
-    for file in expected_files:
-        assert Path(tmp_path_fixture / file["path"]).is_file()
-        assert Path(tmp_path_fixture / file["path"]).read_text() == file["value"]
+    assert serialize(output) == expected_output
 
 
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,exception",
+    "function_name,kwargs_list,expected_files",
     [
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_two_params_one_output",
+            "empty_str_param",
+            [],
+            [{"subpath": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
+        ),
+        (
+            "none_param",
+            [],
+            [{"subpath": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
+        ),
+        (
+            "script_param",
+            [{"name": "a_number", "value": "3"}],
+            [{"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"}],
+        ),
+        (
+            "script_artifact",
+            [{"name": "a_number", "value": "3"}],
+            [{"subpath": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
+        ),
+        (
+            "script_artifact_path",
+            [{"name": "a_number", "value": "3"}],
+            [{"subpath": "file.txt", "value": "4"}],
+        ),
+        (
+            "script_artifact_and_param",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor", "value": "5"},
+            ],
+        ),
+        (
+            "script_two_params",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/parameters/successor2", "value": "5"},
+            ],
+        ),
+        (
+            "script_two_artifacts",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "tmp/hera/outputs/artifacts/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+            ],
+        ),
+        (
+            "script_outputs_in_function_signature",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+            ],
+        ),
+        (
+            "script_outputs_in_function_signature_with_path",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "successor", "value": "4"},
+                {"subpath": "successor2", "value": "5"},
+            ],
+        ),
+        (
+            "script_param_artifact_in_function_signature_and_return_type",
+            [{"name": "a_number", "value": "3"}],
+            [
+                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera/outputs/parameters/successor3", "value": "6"},
+                {"subpath": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
+            ],
+        ),
+        (
+            "return_list_str",
+            [],
+            [{"subpath": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
+        ),
+        (
+            "return_dict",
+            [],
+            [{"subpath": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
+        ),
+    ],
+)
+def test_script_annotations_outputs(
+    function_name,
+    kwargs_list: List[Dict[str, str]],
+    expected_files: List[Dict[str, str]],
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    tmp_path: Path,
+    monkeypatch,
+):
+    """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
+    for file in expected_files:
+        assert not Path(tmp_path / file["subpath"]).is_file()
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_runner"] = True
+
+    outputs_directory = str(tmp_path / "tmp/hera/outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_runner.annotated_outputs as output_tests_module
+
+    importlib.reload(output_tests_module)
+
+    # WHEN
+    output = _runner(f"{output_tests_module.__name__}:{function_name}", kwargs_list)
+    # THEN
+    assert output is None, "Runner should not return values directly when using return Annotations"
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "function_name,kwargs_list,exception",
+    [
+        (
+            "script_two_params_one_output",
             [{"name": "a_number", "value": "3"}],
             "The number of outputs does not match the annotation",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_basic_type",
+            "script_param_incorrect_basic_type",
             [{"name": "a_number", "value": "3"}],
             "The type of output `successor`, `<class 'str'>` does not match the annotated type `<class 'int'>`",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_incorrect_generic_type",
+            "script_param_incorrect_generic_type",
             [{"name": "a_number", "value": "3"}],
             "The type of output `successor`, `<class 'int'>` does not match the annotated type `typing.Dict[str, str]`",
         ),
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param_no_name",
+            "script_param_no_name",
             [{"name": "a_number", "value": "3"}],
             "The name was not provided for one of the outputs.",
         ),
     ],
 )
 def test_script_annotations_outputs_exceptions(
-    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    function_name,
     kwargs_list: List[Dict[str, str]],
-    exception: Literal[
-        "The number of outputs does not match the annotatio…",
-        "The type of output `successor`, `<class 'str'>` do…",
-        "The name was not provided for one of the outputs.",
-    ],
+    exception,
     global_config_fixture: GlobalConfig,
     environ_annotations_fixture: None,
 ):
@@ -219,7 +274,7 @@ def test_script_annotations_outputs_exceptions(
 
     # WHEN
     with pytest.raises(ValueError) as e:
-        _ = _runner(entrypoint, kwargs_list)
+        _ = _runner(f"tests.script_runner.annotated_outputs:{function_name}", kwargs_list)
     # THEN
     assert exception in str(e.value)
 
@@ -228,16 +283,16 @@ def test_script_annotations_outputs_exceptions(
     "entrypoint,kwargs_list,expected_output",
     [
         (
-            "tests.script_annotations_outputs.script_annotations_output:script_param",
+            "tests.script_runner.annotated_outputs:script_param",
             [{"name": "a_number", "value": "3"}],
             "4",
         )
     ],
 )
 def test_script_annotations_outputs_no_global_config(
-    entrypoint: Literal["tests.script_annotations_outputs.script_annotation…"],
+    entrypoint,
     kwargs_list: Dict[str, str],
-    expected_output: Literal["4"],
+    expected_output,
 ):
     """Test that the output annotations are ignored when global_config is not set."""
     # WHEN
@@ -248,34 +303,39 @@ def test_script_annotations_outputs_no_global_config(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,file_contents,expected_output",
+    "function,file_contents,expected_output",
     [
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_path:read_artifact",
-            "Hello there!",
-            "Hello there!",
+            "no_loader",
+            "First test!",
+            "First test!",
         ),
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_object:read_artifact",
+            "no_loader_as_string",
+            "Another test",
+            "Another test",
+        ),
+        (
+            "json_object_loader",
             """{"a": "Hello ", "b": "there!"}""",
             "Hello there!",
         ),
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_file:read_artifact",
-            "Hello there!",
-            "Hello there!",
+            "file_loader",
+            "This file had a path",
+            "This file had a path",
         ),
         (
-            "tests.script_annotations_artifacts.script_annotations_artifact_file_with_path:read_artifact",
-            "/this/is/a/path",
-            "/this/is/a/path",
+            "file_loader",
+            "/this/file/contains/a/path",  # A file containing a path as a string (we should not do any further processing)
+            "/this/file/contains/a/path",
         ),
     ],
 )
-def test_script_annotations_artifacts(
-    entrypoint: Literal["tests.script_annotations_artifacts.script_annotati…"],
-    file_contents: Literal["Hello there!", '{"a": "Hello ", "b": "there!"}', "/this/is/a/path"],
-    expected_output: Literal["Hello there!", "/this/is/a/path"],
+def test_script_annotations_artifact_inputs(
+    function,
+    file_contents,
+    expected_output,
     tmp_path: Path,
     monkeypatch,
     global_config_fixture: GlobalConfig,
@@ -283,11 +343,80 @@ def test_script_annotations_artifacts(
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
     filepath = tmp_path / "my_file.txt"
-
     filepath.write_text(file_contents)
-    import tests.helper as test_module
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(filepath))
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_runner.artifact_loaders as module
+
+    importlib.reload(module)
+
+    kwargs_list = []
+    global_config_fixture.experimental_features["script_annotations"] = True
+    os.environ["hera__script_annotations"] = ""
+
+    # WHEN
+    output = _runner(f"{module.__name__}:{function}", kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+def test_script_annotations_artifact_input_loader_error(
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+):
+    """Test that the input artifact loaded with wrong type throws the expected exception."""
+    # GIVEN
+    function_name = "no_loader_invalid_type"
+    kwargs_list = []
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_runner"] = True
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_runner.artifact_loaders as module
+
+    importlib.reload(module)
+
+    # WHEN
+    with pytest.raises(ValidationError) as e:
+        _ = _runner(f"{module.__name__}:{function_name}", kwargs_list)
+
+    # THEN
+    assert "value is not a valid integer" in str(e.value)
+
+
+@pytest.mark.parametrize(
+    "entrypoint,artifact_name,file_contents,expected_output",
+    [
+        (
+            "tests.script_runner.artifact_loaders:file_loader_default_path",
+            "my-artifact",
+            "Hello there!",
+            "Hello there!",
+        ),
+    ],
+)
+def test_script_annotations_artifacts_no_path(
+    entrypoint,
+    artifact_name,
+    file_contents,
+    expected_output,
+    tmp_path: Path,
+    monkeypatch,
+    global_config_fixture: GlobalConfig,
+):
+    """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
+    # GIVEN
+    filepath = tmp_path / f"{artifact_name}"
+    filepath.write_text(file_contents)
+
+    # Trailing slash required
+    monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
+
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     os.environ["hera__script_annotations"] = ""
@@ -299,15 +428,12 @@ def test_script_annotations_artifacts(
     assert serialize(output) == expected_output
 
 
-@pytest.mark.parametrize(
-    "entrypoint",
-    ["tests.script_annotations_artifacts.script_annotations_artifact_wrong_loader:read_artifact"],
-)
 def test_script_annotations_artifacts_wrong_loader(
-    entrypoint: Literal["tests.script_annotations_artifacts.script_annotati…"], global_config_fixture: GlobalConfig
+    global_config_fixture: GlobalConfig,
 ):
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
+    entrypoint = "tests.script_runner.artifact_with_invalid_loader:invalid_loader"
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
     os.environ["hera__script_annotations"] = ""
@@ -318,6 +444,21 @@ def test_script_annotations_artifacts_wrong_loader(
 
     # THEN
     assert "value is not a valid enumeration member" in str(e.value)
+
+
+def test_script_annotations_unknown_type(global_config_fixture: GlobalConfig):
+    # GIVEN
+    expected_output = "a string"
+    entrypoint = "tests.script_runner.unknown_annotation_types:unknown_annotations_ignored"
+    kwargs_list = [{"name": "my_string", "value": expected_output}]
+    global_config_fixture.experimental_features["script_annotations"] = True
+    os.environ["hera__script_annotations"] = ""
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
 
 
 @pytest.mark.parametrize(

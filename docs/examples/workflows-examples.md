@@ -26,7 +26,6 @@ Explore the examples through the side bar!
 | [artifacts-workflowtemplate](https://github.com/argoproj/argo-workflows/blob/master/examples/artifacts-workflowtemplate.yaml) |
 | [buildkit-template](https://github.com/argoproj/argo-workflows/blob/master/examples/buildkit-template.yaml) |
 | [ci](https://github.com/argoproj/argo-workflows/blob/master/examples/ci.yaml) |
-| [ci-workflowtemplate](https://github.com/argoproj/argo-workflows/blob/master/examples/ci-workflowtemplate.yaml) |
 | [cluster-workflow-template/clustertemplates](https://github.com/argoproj/argo-workflows/blob/master/examples/cluster-workflow-template/clustertemplates.yaml) |
 | [conditional-parameters](https://github.com/argoproj/argo-workflows/blob/master/examples/conditional-parameters.yaml) |
 | [conditionals](https://github.com/argoproj/argo-workflows/blob/master/examples/conditionals.yaml) |

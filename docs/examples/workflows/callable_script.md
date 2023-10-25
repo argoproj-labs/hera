@@ -88,8 +88,8 @@
 
 
     @script()
-    def function_kebab_object(input_values: Annotated[Input, Parameter(name="input-values")]) -> Output:
-        return Output(output=[input_values])
+    def function_kebab_object(annotated_input_value: Annotated[Input, Parameter(name="input-value")]) -> Output:
+        return Output(output=[annotated_input_value])
 
 
     with Workflow(name="my-workflow") as w:
@@ -98,7 +98,7 @@
             str_function(arguments={"input": Input(a=2, b="bar").json()})
             another_function(arguments={"inputs": [Input(a=2, b="bar"), Input(a=2, b="bar")]})
             function_kebab(arguments={"a-but-kebab": 3, "b-but-kebab": "bar"})
-            function_kebab_object(arguments={"input-values": Input(a=3, b="bar")})
+            function_kebab_object(arguments={"input-value": Input(a=3, b="bar")})
     ```
 
 === "YAML"
@@ -140,7 +140,7 @@
             template: function-kebab
         - - arguments:
               parameters:
-              - name: input-values
+              - name: input-value
                 value: '{"a": 3, "b": "bar"}'
             name: function-kebab-object
             template: function-kebab-object
@@ -217,7 +217,7 @@
           source: '{{inputs.parameters}}'
       - inputs:
           parameters:
-          - name: input-values
+          - name: input-value
         name: function-kebab-object
         script:
           args:

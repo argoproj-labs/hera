@@ -23,6 +23,31 @@ class UserContainer(_ModelUserContainer):
     resources: Optional[Union[Resources, ResourceRequirements]] = None  # type: ignore[assignment]
     volumes: Optional[List[_BaseVolume]] = None
 
+    def _build_image_pull_policy(self) -> Optional[str]:
+        """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
+        if self.image_pull_policy is None:
+            return None
+        elif isinstance(self.image_pull_policy, ImagePullPolicy):
+            return self.image_pull_policy.value
+
+        # this helps map image pull policy values as a convenience
+        policy_mapper = {
+            # the following 2 are "normal" entries
+            **{ipp.name: ipp for ipp in ImagePullPolicy},
+            **{ipp.value: ipp for ipp in ImagePullPolicy},
+            # some users might submit the policy without underscores
+            **{ipp.value.lower().replace("_", ""): ipp for ipp in ImagePullPolicy},
+            # some users might submit the policy in lowercase
+            **{ipp.name.lower(): ipp for ipp in ImagePullPolicy},
+        }
+        try:
+            return ImagePullPolicy[policy_mapper[self.image_pull_policy].name].value
+        except KeyError as e:
+            raise KeyError(
+                f"Supplied image policy {self.image_pull_policy} is not valid. "
+                "Use one of {ImagePullPolicy.__members__}"
+            ) from e
+
     def build(self) -> _ModelUserContainer:
         """Builds the Hera auto-generated model of the user container."""
         return _ModelUserContainer(
@@ -31,7 +56,7 @@ class UserContainer(_ModelUserContainer):
             env=self.env,
             env_from=self.env_from,
             image=self.image,
-            image_pull_policy=self.image_pull_policy,
+            image_pull_policy=self._build_image_pull_policy(),
             lifecycle=self.lifecycle,
             liveness_probe=self.liveness_probe,
             mirror_volume_mounts=self.mirror_volume_mounts,

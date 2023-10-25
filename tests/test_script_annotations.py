@@ -1,3 +1,4 @@
+"""Test script annotations are built correctly within workflows."""
 import importlib
 
 import pytest
@@ -65,13 +66,14 @@ def test_script_annotations_artifact_regression(module_name, global_config_fixtu
     _compare_workflows(workflow_old, output_old, output_new)
 
 
-@script()
-def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
-    print(an_int)
-
-
 def test_double_default_throws_a_value_error(global_config_fixture):
     """Test asserting that it is not possible to define default in the annotation and normal Python."""
+
+    # GIVEN
+    @script()
+    def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
+        print(an_int)
+
     global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
         with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
@@ -84,20 +86,20 @@ def test_double_default_throws_a_value_error(global_config_fixture):
 
 
 @pytest.mark.parametrize(
-    "module,expected_input,expected_output",
+    "function_name,expected_input,expected_output",
     [
         (
-            "script_annotations_output_param_in_func",
+            "output_parameter_as_function_parameter",
             {"parameters": [{"name": "a_number"}]},
             {"parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}]},
         ),
         (
-            "script_annotations_output_artifact_in_func",
+            "output_artifact_as_function_parameter",
             {"parameters": [{"name": "a_number"}]},
             {"artifacts": [{"name": "successor", "path": "/tmp/hera/outputs/artifacts/successor"}]},
         ),
         (
-            "script_annotations_output_param_and_artifact_in_func",
+            "output_artifact_and_parameter_as_function_parameters",
             {"parameters": [{"name": "a_number"}]},
             {
                 "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}],
@@ -105,7 +107,7 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             },
         ),
         (
-            "script_annotations_output_param_and_artifact_mix",
+            "outputs_in_function_parameters_and_return_signature",
             {"parameters": [{"name": "a_number"}]},
             {
                 "parameters": [
@@ -119,7 +121,7 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             },
         ),
         (
-            "script_annotations_output_in_func_no_name",
+            "output_annotations_unnamed_in_function_parameters",
             {"parameters": [{"name": "a_number"}]},
             {
                 "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}],
@@ -127,7 +129,7 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             },
         ),
         (
-            "script_annotations_output_custom_output_directory",
+            "custom_output_directory",
             {"parameters": [{"name": "a_number"}]},
             {
                 "parameters": [
@@ -137,23 +139,26 @@ def test_double_default_throws_a_value_error(global_config_fixture):
         ),
     ],
 )
-def test_script_annotations_outputs(module, expected_input, expected_output, global_config_fixture):
-    """Test that output annotations work correctly by asserting correct inputs and outputs."""
+def test_script_annotated_outputs(function_name, expected_input, expected_output, global_config_fixture):
+    """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-    workflow = importlib.import_module(f"tests.script_annotations_outputs.{module}").w
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_annotations.outputs as module
+
+    importlib.reload(module)
+    workflow = importlib.import_module("tests.script_annotations.outputs").w
 
     # WHEN
     workflow_dict = workflow.to_dict()
     assert workflow == Workflow.from_dict(workflow_dict)
     assert workflow == Workflow.from_yaml(workflow.to_yaml())
 
-    inputs = workflow_dict["spec"]["templates"][1]["inputs"]
-    outputs = workflow_dict["spec"]["templates"][1]["outputs"]
-
     # THEN
-    assert inputs == expected_input
-    assert outputs == expected_output
+    template = next(filter(lambda t: t["name"] == function_name.replace("_", "-"), workflow_dict["spec"]["templates"]))
+    assert template["inputs"] == expected_input
+    assert template["outputs"] == expected_output
 
 
 def test_configmap(global_config_fixture):

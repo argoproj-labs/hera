@@ -34,7 +34,7 @@ spec:
         template: function-kebab
     - - arguments:
           parameters:
-          - name: input-values
+          - name: input-value
             value: '{"a": 3, "b": "bar", "c": "42"}'
         name: function-kebab-object
         template: function-kebab-object
@@ -113,7 +113,7 @@ spec:
       source: '{{inputs.parameters}}'
   - inputs:
       parameters:
-      - name: input-values
+      - name: input-value
     name: function-kebab-object
     script:
       args:

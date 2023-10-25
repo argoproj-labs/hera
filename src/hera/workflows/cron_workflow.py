@@ -90,9 +90,13 @@ class CronWorkflow(Workflow):
         """Creates the CronWorkflow on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
-        return self.workflows_service.create_cron_workflow(
+
+        wf = self.workflows_service.create_cron_workflow(
             CreateCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
         )
+        # set the name on the object so that we can do a get/update later
+        self.name = wf.metadata.name
+        return wf
 
     def get(self) -> TWorkflow:
         """Attempts to get a cron workflow based on the parameters of this template e.g. name + namespace."""
@@ -208,6 +212,12 @@ class CronWorkflow(Workflow):
             >>> my_workflow_template = CronWorkflow.from_file(yaml_file)
         """
         return cls._from_file(yaml_file, _ModelCronWorkflow)
+
+    def get_workflow_link(self) -> str:
+        """Returns the workflow link for the workflow."""
+        assert self.workflows_service is not None, "Cannot fetch a cron workflow link without a service"
+        assert self.name is not None, "Cannot fetch a cron workflow link without a cron workflow name"
+        return self.workflows_service.get_cron_workflow_link(self.name)
 
 
 __all__ = ["CronWorkflow"]
