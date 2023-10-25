@@ -27,8 +27,8 @@ from hera.workflows.script import RunnerScriptConstructor
         ),
         (
             "examples.workflows.callable_script:str_function",
-            [{"name": "input", "value": '{"a": 2, "b": "bar"}'}],
-            '{"output": [{"a": 2, "b": "bar"}]}',
+            [{"name": "input", "value": '{"a": 2, "b": "bar", "c": 42}'}],
+            '{"output": [{"a": 2, "b": "bar", "c": 42}]}',
         ),
         (
             "examples.workflows.callable_script:function_kebab",

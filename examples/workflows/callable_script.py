@@ -34,6 +34,9 @@ class Input(BaseModel):
     b: str = "foo"
     c: Union[str, int, float]
 
+    class Config:
+        smart_union = True
+
 
 # An optional pydantic output type
 # hera can automatically serialize the output

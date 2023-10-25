@@ -9,19 +9,19 @@ spec:
     - - arguments:
           parameters:
           - name: input
-            value: '{"a": 2, "b": "bar"}'
+            value: '{"a": 2, "b": "bar", "c": 42}'
         name: my-function
         template: my-function
     - - arguments:
           parameters:
           - name: input
-            value: '{"a": 2, "b": "bar"}'
+            value: '{"a": 2, "b": "bar", "c": 42}'
         name: str-function
         template: str-function
     - - arguments:
           parameters:
           - name: inputs
-            value: '[{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]'
+            value: '[{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]'
         name: another-function
         template: another-function
     - - arguments:
@@ -35,7 +35,7 @@ spec:
     - - arguments:
           parameters:
           - name: input-values
-            value: '{"a": 3, "b": "bar"}'
+            value: '{"a": 3, "b": "bar", "c": "42"}'
         name: function-kebab-object
         template: function-kebab-object
   - inputs:
@@ -95,6 +95,8 @@ spec:
         name: a-but-kebab
       - default: foo
         name: b-but-kebab
+      - default: '42.0'
+        name: c-but-kebab
     name: function-kebab
     script:
       args:
