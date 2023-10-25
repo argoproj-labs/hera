@@ -168,7 +168,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         with DAG(name="main"):
             cache_restore_task = Task(name="cache-restore", template=cache_restore)
             clone_task = Task(name="clone", template=clone)
-            deps_task = Task(name="deps", template=deps, dependencies=[ "clone", "cache-restore"])
+            deps_task = Task(name="deps", template=deps, dependencies=["clone", "cache-restore"])
             build_task = Task(name="build", template=build, dependencies=["deps"])
             test_task = Task(name="test", template=test, dependencies=["build"])
     ```
