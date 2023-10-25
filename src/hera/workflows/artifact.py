@@ -84,6 +84,11 @@ class Artifact(BaseModel):
 
     Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
 
+    optional: Optional[bool] = None
+    """whether the Artifact is optional. For an input Artifact, this means it may possibly not
+    exist at the specified path during the template's runtime. For an output Artifact, it may
+    possibly not be generated during the step/task and available as an output to subsequent steps/tasks."""
+
     output: bool = False
     """used to specify artifact as an output in function signature annotations"""
 
@@ -114,6 +119,7 @@ class Artifact(BaseModel):
             from_expression=self.from_expression,
             global_name=self.global_name,
             mode=self.mode,
+            optional=self.optional,
             path=self.path,
             recurse_mode=self.recurse_mode,
             sub_path=self.sub_path,
