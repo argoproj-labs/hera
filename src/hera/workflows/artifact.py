@@ -85,7 +85,9 @@ class Artifact(BaseModel):
     Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
 
     optional: Optional[bool] = None
-    """make the Artifact optional, meaning it may not be generated (if an output Artifact) or exist (if an input)"""
+    """whether the Artifact is optional. For an input Artifact, this means it may possibly not
+    exist at the specified path during the template's runtime. For an output Artifact, it may
+    possibly not be generated during the step/task and available as an output to subsequent steps/tasks."""
 
     output: bool = False
     """used to specify artifact as an output in function signature annotations"""
