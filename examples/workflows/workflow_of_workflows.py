@@ -7,7 +7,7 @@ with Workflow(
     Container(
         name="echo",
         image="docker/whalesay:latest",
-        command=["whalesay"],
+        command=["cowsay"],
         args=["I'm workflow 1"],
     )
 
@@ -18,7 +18,7 @@ with Workflow(
     Container(
         name="echo",
         image="docker/whalesay:latest",
-        command=["whalesay"],
+        command=["cowsay"],
         args=["I'm workflow 2"],
     )
 
