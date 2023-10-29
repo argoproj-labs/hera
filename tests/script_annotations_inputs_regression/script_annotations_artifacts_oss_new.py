@@ -26,6 +26,7 @@ def read_artifact(
             name="my_artifact",
             path="/tmp/file",
             access_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
+            secret_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
             bucket="test-bucket-name",
             create_bucket_if_not_present=True,
             endpoint="http://oss-cn-hangzhou-zmf.aliyuncs.com",

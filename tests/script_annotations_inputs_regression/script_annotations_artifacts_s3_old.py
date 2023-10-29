@@ -16,6 +16,7 @@ from hera.workflows import (
             name="my_artifact",
             path="/tmp/file",
             access_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
+            secret_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
             bucket="my-bucket-name",
             create_bucket_if_not_present=m.CreateS3BucketOptions(object_locking=True),
             encryption_options=m.S3EncryptionOptions(enable_encryption=True),
@@ -24,7 +25,6 @@ from hera.workflows import (
             key="path/in/bucket",
             region="us-west-2",
             role_arn="s3-role-arn",
-            secret_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
             use_sdk_creds=True,
         ),
     ]
