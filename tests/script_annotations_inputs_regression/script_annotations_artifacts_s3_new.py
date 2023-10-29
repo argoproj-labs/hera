@@ -6,9 +6,14 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from hera.shared import global_config
-from hera.workflows import Workflow, script
-from hera.workflows.artifact import Artifact, S3Artifact
-from hera.workflows.steps import Steps
+from hera.workflows import (
+    Artifact,
+    S3Artifact,
+    Steps,
+    Workflow,
+    models as m,
+    script,
+)
 
 global_config.experimental_features["script_annotations"] = True
 
@@ -20,16 +25,16 @@ def read_artifact(
         S3Artifact(
             name="my_artifact",
             path="/tmp/file",
-            access_key_secret={"name": "my-oss-credentials", "key": "secretKey"},
+            access_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
             bucket="my-bucket-name",
-            create_bucket_if_not_present={"value": "true"},
-            encryption_options={"value": "s3-encryption"},
+            create_bucket_if_not_present=m.CreateS3BucketOptions(object_locking=True),
+            encryption_options=m.S3EncryptionOptions(enable_encryption=True),
             endpoint="s3.amazonaws.com",
             insecure=True,
             key="path/in/bucket",
             region="us-west-2",
             role_arn="s3-role-arn",
-            secret_key_secret={"name": "my-oss-credentials", "key": "secretKey"},
+            secret_key_secret=m.SecretKeySelector(name="my-oss-credentials", key="secretKey"),
             use_sdk_creds=True,
         ),
     ]
