@@ -1,0 +1,108 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dynamic-resources-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - name: compute-resources
+        template: compute-resources
+      - arguments:
+          parameters:
+          - name: cpu
+            value: '{{item.cpu}}'
+          - name: mem
+            value: '{{item.mem}}'
+        depends: compute-resources
+        name: resource-consumer
+        template: resource-consumer
+        withParam: '{{tasks.compute-resources.outputs.result}}'
+      - arguments:
+          parameters:
+          - name: cpu
+            value: '{{item.cpu}}'
+          - name: mem
+            value: '{{item.mem}}'
+        depends: compute-resources
+        name: another-resource-consumer
+        template: another-resource-consumer
+        withParam: '{{tasks.compute-resources.outputs.result}}'
+    name: d
+  - name: compute-resources
+    script:
+      command:
+      - python
+      image: python:3.10
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\n\"\"\"Computes\
+        \ the resources necessary by the following job, which could be anything.\"\
+        \"\"\nimport json\nimport sys\nresources = []\nfor i in range(1, 4):\n   \
+        \ resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})\njson.dump(resources,\
+        \ sys.stdout)"
+  - inputs:
+      parameters:
+      - name: cpu
+      - name: mem
+    name: resource-consumer
+    podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
+      "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
+      {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+    script:
+      command:
+      - python
+      image: python:3.10
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: cpu = json.loads(r''''''{{inputs.parameters.cpu}}'''''')
+
+        except: cpu = r''''''{{inputs.parameters.cpu}}''''''
+
+        try: mem = json.loads(r''''''{{inputs.parameters.mem}}'''''')
+
+        except: mem = r''''''{{inputs.parameters.mem}}''''''
+
+
+        """Perform some computation."""
+
+        print(''received cpu {cpu} and mem {mem}''.format(cpu=cpu, mem=mem))'
+  - inputs:
+      parameters:
+      - default: '1'
+        name: cpu
+      - default: 100Mi
+        name: mem
+    name: another-resource-consumer
+    podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
+      "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
+      {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+    script:
+      command:
+      - python
+      image: python:3.10
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        import json
+
+        try: cpu = json.loads(r''''''{{inputs.parameters.cpu}}'''''')
+
+        except: cpu = r''''''{{inputs.parameters.cpu}}''''''
+
+        try: mem = json.loads(r''''''{{inputs.parameters.mem}}'''''')
+
+        except: mem = r''''''{{inputs.parameters.mem}}''''''
+
+
+        """Perform some computation."""
+
+        print(''received cpu {cpu} and mem {mem}''.format(cpu=cpu, mem=mem))'
