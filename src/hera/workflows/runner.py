@@ -265,7 +265,10 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     else:
         kwargs = _map_argo_inputs_to_function(function, kwargs)
 
-    function = validate_arguments(function)
+    # using smart union by default just in case clients do not rely on it. This means that if a function uses a union
+    # type for any of its inputs, then this will at least try to map those types correctly if the input object is
+    # not a pydantic model with smart_union enabled
+    function = validate_arguments(function, config=dict(smart_union=True))
     function = _ignore_unmatched_kwargs(function)
 
     if os.environ.get("hera__script_annotations", None) is not None:
