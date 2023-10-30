@@ -8,7 +8,7 @@
 === "Hera"
 
     ```python linenums="1"
-    from typing import List
+    from typing import List, Union
 
     try:
         from typing import Annotated  # type: ignore
@@ -42,6 +42,10 @@
     class Input(BaseModel):
         a: int
         b: str = "foo"
+        c: Union[str, int, float]
+
+        class Config:
+            smart_union = True
 
 
     # An optional pydantic output type
@@ -83,8 +87,9 @@
     def function_kebab(
         a_but_kebab: Annotated[int, Parameter(name="a-but-kebab")] = 2,
         b_but_kebab: Annotated[str, Parameter(name="b-but-kebab")] = "foo",
+        c_but_kebab: Annotated[float, Parameter(name="c-but-kebab")] = 42.0,
     ) -> Output:
-        return Output(output=[Input(a=a_but_kebab, b=b_but_kebab)])
+        return Output(output=[Input(a=a_but_kebab, b=b_but_kebab, c=c_but_kebab)])
 
 
     @script()
@@ -94,11 +99,11 @@
 
     with Workflow(name="my-workflow") as w:
         with Steps(name="my-steps") as s:
-            my_function(arguments={"input": Input(a=2, b="bar")})
-            str_function(arguments={"input": Input(a=2, b="bar").json()})
-            another_function(arguments={"inputs": [Input(a=2, b="bar"), Input(a=2, b="bar")]})
+            my_function(arguments={"input": Input(a=2, b="bar", c=42)})
+            str_function(arguments={"input": Input(a=2, b="bar", c=42).json()})
+            another_function(arguments={"inputs": [Input(a=2, b="bar", c=42), Input(a=2, b="bar", c=42.0)]})
             function_kebab(arguments={"a-but-kebab": 3, "b-but-kebab": "bar"})
-            function_kebab_object(arguments={"input-value": Input(a=3, b="bar")})
+            function_kebab_object(arguments={"input-value": Input(a=3, b="bar", c="42")})
     ```
 
 === "YAML"
@@ -115,19 +120,19 @@
         - - arguments:
               parameters:
               - name: input
-                value: '{"a": 2, "b": "bar"}'
+                value: '{"a": 2, "b": "bar", "c": 42}'
             name: my-function
             template: my-function
         - - arguments:
               parameters:
               - name: input
-                value: '{"a": 2, "b": "bar"}'
+                value: '{"a": 2, "b": "bar", "c": 42}'
             name: str-function
             template: str-function
         - - arguments:
               parameters:
               - name: inputs
-                value: '[{"a": 2, "b": "bar"}, {"a": 2, "b": "bar"}]'
+                value: '[{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]'
             name: another-function
             template: another-function
         - - arguments:
@@ -141,7 +146,7 @@
         - - arguments:
               parameters:
               - name: input-value
-                value: '{"a": 3, "b": "bar"}'
+                value: '{"a": 3, "b": "bar", "c": "42"}'
             name: function-kebab-object
             template: function-kebab-object
       - inputs:
@@ -201,6 +206,8 @@
             name: a-but-kebab
           - default: foo
             name: b-but-kebab
+          - default: '42.0'
+            name: c-but-kebab
         name: function-kebab
         script:
           args:

@@ -1,6 +1,6 @@
 # Authentication
 
-The way you authenticate generally depends on your unique organization setup. If you submit workflows through Hera 
+The way you authenticate generally depends on your unique organization setup. If you submit workflows through Hera
 directly you have multiple ways to authenticate with the Argo server.
 
 Note that the follow examples combine a global config with a workflow submission for illustration purposes. You can
@@ -101,9 +101,6 @@ class MyTokenGenerator(TokenGenerator):
 global_config.host = "https://my-argo-server.com"
 global_config.token = MyTokenGenerator
 
-
-# the workflow automatically creates a workflow service, which uses the global config
-# host and token generator for authentication
 with Workflow(
     generate_name="test-",
     entrypoint="c",
