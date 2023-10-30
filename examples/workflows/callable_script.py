@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 try:
     from typing import Annotated  # type: ignore
@@ -32,6 +32,10 @@ global_config.experimental_features["script_annotations"] = True
 class Input(BaseModel):
     a: int
     b: str = "foo"
+    c: Union[str, int, float]
+
+    class Config:
+        smart_union = True
 
 
 # An optional pydantic output type
@@ -73,8 +77,9 @@ def str_function(input: str) -> Output:
 def function_kebab(
     a_but_kebab: Annotated[int, Parameter(name="a-but-kebab")] = 2,
     b_but_kebab: Annotated[str, Parameter(name="b-but-kebab")] = "foo",
+    c_but_kebab: Annotated[float, Parameter(name="c-but-kebab")] = 42.0,
 ) -> Output:
-    return Output(output=[Input(a=a_but_kebab, b=b_but_kebab)])
+    return Output(output=[Input(a=a_but_kebab, b=b_but_kebab, c=c_but_kebab)])
 
 
 @script()
@@ -84,8 +89,8 @@ def function_kebab_object(annotated_input_value: Annotated[Input, Parameter(name
 
 with Workflow(name="my-workflow") as w:
     with Steps(name="my-steps") as s:
-        my_function(arguments={"input": Input(a=2, b="bar")})
-        str_function(arguments={"input": Input(a=2, b="bar").json()})
-        another_function(arguments={"inputs": [Input(a=2, b="bar"), Input(a=2, b="bar")]})
+        my_function(arguments={"input": Input(a=2, b="bar", c=42)})
+        str_function(arguments={"input": Input(a=2, b="bar", c=42).json()})
+        another_function(arguments={"inputs": [Input(a=2, b="bar", c=42), Input(a=2, b="bar", c=42.0)]})
         function_kebab(arguments={"a-but-kebab": 3, "b-but-kebab": "bar"})
-        function_kebab_object(arguments={"input-value": Input(a=3, b="bar")})
+        function_kebab_object(arguments={"input-value": Input(a=3, b="bar", c="42")})
