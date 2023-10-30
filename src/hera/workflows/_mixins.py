@@ -653,9 +653,9 @@ class CallableTemplateMixin(ArgumentsMixin):
                 # * Containers, ContainerSets and Data objects (i.e. subclasses of CallableTemplateMixin) are already
                 #   added when initialized under the Workflow context so a callable doesn't make sense in that context,
                 #   so we raise an InvalidTemplateCall exception.
-                # * We do not currently validate the added templates to stop a user adding the same template multiple times,
-                #   which can happen if "calling" the same script multiple times to add it to the workflow, or initializing
-                #   a second `Container` exactly like the first.
+                # * We do not currently validate the added templates to stop a user adding the same template multiple
+                #   times, which can happen if "calling" the same script multiple times to add it to the workflow,
+                #   or initializing a second `Container` exactly like the first.
                 if isinstance(self, Script):
                     _context.add_sub_node(self)
                     return None
