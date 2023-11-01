@@ -44,6 +44,34 @@ and `C` will both run in parallel once `A` has completed. Finally, `D` depends o
 have *both* completed. We can use the rshift syntax anywhere with `Tasks`, but it makes sense to keep it as the last
 line of the `DAG` context.
 
+### Note
+
+It's not necessary to set all the dependencies on a single line! Writing 
+
+```python
+A >> [B, C] >> D
+``` 
+
+is equivalent to writing
+
+```python
+A >> B >> D
+A >> C >> D
+```
+
+or
+
+```python
+A >> B
+B >> D
+
+A >> C
+C >> D
+```
+
+This means that you can incrementally build up your DAG, add dependencies as you go, define tasks wherever, and even
+import scripts from some place other than the file where the Workflow/DAG are used!
+
 ## Parallel Steps Example as a DAG
 
 If we look at the parallel steps example from [the Steps walk through](steps.md#parallel-steps), we can write a Workflow
