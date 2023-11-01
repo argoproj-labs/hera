@@ -31,6 +31,7 @@ def read_artifact(
             create_bucket_if_not_present=True,
             endpoint="http://oss-cn-hangzhou-zmf.aliyuncs.com",
             key="test/mydirectory/",
+            lifecycle_rule=m.OSSLifecycleRule(mark_deletion_after_days=42),
             security_token="oss-token",
         ),
     ]
