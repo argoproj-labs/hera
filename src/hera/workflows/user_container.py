@@ -40,7 +40,7 @@ aforementioned objects.
 class UserContainer(_ModelUserContainer):
     """`UserContainer` is a container type that is specifically used as a side container."""
 
-    env: EnvT = None
+    env: EnvT = None  # type: ignore[assignment]
     env_from: EnvFromT = None  # type: ignore[assignment]
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None  # type: ignore[assignment]
     resources: Optional[Union[Resources, ResourceRequirements]] = None  # type: ignore[assignment]
