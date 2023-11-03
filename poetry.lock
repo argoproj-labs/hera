@@ -1189,19 +1189,22 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-sugar"
-version = "0.9.6"
+version = "0.9.7"
 description = "pytest-sugar is a plugin for pytest that changes the default look and feel of pytest (e.g. progressbar, show tests that fail instantly)."
 optional = false
 python-versions = "*"
 files = [
-    {file = "pytest-sugar-0.9.6.tar.gz", hash = "sha256:c4793495f3c32e114f0f5416290946c316eb96ad5a3684dcdadda9267e59b2b8"},
-    {file = "pytest_sugar-0.9.6-py2.py3-none-any.whl", hash = "sha256:30e5225ed2b3cc988a8a672f8bda0fc37bcd92d62e9273937f061112b3f2186d"},
+    {file = "pytest-sugar-0.9.7.tar.gz", hash = "sha256:f1e74c1abfa55f7241cf7088032b6e378566f16b938f3f08905e2cf4494edd46"},
+    {file = "pytest_sugar-0.9.7-py2.py3-none-any.whl", hash = "sha256:8cb5a4e5f8bbcd834622b0235db9e50432f4cbd71fef55b467fe44e43701e062"},
 ]
 
 [package.dependencies]
-packaging = ">=14.1"
-pytest = ">=2.9"
-termcolor = ">=1.1.0"
+packaging = ">=21.3"
+pytest = ">=6.2.0"
+termcolor = ">=2.1.0"
+
+[package.extras]
+dev = ["black", "flake8", "pre-commit"]
 
 [[package]]
 name = "pyyaml"
