@@ -44,7 +44,7 @@ and `C` will both run in parallel once `A` has completed. Finally, `D` depends o
 have *both* completed. We can use the rshift syntax anywhere with `Tasks`, but it makes sense to keep it as the last
 line of the `DAG` context.
 
-### Note
+### Flexible depends syntax
 
 It's not necessary to set all the dependencies on a single line! Writing 
 
@@ -170,7 +170,10 @@ A list of Tasks used with the rshift syntax helps to describe multiple dependenc
   _all_ the Tasks in the list have the task result of `Succeeded || Skipped || Daemoned`
 * A list of Tasks on both sides of `>>` is not supported, and multiple dependency statements should be used
 
-For example:
+
+### Example 1
+
+To create a DAG diamond, we have the option to use the list syntax in the middle of the dependency syntax:
 
 ```py
 A = Task(...)
@@ -196,7 +199,9 @@ B   C
   D
 ```
 
-Dependencies can be described over multiple statements:
+### Example 2
+
+In this DAG, we **have to** describe the dependencies over multiple statements, as `[A, B] >> [C, D]` is not valid syntax:
 
 ```py
 A = Task(...)
