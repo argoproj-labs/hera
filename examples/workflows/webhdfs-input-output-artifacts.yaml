@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: input-output-artifact-webhdfs-
+spec:
+  entrypoint: input-output-artifact-webhdfs-example
+  templates:
+  - container:
+      args:
+      - cat /my-artifact
+      command:
+      - sh
+      - -c
+      image: debian:latest
+    inputs:
+      artifacts:
+      - http:
+          auth:
+            oauth2:
+              clientIDSecret:
+                key: clientID
+                name: oauth-sec
+              clientSecretSecret:
+                key: clientSecret
+                name: oauth-sec
+              endpointParams:
+              - key: customkey
+                value: customvalue
+              scopes:
+              - some
+              - scopes
+              tokenURLSecret:
+                key: tokenURL
+                name: oauth-sec
+          headers:
+          - name: CustomHeader
+            value: CustomValue
+          url: https://mywebhdfsprovider.com/webhdfs/v1/file.txt?op=OPEN
+        name: my-art
+        path: /my-artifact
+    name: input-output-artifact-webhdfs-example
+    outputs:
+      artifacts:
+      - http:
+          auth:
+            clientCert:
+              clientCertSecret:
+                key: certificate.pem
+                name: cert-sec
+              clientKeySecret:
+                key: key.pem
+                name: cert-sec
+          headers:
+          - name: CustomHeader
+            value: CustomValue
+          url: https://mywebhdfsprovider.com/webhdfs/v1/file.txt?op=CREATE&overwrite=true
+        name: my-art2
+        path: /my-artifact
