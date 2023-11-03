@@ -28,4 +28,4 @@ class BaseModel(PyBaseModel):
         """uses smart union for matching a field's specified value to the underlying type that's part of a union."""
 
         extra = Extra.forbid
-        """forbids extra fields from being added to Hera objects. This protects users from types."""
+        """forbids extra fields from being added to Hera objects. This protects users from using the wrong kwargs."""
