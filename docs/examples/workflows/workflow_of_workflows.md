@@ -70,8 +70,8 @@
           failureCondition: status.phase in (Failed, Error)
           manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
             \ sub-workflow-1-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
-            \      args:\n      - I'm workflow 1\n      command:\n      - cowsay\n \
-            \     image: docker/whalesay:latest\n    name: echo\n"
+            \      args:\n      - I'm workflow 1\n      command:\n      - cowsay\n   \
+            \   image: docker/whalesay:latest\n    name: echo\n"
           successCondition: status.phase == Succeeded
       - name: w2-resource
         resource:
@@ -79,8 +79,8 @@
           failureCondition: status.phase in (Failed, Error)
           manifest: "apiVersion: argoproj.io/v1alpha1\nkind: Workflow\nmetadata:\n  generateName:\
             \ sub-workflow-2-\nspec:\n  entrypoint: echo\n  templates:\n  - container:\n\
-            \      args:\n      - I'm workflow 2\n      command:\n      - cowsay\n \
-            \     image: docker/whalesay:latest\n    name: echo\n"
+            \      args:\n      - I'm workflow 2\n      command:\n      - cowsay\n   \
+            \   image: docker/whalesay:latest\n    name: echo\n"
           successCondition: status.phase == Succeeded
       - name: main
         steps:

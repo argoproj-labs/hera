@@ -18,8 +18,8 @@ with Workflow(
             name="a",
             image="argoproj/argosay:v2",
             args=["echo", "hi", "/workspace/out"],
-        ),
+        )
         ContainerNode(
             name="main",
             image="argoproj/argosay:v2",
-        ),
+        )

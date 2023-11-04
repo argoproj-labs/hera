@@ -39,7 +39,7 @@ def use_artifact(
             path="/tmp/file",
             loader=ArtifactLoader.json,
         ),
-    ]
+    ],
 ):
     print(successor_in)
 

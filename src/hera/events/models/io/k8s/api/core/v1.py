@@ -20,16 +20,19 @@ class AWSElasticBlockStoreVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            "Filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported"
-            ' by the host operating system. Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if'
-            " unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore"
+            "Filesystem type of the volume that you want to mount. Tip: Ensure that the"
+            " filesystem type is supported by the host operating system. Examples:"
+            ' "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            " More info:"
+            " https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore"
         ),
     )
     partition: Optional[int] = Field(
         default=None,
         description=(
-            "The partition in the volume that you want to mount. If omitted, the default is to mount by volume name."
-            ' Examples: For volume /dev/sda1, you specify the partition as "1". Similarly, the volume partition for'
+            "The partition in the volume that you want to mount. If omitted, the"
+            " default is to mount by volume name. Examples: For volume /dev/sda1, you"
+            ' specify the partition as "1". Similarly, the volume partition for'
             ' /dev/sda is "0" (or you can leave the property empty).'
         ),
     )
@@ -37,15 +40,17 @@ class AWSElasticBlockStoreVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            'Specify "true" to force and set the ReadOnly property in VolumeMounts to "true". If omitted, the default'
-            ' is "false". More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore'
+            'Specify "true" to force and set the ReadOnly property in VolumeMounts to'
+            ' "true". If omitted, the default is "false". More info:'
+            " https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore"
         ),
     )
     volume_id: str = Field(
         ...,
         alias="volumeID",
         description=(
-            "Unique ID of the persistent disk resource in AWS (Amazon EBS volume). More info:"
+            "Unique ID of the persistent disk resource in AWS (Amazon EBS volume). More"
+            " info:"
             " https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore"
         ),
     )
@@ -53,29 +58,39 @@ class AWSElasticBlockStoreVolumeSource(BaseModel):
 
 class AzureDiskVolumeSource(BaseModel):
     caching_mode: Optional[str] = Field(
-        default=None, alias="cachingMode", description="Host Caching mode: None, Read Only, Read Write."
+        default=None,
+        alias="cachingMode",
+        description="Host Caching mode: None, Read Only, Read Write.",
     )
-    disk_name: str = Field(..., alias="diskName", description="The Name of the data disk in the blob storage")
+    disk_name: str = Field(
+        ...,
+        alias="diskName",
+        description="The Name of the data disk in the blob storage",
+    )
     disk_uri: str = Field(..., alias="diskURI", description="The URI the data disk in the blob storage")
     fs_type: Optional[str] = Field(
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be'
+            ' "ext4" if unspecified.'
         ),
     )
     kind: Optional[str] = Field(
         default=None,
         description=(
-            "Expected values Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage"
-            " account  Managed: azure managed data disk (only in managed availability set). defaults to shared"
+            "Expected values Shared: multiple blob disks per storage account "
+            " Dedicated: single blob disk per storage account  Managed: azure managed"
+            " data disk (only in managed availability set). defaults to shared"
         ),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+        description=(
+            "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+        ),
     )
 
 
@@ -83,10 +98,14 @@ class AzureFileVolumeSource(BaseModel):
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+        description=(
+            "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+        ),
     )
     secret_name: str = Field(
-        ..., alias="secretName", description="the name of secret that contains Azure Storage Account Name and Key"
+        ...,
+        alias="secretName",
+        description=("the name of secret that contains Azure Storage Account Name and Key"),
     )
     share_name: str = Field(..., alias="shareName", description="Share Name")
 
@@ -117,7 +136,8 @@ class ConfigMapKeySelector(BaseModel):
         ),
     )
     optional: Optional[bool] = Field(
-        default=None, description="Specify whether the ConfigMap or its key must be defined"
+        default=None,
+        description="Specify whether the ConfigMap or its key must be defined",
     )
 
 
@@ -143,32 +163,37 @@ class ContainerPort(BaseModel):
         ...,
         alias="containerPort",
         description=(
-            "Number of port to expose on the pod's IP address. This must be a valid port number, 0 < x < 65536."
+            "Number of port to expose on the pod's IP address. This must be a valid" " port number, 0 < x < 65536."
         ),
     )
     host_ip: Optional[str] = Field(
-        default=None, alias="hostIP", description="What host IP to bind the external port to."
+        default=None,
+        alias="hostIP",
+        description="What host IP to bind the external port to.",
     )
     host_port: Optional[int] = Field(
         default=None,
         alias="hostPort",
         description=(
-            "Number of port to expose on the host. If specified, this must be a valid port number, 0 < x < 65536. If"
-            " HostNetwork is specified, this must match ContainerPort. Most containers do not need this."
+            "Number of port to expose on the host. If specified, this must be a valid"
+            " port number, 0 < x < 65536. If HostNetwork is specified, this must match"
+            " ContainerPort. Most containers do not need this."
         ),
     )
     name: Optional[str] = Field(
         default=None,
         description=(
-            "If specified, this must be an IANA_SVC_NAME and unique within the pod. Each named port in a pod must have"
-            " a unique name. Name for the port that can be referred to by services."
+            "If specified, this must be an IANA_SVC_NAME and unique within the pod."
+            " Each named port in a pod must have a unique name. Name for the port that"
+            " can be referred to by services."
         ),
     )
     protocol: Optional[Protocol] = Field(
         default=None,
         description=(
-            'Protocol for port. Must be UDP, TCP, or SCTP. Defaults to "TCP".\n\nPossible enum values:\n - `"SCTP"` is'
-            ' the SCTP protocol.\n - `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP protocol.'
+            "Protocol for port. Must be UDP, TCP, or SCTP. Defaults to"
+            ' "TCP".\n\nPossible enum values:\n - `"SCTP"` is the SCTP protocol.\n -'
+            ' `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP protocol.'
         ),
     )
 
@@ -182,10 +207,12 @@ class ExecAction(BaseModel):
     command: Optional[List[str]] = Field(
         default=None,
         description=(
-            "Command is the command line to execute inside the container, the working directory for the command  is"
-            " root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so"
-            " traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to"
-            " that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy."
+            "Command is the command line to execute inside the container, the working"
+            " directory for the command  is root ('/') in the container's filesystem."
+            " The command is simply exec'd, it is not run inside a shell, so"
+            " traditional shell instructions ('|', etc) won't work. To use a shell, you"
+            " need to explicitly call out to that shell. Exit status of 0 is treated as"
+            " live/healthy and non-zero is unhealthy."
         ),
     )
 
@@ -195,8 +222,9 @@ class FCVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be'
+            ' "ext4" if unspecified.'
         ),
     )
     lun: Optional[int] = Field(default=None, description="Optional: FC target lun number")
@@ -204,17 +232,21 @@ class FCVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts."
+            "Optional: Defaults to false (read/write). ReadOnly here will force the"
+            " ReadOnly setting in VolumeMounts."
         ),
     )
     target_ww_ns: Optional[List[str]] = Field(
-        default=None, alias="targetWWNs", description="Optional: FC target worldwide names (WWNs)"
+        default=None,
+        alias="targetWWNs",
+        description="Optional: FC target worldwide names (WWNs)",
     )
     wwids: Optional[List[str]] = Field(
         default=None,
         description=(
-            "Optional: FC volume world wide identifiers (wwids) Either wwids or combination of targetWWNs and lun must"
-            " be set, but not both simultaneously."
+            "Optional: FC volume world wide identifiers (wwids) Either wwids or"
+            " combination of targetWWNs and lun must be set, but not both"
+            " simultaneously."
         ),
     )
 
@@ -224,14 +256,14 @@ class FlockerVolumeSource(BaseModel):
         default=None,
         alias="datasetName",
         description=(
-            "Name of the dataset stored as metadata -> name on the dataset for Flocker should be considered as"
-            " deprecated"
+            "Name of the dataset stored as metadata -> name on the dataset for Flocker"
+            " should be considered as deprecated"
         ),
     )
     dataset_uuid: Optional[str] = Field(
         default=None,
         alias="datasetUUID",
-        description="UUID of the dataset. This is unique identifier of a Flocker dataset",
+        description=("UUID of the dataset. This is unique identifier of a Flocker dataset"),
     )
 
 
@@ -240,16 +272,19 @@ class GCEPersistentDiskVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            "Filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported"
-            ' by the host operating system. Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if'
-            " unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
+            "Filesystem type of the volume that you want to mount. Tip: Ensure that the"
+            " filesystem type is supported by the host operating system. Examples:"
+            ' "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            " More info:"
+            " https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
         ),
     )
     partition: Optional[int] = Field(
         default=None,
         description=(
-            "The partition in the volume that you want to mount. If omitted, the default is to mount by volume name."
-            ' Examples: For volume /dev/sda1, you specify the partition as "1". Similarly, the volume partition for'
+            "The partition in the volume that you want to mount. If omitted, the"
+            " default is to mount by volume name. Examples: For volume /dev/sda1, you"
+            ' specify the partition as "1". Similarly, the volume partition for'
             ' /dev/sda is "0" (or you can leave the property empty). More info:'
             " https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
         ),
@@ -258,7 +293,8 @@ class GCEPersistentDiskVolumeSource(BaseModel):
         ...,
         alias="pdName",
         description=(
-            "Unique name of the PD resource in GCE. Used to identify the disk in GCE. More info:"
+            "Unique name of the PD resource in GCE. Used to identify the disk in GCE."
+            " More info:"
             " https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
         ),
     )
@@ -266,20 +302,25 @@ class GCEPersistentDiskVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false. More info:"
+            "ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to"
+            " false. More info:"
             " https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
         ),
     )
 
 
 class GRPCAction(BaseModel):
-    port: int = Field(..., description="Port number of the gRPC service. Number must be in the range 1 to 65535.")
+    port: int = Field(
+        ...,
+        description=("Port number of the gRPC service. Number must be in the range 1 to 65535."),
+    )
     service: Optional[str] = Field(
         default=None,
         description=(
-            "Service is the name of the service to place in the gRPC HealthCheckRequest (see"
-            " https://github.com/grpc/grpc/blob/master/doc/health-checking.md).\n\nIf this is not specified, the"
-            " default behavior is defined by gRPC."
+            "Service is the name of the service to place in the gRPC HealthCheckRequest"
+            " (see"
+            " https://github.com/grpc/grpc/blob/master/doc/health-checking.md).\n\nIf"
+            " this is not specified, the default behavior is defined by gRPC."
         ),
     )
 
@@ -288,9 +329,10 @@ class GitRepoVolumeSource(BaseModel):
     directory: Optional[str] = Field(
         default=None,
         description=(
-            "Target directory name. Must not contain or start with '..'.  If '.' is supplied, the volume directory"
-            " will be the git repository.  Otherwise, if specified, the volume will contain the git repository in the"
-            " subdirectory with the given name."
+            "Target directory name. Must not contain or start with '..'.  If '.' is"
+            " supplied, the volume directory will be the git repository.  Otherwise, if"
+            " specified, the volume will contain the git repository in the subdirectory"
+            " with the given name."
         ),
     )
     repository: str = Field(..., description="Repository URL")
@@ -301,8 +343,8 @@ class GlusterfsVolumeSource(BaseModel):
     endpoints: str = Field(
         ...,
         description=(
-            "EndpointsName is the endpoint name that details Glusterfs topology. More info:"
-            " https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod"
+            "EndpointsName is the endpoint name that details Glusterfs topology. More"
+            " info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod"
         ),
     )
     path: str = Field(
@@ -316,8 +358,9 @@ class GlusterfsVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions. Defaults to"
-            " false. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod"
+            "ReadOnly here will force the Glusterfs volume to be mounted with read-only"
+            " permissions. Defaults to false. More info:"
+            " https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod"
         ),
     )
 
@@ -341,8 +384,9 @@ class HostPathVolumeSource(BaseModel):
     path: str = Field(
         ...,
         description=(
-            "Path of the directory on the host. If the path is a symlink, it will follow the link to the real path."
-            " More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath"
+            "Path of the directory on the host. If the path is a symlink, it will"
+            " follow the link to the real path. More info:"
+            " https://kubernetes.io/docs/concepts/storage/volumes#hostpath"
         ),
     )
     type: Optional[str] = Field(
@@ -359,17 +403,20 @@ class KeyToPath(BaseModel):
     mode: Optional[int] = Field(
         default=None,
         description=(
-            "Optional: mode bits used to set permissions on this file. Must be an octal value between 0000 and 0777 or"
-            " a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal"
-            " values for mode bits. If not specified, the volume defaultMode will be used. This might be in conflict"
-            " with other options that affect the file mode, like fsGroup, and the result can be other mode bits set."
+            "Optional: mode bits used to set permissions on this file. Must be an octal"
+            " value between 0000 and 0777 or a decimal value between 0 and 511. YAML"
+            " accepts both octal and decimal values, JSON requires decimal values for"
+            " mode bits. If not specified, the volume defaultMode will be used. This"
+            " might be in conflict with other options that affect the file mode, like"
+            " fsGroup, and the result can be other mode bits set."
         ),
     )
     path: str = Field(
         ...,
         description=(
-            "The relative path of the file to map the key to. May not be an absolute path. May not contain the path"
-            " element '..'. May not start with the string '..'."
+            "The relative path of the file to map the key to. May not be an absolute"
+            " path. May not contain the path element '..'. May not start with the"
+            " string '..'."
         ),
     )
 
@@ -396,8 +443,9 @@ class NFSVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "ReadOnly here will force the NFS export to be mounted with read-only permissions. Defaults to false. More"
-            " info: https://kubernetes.io/docs/concepts/storage/volumes#nfs"
+            "ReadOnly here will force the NFS export to be mounted with read-only"
+            " permissions. Defaults to false. More info:"
+            " https://kubernetes.io/docs/concepts/storage/volumes#nfs"
         ),
     )
     server: str = Field(
@@ -423,28 +471,34 @@ class NodeSelectorRequirement(BaseModel):
     operator: Operator = Field(
         ...,
         description=(
-            "Represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists, DoesNotExist."
-            ' Gt, and Lt.\n\nPossible enum values:\n - `"DoesNotExist"`\n - `"Exists"`\n - `"Gt"`\n - `"In"`\n -'
-            ' `"Lt"`\n - `"NotIn"`'
+            "Represents a key's relationship to a set of values. Valid operators are"
+            " In, NotIn, Exists, DoesNotExist. Gt, and Lt.\n\nPossible enum values:\n -"
+            ' `"DoesNotExist"`\n - `"Exists"`\n - `"Gt"`\n - `"In"`\n - `"Lt"`\n -'
+            ' `"NotIn"`'
         ),
     )
     values: Optional[List[str]] = Field(
         default=None,
         description=(
-            "An array of string values. If the operator is In or NotIn, the values array must be non-empty. If the"
-            " operator is Exists or DoesNotExist, the values array must be empty. If the operator is Gt or Lt, the"
-            " values array must have a single element, which will be interpreted as an integer. This array is replaced"
-            " during a strategic merge patch."
+            "An array of string values. If the operator is In or NotIn, the values"
+            " array must be non-empty. If the operator is Exists or DoesNotExist, the"
+            " values array must be empty. If the operator is Gt or Lt, the values array"
+            " must have a single element, which will be interpreted as an integer. This"
+            " array is replaced during a strategic merge patch."
         ),
     )
 
 
 class NodeSelectorTerm(BaseModel):
     match_expressions: Optional[List[NodeSelectorRequirement]] = Field(
-        default=None, alias="matchExpressions", description="A list of node selector requirements by node's labels."
+        default=None,
+        alias="matchExpressions",
+        description="A list of node selector requirements by node's labels.",
     )
     match_fields: Optional[List[NodeSelectorRequirement]] = Field(
-        default=None, alias="matchFields", description="A list of node selector requirements by node's fields."
+        default=None,
+        alias="matchFields",
+        description="A list of node selector requirements by node's fields.",
     )
 
 
@@ -452,10 +506,12 @@ class ObjectFieldSelector(BaseModel):
     api_version: Optional[str] = Field(
         default=None,
         alias="apiVersion",
-        description='Version of the schema the FieldPath is written in terms of, defaults to "v1".',
+        description=("Version of the schema the FieldPath is written in terms of, defaults to" ' "v1".'),
     )
     field_path: str = Field(
-        ..., alias="fieldPath", description="Path of the field to select in the specified API version."
+        ...,
+        alias="fieldPath",
+        description="Path of the field to select in the specified API version.",
     )
 
 
@@ -465,12 +521,15 @@ class ObjectReference(BaseModel):
         default=None,
         alias="fieldPath",
         description=(
-            "If referring to a piece of an object instead of an entire object, this string should contain a valid"
-            " JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object"
-            ' reference is to a container within a pod, this would take on a value like: "spec.containers{name}"'
-            ' (where "name" refers to the name of the container that triggered the event) or if no container name is'
-            ' specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have'
-            " some well-defined way of referencing a part of an object."
+            "If referring to a piece of an object instead of an entire object, this"
+            " string should contain a valid JSON/Go field access statement, such as"
+            " desiredState.manifest.containers[2]. For example, if the object reference"
+            " is to a container within a pod, this would take on a value like:"
+            ' "spec.containers{name}" (where "name" refers to the name of the container'
+            " that triggered the event) or if no container name is specified"
+            ' "spec.containers[2]" (container with index 2 in this pod). This syntax is'
+            " chosen only to have some well-defined way of referencing a part of an"
+            " object."
         ),
     )
     kind: Optional[str] = Field(
@@ -498,7 +557,8 @@ class ObjectReference(BaseModel):
         default=None,
         alias="resourceVersion",
         description=(
-            "Specific resourceVersion to which this reference is made, if any. More info:"
+            "Specific resourceVersion to which this reference is made, if any. More"
+            " info:"
             " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency"
         ),
     )
@@ -527,12 +587,15 @@ class PersistentVolumeClaimVolumeSource(BaseModel):
         ...,
         alias="claimName",
         description=(
-            "ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More"
-            " info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims"
+            "ClaimName is the name of a PersistentVolumeClaim in the same namespace as"
+            " the pod using this volume. More info:"
+            " https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims"
         ),
     )
     read_only: Optional[bool] = Field(
-        default=None, alias="readOnly", description="Will force the ReadOnly setting in VolumeMounts. Default false."
+        default=None,
+        alias="readOnly",
+        description="Will force the ReadOnly setting in VolumeMounts. Default false.",
     )
 
 
@@ -541,11 +604,16 @@ class PhotonPersistentDiskVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be'
+            ' "ext4" if unspecified.'
         ),
     )
-    pd_id: str = Field(..., alias="pdID", description="ID that identifies Photon Controller persistent disk")
+    pd_id: str = Field(
+        ...,
+        alias="pdID",
+        description="ID that identifies Photon Controller persistent disk",
+    )
 
 
 class PodDNSConfigOption(BaseModel):
@@ -558,24 +626,33 @@ class PortworxVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            "FSType represents the filesystem type to mount Must be a filesystem type supported by the host operating"
-            ' system. Ex. "ext4", "xfs". Implicitly inferred to be "ext4" if unspecified.'
+            "FSType represents the filesystem type to mount Must be a filesystem type"
+            ' supported by the host operating system. Ex. "ext4", "xfs". Implicitly'
+            ' inferred to be "ext4" if unspecified.'
         ),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+        description=(
+            "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+        ),
     )
-    volume_id: str = Field(..., alias="volumeID", description="VolumeID uniquely identifies a Portworx volume")
+    volume_id: str = Field(
+        ...,
+        alias="volumeID",
+        description="VolumeID uniquely identifies a Portworx volume",
+    )
 
 
 class PreferredSchedulingTerm(BaseModel):
     preference: NodeSelectorTerm = Field(
-        ..., description="A node selector term, associated with the corresponding weight."
+        ...,
+        description="A node selector term, associated with the corresponding weight.",
     )
     weight: int = Field(
-        ..., description="Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100."
+        ...,
+        description=("Weight associated with matching the corresponding nodeSelectorTerm, in the" " range 1-100."),
     )
 
 
@@ -585,28 +662,32 @@ class QuobyteVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "ReadOnly here will force the Quobyte volume to be mounted with read-only permissions. Defaults to false."
+            "ReadOnly here will force the Quobyte volume to be mounted with read-only"
+            " permissions. Defaults to false."
         ),
     )
     registry: str = Field(
         ...,
         description=(
-            "Registry represents a single or multiple Quobyte Registry services specified as a string as host:port"
-            " pair (multiple entries are separated with commas) which acts as the central registry for volumes"
+            "Registry represents a single or multiple Quobyte Registry services"
+            " specified as a string as host:port pair (multiple entries are separated"
+            " with commas) which acts as the central registry for volumes"
         ),
     )
     tenant: Optional[str] = Field(
         default=None,
         description=(
-            "Tenant owning the given Quobyte volume in the Backend Used with dynamically provisioned Quobyte volumes,"
-            " value is set by the plugin"
+            "Tenant owning the given Quobyte volume in the Backend Used with"
+            " dynamically provisioned Quobyte volumes, value is set by the plugin"
         ),
     )
     user: Optional[str] = Field(
-        default=None, description="User to map volume access to Defaults to serivceaccount user"
+        default=None,
+        description="User to map volume access to Defaults to serivceaccount user",
     )
     volume: str = Field(
-        ..., description="Volume is a string that references an already created Quobyte volume by name."
+        ...,
+        description=("Volume is a string that references an already created Quobyte volume by" " name."),
     )
 
 
@@ -615,25 +696,29 @@ class RBDVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            "Filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported"
-            ' by the host operating system. Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if'
-            " unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd"
+            "Filesystem type of the volume that you want to mount. Tip: Ensure that the"
+            " filesystem type is supported by the host operating system. Examples:"
+            ' "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            " More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd"
         ),
     )
     image: str = Field(
-        ..., description="The rados image name. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+        ...,
+        description=(
+            "The rados image name. More info:" " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+        ),
     )
     keyring: Optional[str] = Field(
         default=None,
         description=(
-            "Keyring is the path to key ring for RBDUser. Default is /etc/ceph/keyring. More info:"
-            " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            "Keyring is the path to key ring for RBDUser. Default is /etc/ceph/keyring."
+            " More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
         ),
     )
     monitors: List[str] = Field(
         ...,
         description=(
-            "A collection of Ceph monitors. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            "A collection of Ceph monitors. More info:" " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
         ),
     )
     pool: Optional[str] = Field(
@@ -647,7 +732,8 @@ class RBDVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false. More info:"
+            "ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to"
+            " false. More info:"
             " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
         ),
     )
@@ -655,8 +741,9 @@ class RBDVolumeSource(BaseModel):
         default=None,
         alias="secretRef",
         description=(
-            "SecretRef is name of the authentication secret for RBDUser. If provided overrides keyring. Default is"
-            " nil. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            "SecretRef is name of the authentication secret for RBDUser. If provided"
+            " overrides keyring. Default is nil. More info:"
+            " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
         ),
     )
     user: Optional[str] = Field(
@@ -670,16 +757,20 @@ class RBDVolumeSource(BaseModel):
 
 class SELinuxOptions(BaseModel):
     level: Optional[str] = Field(
-        default=None, description="Level is SELinux level label that applies to the container."
+        default=None,
+        description="Level is SELinux level label that applies to the container.",
     )
     role: Optional[str] = Field(
-        default=None, description="Role is a SELinux role label that applies to the container."
+        default=None,
+        description="Role is a SELinux role label that applies to the container.",
     )
     type: Optional[str] = Field(
-        default=None, description="Type is a SELinux type label that applies to the container."
+        default=None,
+        description="Type is a SELinux type label that applies to the container.",
     )
     user: Optional[str] = Field(
-        default=None, description="User is a SELinux user label that applies to the container."
+        default=None,
+        description="User is a SELinux user label that applies to the container.",
     )
 
 
@@ -688,40 +779,42 @@ class ScaleIOVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". Default is "xfs".'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". Default is "xfs".'
         ),
     )
     gateway: str = Field(..., description="The host address of the ScaleIO API Gateway.")
     protection_domain: Optional[str] = Field(
         default=None,
         alias="protectionDomain",
-        description="The name of the ScaleIO Protection Domain for the configured storage.",
+        description=("The name of the ScaleIO Protection Domain for the configured storage."),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+        description=(
+            "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+        ),
     )
     secret_ref: LocalObjectReference = Field(
         ...,
         alias="secretRef",
         description=(
-            "SecretRef references to the secret for ScaleIO user and other sensitive information. If this is not"
-            " provided, Login operation will fail."
+            "SecretRef references to the secret for ScaleIO user and other sensitive"
+            " information. If this is not provided, Login operation will fail."
         ),
     )
     ssl_enabled: Optional[bool] = Field(
         default=None,
         alias="sslEnabled",
-        description="Flag to enable/disable SSL communication with Gateway, default false",
+        description=("Flag to enable/disable SSL communication with Gateway, default false"),
     )
     storage_mode: Optional[str] = Field(
         default=None,
         alias="storageMode",
         description=(
-            "Indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned. Default is"
-            " ThinProvisioned."
+            "Indicates whether the storage for a volume should be ThickProvisioned or"
+            " ThinProvisioned. Default is ThinProvisioned."
         ),
     )
     storage_pool: Optional[str] = Field(
@@ -734,7 +827,7 @@ class ScaleIOVolumeSource(BaseModel):
         default=None,
         alias="volumeName",
         description=(
-            "The name of a volume already created in the ScaleIO system that is associated with this volume source."
+            "The name of a volume already created in the ScaleIO system that is" " associated with this volume source."
         ),
     )
 
@@ -750,20 +843,24 @@ class SeccompProfile(BaseModel):
         default=None,
         alias="localhostProfile",
         description=(
-            "localhostProfile indicates a profile defined in a file on the node should be used. The profile must be"
-            " preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured"
-            ' seccomp profile location. Must only be set if type is "Localhost".'
+            "localhostProfile indicates a profile defined in a file on the node should"
+            " be used. The profile must be preconfigured on the node to work. Must be a"
+            " descending path, relative to the kubelet's configured seccomp profile"
+            ' location. Must only be set if type is "Localhost".'
         ),
     )
     type: TypeModel = Field(
         ...,
         description=(
-            "type indicates which kind of seccomp profile will be applied. Valid options are:\n\nLocalhost - a profile"
-            " defined in a file on the node should be used. RuntimeDefault - the container runtime default profile"
-            ' should be used. Unconfined - no profile should be applied.\n\nPossible enum values:\n - `"Localhost"`'
-            " indicates a profile defined in a file on the node should be used. The file's location relative to"
-            ' <kubelet-root-dir>/seccomp.\n - `"RuntimeDefault"` represents the default container runtime seccomp'
-            ' profile.\n - `"Unconfined"` indicates no seccomp profile is applied (A.K.A. unconfined).'
+            "type indicates which kind of seccomp profile will be applied. Valid"
+            " options are:\n\nLocalhost - a profile defined in a file on the node"
+            " should be used. RuntimeDefault - the container runtime default profile"
+            " should be used. Unconfined - no profile should be applied.\n\nPossible"
+            ' enum values:\n - `"Localhost"` indicates a profile defined in a file on'
+            " the node should be used. The file's location relative to"
+            ' <kubelet-root-dir>/seccomp.\n - `"RuntimeDefault"` represents the default'
+            ' container runtime seccomp profile.\n - `"Unconfined"` indicates no'
+            " seccomp profile is applied (A.K.A. unconfined)."
         ),
     )
 
@@ -780,7 +877,10 @@ class SecretEnvSource(BaseModel):
 
 
 class SecretKeySelector(BaseModel):
-    key: str = Field(..., description="The key of the secret to select from.  Must be a valid secret key.")
+    key: str = Field(
+        ...,
+        description=("The key of the secret to select from.  Must be a valid secret key."),
+    )
     name: Optional[str] = Field(
         default=None,
         description=(
@@ -788,18 +888,23 @@ class SecretKeySelector(BaseModel):
             " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
         ),
     )
-    optional: Optional[bool] = Field(default=None, description="Specify whether the Secret or its key must be defined")
+    optional: Optional[bool] = Field(
+        default=None,
+        description="Specify whether the Secret or its key must be defined",
+    )
 
 
 class SecretProjection(BaseModel):
     items: Optional[List[KeyToPath]] = Field(
         default=None,
         description=(
-            "If unspecified, each key-value pair in the Data field of the referenced Secret will be projected into the"
-            " volume as a file whose name is the key and content is the value. If specified, the listed keys will be"
-            " projected into the specified paths, and unlisted keys will not be present. If a key is specified which"
-            " is not present in the Secret, the volume setup will error unless it is marked optional. Paths must be"
-            " relative and may not contain the '..' path or start with '..'."
+            "If unspecified, each key-value pair in the Data field of the referenced"
+            " Secret will be projected into the volume as a file whose name is the key"
+            " and content is the value. If specified, the listed keys will be projected"
+            " into the specified paths, and unlisted keys will not be present. If a key"
+            " is specified which is not present in the Secret, the volume setup will"
+            " error unless it is marked optional. Paths must be relative and may not"
+            " contain the '..' path or start with '..'."
         ),
     )
     name: Optional[str] = Field(
@@ -809,7 +914,10 @@ class SecretProjection(BaseModel):
             " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
         ),
     )
-    optional: Optional[bool] = Field(default=None, description="Specify whether the Secret or its key must be defined")
+    optional: Optional[bool] = Field(
+        default=None,
+        description="Specify whether the Secret or its key must be defined",
+    )
 
 
 class SecretVolumeSource(BaseModel):
@@ -817,25 +925,30 @@ class SecretVolumeSource(BaseModel):
         default=None,
         alias="defaultMode",
         description=(
-            "Optional: mode bits used to set permissions on created files by default. Must be an octal value between"
-            " 0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON"
-            " requires decimal values for mode bits. Defaults to 0644. Directories within the path are not affected by"
-            " this setting. This might be in conflict with other options that affect the file mode, like fsGroup, and"
-            " the result can be other mode bits set."
+            "Optional: mode bits used to set permissions on created files by default."
+            " Must be an octal value between 0000 and 0777 or a decimal value between 0"
+            " and 511. YAML accepts both octal and decimal values, JSON requires"
+            " decimal values for mode bits. Defaults to 0644. Directories within the"
+            " path are not affected by this setting. This might be in conflict with"
+            " other options that affect the file mode, like fsGroup, and the result can"
+            " be other mode bits set."
         ),
     )
     items: Optional[List[KeyToPath]] = Field(
         default=None,
         description=(
-            "If unspecified, each key-value pair in the Data field of the referenced Secret will be projected into the"
-            " volume as a file whose name is the key and content is the value. If specified, the listed keys will be"
-            " projected into the specified paths, and unlisted keys will not be present. If a key is specified which"
-            " is not present in the Secret, the volume setup will error unless it is marked optional. Paths must be"
-            " relative and may not contain the '..' path or start with '..'."
+            "If unspecified, each key-value pair in the Data field of the referenced"
+            " Secret will be projected into the volume as a file whose name is the key"
+            " and content is the value. If specified, the listed keys will be projected"
+            " into the specified paths, and unlisted keys will not be present. If a key"
+            " is specified which is not present in the Secret, the volume setup will"
+            " error unless it is marked optional. Paths must be relative and may not"
+            " contain the '..' path or start with '..'."
         ),
     )
     optional: Optional[bool] = Field(
-        default=None, description="Specify whether the Secret or its keys must be defined"
+        default=None,
+        description="Specify whether the Secret or its keys must be defined",
     )
     secret_name: Optional[str] = Field(
         default=None,
@@ -851,23 +964,27 @@ class ServiceAccountTokenProjection(BaseModel):
     audience: Optional[str] = Field(
         default=None,
         description=(
-            "Audience is the intended audience of the token. A recipient of a token must identify itself with an"
-            " identifier specified in the audience of the token, and otherwise should reject the token. The audience"
-            " defaults to the identifier of the apiserver."
+            "Audience is the intended audience of the token. A recipient of a token"
+            " must identify itself with an identifier specified in the audience of the"
+            " token, and otherwise should reject the token. The audience defaults to"
+            " the identifier of the apiserver."
         ),
     )
     expiration_seconds: Optional[int] = Field(
         default=None,
         alias="expirationSeconds",
         description=(
-            "ExpirationSeconds is the requested duration of validity of the service account token. As the token"
-            " approaches expiration, the kubelet volume plugin will proactively rotate the service account token. The"
-            " kubelet will start trying to rotate the token if the token is older than 80 percent of its time to live"
-            " or if the token is older than 24 hours.Defaults to 1 hour and must be at least 10 minutes."
+            "ExpirationSeconds is the requested duration of validity of the service"
+            " account token. As the token approaches expiration, the kubelet volume"
+            " plugin will proactively rotate the service account token. The kubelet"
+            " will start trying to rotate the token if the token is older than 80"
+            " percent of its time to live or if the token is older than 24"
+            " hours.Defaults to 1 hour and must be at least 10 minutes."
         ),
     )
     path: str = Field(
-        ..., description="Path is the path relative to the mount point of the file to project the token into."
+        ...,
+        description=("Path is the path relative to the mount point of the file to project the" " token into."),
     )
 
 
@@ -876,40 +993,45 @@ class StorageOSVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be'
+            ' "ext4" if unspecified.'
         ),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+        description=(
+            "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+        ),
     )
     secret_ref: Optional[LocalObjectReference] = Field(
         default=None,
         alias="secretRef",
         description=(
-            "SecretRef specifies the secret to use for obtaining the StorageOS API credentials.  If not specified,"
-            " default values will be attempted."
+            "SecretRef specifies the secret to use for obtaining the StorageOS API"
+            " credentials.  If not specified, default values will be attempted."
         ),
     )
     volume_name: Optional[str] = Field(
         default=None,
         alias="volumeName",
         description=(
-            "VolumeName is the human-readable name of the StorageOS volume.  Volume names are only unique within a"
-            " namespace."
+            "VolumeName is the human-readable name of the StorageOS volume.  Volume"
+            " names are only unique within a namespace."
         ),
     )
     volume_namespace: Optional[str] = Field(
         default=None,
         alias="volumeNamespace",
         description=(
-            "VolumeNamespace specifies the scope of the volume within StorageOS.  If no namespace is specified then"
-            " the Pod's namespace will be used.  This allows the Kubernetes name scoping to be mirrored within"
-            " StorageOS for tighter integration. Set VolumeName to any name to override the default behaviour. Set to"
-            ' "default" if you are not using namespaces within StorageOS. Namespaces that do not pre-exist within'
-            " StorageOS will be created."
+            "VolumeNamespace specifies the scope of the volume within StorageOS.  If no"
+            " namespace is specified then the Pod's namespace will be used.  This"
+            " allows the Kubernetes name scoping to be mirrored within StorageOS for"
+            " tighter integration. Set VolumeName to any name to override the default"
+            ' behaviour. Set to "default" if you are not using namespaces within'
+            " StorageOS. Namespaces that do not pre-exist within StorageOS will be"
+            " created."
         ),
     )
 
@@ -934,28 +1056,34 @@ class Toleration(BaseModel):
     effect: Optional[Effect] = Field(
         default=None,
         description=(
-            "Effect indicates the taint effect to match. Empty means match all taint effects. When specified, allowed"
-            ' values are NoSchedule, PreferNoSchedule and NoExecute.\n\nPossible enum values:\n - `"NoExecute"` Evict'
-            " any already-running pods that do not tolerate the taint. Currently enforced by NodeController.\n -"
-            ' `"NoSchedule"` Do not allow new pods to schedule onto the node unless they tolerate the taint, but allow'
-            " all pods submitted to Kubelet without going through the scheduler to start, and allow all"
-            ' already-running pods to continue running. Enforced by the scheduler.\n - `"PreferNoSchedule"` Like'
-            " TaintEffectNoSchedule, but the scheduler tries not to schedule new pods onto the node, rather than"
-            " prohibiting new pods from scheduling onto the node entirely. Enforced by the scheduler."
+            "Effect indicates the taint effect to match. Empty means match all taint"
+            " effects. When specified, allowed values are NoSchedule, PreferNoSchedule"
+            ' and NoExecute.\n\nPossible enum values:\n - `"NoExecute"` Evict any'
+            " already-running pods that do not tolerate the taint. Currently enforced"
+            ' by NodeController.\n - `"NoSchedule"` Do not allow new pods to schedule'
+            " onto the node unless they tolerate the taint, but allow all pods"
+            " submitted to Kubelet without going through the scheduler to start, and"
+            " allow all already-running pods to continue running. Enforced by the"
+            ' scheduler.\n - `"PreferNoSchedule"` Like TaintEffectNoSchedule, but the'
+            " scheduler tries not to schedule new pods onto the node, rather than"
+            " prohibiting new pods from scheduling onto the node entirely. Enforced by"
+            " the scheduler."
         ),
     )
     key: Optional[str] = Field(
         default=None,
         description=(
-            "Key is the taint key that the toleration applies to. Empty means match all taint keys. If the key is"
-            " empty, operator must be Exists; this combination means to match all values and all keys."
+            "Key is the taint key that the toleration applies to. Empty means match all"
+            " taint keys. If the key is empty, operator must be Exists; this"
+            " combination means to match all values and all keys."
         ),
     )
     operator: Optional[OperatorModel] = Field(
         default=None,
         description=(
-            "Operator represents a key's relationship to the value. Valid operators are Exists and Equal. Defaults to"
-            " Equal. Exists is equivalent to wildcard for value, so that a pod can tolerate all taints of a particular"
+            "Operator represents a key's relationship to the value. Valid operators"
+            " are Exists and Equal. Defaults to Equal. Exists is equivalent to wildcard"
+            " for value, so that a pod can tolerate all taints of a particular"
             ' category.\n\nPossible enum values:\n - `"Equal"`\n - `"Exists"`'
         ),
     )
@@ -963,17 +1091,18 @@ class Toleration(BaseModel):
         default=None,
         alias="tolerationSeconds",
         description=(
-            "TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute,"
-            " otherwise this field is ignored) tolerates the taint. By default, it is not set, which means tolerate"
-            " the taint forever (do not evict). Zero and negative values will be treated as 0 (evict immediately) by"
-            " the system."
+            "TolerationSeconds represents the period of time the toleration (which must"
+            " be of effect NoExecute, otherwise this field is ignored) tolerates the"
+            " taint. By default, it is not set, which means tolerate the taint forever"
+            " (do not evict). Zero and negative values will be treated as 0 (evict"
+            " immediately) by the system."
         ),
     )
     value: Optional[str] = Field(
         default=None,
         description=(
-            "Value is the taint value the toleration matches to. If the operator is Exists, the value should be empty,"
-            " otherwise just a regular string."
+            "Value is the taint value the toleration matches to. If the operator is"
+            " Exists, the value should be empty, otherwise just a regular string."
         ),
     )
 
@@ -983,8 +1112,9 @@ class TypedLocalObjectReference(BaseModel):
         default=None,
         alias="apiGroup",
         description=(
-            "APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind"
-            " must be in the core API group. For any other third-party types, APIGroup is required."
+            "APIGroup is the group for the resource being referenced. If APIGroup is"
+            " not specified, the specified Kind must be in the core API group. For any"
+            " other third-party types, APIGroup is required."
         ),
     )
     kind: str = Field(..., description="Kind is the type of resource being referenced")
@@ -995,46 +1125,52 @@ class VolumeDevice(BaseModel):
     device_path: str = Field(
         ...,
         alias="devicePath",
-        description="devicePath is the path inside of the container that the device will be mapped to.",
+        description=("devicePath is the path inside of the container that the device will be" " mapped to."),
     )
-    name: str = Field(..., description="name must match the name of a persistentVolumeClaim in the pod")
+    name: str = Field(
+        ...,
+        description="name must match the name of a persistentVolumeClaim in the pod",
+    )
 
 
 class VolumeMount(BaseModel):
     mount_path: str = Field(
         ...,
         alias="mountPath",
-        description="Path within the container at which the volume should be mounted.  Must not contain ':'.",
+        description=("Path within the container at which the volume should be mounted.  Must not" " contain ':'."),
     )
     mount_propagation: Optional[str] = Field(
         default=None,
         alias="mountPropagation",
         description=(
-            "mountPropagation determines how mounts are propagated from the host to container and the other way"
-            " around. When not set, MountPropagationNone is used. This field is beta in 1.10."
+            "mountPropagation determines how mounts are propagated from the host to"
+            " container and the other way around. When not set, MountPropagationNone is"
+            " used. This field is beta in 1.10."
         ),
     )
     name: str = Field(..., description="This must match the Name of a Volume.")
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false.",
+        description=("Mounted read-only if true, read-write otherwise (false or unspecified)." " Defaults to false."),
     )
     sub_path: Optional[str] = Field(
         default=None,
         alias="subPath",
         description=(
-            "Path within the volume from which the container's volume should be mounted. Defaults to \"\" (volume's"
-            " root)."
+            "Path within the volume from which the container's volume should be"
+            ' mounted. Defaults to "" (volume\'s root).'
         ),
     )
     sub_path_expr: Optional[str] = Field(
         default=None,
         alias="subPathExpr",
         description=(
-            "Expanded path within the volume from which the container's volume should be mounted. Behaves similarly"
-            " to SubPath but environment variable references $(VAR_NAME) are expanded using the container's"
-            ' environment. Defaults to "" (volume\'s root). SubPathExpr and SubPath are mutually exclusive.'
+            "Expanded path within the volume from which the container's volume should"
+            " be mounted. Behaves similarly to SubPath but environment variable"
+            " references $(VAR_NAME) are expanded using the container's environment."
+            ' Defaults to "" (volume\'s root). SubPathExpr and SubPath are mutually'
+            " exclusive."
         ),
     )
 
@@ -1044,17 +1180,20 @@ class VsphereVirtualDiskVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be'
+            ' "ext4" if unspecified.'
         ),
     )
     storage_policy_id: Optional[str] = Field(
         default=None,
         alias="storagePolicyID",
-        description="Storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.",
+        description=("Storage Policy Based Management (SPBM) profile ID associated with the" " StoragePolicyName."),
     )
     storage_policy_name: Optional[str] = Field(
-        default=None, alias="storagePolicyName", description="Storage Policy Based Management (SPBM) profile name."
+        default=None,
+        alias="storagePolicyName",
+        description="Storage Policy Based Management (SPBM) profile name.",
     )
     volume_path: str = Field(..., alias="volumePath", description="Path that identifies vSphere volume vmdk")
 
@@ -1064,34 +1203,39 @@ class WindowsSecurityContextOptions(BaseModel):
         default=None,
         alias="gmsaCredentialSpec",
         description=(
-            "GMSACredentialSpec is where the GMSA admission webhook (https://github.com/kubernetes-sigs/windows-gmsa)"
-            " inlines the contents of the GMSA credential spec named by the GMSACredentialSpecName field."
+            "GMSACredentialSpec is where the GMSA admission webhook"
+            " (https://github.com/kubernetes-sigs/windows-gmsa) inlines the contents of"
+            " the GMSA credential spec named by the GMSACredentialSpecName field."
         ),
     )
     gmsa_credential_spec_name: Optional[str] = Field(
         default=None,
         alias="gmsaCredentialSpecName",
-        description="GMSACredentialSpecName is the name of the GMSA credential spec to use.",
+        description=("GMSACredentialSpecName is the name of the GMSA credential spec to use."),
     )
     host_process: Optional[bool] = Field(
         default=None,
         alias="hostProcess",
         description=(
-            "HostProcess determines if a container should be run as a 'Host Process' container. This field is"
-            " alpha-level and will only be honored by components that enable the WindowsHostProcessContainers feature"
-            " flag. Setting this field without the feature flag will result in errors when validating the Pod. All of"
-            " a Pod's containers must have the same effective HostProcess value (it is not allowed to have a mix of"
-            " HostProcess containers and non-HostProcess containers).  In addition, if HostProcess is true then"
-            " HostNetwork must also be set to true."
+            "HostProcess determines if a container should be run as a 'Host Process'"
+            " container. This field is alpha-level and will only be honored by"
+            " components that enable the WindowsHostProcessContainers feature flag."
+            " Setting this field without the feature flag will result in errors when"
+            " validating the Pod. All of a Pod's containers must have the same"
+            " effective HostProcess value (it is not allowed to have a mix of"
+            " HostProcess containers and non-HostProcess containers).  In addition, if"
+            " HostProcess is true then HostNetwork must also be set to true."
         ),
     )
     run_as_user_name: Optional[str] = Field(
         default=None,
         alias="runAsUserName",
         description=(
-            "The UserName in Windows to run the entrypoint of the container process. Defaults to the user specified in"
-            " image metadata if unspecified. May also be set in PodSecurityContext. If set in both SecurityContext and"
-            " PodSecurityContext, the value specified in SecurityContext takes precedence."
+            "The UserName in Windows to run the entrypoint of the container process."
+            " Defaults to the user specified in image metadata if unspecified. May also"
+            " be set in PodSecurityContext. If set in both SecurityContext and"
+            " PodSecurityContext, the value specified in SecurityContext takes"
+            " precedence."
         ),
     )
 
@@ -1100,39 +1244,41 @@ class CSIVolumeSource(BaseModel):
     driver: str = Field(
         ...,
         description=(
-            "Driver is the name of the CSI driver that handles this volume. Consult with your admin for the correct"
-            " name as registered in the cluster."
+            "Driver is the name of the CSI driver that handles this volume. Consult"
+            " with your admin for the correct name as registered in the cluster."
         ),
     )
     fs_type: Optional[str] = Field(
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Ex. "ext4", "xfs", "ntfs". If not provided, the empty value is passed to the'
-            " associated CSI driver which will determine the default filesystem to apply."
+            'Filesystem type to mount. Ex. "ext4", "xfs", "ntfs". If not provided, the'
+            " empty value is passed to the associated CSI driver which will determine"
+            " the default filesystem to apply."
         ),
     )
     node_publish_secret_ref: Optional[LocalObjectReference] = Field(
         default=None,
         alias="nodePublishSecretRef",
         description=(
-            "NodePublishSecretRef is a reference to the secret object containing sensitive information to pass to the"
-            " CSI driver to complete the CSI NodePublishVolume and NodeUnpublishVolume calls. This field is optional,"
-            " and  may be empty if no secret is required. If the secret object contains more than one secret, all"
-            " secret references are passed."
+            "NodePublishSecretRef is a reference to the secret object containing"
+            " sensitive information to pass to the CSI driver to complete the CSI"
+            " NodePublishVolume and NodeUnpublishVolume calls. This field is optional,"
+            " and  may be empty if no secret is required. If the secret object contains"
+            " more than one secret, all secret references are passed."
         ),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="Specifies a read-only configuration for the volume. Defaults to false (read/write).",
+        description=("Specifies a read-only configuration for the volume. Defaults to false" " (read/write)."),
     )
     volume_attributes: Optional[Dict[str, str]] = Field(
         default=None,
         alias="volumeAttributes",
         description=(
-            "VolumeAttributes stores driver-specific properties that are passed to the CSI driver. Consult your"
-            " driver's documentation for supported values."
+            "VolumeAttributes stores driver-specific properties that are passed to the"
+            " CSI driver. Consult your driver's documentation for supported values."
         ),
     )
 
@@ -1146,21 +1292,24 @@ class CephFSVolumeSource(BaseModel):
         ),
     )
     path: Optional[str] = Field(
-        default=None, description="Optional: Used as the mounted root, rather than the full Ceph tree, default is /"
+        default=None,
+        description=("Optional: Used as the mounted root, rather than the full Ceph tree," " default is /"),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
         description=(
-            "Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts."
-            " More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it"
+            "Optional: Defaults to false (read/write). ReadOnly here will force the"
+            " ReadOnly setting in VolumeMounts. More info:"
+            " https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it"
         ),
     )
     secret_file: Optional[str] = Field(
         default=None,
         alias="secretFile",
         description=(
-            "Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret More info:"
+            "Optional: SecretFile is the path to key ring for User, default is"
+            " /etc/ceph/user.secret More info:"
             " https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it"
         ),
     )
@@ -1168,7 +1317,8 @@ class CephFSVolumeSource(BaseModel):
         default=None,
         alias="secretRef",
         description=(
-            "Optional: SecretRef is reference to the authentication secret for User, default is empty. More info:"
+            "Optional: SecretRef is reference to the authentication secret for User,"
+            " default is empty. More info:"
             " https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it"
         ),
     )
@@ -1186,8 +1336,9 @@ class CinderVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            "Filesystem type to mount. Must be a filesystem type supported by the host operating system. Examples:"
-            ' "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified. More info:'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Examples: "ext4", "xfs", "ntfs". Implicitly inferred to'
+            ' be "ext4" if unspecified. More info:'
             " https://examples.k8s.io/mysql-cinder-pd/README.md"
         ),
     )
@@ -1195,14 +1346,15 @@ class CinderVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts."
-            " More info: https://examples.k8s.io/mysql-cinder-pd/README.md"
+            "Optional: Defaults to false (read/write). ReadOnly here will force the"
+            " ReadOnly setting in VolumeMounts. More info:"
+            " https://examples.k8s.io/mysql-cinder-pd/README.md"
         ),
     )
     secret_ref: Optional[LocalObjectReference] = Field(
         default=None,
         alias="secretRef",
-        description="Optional: points to a secret object containing parameters used to connect to OpenStack.",
+        description=("Optional: points to a secret object containing parameters used to connect" " to OpenStack."),
     )
     volume_id: str = Field(
         ...,
@@ -1218,11 +1370,13 @@ class ConfigMapProjection(BaseModel):
     items: Optional[List[KeyToPath]] = Field(
         default=None,
         description=(
-            "If unspecified, each key-value pair in the Data field of the referenced ConfigMap will be projected into"
-            " the volume as a file whose name is the key and content is the value. If specified, the listed keys will"
-            " be projected into the specified paths, and unlisted keys will not be present. If a key is specified"
-            " which is not present in the ConfigMap, the volume setup will error unless it is marked optional. Paths"
-            " must be relative and may not contain the '..' path or start with '..'."
+            "If unspecified, each key-value pair in the Data field of the referenced"
+            " ConfigMap will be projected into the volume as a file whose name is the"
+            " key and content is the value. If specified, the listed keys will be"
+            " projected into the specified paths, and unlisted keys will not be"
+            " present. If a key is specified which is not present in the ConfigMap, the"
+            " volume setup will error unless it is marked optional. Paths must be"
+            " relative and may not contain the '..' path or start with '..'."
         ),
     )
     name: Optional[str] = Field(
@@ -1233,7 +1387,8 @@ class ConfigMapProjection(BaseModel):
         ),
     )
     optional: Optional[bool] = Field(
-        default=None, description="Specify whether the ConfigMap or its keys must be defined"
+        default=None,
+        description="Specify whether the ConfigMap or its keys must be defined",
     )
 
 
@@ -1242,21 +1397,25 @@ class ConfigMapVolumeSource(BaseModel):
         default=None,
         alias="defaultMode",
         description=(
-            "Optional: mode bits used to set permissions on created files by default. Must be an octal value between"
-            " 0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON"
-            " requires decimal values for mode bits. Defaults to 0644. Directories within the path are not affected by"
-            " this setting. This might be in conflict with other options that affect the file mode, like fsGroup, and"
-            " the result can be other mode bits set."
+            "Optional: mode bits used to set permissions on created files by default."
+            " Must be an octal value between 0000 and 0777 or a decimal value between 0"
+            " and 511. YAML accepts both octal and decimal values, JSON requires"
+            " decimal values for mode bits. Defaults to 0644. Directories within the"
+            " path are not affected by this setting. This might be in conflict with"
+            " other options that affect the file mode, like fsGroup, and the result can"
+            " be other mode bits set."
         ),
     )
     items: Optional[List[KeyToPath]] = Field(
         default=None,
         description=(
-            "If unspecified, each key-value pair in the Data field of the referenced ConfigMap will be projected into"
-            " the volume as a file whose name is the key and content is the value. If specified, the listed keys will"
-            " be projected into the specified paths, and unlisted keys will not be present. If a key is specified"
-            " which is not present in the ConfigMap, the volume setup will error unless it is marked optional. Paths"
-            " must be relative and may not contain the '..' path or start with '..'."
+            "If unspecified, each key-value pair in the Data field of the referenced"
+            " ConfigMap will be projected into the volume as a file whose name is the"
+            " key and content is the value. If specified, the listed keys will be"
+            " projected into the specified paths, and unlisted keys will not be"
+            " present. If a key is specified which is not present in the ConfigMap, the"
+            " volume setup will error unless it is marked optional. Paths must be"
+            " relative and may not contain the '..' path or start with '..'."
         ),
     )
     name: Optional[str] = Field(
@@ -1267,7 +1426,8 @@ class ConfigMapVolumeSource(BaseModel):
         ),
     )
     optional: Optional[bool] = Field(
-        default=None, description="Specify whether the ConfigMap or its keys must be defined"
+        default=None,
+        description="Specify whether the ConfigMap or its keys must be defined",
     )
 
 
@@ -1275,8 +1435,9 @@ class EmptyDirVolumeSource(BaseModel):
     medium: Optional[str] = Field(
         default=None,
         description=(
-            'What type of storage medium should back this directory. The default is "" which means to use the node\'s'
-            " default medium. Must be an empty string (default) or Memory. More info:"
+            'What type of storage medium should back this directory. The default is ""'
+            " which means to use the node's default medium. Must be an empty string"
+            " (default) or Memory. More info:"
             " https://kubernetes.io/docs/concepts/storage/volumes#emptydir"
         ),
     )
@@ -1284,10 +1445,11 @@ class EmptyDirVolumeSource(BaseModel):
         default=None,
         alias="sizeLimit",
         description=(
-            "Total amount of local storage required for this EmptyDir volume. The size limit is also applicable for"
-            " memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the"
-            " SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil"
-            " which means that the limit is undefined. More info:"
+            "Total amount of local storage required for this EmptyDir volume. The size"
+            " limit is also applicable for memory medium. The maximum usage on memory"
+            " medium EmptyDir would be the minimum value between the SizeLimit"
+            " specified here and the sum of memory limits of all containers in a pod."
+            " The default is nil which means that the limit is undefined. More info:"
             " http://kubernetes.io/docs/user-guide/volumes#emptydir"
         ),
     )
@@ -1299,7 +1461,7 @@ class EnvFromSource(BaseModel):
     )
     prefix: Optional[str] = Field(
         default=None,
-        description="An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.",
+        description=("An optional identifier to prepend to each key in the ConfigMap. Must be a" " C_IDENTIFIER."),
     )
     secret_ref: Optional[SecretEnvSource] = Field(
         default=None, alias="secretRef", description="The Secret to select from"
@@ -1308,10 +1470,13 @@ class EnvFromSource(BaseModel):
 
 class EventSeries(BaseModel):
     count: Optional[int] = Field(
-        default=None, description="Number of occurrences in this series up to the last heartbeat time"
+        default=None,
+        description=("Number of occurrences in this series up to the last heartbeat time"),
     )
     last_observed_time: Optional[v1.MicroTime] = Field(
-        default=None, alias="lastObservedTime", description="Time of the last occurrence observed"
+        default=None,
+        alias="lastObservedTime",
+        description="Time of the last occurrence observed",
     )
 
 
@@ -1321,8 +1486,9 @@ class FlexVolumeSource(BaseModel):
         default=None,
         alias="fsType",
         description=(
-            'Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4",'
-            ' "xfs", "ntfs". The default filesystem depends on FlexVolume script.'
+            "Filesystem type to mount. Must be a filesystem type supported by the host"
+            ' operating system. Ex. "ext4", "xfs", "ntfs". The default filesystem'
+            " depends on FlexVolume script."
         ),
     )
     options: Optional[Dict[str, str]] = Field(default=None, description="Optional: Extra command options if any.")
@@ -1330,16 +1496,18 @@ class FlexVolumeSource(BaseModel):
         default=None,
         alias="readOnly",
         description=(
-            "Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts."
+            "Optional: Defaults to false (read/write). ReadOnly here will force the"
+            " ReadOnly setting in VolumeMounts."
         ),
     )
     secret_ref: Optional[LocalObjectReference] = Field(
         default=None,
         alias="secretRef",
         description=(
-            "Optional: SecretRef is reference to the secret object containing sensitive information to pass to the"
-            " plugin scripts. This may be empty if no secret object is specified. If the secret object contains more"
-            " than one secret, all secrets are passed to the plugin scripts."
+            "Optional: SecretRef is reference to the secret object containing sensitive"
+            " information to pass to the plugin scripts. This may be empty if no secret"
+            " object is specified. If the secret object contains more than one secret,"
+            " all secrets are passed to the plugin scripts."
         ),
     )
 
@@ -1348,96 +1516,110 @@ class HTTPGetAction(BaseModel):
     host: Optional[str] = Field(
         default=None,
         description=(
-            'Host name to connect to, defaults to the pod IP. You probably want to set "Host" in httpHeaders instead.'
+            "Host name to connect to, defaults to the pod IP. You probably want to set"
+            ' "Host" in httpHeaders instead.'
         ),
     )
     http_headers: Optional[List[HTTPHeader]] = Field(
         default=None,
         alias="httpHeaders",
-        description="Custom headers to set in the request. HTTP allows repeated headers.",
+        description=("Custom headers to set in the request. HTTP allows repeated headers."),
     )
     path: Optional[str] = Field(default=None, description="Path to access on the HTTP server.")
     port: intstr.IntOrString = Field(
         ...,
         description=(
-            "Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must"
-            " be an IANA_SVC_NAME."
+            "Name or number of the port to access on the container. Number must be in"
+            " the range 1 to 65535. Name must be an IANA_SVC_NAME."
         ),
     )
     scheme: Optional[Scheme] = Field(
         default=None,
         description=(
-            'Scheme to use for connecting to the host. Defaults to HTTP.\n\nPossible enum values:\n - `"HTTP"` means'
-            ' that the scheme used will be http://\n - `"HTTPS"` means that the scheme used will be https://'
+            "Scheme to use for connecting to the host. Defaults to HTTP.\n\nPossible"
+            ' enum values:\n - `"HTTP"` means that the scheme used will be http://\n -'
+            ' `"HTTPS"` means that the scheme used will be https://'
         ),
     )
 
 
 class ISCSIVolumeSource(BaseModel):
     chap_auth_discovery: Optional[bool] = Field(
-        default=None, alias="chapAuthDiscovery", description="whether support iSCSI Discovery CHAP authentication"
+        default=None,
+        alias="chapAuthDiscovery",
+        description="whether support iSCSI Discovery CHAP authentication",
     )
     chap_auth_session: Optional[bool] = Field(
-        default=None, alias="chapAuthSession", description="whether support iSCSI Session CHAP authentication"
+        default=None,
+        alias="chapAuthSession",
+        description="whether support iSCSI Session CHAP authentication",
     )
     fs_type: Optional[str] = Field(
         default=None,
         alias="fsType",
         description=(
-            "Filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported"
-            ' by the host operating system. Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if'
-            " unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi"
+            "Filesystem type of the volume that you want to mount. Tip: Ensure that the"
+            " filesystem type is supported by the host operating system. Examples:"
+            ' "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.'
+            " More info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi"
         ),
     )
     initiator_name: Optional[str] = Field(
         default=None,
         alias="initiatorName",
         description=(
-            "Custom iSCSI Initiator Name. If initiatorName is specified with iscsiInterface simultaneously, new iSCSI"
-            " interface <target portal>:<volume name> will be created for the connection."
+            "Custom iSCSI Initiator Name. If initiatorName is specified with"
+            " iscsiInterface simultaneously, new iSCSI interface <target"
+            " portal>:<volume name> will be created for the connection."
         ),
     )
     iqn: str = Field(..., description="Target iSCSI Qualified Name.")
     iscsi_interface: Optional[str] = Field(
         default=None,
         alias="iscsiInterface",
-        description="iSCSI Interface Name that uses an iSCSI transport. Defaults to 'default' (tcp).",
+        description=("iSCSI Interface Name that uses an iSCSI transport. Defaults to 'default'" " (tcp)."),
     )
     lun: int = Field(..., description="iSCSI Target Lun number.")
     portals: Optional[List[str]] = Field(
         default=None,
         description=(
-            "iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port is other than default"
-            " (typically TCP ports 860 and 3260)."
+            "iSCSI Target Portal List. The portal is either an IP or ip_addr:port if"
+            " the port is other than default (typically TCP ports 860 and 3260)."
         ),
     )
     read_only: Optional[bool] = Field(
         default=None,
         alias="readOnly",
-        description="ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false.",
+        description=("ReadOnly here will force the ReadOnly setting in VolumeMounts. Defaults to" " false."),
     )
     secret_ref: Optional[LocalObjectReference] = Field(
-        default=None, alias="secretRef", description="CHAP Secret for iSCSI target and initiator authentication"
+        default=None,
+        alias="secretRef",
+        description="CHAP Secret for iSCSI target and initiator authentication",
     )
     target_portal: str = Field(
         ...,
         alias="targetPortal",
         description=(
-            "iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port is other than default"
-            " (typically TCP ports 860 and 3260)."
+            "iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the"
+            " port is other than default (typically TCP ports 860 and 3260)."
         ),
     )
 
 
 class NodeSelector(BaseModel):
     node_selector_terms: List[NodeSelectorTerm] = Field(
-        ..., alias="nodeSelectorTerms", description="Required. A list of node selector terms. The terms are ORed."
+        ...,
+        alias="nodeSelectorTerms",
+        description="Required. A list of node selector terms. The terms are ORed.",
     )
 
 
 class PersistentVolumeClaimCondition(BaseModel):
     last_probe_time: Optional[v1.Time] = Field(
-        default=None, alias="lastProbeTime", description="Last time we probed the condition."
+        default=None,
+        alias="lastProbeTime",
+        description="Last time we probed the condition.",
     )
     last_transition_time: Optional[v1.Time] = Field(
         default=None,
@@ -1445,21 +1627,25 @@ class PersistentVolumeClaimCondition(BaseModel):
         description="Last time the condition transitioned from one status to another.",
     )
     message: Optional[str] = Field(
-        default=None, description="Human-readable message indicating details about last transition."
+        default=None,
+        description="Human-readable message indicating details about last transition.",
     )
     reason: Optional[str] = Field(
         default=None,
         description=(
-            "Unique, this should be a short, machine understandable string that gives the reason for condition's last"
-            ' transition. If it reports "ResizeStarted" that means the underlying persistent volume is being resized.'
+            "Unique, this should be a short, machine understandable string that gives"
+            " the reason for condition's last transition. If it reports"
+            ' "ResizeStarted" that means the underlying persistent volume is being'
+            " resized."
         ),
     )
     status: str
     type: Type = Field(
         ...,
         description=(
-            '\n\n\nPossible enum values:\n - `"FileSystemResizePending"` - controller resize is finished and a file'
-            ' system resize is pending on node\n - `"Resizing"` - a user trigger resize of pvc has been started'
+            '\n\n\nPossible enum values:\n - `"FileSystemResizePending"` - controller'
+            " resize is finished and a file system resize is pending on node\n -"
+            ' `"Resizing"` - a user trigger resize of pvc has been started'
         ),
     )
 
@@ -1469,7 +1655,8 @@ class PersistentVolumeClaimStatus(BaseModel):
         default=None,
         alias="accessModes",
         description=(
-            "AccessModes contains the actual access modes the volume backing the PVC has. More info:"
+            "AccessModes contains the actual access modes the volume backing the PVC"
+            " has. More info:"
             " https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
         ),
     )
@@ -1477,41 +1664,48 @@ class PersistentVolumeClaimStatus(BaseModel):
         default=None,
         alias="allocatedResources",
         description=(
-            "The storage resource within AllocatedResources tracks the capacity allocated to a PVC. It may be larger"
-            " than the actual capacity when a volume expansion operation is requested. For storage quota, the larger"
-            " value from allocatedResources and PVC.spec.resources is used. If allocatedResources is not set,"
-            " PVC.spec.resources alone is used for quota calculation. If a volume expansion capacity request is"
-            " lowered, allocatedResources is only lowered if there are no expansion operations in progress and if the"
-            " actual volume capacity is equal or lower than the requested capacity. This is an alpha field and"
-            " requires enabling RecoverVolumeExpansionFailure feature."
+            "The storage resource within AllocatedResources tracks the capacity"
+            " allocated to a PVC. It may be larger than the actual capacity when a"
+            " volume expansion operation is requested. For storage quota, the larger"
+            " value from allocatedResources and PVC.spec.resources is used. If"
+            " allocatedResources is not set, PVC.spec.resources alone is used for quota"
+            " calculation. If a volume expansion capacity request is lowered,"
+            " allocatedResources is only lowered if there are no expansion operations"
+            " in progress and if the actual volume capacity is equal or lower than the"
+            " requested capacity. This is an alpha field and requires enabling"
+            " RecoverVolumeExpansionFailure feature."
         ),
     )
     capacity: Optional[Dict[str, resource.Quantity]] = Field(
-        default=None, description="Represents the actual resources of the underlying volume."
+        default=None,
+        description="Represents the actual resources of the underlying volume.",
     )
     conditions: Optional[List[PersistentVolumeClaimCondition]] = Field(
         default=None,
         description=(
-            "Current Condition of persistent volume claim. If underlying persistent volume is being resized then the"
-            " Condition will be set to 'ResizeStarted'."
+            "Current Condition of persistent volume claim. If underlying persistent"
+            " volume is being resized then the Condition will be set to"
+            " 'ResizeStarted'."
         ),
     )
     phase: Optional[Phase] = Field(
         default=None,
         description=(
-            'Phase represents the current phase of PersistentVolumeClaim.\n\nPossible enum values:\n - `"Bound"` used'
-            ' for PersistentVolumeClaims that are bound\n - `"Lost"` used for PersistentVolumeClaims that lost their'
-            " underlying PersistentVolume. The claim was bound to a PersistentVolume and this volume does not exist"
-            ' any longer and all data on it was lost.\n - `"Pending"` used for PersistentVolumeClaims that are not yet'
-            " bound"
+            "Phase represents the current phase of PersistentVolumeClaim.\n\nPossible"
+            ' enum values:\n - `"Bound"` used for PersistentVolumeClaims that are'
+            ' bound\n - `"Lost"` used for PersistentVolumeClaims that lost their'
+            " underlying PersistentVolume. The claim was bound to a PersistentVolume"
+            " and this volume does not exist any longer and all data on it was lost.\n"
+            ' - `"Pending"` used for PersistentVolumeClaims that are not yet bound'
         ),
     )
     resize_status: Optional[str] = Field(
         default=None,
         alias="resizeStatus",
         description=(
-            "ResizeStatus stores status of resize operation. ResizeStatus is not set by default but when expansion is"
-            " complete resizeStatus is set to empty string by resize controller or kubelet. This is an alpha field and"
+            "ResizeStatus stores status of resize operation. ResizeStatus is not set by"
+            " default but when expansion is complete resizeStatus is set to empty"
+            " string by resize controller or kubelet. This is an alpha field and"
             " requires enabling RecoverVolumeExpansionFailure feature."
         ),
     )
@@ -1521,23 +1715,26 @@ class PodDNSConfig(BaseModel):
     nameservers: Optional[List[str]] = Field(
         default=None,
         description=(
-            "A list of DNS name server IP addresses. This will be appended to the base nameservers generated from"
-            " DNSPolicy. Duplicated nameservers will be removed."
+            "A list of DNS name server IP addresses. This will be appended to the base"
+            " nameservers generated from DNSPolicy. Duplicated nameservers will be"
+            " removed."
         ),
     )
     options: Optional[List[PodDNSConfigOption]] = Field(
         default=None,
         description=(
-            "A list of DNS resolver options. This will be merged with the base options generated from DNSPolicy."
-            " Duplicated entries will be removed. Resolution options given in Options will override those that appear"
-            " in the base DNSPolicy."
+            "A list of DNS resolver options. This will be merged with the base options"
+            " generated from DNSPolicy. Duplicated entries will be removed. Resolution"
+            " options given in Options will override those that appear in the base"
+            " DNSPolicy."
         ),
     )
     searches: Optional[List[str]] = Field(
         default=None,
         description=(
-            "A list of DNS search domains for host-name lookup. This will be appended to the base search paths"
-            " generated from DNSPolicy. Duplicated search paths will be removed."
+            "A list of DNS search domains for host-name lookup. This will be appended"
+            " to the base search paths generated from DNSPolicy. Duplicated search"
+            " paths will be removed."
         ),
     )
 
@@ -1547,106 +1744,123 @@ class PodSecurityContext(BaseModel):
         default=None,
         alias="fsGroup",
         description=(
-            "A special supplemental group that applies to all containers in a pod. Some volume types allow the Kubelet"
-            " to change the ownership of that volume to be owned by the pod:\n\n1. The owning GID will be the FSGroup"
-            " 2. The setgid bit is set (new files created in the volume will be owned by FSGroup) 3. The permission"
-            " bits are OR'd with rw-rw----\n\nIf unset, the Kubelet will not modify the ownership and permissions of"
-            " any volume. Note that this field cannot be set when spec.os.name is windows."
+            "A special supplemental group that applies to all containers in a pod. Some"
+            " volume types allow the Kubelet to change the ownership of that volume to"
+            " be owned by the pod:\n\n1. The owning GID will be the FSGroup 2. The"
+            " setgid bit is set (new files created in the volume will be owned by"
+            " FSGroup) 3. The permission bits are OR'd with rw-rw----\n\nIf unset, the"
+            " Kubelet will not modify the ownership and permissions of any volume. Note"
+            " that this field cannot be set when spec.os.name is windows."
         ),
     )
     fs_group_change_policy: Optional[str] = Field(
         default=None,
         alias="fsGroupChangePolicy",
         description=(
-            "fsGroupChangePolicy defines behavior of changing ownership and permission of the volume before being"
-            " exposed inside Pod. This field will only apply to volume types which support fsGroup based ownership(and"
-            " permissions). It will have no effect on ephemeral volume types such as: secret, configmaps and emptydir."
-            ' Valid values are "OnRootMismatch" and "Always". If not specified, "Always" is used. Note that this field'
-            " cannot be set when spec.os.name is windows."
+            "fsGroupChangePolicy defines behavior of changing ownership and permission"
+            " of the volume before being exposed inside Pod. This field will only apply"
+            " to volume types which support fsGroup based ownership(and permissions)."
+            " It will have no effect on ephemeral volume types such as: secret,"
+            ' configmaps and emptydir. Valid values are "OnRootMismatch" and "Always".'
+            ' If not specified, "Always" is used. Note that this field cannot be set'
+            " when spec.os.name is windows."
         ),
     )
     run_as_group: Optional[int] = Field(
         default=None,
         alias="runAsGroup",
         description=(
-            "The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in"
-            " SecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in"
-            " SecurityContext takes precedence for that container. Note that this field cannot be set when"
-            " spec.os.name is windows."
+            "The GID to run the entrypoint of the container process. Uses runtime"
+            " default if unset. May also be set in SecurityContext.  If set in both"
+            " SecurityContext and PodSecurityContext, the value specified in"
+            " SecurityContext takes precedence for that container. Note that this field"
+            " cannot be set when spec.os.name is windows."
         ),
     )
     run_as_non_root: Optional[bool] = Field(
         default=None,
         alias="runAsNonRoot",
         description=(
-            "Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at"
-            " runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If"
-            " unset or false, no such validation will be performed. May also be set in SecurityContext.  If set in"
-            " both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence."
+            "Indicates that the container must run as a non-root user. If true, the"
+            " Kubelet will validate the image at runtime to ensure that it does not run"
+            " as UID 0 (root) and fail to start the container if it does. If unset or"
+            " false, no such validation will be performed. May also be set in"
+            " SecurityContext.  If set in both SecurityContext and PodSecurityContext,"
+            " the value specified in SecurityContext takes precedence."
         ),
     )
     run_as_user: Optional[int] = Field(
         default=None,
         alias="runAsUser",
         description=(
-            "The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if"
-            " unspecified. May also be set in SecurityContext.  If set in both SecurityContext and PodSecurityContext,"
-            " the value specified in SecurityContext takes precedence for that container. Note that this field cannot"
-            " be set when spec.os.name is windows."
+            "The UID to run the entrypoint of the container process. Defaults to user"
+            " specified in image metadata if unspecified. May also be set in"
+            " SecurityContext.  If set in both SecurityContext and PodSecurityContext,"
+            " the value specified in SecurityContext takes precedence for that"
+            " container. Note that this field cannot be set when spec.os.name is"
+            " windows."
         ),
     )
     se_linux_options: Optional[SELinuxOptions] = Field(
         default=None,
         alias="seLinuxOptions",
         description=(
-            "The SELinux context to be applied to all containers. If unspecified, the container runtime will allocate"
-            " a random SELinux context for each container.  May also be set in SecurityContext.  If set in both"
-            " SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence for that"
-            " container. Note that this field cannot be set when spec.os.name is windows."
+            "The SELinux context to be applied to all containers. If unspecified, the"
+            " container runtime will allocate a random SELinux context for each"
+            " container.  May also be set in SecurityContext.  If set in both"
+            " SecurityContext and PodSecurityContext, the value specified in"
+            " SecurityContext takes precedence for that container. Note that this field"
+            " cannot be set when spec.os.name is windows."
         ),
     )
     seccomp_profile: Optional[SeccompProfile] = Field(
         default=None,
         alias="seccompProfile",
         description=(
-            "The seccomp options to use by the containers in this pod. Note that this field cannot be set when"
-            " spec.os.name is windows."
+            "The seccomp options to use by the containers in this pod. Note that this"
+            " field cannot be set when spec.os.name is windows."
         ),
     )
     supplemental_groups: Optional[List[int]] = Field(
         default=None,
         alias="supplementalGroups",
         description=(
-            "A list of groups applied to the first process run in each container, in addition to the container's"
-            " primary GID.  If unspecified, no groups will be added to any container. Note that this field cannot be"
-            " set when spec.os.name is windows."
+            "A list of groups applied to the first process run in each container, in"
+            " addition to the container's primary GID.  If unspecified, no groups will"
+            " be added to any container. Note that this field cannot be set when"
+            " spec.os.name is windows."
         ),
     )
     sysctls: Optional[List[Sysctl]] = Field(
         default=None,
         description=(
-            "Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported sysctls (by the"
-            " container runtime) might fail to launch. Note that this field cannot be set when spec.os.name is"
-            " windows."
+            "Sysctls hold a list of namespaced sysctls used for the pod. Pods with"
+            " unsupported sysctls (by the container runtime) might fail to launch. Note"
+            " that this field cannot be set when spec.os.name is windows."
         ),
     )
     windows_options: Optional[WindowsSecurityContextOptions] = Field(
         default=None,
         alias="windowsOptions",
         description=(
-            "The Windows specific settings applied to all containers. If unspecified, the options within a container's"
-            " SecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value specified"
-            " in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is linux."
+            "The Windows specific settings applied to all containers. If unspecified,"
+            " the options within a container's SecurityContext will be used. If set in"
+            " both SecurityContext and PodSecurityContext, the value specified in"
+            " SecurityContext takes precedence. Note that this field cannot be set when"
+            " spec.os.name is linux."
         ),
     )
 
 
 class ResourceFieldSelector(BaseModel):
     container_name: Optional[str] = Field(
-        default=None, alias="containerName", description="Container name: required for volumes, optional for env vars"
+        default=None,
+        alias="containerName",
+        description="Container name: required for volumes, optional for env vars",
     )
     divisor: Optional[resource.Quantity] = Field(
-        default=None, description='Specifies the output format of the exposed resources, defaults to "1"'
+        default=None,
+        description=('Specifies the output format of the exposed resources, defaults to "1"'),
     )
     resource: str = Field(..., description="Required: resource to select")
 
@@ -1655,16 +1869,19 @@ class ResourceRequirements(BaseModel):
     limits: Optional[Dict[str, resource.Quantity]] = Field(
         default=None,
         description=(
-            "Limits describes the maximum amount of compute resources allowed. More info:"
+            "Limits describes the maximum amount of compute resources allowed. More"
+            " info:"
             " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
         ),
     )
     requests: Optional[Dict[str, resource.Quantity]] = Field(
         default=None,
         description=(
-            "Requests describes the minimum amount of compute resources required. If Requests is omitted for a"
-            " container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined"
-            " value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+            "Requests describes the minimum amount of compute resources required. If"
+            " Requests is omitted for a container, it defaults to Limits if that is"
+            " explicitly specified, otherwise to an implementation-defined value. More"
+            " info:"
+            " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
         ),
     )
 
@@ -1674,88 +1891,104 @@ class SecurityContext(BaseModel):
         default=None,
         alias="allowPrivilegeEscalation",
         description=(
-            "AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process."
-            " This bool directly controls if the no_new_privs flag will be set on the container process."
-            " AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN"
-            " Note that this field cannot be set when spec.os.name is windows."
+            "AllowPrivilegeEscalation controls whether a process can gain more"
+            " privileges than its parent process. This bool directly controls if the"
+            " no_new_privs flag will be set on the container process."
+            " AllowPrivilegeEscalation is true always when the container is: 1) run as"
+            " Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when"
+            " spec.os.name is windows."
         ),
     )
     capabilities: Optional[Capabilities] = Field(
         default=None,
         description=(
-            "The capabilities to add/drop when running containers. Defaults to the default set of capabilities granted"
-            " by the container runtime. Note that this field cannot be set when spec.os.name is windows."
+            "The capabilities to add/drop when running containers. Defaults to the"
+            " default set of capabilities granted by the container runtime. Note that"
+            " this field cannot be set when spec.os.name is windows."
         ),
     )
     privileged: Optional[bool] = Field(
         default=None,
         description=(
-            "Run container in privileged mode. Processes in privileged containers are essentially equivalent to root"
-            " on the host. Defaults to false. Note that this field cannot be set when spec.os.name is windows."
+            "Run container in privileged mode. Processes in privileged containers are"
+            " essentially equivalent to root on the host. Defaults to false. Note that"
+            " this field cannot be set when spec.os.name is windows."
         ),
     )
     proc_mount: Optional[str] = Field(
         default=None,
         alias="procMount",
         description=(
-            "procMount denotes the type of proc mount to use for the containers. The default is DefaultProcMount which"
-            " uses the container runtime defaults for readonly paths and masked paths. This requires the ProcMountType"
-            " feature flag to be enabled. Note that this field cannot be set when spec.os.name is windows."
+            "procMount denotes the type of proc mount to use for the containers. The"
+            " default is DefaultProcMount which uses the container runtime defaults for"
+            " readonly paths and masked paths. This requires the ProcMountType feature"
+            " flag to be enabled. Note that this field cannot be set when spec.os.name"
+            " is windows."
         ),
     )
     read_only_root_filesystem: Optional[bool] = Field(
         default=None,
         alias="readOnlyRootFilesystem",
         description=(
-            "Whether this container has a read-only root filesystem. Default is false. Note that this field cannot be"
-            " set when spec.os.name is windows."
+            "Whether this container has a read-only root filesystem. Default is false."
+            " Note that this field cannot be set when spec.os.name is windows."
         ),
     )
     run_as_group: Optional[int] = Field(
         default=None,
         alias="runAsGroup",
         description=(
-            "The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in"
-            " PodSecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in"
-            " SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is windows."
+            "The GID to run the entrypoint of the container process. Uses runtime"
+            " default if unset. May also be set in PodSecurityContext.  If set in both"
+            " SecurityContext and PodSecurityContext, the value specified in"
+            " SecurityContext takes precedence. Note that this field cannot be set when"
+            " spec.os.name is windows."
         ),
     )
     run_as_non_root: Optional[bool] = Field(
         default=None,
         alias="runAsNonRoot",
         description=(
-            "Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at"
-            " runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If"
-            " unset or false, no such validation will be performed. May also be set in PodSecurityContext.  If set in"
-            " both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence."
+            "Indicates that the container must run as a non-root user. If true, the"
+            " Kubelet will validate the image at runtime to ensure that it does not run"
+            " as UID 0 (root) and fail to start the container if it does. If unset or"
+            " false, no such validation will be performed. May also be set in"
+            " PodSecurityContext.  If set in both SecurityContext and"
+            " PodSecurityContext, the value specified in SecurityContext takes"
+            " precedence."
         ),
     )
     run_as_user: Optional[int] = Field(
         default=None,
         alias="runAsUser",
         description=(
-            "The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if"
-            " unspecified. May also be set in PodSecurityContext.  If set in both SecurityContext and"
-            " PodSecurityContext, the value specified in SecurityContext takes precedence. Note that this field cannot"
-            " be set when spec.os.name is windows."
+            "The UID to run the entrypoint of the container process. Defaults to user"
+            " specified in image metadata if unspecified. May also be set in"
+            " PodSecurityContext.  If set in both SecurityContext and"
+            " PodSecurityContext, the value specified in SecurityContext takes"
+            " precedence. Note that this field cannot be set when spec.os.name is"
+            " windows."
         ),
     )
     se_linux_options: Optional[SELinuxOptions] = Field(
         default=None,
         alias="seLinuxOptions",
         description=(
-            "The SELinux context to be applied to the container. If unspecified, the container runtime will allocate a"
-            " random SELinux context for each container.  May also be set in PodSecurityContext.  If set in both"
-            " SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence. Note"
-            " that this field cannot be set when spec.os.name is windows."
+            "The SELinux context to be applied to the container. If unspecified, the"
+            " container runtime will allocate a random SELinux context for each"
+            " container.  May also be set in PodSecurityContext.  If set in both"
+            " SecurityContext and PodSecurityContext, the value specified in"
+            " SecurityContext takes precedence. Note that this field cannot be set when"
+            " spec.os.name is windows."
         ),
     )
     seccomp_profile: Optional[SeccompProfile] = Field(
         default=None,
         alias="seccompProfile",
         description=(
-            "The seccomp options to use by this container. If seccomp options are provided at both the pod & container"
-            " level, the container options override the pod options. Note that this field cannot be set when"
+            "The seccomp options to use by this container. If seccomp options are"
+            " provided at both the pod & container level, the container options"
+            " override the pod options. Note that this field cannot be set when"
             " spec.os.name is windows."
         ),
     )
@@ -1763,10 +1996,11 @@ class SecurityContext(BaseModel):
         default=None,
         alias="windowsOptions",
         description=(
-            "The Windows specific settings applied to all containers. If unspecified, the options from the"
-            " PodSecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value"
-            " specified in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is"
-            " linux."
+            "The Windows specific settings applied to all containers. If unspecified,"
+            " the options from the PodSecurityContext will be used. If set in both"
+            " SecurityContext and PodSecurityContext, the value specified in"
+            " SecurityContext takes precedence. Note that this field cannot be set when"
+            " spec.os.name is linux."
         ),
     )
 
@@ -1776,62 +2010,73 @@ class ServicePort(BaseModel):
         default=None,
         alias="appProtocol",
         description=(
-            "The application protocol for this port. This field follows standard Kubernetes label syntax. Un-prefixed"
-            " names are reserved for IANA standard service names (as per RFC-6335 and"
-            " http://www.iana.org/assignments/service-names). Non-standard protocols should use prefixed names such as"
-            " mycompany.com/my-custom-protocol."
+            "The application protocol for this port. This field follows standard"
+            " Kubernetes label syntax. Un-prefixed names are reserved for IANA standard"
+            " service names (as per RFC-6335 and"
+            " http://www.iana.org/assignments/service-names). Non-standard protocols"
+            " should use prefixed names such as mycompany.com/my-custom-protocol."
         ),
     )
     name: Optional[str] = Field(
         default=None,
         description=(
-            "The name of this port within the service. This must be a DNS_LABEL. All ports within a ServiceSpec must"
-            " have unique names. When considering the endpoints for a Service, this must match the 'name' field in the"
-            " EndpointPort. Optional if only one ServicePort is defined on this service."
+            "The name of this port within the service. This must be a DNS_LABEL. All"
+            " ports within a ServiceSpec must have unique names. When considering the"
+            " endpoints for a Service, this must match the 'name' field in the"
+            " EndpointPort. Optional if only one ServicePort is defined on this"
+            " service."
         ),
     )
     node_port: Optional[int] = Field(
         default=None,
         alias="nodePort",
         description=(
-            "The port on each node on which this service is exposed when type is NodePort or LoadBalancer.  Usually"
-            " assigned by the system. If a value is specified, in-range, and not in use it will be used, otherwise the"
-            " operation will fail.  If not specified, a port will be allocated if this Service requires one.  If this"
-            " field is specified when creating a Service which does not need it, creation will fail. This field will"
-            " be wiped when updating a Service to no longer need it (e.g. changing type from NodePort to ClusterIP)."
-            " More info: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport"
+            "The port on each node on which this service is exposed when type is"
+            " NodePort or LoadBalancer.  Usually assigned by the system. If a value is"
+            " specified, in-range, and not in use it will be used, otherwise the"
+            " operation will fail.  If not specified, a port will be allocated if this"
+            " Service requires one.  If this field is specified when creating a Service"
+            " which does not need it, creation will fail. This field will be wiped when"
+            " updating a Service to no longer need it (e.g. changing type from NodePort"
+            " to ClusterIP). More info:"
+            " https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport"
         ),
     )
     port: int = Field(..., description="The port that will be exposed by this service.")
     protocol: Optional[Protocol] = Field(
         default=None,
         description=(
-            'The IP protocol for this port. Supports "TCP", "UDP", and "SCTP". Default is TCP.\n\nPossible enum'
-            ' values:\n - `"SCTP"` is the SCTP protocol.\n - `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP'
-            " protocol."
+            'The IP protocol for this port. Supports "TCP", "UDP", and "SCTP". Default'
+            ' is TCP.\n\nPossible enum values:\n - `"SCTP"` is the SCTP protocol.\n -'
+            ' `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP protocol.'
         ),
     )
     target_port: Optional[intstr.IntOrString] = Field(
         default=None,
         alias="targetPort",
         description=(
-            "Number or name of the port to access on the pods targeted by the service. Number must be in the range 1"
-            " to 65535. Name must be an IANA_SVC_NAME. If this is a string, it will be looked up as a named port in"
-            " the target Pod's container ports. If this is not specified, the value of the 'port' field is used (an"
-            " identity map). This field is ignored for services with clusterIP=None, and should be omitted or set"
-            " equal to the 'port' field. More info:"
+            "Number or name of the port to access on the pods targeted by the service."
+            " Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME. If"
+            " this is a string, it will be looked up as a named port in the target"
+            " Pod's container ports. If this is not specified, the value of the 'port'"
+            " field is used (an identity map). This field is ignored for services with"
+            " clusterIP=None, and should be omitted or set equal to the 'port' field."
+            " More info:"
             " https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service"
         ),
     )
 
 
 class TCPSocketAction(BaseModel):
-    host: Optional[str] = Field(default=None, description="Optional: Host name to connect to, defaults to the pod IP.")
+    host: Optional[str] = Field(
+        default=None,
+        description="Optional: Host name to connect to, defaults to the pod IP.",
+    )
     port: intstr.IntOrString = Field(
         ...,
         description=(
-            "Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must"
-            " be an IANA_SVC_NAME."
+            "Number or name of the port to access on the container. Number must be in"
+            " the range 1 to 65535. Name must be an IANA_SVC_NAME."
         ),
     )
 
@@ -1841,31 +2086,35 @@ class DownwardAPIVolumeFile(BaseModel):
         default=None,
         alias="fieldRef",
         description=(
-            "Required: Selects a field of the pod: only annotations, labels, name and namespace are supported."
+            "Required: Selects a field of the pod: only annotations, labels, name and" " namespace are supported."
         ),
     )
     mode: Optional[int] = Field(
         default=None,
         description=(
-            "Optional: mode bits used to set permissions on this file, must be an octal value between 0000 and 0777 or"
-            " a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal"
-            " values for mode bits. If not specified, the volume defaultMode will be used. This might be in conflict"
-            " with other options that affect the file mode, like fsGroup, and the result can be other mode bits set."
+            "Optional: mode bits used to set permissions on this file, must be an octal"
+            " value between 0000 and 0777 or a decimal value between 0 and 511. YAML"
+            " accepts both octal and decimal values, JSON requires decimal values for"
+            " mode bits. If not specified, the volume defaultMode will be used. This"
+            " might be in conflict with other options that affect the file mode, like"
+            " fsGroup, and the result can be other mode bits set."
         ),
     )
     path: str = Field(
         ...,
         description=(
-            "Required: Path is  the relative path name of the file to be created. Must not be absolute or contain the"
-            " '..' path. Must be utf-8 encoded. The first item of the relative path must not start with '..'"
+            "Required: Path is  the relative path name of the file to be created. Must"
+            " not be absolute or contain the '..' path. Must be utf-8 encoded. The"
+            " first item of the relative path must not start with '..'"
         ),
     )
     resource_field_ref: Optional[ResourceFieldSelector] = Field(
         default=None,
         alias="resourceFieldRef",
         description=(
-            "Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory,"
-            " requests.cpu and requests.memory) are currently supported."
+            "Selects a resource of the container: only resources limits and requests"
+            " (limits.cpu, limits.memory, requests.cpu and requests.memory) are"
+            " currently supported."
         ),
     )
 
@@ -1875,12 +2124,14 @@ class DownwardAPIVolumeSource(BaseModel):
         default=None,
         alias="defaultMode",
         description=(
-            "Optional: mode bits to use on created files by default. Must be a Optional: mode bits used to set"
-            " permissions on created files by default. Must be an octal value between 0000 and 0777 or a decimal value"
-            " between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal values for mode"
-            " bits. Defaults to 0644. Directories within the path are not affected by this setting. This might be in"
-            " conflict with other options that affect the file mode, like fsGroup, and the result can be other mode"
-            " bits set."
+            "Optional: mode bits to use on created files by default. Must be a"
+            " Optional: mode bits used to set permissions on created files by default."
+            " Must be an octal value between 0000 and 0777 or a decimal value between 0"
+            " and 511. YAML accepts both octal and decimal values, JSON requires"
+            " decimal values for mode bits. Defaults to 0644. Directories within the"
+            " path are not affected by this setting. This might be in conflict with"
+            " other options that affect the file mode, like fsGroup, and the result can"
+            " be other mode bits set."
         ),
     )
     items: Optional[List[DownwardAPIVolumeFile]] = Field(
@@ -1890,14 +2141,17 @@ class DownwardAPIVolumeSource(BaseModel):
 
 class EnvVarSource(BaseModel):
     config_map_key_ref: Optional[ConfigMapKeySelector] = Field(
-        default=None, alias="configMapKeyRef", description="Selects a key of a ConfigMap."
+        default=None,
+        alias="configMapKeyRef",
+        description="Selects a key of a ConfigMap.",
     )
     field_ref: Optional[ObjectFieldSelector] = Field(
         default=None,
         alias="fieldRef",
         description=(
-            "Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`,"
-            " `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP,"
+            "Selects a field of the pod: supports metadata.name, metadata.namespace,"
+            " `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`,"
+            " spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP,"
             " status.podIPs."
         ),
     )
@@ -1905,37 +2159,43 @@ class EnvVarSource(BaseModel):
         default=None,
         alias="resourceFieldRef",
         description=(
-            "Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory,"
-            " limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently"
-            " supported."
+            "Selects a resource of the container: only resources limits and requests"
+            " (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu,"
+            " requests.memory and requests.ephemeral-storage) are currently supported."
         ),
     )
     secret_key_ref: Optional[SecretKeySelector] = Field(
-        default=None, alias="secretKeyRef", description="Selects a key of a secret in the pod's namespace"
+        default=None,
+        alias="secretKeyRef",
+        description="Selects a key of a secret in the pod's namespace",
     )
 
 
 class Event(BaseModel):
     action: Optional[str] = Field(
-        default=None, description="What action was taken/failed regarding to the Regarding object."
+        default=None,
+        description="What action was taken/failed regarding to the Regarding object.",
     )
     api_version: Optional[str] = Field(
         default=None,
         alias="apiVersion",
         description=(
-            "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
-            " recognized schemas to the latest internal value, and may reject unrecognized values. More info:"
+            "APIVersion defines the versioned schema of this representation of an"
+            " object. Servers should convert recognized schemas to the latest internal"
+            " value, and may reject unrecognized values. More info:"
             " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
         ),
     )
     count: Optional[int] = Field(default=None, description="The number of times this event has occurred.")
     event_time: Optional[v1.MicroTime] = Field(
-        default=None, alias="eventTime", description="Time when this Event was first observed."
+        default=None,
+        alias="eventTime",
+        description="Time when this Event was first observed.",
     )
     first_timestamp: Optional[v1.Time] = Field(
         default=None,
         alias="firstTimestamp",
-        description="The time at which the event was first recorded. (Time of server receipt is in TypeMeta.)",
+        description=("The time at which the event was first recorded. (Time of server receipt is" " in TypeMeta.)"),
     )
     involved_object: ObjectReference = Field(
         ..., alias="involvedObject", description="The object that this event is about."
@@ -1943,18 +2203,20 @@ class Event(BaseModel):
     kind: Optional[str] = Field(
         default=None,
         description=(
-            "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
-            " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
+            "Kind is a string value representing the REST resource this object"
+            " represents. Servers may infer this from the endpoint the client submits"
+            " requests to. Cannot be updated. In CamelCase. More info:"
             " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
         ),
     )
     last_timestamp: Optional[v1.Time] = Field(
         default=None,
         alias="lastTimestamp",
-        description="The time at which the most recent occurrence of this event was recorded.",
+        description=("The time at which the most recent occurrence of this event was recorded."),
     )
     message: Optional[str] = Field(
-        default=None, description="A human-readable description of the status of this operation."
+        default=None,
+        description="A human-readable description of the status of this operation.",
     )
     metadata: v1.ObjectMeta = Field(
         ...,
@@ -1966,8 +2228,8 @@ class Event(BaseModel):
     reason: Optional[str] = Field(
         default=None,
         description=(
-            "This should be a short, machine understandable string that gives the reason for the transition into the"
-            " object's current status."
+            "This should be a short, machine understandable string that gives the"
+            " reason for the transition into the object's current status."
         ),
     )
     related: Optional[ObjectReference] = Field(
@@ -1976,35 +2238,41 @@ class Event(BaseModel):
     reporting_component: Optional[str] = Field(
         default=None,
         alias="reportingComponent",
-        description="Name of the controller that emitted this Event, e.g. `kubernetes.io/kubelet`.",
+        description=("Name of the controller that emitted this Event, e.g." " `kubernetes.io/kubelet`."),
     )
     reporting_instance: Optional[str] = Field(
-        default=None, alias="reportingInstance", description="ID of the controller instance, e.g. `kubelet-xyzf`."
+        default=None,
+        alias="reportingInstance",
+        description="ID of the controller instance, e.g. `kubelet-xyzf`.",
     )
     series: Optional[EventSeries] = Field(
-        default=None, description="Data about the Event series this event represents or nil if it's a singleton Event."
+        default=None,
+        description=("Data about the Event series this event represents or nil if it's a" " singleton Event."),
     )
     source: Optional[EventSource] = Field(
         default=None,
-        description="The component reporting this event. Should be a short machine understandable string.",
+        description=("The component reporting this event. Should be a short machine" " understandable string."),
     )
     type: Optional[str] = Field(
-        default=None, description="Type of this event (Normal, Warning), new types could be added in the future"
+        default=None,
+        description=("Type of this event (Normal, Warning), new types could be added in the" " future"),
     )
 
 
 class LifecycleHandler(BaseModel):
     exec: Optional[ExecAction] = Field(default=None, description="Exec specifies the action to take.")
     http_get: Optional[HTTPGetAction] = Field(
-        default=None, alias="httpGet", description="HTTPGet specifies the http request to perform."
+        default=None,
+        alias="httpGet",
+        description="HTTPGet specifies the http request to perform.",
     )
     tcp_socket: Optional[TCPSocketAction] = Field(
         default=None,
         alias="tcpSocket",
         description=(
-            "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept for the backward compatibility."
-            " There are no validation of this field and lifecycle hooks will fail in runtime when tcp handler is"
-            " specified."
+            "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept for"
+            " the backward compatibility. There are no validation of this field and"
+            " lifecycle hooks will fail in runtime when tcp handler is specified."
         ),
     )
 
@@ -2014,22 +2282,26 @@ class NodeAffinity(BaseModel):
         default=None,
         alias="preferredDuringSchedulingIgnoredDuringExecution",
         description=(
-            "The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified by"
-            " this field, but it may choose a node that violates one or more of the expressions. The node that is most"
-            " preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the"
-            " scheduling requirements (resource request, requiredDuringScheduling affinity expressions, etc.), compute"
-            ' a sum by iterating through the elements of this field and adding "weight" to the sum if the node matches'
-            " the corresponding matchExpressions; the node(s) with the highest sum are the most preferred."
+            "The scheduler will prefer to schedule pods to nodes that satisfy the"
+            " affinity expressions specified by this field, but it may choose a node"
+            " that violates one or more of the expressions. The node that is most"
+            " preferred is the one with the greatest sum of weights, i.e. for each node"
+            " that meets all of the scheduling requirements (resource request,"
+            " requiredDuringScheduling affinity expressions, etc.), compute a sum by"
+            ' iterating through the elements of this field and adding "weight" to the'
+            " sum if the node matches the corresponding matchExpressions; the node(s)"
+            " with the highest sum are the most preferred."
         ),
     )
     required_during_scheduling_ignored_during_execution: Optional[NodeSelector] = Field(
         default=None,
         alias="requiredDuringSchedulingIgnoredDuringExecution",
         description=(
-            "If the affinity requirements specified by this field are not met at scheduling time, the pod will not be"
-            " scheduled onto the node. If the affinity requirements specified by this field cease to be met at some"
-            " point during pod execution (e.g. due to an update), the system may or may not try to eventually evict"
-            " the pod from its node."
+            "If the affinity requirements specified by this field are not met at"
+            " scheduling time, the pod will not be scheduled onto the node. If the"
+            " affinity requirements specified by this field cease to be met at some"
+            " point during pod execution (e.g. due to an update), the system may or may"
+            " not try to eventually evict the pod from its node."
         ),
     )
 
@@ -2039,7 +2311,8 @@ class PersistentVolumeClaimSpec(BaseModel):
         default=None,
         alias="accessModes",
         description=(
-            "AccessModes contains the desired access modes the volume should have. More info:"
+            "AccessModes contains the desired access modes the volume should have. More"
+            " info:"
             " https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
         ),
     )
@@ -2047,37 +2320,46 @@ class PersistentVolumeClaimSpec(BaseModel):
         default=None,
         alias="dataSource",
         description=(
-            "This field can be used to specify either: * An existing VolumeSnapshot object"
-            " (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC (PersistentVolumeClaim) If the provisioner or"
-            " an external controller can support the specified data source, it will create a new volume based on the"
-            " contents of the specified data source. If the AnyVolumeDataSource feature gate is enabled, this field"
-            " will always have the same contents as the DataSourceRef field."
+            "This field can be used to specify either: * An existing VolumeSnapshot"
+            " object (snapshot.storage.k8s.io/VolumeSnapshot) * An existing PVC"
+            " (PersistentVolumeClaim) If the provisioner or an external controller can"
+            " support the specified data source, it will create a new volume based on"
+            " the contents of the specified data source. If the AnyVolumeDataSource"
+            " feature gate is enabled, this field will always have the same contents as"
+            " the DataSourceRef field."
         ),
     )
     data_source_ref: Optional[TypedLocalObjectReference] = Field(
         default=None,
         alias="dataSourceRef",
         description=(
-            "Specifies the object from which to populate the volume with data, if a non-empty volume is desired. This"
-            " may be any local object from a non-empty API group (non core object) or a PersistentVolumeClaim object."
-            " When this field is specified, volume binding will only succeed if the type of the specified object"
-            " matches some installed volume populator or dynamic provisioner. This field will replace the"
-            " functionality of the DataSource field and as such if both fields are non-empty, they must have the same"
-            " value. For backwards compatibility, both fields (DataSource and DataSourceRef) will be set to the same"
-            " value automatically if one of them is empty and the other is non-empty. There are two important"
-            " differences between DataSource and DataSourceRef: * While DataSource only allows two specific types of"
-            " objects, DataSourceRef\n  allows any non-core object, as well as PersistentVolumeClaim objects.\n* While"
-            " DataSource ignores disallowed values (dropping them), DataSourceRef\n  preserves all values, and"
-            " generates an error if a disallowed value is\n  specified.\n(Alpha) Using this field requires the"
-            " AnyVolumeDataSource feature gate to be enabled."
+            "Specifies the object from which to populate the volume with data, if a"
+            " non-empty volume is desired. This may be any local object from a"
+            " non-empty API group (non core object) or a PersistentVolumeClaim object."
+            " When this field is specified, volume binding will only succeed if the"
+            " type of the specified object matches some installed volume populator or"
+            " dynamic provisioner. This field will replace the functionality of the"
+            " DataSource field and as such if both fields are non-empty, they must have"
+            " the same value. For backwards compatibility, both fields (DataSource and"
+            " DataSourceRef) will be set to the same value automatically if one of them"
+            " is empty and the other is non-empty. There are two important differences"
+            " between DataSource and DataSourceRef: * While DataSource only allows two"
+            " specific types of objects, DataSourceRef\n  allows any non-core object,"
+            " as well as PersistentVolumeClaim objects.\n* While DataSource ignores"
+            " disallowed values (dropping them), DataSourceRef\n  preserves all values,"
+            " and generates an error if a disallowed value is\n  specified.\n(Alpha)"
+            " Using this field requires the AnyVolumeDataSource feature gate to be"
+            " enabled."
         ),
     )
     resources: Optional[ResourceRequirements] = Field(
         default=None,
         description=(
-            "Resources represents the minimum resources the volume should have. If RecoverVolumeExpansionFailure"
-            " feature is enabled users are allowed to specify resource requirements that are lower than previous value"
-            " but must still be higher than capacity recorded in the status field of the claim. More info:"
+            "Resources represents the minimum resources the volume should have. If"
+            " RecoverVolumeExpansionFailure feature is enabled users are allowed to"
+            " specify resource requirements that are lower than previous value but must"
+            " still be higher than capacity recorded in the status field of the claim."
+            " More info:"
             " https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources"
         ),
     )
@@ -2096,14 +2378,14 @@ class PersistentVolumeClaimSpec(BaseModel):
         default=None,
         alias="volumeMode",
         description=(
-            "volumeMode defines what type of volume is required by the claim. Value of Filesystem is implied when not"
-            " included in claim spec."
+            "volumeMode defines what type of volume is required by the claim. Value of"
+            " Filesystem is implied when not included in claim spec."
         ),
     )
     volume_name: Optional[str] = Field(
         default=None,
         alias="volumeName",
-        description="VolumeName is the binding reference to the PersistentVolume backing this claim.",
+        description=("VolumeName is the binding reference to the PersistentVolume backing this" " claim."),
     )
 
 
@@ -2111,50 +2393,57 @@ class PersistentVolumeClaimTemplate(BaseModel):
     metadata: Optional[v1.ObjectMeta] = Field(
         default=None,
         description=(
-            "May contain labels and annotations that will be copied into the PVC when creating it. No other fields are"
-            " allowed and will be rejected during validation."
+            "May contain labels and annotations that will be copied into the PVC when"
+            " creating it. No other fields are allowed and will be rejected during"
+            " validation."
         ),
     )
     spec: PersistentVolumeClaimSpec = Field(
         ...,
         description=(
-            "The specification for the PersistentVolumeClaim. The entire content is copied unchanged into the PVC that"
-            " gets created from this template. The same fields as in a PersistentVolumeClaim are also valid here."
+            "The specification for the PersistentVolumeClaim. The entire content is"
+            " copied unchanged into the PVC that gets created from this template. The"
+            " same fields as in a PersistentVolumeClaim are also valid here."
         ),
     )
 
 
 class PodAffinityTerm(BaseModel):
     label_selector: Optional[v1.LabelSelector] = Field(
-        default=None, alias="labelSelector", description="A label query over a set of resources, in this case pods."
+        default=None,
+        alias="labelSelector",
+        description="A label query over a set of resources, in this case pods.",
     )
     namespace_selector: Optional[v1.LabelSelector] = Field(
         default=None,
         alias="namespaceSelector",
         description=(
-            "A label query over the set of namespaces that the term applies to. The term is applied to the union of"
-            " the namespaces selected by this field and the ones listed in the namespaces field. null selector and"
-            ' null or empty namespaces list means "this pod\'s namespace". An empty selector ({}) matches all'
-            " namespaces. This field is beta-level and is only honored when PodAffinityNamespaceSelector feature is"
-            " enabled."
+            "A label query over the set of namespaces that the term applies to. The"
+            " term is applied to the union of the namespaces selected by this field and"
+            " the ones listed in the namespaces field. null selector and null or empty"
+            ' namespaces list means "this pod\'s namespace". An empty selector ({})'
+            " matches all namespaces. This field is beta-level and is only honored when"
+            " PodAffinityNamespaceSelector feature is enabled."
         ),
     )
     namespaces: Optional[List[str]] = Field(
         default=None,
         description=(
-            "namespaces specifies a static list of namespace names that the term applies to. The term is applied to"
-            " the union of the namespaces listed in this field and the ones selected by namespaceSelector. null or"
-            ' empty namespaces list and null namespaceSelector means "this pod\'s namespace"'
+            "namespaces specifies a static list of namespace names that the term"
+            " applies to. The term is applied to the union of the namespaces listed in"
+            " this field and the ones selected by namespaceSelector. null or empty"
+            ' namespaces list and null namespaceSelector means "this pod\'s namespace"'
         ),
     )
     topology_key: str = Field(
         ...,
         alias="topologyKey",
         description=(
-            "This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching the"
-            " labelSelector in the specified namespaces, where co-located is defined as running on a node whose value"
-            " of the label with key topologyKey matches that of any node on which any of the selected pods is running."
-            " Empty topologyKey is not allowed."
+            "This pod should be co-located (affinity) or not co-located (anti-affinity)"
+            " with the pods matching the labelSelector in the specified namespaces,"
+            " where co-located is defined as running on a node whose value of the label"
+            " with key topologyKey matches that of any node on which any of the"
+            " selected pods is running. Empty topologyKey is not allowed."
         ),
     )
 
@@ -2165,63 +2454,73 @@ class Probe(BaseModel):
         default=None,
         alias="failureThreshold",
         description=(
-            "Minimum consecutive failures for the probe to be considered failed after having succeeded. Defaults to 3."
-            " Minimum value is 1."
+            "Minimum consecutive failures for the probe to be considered failed after"
+            " having succeeded. Defaults to 3. Minimum value is 1."
         ),
     )
     grpc: Optional[GRPCAction] = Field(
         default=None,
         description=(
-            "GRPC specifies an action involving a GRPC port. This is an alpha field and requires enabling"
-            " GRPCContainerProbe feature gate."
+            "GRPC specifies an action involving a GRPC port. This is an alpha field and"
+            " requires enabling GRPCContainerProbe feature gate."
         ),
     )
     http_get: Optional[HTTPGetAction] = Field(
-        default=None, alias="httpGet", description="HTTPGet specifies the http request to perform."
+        default=None,
+        alias="httpGet",
+        description="HTTPGet specifies the http request to perform.",
     )
     initial_delay_seconds: Optional[int] = Field(
         default=None,
         alias="initialDelaySeconds",
         description=(
-            "Number of seconds after the container has started before liveness probes are initiated. More info:"
+            "Number of seconds after the container has started before liveness probes"
+            " are initiated. More info:"
             " https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
         ),
     )
     period_seconds: Optional[int] = Field(
         default=None,
         alias="periodSeconds",
-        description="How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1.",
+        description=("How often (in seconds) to perform the probe. Default to 10 seconds." " Minimum value is 1."),
     )
     success_threshold: Optional[int] = Field(
         default=None,
         alias="successThreshold",
         description=(
-            "Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to"
-            " 1. Must be 1 for liveness and startup. Minimum value is 1."
+            "Minimum consecutive successes for the probe to be considered successful"
+            " after having failed. Defaults to 1. Must be 1 for liveness and startup."
+            " Minimum value is 1."
         ),
     )
     tcp_socket: Optional[TCPSocketAction] = Field(
-        default=None, alias="tcpSocket", description="TCPSocket specifies an action involving a TCP port."
+        default=None,
+        alias="tcpSocket",
+        description="TCPSocket specifies an action involving a TCP port.",
     )
     termination_grace_period_seconds: Optional[int] = Field(
         default=None,
         alias="terminationGracePeriodSeconds",
         description=(
-            "Optional duration in seconds the pod needs to terminate gracefully upon probe failure. The grace period"
-            " is the duration in seconds after the processes running in the pod are sent a termination signal and the"
-            " time when the processes are forcibly halted with a kill signal. Set this value longer than the expected"
-            " cleanup time for your process. If this value is nil, the pod's terminationGracePeriodSeconds will be"
-            " used. Otherwise, this value overrides the value provided by the pod spec. Value must be non-negative"
-            " integer. The value zero indicates stop immediately via the kill signal (no opportunity to shut down)."
-            " This is a beta field and requires enabling ProbeTerminationGracePeriod feature gate. Minimum value is 1."
-            " spec.terminationGracePeriodSeconds is used if unset."
+            "Optional duration in seconds the pod needs to terminate gracefully upon"
+            " probe failure. The grace period is the duration in seconds after the"
+            " processes running in the pod are sent a termination signal and the time"
+            " when the processes are forcibly halted with a kill signal. Set this value"
+            " longer than the expected cleanup time for your process. If this value is"
+            " nil, the pod's terminationGracePeriodSeconds will be used. Otherwise,"
+            " this value overrides the value provided by the pod spec. Value must be"
+            " non-negative integer. The value zero indicates stop immediately via the"
+            " kill signal (no opportunity to shut down). This is a beta field and"
+            " requires enabling ProbeTerminationGracePeriod feature gate. Minimum value"
+            " is 1. spec.terminationGracePeriodSeconds is used if unset."
         ),
     )
     timeout_seconds: Optional[int] = Field(
         default=None,
         alias="timeoutSeconds",
         description=(
-            "Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. More info:"
+            "Number of seconds after which the probe times out. Defaults to 1 second."
+            " Minimum value is 1. More info:"
             " https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
         ),
     )
@@ -2231,10 +2530,11 @@ class WeightedPodAffinityTerm(BaseModel):
     pod_affinity_term: PodAffinityTerm = Field(
         ...,
         alias="podAffinityTerm",
-        description="Required. A pod affinity term, associated with the corresponding weight.",
+        description=("Required. A pod affinity term, associated with the corresponding weight."),
     )
     weight: int = Field(
-        ..., description="weight associated with matching the corresponding podAffinityTerm, in the range 1-100."
+        ...,
+        description=("weight associated with matching the corresponding podAffinityTerm, in the" " range 1-100."),
     )
 
 
@@ -2249,17 +2549,20 @@ class EnvVar(BaseModel):
     value: Optional[str] = Field(
         default=None,
         description=(
-            "Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the"
-            " container and any service environment variables. If a variable cannot be resolved, the reference in the"
-            " input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the"
-            ' $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)". Escaped'
-            ' references will never be expanded, regardless of whether the variable exists or not. Defaults to "".'
+            "Variable references $(VAR_NAME) are expanded using the previously defined"
+            " environment variables in the container and any service environment"
+            " variables. If a variable cannot be resolved, the reference in the input"
+            " string will be unchanged. Double $$ are reduced to a single $, which"
+            ' allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will'
+            ' produce the string literal "$(VAR_NAME)". Escaped references will never'
+            " be expanded, regardless of whether the variable exists or not. Defaults"
+            ' to "".'
         ),
     )
     value_from: Optional[EnvVarSource] = Field(
         default=None,
         alias="valueFrom",
-        description="Source for the environment variable's value. Cannot be used if value is not empty.",
+        description=("Source for the environment variable's value. Cannot be used if value is" " not empty."),
     )
 
 
@@ -2268,17 +2571,21 @@ class EphemeralVolumeSource(BaseModel):
         default=None,
         alias="volumeClaimTemplate",
         description=(
-            "Will be used to create a stand-alone PVC to provision the volume. The pod in which this"
-            " EphemeralVolumeSource is embedded will be the owner of the PVC, i.e. the PVC will be deleted together"
-            " with the pod.  The name of the PVC will be `<pod name>-<volume name>` where `<volume name>` is the name"
-            " from the `PodSpec.Volumes` array entry. Pod validation will reject the pod if the concatenated name is"
-            " not valid for a PVC (for example, too long).\n\nAn existing PVC with that name that is not owned by the"
-            " pod will *not* be used for the pod to avoid using an unrelated volume by mistake. Starting the pod is"
-            " then blocked until the unrelated PVC is removed. If such a pre-created PVC is meant to be used by the"
-            " pod, the PVC has to updated with an owner reference to the pod once the pod exists. Normally this should"
-            " not be necessary, but it may be useful when manually reconstructing a broken cluster.\n\nThis field is"
-            " read-only and no changes will be made by Kubernetes to the PVC after it has been created.\n\nRequired,"
-            " must not be nil."
+            "Will be used to create a stand-alone PVC to provision the volume. The pod"
+            " in which this EphemeralVolumeSource is embedded will be the owner of the"
+            " PVC, i.e. the PVC will be deleted together with the pod.  The name of the"
+            " PVC will be `<pod name>-<volume name>` where `<volume name>` is the name"
+            " from the `PodSpec.Volumes` array entry. Pod validation will reject the"
+            " pod if the concatenated name is not valid for a PVC (for example, too"
+            " long).\n\nAn existing PVC with that name that is not owned by the pod"
+            " will *not* be used for the pod to avoid using an unrelated volume by"
+            " mistake. Starting the pod is then blocked until the unrelated PVC is"
+            " removed. If such a pre-created PVC is meant to be used by the pod, the"
+            " PVC has to updated with an owner reference to the pod once the pod"
+            " exists. Normally this should not be necessary, but it may be useful when"
+            " manually reconstructing a broken cluster.\n\nThis field is read-only and"
+            " no changes will be made by Kubernetes to the PVC after it has been"
+            " created.\n\nRequired, must not be nil."
         ),
     )
 
@@ -2288,9 +2595,10 @@ class Lifecycle(BaseModel):
         default=None,
         alias="postStart",
         description=(
-            "PostStart is called immediately after a container is created. If the handler fails, the container is"
-            " terminated and restarted according to its restart policy. Other management of the container blocks until"
-            " the hook completes. More info:"
+            "PostStart is called immediately after a container is created. If the"
+            " handler fails, the container is terminated and restarted according to its"
+            " restart policy. Other management of the container blocks until the hook"
+            " completes. More info:"
             " https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
         ),
     )
@@ -2298,13 +2606,16 @@ class Lifecycle(BaseModel):
         default=None,
         alias="preStop",
         description=(
-            "PreStop is called immediately before a container is terminated due to an API request or management event"
-            " such as liveness/startup probe failure, preemption, resource contention, etc. The handler is not called"
-            " if the container crashes or exits. The Pod's termination grace period countdown begins before the"
-            " PreStop hook is executed. Regardless of the outcome of the handler, the container will eventually"
-            " terminate within the Pod's termination grace period (unless delayed by finalizers). Other management of"
-            " the container blocks until the hook completes or until the termination grace period is reached. More"
-            " info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
+            "PreStop is called immediately before a container is terminated due to an"
+            " API request or management event such as liveness/startup probe failure,"
+            " preemption, resource contention, etc. The handler is not called if the"
+            " container crashes or exits. The Pod's termination grace period countdown"
+            " begins before the PreStop hook is executed. Regardless of the outcome of"
+            " the handler, the container will eventually terminate within the Pod's"
+            " termination grace period (unless delayed by finalizers). Other management"
+            " of the container blocks until the hook completes or until the termination"
+            " grace period is reached. More info:"
+            " https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
         ),
     )
 
@@ -2314,16 +2625,18 @@ class PersistentVolumeClaim(BaseModel):
         default=None,
         alias="apiVersion",
         description=(
-            "APIVersion defines the versioned schema of this representation of an object. Servers should convert"
-            " recognized schemas to the latest internal value, and may reject unrecognized values. More info:"
+            "APIVersion defines the versioned schema of this representation of an"
+            " object. Servers should convert recognized schemas to the latest internal"
+            " value, and may reject unrecognized values. More info:"
             " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
         ),
     )
     kind: Optional[str] = Field(
         default=None,
         description=(
-            "Kind is a string value representing the REST resource this object represents. Servers may infer this from"
-            " the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info:"
+            "Kind is a string value representing the REST resource this object"
+            " represents. Servers may infer this from the endpoint the client submits"
+            " requests to. Cannot be updated. In CamelCase. More info:"
             " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
         ),
     )
@@ -2337,14 +2650,16 @@ class PersistentVolumeClaim(BaseModel):
     spec: Optional[PersistentVolumeClaimSpec] = Field(
         default=None,
         description=(
-            "Spec defines the desired characteristics of a volume requested by a pod author. More info:"
+            "Spec defines the desired characteristics of a volume requested by a pod"
+            " author. More info:"
             " https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims"
         ),
     )
     status: Optional[PersistentVolumeClaimStatus] = Field(
         default=None,
         description=(
-            "Status represents the current information/status of a persistent volume claim. Read-only. More info:"
+            "Status represents the current information/status of a persistent volume"
+            " claim. Read-only. More info:"
             " https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims"
         ),
     )
@@ -2355,23 +2670,27 @@ class PodAffinity(BaseModel):
         default=None,
         alias="preferredDuringSchedulingIgnoredDuringExecution",
         description=(
-            "The scheduler will prefer to schedule pods to nodes that satisfy the affinity expressions specified by"
-            " this field, but it may choose a node that violates one or more of the expressions. The node that is most"
-            " preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the"
-            " scheduling requirements (resource request, requiredDuringScheduling affinity expressions, etc.), compute"
-            ' a sum by iterating through the elements of this field and adding "weight" to the sum if the node has'
-            " pods which matches the corresponding podAffinityTerm; the node(s) with the highest sum are the most"
-            " preferred."
+            "The scheduler will prefer to schedule pods to nodes that satisfy the"
+            " affinity expressions specified by this field, but it may choose a node"
+            " that violates one or more of the expressions. The node that is most"
+            " preferred is the one with the greatest sum of weights, i.e. for each node"
+            " that meets all of the scheduling requirements (resource request,"
+            " requiredDuringScheduling affinity expressions, etc.), compute a sum by"
+            ' iterating through the elements of this field and adding "weight" to the'
+            " sum if the node has pods which matches the corresponding podAffinityTerm;"
+            " the node(s) with the highest sum are the most preferred."
         ),
     )
     required_during_scheduling_ignored_during_execution: Optional[List[PodAffinityTerm]] = Field(
         default=None,
         alias="requiredDuringSchedulingIgnoredDuringExecution",
         description=(
-            "If the affinity requirements specified by this field are not met at scheduling time, the pod will not be"
-            " scheduled onto the node. If the affinity requirements specified by this field cease to be met at some"
-            " point during pod execution (e.g. due to a pod label update), the system may or may not try to eventually"
-            " evict the pod from its node. When there are multiple elements, the lists of nodes corresponding to each"
+            "If the affinity requirements specified by this field are not met at"
+            " scheduling time, the pod will not be scheduled onto the node. If the"
+            " affinity requirements specified by this field cease to be met at some"
+            " point during pod execution (e.g. due to a pod label update), the system"
+            " may or may not try to eventually evict the pod from its node. When there"
+            " are multiple elements, the lists of nodes corresponding to each"
             " podAffinityTerm are intersected, i.e. all terms must be satisfied."
         ),
     )
@@ -2382,34 +2701,42 @@ class PodAntiAffinity(BaseModel):
         default=None,
         alias="preferredDuringSchedulingIgnoredDuringExecution",
         description=(
-            "The scheduler will prefer to schedule pods to nodes that satisfy the anti-affinity expressions specified"
-            " by this field, but it may choose a node that violates one or more of the expressions. The node that is"
-            " most preferred is the one with the greatest sum of weights, i.e. for each node that meets all of the"
-            " scheduling requirements (resource request, requiredDuringScheduling anti-affinity expressions, etc.),"
-            ' compute a sum by iterating through the elements of this field and adding "weight" to the sum if the node'
-            " has pods which matches the corresponding podAffinityTerm; the node(s) with the highest sum are the most"
-            " preferred."
+            "The scheduler will prefer to schedule pods to nodes that satisfy the"
+            " anti-affinity expressions specified by this field, but it may choose a"
+            " node that violates one or more of the expressions. The node that is most"
+            " preferred is the one with the greatest sum of weights, i.e. for each node"
+            " that meets all of the scheduling requirements (resource request,"
+            " requiredDuringScheduling anti-affinity expressions, etc.), compute a sum"
+            ' by iterating through the elements of this field and adding "weight" to'
+            " the sum if the node has pods which matches the corresponding"
+            " podAffinityTerm; the node(s) with the highest sum are the most preferred."
         ),
     )
     required_during_scheduling_ignored_during_execution: Optional[List[PodAffinityTerm]] = Field(
         default=None,
         alias="requiredDuringSchedulingIgnoredDuringExecution",
         description=(
-            "If the anti-affinity requirements specified by this field are not met at scheduling time, the pod will"
-            " not be scheduled onto the node. If the anti-affinity requirements specified by this field cease to be"
-            " met at some point during pod execution (e.g. due to a pod label update), the system may or may not try"
-            " to eventually evict the pod from its node. When there are multiple elements, the lists of nodes"
-            " corresponding to each podAffinityTerm are intersected, i.e. all terms must be satisfied."
+            "If the anti-affinity requirements specified by this field are not met at"
+            " scheduling time, the pod will not be scheduled onto the node. If the"
+            " anti-affinity requirements specified by this field cease to be met at"
+            " some point during pod execution (e.g. due to a pod label update), the"
+            " system may or may not try to eventually evict the pod from its node. When"
+            " there are multiple elements, the lists of nodes corresponding to each"
+            " podAffinityTerm are intersected, i.e. all terms must be satisfied."
         ),
     )
 
 
 class VolumeProjection(BaseModel):
     config_map: Optional[ConfigMapProjection] = Field(
-        default=None, alias="configMap", description="information about the configMap data to project"
+        default=None,
+        alias="configMap",
+        description="information about the configMap data to project",
     )
     downward_api: Optional[DownwardAPIProjection] = Field(
-        default=None, alias="downwardAPI", description="information about the downwardAPI data to project"
+        default=None,
+        alias="downwardAPI",
+        description="information about the downwardAPI data to project",
     )
     secret: Optional[SecretProjection] = Field(
         default=None, description="information about the secret data to project"
@@ -2423,22 +2750,24 @@ class VolumeProjection(BaseModel):
 
 class Affinity(BaseModel):
     node_affinity: Optional[NodeAffinity] = Field(
-        default=None, alias="nodeAffinity", description="Describes node affinity scheduling rules for the pod."
+        default=None,
+        alias="nodeAffinity",
+        description="Describes node affinity scheduling rules for the pod.",
     )
     pod_affinity: Optional[PodAffinity] = Field(
         default=None,
         alias="podAffinity",
         description=(
-            "Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some"
-            " other pod(s))."
+            "Describes pod affinity scheduling rules (e.g. co-locate this pod in the"
+            " same node, zone, etc. as some other pod(s))."
         ),
     )
     pod_anti_affinity: Optional[PodAntiAffinity] = Field(
         default=None,
         alias="podAntiAffinity",
         description=(
-            "Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone, etc. as"
-            " some other pod(s))."
+            "Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod"
+            " in the same node, zone, etc. as some other pod(s))."
         ),
     )
 
@@ -2447,105 +2776,122 @@ class Container(BaseModel):
     args: Optional[List[str]] = Field(
         default=None,
         description=(
-            "Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references"
-            " $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the"
-            " reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for"
-            ' escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".'
-            " Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be"
-            " updated. More info:"
+            "Arguments to the entrypoint. The docker image's CMD is used if this is"
+            " not provided. Variable references $(VAR_NAME) are expanded using the"
+            " container's environment. If a variable cannot be resolved, the reference"
+            " in the input string will be unchanged. Double $$ are reduced to a single"
+            ' $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"'
+            ' will produce the string literal "$(VAR_NAME)". Escaped references will'
+            " never be expanded, regardless of whether the variable exists or not."
+            " Cannot be updated. More info:"
             " https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell"
         ),
     )
     command: Optional[List[str]] = Field(
         default=None,
         description=(
-            "Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not"
-            " provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable"
-            " cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a"
-            ' single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string'
-            ' literal "$(VAR_NAME)". Escaped references will never be expanded, regardless of whether the variable'
-            " exists or not. Cannot be updated. More info:"
+            "Entrypoint array. Not executed within a shell. The docker image's"
+            " ENTRYPOINT is used if this is not provided. Variable references"
+            " $(VAR_NAME) are expanded using the container's environment. If a"
+            " variable cannot be resolved, the reference in the input string will be"
+            " unchanged. Double $$ are reduced to a single $, which allows for escaping"
+            ' the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the string'
+            ' literal "$(VAR_NAME)". Escaped references will never be expanded,'
+            " regardless of whether the variable exists or not. Cannot be updated. More"
+            " info:"
             " https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell"
         ),
     )
     env: Optional[List[EnvVar]] = Field(
-        default=None, description="List of environment variables to set in the container. Cannot be updated."
+        default=None,
+        description=("List of environment variables to set in the container. Cannot be updated."),
     )
     env_from: Optional[List[EnvFromSource]] = Field(
         default=None,
         alias="envFrom",
         description=(
-            "List of sources to populate environment variables in the container. The keys defined within a source must"
-            " be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a"
-            " key exists in multiple sources, the value associated with the last source will take precedence. Values"
-            " defined by an Env with a duplicate key will take precedence. Cannot be updated."
+            "List of sources to populate environment variables in the container. The"
+            " keys defined within a source must be a C_IDENTIFIER. All invalid keys"
+            " will be reported as an event when the container is starting. When a key"
+            " exists in multiple sources, the value associated with the last source"
+            " will take precedence. Values defined by an Env with a duplicate key will"
+            " take precedence. Cannot be updated."
         ),
     )
     image: str = Field(
         ...,
         description=(
-            "Docker image name. More info: https://kubernetes.io/docs/concepts/containers/images This field is"
-            " optional to allow higher level config management to default or override container images in workload"
-            " controllers like Deployments and StatefulSets."
+            "Docker image name. More info:"
+            " https://kubernetes.io/docs/concepts/containers/images This field is"
+            " optional to allow higher level config management to default or override"
+            " container images in workload controllers like Deployments and"
+            " StatefulSets."
         ),
     )
     image_pull_policy: Optional[ImagePullPolicy] = Field(
         default=None,
         alias="imagePullPolicy",
         description=(
-            "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or"
-            " IfNotPresent otherwise. Cannot be updated. More info:"
-            " https://kubernetes.io/docs/concepts/containers/images#updating-images\n\nPossible enum values:\n -"
-            ' `"Always"` means that kubelet always attempts to pull the latest image. Container will fail If the pull'
-            ' fails.\n - `"IfNotPresent"` means that kubelet pulls if the image isn\'t present on disk. Container will'
-            ' fail if the image isn\'t present and the pull fails.\n - `"Never"` means that kubelet never pulls an'
-            " image, but only uses a local image. Container will fail if the image isn't present"
+            "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always"
+            " if :latest tag is specified, or IfNotPresent otherwise. Cannot be"
+            " updated. More info:"
+            " https://kubernetes.io/docs/concepts/containers/images#updating-images\n\nPossible"
+            ' enum values:\n - `"Always"` means that kubelet always attempts to pull'
+            " the latest image. Container will fail If the pull fails.\n -"
+            ' `"IfNotPresent"` means that kubelet pulls if the image isn\'t present on'
+            " disk. Container will fail if the image isn't present and the pull"
+            ' fails.\n - `"Never"` means that kubelet never pulls an image, but only'
+            " uses a local image. Container will fail if the image isn't present"
         ),
     )
     lifecycle: Optional[Lifecycle] = Field(
         default=None,
         description=(
-            "Actions that the management system should take in response to container lifecycle events. Cannot be"
-            " updated."
+            "Actions that the management system should take in response to container"
+            " lifecycle events. Cannot be updated."
         ),
     )
     liveness_probe: Optional[Probe] = Field(
         default=None,
         alias="livenessProbe",
         description=(
-            "Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated."
-            " More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
+            "Periodic probe of container liveness. Container will be restarted if the"
+            " probe fails. Cannot be updated. More info:"
+            " https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
         ),
     )
     name: Optional[str] = Field(
         default=None,
         description=(
-            "Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name"
-            " (DNS_LABEL). Cannot be updated."
+            "Name of the container specified as a DNS_LABEL. Each container in a pod"
+            " must have a unique name (DNS_LABEL). Cannot be updated."
         ),
     )
     ports: Optional[List[ContainerPort]] = Field(
         default=None,
         description=(
-            "List of ports to expose from the container. Exposing a port here gives the system additional information"
-            " about the network connections a container uses, but is primarily informational. Not specifying a port"
-            ' here DOES NOT prevent that port from being exposed. Any port which is listening on the default "0.0.0.0"'
-            " address inside a container will be accessible from the network. Cannot be updated."
+            "List of ports to expose from the container. Exposing a port here gives the"
+            " system additional information about the network connections a container"
+            " uses, but is primarily informational. Not specifying a port here DOES NOT"
+            " prevent that port from being exposed. Any port which is listening on the"
+            ' default "0.0.0.0" address inside a container will be accessible from the'
+            " network. Cannot be updated."
         ),
     )
     readiness_probe: Optional[Probe] = Field(
         default=None,
         alias="readinessProbe",
         description=(
-            "Periodic probe of container service readiness. Container will be removed from service endpoints if the"
-            " probe fails. Cannot be updated. More info:"
+            "Periodic probe of container service readiness. Container will be removed"
+            " from service endpoints if the probe fails. Cannot be updated. More info:"
             " https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
         ),
     )
     resources: Optional[ResourceRequirements] = Field(
         default=None,
         description=(
-            "Compute Resources required by this container. Cannot be updated. More info:"
+            "Compute Resources required by this container. Cannot be updated. More"
+            " info:"
             " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
         ),
     )
@@ -2553,8 +2899,9 @@ class Container(BaseModel):
         default=None,
         alias="securityContext",
         description=(
-            "SecurityContext defines the security options the container should be run with. If set, the fields of"
-            " SecurityContext override the equivalent fields of PodSecurityContext. More info:"
+            "SecurityContext defines the security options the container should be run"
+            " with. If set, the fields of SecurityContext override the equivalent"
+            " fields of PodSecurityContext. More info:"
             " https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
         ),
     )
@@ -2562,10 +2909,12 @@ class Container(BaseModel):
         default=None,
         alias="startupProbe",
         description=(
-            "StartupProbe indicates that the Pod has successfully initialized. If specified, no other probes are"
-            " executed until this completes successfully. If this probe fails, the Pod will be restarted, just as if"
-            " the livenessProbe failed. This can be used to provide different probe parameters at the beginning of a"
-            " Pod's lifecycle, when it might take a long time to load data or warm a cache, than during steady-state"
+            "StartupProbe indicates that the Pod has successfully initialized. If"
+            " specified, no other probes are executed until this completes"
+            " successfully. If this probe fails, the Pod will be restarted, just as if"
+            " the livenessProbe failed. This can be used to provide different probe"
+            " parameters at the beginning of a Pod's lifecycle, when it might take a"
+            " long time to load data or warm a cache, than during steady-state"
             " operation. This cannot be updated. More info:"
             " https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes"
         ),
@@ -2573,71 +2922,80 @@ class Container(BaseModel):
     stdin: Optional[bool] = Field(
         default=None,
         description=(
-            "Whether this container should allocate a buffer for stdin in the container runtime. If this is not set,"
-            " reads from stdin in the container will always result in EOF. Default is false."
+            "Whether this container should allocate a buffer for stdin in the container"
+            " runtime. If this is not set, reads from stdin in the container will"
+            " always result in EOF. Default is false."
         ),
     )
     stdin_once: Optional[bool] = Field(
         default=None,
         alias="stdinOnce",
         description=(
-            "Whether the container runtime should close the stdin channel after it has been opened by a single attach."
-            " When stdin is true the stdin stream will remain open across multiple attach sessions. If stdinOnce is"
-            " set to true, stdin is opened on container start, is empty until the first client attaches to stdin, and"
-            " then remains open and accepts data until the client disconnects, at which time stdin is closed and"
-            " remains closed until the container is restarted. If this flag is false, a container processes that reads"
-            " from stdin will never receive an EOF. Default is false"
+            "Whether the container runtime should close the stdin channel after it has"
+            " been opened by a single attach. When stdin is true the stdin stream will"
+            " remain open across multiple attach sessions. If stdinOnce is set to true,"
+            " stdin is opened on container start, is empty until the first client"
+            " attaches to stdin, and then remains open and accepts data until the"
+            " client disconnects, at which time stdin is closed and remains closed"
+            " until the container is restarted. If this flag is false, a container"
+            " processes that reads from stdin will never receive an EOF. Default is"
+            " false"
         ),
     )
     termination_message_path: Optional[str] = Field(
         default=None,
         alias="terminationMessagePath",
         description=(
-            "Optional: Path at which the file to which the container's termination message will be written is mounted"
-            " into the container's filesystem. Message written is intended to be brief final status, such as an"
-            " assertion failure message. Will be truncated by the node if greater than 4096 bytes. The total message"
-            " length across all containers will be limited to 12kb. Defaults to /dev/termination-log. Cannot be"
-            " updated."
+            "Optional: Path at which the file to which the container's termination"
+            " message will be written is mounted into the container's filesystem."
+            " Message written is intended to be brief final status, such as an"
+            " assertion failure message. Will be truncated by the node if greater than"
+            " 4096 bytes. The total message length across all containers will be"
+            " limited to 12kb. Defaults to /dev/termination-log. Cannot be updated."
         ),
     )
     termination_message_policy: Optional[TerminationMessagePolicy] = Field(
         default=None,
         alias="terminationMessagePolicy",
         description=(
-            "Indicate how the termination message should be populated. File will use the contents of"
-            " terminationMessagePath to populate the container status message on both success and failure."
-            " FallbackToLogsOnError will use the last chunk of container log output if the termination message file is"
-            " empty and the container exited with an error. The log output is limited to 2048 bytes or 80 lines,"
-            " whichever is smaller. Defaults to File. Cannot be updated.\n\nPossible enum values:\n -"
-            ' `"FallbackToLogsOnError"` will read the most recent contents of the container logs for the container'
-            " status message when the container exits with an error and the terminationMessagePath has no contents.\n"
-            ' - `"File"` is the default behavior and will set the container status message to the contents of the'
+            "Indicate how the termination message should be populated. File will use"
+            " the contents of terminationMessagePath to populate the container status"
+            " message on both success and failure. FallbackToLogsOnError will use the"
+            " last chunk of container log output if the termination message file is"
+            " empty and the container exited with an error. The log output is limited"
+            " to 2048 bytes or 80 lines, whichever is smaller. Defaults to File. Cannot"
+            ' be updated.\n\nPossible enum values:\n - `"FallbackToLogsOnError"` will'
+            " read the most recent contents of the container logs for the container"
+            " status message when the container exits with an error and the"
+            ' terminationMessagePath has no contents.\n - `"File"` is the default'
+            " behavior and will set the container status message to the contents of the"
             " container's terminationMessagePath when the container exits."
         ),
     )
     tty: Optional[bool] = Field(
         default=None,
         description=(
-            "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is"
-            " false."
+            "Whether this container should allocate a TTY for itself, also requires"
+            " 'stdin' to be true. Default is false."
         ),
     )
     volume_devices: Optional[List[VolumeDevice]] = Field(
         default=None,
         alias="volumeDevices",
-        description="volumeDevices is the list of block devices to be used by the container.",
+        description=("volumeDevices is the list of block devices to be used by the container."),
     )
     volume_mounts: Optional[List[VolumeMount]] = Field(
         default=None,
         alias="volumeMounts",
-        description="Pod volumes to mount into the container's filesystem. Cannot be updated.",
+        description=("Pod volumes to mount into the container's filesystem. Cannot be updated."),
     )
     working_dir: Optional[str] = Field(
         default=None,
         alias="workingDir",
         description=(
-            "Container's working directory. If not specified, the container runtime's default will be used, which"
-            " might be configured in the container image. Cannot be updated."
+            "Container's working directory. If not specified, the container runtime's"
+            " default will be used, which might be configured in the container image."
+            " Cannot be updated."
         ),
     )
 
@@ -2647,11 +3005,12 @@ class ProjectedVolumeSource(BaseModel):
         default=None,
         alias="defaultMode",
         description=(
-            "Mode bits used to set permissions on created files by default. Must be an octal value between 0000 and"
-            " 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires"
-            " decimal values for mode bits. Directories within the path are not affected by this setting. This might"
-            " be in conflict with other options that affect the file mode, like fsGroup, and the result can be other"
-            " mode bits set."
+            "Mode bits used to set permissions on created files by default. Must be an"
+            " octal value between 0000 and 0777 or a decimal value between 0 and 511."
+            " YAML accepts both octal and decimal values, JSON requires decimal values"
+            " for mode bits. Directories within the path are not affected by this"
+            " setting. This might be in conflict with other options that affect the"
+            " file mode, like fsGroup, and the result can be other mode bits set."
         ),
     )
     sources: Optional[List[VolumeProjection]] = Field(default=None, description="list of volume projections")
@@ -2662,29 +3021,30 @@ class Volume(BaseModel):
         default=None,
         alias="awsElasticBlockStore",
         description=(
-            "AWSElasticBlockStore represents an AWS Disk resource that is attached to a kubelet's host machine and"
-            " then exposed to the pod. More info:"
+            "AWSElasticBlockStore represents an AWS Disk resource that is attached to a"
+            " kubelet's host machine and then exposed to the pod. More info:"
             " https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore"
         ),
     )
     azure_disk: Optional[AzureDiskVolumeSource] = Field(
         default=None,
         alias="azureDisk",
-        description="AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.",
+        description=("AzureDisk represents an Azure Data Disk mount on the host and bind mount" " to the pod."),
     )
     azure_file: Optional[AzureFileVolumeSource] = Field(
         default=None,
         alias="azureFile",
-        description="AzureFile represents an Azure File Service mount on the host and bind mount to the pod.",
+        description=("AzureFile represents an Azure File Service mount on the host and bind" " mount to the pod."),
     )
     cephfs: Optional[CephFSVolumeSource] = Field(
-        default=None, description="CephFS represents a Ceph FS mount on the host that shares a pod's lifetime"
+        default=None,
+        description=("CephFS represents a Ceph FS mount on the host that shares a pod's lifetime"),
     )
     cinder: Optional[CinderVolumeSource] = Field(
         default=None,
         description=(
-            "Cinder represents a cinder volume attached and mounted on kubelets host machine. More info:"
-            " https://examples.k8s.io/mysql-cinder-pd/README.md"
+            "Cinder represents a cinder volume attached and mounted on kubelets host"
+            " machine. More info: https://examples.k8s.io/mysql-cinder-pd/README.md"
         ),
     )
     config_map: Optional[ConfigMapVolumeSource] = Field(
@@ -2695,99 +3055,109 @@ class Volume(BaseModel):
     csi: Optional[CSIVolumeSource] = Field(
         default=None,
         description=(
-            "CSI (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI"
-            " drivers (Beta feature)."
+            "CSI (Container Storage Interface) represents ephemeral storage that is"
+            " handled by certain external CSI drivers (Beta feature)."
         ),
     )
     downward_api: Optional[DownwardAPIVolumeSource] = Field(
         default=None,
         alias="downwardAPI",
-        description="DownwardAPI represents downward API about the pod that should populate this volume",
+        description=("DownwardAPI represents downward API about the pod that should populate" " this volume"),
     )
     empty_dir: Optional[EmptyDirVolumeSource] = Field(
         default=None,
         alias="emptyDir",
         description=(
-            "EmptyDir represents a temporary directory that shares a pod's lifetime. More info:"
-            " https://kubernetes.io/docs/concepts/storage/volumes#emptydir"
+            "EmptyDir represents a temporary directory that shares a pod's lifetime."
+            " More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir"
         ),
     )
     ephemeral: Optional[EphemeralVolumeSource] = Field(
         default=None,
         description=(
-            "Ephemeral represents a volume that is handled by a cluster storage driver. The volume's lifecycle is tied"
-            " to the pod that defines it - it will be created before the pod starts, and deleted when the pod is"
-            " removed.\n\nUse this if: a) the volume is only needed while the pod runs, b) features of normal volumes"
-            " like restoring from snapshot or capacity\n   tracking are needed,\nc) the storage driver is specified"
-            " through a storage class, and d) the storage driver supports dynamic volume provisioning through\n   a"
-            " PersistentVolumeClaim (see EphemeralVolumeSource for more\n   information on the connection between this"
-            " volume type\n   and PersistentVolumeClaim).\n\nUse PersistentVolumeClaim or one of the vendor-specific"
-            " APIs for volumes that persist for longer than the lifecycle of an individual pod.\n\nUse CSI for"
-            " light-weight local ephemeral volumes if the CSI driver is meant to be used that way - see the"
-            " documentation of the driver for more information.\n\nA pod can use both types of ephemeral volumes and"
+            "Ephemeral represents a volume that is handled by a cluster storage driver."
+            " The volume's lifecycle is tied to the pod that defines it - it will be"
+            " created before the pod starts, and deleted when the pod is"
+            " removed.\n\nUse this if: a) the volume is only needed while the pod runs,"
+            " b) features of normal volumes like restoring from snapshot or capacity\n "
+            "  tracking are needed,\nc) the storage driver is specified through a"
+            " storage class, and d) the storage driver supports dynamic volume"
+            " provisioning through\n   a PersistentVolumeClaim (see"
+            " EphemeralVolumeSource for more\n   information on the connection between"
+            " this volume type\n   and PersistentVolumeClaim).\n\nUse"
+            " PersistentVolumeClaim or one of the vendor-specific APIs for volumes that"
+            " persist for longer than the lifecycle of an individual pod.\n\nUse CSI"
+            " for light-weight local ephemeral volumes if the CSI driver is meant to be"
+            " used that way - see the documentation of the driver for more"
+            " information.\n\nA pod can use both types of ephemeral volumes and"
             " persistent volumes at the same time."
         ),
     )
     fc: Optional[FCVolumeSource] = Field(
         default=None,
         description=(
-            "FC represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to"
-            " the pod."
+            "FC represents a Fibre Channel resource that is attached to a kubelet's"
+            " host machine and then exposed to the pod."
         ),
     )
     flex_volume: Optional[FlexVolumeSource] = Field(
         default=None,
         alias="flexVolume",
         description=(
-            "FlexVolume represents a generic volume resource that is provisioned/attached using an exec based plugin."
+            "FlexVolume represents a generic volume resource that is"
+            " provisioned/attached using an exec based plugin."
         ),
     )
     flocker: Optional[FlockerVolumeSource] = Field(
         default=None,
         description=(
-            "Flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker"
-            " control service being running"
+            "Flocker represents a Flocker volume attached to a kubelet's host machine."
+            " This depends on the Flocker control service being running"
         ),
     )
     gce_persistent_disk: Optional[GCEPersistentDiskVolumeSource] = Field(
         default=None,
         alias="gcePersistentDisk",
         description=(
-            "GCEPersistentDisk represents a GCE Disk resource that is attached to a kubelet's host machine and then"
-            " exposed to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
+            "GCEPersistentDisk represents a GCE Disk resource that is attached to a"
+            " kubelet's host machine and then exposed to the pod. More info:"
+            " https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk"
         ),
     )
     git_repo: Optional[GitRepoVolumeSource] = Field(
         default=None,
         alias="gitRepo",
         description=(
-            "GitRepo represents a git repository at a particular revision. DEPRECATED: GitRepo is deprecated. To"
-            " provision a container with a git repo, mount an EmptyDir into an InitContainer that clones the repo"
-            " using git, then mount the EmptyDir into the Pod's container."
+            "GitRepo represents a git repository at a particular revision. DEPRECATED:"
+            " GitRepo is deprecated. To provision a container with a git repo, mount an"
+            " EmptyDir into an InitContainer that clones the repo using git, then mount"
+            " the EmptyDir into the Pod's container."
         ),
     )
     glusterfs: Optional[GlusterfsVolumeSource] = Field(
         default=None,
         description=(
-            "Glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime. More info:"
-            " https://examples.k8s.io/volumes/glusterfs/README.md"
+            "Glusterfs represents a Glusterfs mount on the host that shares a pod's"
+            " lifetime. More info: https://examples.k8s.io/volumes/glusterfs/README.md"
         ),
     )
     host_path: Optional[HostPathVolumeSource] = Field(
         default=None,
         alias="hostPath",
         description=(
-            "HostPath represents a pre-existing file or directory on the host machine that is directly exposed to the"
-            " container. This is generally used for system agents or other privileged things that are allowed to see"
-            " the host machine. Most containers will NOT need this. More info:"
+            "HostPath represents a pre-existing file or directory on the host machine"
+            " that is directly exposed to the container. This is generally used for"
+            " system agents or other privileged things that are allowed to see the host"
+            " machine. Most containers will NOT need this. More info:"
             " https://kubernetes.io/docs/concepts/storage/volumes#hostpath"
         ),
     )
     iscsi: Optional[ISCSIVolumeSource] = Field(
         default=None,
         description=(
-            "ISCSI represents an ISCSI Disk resource that is attached to a kubelet's host machine and then exposed to"
-            " the pod. More info: https://examples.k8s.io/volumes/iscsi/README.md"
+            "ISCSI represents an ISCSI Disk resource that is attached to a kubelet's"
+            " host machine and then exposed to the pod. More info:"
+            " https://examples.k8s.io/volumes/iscsi/README.md"
         ),
     )
     name: str = Field(
@@ -2800,16 +3170,16 @@ class Volume(BaseModel):
     nfs: Optional[NFSVolumeSource] = Field(
         default=None,
         description=(
-            "NFS represents an NFS mount on the host that shares a pod's lifetime More info:"
-            " https://kubernetes.io/docs/concepts/storage/volumes#nfs"
+            "NFS represents an NFS mount on the host that shares a pod's lifetime More"
+            " info: https://kubernetes.io/docs/concepts/storage/volumes#nfs"
         ),
     )
     persistent_volume_claim: Optional[PersistentVolumeClaimVolumeSource] = Field(
         default=None,
         alias="persistentVolumeClaim",
         description=(
-            "PersistentVolumeClaimVolumeSource represents a reference to a PersistentVolumeClaim in the same"
-            " namespace. More info:"
+            "PersistentVolumeClaimVolumeSource represents a reference to a"
+            " PersistentVolumeClaim in the same namespace. More info:"
             " https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims"
         ),
     )
@@ -2817,32 +3187,34 @@ class Volume(BaseModel):
         default=None,
         alias="photonPersistentDisk",
         description=(
-            "PhotonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host"
-            " machine"
+            "PhotonPersistentDisk represents a PhotonController persistent disk"
+            " attached and mounted on kubelets host machine"
         ),
     )
     portworx_volume: Optional[PortworxVolumeSource] = Field(
         default=None,
         alias="portworxVolume",
-        description="PortworxVolume represents a portworx volume attached and mounted on kubelets host machine",
+        description=("PortworxVolume represents a portworx volume attached and mounted on" " kubelets host machine"),
     )
     projected: Optional[ProjectedVolumeSource] = Field(
-        default=None, description="Items for all in one resources secrets, configmaps, and downward API"
+        default=None,
+        description=("Items for all in one resources secrets, configmaps, and downward API"),
     )
     quobyte: Optional[QuobyteVolumeSource] = Field(
-        default=None, description="Quobyte represents a Quobyte mount on the host that shares a pod's lifetime"
+        default=None,
+        description=("Quobyte represents a Quobyte mount on the host that shares a pod's" " lifetime"),
     )
     rbd: Optional[RBDVolumeSource] = Field(
         default=None,
         description=(
-            "RBD represents a Rados Block Device mount on the host that shares a pod's lifetime. More info:"
-            " https://examples.k8s.io/volumes/rbd/README.md"
+            "RBD represents a Rados Block Device mount on the host that shares a pod's"
+            " lifetime. More info: https://examples.k8s.io/volumes/rbd/README.md"
         ),
     )
     scale_io: Optional[ScaleIOVolumeSource] = Field(
         default=None,
         alias="scaleIO",
-        description="ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.",
+        description=("ScaleIO represents a ScaleIO persistent volume attached and mounted on" " Kubernetes nodes."),
     )
     secret: Optional[SecretVolumeSource] = Field(
         default=None,
@@ -2852,10 +3224,11 @@ class Volume(BaseModel):
         ),
     )
     storageos: Optional[StorageOSVolumeSource] = Field(
-        default=None, description="StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes."
+        default=None,
+        description=("StorageOS represents a StorageOS volume attached and mounted on Kubernetes" " nodes."),
     )
     vsphere_volume: Optional[VsphereVirtualDiskVolumeSource] = Field(
         default=None,
         alias="vsphereVolume",
-        description="VsphereVolume represents a vSphere volume attached and mounted on kubelets host machine",
+        description=("VsphereVolume represents a vSphere volume attached and mounted on kubelets" " host machine"),
     )

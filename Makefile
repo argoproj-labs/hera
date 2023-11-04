@@ -33,13 +33,13 @@ check-codegen:
 
 .PHONY: format
 format: ## Format and sort imports for source, tests, examples, etc.
-	@poetry run black .
-	@poetry run ruff . --fix
+	@poetry run ruff format .
+	@poetry run ruff check . --fix
 
 .PHONY: lint
 lint:  ## Run a `lint` process on Hera and report problems
-	@poetry run black . --check
-	@poetry run ruff .
+	@poetry run ruff check .
+	@poetry run ruff format . --check
 	@poetry run mypy -p hera
 
 .PHONY: test

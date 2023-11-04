@@ -24,7 +24,7 @@ def read_artifact(
             auth={"name": "http-auth", "key": "http-key"},
             headers=[{"name": "header1", "value": "value1"}, {"name": "header2", "value": "value1"}],
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

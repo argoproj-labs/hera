@@ -33,7 +33,7 @@ def echo(
                 path="configmap-path",
             ),
         ),
-    ]
+    ],
 ):
     print(message)
 

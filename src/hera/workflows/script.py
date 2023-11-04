@@ -508,7 +508,7 @@ def _take_annotation_from(
     _: Callable[
         ScriptIns,
         Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
-    ]
+    ],
 ) -> Callable[
     [Callable],
     Callable[

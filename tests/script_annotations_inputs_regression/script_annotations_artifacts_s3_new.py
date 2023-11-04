@@ -37,7 +37,7 @@ def read_artifact(
             role_arn="s3-role-arn",
             use_sdk_creds=True,
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

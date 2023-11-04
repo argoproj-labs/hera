@@ -42,7 +42,7 @@ This example will reuse the outputs volume across script steps.
         successor_in: Annotated[
             int,
             Artifact(name="successor_in", path="/my-path", loader=ArtifactLoader.json),
-        ]
+        ],
     ):
         print(successor_in)
         print(Path("/my-path").read_text())  # if you still need the actual path, it is still mounted where you specify

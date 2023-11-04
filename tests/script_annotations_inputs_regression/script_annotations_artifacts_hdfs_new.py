@@ -34,7 +34,7 @@ def read_artifact(
             krb_username="user1",
             hdfs_path="/tmp/argo/foo",
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

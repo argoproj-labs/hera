@@ -26,7 +26,7 @@ def read_artifact(
             account_key_secret={"name": "my-azure-credentials", "key": "accountKey"},
             use_sdk_creds=True,
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

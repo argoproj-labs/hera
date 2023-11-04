@@ -32,7 +32,7 @@ def read_artifact(
             ssh_private_key_secret={"name": "github-creds", "key": "ssh-private-key"},
             username_secret={"name": "github-creds", "key": "username"},
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

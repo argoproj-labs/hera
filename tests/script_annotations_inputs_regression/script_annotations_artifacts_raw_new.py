@@ -24,7 +24,7 @@ def read_artifact(
             the raw file
             contents""",
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 
