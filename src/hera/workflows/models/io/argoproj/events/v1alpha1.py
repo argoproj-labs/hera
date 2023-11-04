@@ -18,28 +18,32 @@ class AMQPConsumeConfig(BaseModel):
         default=None,
         alias="autoAck",
         title=(
-            "AutoAck when true, the server will acknowledge deliveries to this consumer prior to writing\nthe delivery"
-            " to the network\n+optional"
+            "AutoAck when true, the server will acknowledge deliveries to this consumer"
+            " prior to writing\nthe delivery to the network\n+optional"
         ),
     )
     consumer_tag: Optional[str] = Field(
         default=None,
         alias="consumerTag",
-        title="ConsumerTag is the identity of the consumer included in every delivery\n+optional",
+        title=("ConsumerTag is the identity of the consumer included in every" " delivery\n+optional"),
     )
     exclusive: Optional[bool] = Field(
         default=None,
-        title="Exclusive when true, the server will ensure that this is the sole consumer from this queue\n+optional",
+        title=(
+            "Exclusive when true, the server will ensure that this is the sole consumer" " from this queue\n+optional"
+        ),
     )
     no_local: Optional[bool] = Field(
-        default=None, alias="noLocal", title="NoLocal flag is not supported by RabbitMQ\n+optional"
+        default=None,
+        alias="noLocal",
+        title="NoLocal flag is not supported by RabbitMQ\n+optional",
     )
     no_wait: Optional[bool] = Field(
         default=None,
         alias="noWait",
         title=(
-            "NowWait when true, do not wait for the server to confirm the request and immediately begin"
-            " deliveries\n+optional"
+            "NowWait when true, do not wait for the server to confirm the request and"
+            " immediately begin deliveries\n+optional"
         ),
     )
 
@@ -51,13 +55,14 @@ class AMQPExchangeDeclareConfig(BaseModel):
         title="AutoDelete removes the exchange when no bindings are active\n+optional",
     )
     durable: Optional[bool] = Field(
-        default=None, title="Durable keeps the exchange also after the server restarts\n+optional"
+        default=None,
+        title="Durable keeps the exchange also after the server restarts\n+optional",
     )
     internal: Optional[bool] = Field(default=None, title="Internal when true does not accept publishings\n+optional")
     no_wait: Optional[bool] = Field(
         default=None,
         alias="noWait",
-        title="NowWait when true does not wait for a confirmation from the server\n+optional",
+        title=("NowWait when true does not wait for a confirmation from the" " server\n+optional"),
     )
 
 
@@ -65,36 +70,43 @@ class AMQPQueueBindConfig(BaseModel):
     no_wait: Optional[bool] = Field(
         default=None,
         alias="noWait",
-        title="NowWait false and the queue could not be bound, the channel will be closed with an error\n+optional",
+        title=(
+            "NowWait false and the queue could not be bound, the channel will be closed" " with an error\n+optional"
+        ),
     )
 
 
 class AMQPQueueDeclareConfig(BaseModel):
     arguments: Optional[str] = Field(
         default=None,
-        title='Arguments of a queue (also known as "x-arguments") used for optional features and plugins\n+optional',
+        title=(
+            'Arguments of a queue (also known as "x-arguments") used for optional' " features and plugins\n+optional"
+        ),
     )
     auto_delete: Optional[bool] = Field(
-        default=None, alias="autoDelete", title="AutoDelete removes the queue when no consumers are active\n+optional"
+        default=None,
+        alias="autoDelete",
+        title="AutoDelete removes the queue when no consumers are active\n+optional",
     )
     durable: Optional[bool] = Field(
-        default=None, title="Durable keeps the queue also after the server restarts\n+optional"
+        default=None,
+        title="Durable keeps the queue also after the server restarts\n+optional",
     )
     exclusive: Optional[bool] = Field(
         default=None,
         title=(
-            "Exclusive sets the queues to be accessible only by the connection that declares them and will be\ndeleted"
-            " wgen the connection closes\n+optional"
+            "Exclusive sets the queues to be accessible only by the connection that"
+            " declares them and will be\ndeleted wgen the connection closes\n+optional"
         ),
     )
     name: Optional[str] = Field(
         default=None,
-        title="Name of the queue. If empty the server auto-generates a unique name for this queue\n+optional",
+        title=("Name of the queue. If empty the server auto-generates a unique name for" " this queue\n+optional"),
     )
     no_wait: Optional[bool] = Field(
         default=None,
         alias="noWait",
-        title="NowWait when true, the queue assumes to be declared on the server\n+optional",
+        title=("NowWait when true, the queue assumes to be declared on the" " server\n+optional"),
     )
 
 
@@ -108,8 +120,8 @@ class BitbucketRepository(BaseModel):
         default=None,
         alias="repositorySlug",
         title=(
-            "RepositorySlug is a URL-friendly version of a repository name, automatically generated by Bitbucket for"
-            " use in the URL"
+            "RepositorySlug is a URL-friendly version of a repository name,"
+            " automatically generated by Bitbucket for use in the URL"
         ),
     )
 
@@ -123,22 +135,26 @@ class BitbucketServerRepository(BaseModel):
     repository_slug: Optional[str] = Field(
         default=None,
         alias="repositorySlug",
-        title="RepositorySlug is the slug of the repository for which integration needs to set up",
+        title=("RepositorySlug is the slug of the repository for which integration needs" " to set up"),
     )
 
 
 class CatchupConfiguration(BaseModel):
     enabled: Optional[bool] = Field(
-        default=None, title="Enabled enables to triggered the missed schedule when eventsource restarts"
+        default=None,
+        title=("Enabled enables to triggered the missed schedule when eventsource restarts"),
     )
     max_duration: Optional[str] = Field(
-        default=None, alias="maxDuration", title="MaxDuration holds max catchup duration"
+        default=None,
+        alias="maxDuration",
+        title="MaxDuration holds max catchup duration",
     )
 
 
 class ConditionsResetByTime(BaseModel):
     cron: Optional[str] = Field(
-        default=None, title="Cron is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron"
+        default=None,
+        title=("Cron is a cron-like expression. For reference, see:" " https://en.wikipedia.org/wiki/Cron"),
     )
     timezone: Optional[str] = Field(default=None, title="+optional")
 
@@ -147,13 +163,15 @@ class ConditionsResetCriteria(BaseModel):
     by_time: Optional[ConditionsResetByTime] = Field(
         default=None,
         alias="byTime",
-        title="Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
+        title=("Schedule is a cron-like expression. For reference, see:" " https://en.wikipedia.org/wiki/Cron"),
     )
 
 
 class ConfigMapPersistence(BaseModel):
     create_if_not_exist: Optional[bool] = Field(
-        default=None, alias="createIfNotExist", title="CreateIfNotExist will create configmap if it doesn't exists"
+        default=None,
+        alias="createIfNotExist",
+        title="CreateIfNotExist will create configmap if it doesn't exists",
     )
     name: Optional[str] = Field(default=None, title="Name of the configmap")
 
@@ -162,51 +180,63 @@ class DataFilter(BaseModel):
     comparator: Optional[str] = Field(
         default=None,
         description=(
-            'Comparator compares the event data with a user given value.\nCan be ">=", ">", "=", "!=", "<", or'
-            ' "<=".\nIs optional, and if left blank treated as equality "=".'
+            'Comparator compares the event data with a user given value.\nCan be ">=",'
+            ' ">", "=", "!=", "<", or "<=".\nIs optional, and if left blank treated as'
+            ' equality "=".'
         ),
     )
     path: Optional[str] = Field(
         default=None,
         description=(
-            "Path is the JSONPath of the event's (JSON decoded) data key\nPath is a series of keys separated by a dot."
-            " A key may contain wildcard characters '*' and '?'.\nTo access an array value use the index as the key."
-            " The dot and wildcard characters can be escaped with '\\\\'.\nSee"
-            " https://github.com/tidwall/gjson#path-syntax for more information on how to use this."
+            "Path is the JSONPath of the event's (JSON decoded) data key\nPath is a"
+            " series of keys separated by a dot. A key may contain wildcard characters"
+            " '*' and '?'.\nTo access an array value use the index as the key. The dot"
+            " and wildcard characters can be escaped with '\\\\'.\nSee"
+            " https://github.com/tidwall/gjson#path-syntax for more information on how"
+            " to use this."
         ),
     )
     template: Optional[str] = Field(
         default=None,
         title=(
-            "Template is a go-template for extracting a string from the event's data.\nA Template is evaluated with"
-            " provided path, type and value.\nThe templating follows the standard go-template syntax as well as"
-            " sprig's extra functions.\nSee https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/"
+            "Template is a go-template for extracting a string from the event's"
+            " data.\nA Template is evaluated with provided path, type and value.\nThe"
+            " templating follows the standard go-template syntax as well as sprig's"
+            " extra functions.\nSee https://pkg.go.dev/text/template and"
+            " https://masterminds.github.io/sprig/"
         ),
     )
     type: Optional[str] = Field(default=None, title="Type contains the JSON type of the data")
     value: Optional[List[str]] = Field(
         default=None,
         title=(
-            "Value is the allowed string values for this key\nBooleans are passed using strconv.ParseBool()\nNumbers"
-            " are parsed using as float64 using strconv.ParseFloat()\nStrings are taken as is\nNils this value is"
-            " ignored"
+            "Value is the allowed string values for this key\nBooleans are passed using"
+            " strconv.ParseBool()\nNumbers are parsed using as float64 using"
+            " strconv.ParseFloat()\nStrings are taken as is\nNils this value is ignored"
         ),
     )
 
 
 class EventDependencyTransformer(BaseModel):
-    jq: Optional[str] = Field(default=None, title="JQ holds the jq command applied for transformation\n+optional")
+    jq: Optional[str] = Field(
+        default=None,
+        title="JQ holds the jq command applied for transformation\n+optional",
+    )
     script: Optional[str] = Field(
-        default=None, title="Script refers to a Lua script used to transform the event\n+optional"
+        default=None,
+        title="Script refers to a Lua script used to transform the event\n+optional",
     )
 
 
 class EventPersistence(BaseModel):
     catchup: Optional[CatchupConfiguration] = Field(
-        default=None, title="Catchup enables to triggered the missed schedule when eventsource restarts"
+        default=None,
+        title=("Catchup enables to triggered the missed schedule when eventsource restarts"),
     )
     config_map: Optional[ConfigMapPersistence] = Field(
-        default=None, alias="configMap", title="ConfigMap holds configmap details for persistence"
+        default=None,
+        alias="configMap",
+        title="ConfigMap holds configmap details for persistence",
     )
 
 
@@ -223,8 +253,8 @@ class GitRemoteConfig(BaseModel):
     urls: Optional[List[str]] = Field(
         default=None,
         description=(
-            "URLs the URLs of a remote repository. It must be non-empty. Fetch will\nalways use the first URL, while"
-            " push will use all of them."
+            "URLs the URLs of a remote repository. It must be non-empty. Fetch"
+            " will\nalways use the first URL, while push will use all of them."
         ),
     )
 
@@ -240,14 +270,14 @@ class KafkaConsumerGroup(BaseModel):
     oldest: Optional[bool] = Field(
         default=None,
         title=(
-            "When starting up a new group do we want to start from the oldest event (true) or the newest event"
-            " (false), defaults to false\n+optional"
+            "When starting up a new group do we want to start from the oldest event"
+            " (true) or the newest event (false), defaults to false\n+optional"
         ),
     )
     rebalance_strategy: Optional[str] = Field(
         default=None,
         alias="rebalanceStrategy",
-        title="Rebalance strategy can be one of: sticky, roundrobin, range. Range is the default.\n+optional",
+        title=("Rebalance strategy can be one of: sticky, roundrobin, range. Range is the" " default.\n+optional"),
     )
 
 
@@ -256,7 +286,8 @@ class LogTrigger(BaseModel):
         default=None,
         alias="intervalSeconds",
         title=(
-            "Only print messages every interval. Useful to prevent logging too much data for busy events.\n+optional"
+            "Only print messages every interval. Useful to prevent logging too much"
+            " data for busy events.\n+optional"
         ),
     )
 
@@ -276,10 +307,12 @@ class PayloadField(BaseModel):
     path: Optional[str] = Field(
         default=None,
         description=(
-            "Path is the JSONPath of the event's (JSON decoded) data key\nPath is a series of keys separated by a dot."
-            " A key may contain wildcard characters '*' and '?'.\nTo access an array value use the index as the key."
-            " The dot and wildcard characters can be escaped with '\\\\'.\nSee"
-            " https://github.com/tidwall/gjson#path-syntax for more information on how to use this."
+            "Path is the JSONPath of the event's (JSON decoded) data key\nPath is a"
+            " series of keys separated by a dot. A key may contain wildcard characters"
+            " '*' and '?'.\nTo access an array value use the index as the key. The dot"
+            " and wildcard characters can be escaped with '\\\\'.\nSee"
+            " https://github.com/tidwall/gjson#path-syntax for more information on how"
+            " to use this."
         ),
     )
 
@@ -309,8 +342,8 @@ class Selector(BaseModel):
         default=None,
         title=(
             "Supported operations like ==, !=, <=, >= etc.\nDefaults to ==.\nRefer"
-            " https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more"
-            " io.argoproj.workflow.v1alpha1.\n+optional"
+            " https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors"
+            " for more io.argoproj.workflow.v1alpha1.\n+optional"
         ),
     )
     value: Optional[str] = Field(default=None, title="Value")
@@ -329,16 +362,17 @@ class TimeFilter(BaseModel):
     start: Optional[str] = Field(
         default=None,
         description=(
-            "Start is the beginning of a time window in UTC.\nBefore this time, events for this dependency are"
-            " ignored.\nFormat is hh:mm:ss."
+            "Start is the beginning of a time window in UTC.\nBefore this time, events"
+            " for this dependency are ignored.\nFormat is hh:mm:ss."
         ),
     )
     stop: Optional[str] = Field(
         default=None,
         description=(
-            "Stop is the end of a time window in UTC.\nAfter or equal to this time, events for this dependency are"
-            " ignored and\nFormat is hh:mm:ss.\nIf it is smaller than Start, it is treated as next day of"
-            " Start\n(e.g.: 22:00:00-01:00:00 means 22:00:00-25:00:00)."
+            "Stop is the end of a time window in UTC.\nAfter or equal to this time,"
+            " events for this dependency are ignored and\nFormat is hh:mm:ss.\nIf it is"
+            " smaller than Start, it is treated as next day of Start\n(e.g.:"
+            " 22:00:00-01:00:00 means 22:00:00-25:00:00)."
         ),
     )
 
@@ -348,39 +382,46 @@ class TriggerParameterSource(BaseModel):
         default=None,
         alias="contextKey",
         description=(
-            "ContextKey is the JSONPath of the event's (JSON decoded) context key\nContextKey is a series of keys"
-            " separated by a dot. A key may contain wildcard characters '*' and '?'.\nTo access an array value use the"
-            " index as the key. The dot and wildcard characters can be escaped with '\\\\'.\nSee"
-            " https://github.com/tidwall/gjson#path-syntax for more information on how to use this."
+            "ContextKey is the JSONPath of the event's (JSON decoded) context"
+            " key\nContextKey is a series of keys separated by a dot. A key may contain"
+            " wildcard characters '*' and '?'.\nTo access an array value use the index"
+            " as the key. The dot and wildcard characters can be escaped with"
+            " '\\\\'.\nSee https://github.com/tidwall/gjson#path-syntax for more"
+            " information on how to use this."
         ),
     )
     context_template: Optional[str] = Field(
         default=None,
         alias="contextTemplate",
         title=(
-            "ContextTemplate is a go-template for extracting a string from the event's context.\nIf a ContextTemplate"
-            " is provided with a ContextKey, the template will be evaluated first and fallback to the ContextKey.\nThe"
-            " templating follows the standard go-template syntax as well as sprig's extra functions.\nSee"
-            " https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/"
+            "ContextTemplate is a go-template for extracting a string from the event's"
+            " context.\nIf a ContextTemplate is provided with a ContextKey, the"
+            " template will be evaluated first and fallback to the ContextKey.\nThe"
+            " templating follows the standard go-template syntax as well as sprig's"
+            " extra functions.\nSee https://pkg.go.dev/text/template and"
+            " https://masterminds.github.io/sprig/"
         ),
     )
     data_key: Optional[str] = Field(
         default=None,
         alias="dataKey",
         description=(
-            "DataKey is the JSONPath of the event's (JSON decoded) data key\nDataKey is a series of keys separated by"
-            " a dot. A key may contain wildcard characters '*' and '?'.\nTo access an array value use the index as the"
+            "DataKey is the JSONPath of the event's (JSON decoded) data key\nDataKey is"
+            " a series of keys separated by a dot. A key may contain wildcard"
+            " characters '*' and '?'.\nTo access an array value use the index as the"
             " key. The dot and wildcard characters can be escaped with '\\\\'.\nSee"
-            " https://github.com/tidwall/gjson#path-syntax for more information on how to use this."
+            " https://github.com/tidwall/gjson#path-syntax for more information on how"
+            " to use this."
         ),
     )
     data_template: Optional[str] = Field(
         default=None,
         alias="dataTemplate",
         title=(
-            "DataTemplate is a go-template for extracting a string from the event's data.\nIf a DataTemplate is"
-            " provided with a DataKey, the template will be evaluated first and fallback to the DataKey.\nThe"
-            " templating follows the standard go-template syntax as well as sprig's extra functions.\nSee"
+            "DataTemplate is a go-template for extracting a string from the event's"
+            " data.\nIf a DataTemplate is provided with a DataKey, the template will be"
+            " evaluated first and fallback to the DataKey.\nThe templating follows the"
+            " standard go-template syntax as well as sprig's extra functions.\nSee"
             " https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/"
         ),
     )
@@ -388,16 +429,18 @@ class TriggerParameterSource(BaseModel):
         default=None,
         alias="dependencyName",
         description=(
-            "DependencyName refers to the name of the dependency. The event which is stored for this dependency is"
-            " used as payload\nfor the parameterization. Make sure to refer to one of the dependencies you have"
-            " defined under Dependencies list."
+            "DependencyName refers to the name of the dependency. The event which is"
+            " stored for this dependency is used as payload\nfor the parameterization."
+            " Make sure to refer to one of the dependencies you have defined under"
+            " Dependencies list."
         ),
     )
     value: Optional[str] = Field(
         default=None,
         description=(
-            "Value is the default literal value to use for this parameter source\nThis is only used if the DataKey is"
-            " invalid.\nIf the DataKey is invalid and this is not defined, this param source will produce an error."
+            "Value is the default literal value to use for this parameter source\nThis"
+            " is only used if the DataKey is invalid.\nIf the DataKey is invalid and"
+            " this is not defined, this param source will produce an error."
         ),
     )
 
@@ -405,19 +448,22 @@ class TriggerParameterSource(BaseModel):
 class URLArtifact(BaseModel):
     path: Optional[str] = Field(default=None, title="Path is the complete URL")
     verify_cert: Optional[bool] = Field(
-        default=None, alias="verifyCert", title="VerifyCert decides whether the connection is secure or not"
+        default=None,
+        alias="verifyCert",
+        title="VerifyCert decides whether the connection is secure or not",
     )
 
 
 class WatchPathConfig(BaseModel):
     directory: Optional[str] = Field(default=None, title="Directory to watch for events")
     path: Optional[str] = Field(
-        default=None, title="Path is relative path of object to watch with respect to the directory"
+        default=None,
+        title="Path is relative path of object to watch with respect to the directory",
     )
     path_regexp: Optional[str] = Field(
         default=None,
         alias="pathRegexp",
-        title="PathRegexp is regexp of relative path of object to watch with respect to the directory",
+        title=("PathRegexp is regexp of relative path of object to watch with respect to" " the directory"),
     )
 
 
@@ -433,21 +479,24 @@ class AzureEventsHubEventSource(BaseModel):
     hub_name: Optional[str] = Field(default=None, alias="hubName", title="Event Hub path/name")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     shared_access_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="sharedAccessKey", title="SharedAccessKey is the generated value of the key"
+        default=None,
+        alias="sharedAccessKey",
+        title="SharedAccessKey is the generated value of the key",
     )
     shared_access_key_name: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="sharedAccessKeyName",
-        title="SharedAccessKeyName is the name you chose for your application's SAS keys",
+        title=("SharedAccessKeyName is the name you chose for your application's SAS keys"),
     )
 
 
 class Backoff(BaseModel):
     duration: Optional[Int64OrString] = Field(
-        default=None, title='The initial duration in nanoseconds or strings like "1s", "3m"\n+optional'
+        default=None,
+        title=('The initial duration in nanoseconds or strings like "1s", "3m"\n+optional'),
     )
     factor: Optional[Amount] = Field(default=None, title="Duration is multiplied by factor each iteration\n+optional")
     jitter: Optional[Amount] = Field(default=None, title="The amount of jitter applied each iteration\n+optional")
@@ -457,20 +506,22 @@ class Backoff(BaseModel):
 class BasicAuth(BaseModel):
     password: Optional[v1.SecretKeySelector] = Field(
         default=None,
-        description="Password refers to the Kubernetes secret that holds the password required for basic auth.",
+        description=("Password refers to the Kubernetes secret that holds the password required" " for basic auth."),
     )
     username: Optional[v1.SecretKeySelector] = Field(
         default=None,
-        description="Username refers to the Kubernetes secret that holds the username required for basic auth.",
+        description=("Username refers to the Kubernetes secret that holds the username required" " for basic auth."),
     )
 
 
 class BitbucketBasicAuth(BaseModel):
     password: Optional[v1.SecretKeySelector] = Field(
-        default=None, description="Password refers to the K8s secret that holds the password."
+        default=None,
+        description="Password refers to the K8s secret that holds the password.",
     )
     username: Optional[v1.SecretKeySelector] = Field(
-        default=None, description="Username refers to the K8s secret that holds the username."
+        default=None,
+        description="Username refers to the K8s secret that holds the username.",
     )
 
 
@@ -478,22 +529,25 @@ class CalendarEventSource(BaseModel):
     exclusion_dates: Optional[List[str]] = Field(
         default=None,
         alias="exclusionDates",
-        description="ExclusionDates defines the list of DATE-TIME exceptions for recurring events.",
+        description=("ExclusionDates defines the list of DATE-TIME exceptions for recurring" " events."),
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     interval: Optional[str] = Field(
-        default=None, title="Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...\n+optional"
+        default=None,
+        title=("Interval is a string that describes an interval duration, e.g. 1s, 30m," " 2h...\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     persistence: Optional[EventPersistence] = Field(
         default=None, title="Persistence hold the configuration for event persistence"
     )
     schedule: Optional[str] = Field(
         default=None,
-        title="Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron\n+optional",
+        title=(
+            "Schedule is a cron-like expression. For reference, see:" " https://en.wikipedia.org/wiki/Cron\n+optional"
+        ),
     )
     timezone: Optional[str] = Field(default=None, title="Timezone in which to run the schedule\n+optional")
 
@@ -502,16 +556,18 @@ class Condition(BaseModel):
     last_transition_time: Optional[v1_1.Time] = Field(
         default=None,
         alias="lastTransitionTime",
-        title="Last time the condition transitioned from one status to another.\n+optional",
+        title=("Last time the condition transitioned from one status to" " another.\n+optional"),
     )
     message: Optional[str] = Field(
-        default=None, title="Human-readable message indicating details about last transition.\n+optional"
+        default=None,
+        title=("Human-readable message indicating details about last" " transition.\n+optional"),
     )
     reason: Optional[str] = Field(
         default=None,
         title=(
-            "Unique, this should be a short, machine understandable string that gives the reason\nfor condition's"
-            ' last transition. For example, "ImageNotFound"\n+optional'
+            "Unique, this should be a short, machine understandable string that gives"
+            " the reason\nfor condition's last transition. For example,"
+            ' "ImageNotFound"\n+optional'
         ),
     )
     status: Optional[str] = Field(default=None, title="Condition status, True, False or Unknown.\n+required")
@@ -520,31 +576,39 @@ class Condition(BaseModel):
 
 class EventContext(BaseModel):
     datacontenttype: Optional[str] = Field(
-        default=None, description="DataContentType - A MIME (RFC2046) string describing the media type of `data`."
+        default=None,
+        description=("DataContentType - A MIME (RFC2046) string describing the media type of" " `data`."),
     )
     id: Optional[str] = Field(
-        default=None, description="ID of the event; must be non-empty and unique within the scope of the producer."
+        default=None,
+        description=("ID of the event; must be non-empty and unique within the scope of the" " producer."),
     )
     source: Optional[str] = Field(default=None, description="Source - A URI describing the event producer.")
     specversion: Optional[str] = Field(
         default=None,
         description=(
-            "SpecVersion - The version of the CloudEvents specification used by the io.argoproj.workflow.v1alpha1."
+            "SpecVersion - The version of the CloudEvents specification used by the" " io.argoproj.workflow.v1alpha1."
         ),
     )
     subject: Optional[str] = Field(
-        default=None, title="Subject - The subject of the event in the context of the event producer"
+        default=None,
+        title="Subject - The subject of the event in the context of the event producer",
     )
     time: Optional[v1_1.Time] = Field(default=None, description="Time - A Timestamp when the event happened.")
-    type: Optional[str] = Field(default=None, description="Type - The type of the occurrence which has happened.")
+    type: Optional[str] = Field(
+        default=None,
+        description="Type - The type of the occurrence which has happened.",
+    )
 
 
 class ExprFilter(BaseModel):
     expr: Optional[str] = Field(
-        default=None, description="Expr refers to the expression that determines the outcome of the filter."
+        default=None,
+        description=("Expr refers to the expression that determines the outcome of the filter."),
     )
     fields: Optional[List[PayloadField]] = Field(
-        default=None, description="Fields refers to set of keys that refer to the paths within event payload."
+        default=None,
+        description=("Fields refers to set of keys that refer to the paths within event payload."),
     )
 
 
@@ -553,14 +617,15 @@ class FileEventSource(BaseModel):
         default=None,
         alias="eventType",
         title=(
-            "Type of file operations to watch\nRefer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for"
-            " more information"
+            "Type of file operations to watch\nRefer"
+            " https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more"
+            " information"
         ),
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     polling: Optional[bool] = Field(default=None, title="Use polling instead of inotify")
     watch_path_config: Optional[WatchPathConfig] = Field(
@@ -574,7 +639,7 @@ class GenericEventSource(BaseModel):
     auth_secret: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="authSecret",
-        title="AuthSecret holds a secret selector that contains a bearer token for authentication\n+optional",
+        title=("AuthSecret holds a secret selector that contains a bearer token for" " authentication\n+optional"),
     )
     config: Optional[str] = Field(default=None, title="Config is the event source configuration")
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
@@ -582,13 +647,16 @@ class GenericEventSource(BaseModel):
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
-    url: Optional[str] = Field(default=None, description="URL of the gRPC server that implements the event source.")
+    url: Optional[str] = Field(
+        default=None,
+        description="URL of the gRPC server that implements the event source.",
+    )
 
 
 class GitCreds(BaseModel):
@@ -598,12 +666,14 @@ class GitCreds(BaseModel):
 
 class GithubAppCreds(BaseModel):
     app_id: Optional[str] = Field(
-        default=None, alias="appID", title="AppID refers to the GitHub App ID for the application you created"
+        default=None,
+        alias="appID",
+        title="AppID refers to the GitHub App ID for the application you created",
     )
     installation_id: Optional[str] = Field(
         default=None,
         alias="installationID",
-        title="InstallationID refers to the Installation ID of the GitHub app you created and installed",
+        title=("InstallationID refers to the Installation ID of the GitHub app you created" " and installed"),
     )
     private_key: Optional[v1.SecretKeySelector] = Field(
         default=None,
@@ -618,8 +688,8 @@ class HDFSEventSource(BaseModel):
         default=None,
         alias="checkInterval",
         title=(
-            "CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m,"
-            " 2h... (defaults to 1m)"
+            "CheckInterval is a string that describes an interval duration to check the"
+            " directory state, e.g. 1s, 30m, 2h... (defaults to 1m)"
         ),
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
@@ -627,56 +697,56 @@ class HDFSEventSource(BaseModel):
         default=None,
         alias="hdfsUser",
         description=(
-            "HDFSUser is the user to access HDFS file system.\nIt is ignored if either ccache or keytab is used."
+            "HDFSUser is the user to access HDFS file system.\nIt is ignored if either" " ccache or keytab is used."
         ),
     )
     krb_c_cache_secret: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="krbCCacheSecret",
         description=(
-            "KrbCCacheSecret is the secret selector for Kerberos ccache\nEither ccache or keytab can be set to use"
-            " Kerberos."
+            "KrbCCacheSecret is the secret selector for Kerberos ccache\nEither ccache"
+            " or keytab can be set to use Kerberos."
         ),
     )
     krb_config_config_map: Optional[v1.ConfigMapKeySelector] = Field(
         default=None,
         alias="krbConfigConfigMap",
         description=(
-            "KrbConfig is the configmap selector for Kerberos config as string\nIt must be set if either ccache or"
-            " keytab is used."
+            "KrbConfig is the configmap selector for Kerberos config as string\nIt must"
+            " be set if either ccache or keytab is used."
         ),
     )
     krb_keytab_secret: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="krbKeytabSecret",
         description=(
-            "KrbKeytabSecret is the secret selector for Kerberos keytab\nEither ccache or keytab can be set to use"
-            " Kerberos."
+            "KrbKeytabSecret is the secret selector for Kerberos keytab\nEither ccache"
+            " or keytab can be set to use Kerberos."
         ),
     )
     krb_realm: Optional[str] = Field(
         default=None,
         alias="krbRealm",
-        description="KrbRealm is the Kerberos realm used with Kerberos keytab\nIt must be set if keytab is used.",
+        description=("KrbRealm is the Kerberos realm used with Kerberos keytab\nIt must be set" " if keytab is used."),
     )
     krb_service_principal_name: Optional[str] = Field(
         default=None,
         alias="krbServicePrincipalName",
         description=(
-            "KrbServicePrincipalName is the principal name of Kerberos service\nIt must be set if either ccache or"
-            " keytab is used."
+            "KrbServicePrincipalName is the principal name of Kerberos service\nIt must"
+            " be set if either ccache or keytab is used."
         ),
     )
     krb_username: Optional[str] = Field(
         default=None,
         alias="krbUsername",
         description=(
-            "KrbUsername is the Kerberos username used with Kerberos keytab\nIt must be set if keytab is used."
+            "KrbUsername is the Kerberos username used with Kerberos keytab\nIt must be" " set if keytab is used."
         ),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     type: Optional[str] = Field(default=None, title="Type of file operations to watch")
     watch_path_config: Optional[WatchPathConfig] = Field(default=None, alias="watchPathConfig")
@@ -688,12 +758,14 @@ class K8SResourcePolicy(BaseModel):
         default=None,
         alias="errorOnBackoffTimeout",
         title=(
-            "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is"
-            " unable to determine\nthe state of the resource"
+            "ErrorOnBackoffTimeout determines whether sensor should transition to error"
+            " state if the trigger policy is unable to determine\nthe state of the"
+            " resource"
         ),
     )
     labels: Optional[Dict[str, str]] = Field(
-        default=None, title="Labels required to identify whether a resource is in success state"
+        default=None,
+        title="Labels required to identify whether a resource is in success state",
     )
 
 
@@ -709,8 +781,8 @@ class PubSubEventSource(BaseModel):
         default=None,
         alias="credentialSecret",
         title=(
-            "CredentialSecret references to the secret that contains JSON credentials to access GCP.\nIf it is"
-            " missing, it implicitly uses Workload Identity to"
+            "CredentialSecret references to the secret that contains JSON credentials"
+            " to access GCP.\nIf it is missing, it implicitly uses Workload Identity to"
             " access.\nhttps://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity\n+optional"
         ),
     )
@@ -718,49 +790,53 @@ class PubSubEventSource(BaseModel):
         default=None,
         alias="deleteSubscriptionOnFinish",
         title=(
-            "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source"
-            " is stopped.\n+optional"
+            "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub"
+            " subscription once the event source is stopped.\n+optional"
         ),
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     project_id: Optional[str] = Field(
         default=None,
         alias="projectID",
         title=(
-            "ProjectID is GCP project ID for the subscription.\nRequired if you run Argo Events outside of"
-            " GKE/GCE.\n(otherwise, the default value is its project)\n+optional"
+            "ProjectID is GCP project ID for the subscription.\nRequired if you run"
+            " Argo Events outside of GKE/GCE.\n(otherwise, the default value is its"
+            " project)\n+optional"
         ),
     )
     subscription_id: Optional[str] = Field(
         default=None,
         alias="subscriptionID",
         title=(
-            "SubscriptionID is ID of subscription.\nRequired if you use existing subscription.\nThe default value will"
-            " be auto generated hash based on this eventsource setting, so the subscription\nmight be recreated every"
-            " time you update the setting, which has a possibility of event loss.\n+optional"
+            "SubscriptionID is ID of subscription.\nRequired if you use existing"
+            " subscription.\nThe default value will be auto generated hash based on"
+            " this eventsource setting, so the subscription\nmight be recreated every"
+            " time you update the setting, which has a possibility of event"
+            " loss.\n+optional"
         ),
     )
     topic: Optional[str] = Field(
         default=None,
         title=(
-            "Topic to which the subscription should belongs.\nRequired if you want the eventsource to create a new"
-            " subscription.\nIf you specify this field along with an existing subscription,\nit will be verified"
-            " whether it actually belongs to the specified topic.\n+optional"
+            "Topic to which the subscription should belongs.\nRequired if you want the"
+            " eventsource to create a new subscription.\nIf you specify this field"
+            " along with an existing subscription,\nit will be verified whether it"
+            " actually belongs to the specified topic.\n+optional"
         ),
     )
     topic_project_id: Optional[str] = Field(
         default=None,
         alias="topicProjectID",
-        title="TopicProjectID is GCP project ID for the topic.\nBy default, it is same as ProjectID.\n+optional",
+        title=("TopicProjectID is GCP project ID for the topic.\nBy default, it is same as" " ProjectID.\n+optional"),
     )
 
 
@@ -768,28 +844,30 @@ class ResourceFilter(BaseModel):
     after_start: Optional[bool] = Field(
         default=None,
         alias="afterStart",
-        title="If the resource is created after the start time then the event is treated as valid.\n+optional",
+        title=("If the resource is created after the start time then the event is treated" " as valid.\n+optional"),
     )
     created_by: Optional[v1_1.Time] = Field(
         default=None,
         alias="createdBy",
-        title="If resource is created before the specified time then the event is treated as valid.\n+optional",
+        title=("If resource is created before the specified time then the event is treated" " as valid.\n+optional"),
     )
     fields: Optional[List[Selector]] = Field(
         default=None,
         title=(
             "Fields provide field filters similar to K8s field selector\n(see"
-            " https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).\nUnlike K8s field"
-            ' selector, it supports arbitrary fileds like "spec.serviceAccountName",\nand the value could be a string'
-            ' or a regex.\nSame as K8s field selector, operator "=", "==" and "!=" are supported.\n+optional'
+            " https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).\nUnlike"
+            " K8s field selector, it supports arbitrary fileds like"
+            ' "spec.serviceAccountName",\nand the value could be a string or a'
+            ' regex.\nSame as K8s field selector, operator "=", "==" and "!=" are'
+            " supported.\n+optional"
         ),
     )
     labels: Optional[List[Selector]] = Field(
         default=None,
         title=(
             "Labels provide listing options to K8s API to watch resource/s.\nRefer"
-            " https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more"
-            " io.argoproj.workflow.v1alpha1.\n+optional"
+            " https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/"
+            " for more io.argoproj.workflow.v1alpha1.\n+optional"
         ),
     )
     prefix: Optional[str] = Field(default=None, title="Prefix filter is applied on the resource name.\n+optional")
@@ -811,69 +889,78 @@ class SASLConfig(BaseModel):
     mechanism: Optional[str] = Field(
         default=None,
         title=(
-            "SASLMechanism is the name of the enabled SASL mechanism.\nPossible values: OAUTHBEARER, PLAIN (defaults"
-            " to PLAIN).\n+optional"
+            "SASLMechanism is the name of the enabled SASL mechanism.\nPossible values:"
+            " OAUTHBEARER, PLAIN (defaults to PLAIN).\n+optional"
         ),
     )
     password: Optional[v1.SecretKeySelector] = Field(default=None, title="Password for SASL/PLAIN authentication")
     user: Optional[v1.SecretKeySelector] = Field(
         default=None,
-        title="User is the authentication identity (authcid) to present for\nSASL/PLAIN or SASL/SCRAM authentication",
+        title=(
+            "User is the authentication identity (authcid) to present for\nSASL/PLAIN" " or SASL/SCRAM authentication"
+        ),
     )
 
 
 class SQSEventSource(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="accessKey", title="AccessKey refers K8s secret containing aws access key"
+        default=None,
+        alias="accessKey",
+        title="AccessKey refers K8s secret containing aws access key",
     )
     dlq: Optional[bool] = Field(
         default=None,
         title=(
-            "DLQ specifies if a dead-letter queue is configured for messages that can't be processed successfully.\nIf"
-            " set to true, messages with invalid payload won't be acknowledged to allow to forward them farther to the"
-            " dead-letter queue.\nThe default value is false.\n+optional"
+            "DLQ specifies if a dead-letter queue is configured for messages that can't"
+            " be processed successfully.\nIf set to true, messages with invalid payload"
+            " won't be acknowledged to allow to forward them farther to the dead-letter"
+            " queue.\nThe default value is false.\n+optional"
         ),
     )
     endpoint: Optional[str] = Field(
         default=None,
-        title="Endpoint configures connection to a specific SQS endpoint instead of Amazons servers\n+optional",
+        title=("Endpoint configures connection to a specific SQS endpoint instead of" " Amazons servers\n+optional"),
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     queue: Optional[str] = Field(default=None, title="Queue is AWS SQS queue to listen to for messages")
     queue_account_id: Optional[str] = Field(
         default=None,
         alias="queueAccountId",
-        title="QueueAccountID is the ID of the account that created the queue to monitor\n+optional",
+        title=("QueueAccountID is the ID of the account that created the queue to" " monitor\n+optional"),
     )
     region: Optional[str] = Field(default=None, title="Region is AWS region")
     role_arn: Optional[str] = Field(
         default=None,
         alias="roleARN",
-        title="RoleARN is the Amazon Resource Name (ARN) of the role to assume.\n+optional",
+        title=("RoleARN is the Amazon Resource Name (ARN) of the role to" " assume.\n+optional"),
     )
     secret_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="secretKey", title="SecretKey refers K8s secret containing aws secret key"
+        default=None,
+        alias="secretKey",
+        title="SecretKey refers K8s secret containing aws secret key",
     )
     session_token: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="sessionToken",
-        title="SessionToken refers to K8s secret containing AWS temporary credentials(STS) session token\n+optional",
+        title=(
+            "SessionToken refers to K8s secret containing AWS temporary" " credentials(STS) session token\n+optional"
+        ),
     )
     wait_time_seconds: Optional[str] = Field(
         default=None,
         alias="waitTimeSeconds",
         description=(
-            "WaitTimeSeconds is The duration (in seconds) for which the call waits for a message to arrive\nin the"
-            " queue before returning."
+            "WaitTimeSeconds is The duration (in seconds) for which the call waits for"
+            " a message to arrive\nin the queue before returning."
         ),
     )
 
@@ -890,7 +977,9 @@ class Status(BaseModel):
 
 class TLSConfig(BaseModel):
     ca_cert_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="caCertSecret", title="CACertSecret refers to the secret that contains the CA cert"
+        default=None,
+        alias="caCertSecret",
+        title="CACertSecret refers to the secret that contains the CA cert",
     )
     client_cert_secret: Optional[v1.SecretKeySelector] = Field(
         default=None,
@@ -906,8 +995,8 @@ class TLSConfig(BaseModel):
         default=None,
         alias="insecureSkipVerify",
         title=(
-            "If true, skips creation of TLSConfig with certs and creates an empty TLSConfig. (Defaults to"
-            " false)\n+optional"
+            "If true, skips creation of TLSConfig with certs and creates an empty"
+            " TLSConfig. (Defaults to false)\n+optional"
         ),
     )
 
@@ -916,20 +1005,23 @@ class TriggerParameter(BaseModel):
     dest: Optional[str] = Field(
         default=None,
         description=(
-            "Dest is the JSONPath of a resource key.\nA path is a series of keys separated by a dot. The colon"
-            " character can be escaped with '.'\nThe -1 key can be used to append a value to an existing array.\nSee"
-            " https://github.com/tidwall/sjson#path-syntax for more information about how this is used."
+            "Dest is the JSONPath of a resource key.\nA path is a series of keys"
+            " separated by a dot. The colon character can be escaped with '.'\nThe -1"
+            " key can be used to append a value to an existing array.\nSee"
+            " https://github.com/tidwall/sjson#path-syntax for more information about"
+            " how this is used."
         ),
     )
     operation: Optional[str] = Field(
         default=None,
         description=(
-            "Operation is what to do with the existing value at Dest, whether to\n'prepend', 'overwrite', or"
-            " 'append' it."
+            "Operation is what to do with the existing value at Dest, whether"
+            " to\n'prepend', 'overwrite', or 'append' it."
         ),
     )
     src: Optional[TriggerParameterSource] = Field(
-        default=None, title="Src contains a source reference to the value of the parameter from a dependency"
+        default=None,
+        title=("Src contains a source reference to the value of the parameter from a" " dependency"),
     )
 
 
@@ -937,11 +1029,13 @@ class TriggerPolicy(BaseModel):
     k8s: Optional[K8SResourcePolicy] = Field(
         default=None,
         title=(
-            "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels"
+            "K8SResourcePolicy refers to the policy used to check the state of K8s"
+            " based triggers using using labels"
         ),
     )
     status: Optional[StatusPolicy] = Field(
-        default=None, title="Status refers to the policy used to check the state of the trigger using response status"
+        default=None,
+        title=("Status refers to the policy used to check the state of the trigger using" " response status"),
     )
 
 
@@ -954,36 +1048,43 @@ class WebhookContext(BaseModel):
     auth_secret: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="authSecret",
-        title="AuthSecret holds a secret selector that contains a bearer token for authentication\n+optional",
+        title=("AuthSecret holds a secret selector that contains a bearer token for" " authentication\n+optional"),
     )
     endpoint: Optional[str] = Field(default=None, title="REST API endpoint")
     max_payload_size: Optional[str] = Field(
         default=None,
         alias="maxPayloadSize",
         title=(
-            "MaxPayloadSize is the maximum webhook payload size that the server will accept.\nRequests exceeding that"
-            ' limit will be rejected with "request too large" response.\nDefault value: 1048576 (1MB).\n+optional'
+            "MaxPayloadSize is the maximum webhook payload size that the server will"
+            ' accept.\nRequests exceeding that limit will be rejected with "request too'
+            ' large" response.\nDefault value: 1048576 (1MB).\n+optional'
         ),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     method: Optional[str] = Field(
         default=None,
         title=(
-            "Method is HTTP request method that indicates the desired action to be performed for a given"
-            " resource.\nSee RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content"
+            "Method is HTTP request method that indicates the desired action to be"
+            " performed for a given resource.\nSee RFC7231 Hypertext Transfer Protocol"
+            " (HTTP/1.1): Semantics and Content"
         ),
     )
     port: Optional[str] = Field(
-        default=None, description="Port on which HTTP server is listening for incoming events."
+        default=None,
+        description="Port on which HTTP server is listening for incoming events.",
     )
     server_cert_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="serverCertSecret", description="ServerCertPath refers the file that contains the cert."
+        default=None,
+        alias="serverCertSecret",
+        description="ServerCertPath refers the file that contains the cert.",
     )
     server_key_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="serverKeySecret", title="ServerKeyPath refers the file that contains private key"
+        default=None,
+        alias="serverKeySecret",
+        title="ServerKeyPath refers the file that contains private key",
     )
     url: Optional[str] = Field(default=None, description="URL is the url of the server.")
 
@@ -995,23 +1096,28 @@ class WebhookEventSource(BaseModel):
 
 class AMQPEventSource(BaseModel):
     auth: Optional[BasicAuth] = Field(
-        default=None, title="Auth hosts secret selectors for username and password\n+optional"
+        default=None,
+        title="Auth hosts secret selectors for username and password\n+optional",
     )
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
+        default=None,
+        alias="connectionBackoff",
+        title="Backoff holds parameters applied to connection.\n+optional",
     )
     consume: Optional[AMQPConsumeConfig] = Field(
         default=None,
         title=(
-            "Consume holds the configuration to immediately starts delivering queued messages\nFor more information,"
-            " visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume\n+optional"
+            "Consume holds the configuration to immediately starts delivering queued"
+            " messages\nFor more information, visit"
+            " https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.Consume\n+optional"
         ),
     )
     exchange_declare: Optional[AMQPExchangeDeclareConfig] = Field(
         default=None,
         alias="exchangeDeclare",
         title=(
-            "ExchangeDeclare holds the configuration for the exchange on the server\nFor more information, visit"
+            "ExchangeDeclare holds the configuration for the exchange on the"
+            " server\nFor more information, visit"
             " https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.ExchangeDeclare\n+optional"
         ),
     )
@@ -1024,33 +1130,38 @@ class AMQPEventSource(BaseModel):
         ),
     )
     exchange_type: Optional[str] = Field(
-        default=None, alias="exchangeType", title="ExchangeType is rabbitmq exchange type"
+        default=None,
+        alias="exchangeType",
+        title="ExchangeType is rabbitmq exchange type",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     queue_bind: Optional[AMQPQueueBindConfig] = Field(
         default=None,
         alias="queueBind",
         title=(
-            "QueueBind holds the configuration that binds an exchange to a queue so that publishings to the\nexchange"
-            " will be routed to the queue when the publishing routing key matches the binding routing key\nFor more"
-            " information, visit https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind\n+optional"
+            "QueueBind holds the configuration that binds an exchange to a queue so"
+            " that publishings to the\nexchange will be routed to the queue when the"
+            " publishing routing key matches the binding routing key\nFor more"
+            " information, visit"
+            " https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueBind\n+optional"
         ),
     )
     queue_declare: Optional[AMQPQueueDeclareConfig] = Field(
         default=None,
         alias="queueDeclare",
         title=(
-            "QueueDeclare holds the configuration of a queue to hold messages and deliver to consumers.\nDeclaring"
-            " creates a queue if it doesn't already exist, or ensures that an existing queue matches\nthe same"
+            "QueueDeclare holds the configuration of a queue to hold messages and"
+            " deliver to consumers.\nDeclaring creates a queue if it doesn't already"
+            " exist, or ensures that an existing queue matches\nthe same"
             " parameters\nFor more information, visit"
             " https://pkg.go.dev/github.com/rabbitmq/amqp091-go#Channel.QueueDeclare\n+optional"
         ),
@@ -1059,50 +1170,61 @@ class AMQPEventSource(BaseModel):
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the amqp client.\n+optional")
     url: Optional[str] = Field(default=None, title="URL for rabbitmq service")
     url_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="urlSecret", title="URLSecret is secret reference for rabbitmq service URL"
+        default=None,
+        alias="urlSecret",
+        title="URLSecret is secret reference for rabbitmq service URL",
     )
 
 
 class AWSLambdaTrigger(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="accessKey", title="AccessKey refers K8s secret containing aws access key\n+optional"
+        default=None,
+        alias="accessKey",
+        title="AccessKey refers K8s secret containing aws access key\n+optional",
     )
     function_name: Optional[str] = Field(
-        default=None, alias="functionName", description="FunctionName refers to the name of the function to invoke."
+        default=None,
+        alias="functionName",
+        description="FunctionName refers to the name of the function to invoke.",
     )
     invocation_type: Optional[str] = Field(
         default=None,
         alias="invocationType",
         description=(
-            "Choose from the following options.\n\n   * RequestResponse (default) - Invoke the function synchronously."
-            " Keep\n   the connection open until the function returns a response or times out.\n   The API response"
-            " includes the function response and additional data.\n\n   * Event - Invoke the function asynchronously."
-            " Send events that fail multiple\n   times to the function's dead-letter queue (if it's configured). The"
-            " API\n   response only includes a status code.\n\n   * DryRun - Validate parameter values and verify that"
-            " the user or role\n   has permission to invoke the function.\n+optional"
+            "Choose from the following options.\n\n   * RequestResponse (default) -"
+            " Invoke the function synchronously. Keep\n   the connection open until the"
+            " function returns a response or times out.\n   The API response includes"
+            " the function response and additional data.\n\n   * Event - Invoke the"
+            " function asynchronously. Send events that fail multiple\n   times to the"
+            " function's dead-letter queue (if it's configured). The API\n   response"
+            " only includes a status code.\n\n   * DryRun - Validate parameter values"
+            " and verify that the user or role\n   has permission to invoke the"
+            " function.\n+optional"
         ),
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
         title=(
-            "Parameters is the list of key-value extracted from event's payload that are applied to\nthe trigger"
-            " resource.\n+optional"
+            "Parameters is the list of key-value extracted from event's payload that"
+            " are applied to\nthe trigger resource.\n+optional"
         ),
     )
     payload: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Payload is the list of key-value extracted from an event payload to construct the request payload."
+            "Payload is the list of key-value extracted from an event payload to" " construct the request payload."
         ),
     )
     region: Optional[str] = Field(default=None, title="Region is AWS region")
     role_arn: Optional[str] = Field(
         default=None,
         alias="roleARN",
-        title="RoleARN is the Amazon Resource Name (ARN) of the role to assume.\n+optional",
+        title=("RoleARN is the Amazon Resource Name (ARN) of the role to" " assume.\n+optional"),
     )
     secret_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="secretKey", title="SecretKey refers K8s secret containing aws secret key\n+optional"
+        default=None,
+        alias="secretKey",
+        title="SecretKey refers K8s secret containing aws secret key\n+optional",
     )
 
 
@@ -1110,29 +1232,32 @@ class AzureEventHubsTrigger(BaseModel):
     fqdn: Optional[str] = Field(
         default=None,
         title=(
-            "FQDN refers to the namespace dns of Azure Event Hubs to be used i.e. <namespace>.servicebus.windows.net"
+            "FQDN refers to the namespace dns of Azure Event Hubs to be used i.e."
+            " <namespace>.servicebus.windows.net"
         ),
     )
     hub_name: Optional[str] = Field(
-        default=None, alias="hubName", title="HubName refers to the Azure Event Hub to send events to"
+        default=None,
+        alias="hubName",
+        title="HubName refers to the Azure Event Hub to send events to",
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
         title=(
-            "Parameters is the list of key-value extracted from event's payload that are applied to\nthe trigger"
-            " resource.\n+optional"
+            "Parameters is the list of key-value extracted from event's payload that"
+            " are applied to\nthe trigger resource.\n+optional"
         ),
     )
     payload: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Payload is the list of key-value extracted from an event payload to construct the request payload."
+            "Payload is the list of key-value extracted from an event payload to" " construct the request payload."
         ),
     )
     shared_access_key: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="sharedAccessKey",
-        title="SharedAccessKey refers to a K8s secret containing the primary key for the",
+        title=("SharedAccessKey refers to a K8s secret containing the primary key for the"),
     )
     shared_access_key_name: Optional[v1.SecretKeySelector] = Field(
         default=None,
@@ -1146,7 +1271,7 @@ class BitbucketAuth(BaseModel):
     oauth_token: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="oauthToken",
-        title="OAuthToken refers to the K8s secret that holds the OAuth Bearer token.\n+optional",
+        title=("OAuthToken refers to the K8s secret that holds the OAuth Bearer" " token.\n+optional"),
     )
 
 
@@ -1158,46 +1283,48 @@ class BitbucketEventSource(BaseModel):
         default=None,
         alias="deleteHookOnFinish",
         title=(
-            "DeleteHookOnFinish determines whether to delete the defined Bitbucket hook once the event source is"
-            " stopped.\n+optional"
+            "DeleteHookOnFinish determines whether to delete the defined Bitbucket hook"
+            " once the event source is stopped.\n+optional"
         ),
     )
     events: Optional[List[str]] = Field(default=None, description="Events this webhook is subscribed to.")
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will be passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will be passed along the" " event payload.\n+optional"),
     )
     owner: Optional[str] = Field(
         default=None,
         title=(
-            "DeprecatedOwner is the owner of the repository.\nDeprecated: use Repositories instead. Will be"
-            " unsupported in v1.9\n+optional"
+            "DeprecatedOwner is the owner of the repository.\nDeprecated: use"
+            " Repositories instead. Will be unsupported in v1.9\n+optional"
         ),
     )
     project_key: Optional[str] = Field(
         default=None,
         alias="projectKey",
         title=(
-            "DeprecatedProjectKey is the key of the project to which the repository relates\nDeprecated: use"
-            " Repositories instead. Will be unsupported in v1.9\n+optional"
+            "DeprecatedProjectKey is the key of the project to which the repository"
+            " relates\nDeprecated: use Repositories instead. Will be unsupported in"
+            " v1.9\n+optional"
         ),
     )
     repositories: Optional[List[BitbucketRepository]] = Field(
         default=None,
-        title="Repositories holds a list of repositories for which integration needs to set up\n+optional",
+        title=("Repositories holds a list of repositories for which integration needs to" " set up\n+optional"),
     )
     repository_slug: Optional[str] = Field(
         default=None,
         alias="repositorySlug",
         title=(
-            "DeprecatedRepositorySlug is a URL-friendly version of a repository name, automatically generated by"
-            " Bitbucket for use in the URL\nDeprecated: use Repositories instead. Will be unsupported in"
-            " v1.9\n+optional"
+            "DeprecatedRepositorySlug is a URL-friendly version of a repository name,"
+            " automatically generated by Bitbucket for use in the URL\nDeprecated: use"
+            " Repositories instead. Will be unsupported in v1.9\n+optional"
         ),
     )
     webhook: Optional[WebhookContext] = Field(
-        default=None, title="Webhook refers to the configuration required to run an http server"
+        default=None,
+        title="Webhook refers to the configuration required to run an http server",
     )
 
 
@@ -1205,19 +1332,19 @@ class BitbucketServerEventSource(BaseModel):
     access_token: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="accessToken",
-        title="AccessToken is reference to K8s secret which holds the bitbucket api access information",
+        title=("AccessToken is reference to K8s secret which holds the bitbucket api" " access information"),
     )
     bitbucketserver_base_url: Optional[str] = Field(
         default=None,
         alias="bitbucketserverBaseURL",
-        title="BitbucketServerBaseURL is the base URL for API requests to a custom endpoint",
+        title=("BitbucketServerBaseURL is the base URL for API requests to a custom" " endpoint"),
     )
     delete_hook_on_finish: Optional[bool] = Field(
         default=None,
         alias="deleteHookOnFinish",
         title=(
-            "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook for the project once the event"
-            " source is stopped.\n+optional"
+            "DeleteHookOnFinish determines whether to delete the Bitbucket Server hook"
+            " for the project once the event source is stopped.\n+optional"
         ),
     )
     events: Optional[List[str]] = Field(
@@ -1230,26 +1357,28 @@ class BitbucketServerEventSource(BaseModel):
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     project_key: Optional[str] = Field(
         default=None,
         alias="projectKey",
         title=(
-            "DeprecatedProjectKey is the key of project for which integration needs to set up\nDeprecated: use"
-            " Repositories instead. Will be unsupported in v1.8\n+optional"
+            "DeprecatedProjectKey is the key of project for which integration needs to"
+            " set up\nDeprecated: use Repositories instead. Will be unsupported in"
+            " v1.8\n+optional"
         ),
     )
     repositories: Optional[List[BitbucketServerRepository]] = Field(
         default=None,
-        title="Repositories holds a list of repositories for which integration needs to set up\n+optional",
+        title=("Repositories holds a list of repositories for which integration needs to" " set up\n+optional"),
     )
     repository_slug: Optional[str] = Field(
         default=None,
         alias="repositorySlug",
         title=(
-            "DeprecatedRepositorySlug is the slug of the repository for which integration needs to set up\nDeprecated:"
-            " use Repositories instead. Will be unsupported in v1.8\n+optional"
+            "DeprecatedRepositorySlug is the slug of the repository for which"
+            " integration needs to set up\nDeprecated: use Repositories instead. Will"
+            " be unsupported in v1.8\n+optional"
         ),
     )
     webhook: Optional[WebhookContext] = Field(default=None, title="Webhook holds configuration to run a http server")
@@ -1257,7 +1386,8 @@ class BitbucketServerEventSource(BaseModel):
         default=None,
         alias="webhookSecret",
         title=(
-            "WebhookSecret is reference to K8s secret which holds the bitbucket webhook secret (for HMAC validation)"
+            "WebhookSecret is reference to K8s secret which holds the bitbucket webhook"
+            " secret (for HMAC validation)"
         ),
     )
 
@@ -1267,35 +1397,41 @@ class CustomTrigger(BaseModel):
         default=None,
         alias="certSecret",
         description=(
-            "CertSecret refers to the secret that contains cert for secure connection between sensor and custom"
-            " trigger gRPC server."
+            "CertSecret refers to the secret that contains cert for secure connection"
+            " between sensor and custom trigger gRPC server."
         ),
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
-        description="Parameters is the list of parameters that is applied to resolved custom trigger trigger object.",
+        description=(
+            "Parameters is the list of parameters that is applied to resolved custom" " trigger trigger object."
+        ),
     )
     payload: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Payload is the list of key-value extracted from an event payload to construct the request payload."
+            "Payload is the list of key-value extracted from an event payload to" " construct the request payload."
         ),
     )
     secure: Optional[bool] = Field(
-        default=None, title="Secure refers to type of the connection between sensor to custom trigger gRPC"
+        default=None,
+        title=("Secure refers to type of the connection between sensor to custom trigger" " gRPC"),
     )
     server_name_override: Optional[str] = Field(
         default=None,
         alias="serverNameOverride",
-        description="ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.",
+        description=("ServerNameOverride for the secure connection between sensor and custom" " trigger gRPC server."),
     )
     server_url: Optional[str] = Field(
-        default=None, alias="serverURL", title="ServerURL is the url of the gRPC server that executes custom trigger"
+        default=None,
+        alias="serverURL",
+        title="ServerURL is the url of the gRPC server that executes custom trigger",
     )
     spec: Optional[Dict[str, str]] = Field(
         default=None,
         description=(
-            "Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret."
+            "Spec is the custom trigger resource specification that custom trigger gRPC"
+            " server knows how to interpret."
         ),
     )
 
@@ -1304,20 +1440,24 @@ class EmitterEventSource(BaseModel):
     broker: Optional[str] = Field(default=None, description="Broker URI to connect to.")
     channel_key: Optional[str] = Field(default=None, alias="channelKey", title="ChannelKey refers to the channel key")
     channel_name: Optional[str] = Field(
-        default=None, alias="channelName", title="ChannelName refers to the channel name"
+        default=None,
+        alias="channelName",
+        title="ChannelName refers to the channel name",
     )
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
+        default=None,
+        alias="connectionBackoff",
+        title="Backoff holds parameters applied to connection.\n+optional",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     password: Optional[v1.SecretKeySelector] = Field(
         default=None, title="Password to use to connect to broker\n+optional"
@@ -1335,25 +1475,28 @@ class EventDependencyFilter(BaseModel):
         default=None,
         alias="dataLogicalOperator",
         description=(
-            "DataLogicalOperator defines how multiple Data filters (if defined) are evaluated together.\nAvailable"
-            " values: and (&&), or (||)\nIs optional and if left blank treated as and (&&)."
+            "DataLogicalOperator defines how multiple Data filters (if defined) are"
+            " evaluated together.\nAvailable values: and (&&), or (||)\nIs optional and"
+            " if left blank treated as and (&&)."
         ),
     )
     expr_logical_operator: Optional[str] = Field(
         default=None,
         alias="exprLogicalOperator",
         description=(
-            "ExprLogicalOperator defines how multiple Exprs filters (if defined) are evaluated together.\nAvailable"
-            " values: and (&&), or (||)\nIs optional and if left blank treated as and (&&)."
+            "ExprLogicalOperator defines how multiple Exprs filters (if defined) are"
+            " evaluated together.\nAvailable values: and (&&), or (||)\nIs optional and"
+            " if left blank treated as and (&&)."
         ),
     )
     exprs: Optional[List[ExprFilter]] = Field(
-        default=None, description="Exprs contains the list of expressions evaluated against the event payload."
+        default=None,
+        description=("Exprs contains the list of expressions evaluated against the event" " payload."),
     )
     script: Optional[str] = Field(
         default=None,
         description=(
-            "Script refers to a Lua script evaluated to determine the validity of an io.argoproj.workflow.v1alpha1."
+            "Script refers to a Lua script evaluated to determine the validity of an" " io.argoproj.workflow.v1alpha1."
         ),
     )
     time: Optional[TimeFilter] = Field(default=None, title="Time filter on the event with escalation")
@@ -1369,22 +1512,28 @@ class GitArtifact(BaseModel):
         default=None,
         alias="cloneDirectory",
         description=(
-            "Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any"
-            " specific Git service providers.\nHence we don't use any specific git provider client."
+            "Directory to clone the repository. We clone complete directory because"
+            " GitArtifact is not limited to any specific Git service providers.\nHence"
+            " we don't use any specific git provider client."
         ),
     )
     creds: Optional[GitCreds] = Field(
-        default=None, title="Creds contain reference to git username and password\n+optional"
+        default=None,
+        title="Creds contain reference to git username and password\n+optional",
     )
     file_path: Optional[str] = Field(
-        default=None, alias="filePath", title="Path to file that contains trigger resource definition"
+        default=None,
+        alias="filePath",
+        title="Path to file that contains trigger resource definition",
     )
     insecure_ignore_host_key: Optional[bool] = Field(
-        default=None, alias="insecureIgnoreHostKey", title="Whether to ignore host key\n+optional"
+        default=None,
+        alias="insecureIgnoreHostKey",
+        title="Whether to ignore host key\n+optional",
     )
     ref: Optional[str] = Field(
         default=None,
-        title="Ref to use to pull trigger resource. Will result in a shallow clone and\nfetch.\n+optional",
+        title=("Ref to use to pull trigger resource. Will result in a shallow clone" " and\nfetch.\n+optional"),
     )
     remote: Optional[GitRemoteConfig] = Field(
         default=None,
@@ -1394,7 +1543,9 @@ class GitArtifact(BaseModel):
         ),
     )
     ssh_key_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="sshKeySecret", title="SSHKeySecret refers to the secret that contains SSH key"
+        default=None,
+        alias="sshKeySecret",
+        title="SSHKeySecret refers to the secret that contains SSH key",
     )
     tag: Optional[str] = Field(default=None, title="Tag to use to pull trigger resource\n+optional")
     url: Optional[str] = Field(default=None, title="Git URL")
@@ -1409,69 +1560,81 @@ class GithubEventSource(BaseModel):
         ),
     )
     api_token: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="apiToken", title="APIToken refers to a K8s secret containing github api token\n+optional"
+        default=None,
+        alias="apiToken",
+        title="APIToken refers to a K8s secret containing github api token\n+optional",
     )
     content_type: Optional[str] = Field(default=None, alias="contentType", title="ContentType of the event delivery")
     delete_hook_on_finish: Optional[bool] = Field(
         default=None,
         alias="deleteHookOnFinish",
         title=(
-            "DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source"
-            " is stopped.\n+optional"
+            "DeleteHookOnFinish determines whether to delete the GitHub hook for the"
+            " repository once the event source is stopped.\n+optional"
         ),
     )
     events: Optional[List[str]] = Field(
-        default=None, title="Events refer to Github events to which the event source will subscribe"
+        default=None,
+        title="Events refer to Github events to which the event source will subscribe",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     github_app: Optional[GithubAppCreds] = Field(
-        default=None, alias="githubApp", title="GitHubApp holds the GitHub app credentials\n+optional"
+        default=None,
+        alias="githubApp",
+        title="GitHubApp holds the GitHub app credentials\n+optional",
     )
     github_base_url: Optional[str] = Field(
-        default=None, alias="githubBaseURL", title="GitHub base URL (for GitHub Enterprise)\n+optional"
+        default=None,
+        alias="githubBaseURL",
+        title="GitHub base URL (for GitHub Enterprise)\n+optional",
     )
     github_upload_url: Optional[str] = Field(
-        default=None, alias="githubUploadURL", title="GitHub upload URL (for GitHub Enterprise)\n+optional"
+        default=None,
+        alias="githubUploadURL",
+        title="GitHub upload URL (for GitHub Enterprise)\n+optional",
     )
     id: Optional[str] = Field(
         default=None,
-        title="Id is the webhook's id\nDeprecated: This is not used at all, will be removed in v1.6\n+optional",
+        title=("Id is the webhook's id\nDeprecated: This is not used at all, will be" " removed in v1.6\n+optional"),
     )
     insecure: Optional[bool] = Field(default=None, title="Insecure tls verification")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     organizations: Optional[List[str]] = Field(
         default=None,
         description=(
-            "Organizations holds the names of organizations (used for organization level webhooks). Not required if"
-            " Repositories is set."
+            "Organizations holds the names of organizations (used for organization"
+            " level webhooks). Not required if Repositories is set."
         ),
     )
     owner: Optional[str] = Field(
         default=None,
         title=(
-            "DeprecatedOwner refers to GitHub owner name i.e. argoproj\nDeprecated: use Repositories instead. Will be"
-            " unsupported in v 1.6\n+optional"
+            "DeprecatedOwner refers to GitHub owner name i.e. argoproj\nDeprecated: use"
+            " Repositories instead. Will be unsupported in v 1.6\n+optional"
         ),
     )
     repositories: Optional[List[OwnedRepositories]] = Field(
         default=None,
         description=(
-            "Repositories holds the information of repositories, which uses repo owner as the key,\nand list of repo"
-            " names as the value. Not required if Organizations is set."
+            "Repositories holds the information of repositories, which uses repo owner"
+            " as the key,\nand list of repo names as the value. Not required if"
+            " Organizations is set."
         ),
     )
     repository: Optional[str] = Field(
         default=None,
         title=(
-            "DeprecatedRepository refers to GitHub repo name i.e. argo-events\nDeprecated: use Repositories instead."
-            " Will be unsupported in v 1.6\n+optional"
+            "DeprecatedRepository refers to GitHub repo name i.e."
+            " argo-events\nDeprecated: use Repositories instead. Will be unsupported in"
+            " v 1.6\n+optional"
         ),
     )
     webhook: Optional[WebhookContext] = Field(
-        default=None, title="Webhook refers to the configuration required to run a http server"
+        default=None,
+        title="Webhook refers to the configuration required to run a http server",
     )
     webhook_secret: Optional[v1.SecretKeySelector] = Field(
         default=None,
@@ -1487,14 +1650,14 @@ class GitlabEventSource(BaseModel):
     access_token: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="accessToken",
-        title="AccessToken references to k8 secret which holds the gitlab api access information",
+        title=("AccessToken references to k8 secret which holds the gitlab api access" " information"),
     )
     delete_hook_on_finish: Optional[bool] = Field(
         default=None,
         alias="deleteHookOnFinish",
         title=(
-            "DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is"
-            " stopped.\n+optional"
+            "DeleteHookOnFinish determines whether to delete the GitLab hook for the"
+            " project once the event source is stopped.\n+optional"
         ),
     )
     enable_ssl_verification: Optional[bool] = Field(
@@ -1517,23 +1680,25 @@ class GitlabEventSource(BaseModel):
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     project_id: Optional[str] = Field(
         default=None,
         alias="projectID",
         title=(
-            "DeprecatedProjectID is the id of project for which integration needs to setup\nDeprecated: use Projects"
-            " instead. Will be unsupported in v 1.7\n+optional"
+            "DeprecatedProjectID is the id of project for which integration needs to"
+            " setup\nDeprecated: use Projects instead. Will be unsupported in v"
+            " 1.7\n+optional"
         ),
     )
     projects: Optional[List[str]] = Field(
-        default=None, title='List of project IDs or project namespace paths like "whynowy/test"'
+        default=None,
+        title='List of project IDs or project namespace paths like "whynowy/test"',
     )
     secret_token: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="secretToken",
-        title="SecretToken references to k8 secret which holds the Secret Token used by webhook config",
+        title=("SecretToken references to k8 secret which holds the Secret Token used by" " webhook config"),
     )
     webhook: Optional[WebhookContext] = Field(default=None, title="Webhook holds configuration to run a http server")
 
@@ -1542,31 +1707,36 @@ class KafkaEventSource(BaseModel):
     config: Optional[str] = Field(
         default=None,
         description=(
-            "Yaml format Sarama config for Kafka connection.\nIt follows the struct of sarama.Config. See"
-            " https://github.com/Shopify/sarama/blob/main/config.go\ne.g.\n\nconsumer:\n  fetch:\n    min: 1\nnet:\n "
-            " MaxOpenRequests: 5\n\n+optional"
+            "Yaml format Sarama config for Kafka connection.\nIt follows the struct of"
+            " sarama.Config. See"
+            " https://github.com/Shopify/sarama/blob/main/config.go\ne.g.\n\nconsumer:\n"
+            "  fetch:\n    min: 1\nnet:\n  MaxOpenRequests: 5\n\n+optional"
         ),
     )
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", description="Backoff holds parameters applied to connection."
+        default=None,
+        alias="connectionBackoff",
+        description="Backoff holds parameters applied to connection.",
     )
     consumer_group: Optional[KafkaConsumerGroup] = Field(
-        default=None, alias="consumerGroup", title="Consumer group for kafka client\n+optional"
+        default=None,
+        alias="consumerGroup",
+        title="Consumer group for kafka client\n+optional",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     limit_events_per_second: Optional[str] = Field(
         default=None,
         alias="limitEventsPerSecond",
-        title="Sets a limit on how many events get read from kafka per second.\n+optional",
+        title=("Sets a limit on how many events get read from kafka per second.\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     partition: Optional[str] = Field(default=None, title="Partition name")
     sasl: Optional[SASLConfig] = Field(default=None, title="SASL configuration for the kafka client\n+optional")
@@ -1576,8 +1746,8 @@ class KafkaEventSource(BaseModel):
     version: Optional[str] = Field(
         default=None,
         title=(
-            "Specify what kafka version is being connected to enables certain features in sarama, defaults to"
-            " 1.0.0\n+optional"
+            "Specify what kafka version is being connected to enables certain features"
+            " in sarama, defaults to 1.0.0\n+optional"
         ),
     )
 
@@ -1586,55 +1756,61 @@ class KafkaTrigger(BaseModel):
     compress: Optional[bool] = Field(
         default=None,
         title=(
-            "Compress determines whether to compress message or not.\nDefaults to false.\nIf set to true, compresses"
-            " message using snappy compression.\n+optional"
+            "Compress determines whether to compress message or not.\nDefaults to"
+            " false.\nIf set to true, compresses message using snappy"
+            " compression.\n+optional"
         ),
     )
     flush_frequency: Optional[int] = Field(
         default=None,
         alias="flushFrequency",
         title=(
-            "FlushFrequency refers to the frequency in milliseconds to flush batches.\nDefaults to 500"
-            " milliseconds.\n+optional"
+            "FlushFrequency refers to the frequency in milliseconds to flush"
+            " batches.\nDefaults to 500 milliseconds.\n+optional"
         ),
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
-        description="Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
+        description=("Parameters is the list of parameters that is applied to resolved Kafka" " trigger object."),
     )
     partition: Optional[int] = Field(default=None, description="Partition to write data to.")
     partitioning_key: Optional[str] = Field(
         default=None,
         alias="partitioningKey",
         description=(
-            "The partitioning key for the messages put on the Kafka topic.\nDefaults to broker url.\n+optional."
+            "The partitioning key for the messages put on the Kafka topic.\nDefaults to" " broker url.\n+optional."
         ),
     )
     payload: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Payload is the list of key-value extracted from an event payload to construct the request payload."
+            "Payload is the list of key-value extracted from an event payload to" " construct the request payload."
         ),
     )
     required_acks: Optional[int] = Field(
         default=None,
         alias="requiredAcks",
         description=(
-            "RequiredAcks used in producer to tell the broker how many replica acknowledgements\nDefaults to 1 (Only"
-            " wait for the leader to ack).\n+optional."
+            "RequiredAcks used in producer to tell the broker how many replica"
+            " acknowledgements\nDefaults to 1 (Only wait for the leader to"
+            " ack).\n+optional."
         ),
     )
     sasl: Optional[SASLConfig] = Field(default=None, title="SASL configuration for the kafka client\n+optional")
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the Kafka producer.\n+optional")
     topic: Optional[str] = Field(
-        default=None, title="Name of the topic.\nMore info at https://kafka.apache.org/documentation/#intro_topics"
+        default=None,
+        title=("Name of the topic.\nMore info at" " https://kafka.apache.org/documentation/#intro_topics"),
     )
-    url: Optional[str] = Field(default=None, description="URL of the Kafka broker, multiple URLs separated by comma.")
+    url: Optional[str] = Field(
+        default=None,
+        description="URL of the Kafka broker, multiple URLs separated by comma.",
+    )
     version: Optional[str] = Field(
         default=None,
         title=(
-            "Specify what kafka version is being connected to enables certain features in sarama, defaults to"
-            " 1.0.0\n+optional"
+            "Specify what kafka version is being connected to enables certain features"
+            " in sarama, defaults to 1.0.0\n+optional"
         ),
     )
 
@@ -1642,17 +1818,19 @@ class KafkaTrigger(BaseModel):
 class MQTTEventSource(BaseModel):
     client_id: Optional[str] = Field(default=None, alias="clientId", title="ClientID is the id of the client")
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", description="ConnectionBackoff holds backoff applied to connection."
+        default=None,
+        alias="connectionBackoff",
+        description="ConnectionBackoff holds backoff applied to connection.",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the mqtt client.\n+optional")
     topic: Optional[str] = Field(default=None, title="Topic name")
@@ -1662,20 +1840,23 @@ class MQTTEventSource(BaseModel):
 class NATSEventsSource(BaseModel):
     auth: Optional[NATSAuth] = Field(default=None, title="Auth information\n+optional")
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", description="ConnectionBackoff holds backoff applied to connection."
+        default=None,
+        alias="connectionBackoff",
+        description="ConnectionBackoff holds backoff applied to connection.",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     subject: Optional[str] = Field(
-        default=None, title="Subject holds the name of the subject onto which messages are published"
+        default=None,
+        title="Subject holds the name of the subject onto which messages are published",
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the nats client.\n+optional")
     url: Optional[str] = Field(default=None, title="URL to connect to NATS cluster")
@@ -1692,20 +1873,24 @@ class NATSTrigger(BaseModel):
 class NSQEventSource(BaseModel):
     channel: Optional[str] = Field(default=None, title="Channel used for subscription")
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
+        default=None,
+        alias="connectionBackoff",
+        title="Backoff holds parameters applied to connection.\n+optional",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     host_address: Optional[str] = Field(
-        default=None, alias="hostAddress", title="HostAddress is the address of the host for NSQ lookup"
+        default=None,
+        alias="hostAddress",
+        title="HostAddress is the address of the host for NSQ lookup",
     )
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the nsq client.\n+optional")
     topic: Optional[str] = Field(default=None, description="Topic to subscribe to.")
@@ -1714,23 +1899,26 @@ class NSQEventSource(BaseModel):
 class OpenWhiskTrigger(BaseModel):
     action_name: Optional[str] = Field(default=None, alias="actionName", description="Name of the action/function.")
     auth_token: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="authToken", title="AuthToken for authentication.\n+optional"
+        default=None,
+        alias="authToken",
+        title="AuthToken for authentication.\n+optional",
     )
     host: Optional[str] = Field(default=None, description="Host URL of the OpenWhisk.")
     namespace: Optional[str] = Field(
-        default=None, description='Namespace for the action.\nDefaults to "_".\n+optional.'
+        default=None,
+        description='Namespace for the action.\nDefaults to "_".\n+optional.',
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
         title=(
-            "Parameters is the list of key-value extracted from event's payload that are applied to\nthe trigger"
-            " resource.\n+optional"
+            "Parameters is the list of key-value extracted from event's payload that"
+            " are applied to\nthe trigger resource.\n+optional"
         ),
     )
     payload: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Payload is the list of key-value extracted from an event payload to construct the request payload."
+            "Payload is the list of key-value extracted from an event payload to" " construct the request payload."
         ),
     )
     version: Optional[str] = Field(default=None, title="Version for the API.\nDefaults to v1.\n+optional")
@@ -1738,103 +1926,128 @@ class OpenWhiskTrigger(BaseModel):
 
 class PulsarEventSource(BaseModel):
     auth_token_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="authTokenSecret", title="Authentication token for the pulsar client.\n+optional"
+        default=None,
+        alias="authTokenSecret",
+        title="Authentication token for the pulsar client.\n+optional",
     )
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
+        default=None,
+        alias="connectionBackoff",
+        title="Backoff holds parameters applied to connection.\n+optional",
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the pulsar client.\n+optional")
     tls_allow_insecure_connection: Optional[bool] = Field(
         default=None,
         alias="tlsAllowInsecureConnection",
-        title="Whether the Pulsar client accept untrusted TLS certificate from broker.\n+optional",
+        title=("Whether the Pulsar client accept untrusted TLS certificate from" " broker.\n+optional"),
     )
     tls_trust_certs_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="tlsTrustCertsSecret", title="Trusted TLS certificate secret.\n+optional"
+        default=None,
+        alias="tlsTrustCertsSecret",
+        title="Trusted TLS certificate secret.\n+optional",
     )
     tls_validate_hostname: Optional[bool] = Field(
         default=None,
         alias="tlsValidateHostname",
-        title="Whether the Pulsar client verify the validity of the host name from broker.\n+optional",
+        title=("Whether the Pulsar client verify the validity of the host name from" " broker.\n+optional"),
     )
     topics: Optional[List[str]] = Field(default=None, title="Name of the topics to subscribe to.\n+required")
     type: Optional[str] = Field(
         default=None,
         title=(
-            'Type of the subscription.\nOnly "exclusive" and "shared" is supported.\nDefaults to exclusive.\n+optional'
+            'Type of the subscription.\nOnly "exclusive" and "shared" is'
+            " supported.\nDefaults to exclusive.\n+optional"
         ),
     )
-    url: Optional[str] = Field(default=None, title="Configure the service URL for the Pulsar service.\n+required")
+    url: Optional[str] = Field(
+        default=None,
+        title="Configure the service URL for the Pulsar service.\n+required",
+    )
 
 
 class PulsarTrigger(BaseModel):
     auth_token_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="authTokenSecret", title="Authentication token for the pulsar client.\n+optional"
+        default=None,
+        alias="authTokenSecret",
+        title="Authentication token for the pulsar client.\n+optional",
     )
     connection_backoff: Optional[Backoff] = Field(
-        default=None, alias="connectionBackoff", title="Backoff holds parameters applied to connection.\n+optional"
+        default=None,
+        alias="connectionBackoff",
+        title="Backoff holds parameters applied to connection.\n+optional",
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
-        description="Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
+        description=("Parameters is the list of parameters that is applied to resolved Kafka" " trigger object."),
     )
     payload: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Payload is the list of key-value extracted from an event payload to construct the request payload."
+            "Payload is the list of key-value extracted from an event payload to" " construct the request payload."
         ),
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the pulsar client.\n+optional")
     tls_allow_insecure_connection: Optional[bool] = Field(
         default=None,
         alias="tlsAllowInsecureConnection",
-        title="Whether the Pulsar client accept untrusted TLS certificate from broker.\n+optional",
+        title=("Whether the Pulsar client accept untrusted TLS certificate from" " broker.\n+optional"),
     )
     tls_trust_certs_secret: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="tlsTrustCertsSecret", title="Trusted TLS certificate secret.\n+optional"
+        default=None,
+        alias="tlsTrustCertsSecret",
+        title="Trusted TLS certificate secret.\n+optional",
     )
     tls_validate_hostname: Optional[bool] = Field(
         default=None,
         alias="tlsValidateHostname",
-        title="Whether the Pulsar client verify the validity of the host name from broker.\n+optional",
+        title=("Whether the Pulsar client verify the validity of the host name from" " broker.\n+optional"),
     )
     topic: Optional[str] = Field(
-        default=None, title="Name of the topic.\nSee https://pulsar.apache.org/docs/en/concepts-messaging/"
+        default=None,
+        title=("Name of the topic.\nSee" " https://pulsar.apache.org/docs/en/concepts-messaging/"),
     )
-    url: Optional[str] = Field(default=None, title="Configure the service URL for the Pulsar service.\n+required")
+    url: Optional[str] = Field(
+        default=None,
+        title="Configure the service URL for the Pulsar service.\n+required",
+    )
 
 
 class RedisEventSource(BaseModel):
     channels: Optional[List[str]] = None
-    db: Optional[int] = Field(default=None, title="DB to use. If not specified, default DB 0 will be used.\n+optional")
+    db: Optional[int] = Field(
+        default=None,
+        title="DB to use. If not specified, default DB 0 will be used.\n+optional",
+    )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     host_address: Optional[str] = Field(
-        default=None, alias="hostAddress", title="HostAddress refers to the address of the Redis host/server"
+        default=None,
+        alias="hostAddress",
+        title="HostAddress refers to the address of the Redis host/server",
     )
     json_body: Optional[bool] = Field(
         default=None,
         alias="jsonBody",
-        title="JSONBody specifies that all event body payload coming from this\nsource will be JSON\n+optional",
+        title=("JSONBody specifies that all event body payload coming from this\nsource" " will be JSON\n+optional"),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     namespace: Optional[str] = Field(
         default=None,
         title=(
-            "Namespace to use to retrieve the password from. It should only be specified if password is"
-            " declared\n+optional"
+            "Namespace to use to retrieve the password from. It should only be"
+            " specified if password is declared\n+optional"
         ),
     )
     password: Optional[v1.SecretKeySelector] = Field(
@@ -1842,7 +2055,8 @@ class RedisEventSource(BaseModel):
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the redis client.\n+optional")
     username: Optional[str] = Field(
-        default=None, title="Username required for ACL style authentication if any.\n+optional"
+        default=None,
+        title="Username required for ACL style authentication if any.\n+optional",
     )
 
 
@@ -1851,41 +2065,50 @@ class RedisStreamEventSource(BaseModel):
         default=None,
         alias="consumerGroup",
         title=(
-            "ConsumerGroup refers to the Redis stream consumer group that will be\ncreated on all redis streams."
-            " Messages are read through this group. Defaults to 'argo-events-cg'\n+optional"
+            "ConsumerGroup refers to the Redis stream consumer group that will"
+            " be\ncreated on all redis streams. Messages are read through this group."
+            " Defaults to 'argo-events-cg'\n+optional"
         ),
     )
-    db: Optional[int] = Field(default=None, title="DB to use. If not specified, default DB 0 will be used.\n+optional")
+    db: Optional[int] = Field(
+        default=None,
+        title="DB to use. If not specified, default DB 0 will be used.\n+optional",
+    )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     host_address: Optional[str] = Field(
         default=None,
         alias="hostAddress",
-        title="HostAddress refers to the address of the Redis host/server (master instance)",
+        title=("HostAddress refers to the address of the Redis host/server (master" " instance)"),
     )
     max_msg_count_per_read: Optional[int] = Field(
         default=None,
         alias="maxMsgCountPerRead",
         title=(
-            "MaxMsgCountPerRead holds the maximum number of messages per stream that will be read in each XREADGROUP"
-            " of all streams\nExample: if there are 2 streams and MaxMsgCountPerRead=10, then each XREADGROUP may read"
-            " upto a total of 20 messages.\nSame as COUNT option in XREADGROUP(https://redis.io/topics/streams-intro)."
-            " Defaults to 10\n+optional"
+            "MaxMsgCountPerRead holds the maximum number of messages per stream that"
+            " will be read in each XREADGROUP of all streams\nExample: if there are 2"
+            " streams and MaxMsgCountPerRead=10, then each XREADGROUP may read upto a"
+            " total of 20 messages.\nSame as COUNT option in"
+            " XREADGROUP(https://redis.io/topics/streams-intro). Defaults to"
+            " 10\n+optional"
         ),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     password: Optional[v1.SecretKeySelector] = Field(
         default=None, title="Password required for authentication if any.\n+optional"
     )
     streams: Optional[List[str]] = Field(
         default=None,
-        description="Streams to look for entries. XREADGROUP is used on all streams using a single consumer group.",
+        description=(
+            "Streams to look for entries. XREADGROUP is used on all streams using a" " single consumer group."
+        ),
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the redis client.\n+optional")
     username: Optional[str] = Field(
-        default=None, title="Username required for ACL style authentication if any.\n+optional"
+        default=None,
+        title="Username required for ACL style authentication if any.\n+optional",
     )
 
 
@@ -1893,13 +2116,16 @@ class ResourceEventSource(BaseModel):
     event_types: Optional[List[str]] = Field(
         default=None,
         alias="eventTypes",
-        description="EventTypes is the list of event type to watch.\nPossible values are - ADD, UPDATE and DELETE.",
+        description=(
+            "EventTypes is the list of event type to watch.\nPossible values are - ADD," " UPDATE and DELETE."
+        ),
     )
     filter: Optional[ResourceFilter] = Field(
         default=None,
         title=(
-            "Filter is applied on the metadata of the resource\nIf you apply filter, then the internal event informer"
-            " will only monitor objects that pass the filter.\n+optional"
+            "Filter is applied on the metadata of the resource\nIf you apply filter,"
+            " then the internal event informer will only monitor objects that pass the"
+            " filter.\n+optional"
         ),
     )
     group_version_resource: Optional[v1_1.GroupVersionResource] = Field(
@@ -1907,38 +2133,42 @@ class ResourceEventSource(BaseModel):
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     namespace: Optional[str] = Field(default=None, title="Namespace where resource is deployed")
 
 
 class SNSEventSource(BaseModel):
     access_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="accessKey", title="AccessKey refers K8s secret containing aws access key"
+        default=None,
+        alias="accessKey",
+        title="AccessKey refers K8s secret containing aws access key",
     )
     endpoint: Optional[str] = Field(
         default=None,
-        title="Endpoint configures connection to a specific SNS endpoint instead of Amazons servers\n+optional",
+        title=("Endpoint configures connection to a specific SNS endpoint instead of" " Amazons servers\n+optional"),
     )
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     region: Optional[str] = Field(default=None, title="Region is AWS region")
     role_arn: Optional[str] = Field(
         default=None,
         alias="roleARN",
-        title="RoleARN is the Amazon Resource Name (ARN) of the role to assume.\n+optional",
+        title=("RoleARN is the Amazon Resource Name (ARN) of the role to" " assume.\n+optional"),
     )
     secret_key: Optional[v1.SecretKeySelector] = Field(
-        default=None, alias="secretKey", title="SecretKey refers K8s secret containing aws secret key"
+        default=None,
+        alias="secretKey",
+        title="SecretKey refers K8s secret containing aws secret key",
     )
     topic_arn: Optional[str] = Field(default=None, alias="topicArn", title="TopicArn")
     validate_signature: Optional[bool] = Field(
         default=None,
         alias="validateSignature",
-        title="ValidateSignature is boolean that can be set to true for SNS signature verification\n+optional",
+        title=("ValidateSignature is boolean that can be set to true for SNS signature" " verification\n+optional"),
     )
     webhook: Optional[WebhookContext] = Field(default=None, title="Webhook configuration for http server")
 
@@ -1946,7 +2176,9 @@ class SNSEventSource(BaseModel):
 class SecureHeader(BaseModel):
     name: Optional[str] = None
     value_from: Optional[ValueFromSource] = Field(
-        default=None, alias="valueFrom", title="Values can be read from either secrets or configmaps"
+        default=None,
+        alias="valueFrom",
+        title="Values can be read from either secrets or configmaps",
     )
 
 
@@ -1959,11 +2191,13 @@ class Service(BaseModel):
         default=None,
         alias="clusterIP",
         title=(
-            "clusterIP is the IP address of the service and is usually assigned\nrandomly by the master. If an address"
-            " is specified manually and is not in\nuse by others, it will be allocated to the service; otherwise,"
-            " creation\nof the service will fail. This field can not be changed through updates.\nValid values are"
-            ' "None", empty string (""), or a valid IP address. "None"\ncan be specified for headless services when'
-            " proxying is not required.\nMore info:"
+            "clusterIP is the IP address of the service and is usually"
+            " assigned\nrandomly by the master. If an address is specified manually and"
+            " is not in\nuse by others, it will be allocated to the service; otherwise,"
+            " creation\nof the service will fail. This field can not be changed through"
+            ' updates.\nValid values are "None", empty string (""), or a valid IP'
+            ' address. "None"\ncan be specified for headless services when proxying is'
+            " not required.\nMore info:"
             " https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies\n+optional"
         ),
     )
@@ -1980,7 +2214,7 @@ class SlackEventSource(BaseModel):
     filter: Optional[EventSourceFilter] = Field(default=None, title="Filter\n+optional")
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     signing_secret: Optional[v1.SecretKeySelector] = Field(
         default=None, alias="signingSecret", title="Slack App signing secret"
@@ -1991,28 +2225,34 @@ class SlackEventSource(BaseModel):
 
 class SlackTrigger(BaseModel):
     channel: Optional[str] = Field(
-        default=None, title="Channel refers to which Slack channel to send slack message.\n+optional"
+        default=None,
+        title="Channel refers to which Slack channel to send slack message.\n+optional",
     )
     message: Optional[str] = Field(
-        default=None, title="Message refers to the message to send to the Slack channel.\n+optional"
+        default=None,
+        title="Message refers to the message to send to the Slack channel.\n+optional",
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
         title=(
-            "Parameters is the list of key-value extracted from event's payload that are applied to\nthe trigger"
-            " resource.\n+optional"
+            "Parameters is the list of key-value extracted from event's payload that"
+            " are applied to\nthe trigger resource.\n+optional"
         ),
     )
     slack_token: Optional[v1.SecretKeySelector] = Field(
         default=None,
         alias="slackToken",
-        description="SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.",
+        description=(
+            "SlackToken refers to the Kubernetes secret that holds the slack token" " required to send messages."
+        ),
     )
 
 
 class StorageGridEventSource(BaseModel):
     api_url: Optional[str] = Field(
-        default=None, alias="apiURL", description="APIURL is the url of the storagegrid api."
+        default=None,
+        alias="apiURL",
+        description="APIURL is the url of the storagegrid api.",
     )
     auth_token: Optional[v1.SecretKeySelector] = Field(
         default=None, alias="authToken", title="Auth token for storagegrid api"
@@ -2024,7 +2264,7 @@ class StorageGridEventSource(BaseModel):
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     region: Optional[str] = Field(default=None, title="S3 region.\nDefaults to us-east-1\n+optional")
     topic_arn: Optional[str] = Field(default=None, alias="topicArn", title="TopicArn")
@@ -2036,25 +2276,27 @@ class StripeEventSource(BaseModel):
         default=None,
         alias="apiKey",
         title=(
-            "APIKey refers to K8s secret that holds Stripe API key. Used only if CreateWebhook is enabled.\n+optional"
+            "APIKey refers to K8s secret that holds Stripe API key. Used only if"
+            " CreateWebhook is enabled.\n+optional"
         ),
     )
     create_webhook: Optional[bool] = Field(
         default=None,
         alias="createWebhook",
-        title="CreateWebhook if specified creates a new webhook programmatically.\n+optional",
+        title=("CreateWebhook if specified creates a new webhook" " programmatically.\n+optional"),
     )
     event_filter: Optional[List[str]] = Field(
         default=None,
         alias="eventFilter",
         title=(
-            "EventFilter describes the type of events to listen to. If not specified, all types of events will be"
-            " processed.\nMore info at https://stripe.com/docs/api/events/list\n+optional"
+            "EventFilter describes the type of events to listen to. If not specified,"
+            " all types of events will be processed.\nMore info at"
+            " https://stripe.com/docs/api/events/list\n+optional"
         ),
     )
     metadata: Optional[Dict[str, str]] = Field(
         default=None,
-        title="Metadata holds the user defined metadata which will passed along the event payload.\n+optional",
+        title=("Metadata holds the user defined metadata which will passed along the event" " payload.\n+optional"),
     )
     webhook: Optional[WebhookContext] = Field(default=None, title="Webhook holds configuration for a REST endpoint")
 
@@ -2078,14 +2320,17 @@ class EventDependency(BaseModel):
     )
     filters: Optional[EventDependencyFilter] = Field(
         default=None,
-        title="Filters and rules governing toleration of success and constraints on the context and data of an event",
+        title=(
+            "Filters and rules governing toleration of success and constraints on the" " context and data of an event"
+        ),
     )
     filters_logical_operator: Optional[str] = Field(
         default=None,
         alias="filtersLogicalOperator",
         description=(
-            "FiltersLogicalOperator defines how different filters are evaluated together.\nAvailable values: and (&&),"
-            " or (||)\nIs optional and if left blank treated as and (&&)."
+            "FiltersLogicalOperator defines how different filters are evaluated"
+            " together.\nAvailable values: and (&&), or (||)\nIs optional and if left"
+            " blank treated as and (&&)."
         ),
     )
     name: Optional[str] = Field(default=None, title="Name is a unique name of this dependency")
@@ -2094,32 +2339,35 @@ class EventDependency(BaseModel):
 
 class HTTPTrigger(BaseModel):
     basic_auth: Optional[BasicAuth] = Field(
-        default=None, alias="basicAuth", title="BasicAuth configuration for the http request.\n+optional"
+        default=None,
+        alias="basicAuth",
+        title="BasicAuth configuration for the http request.\n+optional",
     )
     headers: Optional[Dict[str, str]] = Field(default=None, title="Headers for the HTTP request.\n+optional")
     method: Optional[str] = Field(
         default=None,
         title=(
-            "Method refers to the type of the HTTP request.\nRefer https://golang.org/src/net/http/method.go for more"
+            "Method refers to the type of the HTTP request.\nRefer"
+            " https://golang.org/src/net/http/method.go for more"
             " io.argoproj.workflow.v1alpha1.\nDefault value is POST.\n+optional"
         ),
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
         description=(
-            "Parameters is the list of key-value extracted from event's payload that are applied to\nthe HTTP trigger"
-            " resource."
+            "Parameters is the list of key-value extracted from event's payload that"
+            " are applied to\nthe HTTP trigger resource."
         ),
     )
     payload: Optional[List[TriggerParameter]] = None
     secure_headers: Optional[List[SecureHeader]] = Field(
         default=None,
         alias="secureHeaders",
-        title="Secure Headers stored in Kubernetes Secrets for the HTTP requests.\n+optional",
+        title=("Secure Headers stored in Kubernetes Secrets for the HTTP" " requests.\n+optional"),
     )
     timeout: Optional[str] = Field(
         default=None,
-        title="Timeout refers to the HTTP request timeout in seconds.\nDefault value is 60 seconds.\n+optional",
+        title=("Timeout refers to the HTTP request timeout in seconds.\nDefault value is" " 60 seconds.\n+optional"),
     )
     tls: Optional[TLSConfig] = Field(default=None, title="TLS configuration for the HTTP client.\n+optional")
     url: Optional[str] = Field(default=None, description="URL refers to the URL to send HTTP request to.")
@@ -2130,29 +2378,31 @@ class StandardK8STrigger(BaseModel):
         default=None,
         alias="liveObject",
         title=(
-            "LiveObject specifies whether the resource should be directly fetched from K8s instead\nof being marshaled"
-            " from the resource artifact. If set to true, the resource artifact\nmust contain the information required"
-            ' to uniquely identify the resource in the cluster,\nthat is, you must specify "apiVersion", "kind" as'
-            ' well as "name" and "namespace" meta\ndata.\nOnly valid for operation type `update`\n+optional'
+            "LiveObject specifies whether the resource should be directly fetched from"
+            " K8s instead\nof being marshaled from the resource artifact. If set to"
+            " true, the resource artifact\nmust contain the information required to"
+            " uniquely identify the resource in the cluster,\nthat is, you must specify"
+            ' "apiVersion", "kind" as well as "name" and "namespace" meta\ndata.\nOnly'
+            " valid for operation type `update`\n+optional"
         ),
     )
     operation: Optional[str] = Field(
         default=None,
         title=(
-            "Operation refers to the type of operation performed on the k8s resource.\nDefault value is"
-            " Create.\n+optional"
+            "Operation refers to the type of operation performed on the k8s"
+            " resource.\nDefault value is Create.\n+optional"
         ),
     )
     parameters: Optional[List[TriggerParameter]] = Field(
         default=None,
-        description="Parameters is the list of parameters that is applied to resolved K8s trigger object.",
+        description=("Parameters is the list of parameters that is applied to resolved K8s" " trigger object."),
     )
     patch_strategy: Optional[str] = Field(
         default=None,
         alias="patchStrategy",
         title=(
-            "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as"
-            " patch.\npossible"
+            "PatchStrategy controls the K8s object patching strategy when the trigger"
+            " operation is specified as patch.\npossible"
             ' values:\n"application/json-patch+json"\n"application/merge-patch+json"\n"application/strategic-merge-patch+json"\n"application/apply-patch+yaml".\nDefaults'
             ' to "application/merge-patch+json"\n+optional'
         ),
@@ -2165,12 +2415,13 @@ class ArgoWorkflowTrigger(BaseModel):
     operation: Optional[str] = Field(
         default=None,
         title=(
-            "Operation refers to the type of operation performed on the argo workflow resource.\nDefault value is"
-            " Submit.\n+optional"
+            "Operation refers to the type of operation performed on the argo workflow"
+            " resource.\nDefault value is Submit.\n+optional"
         ),
     )
     parameters: Optional[List[TriggerParameter]] = Field(
-        default=None, title="Parameters is the list of parameters to pass to resolved Argo Workflow object"
+        default=None,
+        title=("Parameters is the list of parameters to pass to resolved Argo Workflow" " object"),
     )
     source: Optional[ArtifactLocation] = Field(default=None, title="Source of the K8s resource file(s)")
 
@@ -2180,74 +2431,81 @@ class TriggerTemplate(BaseModel):
         default=None,
         alias="argoWorkflow",
         title=(
-            "ArgoWorkflow refers to the trigger that can perform various operations on an Argo"
-            " io.argoproj.workflow.v1alpha1.\n+optional"
+            "ArgoWorkflow refers to the trigger that can perform various operations on"
+            " an Argo io.argoproj.workflow.v1alpha1.\n+optional"
         ),
     )
     aws_lambda: Optional[AWSLambdaTrigger] = Field(
         default=None,
         alias="awsLambda",
         title=(
-            "AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable"
-            " payload.\n+optional"
+            "AWSLambda refers to the trigger designed to invoke AWS Lambda function"
+            " with with on-the-fly constructable payload.\n+optional"
         ),
     )
     azure_event_hubs: Optional[AzureEventHubsTrigger] = Field(
         default=None,
         alias="azureEventHubs",
-        title="AzureEventHubs refers to the trigger send an event to an Azure Event Hub.\n+optional",
+        title=("AzureEventHubs refers to the trigger send an event to an Azure Event" " Hub.\n+optional"),
     )
     conditions: Optional[str] = Field(
         default=None,
         title=(
-            'Conditions is the conditions to execute the trigger.\nFor example: "(dep01 || dep02) && dep04"\n+optional'
+            'Conditions is the conditions to execute the trigger.\nFor example: "(dep01'
+            ' || dep02) && dep04"\n+optional'
         ),
     )
     conditions_reset: Optional[List[ConditionsResetCriteria]] = Field(
-        default=None, alias="conditionsReset", title="Criteria to reset the conditons\n+optional"
+        default=None,
+        alias="conditionsReset",
+        title="Criteria to reset the conditons\n+optional",
     )
     custom: Optional[CustomTrigger] = Field(
         default=None,
         title=(
-            "CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom"
-            " trigger.\n+optional"
+            "CustomTrigger refers to the trigger designed to connect to a gRPC trigger"
+            " server and execute a custom trigger.\n+optional"
         ),
     )
     http: Optional[HTTPTrigger] = Field(
         default=None,
         title=(
-            "HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable"
-            " payload.\n+optional"
+            "HTTP refers to the trigger designed to dispatch a HTTP request with"
+            " on-the-fly constructable payload.\n+optional"
         ),
     )
     k8s: Optional[StandardK8STrigger] = Field(
         default=None,
         title=(
-            "StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes"
-            " resource.\n+optional"
+            "StandardK8STrigger refers to the trigger designed to create or update a"
+            " generic Kubernetes resource.\n+optional"
         ),
     )
     kafka: Optional[KafkaTrigger] = Field(
-        default=None, description="Kafka refers to the trigger designed to place messages on Kafka topic.\n+optional."
+        default=None,
+        description=("Kafka refers to the trigger designed to place messages on Kafka" " topic.\n+optional."),
     )
     log: Optional[LogTrigger] = Field(
         default=None,
-        title="Log refers to the trigger designed to invoke log the io.argoproj.workflow.v1alpha1.\n+optional",
+        title=("Log refers to the trigger designed to invoke log the" " io.argoproj.workflow.v1alpha1.\n+optional"),
     )
     name: Optional[str] = Field(default=None, description="Name is a unique name of the action to take.")
     nats: Optional[NATSTrigger] = Field(
-        default=None, description="NATS refers to the trigger designed to place message on NATS subject.\n+optional."
+        default=None,
+        description=("NATS refers to the trigger designed to place message on NATS" " subject.\n+optional."),
     )
     open_whisk: Optional[OpenWhiskTrigger] = Field(
         default=None,
         alias="openWhisk",
-        title="OpenWhisk refers to the trigger designed to invoke OpenWhisk action.\n+optional",
+        title=("OpenWhisk refers to the trigger designed to invoke OpenWhisk" " action.\n+optional"),
     )
     pulsar: Optional[PulsarTrigger] = Field(
-        default=None, title="Pulsar refers to the trigger designed to place messages on Pulsar topic.\n+optional"
+        default=None,
+        title=("Pulsar refers to the trigger designed to place messages on Pulsar" " topic.\n+optional"),
     )
     slack: Optional[SlackTrigger] = Field(
-        default=None, title="Slack refers to the trigger designed to send slack notification message.\n+optional"
+        default=None,
+        title=("Slack refers to the trigger designed to send slack notification" " message.\n+optional"),
     )
 
 
@@ -2256,38 +2514,43 @@ class Template(BaseModel):
         default=None, title="If specified, the pod's scheduling constraints\n+optional"
     )
     container: Optional[v1.Container] = Field(
-        default=None, title="Container is the main container image to run in the sensor pod\n+optional"
+        default=None,
+        title=("Container is the main container image to run in the sensor pod\n+optional"),
     )
     image_pull_secrets: Optional[List[v1.LocalObjectReference]] = Field(
         default=None,
         alias="imagePullSecrets",
         title=(
-            "ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling"
-            " any of the images used by this PodSpec.\nIf specified, these secrets will be passed to individual puller"
-            " implementations for them to use. For example,\nin the case of docker, only DockerConfig type secrets are"
-            " honored.\nMore info:"
+            "ImagePullSecrets is an optional list of references to secrets in the same"
+            " namespace to use for pulling any of the images used by this PodSpec.\nIf"
+            " specified, these secrets will be passed to individual puller"
+            " implementations for them to use. For example,\nin the case of docker,"
+            " only DockerConfig type secrets are honored.\nMore info:"
             " https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod\n+optional\n+patchMergeKey=name\n+patchStrategy=merge"
         ),
     )
     metadata: Optional[Metadata] = Field(
-        default=None, title="Metadata sets the pods's metadata, i.e. annotations and labels"
+        default=None,
+        title="Metadata sets the pods's metadata, i.e. annotations and labels",
     )
     node_selector: Optional[Dict[str, str]] = Field(
         default=None,
         alias="nodeSelector",
         title=(
-            "NodeSelector is a selector which must be true for the pod to fit on a node.\nSelector which must match a"
-            " node's labels for the pod to be scheduled on that node.\nMore info:"
+            "NodeSelector is a selector which must be true for the pod to fit on a"
+            " node.\nSelector which must match a node's labels for the pod to be"
+            " scheduled on that node.\nMore info:"
             " https://kubernetes.io/docs/concepts/configuration/assign-pod-node/\n+optional"
         ),
     )
     priority: Optional[int] = Field(
         default=None,
         title=(
-            "The priority value. Various system components use this field to find the\npriority of the EventSource"
-            " pod. When Priority Admission Controller is enabled,\nit prevents users from setting this field. The"
-            " admission controller populates\nthis field from PriorityClassName.\nThe higher the value, the higher the"
-            " priority.\nMore info:"
+            "The priority value. Various system components use this field to find"
+            " the\npriority of the EventSource pod. When Priority Admission Controller"
+            " is enabled,\nit prevents users from setting this field. The admission"
+            " controller populates\nthis field from PriorityClassName.\nThe higher the"
+            " value, the higher the priority.\nMore info:"
             " https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/\n+optional"
         ),
     )
@@ -2295,11 +2558,12 @@ class Template(BaseModel):
         default=None,
         alias="priorityClassName",
         title=(
-            'If specified, indicates the EventSource pod\'s priority. "system-node-critical"\nand'
-            ' "system-cluster-critical" are two special keywords which indicate the\nhighest priorities with the'
-            " former being the highest priority. Any other\nname must be defined by creating a PriorityClass object"
-            " with that name.\nIf not specified, the pod priority will be default or zero if there is"
-            " no\ndefault.\nMore info:"
+            "If specified, indicates the EventSource pod's priority."
+            ' "system-node-critical"\nand "system-cluster-critical" are two special'
+            " keywords which indicate the\nhighest priorities with the former being the"
+            " highest priority. Any other\nname must be defined by creating a"
+            " PriorityClass object with that name.\nIf not specified, the pod priority"
+            " will be default or zero if there is no\ndefault.\nMore info:"
             " https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/\n+optional"
         ),
     )
@@ -2307,15 +2571,17 @@ class Template(BaseModel):
         default=None,
         alias="securityContext",
         title=(
-            "SecurityContext holds pod-level security attributes and common container settings.\nOptional: Defaults to"
-            " empty.  See type description for default values of each field.\n+optional"
+            "SecurityContext holds pod-level security attributes and common container"
+            " settings.\nOptional: Defaults to empty.  See type description for default"
+            " values of each field.\n+optional"
         ),
     )
     service_account_name: Optional[str] = Field(
         default=None,
         alias="serviceAccountName",
         title=(
-            "ServiceAccountName is the name of the ServiceAccount to use to run sensor pod.\nMore info:"
+            "ServiceAccountName is the name of the ServiceAccount to use to run sensor"
+            " pod.\nMore info:"
             " https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/\n+optional"
         ),
     )
@@ -2333,16 +2599,22 @@ class Template(BaseModel):
 
 class Trigger(BaseModel):
     parameters: Optional[List[TriggerParameter]] = Field(
-        default=None, title="Parameters is the list of parameters applied to the trigger template definition"
+        default=None,
+        title=("Parameters is the list of parameters applied to the trigger template" " definition"),
     )
     policy: Optional[TriggerPolicy] = Field(
-        default=None, title="Policy to configure backoff and execution criteria for the trigger\n+optional"
+        default=None,
+        title=("Policy to configure backoff and execution criteria for the" " trigger\n+optional"),
     )
     rate_limit: Optional[RateLimit] = Field(
-        default=None, alias="rateLimit", title="Rate limit, default unit is Second\n+optional"
+        default=None,
+        alias="rateLimit",
+        title="Rate limit, default unit is Second\n+optional",
     )
     retry_strategy: Optional[Backoff] = Field(
-        default=None, alias="retryStrategy", title="Retry strategy, defaults to no retry\n+optional"
+        default=None,
+        alias="retryStrategy",
+        title="Retry strategy, defaults to no retry\n+optional",
     )
     template: Optional[TriggerTemplate] = Field(
         default=None, description="Template describes the trigger specification."
@@ -2363,7 +2635,7 @@ class EventSourceSpec(BaseModel):
     event_bus_name: Optional[str] = Field(
         default=None,
         alias="eventBusName",
-        title='EventBusName references to a EventBus name. By default the value is "default"',
+        title=("EventBusName references to a EventBus name. By default the value is" ' "default"'),
     )
     file: Optional[Dict[str, FileEventSource]] = Field(default=None, title="File event sources")
     generic: Optional[Dict[str, GenericEventSource]] = Field(default=None, title="Generic event source")
@@ -2384,7 +2656,8 @@ class EventSourceSpec(BaseModel):
     replicas: Optional[int] = Field(default=None, title="Replicas is the event source deployment replicas")
     resource: Optional[Dict[str, ResourceEventSource]] = Field(default=None, title="Resource event sources")
     service: Optional[Service] = Field(
-        default=None, title="Service is the specifications of the service to expose the event source\n+optional"
+        default=None,
+        title=("Service is the specifications of the service to expose the event" " source\n+optional"),
     )
     slack: Optional[Dict[str, SlackEventSource]] = Field(default=None, title="Slack event sources")
     sns: Optional[Dict[str, SNSEventSource]] = Field(default=None, title="SNS event sources")
@@ -2394,36 +2667,40 @@ class EventSourceSpec(BaseModel):
     )
     stripe: Optional[Dict[str, StripeEventSource]] = Field(default=None, title="Stripe event sources")
     template: Optional[Template] = Field(
-        default=None, title="Template is the pod specification for the event source\n+optional"
+        default=None,
+        title="Template is the pod specification for the event source\n+optional",
     )
     webhook: Optional[Dict[str, WebhookEventSource]] = Field(default=None, title="Webhook event sources")
 
 
 class SensorSpec(BaseModel):
     dependencies: Optional[List[EventDependency]] = Field(
-        default=None, description="Dependencies is a list of the events that this sensor is dependent on."
+        default=None,
+        description=("Dependencies is a list of the events that this sensor is dependent on."),
     )
     error_on_failed_round: Optional[bool] = Field(
         default=None,
         alias="errorOnFailedRound",
         description=(
-            "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round"
-            " fails.\nOnce sensor state is set to `error`, no further triggers will be processed."
+            "ErrorOnFailedRound if set to true, marks sensor state as `error` if the"
+            " previous trigger round fails.\nOnce sensor state is set to `error`, no"
+            " further triggers will be processed."
         ),
     )
     event_bus_name: Optional[str] = Field(
         default=None,
         alias="eventBusName",
-        title='EventBusName references to a EventBus name. By default the value is "default"',
+        title=("EventBusName references to a EventBus name. By default the value is" ' "default"'),
     )
     replicas: Optional[int] = Field(default=None, title="Replicas is the sensor deployment replicas")
     template: Optional[Template] = Field(
-        default=None, title="Template is the pod specification for the sensor\n+optional"
+        default=None,
+        title="Template is the pod specification for the sensor\n+optional",
     )
     triggers: Optional[List[Trigger]] = Field(
         default=None,
         description=(
-            "Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor."
+            "Triggers is a list of the things that this sensor evokes. These are the" " outputs from this sensor."
         ),
     )
 

@@ -31,11 +31,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 name="a",
                 image="argoproj/argosay:v2",
                 args=["echo", "hi", "/workspace/out"],
-            ),
+            )
             ContainerNode(
                 name="main",
                 image="argoproj/argosay:v2",
-            ),
+            )
     ```
 
 === "YAML"

@@ -46,7 +46,7 @@ This example will reuse the outputs volume across script steps.
                 path="/tmp/file",
                 loader=ArtifactLoader.json,
             ),
-        ]
+        ],
     ):
         print(successor_in)
 
