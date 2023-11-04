@@ -55,7 +55,10 @@ def outputs_in_function_parameters_and_return_signature(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],
     successor2: Annotated[Path, Artifact(name="successor2", output=True)],
-) -> Tuple[Annotated[int, Parameter(name="successor3")], Annotated[int, Artifact(name="successor4")],]:
+) -> Tuple[
+    Annotated[int, Parameter(name="successor3")],
+    Annotated[int, Artifact(name="successor4")],
+]:
     successor.write_text(a_number + 1)
     successor2.write_text(a_number + 2)
     return a_number + 3, a_number + 4

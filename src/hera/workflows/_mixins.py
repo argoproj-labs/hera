@@ -680,12 +680,8 @@ class CallableTemplateMixin(ArgumentsMixin):
         # these are the already set parameters. If a user has already set a parameter argument, then Hera
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
-        kwargs_arguments = (
-            kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]
-        )  # type: ignore
-        arguments = (
-            self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments
-        )  # type: ignore
+        kwargs_arguments = kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]  # type: ignore
+        arguments = self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments  # type: ignore
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:

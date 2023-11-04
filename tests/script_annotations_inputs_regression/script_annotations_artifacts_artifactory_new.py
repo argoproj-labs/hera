@@ -24,7 +24,7 @@ def read_artifact(
             password_secret={"name": "my-artifactory-credentials", "key": "secretPassword"},
             username_secret={"name": "my-artifactory-credentials", "key": "secretUsername"},
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

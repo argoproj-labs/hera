@@ -34,7 +34,7 @@ def read_artifact(
             lifecycle_rule=m.OSSLifecycleRule(mark_deletion_after_days=42),
             security_token="oss-token",
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 

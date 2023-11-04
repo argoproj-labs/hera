@@ -24,7 +24,7 @@ def read_artifact(
             key="path/in/bucket",
             service_account_key_secret={"name": "my-gcs-credentials", "key": "serviceAccountKey"},
         ),
-    ]
+    ],
 ) -> str:
     return my_artifact
 
