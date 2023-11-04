@@ -62,8 +62,8 @@ Please keep in mind the following guidelines and practices when contributing to 
    Certificate of Origin (DCO). Currently, a Contributor License Agreement
    ([CLA](https://github.com/cla-assistant/cla-assistant)) check also appears on submitted pull requests. This can be
    safely ignored and is **not** a requirement for contributions to hera. This is an artifact as the Argo Project is slowly migrating projects from CLA to DCO.
-1. Use `make format` to format the repository code. `make format` maps to a usage of
-   [black](https://github.com/psf/black), and the repository adheres to whatever `black` uses as its strict pep8 format.
+1. Use `make format` to format the repository code. `make format` maps to a usage of [ruff](https://docs.astral.sh/ruff/formatter/), acting as a replacement for
+   [black](https://github.com/psf/black), and the repository adheres to whatever `ruff`/`black` uses as its strict pep8 format.
    No questions asked!
 1. Use `make lint test` to lint, run tests, and typecheck on the project.
 1. Add unit tests for any new code you write.
