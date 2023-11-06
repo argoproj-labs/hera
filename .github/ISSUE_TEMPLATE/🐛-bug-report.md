@@ -41,10 +41,9 @@ _A clear and concise description of what you expected to happen:_
 
 
 **Environment**
- - OS: [e.g. iOS]
- - Browser: [e.g. chrome, safari]
- - Version of Hera: [e.g. 5.1.6, 4.4.2]
- - Version of Argo: [e.g. 3.4.7]
+- Hera Version: 5.X.X
+- Python Version: 3.X.X
+- Version of Argo: 3.X.X
 
 **Additional context**
 Add any other context about the problem here.
