@@ -23,7 +23,6 @@ from hera.workflows import (
 )
 
 global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_runner"] = True
 
 
 @script(
