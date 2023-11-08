@@ -138,14 +138,6 @@ as the Hera Runner runs the function by referencing it as an entrypoint of your 
 should be built from the source code package itself and its dependencies, so that the source code's functions,
 dependencies, and Hera itself are available to run.
 
-The `RunnerScriptConstructor` is an experimental feature and must be enabled with the `script_runner` feature flag, as
-described in
-[the experimental features section](../walk-through/advanced-hera-features.md#experimental-features).
-
-```py
-global_config.experimental_features["script_runner"] = True
-```
-
 A function can set its `constructor` to `"runner"` to use the `RunnerScriptConstructor`, or use the
 `global_config.set_class_defaults` function to set it once for all script-decorated functions. We can write a script
 template function using Pydantic objects such as:
