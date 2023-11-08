@@ -157,6 +157,7 @@ w.create()
 - [Argo Workflows and Events Community Meeting 15 June 2022 - Hera project update](https://youtu.be/sdkBDPOdQ-g?t=231)
 - [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](https://www.youtube.com/watch?v=h2TEw8kd1Ds)
 - [Unsticking ourselves from Glue - Migrating PayIt's Data Pipelines to Argo Workflows and Hera](https://youtu.be/sSLFVIIEKcE?t=2088)
+- [How to fine tune LLMs on Kubernetes via Argo Workflows and Hera](https://github.com/flaviuvadan/kubecon_na_23_llama2_finetune)
 
 ## Blogs
 
