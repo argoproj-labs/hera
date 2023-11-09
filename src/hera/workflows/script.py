@@ -711,7 +711,7 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     volume_for_outputs: Optional[_BaseVolume] = None
     """Volume to use if saving outputs when defined using annotations."""
 
-    DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/tmp/hera/outputs"
+    DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/tmp/hera-outputs"
     """Used as the default value for when the outputs_directory is not set"""
 
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
