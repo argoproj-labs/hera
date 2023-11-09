@@ -44,6 +44,10 @@ class Parameter(_ModelParameter):
 
         values["value"] = serialize(values.get("value", MISSING))
         values["default"] = serialize(values.get("default", MISSING))
+        if values.get("enum", []):
+            # We don't need to set "enum" in values to "MISSING" if there are no values
+            # as it's a list of values. The values themselves should be serialized.
+            values["enum"] = [serialize(v) for v in values.get("enum")]
 
         return values
 
