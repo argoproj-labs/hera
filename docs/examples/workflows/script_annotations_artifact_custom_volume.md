@@ -160,7 +160,7 @@ This example will reuse the outputs volume across script steps.
       - inputs:
           artifacts:
           - name: successor_in
-            path: /tmp/hera/inputs/artifacts/successor_in
+            path: /tmp/hera-inputs/artifacts/successor_in
         name: use-artifact
         script:
           args:

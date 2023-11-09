@@ -91,19 +91,19 @@ def test_double_default_throws_a_value_error(global_config_fixture):
         (
             "output_parameter_as_function_parameter",
             {"parameters": [{"name": "a_number"}]},
-            {"parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}]},
+            {"parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera-outputs/parameters/successor"}}]},
         ),
         (
             "output_artifact_as_function_parameter",
             {"parameters": [{"name": "a_number"}]},
-            {"artifacts": [{"name": "successor", "path": "/tmp/hera/outputs/artifacts/successor"}]},
+            {"artifacts": [{"name": "successor", "path": "/tmp/hera-outputs/artifacts/successor"}]},
         ),
         (
             "output_artifact_and_parameter_as_function_parameters",
             {"parameters": [{"name": "a_number"}]},
             {
-                "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}],
-                "artifacts": [{"name": "successor2", "path": "/tmp/hera/outputs/artifacts/successor2"}],
+                "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera-outputs/parameters/successor"}}],
+                "artifacts": [{"name": "successor2", "path": "/tmp/hera-outputs/artifacts/successor2"}],
             },
         ),
         (
@@ -111,12 +111,12 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             {"parameters": [{"name": "a_number"}]},
             {
                 "parameters": [
-                    {"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}},
-                    {"name": "successor3", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor3"}},
+                    {"name": "successor", "valueFrom": {"path": "/tmp/hera-outputs/parameters/successor"}},
+                    {"name": "successor3", "valueFrom": {"path": "/tmp/hera-outputs/parameters/successor3"}},
                 ],
                 "artifacts": [
-                    {"name": "successor2", "path": "/tmp/hera/outputs/artifacts/successor2"},
-                    {"name": "successor4", "path": "/tmp/hera/outputs/artifacts/successor4"},
+                    {"name": "successor2", "path": "/tmp/hera-outputs/artifacts/successor2"},
+                    {"name": "successor4", "path": "/tmp/hera-outputs/artifacts/successor4"},
                 ],
             },
         ),
@@ -124,8 +124,8 @@ def test_double_default_throws_a_value_error(global_config_fixture):
             "output_annotations_unnamed_in_function_parameters",
             {"parameters": [{"name": "a_number"}]},
             {
-                "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera/outputs/parameters/successor"}}],
-                "artifacts": [{"name": "successor2", "path": "/tmp/hera/outputs/artifacts/successor2"}],
+                "parameters": [{"name": "successor", "valueFrom": {"path": "/tmp/hera-outputs/parameters/successor"}}],
+                "artifacts": [{"name": "successor2", "path": "/tmp/hera-outputs/artifacts/successor2"}],
             },
         ),
         (

@@ -88,7 +88,7 @@ This example will reuse the outputs volume across script steps.
         outputs:
           artifacts:
           - name: successor_out
-            path: /tmp/hera/outputs/artifacts/successor_out
+            path: /tmp/hera-outputs/artifacts/successor_out
         script:
           args:
           - -m
@@ -101,7 +101,7 @@ This example will reuse the outputs volume across script steps.
           - name: hera__script_annotations
             value: ''
           - name: hera__outputs_directory
-            value: /tmp/hera/outputs
+            value: /tmp/hera-outputs
           image: python:3.8
           source: '{{inputs.parameters}}'
       - inputs:

@@ -91,7 +91,7 @@
         outputs:
           artifacts:
           - name: a_dict
-            path: /tmp/hera/outputs/artifacts/a_dict
+            path: /tmp/hera-outputs/artifacts/a_dict
         script:
           args:
           - -m
@@ -104,17 +104,17 @@
           - name: hera__script_annotations
             value: ''
           - name: hera__outputs_directory
-            value: /tmp/hera/outputs
+            value: /tmp/hera-outputs
           image: python:3.8
           source: '{{inputs.parameters}}'
       - inputs:
           artifacts:
           - name: my-artifact-path
-            path: /tmp/hera/inputs/artifacts/my-artifact-path
+            path: /tmp/hera-inputs/artifacts/my-artifact-path
           - name: my-artifact-as-str
-            path: /tmp/hera/inputs/artifacts/my-artifact-as-str
+            path: /tmp/hera-inputs/artifacts/my-artifact-as-str
           - name: my-artifact-as-json
-            path: /tmp/hera/inputs/artifacts/my-artifact-as-json
+            path: /tmp/hera-inputs/artifacts/my-artifact-as-json
         name: artifact-loaders
         script:
           args:

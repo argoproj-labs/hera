@@ -35,7 +35,7 @@ spec:
     outputs:
       artifacts:
       - name: a_dict
-        path: /tmp/hera/outputs/artifacts/a_dict
+        path: /tmp/hera-outputs/artifacts/a_dict
     script:
       args:
       - -m
@@ -48,7 +48,7 @@ spec:
       - name: hera__script_annotations
         value: ''
       - name: hera__outputs_directory
-        value: /tmp/hera/outputs
+        value: /tmp/hera-outputs
       image: python:3.8
       source: '{{inputs.parameters}}'
   - inputs:
@@ -56,7 +56,7 @@ spec:
       - name: my-artifact
         path: /tmp/file
       - name: my-artifact-no-path
-        path: /tmp/hera/inputs/artifacts/my-artifact-no-path
+        path: /tmp/hera-inputs/artifacts/my-artifact-no-path
       parameters:
       - default: '1'
         description: an_int parameter
