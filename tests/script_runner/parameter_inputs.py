@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 try:
@@ -41,3 +42,30 @@ def annotated_parameter_no_name(
     annotated_input_value: Annotated[Input, Parameter(description="a value to input")]
 ) -> Output:
     return Output(output=[annotated_input_value])
+
+
+@script()
+def str_parameter_expects_jsonstr_dict(my_json_str: str) -> dict:
+    return json.loads(my_json_str)
+
+
+@script()
+def str_parameter_expects_jsonstr_list(my_json_str: str) -> list:
+    return json.loads(my_json_str)
+
+
+@script()
+def annotated_str_parameter_expects_jsonstr_dict(my_json_str: Annotated[str, "some metadata"]) -> list:
+    return json.loads(my_json_str)
+
+
+class MyStr(str):
+    pass
+
+@script()
+def str_subclass_parameter_expects_jsonstr_dict(my_json_str: MyStr) -> list:
+    return json.loads(my_json_str)
+
+@script()
+def str_subclass_annotated_parameter_expects_jsonstr_dict(my_json_str: Annotated[MyStr, "some metadata"]) -> list:
+    return json.loads(my_json_str)

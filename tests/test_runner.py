@@ -5,6 +5,7 @@ and import logic should be taken into account. The functions are not required to
 part of a Workflow when running locally.
 """
 import importlib
+import json
 import os
 from pathlib import Path
 from typing import Dict, List
@@ -18,6 +19,54 @@ from hera.shared import GlobalConfig
 from hera.shared.serialization import serialize
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor
+
+
+@pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_output",
+    (
+        (
+            "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+        ),
+        (
+            "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_list",
+            [{"name": "my_json_str", "value": json.dumps([{"my": "dict"}])}],
+            [{"my": "dict"}],
+        ),
+        (
+            "tests.script_runner.parameter_inputs:annotated_str_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+        ),
+        (
+            "tests.script_runner.parameter_inputs:str_subclass_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+        ),
+        (
+            "tests.script_runner.parameter_inputs:str_subclass_annotated_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+        ),
+    ),
+)
+def test_parameter_loading(
+    entrypoint,
+    kwargs_list: List[Dict[str, str]],
+    expected_output,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+):
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_runner"] = True
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert output == expected_output
 
 
 @pytest.mark.parametrize(
