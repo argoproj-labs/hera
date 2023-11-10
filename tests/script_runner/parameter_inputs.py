@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import Any, List
 
 try:
     from typing import Annotated
@@ -42,6 +42,12 @@ def annotated_parameter_no_name(
     annotated_input_value: Annotated[Input, Parameter(description="a value to input")]
 ) -> Output:
     return Output(output=[annotated_input_value])
+
+
+@script()
+def no_type_parameter(my_anything) -> Any:
+    """`my_anything` will be whatever the json loader gives back."""
+    return my_anything
 
 
 @script()

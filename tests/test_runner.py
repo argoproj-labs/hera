@@ -24,30 +24,71 @@ from hera.workflows.script import RunnerScriptConstructor
 @pytest.mark.parametrize(
     "entrypoint,kwargs_list,expected_output",
     (
-        (
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "test"}],
+            "test",
+            id="no-type-string",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "1"}],
+            1,
+            id="no-type-int",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "null"}],
+            None,
+            id="no-type-none",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "true"}],
+            True,
+            id="no-type-bool",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "[]"}],
+            [],
+            id="no-type-list",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "{}"}],
+            {},
+            id="no-type-dict",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},
+            id="str-json-param-as-dict",
         ),
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_list",
             [{"name": "my_json_str", "value": json.dumps([{"my": "dict"}])}],
             [{"my": "dict"}],
+            id="str-json-param-as-list",
         ),
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_str_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},
+            id="str-json-annotated-param-as-dict",
         ),
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:str_subclass_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},
+            id="str-subclass-json-param-as-dict",
         ),
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:str_subclass_annotated_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},
+            id="str-subclass-json-annotated-param-as-dict",
         ),
     ),
 )
