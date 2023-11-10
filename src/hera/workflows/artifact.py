@@ -30,7 +30,7 @@ from hera.workflows.models import (
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
-_DEFAULT_ARTIFACT_INPUT_DIRECTORY = "/tmp/hera/inputs/artifacts/"
+_DEFAULT_ARTIFACT_INPUT_DIRECTORY = "/tmp/hera-inputs/artifacts/"
 
 
 class ArtifactLoader(Enum):
