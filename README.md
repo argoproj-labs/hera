@@ -111,10 +111,9 @@ command for port forward!
 
 ### Authenticating in Hera
 
-<!-- This link only works on the readthedocs website, i.e. when viewing docs/README.md -->
 There are a few ways to authenticate in Hera - read more in the
-[authentication walk through](./walk-through/authentication.md) - for now, with the `argo` cli tool installed, this
-example will get you up and running:
+[authentication walk through](https://hera.readthedocs.io/en/stable/walk-through/authentication/) - for now, with the
+`argo` cli tool installed, this example will get you up and running:
 
 ```py
 from hera.workflows import Workflow, Container
