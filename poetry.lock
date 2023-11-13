@@ -366,17 +366,6 @@ typed-ast = [
 http = ["httpx"]
 
 [[package]]
-name = "decorator"
-version = "5.1.1"
-description = "Decorators for Humans"
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
-    {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
-]
-
-[[package]]
 name = "dnspython"
 version = "2.3.0"
 description = "DNS toolkit"
@@ -600,20 +589,17 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "jsonpath-ng"
-version = "1.5.3"
+version = "1.6.0"
 description = "A final implementation of JSONPath for Python that aims to be standard compliant, including arithmetic and binary comparison operators and providing clear AST for metaprogramming."
 optional = false
 python-versions = "*"
 files = [
-    {file = "jsonpath-ng-1.5.3.tar.gz", hash = "sha256:a273b182a82c1256daab86a313b937059261b5c5f8c4fa3fc38b882b344dd567"},
-    {file = "jsonpath_ng-1.5.3-py2-none-any.whl", hash = "sha256:f75b95dbecb8a0f3b86fd2ead21c2b022c3f5770957492b9b6196ecccfeb10aa"},
-    {file = "jsonpath_ng-1.5.3-py3-none-any.whl", hash = "sha256:292a93569d74029ba75ac2dc3d3630fc0e17b2df26119a165fa1d498ca47bf65"},
+    {file = "jsonpath-ng-1.6.0.tar.gz", hash = "sha256:5483f8e9d74c39c9abfab554c070ae783c1c8cbadf5df60d561bc705ac68a07e"},
+    {file = "jsonpath_ng-1.6.0-py3-none-any.whl", hash = "sha256:6fd04833412c4b3d9299edf369542f5e67095ca84efa17cbb7f06a34958adc9f"},
 ]
 
 [package.dependencies]
-decorator = "*"
 ply = "*"
-six = "*"
 
 [[package]]
 name = "jsonschema"
