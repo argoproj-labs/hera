@@ -158,6 +158,7 @@ w.create()
 - [Unsticking ourselves from Glue - Migrating PayIt's Data Pipelines to Argo Workflows and Hera](https://youtu.be/sSLFVIIEKcE?t=2088)
 - [How to Train an LLM with Argo Workflows and Hera - KubeCon / ArgoCon NA 2023](https://www.youtube.com/watch?v=nRYf3GkKpss&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D)
     - [Featured code](https://github.com/flaviuvadan/kubecon_na_23_llama2_finetune)
+- [Automating the Deployment of Data Workloads to Kubernetes with ArgoCD, Argo Workflows, and Hera](https://www.youtube.com/watch?v=NZCmYRVziGY&t=12481s&ab_channel=CNCFTAGAppDelivery)
 
 ## Blogs
 
