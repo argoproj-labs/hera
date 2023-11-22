@@ -164,20 +164,29 @@ def test_runner_parameter_inputs(
 @pytest.mark.parametrize(
     "entrypoint,kwargs_list,expected_output",
     [
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            id="basic-test",
         ),
-        (
+        pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_basic_types",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
+            '{"output": [{"a": 3, "b": "1"}]}',
+            id="str-param-given-int",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            id="annotated-object",
         ),
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_parameter_no_name",
             [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            id="annotated-param-no-name",
         ),
     ],
 )
