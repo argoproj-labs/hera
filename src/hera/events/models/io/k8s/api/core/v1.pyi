@@ -39,11 +39,6 @@ class ConfigMapKeySelector(BaseModel):
     name: Optional[str]
     optional: Optional[bool]
 
-class ImagePullPolicy(Enum):
-    always: str
-    if_not_present: str
-    never: str
-
 class TerminationMessagePolicy(Enum):
     fallback_to_logs_on_error: str
     file: str
@@ -312,6 +307,11 @@ class WindowsSecurityContextOptions(BaseModel):
     gmsa_credential_spec_name: Optional[str]
     host_process: Optional[bool]
     run_as_user_name: Optional[str]
+
+class ImagePullPolicy(Enum):
+    always: str
+    never: str
+    if_not_present: str
 
 class CSIVolumeSource(BaseModel):
     driver: str
@@ -582,7 +582,7 @@ class Container(BaseModel):
     env: Optional[List[EnvVar]]
     env_from: Optional[List[EnvFromSource]]
     image: str
-    image_pull_policy: Optional[ImagePullPolicy]
+    image_pull_policy: Optional[str]
     lifecycle: Optional[Lifecycle]
     liveness_probe: Optional[Probe]
     name: Optional[str]

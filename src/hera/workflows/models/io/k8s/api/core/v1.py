@@ -141,12 +141,6 @@ class ConfigMapKeySelector(BaseModel):
     )
 
 
-class ImagePullPolicy(Enum):
-    always = "Always"
-    if_not_present = "IfNotPresent"
-    never = "Never"
-
-
 class TerminationMessagePolicy(Enum):
     fallback_to_logs_on_error = "FallbackToLogsOnError"
     file = "File"
@@ -1238,6 +1232,12 @@ class WindowsSecurityContextOptions(BaseModel):
             " precedence."
         ),
     )
+
+
+class ImagePullPolicy(Enum):
+    always = "Always"
+    never = "Never"
+    if_not_present = "IfNotPresent"
 
 
 class CSIVolumeSource(BaseModel):
@@ -2828,7 +2828,7 @@ class Container(BaseModel):
             " StatefulSets."
         ),
     )
-    image_pull_policy: Optional[ImagePullPolicy] = Field(
+    image_pull_policy: Optional[str] = Field(
         default=None,
         alias="imagePullPolicy",
         description=(
