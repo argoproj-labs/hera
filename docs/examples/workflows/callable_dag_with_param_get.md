@@ -27,11 +27,10 @@
             inputs=Parameter(name="my-dag-input"),
             outputs=Parameter(
                 name="my-dag-output",
-                value_from={
-                    "parameter": "{{hello.outputs.parameters.output-message}}"
-                },  # Don't think we can improve this?
+                value_from={"parameter": "{{hello.outputs.parameters.output-message}}"},
             ),
         ) as my_dag:
+            # Here, get_parameter searches through the *inputs* of my_dag
             hello_with_output(name="hello", arguments={"name": f"hello {my_dag.get_parameter('my-dag-input')}"})
 
         with DAG(name="calling-dag") as d:

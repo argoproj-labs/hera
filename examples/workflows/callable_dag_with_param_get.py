@@ -17,9 +17,7 @@ with Workflow(
         inputs=Parameter(name="my-dag-input"),
         outputs=Parameter(
             name="my-dag-output",
-            value_from={
-                "parameter": "{{hello.outputs.parameters.output-message}}"
-            },
+            value_from={"parameter": "{{hello.outputs.parameters.output-message}}"},
         ),
     ) as my_dag:
         # Here, get_parameter searches through the *inputs* of my_dag
