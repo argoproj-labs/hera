@@ -22,6 +22,7 @@ with Workflow(
             },
         ),
     ) as my_dag:
+        # Here, get_parameter searches through the *inputs* of my_dag
         hello_with_output(name="hello", arguments={"name": f"hello {my_dag.get_parameter('my-dag-input')}"})
 
     with DAG(name="calling-dag") as d:
