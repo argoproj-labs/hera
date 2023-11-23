@@ -66,7 +66,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           readinessProbe:
             httpGet:
               path: /
-              port: '80'
+              port: 80
             initialDelaySeconds: 2
             timeoutSeconds: 1
         daemon: true
