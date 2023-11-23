@@ -1234,6 +1234,12 @@ class WindowsSecurityContextOptions(BaseModel):
     )
 
 
+class ImagePullPolicy(Enum):
+    always = "Always"
+    never = "Never"
+    if_not_present = "IfNotPresent"
+
+
 class CSIVolumeSource(BaseModel):
     driver: str = Field(
         ...,
