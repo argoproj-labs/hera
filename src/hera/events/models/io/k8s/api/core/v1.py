@@ -1526,7 +1526,7 @@ class HTTPGetAction(BaseModel):
         description=("Custom headers to set in the request. HTTP allows repeated headers."),
     )
     path: Optional[str] = Field(default=None, description="Path to access on the HTTP server.")
-    port: intstr.IntOrString = Field(
+    port: int = Field(
         ...,
         description=(
             "Name or number of the port to access on the container. Number must be in"

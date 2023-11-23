@@ -84,3 +84,10 @@ def test_returns_expected_workflow_link():
         workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"),
     )
     assert w.get_workflow_link() == "hera.test/cron-workflows/my-namespace/test"
+
+    w = CronWorkflow(
+        name="test",
+        schedule="* * * * *",
+        workflows_service=WorkflowsService(host="https://localhost:8443/argo/", namespace="my-namespace"),
+    )
+    assert w.get_workflow_link() == "https://localhost:8443/argo/cron-workflows/my-namespace/test"

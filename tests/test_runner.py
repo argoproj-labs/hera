@@ -5,6 +5,7 @@ and import logic should be taken into account. The functions are not required to
 part of a Workflow when running locally.
 """
 import importlib
+import json
 import os
 from pathlib import Path
 from typing import Dict, List
@@ -18,6 +19,95 @@ from hera.shared import GlobalConfig
 from hera.shared.serialization import serialize
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor
+
+
+@pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_output",
+    (
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "test"}],
+            "test",
+            id="no-type-string",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "1"}],
+            1,
+            id="no-type-int",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "null"}],
+            None,
+            id="no-type-none",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "true"}],
+            True,
+            id="no-type-bool",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "[]"}],
+            [],
+            id="no-type-list",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:no_type_parameter",
+            [{"name": "my_anything", "value": "{}"}],
+            {},
+            id="no-type-dict",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+            id="str-json-param-as-dict",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_list",
+            [{"name": "my_json_str", "value": json.dumps([{"my": "dict"}])}],
+            [{"my": "dict"}],
+            id="str-json-param-as-list",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_str_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+            id="str-json-annotated-param-as-dict",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:str_subclass_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+            id="str-subclass-json-param-as-dict",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:str_subclass_annotated_parameter_expects_jsonstr_dict",
+            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
+            {"my": "dict"},
+            id="str-subclass-json-annotated-param-as-dict",
+        ),
+    ),
+)
+def test_parameter_loading(
+    entrypoint,
+    kwargs_list: List[Dict[str, str]],
+    expected_output,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+):
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_runner"] = True
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert output == expected_output
 
 
 @pytest.mark.parametrize(
@@ -74,20 +164,29 @@ def test_runner_parameter_inputs(
 @pytest.mark.parametrize(
     "entrypoint,kwargs_list,expected_output",
     [
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            id="basic-test",
         ),
-        (
+        pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_basic_types",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
+            '{"output": [{"a": 3, "b": "1"}]}',
+            id="str-param-given-int",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            id="annotated-object",
         ),
-        (
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_parameter_no_name",
             [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            id="annotated-param-no-name",
         ),
     ],
 )

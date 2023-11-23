@@ -116,3 +116,8 @@ def test_returns_expected_workflow_link():
 
     w = Workflow(name="test", workflows_service=WorkflowsService(host="hera.test", namespace="my-namespace"))
     assert w.get_workflow_link() == "hera.test/workflows/my-namespace/test?tab=workflow"
+
+    w = Workflow(
+        name="test", workflows_service=WorkflowsService(host="https://localhost:8443/argo/", namespace="my-namespace")
+    )
+    assert w.get_workflow_link() == "https://localhost:8443/argo/workflows/my-namespace/test?tab=workflow"
