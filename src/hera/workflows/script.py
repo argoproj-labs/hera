@@ -32,7 +32,6 @@ from hera.workflows._mixins import (
     CallableTemplateMixin,
     ContainerMixin,
     EnvIOMixin,
-    ExperimentalMixin,
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
@@ -692,7 +691,7 @@ class InlineScriptConstructor(ScriptConstructor):
         return textwrap.dedent(script)
 
 
-class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
+class RunnerScriptConstructor(ScriptConstructor):
     """`RunnerScriptConstructor` is a script constructor that runs a script in a container.
 
     The runner script, also known as "The Hera runner", takes a script/Python function definition, infers the path
@@ -702,8 +701,6 @@ class RunnerScriptConstructor(ScriptConstructor, ExperimentalMixin):
     contains the submitted script. More specifically, the container must be created in some process (e.g. CI), so that
     it conains the script to run remotely.
     """
-
-    _flag: str = "script_runner"
 
     outputs_directory: Optional[str] = None
     """Used for saving outputs when defined using annotations."""

@@ -13,7 +13,6 @@ from tests.helper import ARTIFACT_PATH
 from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, script
 
-global_config.experimental_features["script_runner"] = True
 global_config.experimental_features["script_annotations"] = True
 
 
