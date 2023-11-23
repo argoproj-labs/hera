@@ -546,7 +546,7 @@ class VolumeMountMixin(VolumeMixin):
 
         result = (
             None
-            if volumes is []
+            if not volumes
             else [v._build_volume_mount() if issubclass(v.__class__, _BaseVolume) else v for v in volumes]
         )
 
@@ -555,9 +555,9 @@ class VolumeMountMixin(VolumeMixin):
         elif result is None and self.volume_mounts is not None:
             return self.volume_mounts
         elif result is not None and self.volume_mounts is None:
-            return result
+            return cast(List[VolumeMount], result)
 
-        return self.volume_mounts + result
+        return cast(List[VolumeMount], self.volume_mounts) + cast(List[VolumeMount], result)
 
 
 class ArgumentsMixin(BaseMixin):
