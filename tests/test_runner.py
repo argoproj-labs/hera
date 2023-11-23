@@ -153,7 +153,6 @@ def test_runner_parameter_inputs(
 ):
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_runner"] = True
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -199,7 +198,6 @@ def test_runner_annotated_parameter_inputs(
 ):
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_runner"] = True
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -311,7 +309,6 @@ def test_script_annotations_outputs(
         assert not Path(tmp_path / file["subpath"]).is_file()
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_runner"] = True
 
     outputs_directory = str(tmp_path / "tmp/hera/outputs")
     global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
@@ -369,7 +366,6 @@ def test_script_annotations_outputs_exceptions(
     """Test that the output annotations throw the expected exceptions."""
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_runner"] = True
 
     # WHEN
     with pytest.raises(ValueError) as e:
@@ -472,7 +468,6 @@ def test_script_annotations_artifact_input_loader_error(
     function_name = "no_loader_invalid_type"
     kwargs_list = []
     global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_runner"] = True
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version

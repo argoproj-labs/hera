@@ -13,7 +13,6 @@ from hera.workflows import script
 from hera.workflows.artifact import Artifact
 
 global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_runner"] = True
 
 
 @script(constructor="runner")
