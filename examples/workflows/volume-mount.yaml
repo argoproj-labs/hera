@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-
+spec:
+  entrypoint: test
+  templates:
+  - container:
+      image: python:3.8
+      volumeMounts:
+      - mountPath: /secrets
+        name: service-account-credential
+      - mountPath: /tmp/pod
+        name: tmp-pod
+    name: git-sync
+  - name: test
+    steps:
+    - - name: git-sync
+        template: git-sync
+  volumeClaimTemplates:
+  - metadata:
+      name: tmp-pod
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Mi
+  volumes:
+  - name: service-account-credential
+    secret:
+      secretName: service-account-credential
