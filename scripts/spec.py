@@ -122,6 +122,21 @@ for obj_name, field in FIELD_REMAPPINGS.items():
         if existing_field != new_field:
             del curr_property[existing_field]
 
+# there are also some specifications that have to be introduced manually for backwards compatibility purposes. This
+# block allows us to define those specifications and add them to the spec.
+MANUAL_SPECIFICATIONS: List[Tuple[str, Dict]] = [
+    (
+        "io.k8s.api.core.v1.ImagePullPolicy",
+        {
+            "description": "An enum that contains available image pull policy options.",
+            "type": "string",
+            "enum": ["Always", "Never", "IfNotPresent"],
+        },
+    ),
+]
+for obj_name, obj_spec in MANUAL_SPECIFICATIONS:
+    spec["definitions"][obj_name] = obj_spec
+
 # finally, we write the spec to the output file that is passed to use assuming the client wants to perform
 # something with this file
 with open(output_file, "w+") as f:
