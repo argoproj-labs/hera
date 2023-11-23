@@ -369,7 +369,7 @@ class HTTPGetAction(BaseModel):
     host: Optional[str]
     http_headers: Optional[List[HTTPHeader]]
     path: Optional[str]
-    port: intstr.IntOrString
+    port: int
     scheme: Optional[Scheme]
 
 class ISCSIVolumeSource(BaseModel):
