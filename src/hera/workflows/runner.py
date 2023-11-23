@@ -75,14 +75,19 @@ def _parse(value, key, f):
 def _is_str_kwarg_of(key: str, f: Callable):
     """Check if param `key` of function `f` has a type annotation of a subclass of str."""
     type_ = inspect.signature(f).parameters[key].annotation
-    if not type_:
-        return True
-    try:
-        return issubclass(type_, str)
-    except TypeError:
-        # If this happens then it means that the annotation is a more complex type annotation
-        # and may be interpretable by the Hera runner
+
+    if type_ is inspect.Parameter.empty:
+        # Untyped args are interpreted according to json spec
+        # ie. we will try to load it via json.loads in _parse
         return False
+    if get_origin(type_) is None:
+        return issubclass(type_, str)
+
+    origin_type = cast(type, get_origin(type_))
+    if origin_type is Annotated:
+        return issubclass(get_args(type_)[0], str)
+
+    return issubclass(origin_type, str)
 
 
 def _is_artifact_loaded(key, f):
