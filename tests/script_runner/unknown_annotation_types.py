@@ -8,7 +8,6 @@ from hera.shared import global_config
 from hera.workflows import script
 
 global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_runner"] = True
 
 
 @script(constructor="runner")
