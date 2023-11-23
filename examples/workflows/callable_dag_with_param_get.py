@@ -19,7 +19,7 @@ with Workflow(
             name="my-dag-output",
             value_from={
                 "parameter": "{{hello.outputs.parameters.output-message}}"
-            },  # Don't think we can improve this?
+            },
         ),
     ) as my_dag:
         hello_with_output(name="hello", arguments={"name": f"hello {my_dag.get_parameter('my-dag-input')}"})
