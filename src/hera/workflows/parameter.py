@@ -51,6 +51,11 @@ class Parameter(_ModelParameter):
 
         return values
 
+    @classmethod
+    def _get_input_attributes(cls):
+        """Return the attributes used for input parameter annotations."""
+        return ["enum", "description", "default", "name", "value", "value_from"]
+
     def __str__(self):
         """Represent the parameter as a string by pointing to its value.
 
@@ -60,6 +65,11 @@ class Parameter(_ModelParameter):
         if self.value is None:
             raise ValueError("Cannot represent `Parameter` as string as `value` is not set")
         return self.value
+
+    @classmethod
+    def from_model(cls, model: _ModelParameter) -> Parameter:
+        """Creates a `Parameter` from a `Parameter` model."""
+        return cls(**model.dict())
 
     def with_name(self, name: str) -> Parameter:
         """Returns a copy of the parameter with the name set to the value."""
@@ -107,11 +117,6 @@ class Parameter(_ModelParameter):
             value=self.value,
             value_from=self.value_from,
         )
-
-    @classmethod
-    def _get_input_attributes(cls):
-        """Return the attributes used for input parameter annotations."""
-        return ["enum", "description", "default", "name", "value", "value_from"]
 
 
 __all__ = ["Parameter"]

@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: callable-dag-
+spec:
+  entrypoint: calling-dag
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: name
+            value: hello {{inputs.parameters.my-dag-input}}
+        name: hello
+        template: hello-with-output
+    inputs:
+      parameters:
+      - name: my-dag-input
+    name: my-dag-with-outputs
+    outputs:
+      parameters:
+      - name: my-dag-output
+        valueFrom:
+          parameter: '{{hello.outputs.parameters.output-message}}'
+  - inputs:
+      parameters:
+      - name: name
+    name: hello-with-output
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.callable_dag_with_param_get:hello_with_output
+      command:
+      - python
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: my-dag-input
+            value: call-1
+        name: call-1
+        template: my-dag-with-outputs
+      - arguments:
+          parameters:
+          - name: my-dag-input
+            value: '{{tasks.call-1.outputs.parameters.my-dag-output}}'
+        depends: call-1
+        name: call-2
+        template: my-dag-with-outputs
+    name: calling-dag

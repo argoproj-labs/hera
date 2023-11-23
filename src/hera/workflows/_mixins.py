@@ -274,6 +274,32 @@ class IOMixin(BaseMixin):
     inputs: InputsT = None
     outputs: OutputsT = None
 
+    def get_parameter(self, name: str) -> Parameter:
+        """Finds and returns the parameter with the supplied name.
+
+        Note that this method will raise an error if the parameter is not found.
+
+        Args:
+            name: name of the input parameter to find and return.
+
+        Returns:
+            Parameter: the parameter with the supplied name.
+
+        Raises:
+            KeyError: if the parameter is not found.
+        """
+        inputs = self._build_inputs()
+        if inputs is None:
+            raise KeyError(f"No inputs set. Parameter {name} not found.")
+        if inputs.parameters is None:
+            raise KeyError(f"No parameters set. Parameter {name} not found.")
+        for p in inputs.parameters:
+            if p.name == name:
+                param = Parameter.from_model(p)
+                param.value = f"{{{{inputs.parameters.{param.name}}}}}"
+                return param
+        raise KeyError(f"Parameter {name} not found.")
+
     def _build_inputs(self) -> Optional[ModelInputs]:
         """Processes the `inputs` field and returns a generated `ModelInputs`."""
         if self.inputs is None:
