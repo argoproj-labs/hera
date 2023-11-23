@@ -10,7 +10,6 @@ from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Steps, Workflow, script
 
 global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_runner"] = True
 
 global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="/tmp/user/chosen/outputs")
 
