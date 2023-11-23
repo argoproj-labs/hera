@@ -3,7 +3,7 @@
 import json
 import logging
 import sys
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import requests
 
@@ -56,17 +56,26 @@ for definition, optional_fields in DEFINITION_TO_OPTIONAL_FIELDS.items():
 # these are specifications of objects with fields that are marked to have a union type of IntOrString. However, K8s
 # only accepts one or the other, unfortunately. Here, we remap those fields from their respective `$ref`s, which
 # contain a specific type, to another type. The mapping is from the `$ref` to a tuple of the existing type and the
-# new type. The dictionary model is:
+# new type. While the first piece of the mapping tuple must be defined the second one is optional - if the second
+# part of the tuple is None then the field will be removed. The dictionary model is:
 # { object name: { field name: ( ( existing field, existing value ) , ( new field, new value ) ) } }
-INT_OR_STRING_FIELD_REMAPPING: Dict[str, Dict[str, Tuple[Tuple[str, str], Tuple[str, str]]]] = {
+FIELD_REMAPPINGS: Dict[
+    str, Dict[str, Tuple[Tuple[str, Union[str, List[str]]], Optional[Tuple[str, Union[str, List[str]]]]]]
+] = {
     "io.k8s.api.core.v1.HTTPGetAction": {
         "port": (
             ("$ref", "#/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString"),
             ("type", "integer"),
         ),
     },
+    "io.k8s.api.core.v1.Container": {
+        "imagePullPolicy": (
+            ("enum", None),
+            None,
+        )
+    },
 }
-for obj_name, field in INT_OR_STRING_FIELD_REMAPPING.items():
+for obj_name, field in FIELD_REMAPPINGS.items():
     try:
         curr_field = spec["definitions"][obj_name]
     except KeyError as e:
@@ -94,7 +103,12 @@ for obj_name, field in INT_OR_STRING_FIELD_REMAPPING.items():
 
         # get the tuple of the existing field and value, and the new field and value
         existing_field, existing_value = field[property_to_change][0]
-        new_field, new_value = field[property_to_change][1]
+        if field[property_to_change][1] is None:
+            # if the second one is absent it means we want to delete the existing field
+            del curr_property[existing_field]
+            continue
+        else:
+            new_field, new_value = field[property_to_change][1]
 
         # check that the existing field and value are the same as the current field and value
         assert curr_property[existing_field] == existing_value, (
@@ -107,6 +121,21 @@ for obj_name, field in INT_OR_STRING_FIELD_REMAPPING.items():
         curr_property[new_field] = new_value
         if existing_field != new_field:
             del curr_property[existing_field]
+
+# there are also some specifications that have to be introduced manually for backwards compatibility purposes. This
+# block allows us to define those specifications and add them to the spec.
+MANUAL_SPECIFICATIONS: List[Tuple[str, Dict]] = [
+    (
+        "io.k8s.api.core.v1.ImagePullPolicy",
+        {
+            "description": "An enum that contains available image pull policy options.",
+            "type": "string",
+            "enum": ["Always", "Never", "IfNotPresent"],
+        },
+    ),
+]
+for obj_name, obj_spec in MANUAL_SPECIFICATIONS:
+    spec["definitions"][obj_name] = obj_spec
 
 # finally, we write the spec to the output file that is passed to use assuming the client wants to perform
 # something with this file
