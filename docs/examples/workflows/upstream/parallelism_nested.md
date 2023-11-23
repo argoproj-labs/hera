@@ -39,7 +39,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                         seq_worker.get_parameter("parallel-id"),
                         Parameter(name="seq-id", value="{{item}}"),
                     ],
-                    with_param="{{inputs.parameters.seq-list}}",
+                    with_param=seq_worker.get_parameter("seq-list"),
                 )
 
         with Steps(
@@ -52,7 +52,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     seq_worker.get_parameter("seq-list"),
                     Parameter(name="parallel-id", value="{{item}}"),
                 ],
-                with_param="{{inputs.parameters.parallel-list}}",
+                with_param=parallel_worker.get_parameter("parallel-list"),
             )
     ```
 
