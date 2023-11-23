@@ -39,5 +39,5 @@ with Workflow(
                 "exit_code": f"{g.item.exit_code:$}",
                 "message": f"{g.item.message:$}",
             },
-            with_param="{{inputs.parameters.step_params}}",
+            with_param=s.get_parameter("step_params"),
         )

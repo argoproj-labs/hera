@@ -32,6 +32,7 @@ class DAG(
         >>> @script()
         >>> def foo() -> None:
         >>>     print(42)
+        >>>
         >>> with DAG(...) as dag:
         >>>     foo()
     """

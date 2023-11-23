@@ -36,7 +36,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 one_job(
                     name="seq-step",
                     arguments=[
-                        Parameter(name="parallel-id", value="{{inputs.parameters.parallel-id}}"),
+                        seq_worker.get_parameter("parallel-id"),
                         Parameter(name="seq-id", value="{{item}}"),
                     ],
                     with_param="{{inputs.parameters.seq-list}}",
@@ -49,7 +49,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 name="parallel-worker",
                 template=seq_worker,
                 arguments=[
-                    Parameter(name="seq-list", value="{{inputs.parameters.seq-list}}"),
+                    seq_worker.get_parameter("seq-list"),
                     Parameter(name="parallel-id", value="{{item}}"),
                 ],
                 with_param="{{inputs.parameters.parallel-list}}",
