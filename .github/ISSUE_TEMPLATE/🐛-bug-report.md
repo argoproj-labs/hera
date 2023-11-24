@@ -9,13 +9,17 @@ assignees: ''
 
 <h2>Pre-bug-report checklist</h2>
 
-**1. This bug can be reproduced using YAML**
+**1. This bug can be reproduced using pure Argo YAML**
 - [ ] Yes [👉 Please report a bug to the Argo Workflows GitHub 👈](https://github.com/argoproj/argo-workflows/issues/new/choose)
 - [ ] No
 
-**2. This bug occurs when...**
-- [ ] running Hera code without submitting to Argo (e.g. when exporting to YAML)
-- [ ] running Hera code and submitting to Argo
+_If yes, it is more likely to be an Argo bug unrelated to Hera. Please double check before submitting an issue to Hera._
+
+**2. This bug occurs in Hera when...**
+- [ ] exporting to YAML
+- [ ] submitting to Argo
+- [ ] running on Argo with the Hera runner
+- [ ] other: 
 
 <h2>Bug report</h2>
 
@@ -43,7 +47,7 @@ _A clear and concise description of what you expected to happen:_
 **Environment**
 - Hera Version: 5.X.X
 - Python Version: 3.X.X
-- Version of Argo: 3.X.X
+- Argo Version: 3.X.X
 
 **Additional context**
 Add any other context about the problem here.
