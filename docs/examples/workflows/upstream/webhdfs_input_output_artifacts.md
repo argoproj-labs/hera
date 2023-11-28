@@ -1,12 +1,11 @@
 # Webhdfs Input Output Artifacts
 
+## Note
+
+This example is a replication of an Argo Workflow example in Hera.
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/webhdfs-input-output-artifacts.yaml).
 
 
-This example showcases how to use WebHDFS.
-
-This example used to reside in the `examples` directory, but was moved here to avoid the extra `overwrite` parameter
-specified in the `outputs` field upstream, which is not an allowed parameter. Example:
-- https://github.com/argoproj/argo-workflows/blob/master/examples/webhdfs-input-output-artifacts.yaml
 
 
 === "Hera"
