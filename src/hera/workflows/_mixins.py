@@ -690,10 +690,12 @@ class CallableTemplateMixin(ArgumentsMixin):
                     f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
                 )
             if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                return Step(*args, template=self, **kwargs)
+                allowed_step_kwargs = Step.__fields__.keys()
+                return Step(template=self, **{k: v for k, v in kwargs.items() if k in allowed_step_kwargs})
 
             if isinstance(_context.pieces[-1], DAG):
-                return Task(*args, template=self, **kwargs)
+                allowed_task_kwargs = Task.__fields__.keys()
+                return Task(template=self, **{k: v for k, v in kwargs.items() if k in allowed_task_kwargs})
 
         raise InvalidTemplateCall(
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
