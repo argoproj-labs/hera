@@ -73,7 +73,7 @@ class Artifact(BaseModel):
     path: Optional[str] = None
     """path where the artifact should be placed/loaded from"""
 
-    recurse_mode: Optional[bool] = None
+    recurse_mode: Optional[str] = None
     """recursion mode when applying the permissions of the artifact if it is an artifact folder"""
 
     sub_path: Optional[str] = None

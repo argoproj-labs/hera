@@ -41,7 +41,7 @@ def test_script_annotations_parameter_regression(module_name, global_config_fixt
 
 @pytest.mark.parametrize(
     "module_name",
-    ["artifactory", "azure", "gcs", "git", "hdfs", "optional", "mode", "mode_recurse", "oss", "raw", "sub_path", "s3"],
+    ["artifactory", "azure", "gcs", "git", "hdfs", "optional", "mode", "mode_recurse", "oss", "raw", "subpath", "s3"],
 )
 def test_script_annotations_artifact_regression(module_name, global_config_fixture):
     """Regression tests for the input artifact annotations.

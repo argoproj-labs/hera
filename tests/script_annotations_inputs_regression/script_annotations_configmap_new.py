@@ -31,6 +31,7 @@ def echo(
                 json_path="configmap-json_path",
                 parameter="configmap-parameter",
                 path="configmap-path",
+                supplied={"name": "configmap-supplied"},
             ),
         ),
     ],

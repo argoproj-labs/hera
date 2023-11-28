@@ -107,7 +107,6 @@ Explore the examples through the side bar!
 | [template-defaults](https://github.com/argoproj/argo-workflows/blob/master/examples/template-defaults.yaml) |
 | [testvolume](https://github.com/argoproj/argo-workflows/blob/master/examples/testvolume.yaml) |
 | [timeouts-step](https://github.com/argoproj/argo-workflows/blob/master/examples/timeouts-step.yaml) |
-| [webhdfs-input-output-artifacts](https://github.com/argoproj/argo-workflows/blob/master/examples/webhdfs-input-output-artifacts.yaml) |
 | [work-avoidance](https://github.com/argoproj/argo-workflows/blob/master/examples/work-avoidance.yaml) |
 | [workflow-count-resourcequota](https://github.com/argoproj/argo-workflows/blob/master/examples/workflow-count-resourcequota.yaml) |
 | [workflow-event-binding/event-consumer-workfloweventbinding](https://github.com/argoproj/argo-workflows/blob/master/examples/workflow-event-binding/event-consumer-workfloweventbinding.yaml) |
