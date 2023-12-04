@@ -30,12 +30,23 @@ nav:
     - Scripts: user-guides/scripts.md
     - Expr Transpiler: user-guides/expr.md
   - Examples:
-    - Workflows:
-      - About: examples/workflows-examples.md
-      - Hera Examples:
-        - ... | flat | examples/workflows/*.md
-      - Upstream Examples:
-        - ... | flat | examples/workflows/upstream/*.md
+    - About: examples/workflows-examples.md
+    - Idiomatic Hera Examples:
+      - Scripts:
+        - ... | flat | examples/workflows/script/*.md
+      - DAGs and Steps:
+        - ... | flat | examples/workflows/dag/*.md
+        - ... | flat | examples/workflows/steps/*.md
+      - Loops:
+        - ... | flat | examples/workflows/loops/*.md
+      - Experimental Features:
+        - ... | flat | examples/workflows/experimental/*.md
+    - Project Examples:
+      - About: examples/workflows/projects/about.md
+      - ... | flat | examples/workflows/projects/*.md
+    - Upstream Examples:
+      - About: examples/workflows/upstream/about.md
+      - ... | flat | examples/workflows/upstream/*.md
   - API Reference:
     - Shared: api/shared.md
     - Workflows:

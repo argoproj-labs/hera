@@ -11,8 +11,8 @@ import yaml
 from hera.workflows import ClusterWorkflowTemplate, CronWorkflow, Workflow, WorkflowTemplate
 from tests.test_examples import CI_MODE, HERA_REGENERATE
 
-ARGO_REPO_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
-GITHUB_API_ARGO = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/master?recursive=1"
+ARGO_REPO_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/main/examples"
+GITHUB_API_ARGO = "https://api.github.com/repos/argoproj/argo-workflows/git/trees/main?recursive=1"
 UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
 # A subset of the upstream examples are known to fail, but a majority pass. We'll
 # selectively xfail these examples rather than all until they can be fixed.
@@ -66,7 +66,7 @@ def test_for_missing_examples():
     missing_examples_header = "## List of **missing** examples"
 
     lines = []
-    with open("docs/examples/workflows-examples.md", "r", encoding="utf-8") as examples_file:
+    with open("examples/workflows-examples.md", "r", encoding="utf-8") as examples_file:
         while True:
             line = examples_file.readline()
             if not line or missing_examples_header in line:
@@ -82,7 +82,7 @@ def test_for_missing_examples():
         for name, link in missing_examples.items():
             lines.append(f"| [{name}]({link}) |\n")
 
-    with open("docs/examples/workflows-examples.md", "w", encoding="utf-8") as examples_file:
+    with open("examples/workflows-examples.md", "w", encoding="utf-8") as examples_file:
         examples_file.writelines(lines)
 
 

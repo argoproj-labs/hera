@@ -36,7 +36,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_artifact_loaders:output_dict_artifact
+      - examples.workflows.experimental.script_annotations_artifact_loaders:output_dict_artifact
       command:
       - python
       env:
@@ -60,7 +60,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_artifact_loaders:artifact_loaders
+      - examples.workflows.experimental.script_annotations_artifact_loaders:artifact_loaders
       command:
       - python
       env:

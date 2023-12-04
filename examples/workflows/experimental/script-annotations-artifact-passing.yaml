@@ -32,7 +32,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_artifact_passing:output_artifact
+      - examples.workflows.experimental.script_annotations_artifact_passing:output_artifact
       command:
       - python
       env:
@@ -52,7 +52,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_artifact_passing:use_artifact
+      - examples.workflows.experimental.script_annotations_artifact_passing:use_artifact
       command:
       - python
       env:
