@@ -113,7 +113,8 @@ my_second_key=my_second_value
 ## Custom Types
 
 Currently, custom types are only supported in the "script runner" experimental feature. See an example usage
-[here](../examples/workflows/callable_script.md). Please note this is an experimental feature so support is limited for now.
+[here](../examples/workflows/scripts/callable_script.md). Please note this is an experimental feature so support is
+limited for now.
 
 ## Passing Parameters
 

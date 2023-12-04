@@ -8,7 +8,7 @@ Artifacts are mainly used for outputs that are very large or are of non-text fil
 
 ## Artifacts in Hera
 
-Here, we are looking at the [Script Artifact Passing](../examples/workflows/script_artifact_passing.md) example.
+Here, we are looking at the [Script Artifact Passing](../examples/workflows/scripts/script_artifact_passing.md) example.
 
 <details><summary>Click here to see the full example
 </summary>
