@@ -33,9 +33,9 @@ nav:
     - About: examples/workflows-examples.md
     - Idiomatic Hera Examples:
       - Scripts:
-        - ... | flat | examples/workflows/script/*.md
+        - ... | flat | examples/workflows/scripts/*.md
       - DAGs:
-        - ... | flat | examples/workflows/dag/*.md
+        - ... | flat | examples/workflows/dags/*.md
       - Steps:
         - ... | flat | examples/workflows/steps/*.md
       - Loops:
