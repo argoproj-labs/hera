@@ -34,16 +34,21 @@ nav:
     - Idiomatic Hera Examples:
       - Scripts:
         - ... | flat | examples/workflows/script/*.md
-      - DAGs and Steps:
+      - DAGs:
         - ... | flat | examples/workflows/dag/*.md
+      - Steps:
         - ... | flat | examples/workflows/steps/*.md
       - Loops:
         - ... | flat | examples/workflows/loops/*.md
+      - Artifacts:
+        - ... | flat | examples/workflows/artifacts/*.md
       - Experimental Features:
         - ... | flat | examples/workflows/experimental/*.md
-    - Project Examples:
-      - About: examples/workflows/projects/about.md
-      - ... | flat | examples/workflows/projects/*.md
+      - Unsorted Examples:
+        - ... | flat | examples/workflows/*.md
+    - Use-Cases and Integrations:
+      - About: examples/workflows/use-cases/about.md
+      - ... | flat | examples/workflows/use-cases/*.md
     - Upstream Examples:
       - About: examples/workflows/upstream/about.md
       - ... | flat | examples/workflows/upstream/*.md
