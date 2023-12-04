@@ -59,7 +59,7 @@ def test_for_missing_examples():
     missing = set(argo_examples).difference(hera_examples)
 
     missing_examples = {
-        example: f"https://github.com/argoproj/argo-workflows/blob/master/examples/{example}.yaml"
+        example: f"https://github.com/argoproj/argo-workflows/blob/main/examples/{example}.yaml"
         for example in sorted(missing)
     }
 

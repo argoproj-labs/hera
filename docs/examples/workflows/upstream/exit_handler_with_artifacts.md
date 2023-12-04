@@ -3,7 +3,7 @@
 ## Note
 
 This example is a replication of an Argo Workflow example in Hera.
-The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/exit-handler-with-artifacts.yaml).
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/main/examples/exit-handler-with-artifacts.yaml).
 
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow

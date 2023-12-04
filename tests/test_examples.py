@@ -23,7 +23,7 @@ from hera.workflows.models import (
     WorkflowTemplate as ModelWorkflowTemplate,
 )
 
-ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
+ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/main/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
 CI_MODE = os.environ.get("CI")
 
