@@ -44,7 +44,7 @@ nav:
         - ... | flat | examples/workflows/artifacts/*.md
       - Experimental Features:
         - ... | flat | examples/workflows/experimental/*.md
-      - Unsorted Examples:
+      - Miscellaneous Examples:
         - ... | flat | examples/workflows/*.md
     - Use-Cases and Integrations:
       - About: examples/about-use-cases.md
