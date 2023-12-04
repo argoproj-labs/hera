@@ -47,10 +47,10 @@ nav:
       - Unsorted Examples:
         - ... | flat | examples/workflows/*.md
     - Use-Cases and Integrations:
-      - About: examples/workflows/use-cases/about.md
+      - About: examples/about-use-cases.md
       - ... | flat | examples/workflows/use-cases/*.md
     - Upstream Examples:
-      - About: examples/workflows/upstream/about.md
+      - About: examples/about-upstream.md
       - ... | flat | examples/workflows/upstream/*.md
   - API Reference:
     - Shared: api/shared.md
