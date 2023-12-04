@@ -61,6 +61,7 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
 """
     (Path("examples") / sub_folder / path.stem).with_suffix(".md").write_text(contents)
 
+
 def _main():
     """Go through example python files and generate markdown for the readthedocs website."""
     examples_workflows = "examples/workflows"
