@@ -109,7 +109,7 @@ init-files:
 	$(MAKE) format
 
 .PHONY: examples
-examples:  ## Generate all the examples
+examples:  ## Generate documentation files for examples
 	@(cd docs && poetry run python generate.py)
 
 .PHONY: regenerate-test-data
