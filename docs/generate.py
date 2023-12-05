@@ -70,7 +70,6 @@ def _main():
         for name in os.listdir(f"../{examples_workflows}")
         if os.path.isdir(os.path.join(f"../{examples_workflows}", name)) and name != "__pycache__"
     ]:
-        print(sub_folder)
         example_sub_folder = f"examples/{sub_folder}"
         shutil.rmtree(example_sub_folder, ignore_errors=True)
         Path(example_sub_folder).mkdir(parents=True, exist_ok=True)
