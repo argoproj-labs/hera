@@ -1,1 +1,1 @@
-../docs/examples/workflows-examples.md
+docs/examples/workflows-examples.md

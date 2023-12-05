@@ -22,5 +22,5 @@ of course).
 
 Since Hera Workflows is built for Argo Workflows, this section offers the Argo Workflows security docs:
 
-- see [docs/security.md](https://github.com/argoproj/argo-workflows/blob/master/docs/security.md) for information about
+- see [docs/security.md](https://github.com/argoproj/argo-workflows/blob/main/docs/security.md) for information about
   securing your Argo Workflows instance

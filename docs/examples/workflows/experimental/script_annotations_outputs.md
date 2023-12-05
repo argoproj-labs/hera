@@ -80,7 +80,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_outputs:script_param_artifact_in_function_signature_and_return_type
+          - examples.workflows.experimental.script_annotations_outputs:script_param_artifact_in_function_signature_and_return_type
           command:
           - python
           env:

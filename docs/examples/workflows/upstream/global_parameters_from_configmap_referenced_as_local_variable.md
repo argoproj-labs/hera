@@ -3,7 +3,7 @@
 ## Note
 
 This example is a replication of an Argo Workflow example in Hera.
-The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/global-parameters-from-configmap-referenced-as-local-variable.yaml).
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/main/examples/global-parameters-from-configmap-referenced-as-local-variable.yaml).
 
 
 

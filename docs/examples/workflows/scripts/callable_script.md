@@ -157,7 +157,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.callable_script:my_function
+          - examples.workflows.scripts.callable_script:my_function
           command:
           - python
           env:
@@ -174,7 +174,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.callable_script:str_function
+          - examples.workflows.scripts.callable_script:str_function
           command:
           - python
           env:
@@ -191,7 +191,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.callable_script:another_function
+          - examples.workflows.scripts.callable_script:another_function
           command:
           - python
           env:
@@ -213,7 +213,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.callable_script:function_kebab
+          - examples.workflows.scripts.callable_script:function_kebab
           command:
           - python
           env:
@@ -230,7 +230,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.callable_script:function_kebab_object
+          - examples.workflows.scripts.callable_script:function_kebab_object
           command:
           - python
           env:

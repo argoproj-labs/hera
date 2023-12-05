@@ -88,14 +88,14 @@ In order to add a new workflow test to test Hera functionality, do the following
 
 ### Upstream Hera examples
 
-Tests that correspond to any [upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/master/examples) should live in `examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and also to catch any regressions that might happen.
+Tests that correspond to any [upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/main/examples) should live in `examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and also to catch any regressions that might happen.
 
 In order to add a new workflow test to test Hera functionality, do the following -
 
 * Create a new file under `examples/workflows/upstream` that corresponds with the name of the upstream example yaml
   file. If the yaml file has a hyphen, your python file name should replace those with an underscore. eg. if you are
   trying to replicate
-  [archive-location.yaml](https://github.com/argoproj/argo-workflows/blob/master/examples/archive-location.yaml) your
+  [archive-location.yaml](https://github.com/argoproj/argo-workflows/blob/main/examples/archive-location.yaml) your
   python file should be called `archive_location.py`
 * Define your new workflow. Make sure that the target workflow you wish to export and test against is named `w`
 * Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name

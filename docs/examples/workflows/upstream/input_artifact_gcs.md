@@ -3,7 +3,7 @@
 ## Note
 
 This example is a replication of an Argo Workflow example in Hera.
-The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/master/examples/input-artifact-gcs.yaml).
+The upstream example can be [found here](https://github.com/argoproj/argo-workflows/blob/main/examples/input-artifact-gcs.yaml).
 
 
 

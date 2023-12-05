@@ -4,7 +4,7 @@
 
 This example showcases how to string together complex expressions.
 This example is a python replica of
-https://github.com/argoproj/argo-workflows/blob/master/examples/expression-reusing-verbose-snippets.yaml
+https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing-verbose-snippets.yaml
 
 
 === "Hera"

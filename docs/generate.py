@@ -1,4 +1,5 @@
 """Module that holds the functionality that generates Hera's documentation."""
+import os
 import re
 import shutil
 import textwrap
@@ -6,7 +7,7 @@ from pathlib import Path
 
 
 def generate_markdown(path: Path, sub_folder: str) -> str:
-    """Generates the Markdown version of the documentation of the file located at the given path.
+    """Generates the Markdown version of the documentation of the file located at the given path, into the given sub_folder.
 
     This code reads the contents at the path which is a python file,
     extracts the python docstring at the top using a regex and then
@@ -18,7 +19,7 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
     to sentence case.
     """
     py_contents = path.read_text()
-    link = "https://github.com/argoproj/argo-workflows/blob/master/examples/{link}".format(
+    link = "https://github.com/argoproj/argo-workflows/blob/main/examples/{link}".format(
         link=path.stem.replace("__", "/").replace("_", "-") + ".yaml"
     )
     match = re.search(r'^"""(.*?)"""', py_contents, re.DOTALL)
@@ -62,12 +63,17 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
 
 
 def _main():
-    # we need to go through each path and generate its markdown
-    for sub_folder in ("workflows", "workflows/upstream"):
-        folder = Path("examples") / sub_folder
-        shutil.rmtree(folder, ignore_errors=True)
-        (folder).mkdir(parents=True, exist_ok=True)
-        for path in Path(f"../examples/{sub_folder}").glob("*.py"):
+    """Go through example python files and generate markdown for the readthedocs website."""
+    examples_workflows = "examples/workflows"
+    for sub_folder in ["workflows"] + [
+        f"workflows/{name}"
+        for name in os.listdir(f"../{examples_workflows}")
+        if os.path.isdir(os.path.join(f"../{examples_workflows}", name)) and name != "__pycache__"
+    ]:
+        example_sub_folder = f"examples/{sub_folder}"
+        shutil.rmtree(example_sub_folder, ignore_errors=True)
+        Path(example_sub_folder).mkdir(parents=True, exist_ok=True)
+        for path in Path(f"../{example_sub_folder}").glob("*.py"):
             if path.stem != "__init__":
                 generate_markdown(path, sub_folder)
 

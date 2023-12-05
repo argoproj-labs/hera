@@ -140,7 +140,7 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_artifact_custom_volume:output_artifact_empty_dir
+          - examples.workflows.experimental.script_annotations_artifact_custom_volume:output_artifact_empty_dir
           command:
           - python
           env:
@@ -166,7 +166,7 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_artifact_custom_volume:use_artifact
+          - examples.workflows.experimental.script_annotations_artifact_custom_volume:use_artifact
           command:
           - python
           env:
@@ -187,7 +187,7 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_artifact_custom_volume:output_artifact_existing_vol
+          - examples.workflows.experimental.script_annotations_artifact_custom_volume:output_artifact_existing_vol
           command:
           - python
           env:
@@ -210,7 +210,7 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_artifact_custom_volume:use_artifact_existing_vol
+          - examples.workflows.experimental.script_annotations_artifact_custom_volume:use_artifact_existing_vol
           command:
           - python
           env:

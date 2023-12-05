@@ -342,7 +342,7 @@ There are two ways to specify output Artifacts and Parameters.
 
 Function return annotations can be used to specify the output type information for output Artifacts and Parameters, and
 the function should return a value or tuple. An example can be seen
-[here](../examples/workflows/script_annotations_outputs.md).
+[here](../examples/workflows/experimental/script_annotations_outputs.md).
 
 For a simple hello world output artifact example we currently have:
 ```python

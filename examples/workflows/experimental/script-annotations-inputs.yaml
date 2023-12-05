@@ -41,7 +41,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_inputs:output_dict_artifact
+      - examples.workflows.experimental.script_annotations_inputs:output_dict_artifact
       command:
       - python
       env:
@@ -73,7 +73,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.script_annotations_inputs:echo_all
+      - examples.workflows.experimental.script_annotations_inputs:echo_all
       command:
       - python
       env:

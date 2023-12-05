@@ -1,4 +1,4 @@
-# Script Annotations Artifact Outputs Defaults
+# Script Annotations Artifact Passing
 
 
 
@@ -8,18 +8,18 @@ This example will reuse the outputs volume across script steps.
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows.artifact import ArtifactLoader
-    from hera.workflows.volume import Volume
-
     try:
         from typing import Annotated  # type: ignore
     except ImportError:
         from typing_extensions import Annotated  # type: ignore
 
 
+    from pathlib import Path
+
     from hera.shared import global_config
     from hera.workflows import (
         Artifact,
+        ArtifactLoader,
         Parameter,
         Steps,
         Workflow,
@@ -40,20 +40,16 @@ This example will reuse the outputs volume across script steps.
     def use_artifact(
         successor_in: Annotated[
             int,
-            Artifact(
-                name="successor_in",
-                path="/tmp/file",
-                loader=ArtifactLoader.json,
-            ),
+            Artifact(name="successor_in", path="/my-path", loader=ArtifactLoader.json),
         ],
     ):
         print(successor_in)
+        print(Path("/my-path").read_text())  # if you still need the actual path, it is still mounted where you specify
 
 
     with Workflow(
-        generate_name="test-output-annotations-",
+        generate_name="annotations-artifact-passing",
         entrypoint="my-steps",
-        volumes=[Volume(name="my-vol", size="1Gi")],
     ) as w:
         with Steps(name="my-steps") as s:
             out = output_artifact(arguments={"a_number": 3})
@@ -66,7 +62,7 @@ This example will reuse the outputs volume across script steps.
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: test-output-annotations-
+      generateName: annotations-artifact-passing
     spec:
       entrypoint: my-steps
       templates:
@@ -97,7 +93,7 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_artifact_outputs_defaults:output_artifact
+          - examples.workflows.experimental.script_annotations_artifact_passing:output_artifact
           command:
           - python
           env:
@@ -110,14 +106,14 @@ This example will reuse the outputs volume across script steps.
       - inputs:
           artifacts:
           - name: successor_in
-            path: /tmp/file
+            path: /my-path
         name: use-artifact
         script:
           args:
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.script_annotations_artifact_outputs_defaults:use_artifact
+          - examples.workflows.experimental.script_annotations_artifact_passing:use_artifact
           command:
           - python
           env:
@@ -125,14 +121,5 @@ This example will reuse the outputs volume across script steps.
             value: ''
           image: python:3.8
           source: '{{inputs.parameters}}'
-      volumeClaimTemplates:
-      - metadata:
-          name: my-vol
-        spec:
-          accessModes:
-          - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
     ```
 

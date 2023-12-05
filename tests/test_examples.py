@@ -3,7 +3,7 @@ import os
 import pkgutil
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 import examples.workflows as hera_examples
 import examples.workflows.upstream as hera_upstream_examples
@@ -23,7 +23,7 @@ from hera.workflows.models import (
     WorkflowTemplate as ModelWorkflowTemplate,
 )
 
-ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples"
+ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/main/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
 CI_MODE = os.environ.get("CI")
 
@@ -89,14 +89,33 @@ def _compare_workflows(hera_workflow, w1: Dict, w2: Dict):
         assert False, f"Unsupported workflow type {hera_workflow}"
 
 
+def _get_examples() -> List:
+    """Return tuple of example's parent path, its full module and its filename (without ".py")."""
+    modules = [
+        (filefinder.path, module)
+        for filefinder, module, ispkg in pkgutil.walk_packages(hera_examples.__path__, hera_examples.__name__ + ".")
+        if not ispkg
+    ]
+    return [(path, module, module.split(".")[-1]) for path, module in modules if "upstream" not in module]
+
+
 @pytest.mark.parametrize(
-    "module_name", [name for _, name, _ in pkgutil.iter_modules(hera_examples.__path__) if name != "upstream"]
+    "path,module_name,filename",
+    [
+        pytest.param(
+            path,
+            module_name,
+            filename,
+            id=filename,
+        )
+        for path, module_name, filename in _get_examples()
+    ],
 )
-def test_hera_output(module_name, global_config_fixture):
+def test_hera_output(path, module_name, filename, global_config_fixture):
     # GIVEN
     global_config_fixture.host = "http://hera.testing"
-    workflow = importlib.import_module(f"examples.workflows.{module_name}").w
-    generated_yaml_path = Path(hera_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
+    workflow = importlib.import_module(module_name).w
+    generated_yaml_path = Path(path) / f"{filename.replace('_', '-')}.yaml"
 
     # WHEN
     output = workflow.to_dict()
