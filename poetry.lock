@@ -1288,10 +1288,10 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
 
 [extras]
-cli = ["typer"]
+cli = ["pyyaml", "typer"]
 yaml = ["pyyaml"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4"
-content-hash = "6623281406a1a41b52185ea43cab6f52db6317dbb0cfa18f78fc1d1eab3c191c"
+content-hash = "81db6b4a6282b5ef2fb90feb5f99da547c3fb0db9ae7763e879fbe2294619aa6"
