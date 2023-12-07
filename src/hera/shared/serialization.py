@@ -3,11 +3,16 @@ import json
 from json import JSONEncoder
 from typing import Any, Optional
 
+from pydantic import BaseModel
+
 # NOTE: Use the original BaseModel in order to support serializing user-defined models,
-# which won't use our hera.shared._pydantic import. This does still require that the
-# user-defined models are using v1 pydantic models for now (either from a pydantic v1
-# installation or `pydantic.v1` import from a pydantic v2 installation).
-from hera.shared._pydantic import PydanticBaseModel
+# for hera internal models, we still need to support v1 base models.
+from hera.shared._pydantic import _PYDANTIC_VERSION
+
+try:
+    from pydantic.v1 import BaseModel as V1BaseModel  # type: ignore
+except (ImportError, ModuleNotFoundError):
+    V1BaseModel = None  # type: ignore
 
 MISSING = object()
 """`MISSING` is a placeholder that indicates field value nullity.
@@ -22,8 +27,14 @@ class PydanticEncoder(JSONEncoder):
 
     def default(self, o: Any):
         """Return the default representation of the given object."""
-        if isinstance(o, PydanticBaseModel):
-            return o.dict(by_alias=True)
+        if _PYDANTIC_VERSION == 1:
+            if isinstance(o, BaseModel):
+                return o.dict(by_alias=True)
+        else:
+            if isinstance(o, BaseModel):
+                return o.model_dump(by_alias=True, mode="json")  # type: ignore
+            if isinstance(o, V1BaseModel):
+                return o.dict(by_alias=True)
         return super().default(o)
 
 

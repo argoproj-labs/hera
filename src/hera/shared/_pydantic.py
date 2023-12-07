@@ -1,25 +1,35 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
+from functools import partial
 
+_PYDANTIC_VERSION = 1
 # The pydantic v1 interface is used for both pydantic v1 and v2 in order to support
 # users across both versions.
+
 try:
-    from pydantic.v1 import (
+    from pydantic import (  # type: ignore
+        validate_call as validate_arguments,
+    )
+    from pydantic.v1 import (  # type: ignore
         BaseModel as PydanticBaseModel,
         Field,
         ValidationError,
         root_validator,
-        validate_arguments,
         validator,
     )
-except ImportError:
+
+    _PYDANTIC_VERSION = 2
+except (ImportError, ModuleNotFoundError):
     from pydantic import (  # type: ignore[assignment,no-redef]
         BaseModel as PydanticBaseModel,
         Field,
         ValidationError,
         root_validator,
-        validate_arguments,
+        validate_arguments as validate_call,
         validator,
     )
+
+    validate_arguments = partial(validate_call, config=dict(smart_union=True))  # type: ignore
+    _PYDANTIC_VERSION = 1
 
 
 __all__ = [

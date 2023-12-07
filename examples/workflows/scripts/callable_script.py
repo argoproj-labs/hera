@@ -1,14 +1,13 @@
 from typing import List, Union
 
+from hera.shared.serialization import serialize
+
 try:
     from typing import Annotated  # type: ignore
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
+from pydantic import BaseModel
 
 from hera.shared import global_config
 from hera.workflows import Parameter, Script, Steps, Workflow, script
@@ -92,7 +91,7 @@ def function_kebab_object(annotated_input_value: Annotated[Input, Parameter(name
 with Workflow(name="my-workflow") as w:
     with Steps(name="my-steps") as s:
         my_function(arguments={"input": Input(a=2, b="bar", c=42)})
-        str_function(arguments={"input": Input(a=2, b="bar", c=42).json()})
+        str_function(arguments={"input": serialize(Input(a=2, b="bar", c=42))})
         another_function(arguments={"inputs": [Input(a=2, b="bar", c=42), Input(a=2, b="bar", c=42.0)]})
         function_kebab(arguments={"a-but-kebab": 3, "b-but-kebab": "bar"})
         function_kebab_object(arguments={"input-value": Input(a=3, b="bar", c="42")})

@@ -382,7 +382,7 @@ class EnvMixin(BaseMixin):
             if isinstance(e, EnvVar):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnv):
-                result.append(e.build())
+                result.append(e.build())  # type: ignore
             elif isinstance(e, dict):
                 for k, v in e.items():
                     result.append(EnvVar(name=k, value=v))
@@ -564,7 +564,7 @@ class VolumeMountMixin(VolumeMixin):
             return None
 
         if self.volumes is None:
-            volumes = []
+            volumes: list = []
         else:
             volumes = self.volumes if isinstance(self.volumes, list) else [self.volumes]
 

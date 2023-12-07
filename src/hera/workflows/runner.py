@@ -6,7 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 from hera.shared._pydantic import validate_arguments
 from hera.shared.serialization import serialize
@@ -63,7 +63,9 @@ def _parse(value, key, f):
         The parsed value.
 
     """
-    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
+    if _is_str_kwarg_of(key, f):
+        return cast(type, _get_type(key, f))(value)
+    if _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
         return value
     try:
         return json.loads(value)
@@ -71,22 +73,24 @@ def _parse(value, key, f):
         return value
 
 
-def _is_str_kwarg_of(key: str, f: Callable):
-    """Check if param `key` of function `f` has a type annotation of a subclass of str."""
+def _get_type(key: str, f: Callable) -> Optional[type]:
     type_ = inspect.signature(f).parameters[key].annotation
-
     if type_ is inspect.Parameter.empty:
-        # Untyped args are interpreted according to json spec
-        # ie. we will try to load it via json.loads in _parse
-        return False
+        return None
     if get_origin(type_) is None:
-        return issubclass(type_, str)
-
+        return type_
     origin_type = cast(type, get_origin(type_))
     if origin_type is Annotated:
-        return issubclass(get_args(type_)[0], str)
+        return get_args(type_)[0]
+    return origin_type
 
-    return issubclass(origin_type, str)
+
+def _is_str_kwarg_of(key: str, f: Callable):
+    """Check if param `key` of function `f` has a type annotation of a subclass of str."""
+    type_ = _get_type(key, f)
+    if type_ is None:
+        return False
+    return issubclass(type_, str)
 
 
 def _is_artifact_loaded(key, f):
@@ -272,7 +276,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     # using smart union by default just in case clients do not rely on it. This means that if a function uses a union
     # type for any of its inputs, then this will at least try to map those types correctly if the input object is
     # not a pydantic model with smart_union enabled
-    function = validate_arguments(function, config=dict(smart_union=True))
+    function = validate_arguments(function)
     function = _ignore_unmatched_kwargs(function)
 
     if os.environ.get("hera__script_annotations", None) is not None:
