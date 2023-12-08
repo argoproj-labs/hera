@@ -126,3 +126,41 @@ regenerate-test-data: install-3.8
 	find examples -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 make test examples
 	@poetry run python -m pytest -k test_for_missing_examples --runxfail
+
+.PHONY: install-minikube
+install-minikube: ## Install minikube client
+	curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+	sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+.PHONY: install-argo
+install-argo:  ## Install argo client
+	# Download the binary
+	curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/argo-linux-amd64.gz
+
+	# Unzip
+	gunzip argo-linux-amd64.gz
+
+	# Make binary executable
+	chmod +x argo-linux-amd64
+
+	# Move binary to path
+	sudo mv ./argo-linux-amd64 /usr/local/bin/argo
+
+	# Test installation
+	argo version
+
+.PHONY: run-argo
+run-argo: ## Start the argo server
+	minikube start --ports 2746
+	-kubectl create namespace argo
+	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
+	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
+	kubectl -n argo port-forward deployment/argo-server 2746:2746
+
+.PHONY: stop-argo
+stop-argo:  ## Stop the argo server
+	minikube stop
+
+.PHONY: test-workflows
+test-workflows: ## Run workflow tests (requires local argo cluster)
+	@poetry run python -m pytest tests/test_submission.py
