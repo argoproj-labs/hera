@@ -155,6 +155,7 @@ run-argo: ## Start the argo server
 	kubectl get namespace argo || kubectl create namespace argo
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
+	kubectl rollout status -n argo deployment/argo-server --timeout=120s --watch=true
 
 .PHONY: stop-argo
 stop-argo:  ## Stop the argo server
@@ -162,5 +163,6 @@ stop-argo:  ## Stop the argo server
 
 .PHONY: test-workflows
 test-workflows: ## Run workflow tests (requires local argo cluster)
+	minikube status
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
 	@poetry run python -m pytest tests/test_submission.py -m workflow
