@@ -6,7 +6,7 @@ import pytest
 
 from hera.workflows.container import Container
 from hera.workflows.exceptions import InvalidTemplateCall
-from hera.workflows.models import WorkflowCreateRequest, ImagePullPolicy
+from hera.workflows.models import ImagePullPolicy, WorkflowCreateRequest
 from hera.workflows.parameter import Parameter
 from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
