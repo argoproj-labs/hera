@@ -151,11 +151,10 @@ install-argo:  ## Install argo client
 
 .PHONY: run-argo
 run-argo: ## Start the argo server
-	minikube start --ports 2746
-	-kubectl create namespace argo
+	minikube status || minikube start --ports 2746
+	kubectl get namespace argo || kubectl create namespace argo
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
-	kubectl -n argo port-forward deployment/argo-server 2746:2746
 
 .PHONY: stop-argo
 stop-argo:  ## Stop the argo server
@@ -163,4 +162,5 @@ stop-argo:  ## Stop the argo server
 
 .PHONY: test-workflows
 test-workflows: ## Run workflow tests (requires local argo cluster)
+	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
 	@poetry run python -m pytest tests/test_submission.py

@@ -1,4 +1,3 @@
-from typing import cast
 from hera.workflows import Steps, Workflow, WorkflowsService, script
 
 
