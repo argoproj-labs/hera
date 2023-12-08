@@ -6,7 +6,7 @@ import pytest
 
 from hera.workflows.container import Container
 from hera.workflows.exceptions import InvalidTemplateCall
-from hera.workflows.models import WorkflowCreateRequest
+from hera.workflows.models import WorkflowCreateRequest, ImagePullPolicy
 from hera.workflows.parameter import Parameter
 from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
@@ -121,3 +121,15 @@ def test_returns_expected_workflow_link():
         name="test", workflows_service=WorkflowsService(host="https://localhost:8443/argo/", namespace="my-namespace")
     )
     assert w.get_workflow_link() == "https://localhost:8443/argo/workflows/my-namespace/test?tab=workflow"
+
+
+def test_builds_successfully_using_containers():
+    with Workflow(name="my-workflow", namespace="argo") as w:
+        Container(image_pull_policy=ImagePullPolicy.always)
+
+    w.to_yaml()
+
+    with Workflow(name="my-workflow", namespace="argo") as w:
+        Container(image_pull_policy="Always")
+
+    w.to_yaml()
