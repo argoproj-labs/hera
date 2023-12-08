@@ -9,5 +9,3 @@ def task_with_image_pull_policy():
 
 with Workflow(generate_name="script-with-image-pull-policy-", entrypoint="task-with-image-pull-policy") as w:
     task_with_image_pull_policy()
-
-w.to_yaml()
