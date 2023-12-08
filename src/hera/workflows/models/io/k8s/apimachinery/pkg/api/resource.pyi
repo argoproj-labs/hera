@@ -1,4 +1,7 @@
-from hera.shared._base_model import BaseModel as BaseModel
+from hera.shared._pydantic import (
+    BaseModel as BaseModel,
+    Field as Field,
+)
 
 class Quantity(BaseModel):
     __root__: str

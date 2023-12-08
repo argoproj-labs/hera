@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from hera.shared._base_model import BaseModel as BaseModel
+from hera.shared._pydantic import (
+    BaseModel as BaseModel,
+    Field as Field,
+)
 
 class CreateOptions(BaseModel):
     dry_run: Optional[List[str]]

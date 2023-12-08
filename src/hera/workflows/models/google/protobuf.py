@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel
 
 
 class Any(BaseModel):

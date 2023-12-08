@@ -18,10 +18,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from pydantic import root_validator, validator
-
 from hera.shared import BaseMixin, global_config
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel, root_validator, validator
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
@@ -384,7 +382,7 @@ class EnvMixin(BaseMixin):
             if isinstance(e, EnvVar):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnv):
-                result.append(e.build())
+                result.append(e.build())  # type: ignore
             elif isinstance(e, dict):
                 for k, v in e.items():
                     result.append(EnvVar(name=k, value=v))
@@ -566,7 +564,7 @@ class VolumeMountMixin(VolumeMixin):
             return None
 
         if self.volumes is None:
-            volumes = []
+            volumes: list = []
         else:
             volumes = self.volumes if isinstance(self.volumes, list) else [self.volumes]
 

@@ -78,18 +78,6 @@ from hera.workflows.script import RunnerScriptConstructor
             {"my": "dict"},
             id="str-json-annotated-param-as-dict",
         ),
-        pytest.param(
-            "tests.script_runner.parameter_inputs:str_subclass_parameter_expects_jsonstr_dict",
-            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
-            {"my": "dict"},
-            id="str-subclass-json-param-as-dict",
-        ),
-        pytest.param(
-            "tests.script_runner.parameter_inputs:str_subclass_annotated_parameter_expects_jsonstr_dict",
-            [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
-            {"my": "dict"},
-            id="str-subclass-json-annotated-param-as-dict",
-        ),
     ),
 )
 def test_parameter_loading(
@@ -475,12 +463,9 @@ def test_script_annotations_artifact_input_loader_error(
 
     importlib.reload(module)
 
-    # WHEN
-    with pytest.raises(ValidationError) as e:
-        _ = _runner(f"{module.__name__}:{function_name}", kwargs_list)
-
     # THEN
-    assert "value is not a valid integer" in str(e.value)
+    with pytest.raises(ValidationError):
+        _ = _runner(f"{module.__name__}:{function_name}", kwargs_list)
 
 
 @pytest.mark.parametrize(

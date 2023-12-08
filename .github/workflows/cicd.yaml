@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: poetry install
-    
+
       - name: run ci checks
         run: make ci
 
@@ -52,6 +52,44 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: dist/*.whl
+
+  # Run tests against pydantic v1 until we drop support.
+  test-pydantic-v1:
+    name: test py${{ matrix.python-version }} (pydantic v1) on ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: setup python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: |
+          poetry install
+          poetry run pip install "pydantic<2"
+
+      - name: run ci checks
+        run: make ci
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}

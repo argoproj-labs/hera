@@ -1,6 +1,9 @@
 from typing import Dict, List, Optional
 
-from hera.shared._base_model import BaseModel as BaseModel
+from hera.shared._pydantic import (
+    BaseModel as BaseModel,
+    Field as Field,
+)
 
 from ...k8s.api.core import v1 as v1
 from ...k8s.apimachinery.pkg.apis.meta import v1 as v1_1

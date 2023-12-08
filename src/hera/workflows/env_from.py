@@ -1,7 +1,7 @@
 """A module that provides implementations of environment variables that can be created from K8s objects."""
 from typing import Optional
 
-from hera.shared._base_model import BaseModel as _BaseModel
+from hera.shared._pydantic import BaseModel as _BaseModel
 from hera.workflows.models import (
     ConfigMapEnvSource as _ModelConfigMapEnvSource,
     EnvFromSource as _ModelEnvFromSource,

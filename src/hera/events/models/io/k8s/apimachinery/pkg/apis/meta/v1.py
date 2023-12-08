@@ -6,9 +6,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import Field
-
-from hera.shared._base_model import BaseModel
+from hera.shared._pydantic import BaseModel, Field
 
 
 class CreateOptions(BaseModel):

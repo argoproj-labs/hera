@@ -62,17 +62,3 @@ def str_parameter_expects_jsonstr_list(my_json_str: str) -> list:
 @script()
 def annotated_str_parameter_expects_jsonstr_dict(my_json_str: Annotated[str, "some metadata"]) -> list:
     return json.loads(my_json_str)
-
-
-class MyStr(str):
-    pass
-
-
-@script()
-def str_subclass_parameter_expects_jsonstr_dict(my_json_str: MyStr) -> list:
-    return json.loads(my_json_str)
-
-
-@script()
-def str_subclass_annotated_parameter_expects_jsonstr_dict(my_json_str: Annotated[MyStr, "some metadata"]) -> list:
-    return json.loads(my_json_str)

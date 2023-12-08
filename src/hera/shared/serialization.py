@@ -5,11 +5,20 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
+# NOTE: Use the original BaseModel in order to support serializing user-defined models,
+# for hera internal models, we still need to support v1 base models.
+from hera.shared._pydantic import _PYDANTIC_VERSION
+
+try:
+    from pydantic.v1 import BaseModel as V1BaseModel  # type: ignore
+except (ImportError, ModuleNotFoundError):
+    V1BaseModel = None  # type: ignore
+
 MISSING = object()
-"""`MISSING` is a placeholder that indicates field value nullity. 
+"""`MISSING` is a placeholder that indicates field value nullity.
 
 When the user of a Hera object sets the field of an object specifically to `None`, Hera needs to distinguish between
-default nullity/None and user-provided `None` on, say, something like the `source` of `Script`.  
+default nullity/None and user-provided `None` on, say, something like the `source` of `Script`.
 """
 
 
@@ -18,8 +27,17 @@ class PydanticEncoder(JSONEncoder):
 
     def default(self, o: Any):
         """Return the default representation of the given object."""
-        if isinstance(o, BaseModel):
-            return o.dict(by_alias=True)
+        # Note that these are slightly different outputs b/w v1 and v2
+        # v1 will give the actual python object whereas v2 will serialize it into
+        # a json compatible format.
+        if _PYDANTIC_VERSION == 1:
+            if isinstance(o, BaseModel):
+                return o.dict(by_alias=True)
+        else:
+            if isinstance(o, BaseModel):
+                return o.model_dump(by_alias=True, mode="json")  # type: ignore
+            if isinstance(o, V1BaseModel):
+                return o.dict(by_alias=True)
         return super().default(o)
 
 

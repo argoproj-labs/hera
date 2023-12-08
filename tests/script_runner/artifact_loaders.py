@@ -16,8 +16,8 @@ global_config.experimental_features["script_annotations"] = True
 
 
 class MyArtifact(BaseModel):
-    a = "a"
-    b = "b"
+    a: str = "a"
+    b: str = "b"
 
 
 @script(constructor="runner")
