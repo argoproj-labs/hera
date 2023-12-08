@@ -63,9 +63,7 @@ def _parse(value, key, f):
         The parsed value.
 
     """
-    if _is_str_kwarg_of(key, f):
-        return cast(type, _get_type(key, f))(value)
-    if _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
+    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
         return value
     try:
         return json.loads(value)
@@ -85,7 +83,7 @@ def _get_type(key: str, f: Callable) -> Optional[type]:
     return origin_type
 
 
-def _is_str_kwarg_of(key: str, f: Callable):
+def _is_str_kwarg_of(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` has a type annotation of a subclass of str."""
     type_ = _get_type(key, f)
     if type_ is None:
@@ -273,7 +271,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     else:
         kwargs = _map_argo_inputs_to_function(function, kwargs)
 
-    # using smart union by default just in case clients do not rely on it. This means that if a function uses a union
+    # The imported validate_arguments uses smart union by default just in case clients do not rely on it. This means that if a function uses a union
     # type for any of its inputs, then this will at least try to map those types correctly if the input object is
     # not a pydantic model with smart_union enabled
     function = validate_arguments(function)

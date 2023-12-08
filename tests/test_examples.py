@@ -27,7 +27,7 @@ ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/m
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
 CI_MODE = os.environ.get("CI")
 
-LOWEST_SUPPORTED_PY_VERSION = (3, 9)
+LOWEST_SUPPORTED_PY_VERSION = (3, 8)
 
 
 def _generate_yaml(path: Path) -> bool:

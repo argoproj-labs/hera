@@ -27,6 +27,9 @@ class PydanticEncoder(JSONEncoder):
 
     def default(self, o: Any):
         """Return the default representation of the given object."""
+        # Note that these are slightly different outputs b/w v1 and v2
+        # v1 will give the actual python object whereas v2 will serialize it into
+        # a json compatible format.
         if _PYDANTIC_VERSION == 1:
             if isinstance(o, BaseModel):
                 return o.dict(by_alias=True)
