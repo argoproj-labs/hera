@@ -5,37 +5,21 @@ import importlib.util
 import os
 import sys
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator
 
-import typer
-from typing_extensions import Annotated
+import cappa
 
+from hera._cli.base import GenerateYaml
 from hera.workflows.workflow import Workflow
 
 
-def generate_yaml(
-    from_: Annotated[
-        Path,
-        typer.Argument(metavar="from"),
-    ],
-    to: Annotated[
-        Optional[Path],
-        typer.Option(
-            help=(
-                "Optional destination for the produced yaml. If 'from' is a file this is assumed"
-                " to be a file. If 'from' is a folder, this is assumed to be a folder, and individual"
-                " file names will match the source file."
-            )
-        ),
-    ] = None,
-    recursive: Annotated[bool, typer.Option(help="Enables recursive traversal of an input folder")] = False,
-):
+def generate_yaml(options: GenerateYaml):
     """Generate yaml from python Workflow definitions.
 
     If the provided path is folder, generates yaml for all python files containing `Workflow`s
     in that folder
     """
-    paths = sorted(expand_paths(from_, recursive=recursive))
+    paths = sorted(expand_paths(options.from_, recursive=options.recursive))
 
     # Generate a collection of source file paths and their resultant yaml.
     path_to_output: list[tuple[str, str]] = []
@@ -51,23 +35,24 @@ def generate_yaml(
         path_to_output.append((path.name, yaml_output))
 
     # When `to` write file(s) to disk, otherwise output everything to stdout.
-    if to:
-        if from_.is_dir():
-            if os.path.exists(to) and not to.is_dir():
-                raise typer.BadParameter(
+    if options.to:
+        if options.from_.is_dir():
+            if os.path.exists(options.to) and not options.to.is_dir():
+                raise cappa.Exit(
                     "The provided source path is a folder, but `--to` points at an existing file.",
+                    code=1,
                 )
 
-            os.makedirs(to, exist_ok=True)
+            os.makedirs(options.to, exist_ok=True)
 
             for path, content in path_to_output:
-                full_path = (to / path).with_suffix(".yaml")
+                full_path = (options.to / path).with_suffix(".yaml")
                 full_path.write_text(content)
         else:
             assert len(path_to_output) == 1
 
             _, content = path_to_output[0]
-            to.write_text(content)
+            options.to.write_text(content)
 
     else:
         output = "\n---\n".join(o for _, o in path_to_output)
