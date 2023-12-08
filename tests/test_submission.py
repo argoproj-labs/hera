@@ -1,3 +1,5 @@
+import pytest
+
 from hera.workflows import Steps, Workflow, WorkflowsService, script
 
 
@@ -20,6 +22,7 @@ with Workflow(
         echo(arguments={"message": "Hello world!"})
 
 
+@pytest.mark.workflow
 def test_create_hello_world():
     model_workflow = w.create(wait=True)
     assert model_workflow.status and model_workflow.status.phase == "Succeeded"
