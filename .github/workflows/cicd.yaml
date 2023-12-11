@@ -115,7 +115,10 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: setup argo cluster
+      - name: setup k3d cluster
+        run: make install-k3d
+
+      - name: setup and run argo
         run: make run-argo
 
       - name: run workflow tests
