@@ -127,10 +127,9 @@ regenerate-test-data: install-3.8
 	HERA_REGENERATE=1 make test examples
 	@poetry run python -m pytest -k test_for_missing_examples --runxfail
 
-.PHONY: install-minikube
-install-minikube: ## Install minikube client
-	curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-	sudo install minikube-linux-amd64 /usr/local/bin/minikube
+.PHONY: install-k3d
+install-k3d: ## Install k3d client
+	curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
 .PHONY: install-argo
 install-argo:  ## Install argo client
@@ -151,7 +150,8 @@ install-argo:  ## Install argo client
 
 .PHONY: run-argo
 run-argo: ## Start the argo server
-	minikube status || minikube start --ports 2746
+	k3d cluster list | grep test-cluster || k3d cluster create test-cluster
+	k3d kubeconfig merge test-cluster --kubeconfig-switch-context
 	kubectl get namespace argo || kubectl create namespace argo
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
@@ -159,10 +159,9 @@ run-argo: ## Start the argo server
 
 .PHONY: stop-argo
 stop-argo:  ## Stop the argo server
-	minikube stop
+	k3d cluster stop test-cluster
 
 .PHONY: test-workflows
 test-workflows: ## Run workflow tests (requires local argo cluster)
-	minikube status
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
 	@poetry run python -m pytest tests/test_submission.py -m workflow
