@@ -22,7 +22,7 @@ with Workflow(
         echo(arguments={"message": "Hello world!"})
 
 
-@pytest.mark.workflow
+@pytest.mark.on_cluster
 def test_create_hello_world():
     model_workflow = w.create(wait=True)
     assert model_workflow.status and model_workflow.status.phase == "Succeeded"

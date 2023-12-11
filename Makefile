@@ -44,7 +44,7 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run python -m pytest --cov-report=term-missing -m "not workflow"
+	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster"
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
@@ -161,7 +161,7 @@ run-argo: ## Start the argo server
 stop-argo:  ## Stop the argo server
 	k3d cluster stop test-cluster
 
-.PHONY: test-workflows
-test-workflows: ## Run workflow tests (requires local argo cluster)
+.PHONY: test-on-cluster
+test-on-cluster: ## Run workflow tests (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
-	@poetry run python -m pytest tests/test_submission.py -m workflow
+	@poetry run python -m pytest tests/test_submission.py -m on_cluster
