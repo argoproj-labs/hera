@@ -38,7 +38,7 @@ def annotated_object(annotated_input_value: Annotated[Input, Parameter(name="inp
 
 @script()
 def annotated_parameter_no_name(
-    annotated_input_value: Annotated[Input, Parameter(description="a value to input")]
+    annotated_input_value: Annotated[Input, Parameter(description="a value to input")],
 ) -> Output:
     return Output(output=[annotated_input_value])
 

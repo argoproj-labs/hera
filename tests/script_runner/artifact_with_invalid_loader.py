@@ -17,6 +17,6 @@ global_config.experimental_features["script_annotations"] = True
 
 @script(constructor="runner")
 def invalid_loader(
-    an_artifact: Annotated[str, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader="a different loader")]
+    an_artifact: Annotated[str, Artifact(name="my-artifact", path=ARTIFACT_PATH, loader="a different loader")],
 ) -> str:
     return an_artifact
