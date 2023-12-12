@@ -100,7 +100,6 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
 
     def _build_container_node(self) -> _ModelContainerNode:
         """Builds the generated `ContainerNode`."""
-        image_pull_policy = self._build_image_pull_policy()
         return _ModelContainerNode(
             args=self.args,
             command=self.command,
@@ -108,7 +107,7 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
             env=self._build_env(),
             env_from=self._build_env_from(),
             image=self.image,
-            image_pull_policy=None if image_pull_policy is None else image_pull_policy.value,
+            image_pull_policy=self._build_image_pull_policy(),
             lifecycle=self.lifecycle,
             liveness_probe=self.liveness_probe,
             name=self.name,

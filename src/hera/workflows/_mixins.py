@@ -233,12 +233,12 @@ class ContainerMixin(BaseMixin):
     termination_message_policy: Optional[TerminationMessagePolicy] = None
     tty: Optional[bool] = None
 
-    def _build_image_pull_policy(self) -> Optional[ImagePullPolicy]:
+    def _build_image_pull_policy(self) -> Optional[str]:
         """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
         if self.image_pull_policy is None:
             return None
         elif isinstance(self.image_pull_policy, ImagePullPolicy):
-            return self.image_pull_policy
+            return self.image_pull_policy.value
 
         # this helps map image pull policy values as a convenience
         policy_mapper = {
@@ -251,7 +251,7 @@ class ContainerMixin(BaseMixin):
             **{ipp.name.lower(): ipp for ipp in ImagePullPolicy},
         }
         try:
-            return ImagePullPolicy[policy_mapper[self.image_pull_policy].name]
+            return ImagePullPolicy[policy_mapper[self.image_pull_policy].name].value
         except KeyError as e:
             raise KeyError(
                 f"Supplied image policy {self.image_pull_policy} is not valid. "

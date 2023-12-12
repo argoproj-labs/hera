@@ -191,7 +191,6 @@ class Script(
 
     def _build_script(self) -> _ModelScriptTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
-        image_pull_policy = self._build_image_pull_policy()
         if _output_annotations_used(cast(Callable, self.source)) and isinstance(
             self.constructor, RunnerScriptConstructor
         ):
@@ -211,7 +210,7 @@ class Script(
                 env_from=self._build_env_from(),
                 image=self.image,
                 # `image_pull_policy` in script wants a string not an `ImagePullPolicy` object
-                image_pull_policy=None if image_pull_policy is None else image_pull_policy.value,
+                image_pull_policy=self._build_image_pull_policy(),
                 lifecycle=self.lifecycle,
                 liveness_probe=self.liveness_probe,
                 name=self.container_name,
