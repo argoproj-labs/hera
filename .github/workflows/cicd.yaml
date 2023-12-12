@@ -91,6 +91,42 @@ jobs:
         with:
           file: ./coverage.xml
 
+  workflow-tests:
+    name: run workflow tests
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: setup python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: setup k3d cluster
+        run: make install-k3d
+
+      - name: setup and run argo
+        run: make run-argo
+
+      - name: run workflow tests
+        run: make test-on-cluster
+
+      - name: stop argo cluster
+        run: make stop-argo
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true

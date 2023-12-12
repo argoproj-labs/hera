@@ -44,7 +44,7 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run python -m pytest --cov-report=term-missing
+	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster"
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
@@ -126,3 +126,42 @@ regenerate-test-data: install-3.8
 	find examples -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 make test examples
 	@poetry run python -m pytest -k test_for_missing_examples --runxfail
+
+.PHONY: install-k3d
+install-k3d: ## Install k3d client
+	curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+.PHONY: install-argo
+install-argo:  ## Install argo client
+	# Download the binary
+	curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/argo-linux-amd64.gz
+
+	# Unzip
+	gunzip argo-linux-amd64.gz
+
+	# Make binary executable
+	chmod +x argo-linux-amd64
+
+	# Move binary to path
+	sudo mv ./argo-linux-amd64 /usr/local/bin/argo
+
+	# Test installation
+	argo version
+
+.PHONY: run-argo
+run-argo: ## Start the argo server
+	k3d cluster list | grep test-cluster || k3d cluster create test-cluster
+	k3d kubeconfig merge test-cluster --kubeconfig-switch-context
+	kubectl get namespace argo || kubectl create namespace argo
+	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
+	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
+	kubectl rollout status -n argo deployment/argo-server --timeout=120s --watch=true
+
+.PHONY: stop-argo
+stop-argo:  ## Stop the argo server
+	k3d cluster stop test-cluster
+
+.PHONY: test-on-cluster
+test-on-cluster: ## Run workflow tests (requires local argo cluster)
+	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
+	@poetry run python -m pytest tests/test_submission.py -m on_cluster

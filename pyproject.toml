@@ -60,6 +60,9 @@ filterwarnings = [
     # Hide the hera.host_config deprecations
     'ignore:.*is deprecated in favor of `global_config.GlobalConfig',
 ]
+markers = [
+    "on_cluster: tests that run on an Argo cluster",
+]
 
 # Convert the following to config
 [tool.mypy]
