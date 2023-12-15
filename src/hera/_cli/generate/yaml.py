@@ -7,8 +7,6 @@ import sys
 from pathlib import Path
 from typing import Generator
 
-import cappa
-
 from hera._cli.base import GenerateYaml
 from hera.workflows.workflow import Workflow
 
@@ -31,31 +29,25 @@ def generate_yaml(options: GenerateYaml):
         if not yaml_outputs:
             continue
 
-        yaml_output = "\n---\n".join(yaml_outputs)
-        path_to_output.append((path.name, yaml_output))
+        path_to_output.append((path.name, join_workflows(yaml_outputs)))
 
     # When `to` write file(s) to disk, otherwise output everything to stdout.
     if options.to:
-        if options.from_.is_dir():
-            if os.path.exists(options.to) and not options.to.is_dir():
-                raise cappa.Exit(
-                    "The provided source path is a folder, but `--to` points at an existing file.",
-                    code=1,
-                )
+        dest_is_file = os.path.exists(options.to) and options.to.is_file()
 
+        if dest_is_file:
+            output = join_workflows(o for _, o in path_to_output)
+            options.to.write_text(output)
+
+        else:
             os.makedirs(options.to, exist_ok=True)
 
             for path, content in path_to_output:
                 full_path = (options.to / path).with_suffix(".yaml")
                 full_path.write_text(content)
-        else:
-            assert len(path_to_output) == 1
-
-            _, content = path_to_output[0]
-            options.to.write_text(content)
 
     else:
-        output = "\n---\n".join(o for _, o in path_to_output)
+        output = join_workflows(o for _, o in path_to_output)
         sys.stdout.write(output)
 
 
@@ -104,3 +96,7 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
             result.append(item)
 
     return result
+
+
+def join_workflows(strings):
+    return "\n---\n\n".join(strings)
