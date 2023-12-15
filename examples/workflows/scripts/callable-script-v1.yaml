@@ -1,0 +1,140 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: my-workflow
+spec:
+  templates:
+  - name: my-steps
+    steps:
+    - - arguments:
+          parameters:
+          - name: input
+            value: '{"a": 2, "b": "bar", "c": 42}'
+        name: my-function
+        template: my-function
+    - - arguments:
+          parameters:
+          - name: input
+            value: '{"a": 2, "b": "bar", "c": 42}'
+        name: str-function
+        template: str-function
+    - - arguments:
+          parameters:
+          - name: inputs
+            value: '[{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]'
+        name: another-function
+        template: another-function
+    - - arguments:
+          parameters:
+          - name: a-but-kebab
+            value: '3'
+          - name: b-but-kebab
+            value: bar
+        name: function-kebab
+        template: function-kebab
+    - - arguments:
+          parameters:
+          - name: input-value
+            value: '{"a": 3, "b": "bar", "c": "42"}'
+        name: function-kebab-object
+        template: function-kebab-object
+  - inputs:
+      parameters:
+      - name: input
+    name: my-function
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.callable_script_v1:my_function
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__pydantic_mode
+        value: '1'
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: input
+    name: str-function
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.callable_script_v1:str_function
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__pydantic_mode
+        value: '1'
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: inputs
+    name: another-function
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.callable_script_v1:another_function
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__pydantic_mode
+        value: '1'
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - default: '2'
+        name: a-but-kebab
+      - default: foo
+        name: b-but-kebab
+      - default: '42.0'
+        name: c-but-kebab
+    name: function-kebab
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.callable_script_v1:function_kebab
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__pydantic_mode
+        value: '1'
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - name: input-value
+    name: function-kebab-object
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.callable_script_v1:function_kebab_object
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__pydantic_mode
+        value: '1'
+      image: my-image-with-python-source-code-and-dependencies
+      source: '{{inputs.parameters}}'
