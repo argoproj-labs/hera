@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from hera.shared._pydantic import validate_arguments
+from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
@@ -274,7 +274,18 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     # The imported validate_arguments uses smart union by default just in case clients do not rely on it. This means that if a function uses a union
     # type for any of its inputs, then this will at least try to map those types correctly if the input object is
     # not a pydantic model with smart_union enabled
-    function = validate_arguments(function)
+    _pydantic_mode = int(os.environ.get("hera__pydantic_mode", _PYDANTIC_VERSION))
+    if _pydantic_mode == 2:
+        from pydantic import validate_call  # type: ignore
+
+        function = validate_call(function)
+    else:
+        if _PYDANTIC_VERSION == 1:
+            from pydantic import validate_arguments
+        else:
+            from pydantic.v1 import validate_arguments  # type: ignore
+        function = validate_arguments(function, config=dict(smart_union=True))  # type: ignore
+
     function = _ignore_unmatched_kwargs(function)
 
     if os.environ.get("hera__script_annotations", None) is not None:

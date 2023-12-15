@@ -13,6 +13,7 @@ from typing import (
     Any,
     Callable,
     List,
+    Literal,
     Optional,
     Tuple,
     Type,
@@ -26,7 +27,7 @@ from typing_extensions import ParamSpec, get_args, get_origin
 
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import root_validator, validator
+from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.workflows._context import _context
 from hera.workflows._mixins import (
     CallableTemplateMixin,
@@ -710,6 +711,17 @@ class RunnerScriptConstructor(ScriptConstructor):
     DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/tmp/hera-outputs"
     """Used as the default value for when the outputs_directory is not set"""
 
+    pydantic_mode: Optional[Literal[1, 2]] = None
+    """Used for selecting the pydantic version used for BaseModels.
+    Allows for using pydantic.v1 BaseModels with pydantic v2.
+    Defaults to the installed version of Pydantic."""
+
+    @validator("pydantic_mode", always=True)
+    def _pydantic_mode(cls, value: Optional[Literal[1, 2]]) -> Optional[Literal[1, 2]]:
+        if value and value > _PYDANTIC_VERSION:
+            raise ValueError("v2 pydantic mode only available for pydantic>=2")
+        return value
+
     def transform_values(self, cls: Type[Script], values: Any) -> Any:
         """A function that can inspect the Script instance and generate the source field."""
         if not callable(values.get("source")):
@@ -740,6 +752,8 @@ class RunnerScriptConstructor(ScriptConstructor):
             script.env.append(EnvVar(name="hera__script_annotations", value=""))
             if self.outputs_directory:
                 script.env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
+            if self.pydantic_mode:
+                script.env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
         return script
 
 

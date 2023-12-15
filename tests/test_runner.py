@@ -16,6 +16,7 @@ from pydantic import ValidationError
 
 import tests.helper as test_module
 from hera.shared import GlobalConfig
+from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor
@@ -149,30 +150,41 @@ def test_runner_parameter_inputs(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,expected_output",
+    "entrypoint,kwargs_list,expected_output,pydantic_mode",
     [
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "bar"}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            _PYDANTIC_VERSION,
             id="basic-test",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_basic_types",
             [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
             '{"output": [{"a": 3, "b": "1"}]}',
+            _PYDANTIC_VERSION,
             id="str-param-given-int",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            _PYDANTIC_VERSION,
             id="annotated-object",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_object_v1",
+            [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
+            '{"output": [{"a": 3, "b": "bar"}]}',
+            1,
+            id="annotated-object-v1",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_parameter_no_name",
             [{"name": "annotated_input_value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
+            _PYDANTIC_VERSION,
             id="annotated-param-no-name",
         ),
     ],
@@ -182,11 +194,13 @@ def test_runner_annotated_parameter_inputs(
     kwargs_list: List[Dict[str, str]],
     expected_output,
     global_config_fixture: GlobalConfig,
+    pydantic_mode,
     environ_annotations_fixture: None,
+    monkeypatch,
 ):
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
-
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     # WHEN
     output = _runner(entrypoint, kwargs_list)
     # THEN
