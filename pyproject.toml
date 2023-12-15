@@ -42,7 +42,7 @@ cli = ["cappa", "PyYAML"]
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-cov = "*"
-mypy = "*"
+mypy = "^1.0.1"
 build = "*"
 ruff = "*"
 types-PyYAML = "*"
