@@ -13,7 +13,7 @@ def main():
     from hera._cli.base import Hera
 
     rich.print(
-        "[yellow bold]warning: The `hera` CLI is a currently work-in-progress, subject to change at any time![/yellow bold]"
+        "[yellow bold]warning: The `hera` CLI is a work-in-progress, subject to change at any time![/yellow bold]"
     )
 
     cappa.invoke(Hera)

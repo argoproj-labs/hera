@@ -12,7 +12,7 @@ class Hera:
     subcommand: Subcommands[Generate]
 
 
-@command(help="Subcommands for converting to/from hera Workflows.")
+@command(help="Subcommands for generating yaml, code, and docs from Hera Workflows.")
 @dataclass
 class Generate:
     subcommand: Subcommands[GenerateYaml]
@@ -29,8 +29,8 @@ class GenerateYaml:
         Arg(
             value_name="from",
             help=(
-                "The path from which the yaml is generated. This can be a file, "
-                "or a folder. When a folder is provided, all python files in the "
+                "The path from which the yaml is generated. This can be a file "
+                "or a folder. When a folder is provided, all Python files in the "
                 "folder will be generated."
             ),
         ),

@@ -12,9 +12,9 @@ from hera.workflows.workflow import Workflow
 
 
 def generate_yaml(options: GenerateYaml):
-    """Generate yaml from python Workflow definitions.
+    """Generate yaml from Python Workflow definitions.
 
-    If the provided path is folder, generates yaml for all python files containing `Workflow`s
+    If the provided path is a folder, generates yaml for all Python files containing `Workflow`s
     in that folder
     """
     paths = sorted(expand_paths(options.from_, recursive=options.recursive))
