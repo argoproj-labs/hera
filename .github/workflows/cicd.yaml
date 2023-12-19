@@ -33,7 +33,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install -E cli
 
       - name: run ci checks
         run: make ci
@@ -80,47 +80,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install -E cli
           poetry run pip install "pydantic<2"
 
       - name: run ci checks
         run: make ci
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-
-  test-cli:
-    name: test cli with py${{ matrix.python-version }} (pydantic v1) on ${{ matrix.os }}
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: setup python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: |
-          poetry install -E cli
-
-      - name: run cli tests
-        run: make test-cli
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -149,7 +113,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install -E cli
 
       - name: setup k3d cluster
         run: make install-k3d
