@@ -42,7 +42,7 @@ cli = ["cappa", "PyYAML"]
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-cov = "*"
-mypy = "^1.0.1"
+mypy = "1.0.1"
 build = "*"
 ruff = "*"
 types-PyYAML = "*"
@@ -67,6 +67,7 @@ filterwarnings = [
 ]
 markers = [
     "on_cluster: tests that run on an Argo cluster",
+    "cli: tests that verify CLI functionality",
 ]
 
 # Convert the following to config

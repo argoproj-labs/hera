@@ -42,8 +42,8 @@ def generate_yaml(options: GenerateYaml):
         else:
             os.makedirs(options.to, exist_ok=True)
 
-            for path, content in path_to_output:
-                full_path = (options.to / path).with_suffix(".yaml")
+            for dest_path, content in path_to_output:
+                full_path = (options.to / dest_path).with_suffix(".yaml")
                 full_path.write_text(content)
 
     else:

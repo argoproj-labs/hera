@@ -21,6 +21,26 @@ single_workflow_output = dedent(
         """
 )
 
+workflow_template_output = dedent(
+    """\
+            apiVersion: argoproj.io/v1alpha1
+            kind: WorkflowTemplate
+            metadata:
+              name: workflow-template
+            spec: {}
+            """
+)
+
+cluster_workflow_template_output = dedent(
+    """\
+            apiVersion: argoproj.io/v1alpha1
+            kind: ClusterWorkflowTemplate
+            metadata:
+              name: cluster-workflow-template
+            spec: {}
+            """
+)
+
 multiple_workflow_output = dedent(
     """\
         apiVersion: argoproj.io/v1alpha1
@@ -39,7 +59,14 @@ multiple_workflow_output = dedent(
         """
 )
 
-whole_folder_output = "\n---\n\n".join([multiple_workflow_output, single_workflow_output])
+whole_folder_output = "\n---\n\n".join(
+    [
+        cluster_workflow_template_output,
+        multiple_workflow_output,
+        single_workflow_output,
+        workflow_template_output,
+    ]
+)
 
 
 @pytest.mark.cli
@@ -65,6 +92,25 @@ def test_multiple_workflow(capsys):
 
     output = get_stdout(capsys)
     assert output == multiple_workflow_output
+
+
+@pytest.mark.cli
+def test_workflow_template(capsys):
+    cappa.invoke(Hera, argv=["generate", "yaml", "tests/cli/examples/workflow_template.py"])
+
+    output = get_stdout(capsys)
+    assert output == workflow_template_output
+
+
+@pytest.mark.cli
+def test_cluster_workflow_template(capsys):
+    cappa.invoke(
+        Hera,
+        argv=["generate", "yaml", "tests/cli/examples/cluster_workflow_template.py"],
+    )
+
+    output = get_stdout(capsys)
+    assert output == cluster_workflow_template_output
 
 
 @pytest.mark.cli
@@ -101,9 +147,10 @@ def test_source_file_output_file():
 @pytest.mark.cli
 def test_source_folder_output_file():
     exists_patch = patch("os.path.exists", return_value=True)
+    is_file_patch = patch("pathlib.Path.is_file", return_value=True)
     write_text_patch = patch("pathlib.Path.write_text")
 
-    with exists_patch, write_text_patch as m:
+    with exists_patch, is_file_patch, write_text_patch as m:
         cappa.invoke(
             Hera,
             argv=[
@@ -169,17 +216,24 @@ def test_source_folder_output_folder():
             ],
         )
 
-    assert open_patch.new.call_count == 2
-    assert open_patch.new.return_value.write.call_count == 2
+    assert open_patch.new.call_count == 4
+    assert open_patch.new.return_value.write.call_count == 4
 
-    filename1 = str(open_patch.new.mock_calls[0][1][0])
-    assert filename1 == "dir/multiple_workflow.yaml"
+    filenames = [
+        str(open_patch.new.mock_calls[0][1][0]),
+        str(open_patch.new.mock_calls[4][1][0]),
+        str(open_patch.new.mock_calls[8][1][0]),
+        str(open_patch.new.mock_calls[12][1][0]),
+    ]
+    assert filenames == [
+        "dir/cluster_workflow_template.yaml",
+        "dir/multiple_workflow.yaml",
+        "dir/single_workflow.yaml",
+        "dir/workflow_template.yaml",
+    ]
 
-    filename2 = str(open_patch.new.mock_calls[4][1][0])
-    assert filename2 == "dir/single_workflow.yaml"
-
-    content1 = open_patch.new.return_value.write.mock_calls[0][1][0]
+    content1 = open_patch.new.return_value.write.mock_calls[1][1][0]
     assert content1 == multiple_workflow_output
 
-    content2 = open_patch.new.return_value.write.mock_calls[1][1][0]
+    content2 = open_patch.new.return_value.write.mock_calls[2][1][0]
     assert content2 == single_workflow_output
