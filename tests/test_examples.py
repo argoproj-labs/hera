@@ -145,9 +145,9 @@ def test_hera_output_upstream(module_name, global_config_fixture):
     global_config_fixture.host = "http://hera.testing"
     workflow = importlib.import_module(f"examples.workflows.upstream.{module_name}").w
     generated_yaml_path = Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.yaml"
-    upstream_yaml_path = (
-        Path(hera_upstream_examples.__file__).parent / f"{module_name.replace('_', '-')}.upstream.yaml"
-    )
+    upstream_yaml_path = Path(
+        hera_upstream_examples.__file__
+    ).parent / f"{module_name.replace('_', '-')}.upstream.yaml"
 
     # WHEN
     output = workflow.to_dict()
