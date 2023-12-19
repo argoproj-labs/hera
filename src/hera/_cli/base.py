@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Union
 
 from cappa import Arg, Subcommands, command
 from typing_extensions import Annotated
@@ -36,7 +37,7 @@ class GenerateYaml:
         ),
     ]
     to: Annotated[
-        Path | None,
+        Union[Path, None],
         Arg(
             long=True,
             help=(

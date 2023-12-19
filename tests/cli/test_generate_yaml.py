@@ -1,3 +1,4 @@
+import sys
 from textwrap import dedent
 from unittest.mock import mock_open, patch
 
@@ -9,6 +10,12 @@ from hera._cli.base import Hera
 
 def get_stdout(capsys):
     return capsys.readouterr().out
+
+
+def patch_open():
+    if sys.version_info >= (3, 10) and sys.version_info <= (3, 11):
+        return patch("pathlib._NormalAccessor.open", new=mock_open())
+    return patch("io.open", new=mock_open())
 
 
 single_workflow_output = dedent(
@@ -175,7 +182,7 @@ def test_source_file_output_folder():
     dest_is_file_patch = patch("pathlib.Path.is_file", return_value=False)
     makedirs_patch = patch("os.makedirs")
 
-    open_patch = patch("io.open", new=mock_open())
+    open_patch = patch_open()
 
     with source_is_dir_patch, dest_exists_patch, dest_is_file_patch, makedirs_patch, open_patch:
         cappa.invoke(
@@ -202,7 +209,7 @@ def test_source_folder_output_folder():
     dest_exists_patch = patch("os.path.exists", return_value=False)
     makedirs_patch = patch("os.makedirs")
 
-    open_patch = patch("io.open", new=mock_open())
+    open_patch = patch_open()
 
     with source_is_dir_patch, dest_exists_patch, makedirs_patch, open_patch:
         cappa.invoke(

@@ -25,5 +25,5 @@ def main(argv=None):
     cappa.invoke(Hera, argv=argv)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
