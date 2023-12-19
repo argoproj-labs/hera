@@ -48,7 +48,7 @@ test:  ## Run tests for Hera
 
 .PHONY: test-cli
 test-cli:  ## Run tests for Hera
-	@poetry run python -m pytest --cov-report=term-missing -m 'cli'
+	@poetry run python -m pytest -m 'cli'
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows

@@ -92,7 +92,7 @@ jobs:
           file: ./coverage.xml
 
   test-cli:
-    name: test py${{ matrix.python-version }} (pydantic v1) on ${{ matrix.os }}
+    name: test cli with py${{ matrix.python-version }} (pydantic v1) on ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -119,7 +119,7 @@ jobs:
         run: |
           poetry install -E cli
 
-      - name: run ci checks
+      - name: run cli tests
         run: make test-cli
 
       - name: Upload coverage
