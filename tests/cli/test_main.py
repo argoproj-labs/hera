@@ -7,8 +7,8 @@ from hera.__main__ import main
 
 
 def test_main_dependency_missing():
-    with patch("importlib.util.find_spec", side_effect=ImportError):
-        with pytest.raises(ImportError) as e:
+    with patch("importlib.import_module", side_effect=ModuleNotFoundError):
+        with pytest.raises(ModuleNotFoundError) as e:
             main()
 
     assert "pip install hera[cli]" in str(e.value)

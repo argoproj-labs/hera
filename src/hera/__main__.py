@@ -1,14 +1,14 @@
 """Entrypoint for running hera as a CLI."""
-import importlib.util
+import importlib
 import sys
 
 
 def main(argv=None):
     """Entrypoint for running hera as a CLI."""
     try:
-        importlib.util.find_spec("cappa")
-    except ImportError as e:
-        raise ImportError(
+        importlib.import_module("cappa")
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError(
             "Use of the `hera` CLI tool requires installing the 'cli' extra, `pip install hera[cli]`."
         ) from e
 
