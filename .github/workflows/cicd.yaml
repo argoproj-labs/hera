@@ -33,7 +33,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install -E cli
 
       - name: run ci checks
         run: make ci
@@ -80,7 +80,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install -E cli
           poetry run pip install "pydantic<2"
 
       - name: run ci checks
@@ -113,7 +113,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install -E cli
 
       - name: setup k3d cluster
         run: make install-k3d

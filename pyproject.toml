@@ -33,14 +33,16 @@ python = ">=3.8,<4"
 pyyaml = { version = ">=6.0", optional = true }
 requests = "*"
 pydantic = { extras = ["email"], version = ">=1.7,<3.0" }
+cappa = {version = "^0.14.3", optional = true}
 
 [tool.poetry.extras]
 yaml = ["PyYAML"]
+cli = ["cappa", "PyYAML"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-cov = "*"
-mypy = "*"
+mypy = "1.0.1"
 build = "*"
 ruff = "*"
 types-PyYAML = "*"
@@ -49,6 +51,9 @@ datamodel-code-generator = { extras = ["http"], version = "^0.25" }
 types-requests = "^2.28.11.12"
 pytest-clarity = "^1.0.1"
 pytest-sugar = "^0.9.6"
+
+[tool.poetry.scripts]
+hera = "hera.__main__:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -62,6 +67,7 @@ filterwarnings = [
 ]
 markers = [
     "on_cluster: tests that run on an Argo cluster",
+    "cli: tests that verify CLI functionality",
 ]
 
 # Convert the following to config
