@@ -101,7 +101,23 @@ except ImportError:
 T = TypeVar("T")
 OneOrMany = Union[T, List[T]]
 """OneOrMany is provided as a convenience to allow Hera models to accept single values or lists of
-values, and so that our code is more readable."""
+values, and so that our code is more readable. It is used by the 'normalize' validators below."""
+
+
+def normalize_to_list(v: Optional[OneOrMany]):
+    """Normalize given value to a list if not None."""
+    if v is None or isinstance(v, list):
+        return v
+    return [v]
+
+def normalize_to_list_or(*valid_types: Type):
+    """Normalize given value to a list if not None."""
+    def normalize_to_list_if_not_valid_type(v: Optional[OneOrMany]):
+        """Normalize given value to a list if not None or already a valid type."""
+        if v is None or isinstance(v, (list, *valid_types)):
+            return v
+        return [v]
+    return normalize_to_list_if_not_valid_type
 
 InputsT = Optional[
     Union[
@@ -277,6 +293,7 @@ class IOMixin(BaseMixin):
 
     inputs: InputsT = None
     outputs: OutputsT = None
+    _normalize_fields = validator("inputs", "outputs", allow_reuse=True)(normalize_to_list_or(ModelInputs, ModelOutputs))
 
     def get_parameter(self, name: str) -> Parameter:
         """Finds and returns the parameter with the supplied name.
@@ -376,6 +393,7 @@ class EnvMixin(BaseMixin):
 
     env: EnvT = None
     env_from: EnvFromT = None
+    _normalize_fields = validator("env", "env_from", allow_reuse=True)(normalize_to_list)
 
     def _build_env(self) -> Optional[List[EnvVar]]:
         """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
@@ -419,6 +437,7 @@ class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
     metrics: MetricsT = None
+    _normalize_metrics = validator("metrics", allow_reuse=True)(normalize_to_list_or(Metrics, ModelMetrics))
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
@@ -526,6 +545,7 @@ class VolumeMixin(BaseMixin):
     """
 
     volumes: VolumesT = None
+    _normalize_fields = validator("volumes", allow_reuse=True)(normalize_to_list)
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
         """Processes the `volumes` and creates an optional list of generates `Volume`s."""
@@ -590,20 +610,11 @@ class VolumeMountMixin(VolumeMixin):
         return cast(List[VolumeMount], self.volume_mounts) + cast(List[VolumeMount], result)
 
 
-def normalize_to_list_or(*valid_types: Type):
-    def normalize_to_list(v: Optional[OneOrMany]):
-        """Normalize given value to a list if not None."""
-        if v is None or isinstance(v, (list, *valid_types)):
-            return v
-        return [v]
-    return normalize_to_list
-
-
 class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object."""
 
     arguments: ArgumentsT = None
-    _normalize_arguments: ArgumentsT = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
+    _normalize_arguments = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
