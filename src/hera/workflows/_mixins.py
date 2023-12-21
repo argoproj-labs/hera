@@ -100,21 +100,21 @@ except ImportError:
 
 T = TypeVar("T")
 OneOrMany = Union[T, List[T]]
-"""OneOrMany is provided as a convenience to allow Hera models to accept single values or lists of
+"""OneOrMany is provided as a convenience type to allow Hera models to accept single values or lists of
 values, and so that our code is more readable. It is used by the 'normalize' validators below."""
 
 
-def normalize_to_list(v: Optional[OneOrMany]):
+def normalize_to_list(v: Optional[OneOrMany]) -> Optional[List]:
     """Normalize given value to a list if not None."""
     if v is None or isinstance(v, list):
         return v
     return [v]
 
 
-def normalize_to_list_or(*valid_types: Type):
+def normalize_to_list_or(*valid_types: Type) -> Callable[[Optional[OneOrMany]], Optional[List]]:
     """Normalize given value to a list if not None."""
 
-    def normalize_to_list_if_not_valid_type(v: Optional[OneOrMany]):
+    def normalize_to_list_if_not_valid_type(v: Optional[OneOrMany]) -> Optional[List]:
         """Normalize given value to a list if not None or already a valid type."""
         if v is None or isinstance(v, (list, *valid_types)):
             return v
