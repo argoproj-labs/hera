@@ -1,8 +1,9 @@
 import pytest
 
-from hera.workflows import Parameter
-from hera.workflows._mixins import ContainerMixin, IOMixin
+from hera.workflows import Env, Parameter
+from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin
 from hera.workflows.models import (
+    Arguments as ModelArguments,
     ImagePullPolicy,
     Inputs as ModelInputs,
 )
@@ -53,3 +54,56 @@ class TestIOMixin:
 
     def test_build_outputs_none(self):
         assert self.io_mixin._build_outputs() is None
+
+
+class TestArgumentsMixin:
+    def test_list_normalized_to_list(self):
+        args_mixin = ArgumentsMixin(
+            arguments=[
+                Parameter(name="my-param-1"),
+                Parameter(name="my-param-2"),
+            ]
+        )
+
+        assert isinstance(args_mixin.arguments, list)
+        assert len(args_mixin.arguments) == 2
+
+    def test_single_value_normalized_to_list(self):
+        args_mixin = ArgumentsMixin(arguments=Parameter(name="my-param"))
+
+        assert isinstance(args_mixin.arguments, list)
+        assert len(args_mixin.arguments) == 1
+
+    def test_none_value_is_not_normalized_to_list(self):
+        args_mixin = ArgumentsMixin(arguments=None)
+
+        assert args_mixin.arguments is None
+
+    def test_model_arguments_value_is_not_normalized_to_list(self):
+        args_mixin = ArgumentsMixin(arguments=ModelArguments())
+
+        assert args_mixin.arguments == ModelArguments()
+
+
+class TestEnvMixin:
+    def test_list_normalized_to_list(self):
+        env_mixin = EnvMixin(
+            env=[
+                Env(name="test-1", value="test"),
+                Env(name="test-2", value="test"),
+            ]
+        )
+
+        assert isinstance(env_mixin.env, list)
+        assert len(env_mixin.env) == 2
+
+    def test_single_value_normalized_to_list(self):
+        env_mixin = EnvMixin(env=Env(name="test", value="test"))
+
+        assert isinstance(env_mixin.env, list)
+        assert len(env_mixin.env) == 1
+
+    def test_none_value_is_not_normalized_to_list(self):
+        env_mixin = EnvMixin(env=None)
+
+        assert env_mixin.env is None

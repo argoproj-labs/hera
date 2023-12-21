@@ -11,7 +11,19 @@ except ImportError:
     from hera.workflows._inspect import get_annotations  # type: ignore
 from collections import ChainMap
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
@@ -85,11 +97,36 @@ try:
 except ImportError:
     _yaml = None
 
+
+T = TypeVar("T")
+OneOrMany = Union[T, List[T]]
+"""OneOrMany is provided as a convenience type to allow Hera models to accept single values or lists of
+values, and so that our code is more readable. It is used by the 'normalize' validators below."""
+
+
+def normalize_to_list(v: Optional[OneOrMany]) -> Optional[List]:
+    """Normalize given value to a list if not None."""
+    if v is None or isinstance(v, list):
+        return v
+    return [v]
+
+
+def normalize_to_list_or(*valid_types: Type) -> Callable[[Optional[OneOrMany]], Optional[List]]:
+    """Normalize given value to a list if not None."""
+
+    def normalize_to_list_if_not_valid_type(v: Optional[OneOrMany]) -> Optional[List]:
+        """Normalize given value to a list if not None or already a valid type."""
+        if v is None or isinstance(v, (list, *valid_types)):
+            return v
+        return [v]
+
+    return normalize_to_list_if_not_valid_type
+
+
 InputsT = Optional[
     Union[
         ModelInputs,
-        Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
-        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
 """`InputsT` is the main type associated with inputs that can be specified in Hera workflows, dags, steps, etc.
@@ -103,8 +140,7 @@ This type enables uses of Hera auto-generated models such as (`hera.workflows.mo
 OutputsT = Optional[
     Union[
         ModelOutputs,
-        Union[Parameter, ModelParameter, Artifact, ModelArtifact],
-        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
+        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
     ]
 ]
 """`OutputsT` is the main type associated with outputs the can be specified in Hera workflows, dags, steps, etc.
@@ -117,8 +153,7 @@ This type enables uses of Hera auto-generated models such as (`hera.workflows.mo
 ArgumentsT = Optional[
     Union[
         ModelArguments,
-        Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
-        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
 """`ArgumentsT` is the main type associated with arguments that can be used on DAG tasks, steps, etc.
@@ -130,12 +165,10 @@ any of the aforementioned objects.
 
 MetricsT = Optional[
     Union[
-        _BaseMetric,
-        List[_BaseMetric],
         Metrics,
-        ModelPrometheus,
-        List[ModelPrometheus],
         ModelMetrics,
+        OneOrMany[_BaseMetric],
+        OneOrMany[ModelPrometheus],
     ]
 ]
 """`MetricsT` is the core Hera type for Prometheus metrics. 
@@ -144,28 +177,21 @@ This metrics type enables users to use either auto-generated Hera metrics, lists
 the variations of metrics provided by `hera.workflows.metrics.*`  
 """
 
-EnvT = Optional[
-    Union[
-        _BaseEnv,
-        EnvVar,
-        List[Union[_BaseEnv, EnvVar, Dict[str, Any]]],
-        Dict[str, Any],
-    ]
-]
+EnvT = Optional[OneOrMany[Union[_BaseEnv, EnvVar, Dict[str, Any]]]]
 """`EnvT` is the core Hera type for environment variables.
 
 The env type enables setting single valued environment variables, lists of environment variables, or dictionary 
 mappings of env variables names to values, which are automatically parsed by Hera.
 """
 
-EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, EnvFromSource]]]]
+EnvFromT = Optional[OneOrMany[Union[_BaseEnvFrom, EnvFromSource]]]
 """`EnvFromT` is the core Hera type for environment variables derived from Argo/Kubernetes sources.
 
 This env type enables specifying environment variables in base form, as `hera.workflows.env` form, or lists of the 
 aforementioned objects.
 """
 
-VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolume, _BaseVolume]]]]
+VolumesT = Optional[OneOrMany[Union[ModelVolume, _BaseVolume]]]
 """`VolumesT` is the core Hera type for volumes. 
 
 This volume type is used to specify the configuration of volumes to be automatically created by Argo/K8s and mounted
@@ -271,6 +297,9 @@ class IOMixin(BaseMixin):
 
     inputs: InputsT = None
     outputs: OutputsT = None
+    _normalize_fields = validator("inputs", "outputs", allow_reuse=True)(
+        normalize_to_list_or(ModelInputs, ModelOutputs)
+    )
 
     def get_parameter(self, name: str) -> Parameter:
         """Finds and returns the parameter with the supplied name.
@@ -341,8 +370,7 @@ class IOMixin(BaseMixin):
             return self.outputs
 
         result = ModelOutputs()
-        outputs = self.outputs if isinstance(self.outputs, list) else [self.outputs]
-        for value in outputs:
+        for value in self.outputs:
             if isinstance(value, Parameter):
                 result.parameters = (
                     [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
@@ -355,7 +383,7 @@ class IOMixin(BaseMixin):
                     if result.artifacts is None
                     else result.artifacts + [value._build_artifact()]
                 )
-            else:
+            elif isinstance(value, ModelArtifact):
                 result.artifacts = [value] if result.artifacts is None else result.artifacts + [value]
 
         # returning `None` for `ModelInputs` means the submission to the server will not even have the `outputs` field
@@ -370,6 +398,7 @@ class EnvMixin(BaseMixin):
 
     env: EnvT = None
     env_from: EnvFromT = None
+    _normalize_fields = validator("env", "env_from", allow_reuse=True)(normalize_to_list)
 
     def _build_env(self) -> Optional[List[EnvVar]]:
         """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
@@ -377,8 +406,7 @@ class EnvMixin(BaseMixin):
             return None
 
         result: List[EnvVar] = []
-        env = self.env if isinstance(self.env, list) else [self.env]
-        for e in env:
+        for e in self.env:
             if isinstance(e, EnvVar):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnv):
@@ -397,8 +425,7 @@ class EnvMixin(BaseMixin):
             return None
 
         result: List[EnvFromSource] = []
-        env_from = self.env_from if isinstance(self.env_from, list) else [self.env_from]
-        for e in env_from:
+        for e in self.env_from:
             if isinstance(e, EnvFromSource):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnvFrom):
@@ -413,23 +440,20 @@ class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
     metrics: MetricsT = None
+    _normalize_metrics = validator("metrics", allow_reuse=True)(normalize_to_list_or(Metrics, ModelMetrics))
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
         if self.metrics is None or isinstance(self.metrics, ModelMetrics):
             return self.metrics
-        elif isinstance(self.metrics, ModelPrometheus):
-            return ModelMetrics(prometheus=[self.metrics])
         elif isinstance(self.metrics, Metrics):
             return ModelMetrics(prometheus=self.metrics._build_metrics())
-        elif isinstance(self.metrics, _BaseMetric):
-            return ModelMetrics(prometheus=[self.metrics._build_metric()])
 
         metrics = []
         for m in self.metrics:
             if isinstance(m, _BaseMetric):
                 metrics.append(m._build_metric())
-            else:
+            elif isinstance(m, ModelPrometheus):
                 metrics.append(m)
         return ModelMetrics(prometheus=metrics) if metrics else None
 
@@ -520,15 +544,15 @@ class VolumeMixin(BaseMixin):
     """
 
     volumes: VolumesT = None
+    _normalize_fields = validator("volumes", allow_reuse=True)(normalize_to_list)
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
         """Processes the `volumes` and creates an optional list of generates `Volume`s."""
         if self.volumes is None:
             return None
 
-        volumes = self.volumes if isinstance(self.volumes, list) else [self.volumes]
         # filter volumes for otherwise we're building extra Argo volumes
-        filtered_volumes = [v for v in volumes if not isinstance(v, Volume)]
+        filtered_volumes = [cast(_BaseVolume, v) for v in self.volumes if not isinstance(v, Volume)]
         # only build volumes if there are any of type `_BaseVolume`, otherwise it must be an autogenerated model
         # already, so kept it as it is
         result = [v._build_volume() if issubclass(v.__class__, _BaseVolume) else v for v in filtered_volumes]
@@ -539,8 +563,7 @@ class VolumeMixin(BaseMixin):
         if self.volumes is None:
             return None
 
-        volumes = self.volumes if isinstance(self.volumes, list) else [self.volumes]
-        volumes_with_pv_claims = [v for v in volumes if isinstance(v, Volume)]
+        volumes_with_pv_claims = [v for v in self.volumes if isinstance(v, Volume)]
         if not volumes_with_pv_claims:
             return None
         return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims] or None
@@ -566,7 +589,7 @@ class VolumeMountMixin(VolumeMixin):
         if self.volumes is None:
             volumes: list = []
         else:
-            volumes = self.volumes if isinstance(self.volumes, list) else [self.volumes]
+            volumes = cast(list, self.volumes)
 
         result = (
             None
@@ -588,6 +611,7 @@ class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object."""
 
     arguments: ArgumentsT = None
+    _normalize_arguments = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
@@ -597,8 +621,7 @@ class ArgumentsMixin(BaseMixin):
             return self.arguments
 
         result = ModelArguments()
-        arguments = self.arguments if isinstance(self.arguments, list) else [self.arguments]
-        for arg in arguments:
+        for arg in self.arguments:
             if isinstance(arg, dict):
                 for k, v in arg.items():
                     value = Parameter(name=k, value=v)
@@ -703,7 +726,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
         kwargs_arguments = kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]  # type: ignore
-        arguments = self.arguments if isinstance(self.arguments, List) else [self.arguments] + kwargs_arguments  # type: ignore
+        arguments = self.arguments if self.arguments else [] + kwargs_arguments
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
@@ -807,7 +830,7 @@ class ItemMixin(BaseMixin):
         The items passed in `with_items` must be serializable objects
     """
 
-    with_items: Optional[List[Any]] = None
+    with_items: Optional[OneOrMany[Any]] = None
 
     def _build_with_items(self) -> Optional[List[Item]]:
         """Process the `with_items` field and returns an optional list of corresponding `Item`s.
