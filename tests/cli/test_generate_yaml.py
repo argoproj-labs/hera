@@ -13,6 +13,10 @@ def get_stdout(capsys):
     return capsys.readouterr().out
 
 
+def join_output(*inputs):
+    return "\n---\n\n".join(inputs)
+
+
 def patch_open():
     if sys.version_info >= (3, 10) and sys.version_info <= (3, 11):
         return patch("pathlib._NormalAccessor.open", new=mock_open())
@@ -67,13 +71,11 @@ multiple_workflow_output = dedent(
         """
 )
 
-whole_folder_output = "\n---\n\n".join(
-    [
-        cluster_workflow_template_output,
-        multiple_workflow_output,
-        single_workflow_output,
-        workflow_template_output,
-    ]
+whole_folder_output = join_output(
+    cluster_workflow_template_output,
+    multiple_workflow_output,
+    single_workflow_output,
+    workflow_template_output,
 )
 
 
@@ -267,3 +269,90 @@ def test_relative_imports(capsys):
               image: image
         """
     )
+
+
+@pytest.mark.cli
+def test_include_one(capsys):
+    cappa.invoke(
+        Hera,
+        argv=[
+            "generate",
+            "yaml",
+            "tests/cli/examples",
+            "--include=*/examples/single*",
+        ],
+    )
+
+    output = get_stdout(capsys)
+    assert output == single_workflow_output
+
+
+@pytest.mark.cli
+def test_include_two(capsys):
+    cappa.invoke(
+        Hera,
+        argv=[
+            "generate",
+            "yaml",
+            "tests/cli/examples",
+            "--include=*/examples/single*",
+            "--include=*/examples/*template*",
+        ],
+    )
+
+    output = get_stdout(capsys)
+    assert output == join_output(
+        cluster_workflow_template_output,
+        single_workflow_output,
+        workflow_template_output,
+    )
+
+
+@pytest.mark.cli
+def test_exlcude_one(capsys):
+    cappa.invoke(
+        Hera,
+        argv=[
+            "generate",
+            "yaml",
+            "tests/cli/examples",
+            "--exclude=*/examples/*template*",
+        ],
+    )
+
+    output = get_stdout(capsys)
+    assert output == join_output(multiple_workflow_output, single_workflow_output)
+
+
+@pytest.mark.cli
+def test_exclude_two(capsys):
+    cappa.invoke(
+        Hera,
+        argv=[
+            "generate",
+            "yaml",
+            "tests/cli/examples",
+            "--exclude=*/examples/single*",
+            "--exclude=*/examples/*template*",
+        ],
+    )
+
+    output = get_stdout(capsys)
+    assert output == multiple_workflow_output
+
+
+@pytest.mark.cli
+def test_include_and_exclude(capsys):
+    cappa.invoke(
+        Hera,
+        argv=[
+            "generate",
+            "yaml",
+            "tests/cli/examples",
+            "--include=*/examples/*template*",
+            "--exclude=*cluster*",
+        ],
+    )
+
+    output = get_stdout(capsys)
+    assert output == workflow_template_output
