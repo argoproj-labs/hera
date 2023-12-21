@@ -49,7 +49,7 @@ jobs:
           poetry build
 
       - name: upload wheel as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: dist/*.whl
 
