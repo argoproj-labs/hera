@@ -11,7 +11,19 @@ except ImportError:
     from hera.workflows._inspect import get_annotations  # type: ignore
 from collections import ChainMap
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
@@ -85,11 +97,16 @@ try:
 except ImportError:
     _yaml = None
 
+
+T = TypeVar("T")
+OneOrMany = Union[T, List[T]]
+"""OneOrMany is provided as a convenience to allow Hera models to accept single values or lists of
+values, and so that our code is more readable."""
+
 InputsT = Optional[
     Union[
         ModelInputs,
-        Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
-        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
 """`InputsT` is the main type associated with inputs that can be specified in Hera workflows, dags, steps, etc.
@@ -103,8 +120,7 @@ This type enables uses of Hera auto-generated models such as (`hera.workflows.mo
 OutputsT = Optional[
     Union[
         ModelOutputs,
-        Union[Parameter, ModelParameter, Artifact, ModelArtifact],
-        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
+        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact]],
     ]
 ]
 """`OutputsT` is the main type associated with outputs the can be specified in Hera workflows, dags, steps, etc.
@@ -117,8 +133,7 @@ This type enables uses of Hera auto-generated models such as (`hera.workflows.mo
 ArgumentsT = Optional[
     Union[
         ModelArguments,
-        Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]],
-        List[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
     ]
 ]
 """`ArgumentsT` is the main type associated with arguments that can be used on DAG tasks, steps, etc.
@@ -130,11 +145,9 @@ any of the aforementioned objects.
 
 MetricsT = Optional[
     Union[
-        _BaseMetric,
-        List[_BaseMetric],
+        OneOrMany[_BaseMetric],
         Metrics,
-        ModelPrometheus,
-        List[ModelPrometheus],
+        OneOrMany[ModelPrometheus],
         ModelMetrics,
     ]
 ]
@@ -144,28 +157,21 @@ This metrics type enables users to use either auto-generated Hera metrics, lists
 the variations of metrics provided by `hera.workflows.metrics.*`  
 """
 
-EnvT = Optional[
-    Union[
-        _BaseEnv,
-        EnvVar,
-        List[Union[_BaseEnv, EnvVar, Dict[str, Any]]],
-        Dict[str, Any],
-    ]
-]
+EnvT = Optional[OneOrMany[Union[_BaseEnv, EnvVar, Dict[str, Any]]]]
 """`EnvT` is the core Hera type for environment variables.
 
 The env type enables setting single valued environment variables, lists of environment variables, or dictionary 
 mappings of env variables names to values, which are automatically parsed by Hera.
 """
 
-EnvFromT = Optional[Union[_BaseEnvFrom, EnvFromSource, List[Union[_BaseEnvFrom, EnvFromSource]]]]
+EnvFromT = Optional[OneOrMany[Union[_BaseEnvFrom, EnvFromSource]]]
 """`EnvFromT` is the core Hera type for environment variables derived from Argo/Kubernetes sources.
 
 This env type enables specifying environment variables in base form, as `hera.workflows.env` form, or lists of the 
 aforementioned objects.
 """
 
-VolumesT = Optional[Union[Union[ModelVolume, _BaseVolume], List[Union[ModelVolume, _BaseVolume]]]]
+VolumesT = Optional[OneOrMany[Union[ModelVolume, _BaseVolume]]]
 """`VolumesT` is the core Hera type for volumes. 
 
 This volume type is used to specify the configuration of volumes to be automatically created by Argo/K8s and mounted
@@ -584,10 +590,20 @@ class VolumeMountMixin(VolumeMixin):
         return cast(List[VolumeMount], self.volume_mounts) + cast(List[VolumeMount], result)
 
 
+def normalize_to_list_or(*valid_types: Type):
+    def normalize_to_list(v: Optional[OneOrMany]):
+        """Normalize given value to a list if not None."""
+        if v is None or isinstance(v, (list, *valid_types)):
+            return v
+        return [v]
+    return normalize_to_list
+
+
 class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object."""
 
     arguments: ArgumentsT = None
+    _normalize_arguments: ArgumentsT = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
