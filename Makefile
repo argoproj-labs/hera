@@ -7,9 +7,9 @@ help: ## Showcase the help instructions for all the available `make` commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: install
-install: ## Run poetry install with default behaviour
+install: ## Run poetry install with all extras for development
 	@poetry env use system
-	@poetry install
+	@poetry install --all-extras
 
 .PHONY: install-3.8
 install-3.8: ## Install python3.8 for generating test data
