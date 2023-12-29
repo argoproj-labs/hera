@@ -1,0 +1,82 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: spacy_inference_pipeline-
+  namespace: argo
+spec:
+  entrypoint: spacy_inference_pipeline
+  serviceAccountName: hera
+  templates:
+  - name: spacy_inference_pipeline
+    steps:
+    - - name: data-prep
+        template: data-prep
+    - - name: inference-spacy
+        template: inference-spacy
+  - name: data-prep
+    script:
+      command:
+      - python
+      image: jupyter/datascience-notebook:latest
+      resources:
+        requests:
+          cpu: '0.5'
+          memory: 1Gi
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+        import subprocess\nfrom spacy.lang.en.examples import sentences\nprint(subprocess.run('cd\
+        \ /mnt/data && ls -l', shell=True, capture_output=True).stdout.decode())\n\
+        ' the used image does not have `spacy` installed, so we need to install it\
+        \ first! '\nsubprocess.run(['pip', 'install', 'spacy'], stdout=subprocess.PIPE,\
+        \ universal_newlines=True)\n' dumping spacy example sentences data into a\
+        \ file\\n        replace this with real dataset '\nwith open('/mnt/data/input_data.json',\
+        \ 'w') as json_file:\n    json.dump(sentences, json_file)\nprint('Data preparation\
+        \ completed')\nprint(subprocess.run('cd /mnt/data && ls -l', shell=True, capture_output=True).stdout.decode())"
+      volumeMounts:
+      - mountPath: /mnt/data
+        name: data-dir
+  - name: inference-spacy
+    script:
+      command:
+      - python
+      image: jupyter/datascience-notebook:latest
+      resources:
+        requests:
+          cpu: '0.5'
+          memory: 1Gi
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport subprocess\n\
+        ' the used image does not have `spacy` installed, so we need to install it\
+        \ first! '\nsubprocess.run(['pip', 'install', 'spacy'], stdout=subprocess.PIPE,\
+        \ universal_newlines=True)\nprint(subprocess.run('cd /mnt/data && ls -l ',\
+        \ shell=True, capture_output=True).stdout.decode())\nimport json\nfrom typing\
+        \ import List\nimport pydantic\nimport spacy\nfrom pydantic import BaseModel\n\
+        from spacy.cli import download\n' download and load spacy model https://spacy.io/models/en#en_core_web_lg\
+        \ '\nspacy_model_name = 'en_core_web_lg'\ndownload(spacy_model_name)\nnlp\
+        \ = spacy.load(spacy_model_name)\n' build pydantic model '\nprint(pydantic.version.version_info())\n\
+        \nclass NEROutput(BaseModel):\n    input_text: str\n    ner_entities: List[str]\
+        \ = []\nner_output_list: List[NEROutput] = []\n' read data prepared from previous\
+        \ step data_prep '\nwith open('/mnt/data/input_data.json', 'r') as json_file:\n\
+        \    input_data = json.load(json_file)\n    print(input_data)\n    ' iterate\
+        \ each sentence in the data and perform NER '\n    for sentence in input_data:\n\
+        \        print('input text: ' + sentence)\n        doc = nlp(sentence)\n \
+        \       print('output NER:')\n        ner_entities: List[str] = []\n     \
+        \   for entity in doc.ents:\n            ' Print the entity text and its NER\
+        \ label '\n            ner_entity = entity.text + ' is ' + entity.label_\n\
+        \            print(ner_entity)\n            ner_entities.append(ner_entity)\n\
+        \        print('ner_entities = + ' + ner_entities)\n        ner_output = NEROutput(input_text=sentence,\
+        \ ner_entities=ner_entities)\n        ner_output_list.append(dict(ner_output))\n\
+        \    print('ner_output_list = ' + ner_output_list)\nprint('Inference completed')\n\
+        ' save output in a file '\nwith open('/mnt/data/output_data.json', 'w') as\
+        \ json_file:\n    json.dump(ner_output_list, json_file)\nprint(subprocess.run('cd\
+        \ /mnt/data && ls -l ', shell=True, capture_output=True).stdout.decode())"
+      volumeMounts:
+      - mountPath: /mnt/data
+        name: data-dir
+  volumeClaimTemplates:
+  - metadata:
+      name: data-dir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
