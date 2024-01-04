@@ -4,6 +4,7 @@ from unittest.mock import mock_open, patch
 
 import cappa
 import pytest
+from cappa.testing import CommandRunner
 
 from hera._cli.base import Hera
 
@@ -74,6 +75,9 @@ whole_folder_output = "\n---\n\n".join(
         workflow_template_output,
     ]
 )
+
+
+runner = CommandRunner(Hera, base_args=["generate", "yaml"])
 
 
 @pytest.mark.cli
@@ -244,3 +248,22 @@ def test_source_folder_output_folder():
 
     content2 = open_patch.new.return_value.write.mock_calls[2][1][0]
     assert content2 == single_workflow_output
+
+
+@pytest.mark.cli
+def test_relative_imports(capsys):
+    runner.invoke("tests/cli/examples/relative_imports")
+
+    output = get_stdout(capsys)
+    assert output == dedent(
+        """\
+        apiVersion: argoproj.io/v1alpha1
+        kind: Workflow
+        metadata:
+          name: relative_import
+        spec:
+          templates:
+          - container:
+              image: image
+        """
+    )
