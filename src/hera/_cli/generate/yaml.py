@@ -82,10 +82,12 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
     Returns:
         A list containing all `Workflow` objects defined within that module.
     """
-    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module_name = path.stem
+    spec = importlib.util.spec_from_file_location(module_name, path, submodule_search_locations=[str(path.parent)])
     assert spec
 
     module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
 
     assert spec.loader
     spec.loader.exec_module(module)
