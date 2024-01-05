@@ -51,7 +51,7 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

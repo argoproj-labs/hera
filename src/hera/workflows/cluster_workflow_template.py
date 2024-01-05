@@ -26,7 +26,7 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
         """Creates the ClusterWorkflowTemplate on the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         return self.workflows_service.create_cluster_workflow_template(
-            ClusterWorkflowTemplateCreateRequest(template=self.build())
+            ClusterWorkflowTemplateCreateRequest(template=self.build())  # type: ignore
         )
 
     def get(self) -> TWorkflow:
@@ -55,14 +55,14 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
             return self.create()
         return self.workflows_service.update_cluster_workflow_template(
             self.name,
-            ClusterWorkflowTemplateUpdateRequest(template=template),
+            ClusterWorkflowTemplateUpdateRequest(template=template),  # type: ignore
         )
 
     def lint(self) -> TWorkflow:
         """Lints the ClusterWorkflowTemplate using the Argo cluster."""
         assert self.workflows_service, "workflow service not initialized"
         return self.workflows_service.lint_cluster_workflow_template(
-            ClusterWorkflowTemplateLintRequest(template=self.build())
+            ClusterWorkflowTemplateLintRequest(template=self.build())  # type: ignore
         )
 
     def build(self) -> TWorkflow:

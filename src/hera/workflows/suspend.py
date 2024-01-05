@@ -35,14 +35,18 @@ class Suspend(
 
     def _build_suspend_template(self) -> _ModelSuspendTemplate:
         return _ModelSuspendTemplate(
-            duration=self.duration,
+            duration=str(self.duration) if self.duration else None,
         )
 
     def _build_outputs(self) -> Optional[Outputs]:
         outputs = []
         for param in self.intermediate_parameters:
             outputs.append(
-                Parameter(name=param.name, value_from={"supplied": {}}, description=param.description).as_output()
+                Parameter(
+                    name=param.name,
+                    value_from={"supplied": {}},  # type: ignore
+                    description=param.description,
+                ).as_output()
             )
         return Outputs(parameters=outputs) if outputs else None
 
@@ -54,7 +58,7 @@ class Suspend(
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

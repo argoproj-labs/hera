@@ -131,9 +131,9 @@ InputsT = Optional[
 ]
 """`InputsT` is the main type associated with inputs that can be specified in Hera workflows, dags, steps, etc.
 
-This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Inputs`, 
-`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, 
-`hera.workflows.Artifact`), dictionary mappings of parameter names to values (auto-converted by Hera to 
+This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Inputs`,
+`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`,
+`hera.workflows.Artifact`), dictionary mappings of parameter names to values (auto-converted by Hera to
 `hera.workflows.Parameter`), or lists of any of the aforementioned objects.
 """
 
@@ -145,8 +145,8 @@ OutputsT = Optional[
 ]
 """`OutputsT` is the main type associated with outputs the can be specified in Hera workflows, dags, steps, etc.
 
-This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Outputs`, 
-`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`, 
+This type enables uses of Hera auto-generated models such as (`hera.workflows.models.Outputs`,
+`hera.workflows.models.Parameter`), Hera managed models such as (`hera.workflows.Parameter`,
 `hera.workflows.Artifact`),  or lists of the aforementioned objects.
 """
 
@@ -158,7 +158,7 @@ ArgumentsT = Optional[
 ]
 """`ArgumentsT` is the main type associated with arguments that can be used on DAG tasks, steps, etc.
 
-This type enables uses of the Hera auto-generated `hera.workflows.models.Arguments` model, Hera managed models such as 
+This type enables uses of the Hera auto-generated `hera.workflows.models.Arguments` model, Hera managed models such as
 `hera.workflows.Parameter`, `hera.workflows.Artifact`, a dictionary mapping of parameter names to values, or a list of
 any of the aforementioned objects.
 """
@@ -171,28 +171,28 @@ MetricsT = Optional[
         OneOrMany[ModelPrometheus],
     ]
 ]
-"""`MetricsT` is the core Hera type for Prometheus metrics. 
+"""`MetricsT` is the core Hera type for Prometheus metrics.
 
 This metrics type enables users to use either auto-generated Hera metrics, lists of auto-generated single metrics, or
-the variations of metrics provided by `hera.workflows.metrics.*`  
+the variations of metrics provided by `hera.workflows.metrics.*`
 """
 
 EnvT = Optional[OneOrMany[Union[_BaseEnv, EnvVar, Dict[str, Any]]]]
 """`EnvT` is the core Hera type for environment variables.
 
-The env type enables setting single valued environment variables, lists of environment variables, or dictionary 
+The env type enables setting single valued environment variables, lists of environment variables, or dictionary
 mappings of env variables names to values, which are automatically parsed by Hera.
 """
 
 EnvFromT = Optional[OneOrMany[Union[_BaseEnvFrom, EnvFromSource]]]
 """`EnvFromT` is the core Hera type for environment variables derived from Argo/Kubernetes sources.
 
-This env type enables specifying environment variables in base form, as `hera.workflows.env` form, or lists of the 
+This env type enables specifying environment variables in base form, as `hera.workflows.env` form, or lists of the
 aforementioned objects.
 """
 
 VolumesT = Optional[OneOrMany[Union[ModelVolume, _BaseVolume]]]
-"""`VolumesT` is the core Hera type for volumes. 
+"""`VolumesT` is the core Hera type for volumes.
 
 This volume type is used to specify the configuration of volumes to be automatically created by Argo/K8s and mounted
 by Hera at specific mount paths in containers.
@@ -439,7 +439,7 @@ class EnvMixin(BaseMixin):
 class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
-    metrics: MetricsT = None
+    metrics: Optional[MetricsT] = None
     _normalize_metrics = validator("metrics", allow_reuse=True)(normalize_to_list_or(Metrics, ModelMetrics))
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
@@ -495,6 +495,12 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
 
+    @validator("active_deadline_seconds")
+    def _convert_active_deadline_seconds(cls, v) -> Optional[IntOrString]:
+        if v is None or isinstance(v, IntOrString):
+            return v
+        return IntOrString(__root__=v)
+
     def _build_sidecars(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""
         if self.sidecars is None:
@@ -543,7 +549,7 @@ class VolumeMixin(BaseMixin):
     mixin should be careful to *not* generate multiple PVCs for the same volume.
     """
 
-    volumes: VolumesT = None
+    volumes: Optional[VolumesT] = None
     _normalize_fields = validator("volumes", allow_reuse=True)(normalize_to_list)
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
@@ -865,12 +871,12 @@ class ItemMixin(BaseMixin):
 class EnvIOMixin(EnvMixin, IOMixin):
     """`EnvIOMixin` provides the capacity to use environment variables."""
 
-    def _build_params_from_env(self) -> Optional[List[Parameter]]:
+    def _build_params_from_env(self) -> Optional[List[ModelParameter]]:
         """Assemble a list of any environment variables that are set to obtain values from `Parameter`s."""
         if self.env is None:
             return None
 
-        params: Optional[List[Parameter]] = None
+        params: Optional[List[ModelParameter]] = None
         for spec in self.env:
             if isinstance(spec, Env) and spec.value_from_input is not None:
                 value = (
@@ -879,9 +885,9 @@ class EnvIOMixin(EnvMixin, IOMixin):
                     else spec.value_from_input
                 )
                 params = (
-                    [Parameter(name=spec.param_name, value=value)]
+                    [ModelParameter(name=spec.param_name, value=value)]
                     if params is None
-                    else params + [Parameter(name=spec.param_name, value=value)]
+                    else params + [ModelParameter(name=spec.param_name, value=value)]
                 )
 
         return params or None
@@ -921,7 +927,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     continue_on: Optional[ContinueOn] = None
     hooks: Optional[Dict[str, LifecycleHook]] = None
     on_exit: Optional[Union[str, Templatable]] = None
-    template: Optional[Union[str, Template, TemplateMixin]] = None
+    template: Optional[Union[str, Template, TemplateMixin, CallableTemplateMixin]] = None
     template_ref: Optional[TemplateRef] = None
     inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None

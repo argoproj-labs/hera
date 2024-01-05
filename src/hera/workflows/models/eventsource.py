@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from typing_extensions import Annotated
+
 from hera.shared._pydantic import BaseModel, Field
 
 from .io.argoproj.events import v1alpha1
@@ -16,17 +18,18 @@ class EventSourceDeletedResponse(BaseModel):
 
 
 class LogEntry(BaseModel):
-    event_name: Optional[str] = Field(
-        default=None,
-        alias="eventName",
-        title="optional - the event name (e.g. `example`)",
-    )
-    event_source_name: Optional[str] = Field(default=None, alias="eventSourceName")
-    event_source_type: Optional[str] = Field(
-        default=None,
-        alias="eventSourceType",
-        title="optional - the event source type (e.g. `webhook`)",
-    )
+    event_name: Annotated[
+        Optional[str],
+        Field(alias="eventName", title="optional - the event name (e.g. `example`)"),
+    ] = None
+    event_source_name: Annotated[Optional[str], Field(alias="eventSourceName")] = None
+    event_source_type: Annotated[
+        Optional[str],
+        Field(
+            alias="eventSourceType",
+            title="optional - the event source type (e.g. `webhook`)",
+        ),
+    ] = None
     level: Optional[str] = None
     msg: Optional[str] = None
     namespace: Optional[str] = None
@@ -34,7 +37,7 @@ class LogEntry(BaseModel):
 
 
 class CreateEventSourceRequest(BaseModel):
-    event_source: Optional[v1alpha1.EventSource] = Field(default=None, alias="eventSource")
+    event_source: Annotated[Optional[v1alpha1.EventSource], Field(alias="eventSource")] = None
     namespace: Optional[str] = None
 
 
@@ -44,6 +47,6 @@ class EventSourceWatchEvent(BaseModel):
 
 
 class UpdateEventSourceRequest(BaseModel):
-    event_source: Optional[v1alpha1.EventSource] = Field(default=None, alias="eventSource")
+    event_source: Annotated[Optional[v1alpha1.EventSource], Field(alias="eventSource")] = None
     name: Optional[str] = None
     namespace: Optional[str] = None

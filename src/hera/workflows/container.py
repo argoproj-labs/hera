@@ -46,6 +46,7 @@ class Container(
 
     def _build_container(self) -> _ModelContainer:
         """Builds the generated `Container` representation."""
+        assert self.image
         return _ModelContainer(
             args=self.args,
             command=self.command,
@@ -73,7 +74,7 @@ class Container(
     def _build_template(self) -> _ModelTemplate:
         """Builds the generated `Template` representation of the container."""
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

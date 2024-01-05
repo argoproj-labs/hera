@@ -156,7 +156,7 @@ class Script(
         return self.constructor.transform_template_post_build(
             self,
             _ModelTemplate(
-                active_deadline_seconds=self.active_deadline_seconds,
+                active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
                 affinity=self.affinity,
                 archive_location=self.archive_location,
                 automount_service_account_token=self.automount_service_account_token,
@@ -201,7 +201,7 @@ class Script(
                 if self.constructor.volume_for_outputs.mount_path is None:
                     self.constructor.volume_for_outputs.mount_path = self.constructor.outputs_directory
                 self._create_hera_outputs_volume(self.constructor.volume_for_outputs)
-
+        assert self.image
         return self.constructor.transform_script_template_post_build(
             self,
             _ModelScriptTemplate(
@@ -224,7 +224,9 @@ class Script(
                 stdin=self.stdin,
                 stdin_once=self.stdin_once,
                 termination_message_path=self.termination_message_path,
-                termination_message_policy=self.termination_message_policy,
+                termination_message_policy=str(self.termination_message_policy)
+                if self.termination_message_policy
+                else None,
                 tty=self.tty,
                 volume_devices=self.volume_devices,
                 volume_mounts=self._build_volume_mounts(),
@@ -588,7 +590,7 @@ def script(**script_kwargs):
         s = Script(name=name, source=source, **script_kwargs)
 
         @overload
-        def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:
+        def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:  # type: ignore
             ...
 
         @overload

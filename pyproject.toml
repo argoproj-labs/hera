@@ -42,7 +42,7 @@ cli = ["cappa", "PyYAML"]
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-cov = "*"
-mypy = "1.0.1"
+mypy = "*"
 build = "*"
 ruff = "*"
 types-PyYAML = "*"
@@ -80,6 +80,10 @@ mypy_path = "src"
 check_untyped_defs = true
 no_implicit_optional = true
 strict_optional = false
+
+plugins = [
+  "pydantic.mypy"
+]
 
 
 [[tool.mypy.overrides]]

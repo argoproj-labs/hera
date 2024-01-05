@@ -61,11 +61,11 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
 		--disable-timestamp \
+		--use-annotated \
 		--use-default-kwarg
 	@find src/hera/workflows/models/ -name '*.py' -exec sed -i.bak 's/from pydantic import Field/from hera.shared._pydantic import Field/' {} +
 	@find src/hera/workflows/models/ -name '*.bak' -delete
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
-	@poetry run stubgen -o src -p hera.workflows.models && find src/hera/workflows/models -name '__init__.pyi' -delete
 	@rm $(SPEC_PATH)
 	@$(MAKE) format
 
@@ -84,11 +84,11 @@ events-models: ## Generate the Events models portion of Argo Workflows
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
 		--disable-timestamp \
+		--use-annotated \
 		--use-default-kwarg
 	@find src/hera/events/models/ -name '*.py' -exec sed -i.bak 's/from pydantic import Field/from hera.shared._pydantic import Field/' {} +
 	@find src/hera/events/models/ -name '*.bak' -delete
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
-	@poetry run stubgen -o src -p hera.events.models && find src/hera/events/models -name '__init__.pyi' -delete
 	@rm $(SPEC_PATH)
 	@$(MAKE) format
 

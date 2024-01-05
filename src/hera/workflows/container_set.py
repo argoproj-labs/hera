@@ -119,7 +119,9 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
             stdin=self.stdin,
             stdin_once=self.stdin_once,
             termination_message_path=self.termination_message_path,
-            termination_message_policy=self.termination_message_policy,
+            termination_message_policy=self.termination_message_policy.value
+            if self.termination_message_policy
+            else None,
             tty=self.tty,
             volume_devices=self.volume_devices,
             volume_mounts=self._build_volume_mounts(),
@@ -132,7 +134,6 @@ class ContainerSet(
     ContainerMixin,
     TemplateMixin,
     CallableTemplateMixin,
-    ResourceMixin,
     VolumeMountMixin,
     ContextMixin,
 ):
@@ -167,7 +168,7 @@ class ContainerSet(
     def _build_template(self) -> _ModelTemplate:
         """Builds the generated `Template` representation of the container set."""
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,
@@ -188,7 +189,6 @@ class ContainerSet(
             pod_spec_patch=self.pod_spec_patch,
             priority=self.priority,
             priority_class_name=self.priority_class_name,
-            resource=self._build_resources(),
             retry_strategy=self.retry_strategy,
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,

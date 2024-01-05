@@ -28,8 +28,6 @@ with Workflow(
             server="your.nfs.server",
             mount_path="/mnt/nfs",
             path="/share/nfs",
-            size="1Gi",
-            storage_class_name="nfs-client",
         )
     ],
     entrypoint="d",

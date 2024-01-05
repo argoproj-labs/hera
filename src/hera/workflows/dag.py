@@ -55,7 +55,7 @@ class DAG(
             else:
                 tasks.append(task)
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,
+            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

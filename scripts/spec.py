@@ -133,6 +133,12 @@ MANUAL_SPECIFICATIONS: List[Tuple[str, Dict]] = [
             "enum": ["Always", "Never", "IfNotPresent"],
         },
     ),
+    (
+        "io.k8s.apimachinery.pkg.util.intstr.IntOrString",
+        {
+            "type": ["string", "integer"],
+        },
+    ),
 ]
 for obj_name, obj_spec in MANUAL_SPECIFICATIONS:
     spec["definitions"][obj_name] = obj_spec
