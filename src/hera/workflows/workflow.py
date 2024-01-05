@@ -248,12 +248,12 @@ class Workflow(
     arguments: Annotated[
         ArgumentsT,
         _WorkflowModelMapper("spec.arguments", ArgumentsMixin._build_arguments),
-    ]
+    ] = None
     metrics: Annotated[
         MetricsT,
         _WorkflowModelMapper("spec.metrics", MetricsMixin._build_metrics),
-    ]
-    volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)]
+    ] = None
+    volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)] = None
 
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
