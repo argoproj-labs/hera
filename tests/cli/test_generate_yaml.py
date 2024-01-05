@@ -281,3 +281,24 @@ def test_include_and_exclude(capsys):
 
     output = get_stdout(capsys)
     assert output == workflow_template_output
+
+
+def test_custom_object_type(capsys):
+    runner.invoke("tests/cli/examples/custom_object_type")
+
+    output = get_stdout(capsys)
+    assert output == dedent(
+        """\
+        kind: Example
+        apiVersion: example.example/v1alpha1
+        name: example
+
+        ---
+
+        apiVersion: argoproj.io/v1alpha1
+        kind: Workflow
+        metadata:
+          name: example_workflow
+        spec: {}
+        """
+    )

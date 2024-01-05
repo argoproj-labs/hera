@@ -4,7 +4,9 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 from pathlib import Path
-from typing import Dict, Optional, Type, Union, cast
+from typing import ClassVar, Dict, Optional, Type, Union, cast
+
+from hera.shared._pydantic import BaseModel
 
 try:
     from typing import Annotated  # type: ignore
@@ -12,8 +14,7 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from hera.exceptions import NotFound
-from hera.shared._pydantic import BaseModel, validator
-from hera.workflows._mixins import ModelMapperMixin
+from hera.shared._pydantic import validator
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -24,13 +25,8 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import _TRUNCATE_LENGTH, Workflow, _WorkflowModelMapper
-
-
-class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
-    @classmethod
-    def _get_model_class(cls) -> Type[BaseModel]:
-        return _ModelWorkflowTemplate  # type: ignore
+from hera.workflows.resource_base import ModelMapper, Self
+from hera.workflows.workflow import _TRUNCATE_LENGTH, Workflow
 
 
 class WorkflowTemplate(Workflow):
@@ -40,8 +36,10 @@ class WorkflowTemplate(Workflow):
     them from your Workflows.
     """
 
+    mapped_model: ClassVar[Type[BaseModel]] = _ModelWorkflowTemplate
+
     # Removes status mapping
-    status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowTemplateModelMapper("")] = None
+    status: Annotated[Optional[_ModelWorkflowStatus], ModelMapper("")] = None
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
@@ -109,10 +107,10 @@ class WorkflowTemplate(Workflow):
             spec=_ModelWorkflowSpec(),
         )
 
-        return _WorkflowTemplateModelMapper.build_model(WorkflowTemplate, self, model_workflow)
+        return ModelMapper.build_model(WorkflowTemplate, self, model_workflow)
 
     @classmethod
-    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
+    def from_dict(cls, model_dict: Dict) -> Self:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a dict.
 
         Examples:
@@ -123,7 +121,7 @@ class WorkflowTemplate(Workflow):
         return cls._from_dict(model_dict, _ModelWorkflowTemplate)
 
     @classmethod
-    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
+    def from_yaml(cls, yaml_str: str) -> Self:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML string.
 
         Examples:
@@ -132,7 +130,7 @@ class WorkflowTemplate(Workflow):
         return cls._from_yaml(yaml_str, _ModelWorkflowTemplate)
 
     @classmethod
-    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
+    def from_file(cls, yaml_file: Union[Path, str]) -> Self:
         """Create a WorkflowTemplate from a WorkflowTemplate contained in a YAML file.
 
         Examples:

@@ -5,16 +5,15 @@ for more on Workflows.
 """
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, ClassVar, Dict, List, Optional, Type, Union
 
 try:
     from typing import Annotated, get_args  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args  # type: ignore
 
-from hera import _yaml
 from hera.shared import global_config
-from hera.shared._pydantic import BaseModel, validator
+from hera.shared._pydantic import PydanticBaseModel, validator
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,
@@ -22,7 +21,6 @@ from hera.workflows._mixins import (
     HookMixin,
     MetricsMixin,
     MetricsT,
-    ModelMapperMixin,
     VolumeMixin,
     VolumesT,
 )
@@ -61,6 +59,7 @@ from hera.workflows.models import (
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
+from hera.workflows.resource_base import ModelMapper, ResourceBase, Self
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow_status import WorkflowStatus
 
@@ -76,19 +75,13 @@ _SUFFIX_LEN = 5
 _TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
 
 
-class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
-    @classmethod
-    def _get_model_class(cls) -> Type[BaseModel]:
-        return _ModelWorkflow
-
-
 class Workflow(
     ArgumentsMixin,
     ContextMixin,
     HookMixin,
     VolumeMixin,
     MetricsMixin,
-    ModelMapperMixin,
+    ResourceBase,
 ):
     """The base Workflow class for Hera.
 
@@ -153,146 +146,157 @@ class Workflow(
                             self.volume_claim_templates.append(claim)
         return templates or None
 
+    mapped_model: ClassVar[Type[PydanticBaseModel]] = _ModelWorkflow
+
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    api_version: Annotated[Optional[str], _WorkflowModelMapper("api_version")] = None
-    kind: Annotated[Optional[str], _WorkflowModelMapper("kind")] = None
-    status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowModelMapper("status")] = None
+    api_version: Annotated[Optional[str], ModelMapper("api_version")] = None
+    kind: Annotated[Optional[str], ModelMapper("kind")] = None
+    status: Annotated[Optional[_ModelWorkflowStatus], ModelMapper("status")] = None
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
-    annotations: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.annotations")] = None
-    cluster_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.cluster_name")] = None
-    creation_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.creation_timestamp")] = None
+    annotations: Annotated[Optional[Dict[str, str]], ModelMapper("metadata.annotations")] = None
+    cluster_name: Annotated[Optional[str], ModelMapper("metadata.cluster_name")] = None
+    creation_timestamp: Annotated[Optional[Time], ModelMapper("metadata.creation_timestamp")] = None
     deletion_grace_period_seconds: Annotated[
-        Optional[int], _WorkflowModelMapper("metadata.deletion_grace_period_seconds")
+        Optional[int], ModelMapper("metadata.deletion_grace_period_seconds")
     ] = None
-    deletion_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.deletion_timestamp")] = None
-    finalizers: Annotated[Optional[List[str]], _WorkflowModelMapper("metadata.finalizers")] = None
-    generate_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.generate_name")] = None
-    generation: Annotated[Optional[int], _WorkflowModelMapper("metadata.generation")] = None
-    labels: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.labels")] = None
+    deletion_timestamp: Annotated[Optional[Time], ModelMapper("metadata.deletion_timestamp")] = None
+    finalizers: Annotated[Optional[List[str]], ModelMapper("metadata.finalizers")] = None
+    generate_name: Annotated[Optional[str], ModelMapper("metadata.generate_name")] = None
+    generation: Annotated[Optional[int], ModelMapper("metadata.generation")] = None
+    labels: Annotated[Optional[Dict[str, str]], ModelMapper("metadata.labels")] = None
     managed_fields: Annotated[
-        Optional[List[ManagedFieldsEntry]], _WorkflowModelMapper("metadata.managed_fields")
+        Optional[List[ManagedFieldsEntry]],
+        ModelMapper("metadata.managed_fields"),
     ] = None
-    name: Annotated[Optional[str], _WorkflowModelMapper("metadata.name")] = None
-    namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace")] = None
+    name: Annotated[Optional[str], ModelMapper("metadata.name")] = None
+    namespace: Annotated[Optional[str], ModelMapper("metadata.namespace")] = None
     owner_references: Annotated[
-        Optional[List[OwnerReference]], _WorkflowModelMapper("metadata.owner_references")
+        Optional[List[OwnerReference]],
+        ModelMapper("metadata.owner_references"),
     ] = None
-    resource_version: Annotated[Optional[str], _WorkflowModelMapper("metadata.resource_version")] = None
-    self_link: Annotated[Optional[str], _WorkflowModelMapper("metadata.self_link")] = None
-    uid: Annotated[Optional[str], _WorkflowModelMapper("metadata.uid")] = None
+    resource_version: Annotated[Optional[str], ModelMapper("metadata.resource_version")] = None
+    self_link: Annotated[Optional[str], ModelMapper("metadata.self_link")] = None
+    uid: Annotated[Optional[str], ModelMapper("metadata.uid")] = None
 
     # WorkflowSpec fields - https://argoproj.github.io/argo-workflows/fields/#workflowspec
-    active_deadline_seconds: Annotated[Optional[int], _WorkflowModelMapper("spec.active_deadline_seconds")] = None
-    affinity: Annotated[Optional[Affinity], _WorkflowModelMapper("spec.affinity")] = None
-    archive_logs: Annotated[Optional[bool], _WorkflowModelMapper("spec.archive_logs")] = None
-    artifact_gc: Annotated[Optional[ArtifactGC], _WorkflowModelMapper("spec.artifact_gc")] = None
+    active_deadline_seconds: Annotated[Optional[int], ModelMapper("spec.active_deadline_seconds")] = None
+    affinity: Annotated[Optional[Affinity], ModelMapper("spec.affinity")] = None
+    archive_logs: Annotated[Optional[bool], ModelMapper("spec.archive_logs")] = None
+    artifact_gc: Annotated[Optional[ArtifactGC], ModelMapper("spec.artifact_gc")] = None
     artifact_repository_ref: Annotated[
-        Optional[ArtifactRepositoryRef], _WorkflowModelMapper("spec.artifact_repository_ref")
+        Optional[ArtifactRepositoryRef],
+        ModelMapper("spec.artifact_repository_ref"),
     ] = None
     automount_service_account_token: Annotated[
-        Optional[bool], _WorkflowModelMapper("spec.automount_service_account_token")
+        Optional[bool], ModelMapper("spec.automount_service_account_token")
     ] = None
-    dns_config: Annotated[Optional[PodDNSConfig], _WorkflowModelMapper("spec.dns_config")] = None
-    dns_policy: Annotated[Optional[str], _WorkflowModelMapper("spec.dns_policy")] = None
-    entrypoint: Annotated[Optional[str], _WorkflowModelMapper("spec.entrypoint")] = None
-    executor: Annotated[Optional[ExecutorConfig], _WorkflowModelMapper("spec.executor")] = None
-    hooks: Annotated[Optional[Dict[str, LifecycleHook]], _WorkflowModelMapper("spec.hooks")] = None
-    host_aliases: Annotated[Optional[List[HostAlias]], _WorkflowModelMapper("spec.host_aliases")] = None
-    host_network: Annotated[Optional[bool], _WorkflowModelMapper("spec.host_network")] = None
-    image_pull_secrets: Annotated[ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets")] = None
-    node_selector: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("spec.node_selector")] = None
-    on_exit: Annotated[Optional[Union[str, Templatable]], _WorkflowModelMapper("spec.on_exit", _build_on_exit)] = None
-    parallelism: Annotated[Optional[int], _WorkflowModelMapper("spec.parallelism")] = None
+    dns_config: Annotated[Optional[PodDNSConfig], ModelMapper("spec.dns_config")] = None
+    dns_policy: Annotated[Optional[str], ModelMapper("spec.dns_policy")] = None
+    entrypoint: Annotated[Optional[str], ModelMapper("spec.entrypoint")] = None
+    executor: Annotated[Optional[ExecutorConfig], ModelMapper("spec.executor")] = None
+    hooks: Annotated[Optional[Dict[str, LifecycleHook]], ModelMapper("spec.hooks")] = None
+    host_aliases: Annotated[Optional[List[HostAlias]], ModelMapper("spec.host_aliases")] = None
+    host_network: Annotated[Optional[bool], ModelMapper("spec.host_network")] = None
+    image_pull_secrets: Annotated[ImagePullSecretsT, ModelMapper("spec.image_pull_secrets")] = None
+    node_selector: Annotated[Optional[Dict[str, str]], ModelMapper("spec.node_selector")] = None
+    on_exit: Annotated[
+        Optional[Union[str, Templatable]],
+        ModelMapper("spec.on_exit", _build_on_exit),
+    ] = None
+    parallelism: Annotated[Optional[int], ModelMapper("spec.parallelism")] = None
     pod_disruption_budget: Annotated[
-        Optional[PodDisruptionBudgetSpec], _WorkflowModelMapper("spec.pod_disruption_budget")
+        Optional[PodDisruptionBudgetSpec],
+        ModelMapper("spec.pod_disruption_budget"),
     ] = None
-    pod_gc: Annotated[Optional[PodGC], _WorkflowModelMapper("spec.pod_gc")] = None
-    pod_metadata: Annotated[Optional[Metadata], _WorkflowModelMapper("spec.pod_metadata")] = None
-    pod_priority: Annotated[Optional[int], _WorkflowModelMapper("spec.pod_priority")] = None
-    pod_priority_class_name: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_priority_class_name")] = None
-    pod_spec_patch: Annotated[Optional[str], _WorkflowModelMapper("spec.pod_spec_patch")] = None
-    priority: Annotated[Optional[int], _WorkflowModelMapper("spec.priority")] = None
-    retry_strategy: Annotated[Optional[RetryStrategy], _WorkflowModelMapper("spec.retry_strategy")] = None
-    scheduler_name: Annotated[Optional[str], _WorkflowModelMapper("spec.scheduler_name")] = None
-    security_context: Annotated[Optional[PodSecurityContext], _WorkflowModelMapper("spec.security_context")] = None
-    service_account_name: Annotated[Optional[str], _WorkflowModelMapper("spec.service_account_name")] = None
-    shutdown: Annotated[Optional[str], _WorkflowModelMapper("spec.shutdown")] = None
-    suspend: Annotated[Optional[bool], _WorkflowModelMapper("spec.suspend")] = None
-    synchronization: Annotated[Optional[Synchronization], _WorkflowModelMapper("spec.synchronization")] = None
-    template_defaults: Annotated[Optional[_ModelTemplate], _WorkflowModelMapper("spec.template_defaults")] = None
+    pod_gc: Annotated[Optional[PodGC], ModelMapper("spec.pod_gc")] = None
+    pod_metadata: Annotated[Optional[Metadata], ModelMapper("spec.pod_metadata")] = None
+    pod_priority: Annotated[Optional[int], ModelMapper("spec.pod_priority")] = None
+    pod_priority_class_name: Annotated[Optional[str], ModelMapper("spec.pod_priority_class_name")] = None
+    pod_spec_patch: Annotated[Optional[str], ModelMapper("spec.pod_spec_patch")] = None
+    priority: Annotated[Optional[int], ModelMapper("spec.priority")] = None
+    retry_strategy: Annotated[Optional[RetryStrategy], ModelMapper("spec.retry_strategy")] = None
+    scheduler_name: Annotated[Optional[str], ModelMapper("spec.scheduler_name")] = None
+    security_context: Annotated[Optional[PodSecurityContext], ModelMapper("spec.security_context")] = None
+    service_account_name: Annotated[Optional[str], ModelMapper("spec.service_account_name")] = None
+    shutdown: Annotated[Optional[str], ModelMapper("spec.shutdown")] = None
+    suspend: Annotated[Optional[bool], ModelMapper("spec.suspend")] = None
+    synchronization: Annotated[Optional[Synchronization], ModelMapper("spec.synchronization")] = None
+    template_defaults: Annotated[Optional[_ModelTemplate], ModelMapper("spec.template_defaults")] = None
     templates: Annotated[
-        List[Union[_ModelTemplate, Templatable]], _WorkflowModelMapper("spec.templates", _build_templates)
+        List[Union[_ModelTemplate, Templatable]],
+        ModelMapper("spec.templates", _build_templates),
     ] = []
-    tolerations: Annotated[Optional[List[Toleration]], _WorkflowModelMapper("spec.tolerations")] = None
-    ttl_strategy: Annotated[Optional[TTLStrategy], _WorkflowModelMapper("spec.ttl_strategy")] = None
-    volume_claim_gc: Annotated[Optional[VolumeClaimGC], _WorkflowModelMapper("spec.volume_claim_gc")] = None
+    tolerations: Annotated[Optional[List[Toleration]], ModelMapper("spec.tolerations")] = None
+    ttl_strategy: Annotated[Optional[TTLStrategy], ModelMapper("spec.ttl_strategy")] = None
+    volume_claim_gc: Annotated[Optional[VolumeClaimGC], ModelMapper("spec.volume_claim_gc")] = None
     volume_claim_templates: Annotated[
         Optional[List[PersistentVolumeClaim]],
-        _WorkflowModelMapper("spec.volume_claim_templates", _build_volume_claim_templates),
+        ModelMapper("spec.volume_claim_templates", _build_volume_claim_templates),
     ] = None
-    workflow_metadata: Annotated[Optional[WorkflowMetadata], _WorkflowModelMapper("spec.workflow_metadata")] = None
+    workflow_metadata: Annotated[Optional[WorkflowMetadata], ModelMapper("spec.workflow_metadata")] = None
     workflow_template_ref: Annotated[
-        Optional[WorkflowTemplateRef], _WorkflowModelMapper("spec.workflow_template_ref")
+        Optional[WorkflowTemplateRef],
+        ModelMapper("spec.workflow_template_ref"),
     ] = None
 
     # Override types for mixin fields
     arguments: Annotated[
         ArgumentsT,
-        _WorkflowModelMapper("spec.arguments", ArgumentsMixin._build_arguments),
+        ModelMapper("spec.arguments", ArgumentsMixin._build_arguments),
     ] = None
     metrics: Annotated[
         MetricsT,
-        _WorkflowModelMapper("spec.metrics", MetricsMixin._build_metrics),
+        ModelMapper("spec.metrics", MetricsMixin._build_metrics),
     ] = None
-    volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)] = None
+    volumes: Annotated[VolumesT, ModelMapper("spec.volumes", VolumeMixin._build_volumes)] = None
 
     # Hera-specific fields
     workflows_service: Optional[WorkflowsService] = None
 
-    @validator("name", pre=True, always=True)
+    @validator("name", pre=True, always=True, allow_reuse=True)
     def _set_name(cls, v):
         if v is not None and len(v) > NAME_LIMIT:
             raise ValueError(f"name must be no more than {NAME_LIMIT} characters: {v}")
         return v
 
-    @validator("generate_name", pre=True, always=True)
+    @validator("generate_name", pre=True, always=True, allow_reuse=True)
     def _set_generate_name(cls, v):
         if v is not None and len(v) > NAME_LIMIT:
             raise ValueError(f"generate_name must be no more than {NAME_LIMIT} characters: {v}")
         return v
 
-    @validator("api_version", pre=True, always=True)
+    @validator("api_version", pre=True, always=True, allow_reuse=True)
     def _set_api_version(cls, v):
         if v is None:
             return global_config.api_version
         return v
 
-    @validator("workflows_service", pre=True, always=True)
+    @validator("workflows_service", pre=True, always=True, allow_reuse=True)
     def _set_workflows_service(cls, v):
         if v is None:
             return WorkflowsService()
         return v
 
-    @validator("kind", pre=True, always=True)
+    @validator("kind", pre=True, always=True, allow_reuse=True)
     def _set_kind(cls, v):
         if v is None:
             return cls.__name__  # type: ignore
         return v
 
-    @validator("namespace", pre=True, always=True)
+    @validator("namespace", pre=True, always=True, allow_reuse=True)
     def _set_namespace(cls, v):
         if v is None:
             return global_config.namespace
         return v
 
-    @validator("service_account_name", pre=True, always=True)
+    @validator("service_account_name", pre=True, always=True, allow_reuse=True)
     def _set_service_account_name(cls, v):
         if v is None:
             return global_config.service_account_name
         return v
 
-    @validator("image_pull_secrets", pre=True, always=True)
+    @validator("image_pull_secrets", pre=True, always=True, allow_reuse=True)
     def _set_image_pull_secrets(cls, v):
         if v is None:
             return None
@@ -335,11 +339,7 @@ class Workflow(
             metadata=ObjectMeta(),
             spec=_ModelWorkflowSpec(),
         )
-        return _WorkflowModelMapper.build_model(Workflow, self, model_workflow)
-
-    def to_dict(self) -> Any:
-        """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
-        return self.build().dict(exclude_none=True, by_alias=True)
+        return ModelMapper.build_model(Workflow, self, model_workflow)
 
     def __eq__(self, other) -> bool:
         """Verifies equality of `self` with the specified `other`."""
@@ -347,10 +347,6 @@ class Workflow(
             return self.to_dict() == other.to_dict()
 
         return False
-
-    def to_yaml(self, *args, **kwargs) -> str:
-        """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
-        return _yaml.dump(self.to_dict(), *args, **kwargs)
 
     def create(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
         """Creates the Workflow on the Argo cluster.
@@ -447,7 +443,7 @@ class Workflow(
         return output_path.absolute()
 
     @classmethod
-    def from_dict(cls, model_dict: Dict) -> ModelMapperMixin:
+    def from_dict(cls, model_dict: Dict) -> Self:
         """Create a Workflow from a Workflow contained in a dict.
 
         Examples:
@@ -458,7 +454,7 @@ class Workflow(
         return cls._from_dict(model_dict, _ModelWorkflow)
 
     @classmethod
-    def from_yaml(cls, yaml_str: str) -> ModelMapperMixin:
+    def from_yaml(cls, yaml_str: str) -> Self:
         """Create a Workflow from a Workflow contained in a YAML string.
 
         Examples:
@@ -467,7 +463,7 @@ class Workflow(
         return cls._from_yaml(yaml_str, _ModelWorkflow)
 
     @classmethod
-    def from_file(cls, yaml_file: Union[Path, str]) -> ModelMapperMixin:
+    def from_file(cls, yaml_file: Union[Path, str]) -> Self:
         """Create a Workflow from a Workflow contained in a YAML file.
 
         Examples:

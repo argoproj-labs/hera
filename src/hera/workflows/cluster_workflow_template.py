@@ -1,6 +1,8 @@
 """Module that provides Hera objects for cluster workflow templates."""
+from typing import ClassVar, Type
+
 from hera.exceptions import NotFound
-from hera.shared._pydantic import validator
+from hera.shared._pydantic import BaseModel, validator
 from hera.workflows.models import (
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,
     ClusterWorkflowTemplateCreateRequest,
@@ -16,6 +18,8 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
 
     Since cluster workflow templates are scoped at the cluster level, they are available globally in the cluster.
     """
+
+    mapped_model: ClassVar[Type[BaseModel]] = _ModelClusterWorkflowTemplate
 
     @validator("namespace", pre=True, always=True)
     def _set_namespace(cls, v):
