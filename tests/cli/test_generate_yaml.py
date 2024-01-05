@@ -267,3 +267,25 @@ def test_relative_imports(capsys):
               image: image
         """
     )
+
+
+@pytest.mark.cli
+def test_custom_object_type(capsys):
+    runner.invoke("tests/cli/examples/custom_object_type")
+
+    output = get_stdout(capsys)
+    assert output == dedent(
+        """\
+        kind: Example
+        apiVersion: example.example/v1alpha1
+        name: example
+
+        ---
+
+        apiVersion: argoproj.io/v1alpha1
+        kind: Workflow
+        metadata:
+          name: example_workflow
+        spec: {}
+        """
+    )

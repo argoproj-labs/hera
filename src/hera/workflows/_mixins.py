@@ -1131,6 +1131,24 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         return self._get_parameter(name=name, subtype=self._subtype)
 
 
+class BuildableMixin:
+    def build(self) -> BaseModel:
+        raise NotImplementedError()
+
+    def to_dict(self) -> Any:
+        """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
+        return self.build().dict(exclude_none=True, by_alias=True)
+
+    def to_yaml(self, *args, **kwargs) -> str:
+        """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
+        if not _yaml:
+            raise ImportError("`PyYAML` is not installed. Install `hera[yaml]` to bring in the extra dependency")
+        # Set some default options if not provided by the user
+        kwargs.setdefault("default_flow_style", False)
+        kwargs.setdefault("sort_keys", False)
+        return _yaml.dump(self.to_dict(), *args, **kwargs)
+
+
 def _get_param_items_from_source(source: Callable) -> List[Parameter]:
     """Returns a list (possibly empty) of `Parameter` from the specified `source`.
 
@@ -1201,7 +1219,7 @@ def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
     return getattr(curr, attrs[-1])
 
 
-class ModelMapperMixin(BaseMixin):
+class ModelMapperMixin(BaseMixin, BuildableMixin):
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
             self.model_path = None

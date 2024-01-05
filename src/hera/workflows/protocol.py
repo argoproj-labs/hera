@@ -4,6 +4,7 @@ from typing import Any, List, Optional, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
+from hera.shared._pydantic import BaseModel
 from hera.workflows.models import (
     ClusterWorkflowTemplate,
     ContainerSetTemplate,
@@ -35,6 +36,20 @@ TWorkflow = Union[
     WorkflowTemplate,
 ]
 """`TWorkflow` is a union type collection of all the Hera workflow type objects that can manage contexts"""
+
+
+@runtime_checkable
+class Buildable(Protocol):
+    """This runtime protocol indicates that an object can built into a standalone serializable representation."""
+
+    def build(self) -> BaseModel:
+        """Produce a serializable model object."""
+
+    def to_dict(self) -> Any:
+        """Produce a raw python dict structure."""
+
+    def to_yaml(self, *args, **kwargs) -> str:
+        """Produce a yaml string of the `to_dict` representation."""
 
 
 @runtime_checkable

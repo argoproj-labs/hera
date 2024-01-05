@@ -345,25 +345,12 @@ class Workflow(
         )
         return _WorkflowModelMapper.build_model(Workflow, self, model_workflow)
 
-    def to_dict(self) -> Any:
-        """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
-        return self.build().dict(exclude_none=True, by_alias=True)
-
     def __eq__(self, other) -> bool:
         """Verifies equality of `self` with the specified `other`."""
         if other.__class__ is self.__class__:
             return self.to_dict() == other.to_dict()
 
         return False
-
-    def to_yaml(self, *args, **kwargs) -> str:
-        """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
-        if not _yaml:
-            raise ImportError("`PyYAML` is not installed. Install `hera[yaml]` to bring in the extra dependency")
-        # Set some default options if not provided by the user
-        kwargs.setdefault("default_flow_style", False)
-        kwargs.setdefault("sort_keys", False)
-        return _yaml.dump(self.to_dict(), *args, **kwargs)
 
     def create(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
         """Creates the Workflow on the Argo cluster.

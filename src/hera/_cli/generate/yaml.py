@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Generator
 
 from hera._cli.base import GenerateYaml
-from hera.workflows.workflow import Workflow
+from hera.workflows.protocol import Buildable
 
 
 def generate_yaml(options: GenerateYaml):
@@ -73,14 +73,14 @@ def expand_paths(source: Path, recursive: bool = False) -> Generator[Path, None,
                 yield path
 
 
-def load_workflows_from_module(path: Path) -> list[Workflow]:
-    """Load the set of `Workflow` objects defined within a given module.
+def load_workflows_from_module(path: Path) -> list[Buildable]:
+    """Load the set of mappable objects defined within a given module.
 
     Arguments:
         path: The path to a given python module
 
     Returns:
-        A list containing all `Workflow` objects defined within that module.
+        A list containing all detected objects defined within that module.
     """
     module_name = path.stem
     spec = importlib.util.spec_from_file_location(module_name, path, submodule_search_locations=[str(path.parent)])
@@ -94,7 +94,7 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
 
     result = []
     for item in module.__dict__.values():
-        if isinstance(item, Workflow):
+        if isinstance(item, Buildable) and not isinstance(item, type):
             result.append(item)
 
     return result
