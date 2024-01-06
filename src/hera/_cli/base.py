@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 from cappa import Arg, Subcommands, command
 from typing_extensions import Annotated
@@ -24,6 +24,7 @@ class Generate:
     help="Generate yaml from python Workflow definitions.",
     invoke="hera._cli.generate.yaml.generate_yaml",
 )
+@dataclass
 class GenerateYaml:
     from_: Annotated[
         Path,
@@ -49,3 +50,25 @@ class GenerateYaml:
         ),
     ] = None
     recursive: Annotated[bool, Arg(help="Enables recursive traversal of an input folder")] = False
+    include: Annotated[
+        List[str],
+        Arg(
+            short=True,
+            long=True,
+            help=(
+                "Filter the set of input files by including only files matching the `--include`. "
+                "Note this also accepts glob specifiers like 'folder/*'. "
+            ),
+        ),
+    ] = field(default_factory=list)
+    exclude: Annotated[
+        List[str],
+        Arg(
+            short=True,
+            long=True,
+            help=(
+                "Filter the set of input files by excluding files matching the `--exclude`. "
+                "Note this also accepts glob specifiers like 'folder/*'. "
+            ),
+        ),
+    ] = field(default_factory=list)

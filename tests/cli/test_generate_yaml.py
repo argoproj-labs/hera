@@ -2,7 +2,6 @@ import sys
 from textwrap import dedent
 from unittest.mock import mock_open, patch
 
-import cappa
 import pytest
 from cappa.testing import CommandRunner
 
@@ -11,6 +10,10 @@ from hera._cli.base import Hera
 
 def get_stdout(capsys):
     return capsys.readouterr().out
+
+
+def join_output(*inputs):
+    return "\n---\n\n".join(inputs)
 
 
 def patch_open():
@@ -67,13 +70,11 @@ multiple_workflow_output = dedent(
         """
 )
 
-whole_folder_output = "\n---\n\n".join(
-    [
-        cluster_workflow_template_output,
-        multiple_workflow_output,
-        single_workflow_output,
-        workflow_template_output,
-    ]
+whole_folder_output = join_output(
+    cluster_workflow_template_output,
+    multiple_workflow_output,
+    single_workflow_output,
+    workflow_template_output,
 )
 
 
@@ -82,7 +83,7 @@ runner = CommandRunner(Hera, base_args=["generate", "yaml"])
 
 @pytest.mark.cli
 def test_no_output(capsys):
-    cappa.invoke(Hera, argv=["generate", "yaml", "tests/cli/test_generate_yaml.py"])
+    runner.invoke("tests/cli/test_generate_yaml.py")
 
     output = get_stdout(capsys)
     expected_result = ""
@@ -91,7 +92,7 @@ def test_no_output(capsys):
 
 @pytest.mark.cli
 def test_single_workflow(capsys):
-    cappa.invoke(Hera, argv=["generate", "yaml", "tests/cli/examples/single_workflow.py"])
+    runner.invoke("tests/cli/examples/single_workflow.py")
 
     output = get_stdout(capsys)
     assert output == single_workflow_output
@@ -99,7 +100,7 @@ def test_single_workflow(capsys):
 
 @pytest.mark.cli
 def test_multiple_workflow(capsys):
-    cappa.invoke(Hera, argv=["generate", "yaml", "tests/cli/examples/multiple_workflow.py"])
+    runner.invoke("tests/cli/examples/multiple_workflow.py")
 
     output = get_stdout(capsys)
     assert output == multiple_workflow_output
@@ -107,7 +108,7 @@ def test_multiple_workflow(capsys):
 
 @pytest.mark.cli
 def test_workflow_template(capsys):
-    cappa.invoke(Hera, argv=["generate", "yaml", "tests/cli/examples/workflow_template.py"])
+    runner.invoke("tests/cli/examples/workflow_template.py")
 
     output = get_stdout(capsys)
     assert output == workflow_template_output
@@ -115,10 +116,7 @@ def test_workflow_template(capsys):
 
 @pytest.mark.cli
 def test_cluster_workflow_template(capsys):
-    cappa.invoke(
-        Hera,
-        argv=["generate", "yaml", "tests/cli/examples/cluster_workflow_template.py"],
-    )
+    runner.invoke("tests/cli/examples/cluster_workflow_template.py")
 
     output = get_stdout(capsys)
     assert output == cluster_workflow_template_output
@@ -126,7 +124,7 @@ def test_cluster_workflow_template(capsys):
 
 @pytest.mark.cli
 def test_scan_folder(capsys):
-    cappa.invoke(Hera, argv=["generate", "yaml", "tests/cli/examples"])
+    runner.invoke("tests/cli/examples")
 
     output = get_stdout(capsys)
     assert output == whole_folder_output
@@ -138,16 +136,7 @@ def test_source_file_output_file():
     write_text_patch = patch("pathlib.Path.write_text")
 
     with exists_patch, write_text_patch as m:
-        cappa.invoke(
-            Hera,
-            argv=[
-                "generate",
-                "yaml",
-                "tests/cli/examples/single_workflow.py",
-                "--to",
-                "foo.yml",
-            ],
-        )
+        runner.invoke("tests/cli/examples/single_workflow.py", "--to", "foo.yml")
 
     assert m.call_count == 1
 
@@ -162,16 +151,7 @@ def test_source_folder_output_file():
     write_text_patch = patch("pathlib.Path.write_text")
 
     with exists_patch, is_file_patch, write_text_patch as m:
-        cappa.invoke(
-            Hera,
-            argv=[
-                "generate",
-                "yaml",
-                "tests/cli/examples",
-                "--to",
-                "foo.yml",
-            ],
-        )
+        runner.invoke("tests/cli/examples", "--to", "foo.yml")
 
     assert m.call_count == 1
 
@@ -189,16 +169,7 @@ def test_source_file_output_folder():
     open_patch = patch_open()
 
     with source_is_dir_patch, dest_exists_patch, dest_is_file_patch, makedirs_patch, open_patch:
-        cappa.invoke(
-            Hera,
-            argv=[
-                "generate",
-                "yaml",
-                "tests/cli/examples/single_workflow.py",
-                "--to",
-                "dir/",
-            ],
-        )
+        runner.invoke("tests/cli/examples/single_workflow.py", "--to", "dir/")
 
     filename = str(open_patch.new.mock_calls[0][1][0])
     assert filename == "dir/single_workflow.yaml"
@@ -216,16 +187,7 @@ def test_source_folder_output_folder():
     open_patch = patch_open()
 
     with source_is_dir_patch, dest_exists_patch, makedirs_patch, open_patch:
-        cappa.invoke(
-            Hera,
-            argv=[
-                "generate",
-                "yaml",
-                "tests/cli/examples",
-                "--to",
-                "dir/",
-            ],
-        )
+        runner.invoke("tests/cli/examples", "--to", "dir/")
 
     assert open_patch.new.call_count == 4
     assert open_patch.new.return_value.write.call_count == 4
@@ -267,3 +229,55 @@ def test_relative_imports(capsys):
               image: image
         """
     )
+
+
+@pytest.mark.cli
+def test_include_one(capsys):
+    runner.invoke("tests/cli/examples", "--include=*/examples/single*")
+
+    output = get_stdout(capsys)
+    assert output == single_workflow_output
+
+
+@pytest.mark.cli
+def test_include_two(capsys):
+    runner.invoke(
+        "tests/cli/examples",
+        "--include=*/examples/single*",
+        "--include=*/examples/*template*",
+    )
+
+    output = get_stdout(capsys)
+    assert output == join_output(
+        cluster_workflow_template_output,
+        single_workflow_output,
+        workflow_template_output,
+    )
+
+
+@pytest.mark.cli
+def test_exclude_one(capsys):
+    runner.invoke("tests/cli/examples", "--exclude=*/examples/*template*")
+
+    output = get_stdout(capsys)
+    assert output == join_output(multiple_workflow_output, single_workflow_output)
+
+
+@pytest.mark.cli
+def test_exclude_two(capsys):
+    runner.invoke(
+        "tests/cli/examples",
+        "--exclude=*/examples/single*",
+        "--exclude=*/examples/*template*",
+    )
+
+    output = get_stdout(capsys)
+    assert output == multiple_workflow_output
+
+
+@pytest.mark.cli
+def test_include_and_exclude(capsys):
+    runner.invoke("tests/cli/examples", "--include=*/examples/*template*", "--exclude=*cluster*")
+
+    output = get_stdout(capsys)
+    assert output == workflow_template_output
