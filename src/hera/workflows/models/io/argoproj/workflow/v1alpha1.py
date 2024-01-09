@@ -19,6 +19,27 @@ class Amount(BaseModel):
     __root__: Annotated[float, Field(description="Amount represent a numeric amount.")]
 
 
+class NoneStrategy(BaseModel):
+    pass
+
+
+class TarStrategy(BaseModel):
+    compression_level: Annotated[
+        Optional[int],
+        Field(
+            alias="compressionLevel",
+            description=(
+                "CompressionLevel specifies the gzip compression level to use for the"
+                " artifact. Defaults to gzip.DefaultCompression."
+            ),
+        ),
+    ] = None
+
+
+class ZipStrategy(BaseModel):
+    pass
+
+
 class ArchivedWorkflowDeletedResponse(BaseModel):
     pass
 
@@ -51,6 +72,15 @@ class ArtGCStatus(BaseModel):
             ),
         ),
     ] = None
+
+
+class RawArtifact(BaseModel):
+    data: Annotated[str, Field(description="Data is the string contents of the artifact")]
+
+
+class Metadata(BaseModel):
+    annotations: Optional[Dict[str, str]] = None
+    labels: Optional[Dict[str, str]] = None
 
 
 class ArtifactRepositoryRef(BaseModel):
@@ -140,6 +170,23 @@ class CronWorkflowResumeRequest(BaseModel):
 class CronWorkflowSuspendRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
+
+
+class TemplateRef(BaseModel):
+    cluster_scope: Annotated[
+        Optional[bool],
+        Field(
+            alias="clusterScope",
+            description=(
+                "ClusterScope indicates the referred template is cluster scoped (i.e. a" " ClusterWorkflowTemplate)."
+            ),
+        ),
+    ] = None
+    name: Annotated[Optional[str], Field(description="Name is the resource name of the template.")] = None
+    template: Annotated[
+        Optional[str],
+        Field(description="Template is the name of referred template in the resource."),
+    ] = None
 
 
 class Event(BaseModel):
@@ -266,11 +313,6 @@ class MemoizationStatus(BaseModel):
     key: Annotated[str, Field(description="Key is the name of the key used for this node's cache")]
 
 
-class Metadata(BaseModel):
-    annotations: Optional[Dict[str, str]] = None
-    labels: Optional[Dict[str, str]] = None
-
-
 class MetricLabel(BaseModel):
     key: str
     value: str
@@ -324,10 +366,6 @@ class NodeSynchronizationStatus(BaseModel):
     ] = None
 
 
-class NoneStrategy(BaseModel):
-    pass
-
-
 class OAuth2EndpointParam(BaseModel):
     key: Annotated[str, Field(description="Name is the header name")]
     value: Annotated[
@@ -360,32 +398,16 @@ class Plugin(BaseModel):
     pass
 
 
-class Prometheus(BaseModel):
-    counter: Annotated[Optional[Counter], Field(description="Counter is a counter metric")] = None
-    gauge: Annotated[Optional[Gauge], Field(description="Gauge is a gauge metric")] = None
-    help: Annotated[str, Field(description="Help is a string that describes the metric")]
-    histogram: Annotated[Optional[Histogram], Field(description="Histogram is a histogram metric")] = None
-    labels: Annotated[
-        Optional[List[MetricLabel]],
-        Field(description="Labels is a list of metric labels"),
-    ] = None
-    name: Annotated[str, Field(description="Name is the name of the metric")]
-    when: Annotated[
-        Optional[str],
-        Field(description=("When is a conditional statement that decides when to emit the metric")),
-    ] = None
-
-
-class RawArtifact(BaseModel):
-    data: Annotated[str, Field(description="Data is the string contents of the artifact")]
-
-
 class ResubmitArchivedWorkflowRequest(BaseModel):
     memoized: Optional[bool] = None
     name: Optional[str] = None
     namespace: Optional[str] = None
     parameters: Optional[List[str]] = None
     uid: Optional[str] = None
+
+
+class RetryNodeAntiAffinity(BaseModel):
+    pass
 
 
 class RetryArchivedWorkflowRequest(BaseModel):
@@ -395,10 +417,6 @@ class RetryArchivedWorkflowRequest(BaseModel):
     parameters: Optional[List[str]] = None
     restart_successful: Annotated[Optional[bool], Field(alias="restartSuccessful")] = None
     uid: Optional[str] = None
-
-
-class RetryNodeAntiAffinity(BaseModel):
-    pass
 
 
 class SemaphoreHolding(BaseModel):
@@ -422,6 +440,22 @@ class SemaphoreStatus(BaseModel):
     ] = None
 
 
+class WorkflowTemplateRef(BaseModel):
+    cluster_scope: Annotated[
+        Optional[bool],
+        Field(
+            alias="clusterScope",
+            description=(
+                "ClusterScope indicates the referred template is cluster scoped (i.e. a" " ClusterWorkflowTemplate)."
+            ),
+        ),
+    ] = None
+    name: Annotated[
+        Optional[str],
+        Field(description="Name is the resource name of the workflow template."),
+    ] = None
+
+
 class SuppliedValueFrom(BaseModel):
     pass
 
@@ -436,17 +470,6 @@ class SuspendTemplate(BaseModel):
                 ' Duration, e.g.: "2m", "6h", "1d"'
             )
         ),
-    ] = None
-
-
-class SynchronizationStatus(BaseModel):
-    mutex: Annotated[
-        Optional[MutexStatus],
-        Field(description="Mutex stores this workflow's mutex holder details"),
-    ] = None
-    semaphore: Annotated[
-        Optional[SemaphoreStatus],
-        Field(description="Semaphore stores this workflow's Semaphore holder details"),
     ] = None
 
 
@@ -471,36 +494,6 @@ class TTLStrategy(BaseModel):
             alias="secondsAfterSuccess",
             description=("SecondsAfterSuccess is the number of seconds to live after success"),
         ),
-    ] = None
-
-
-class TarStrategy(BaseModel):
-    compression_level: Annotated[
-        Optional[int],
-        Field(
-            alias="compressionLevel",
-            description=(
-                "CompressionLevel specifies the gzip compression level to use for the"
-                " artifact. Defaults to gzip.DefaultCompression."
-            ),
-        ),
-    ] = None
-
-
-class TemplateRef(BaseModel):
-    cluster_scope: Annotated[
-        Optional[bool],
-        Field(
-            alias="clusterScope",
-            description=(
-                "ClusterScope indicates the referred template is cluster scoped (i.e. a" " ClusterWorkflowTemplate)."
-            ),
-        ),
-    ] = None
-    name: Annotated[Optional[str], Field(description="Name is the resource name of the template.")] = None
-    template: Annotated[
-        Optional[str],
-        Field(description="Template is the name of referred template in the resource."),
     ] = None
 
 
@@ -582,67 +575,25 @@ class WorkflowTemplateDeleteResponse(BaseModel):
     pass
 
 
-class WorkflowTemplateRef(BaseModel):
-    cluster_scope: Annotated[
-        Optional[bool],
-        Field(
-            alias="clusterScope",
-            description=(
-                "ClusterScope indicates the referred template is cluster scoped (i.e. a" " ClusterWorkflowTemplate)."
-            ),
-        ),
-    ] = None
-    name: Annotated[
-        Optional[str],
-        Field(description="Name is the resource name of the workflow template."),
-    ] = None
-
-
 class WorkflowTerminateRequest(BaseModel):
     name: Optional[str] = None
     namespace: Optional[str] = None
 
 
-class ZipStrategy(BaseModel):
-    pass
-
-
-class ArchiveStrategy(BaseModel):
-    none: Optional[NoneStrategy] = None
-    tar: Optional[TarStrategy] = None
-    zip: Optional[ZipStrategy] = None
-
-
-class ArtifactGC(BaseModel):
-    pod_metadata: Annotated[
-        Optional[Metadata],
-        Field(
-            alias="podMetadata",
-            description=(
-                "PodMetadata is an optional field for specifying the Labels and"
-                " Annotations that should be assigned to the Pod doing the deletion"
-            ),
-        ),
+class CronWorkflowStatus(BaseModel):
+    active: Annotated[
+        Optional[List[v1.ObjectReference]],
+        Field(description=("Active is a list of active workflows stemming from this CronWorkflow")),
     ] = None
-    service_account_name: Annotated[
-        Optional[str],
-        Field(
-            alias="serviceAccountName",
-            description=(
-                "ServiceAccountName is an optional field for specifying the Service"
-                " Account that should be assigned to the Pod doing the deletion"
-            ),
-        ),
+    conditions: Annotated[
+        Optional[List[Condition]],
+        Field(description="Conditions is a list of conditions the CronWorkflow may have"),
     ] = None
-    strategy: Annotated[Optional[str], Field(description="Strategy is the strategy to use.")] = None
-
-
-class ArtifactGCStatus(BaseModel):
-    artifact_results_by_node: Annotated[
-        Optional[Dict[str, ArtifactResultNodeStatus]],
+    last_scheduled_time: Annotated[
+        Optional[v1_1.Time],
         Field(
-            alias="artifactResultsByNode",
-            description="ArtifactResultsByNode maps Node name to result",
+            alias="lastScheduledTime",
+            description=("LastScheduleTime is the last time the CronWorkflow was scheduled"),
         ),
     ] = None
 
@@ -759,29 +710,6 @@ class AzureArtifactRepository(BaseModel):
     ] = None
 
 
-class Backoff(BaseModel):
-    duration: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Duration is the amount to back off. Default unit is seconds, but could"
-                ' also be a duration (e.g. "2m", "1h")'
-            )
-        ),
-    ] = None
-    factor: Annotated[
-        Optional[intstr.IntOrString],
-        Field(description=("Factor is a factor to multiply the base duration after each failed" " retry")),
-    ] = None
-    max_duration: Annotated[
-        Optional[str],
-        Field(
-            alias="maxDuration",
-            description=("MaxDuration is the maximum amount of time allowed for the backoff" " strategy"),
-        ),
-    ] = None
-
-
 class BasicAuth(BaseModel):
     password_secret: Annotated[
         Optional[v1.SecretKeySelector],
@@ -799,48 +727,9 @@ class BasicAuth(BaseModel):
     ] = None
 
 
-class Cache(BaseModel):
-    config_map: Annotated[
-        v1.ConfigMapKeySelector,
-        Field(alias="configMap", description="ConfigMap sets a ConfigMap-based cache"),
-    ]
-
-
 class ClientCertAuth(BaseModel):
     client_cert_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientCertSecret")] = None
     client_key_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientKeySecret")] = None
-
-
-class ContainerSetRetryStrategy(BaseModel):
-    duration: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                'Duration is the time between each retry, examples values are "300ms",'
-                ' "1s" or "5m". Valid time units are "ns", "us" (or "µs"), "ms", "s",'
-                ' "m", "h".'
-            )
-        ),
-    ] = None
-    retries: Annotated[intstr.IntOrString, Field(description="Nbr of retries")]
-
-
-class CronWorkflowStatus(BaseModel):
-    active: Annotated[
-        Optional[List[v1.ObjectReference]],
-        Field(description=("Active is a list of active workflows stemming from this CronWorkflow")),
-    ] = None
-    conditions: Annotated[
-        Optional[List[Condition]],
-        Field(description="Conditions is a list of conditions the CronWorkflow may have"),
-    ] = None
-    last_scheduled_time: Annotated[
-        Optional[v1_1.Time],
-        Field(
-            alias="lastScheduledTime",
-            description=("LastScheduleTime is the last time the CronWorkflow was scheduled"),
-        ),
-    ] = None
 
 
 class GCSArtifact(BaseModel):
@@ -941,6 +830,68 @@ class GitArtifact(BaseModel):
             description=("UsernameSecret is the secret selector to the repository username"),
         ),
     ] = None
+
+
+class HTTPHeaderSource(BaseModel):
+    secret_key_ref: Annotated[Optional[v1.SecretKeySelector], Field(alias="secretKeyRef")] = None
+
+
+class OAuth2Auth(BaseModel):
+    client_id_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientIDSecret")] = None
+    client_secret_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientSecretSecret")] = None
+    endpoint_params: Annotated[Optional[List[OAuth2EndpointParam]], Field(alias="endpointParams")] = None
+    scopes: Optional[List[str]] = None
+    token_url_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="tokenURLSecret")] = None
+
+
+class S3EncryptionOptions(BaseModel):
+    enable_encryption: Annotated[
+        Optional[bool],
+        Field(
+            alias="enableEncryption",
+            description=(
+                "EnableEncryption tells the driver to encrypt objects if set to true."
+                " If kmsKeyId and serverSideCustomerKeySecret are not set, SSE-S3 will"
+                " be used"
+            ),
+        ),
+    ] = None
+    kms_encryption_context: Annotated[
+        Optional[str],
+        Field(
+            alias="kmsEncryptionContext",
+            description=(
+                "KmsEncryptionContext is a json blob that contains an encryption"
+                " context. See"
+                " https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#encrypt_context"
+                " for more information"
+            ),
+        ),
+    ] = None
+    kms_key_id: Annotated[
+        Optional[str],
+        Field(
+            alias="kmsKeyId",
+            description=("KMSKeyId tells the driver to encrypt the object using the specified" " KMS Key."),
+        ),
+    ] = None
+    server_side_customer_key_secret: Annotated[
+        Optional[v1.SecretKeySelector],
+        Field(
+            alias="serverSideCustomerKeySecret",
+            description=(
+                "ServerSideCustomerKeySecret tells the driver to encrypt the output"
+                " artifacts using SSE-C with the specified secret."
+            ),
+        ),
+    ] = None
+
+
+class Cache(BaseModel):
+    config_map: Annotated[
+        v1.ConfigMapKeySelector,
+        Field(alias="configMap", description="ConfigMap sets a ConfigMap-based cache"),
+    ]
 
 
 class HDFSArtifact(BaseModel):
@@ -1109,46 +1060,116 @@ class HDFSArtifactRepository(BaseModel):
     ] = None
 
 
-class HTTPHeaderSource(BaseModel):
-    secret_key_ref: Annotated[Optional[v1.SecretKeySelector], Field(alias="secretKeyRef")] = None
-
-
-class InfoResponse(BaseModel):
-    links: Optional[List[Link]] = None
-    managed_namespace: Annotated[Optional[str], Field(alias="managedNamespace")] = None
-    modals: Annotated[Optional[Dict[str, bool]], Field(title="which modals to show")] = None
-    nav_color: Annotated[Optional[str], Field(alias="navColor")] = None
-
-
-class Memoize(BaseModel):
-    cache: Annotated[Cache, Field(description="Cache sets and configures the kind of cache")]
-    key: Annotated[str, Field(description="Key is the key to use as the caching key")]
-    max_age: Annotated[
-        str,
+class SemaphoreRef(BaseModel):
+    config_map_key_ref: Annotated[
+        Optional[v1.ConfigMapKeySelector],
         Field(
-            alias="maxAge",
-            description=(
-                'MaxAge is the maximum age (e.g. "180s", "24h") of an entry that is'
-                " still considered valid. If an entry is older than the MaxAge, it will"
-                " be ignored."
-            ),
+            alias="configMapKeyRef",
+            description=("ConfigMapKeyRef is configmap selector for Semaphore configuration"),
         ),
-    ]
-
-
-class Metrics(BaseModel):
-    prometheus: Annotated[
-        Optional[List[Prometheus]],
-        Field(description="Prometheus is a list of prometheus metrics to be emitted"),
     ] = None
 
 
-class OAuth2Auth(BaseModel):
-    client_id_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientIDSecret")] = None
-    client_secret_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="clientSecretSecret")] = None
-    endpoint_params: Annotated[Optional[List[OAuth2EndpointParam]], Field(alias="endpointParams")] = None
-    scopes: Optional[List[str]] = None
-    token_url_secret: Annotated[Optional[v1.SecretKeySelector], Field(alias="tokenURLSecret")] = None
+class ArchiveStrategy(BaseModel):
+    none: Optional[NoneStrategy] = None
+    tar: Optional[TarStrategy] = None
+    zip: Optional[ZipStrategy] = None
+
+
+class ArtifactGC(BaseModel):
+    pod_metadata: Annotated[
+        Optional[Metadata],
+        Field(
+            alias="podMetadata",
+            description=(
+                "PodMetadata is an optional field for specifying the Labels and"
+                " Annotations that should be assigned to the Pod doing the deletion"
+            ),
+        ),
+    ] = None
+    service_account_name: Annotated[
+        Optional[str],
+        Field(
+            alias="serviceAccountName",
+            description=(
+                "ServiceAccountName is an optional field for specifying the Service"
+                " Account that should be assigned to the Pod doing the deletion"
+            ),
+        ),
+    ] = None
+    strategy: Annotated[Optional[str], Field(description="Strategy is the strategy to use.")] = None
+
+
+class Backoff(BaseModel):
+    duration: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Duration is the amount to back off. Default unit is seconds, but could"
+                ' also be a duration (e.g. "2m", "1h")'
+            )
+        ),
+    ] = None
+    factor: Annotated[
+        Optional[intstr.IntOrString],
+        Field(description=("Factor is a factor to multiply the base duration after each failed" " retry")),
+    ] = None
+    max_duration: Annotated[
+        Optional[str],
+        Field(
+            alias="maxDuration",
+            description=("MaxDuration is the maximum amount of time allowed for the backoff" " strategy"),
+        ),
+    ] = None
+
+
+class ContainerSetRetryStrategy(BaseModel):
+    duration: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                'Duration is the time between each retry, examples values are "300ms",'
+                ' "1s" or "5m". Valid time units are "ns", "us" (or "µs"), "ms", "s",'
+                ' "m", "h".'
+            )
+        ),
+    ] = None
+    retries: Annotated[intstr.IntOrString, Field(description="Nbr of retries")]
+
+
+class Sequence(BaseModel):
+    count: Annotated[
+        Optional[intstr.IntOrString],
+        Field(description=("Count is number of elements in the sequence (default: 0). Not to be" " used with end")),
+    ] = None
+    end: Annotated[
+        Optional[intstr.IntOrString],
+        Field(description=("Number at which to end the sequence (default: 0). Not to be used with" " Count")),
+    ] = None
+    format: Annotated[
+        Optional[str],
+        Field(description=("Format is a printf format string to format the value in the sequence")),
+    ] = None
+    start: Annotated[
+        Optional[intstr.IntOrString],
+        Field(description="Number at which to start the sequence (default: 0)"),
+    ] = None
+
+
+class Prometheus(BaseModel):
+    counter: Annotated[Optional[Counter], Field(description="Counter is a counter metric")] = None
+    gauge: Annotated[Optional[Gauge], Field(description="Gauge is a gauge metric")] = None
+    help: Annotated[str, Field(description="Help is a string that describes the metric")]
+    histogram: Annotated[Optional[Histogram], Field(description="Histogram is a histogram metric")] = None
+    labels: Annotated[
+        Optional[List[MetricLabel]],
+        Field(description="Labels is a list of metric labels"),
+    ] = None
+    name: Annotated[str, Field(description="Name is the name of the metric")]
+    when: Annotated[
+        Optional[str],
+        Field(description=("When is a conditional statement that decides when to emit the metric")),
+    ] = None
 
 
 class OSSArtifact(BaseModel):
@@ -1266,110 +1287,14 @@ class RetryAffinity(BaseModel):
     node_anti_affinity: Annotated[Optional[RetryNodeAntiAffinity], Field(alias="nodeAntiAffinity")] = None
 
 
-class RetryStrategy(BaseModel):
-    affinity: Annotated[
-        Optional[RetryAffinity],
-        Field(description="Affinity prevents running workflow's step on the same host"),
+class SynchronizationStatus(BaseModel):
+    mutex: Annotated[
+        Optional[MutexStatus],
+        Field(description="Mutex stores this workflow's mutex holder details"),
     ] = None
-    backoff: Annotated[Optional[Backoff], Field(description="Backoff is a backoff strategy")] = None
-    expression: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Expression is a condition expression for when a node will be retried."
-                " If it evaluates to false, the node will not be retried and the retry"
-                " strategy will be ignored"
-            )
-        ),
-    ] = None
-    limit: Annotated[
-        Optional[intstr.IntOrString],
-        Field(
-            description=(
-                "Limit is the maximum number of retry attempts when retrying a"
-                " container. It does not include the original container; the maximum"
-                " number of total attempts will be `limit + 1`."
-            )
-        ),
-    ] = None
-    retry_policy: Annotated[
-        Optional[str],
-        Field(
-            alias="retryPolicy",
-            description=("RetryPolicy is a policy of NodePhase statuses that will be retried"),
-        ),
-    ] = None
-
-
-class S3EncryptionOptions(BaseModel):
-    enable_encryption: Annotated[
-        Optional[bool],
-        Field(
-            alias="enableEncryption",
-            description=(
-                "EnableEncryption tells the driver to encrypt objects if set to true."
-                " If kmsKeyId and serverSideCustomerKeySecret are not set, SSE-S3 will"
-                " be used"
-            ),
-        ),
-    ] = None
-    kms_encryption_context: Annotated[
-        Optional[str],
-        Field(
-            alias="kmsEncryptionContext",
-            description=(
-                "KmsEncryptionContext is a json blob that contains an encryption"
-                " context. See"
-                " https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#encrypt_context"
-                " for more information"
-            ),
-        ),
-    ] = None
-    kms_key_id: Annotated[
-        Optional[str],
-        Field(
-            alias="kmsKeyId",
-            description=("KMSKeyId tells the driver to encrypt the object using the specified" " KMS Key."),
-        ),
-    ] = None
-    server_side_customer_key_secret: Annotated[
-        Optional[v1.SecretKeySelector],
-        Field(
-            alias="serverSideCustomerKeySecret",
-            description=(
-                "ServerSideCustomerKeySecret tells the driver to encrypt the output"
-                " artifacts using SSE-C with the specified secret."
-            ),
-        ),
-    ] = None
-
-
-class SemaphoreRef(BaseModel):
-    config_map_key_ref: Annotated[
-        Optional[v1.ConfigMapKeySelector],
-        Field(
-            alias="configMapKeyRef",
-            description=("ConfigMapKeyRef is configmap selector for Semaphore configuration"),
-        ),
-    ] = None
-
-
-class Sequence(BaseModel):
-    count: Annotated[
-        Optional[intstr.IntOrString],
-        Field(description=("Count is number of elements in the sequence (default: 0). Not to be" " used with end")),
-    ] = None
-    end: Annotated[
-        Optional[intstr.IntOrString],
-        Field(description=("Number at which to end the sequence (default: 0). Not to be used with" " Count")),
-    ] = None
-    format: Annotated[
-        Optional[str],
-        Field(description=("Format is a printf format string to format the value in the sequence")),
-    ] = None
-    start: Annotated[
-        Optional[intstr.IntOrString],
-        Field(description="Number at which to start the sequence (default: 0)"),
+    semaphore: Annotated[
+        Optional[SemaphoreStatus],
+        Field(description="Semaphore stores this workflow's Semaphore holder details"),
     ] = None
 
 
@@ -1442,14 +1367,6 @@ class SubmitOpts(BaseModel):
     ] = None
 
 
-class Synchronization(BaseModel):
-    mutex: Annotated[Optional[Mutex], Field(description="Mutex holds the Mutex lock details")] = None
-    semaphore: Annotated[
-        Optional[SemaphoreRef],
-        Field(description="Semaphore holds the Semaphore configuration"),
-    ] = None
-
-
 class ValueFrom(BaseModel):
     config_map_key_ref: Annotated[
         Optional[v1.ConfigMapKeySelector],
@@ -1514,91 +1431,16 @@ class ValueFrom(BaseModel):
     ] = None
 
 
-class WorkflowSubmitRequest(BaseModel):
-    namespace: Optional[str] = None
-    resource_kind: Annotated[Optional[str], Field(alias="resourceKind")] = None
-    resource_name: Annotated[Optional[str], Field(alias="resourceName")] = None
-    submit_options: Annotated[Optional[SubmitOpts], Field(alias="submitOptions")] = None
-
-
-class HTTPAuth(BaseModel):
-    basic_auth: Annotated[Optional[BasicAuth], Field(alias="basicAuth")] = None
-    client_cert: Annotated[Optional[ClientCertAuth], Field(alias="clientCert")] = None
-    oauth2: Optional[OAuth2Auth] = None
-
-
 class HTTPHeader(BaseModel):
     name: str
     value: Optional[str] = None
     value_from: Annotated[Optional[HTTPHeaderSource], Field(alias="valueFrom")] = None
 
 
-class Parameter(BaseModel):
-    default: Annotated[
-        Optional[str],
-        Field(
-            description=("Default is the default value to use for an input parameter if a value" " was not supplied")
-        ),
-    ] = None
-    description: Annotated[Optional[str], Field(description="Description is the parameter description")] = None
-    enum: Annotated[
-        Optional[List[str]],
-        Field(
-            description=("Enum holds a list of string values to choose from, for the actual" " value of the parameter")
-        ),
-    ] = None
-    global_name: Annotated[
-        Optional[str],
-        Field(
-            alias="globalName",
-            description=(
-                "GlobalName exports an output parameter to the global scope, making it"
-                " available as"
-                " '{{io.argoproj.workflow.v1alpha1.outputs.parameters.XXXX}} and in"
-                " workflow.status.outputs.parameters"
-            ),
-        ),
-    ] = None
-    name: Annotated[str, Field(description="Name is the parameter name")]
-    value: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Value is the literal value to use for the parameter. If specified in"
-                " the context of an input parameter, the value takes precedence over"
-                " any passed values"
-            )
-        ),
-    ] = None
-    value_from: Annotated[
-        Optional[ValueFrom],
-        Field(
-            alias="valueFrom",
-            description="ValueFrom is the source for the output parameter's value",
-        ),
-    ] = None
-
-
-class PodGC(BaseModel):
-    label_selector: Annotated[
-        Optional[v1_1.LabelSelector],
-        Field(
-            alias="labelSelector",
-            description=(
-                "LabelSelector is the label selector to check if the pods match the"
-                " labels before being added to the pod GC queue."
-            ),
-        ),
-    ] = None
-    strategy: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                'Strategy is the strategy to use. One of "OnPodCompletion",'
-                ' "OnPodSuccess", "OnWorkflowCompletion", "OnWorkflowSuccess"'
-            )
-        ),
-    ] = None
+class HTTPAuth(BaseModel):
+    basic_auth: Annotated[Optional[BasicAuth], Field(alias="basicAuth")] = None
+    client_cert: Annotated[Optional[ClientCertAuth], Field(alias="clientCert")] = None
+    oauth2: Optional[OAuth2Auth] = None
 
 
 class S3Artifact(BaseModel):
@@ -1730,6 +1572,130 @@ class S3ArtifactRepository(BaseModel):
     ] = None
 
 
+class Memoize(BaseModel):
+    cache: Annotated[Cache, Field(description="Cache sets and configures the kind of cache")]
+    key: Annotated[str, Field(description="Key is the key to use as the caching key")]
+    max_age: Annotated[
+        str,
+        Field(
+            alias="maxAge",
+            description=(
+                'MaxAge is the maximum age (e.g. "180s", "24h") of an entry that is'
+                " still considered valid. If an entry is older than the MaxAge, it will"
+                " be ignored."
+            ),
+        ),
+    ]
+
+
+class Synchronization(BaseModel):
+    mutex: Annotated[Optional[Mutex], Field(description="Mutex holds the Mutex lock details")] = None
+    semaphore: Annotated[
+        Optional[SemaphoreRef],
+        Field(description="Semaphore holds the Semaphore configuration"),
+    ] = None
+
+
+class RetryStrategy(BaseModel):
+    affinity: Annotated[
+        Optional[RetryAffinity],
+        Field(description="Affinity prevents running workflow's step on the same host"),
+    ] = None
+    backoff: Annotated[Optional[Backoff], Field(description="Backoff is a backoff strategy")] = None
+    expression: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Expression is a condition expression for when a node will be retried."
+                " If it evaluates to false, the node will not be retried and the retry"
+                " strategy will be ignored"
+            )
+        ),
+    ] = None
+    limit: Annotated[
+        Optional[intstr.IntOrString],
+        Field(
+            description=(
+                "Limit is the maximum number of retry attempts when retrying a"
+                " container. It does not include the original container; the maximum"
+                " number of total attempts will be `limit + 1`."
+            )
+        ),
+    ] = None
+    retry_policy: Annotated[
+        Optional[str],
+        Field(
+            alias="retryPolicy",
+            description=("RetryPolicy is a policy of NodePhase statuses that will be retried"),
+        ),
+    ] = None
+
+
+class WorkflowSubmitRequest(BaseModel):
+    namespace: Optional[str] = None
+    resource_kind: Annotated[Optional[str], Field(alias="resourceKind")] = None
+    resource_name: Annotated[Optional[str], Field(alias="resourceName")] = None
+    submit_options: Annotated[Optional[SubmitOpts], Field(alias="submitOptions")] = None
+
+
+class Parameter(BaseModel):
+    default: Annotated[
+        Optional[str],
+        Field(
+            description=("Default is the default value to use for an input parameter if a value" " was not supplied")
+        ),
+    ] = None
+    description: Annotated[Optional[str], Field(description="Description is the parameter description")] = None
+    enum: Annotated[
+        Optional[List[str]],
+        Field(
+            description=("Enum holds a list of string values to choose from, for the actual" " value of the parameter")
+        ),
+    ] = None
+    global_name: Annotated[
+        Optional[str],
+        Field(
+            alias="globalName",
+            description=(
+                "GlobalName exports an output parameter to the global scope, making it"
+                " available as"
+                " '{{io.argoproj.workflow.v1alpha1.outputs.parameters.XXXX}} and in"
+                " workflow.status.outputs.parameters"
+            ),
+        ),
+    ] = None
+    name: Annotated[str, Field(description="Name is the parameter name")]
+    value: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Value is the literal value to use for the parameter. If specified in"
+                " the context of an input parameter, the value takes precedence over"
+                " any passed values"
+            )
+        ),
+    ] = None
+    value_from: Annotated[
+        Optional[ValueFrom],
+        Field(
+            alias="valueFrom",
+            description="ValueFrom is the source for the output parameter's value",
+        ),
+    ] = None
+
+
+class HTTPArtifact(BaseModel):
+    auth: Annotated[
+        Optional[HTTPAuth],
+        Field(description="Auth contains information for client authentication"),
+    ] = None
+    headers: Annotated[
+        Optional[List[Header]],
+        Field(description=("Headers are an optional list of headers to send with HTTP requests for" " artifacts")),
+    ] = None
+    url: Annotated[str, Field(description="URL of the artifact")]
+
+
 class ArtifactRepository(BaseModel):
     archive_logs: Annotated[
         Optional[bool],
@@ -1759,97 +1725,6 @@ class ArtifactRepository(BaseModel):
         Optional[S3ArtifactRepository],
         Field(description="S3 stores artifact in a S3-compliant object store"),
     ] = None
-
-
-class ArtifactRepositoryRefStatus(BaseModel):
-    artifact_repository: Annotated[
-        Optional[ArtifactRepository],
-        Field(
-            alias="artifactRepository",
-            description=("The repository the workflow will use. This maybe empty before v3.1."),
-        ),
-    ] = None
-    config_map: Annotated[
-        Optional[str],
-        Field(
-            alias="configMap",
-            description=('The name of the config map. Defaults to "artifact-repositories".'),
-        ),
-    ] = None
-    default: Annotated[
-        Optional[bool],
-        Field(description=("If this ref represents the default artifact repository, rather than a" " config map.")),
-    ] = None
-    key: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "The config map key. Defaults to the value of the"
-                ' "workflows.argoproj.io/default-artifact-repository" annotation.'
-            )
-        ),
-    ] = None
-    namespace: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "The namespace of the config map. Defaults to the workflow's namespace,"
-                " or the controller's namespace (if found)."
-            )
-        ),
-    ] = None
-
-
-class HTTP(BaseModel):
-    body: Annotated[Optional[str], Field(description="Body is content of the HTTP Request")] = None
-    body_from: Annotated[
-        Optional[HTTPBodySource],
-        Field(
-            alias="bodyFrom",
-            description="BodyFrom is  content of the HTTP Request as Bytes",
-        ),
-    ] = None
-    headers: Annotated[
-        Optional[List[HTTPHeader]],
-        Field(description=("Headers are an optional list of headers to send with HTTP requests")),
-    ] = None
-    insecure_skip_verify: Annotated[
-        Optional[bool],
-        Field(
-            alias="insecureSkipVerify",
-            description=(
-                "InsecureSkipVerify is a bool when if set to true will skip TLS" " verification for the HTTP client"
-            ),
-        ),
-    ] = None
-    method: Annotated[Optional[str], Field(description="Method is HTTP methods for HTTP Request")] = None
-    success_condition: Annotated[
-        Optional[str],
-        Field(
-            alias="successCondition",
-            description=("SuccessCondition is an expression if evaluated to true is considered" " successful"),
-        ),
-    ] = None
-    timeout_seconds: Annotated[
-        Optional[int],
-        Field(
-            alias="timeoutSeconds",
-            description=("TimeoutSeconds is request timeout for HTTP Request. Default is 30" " seconds"),
-        ),
-    ] = None
-    url: Annotated[str, Field(description="URL of the HTTP Request")]
-
-
-class HTTPArtifact(BaseModel):
-    auth: Annotated[
-        Optional[HTTPAuth],
-        Field(description="Auth contains information for client authentication"),
-    ] = None
-    headers: Annotated[
-        Optional[List[Header]],
-        Field(description=("Headers are an optional list of headers to send with HTTP requests for" " artifacts")),
-    ] = None
-    url: Annotated[str, Field(description="URL of the artifact")]
 
 
 class Artifact(BaseModel):
@@ -2017,20 +1892,6 @@ class ArtifactLocation(BaseModel):
     ] = None
 
 
-class ArtifactNodeSpec(BaseModel):
-    archive_location: Annotated[
-        Optional[ArtifactLocation],
-        Field(
-            alias="archiveLocation",
-            description=("ArchiveLocation is the template-level Artifact location specification"),
-        ),
-    ] = None
-    artifacts: Annotated[
-        Optional[Dict[str, Artifact]],
-        Field(description="Artifacts maps artifact name to Artifact description"),
-    ] = None
-
-
 class ArtifactPaths(BaseModel):
     archive: Annotated[
         Optional[ArchiveStrategy],
@@ -2148,6 +2009,557 @@ class ArtifactPaths(BaseModel):
             description=("SubPath allows an artifact to be sourced from a subpath within the" " specified source"),
         ),
     ] = None
+
+
+class ArtifactRepositoryRefStatus(BaseModel):
+    artifact_repository: Annotated[
+        Optional[ArtifactRepository],
+        Field(
+            alias="artifactRepository",
+            description=("The repository the workflow will use. This maybe empty before v3.1."),
+        ),
+    ] = None
+    config_map: Annotated[
+        Optional[str],
+        Field(
+            alias="configMap",
+            description=('The name of the config map. Defaults to "artifact-repositories".'),
+        ),
+    ] = None
+    default: Annotated[
+        Optional[bool],
+        Field(description=("If this ref represents the default artifact repository, rather than a" " config map.")),
+    ] = None
+    key: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "The config map key. Defaults to the value of the"
+                ' "workflows.argoproj.io/default-artifact-repository" annotation.'
+            )
+        ),
+    ] = None
+    namespace: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "The namespace of the config map. Defaults to the workflow's namespace,"
+                " or the controller's namespace (if found)."
+            )
+        ),
+    ] = None
+
+
+class ManifestFrom(BaseModel):
+    artifact: Annotated[Artifact, Field(description="Artifact contains the artifact to use")]
+
+
+class ArtifactNodeSpec(BaseModel):
+    archive_location: Annotated[
+        Optional[ArtifactLocation],
+        Field(
+            alias="archiveLocation",
+            description=("ArchiveLocation is the template-level Artifact location specification"),
+        ),
+    ] = None
+    artifacts: Annotated[
+        Optional[Dict[str, Artifact]],
+        Field(description="Artifacts maps artifact name to Artifact description"),
+    ] = None
+
+
+class DataSource(BaseModel):
+    artifact_paths: Annotated[
+        Optional[ArtifactPaths],
+        Field(
+            alias="artifactPaths",
+            description=("ArtifactPaths is a data transformation that collects a list of" " artifact paths"),
+        ),
+    ] = None
+
+
+class ResourceTemplate(BaseModel):
+    action: Annotated[
+        str,
+        Field(
+            description=(
+                "Action is the action to perform to the resource. Must be one of: get,"
+                " create, apply, delete, replace, patch"
+            )
+        ),
+    ]
+    failure_condition: Annotated[
+        Optional[str],
+        Field(
+            alias="failureCondition",
+            description=(
+                "FailureCondition is a label selector expression which describes the"
+                " conditions of the k8s resource in which the step was considered"
+                " failed"
+            ),
+        ),
+    ] = None
+    flags: Annotated[
+        Optional[List[str]],
+        Field(
+            description=(
+                "Flags is a set of additional options passed to kubectl before"
+                " submitting a resource I.e. to disable resource validation: flags:"
+                ' [\n\t"--validate=false"  # disable resource validation\n]'
+            )
+        ),
+    ] = None
+    manifest: Annotated[Optional[str], Field(description="Manifest contains the kubernetes manifest")] = None
+    manifest_from: Annotated[
+        Optional[ManifestFrom],
+        Field(
+            alias="manifestFrom",
+            description="ManifestFrom is the source for a single kubernetes manifest",
+        ),
+    ] = None
+    merge_strategy: Annotated[
+        Optional[str],
+        Field(
+            alias="mergeStrategy",
+            description=(
+                "MergeStrategy is the strategy used to merge a patch. It defaults to"
+                ' "strategic" Must be one of: strategic, merge, json'
+            ),
+        ),
+    ] = None
+    set_owner_reference: Annotated[
+        Optional[bool],
+        Field(
+            alias="setOwnerReference",
+            description=(
+                "SetOwnerReference sets the reference to the workflow on the" " OwnerReference of generated resource."
+            ),
+        ),
+    ] = None
+    success_condition: Annotated[
+        Optional[str],
+        Field(
+            alias="successCondition",
+            description=(
+                "SuccessCondition is a label selector expression which describes the"
+                " conditions of the k8s resource in which it is acceptable to proceed"
+                " to the following step"
+            ),
+        ),
+    ] = None
+
+
+class Data(BaseModel):
+    source: Annotated[
+        DataSource,
+        Field(description="Source sources external data into a data template"),
+    ]
+    transformation: Annotated[
+        List[TransformationStep],
+        Field(description="Transformation applies a set of transformations"),
+    ]
+
+
+class Arguments(BaseModel):
+    artifacts: Annotated[
+        Optional[List[Artifact]],
+        Field(description=("Artifacts is the list of artifacts to pass to the template or workflow")),
+    ] = None
+    parameters: Annotated[
+        Optional[List[Parameter]],
+        Field(description=("Parameters is the list of parameters to pass to the template or" " workflow")),
+    ] = None
+
+
+class ArtifactGCSpec(BaseModel):
+    artifacts_by_node: Annotated[
+        Optional[Dict[str, ArtifactNodeSpec]],
+        Field(
+            alias="artifactsByNode",
+            description=("ArtifactsByNode maps Node name to information pertaining to Artifacts" " on that Node"),
+        ),
+    ] = None
+
+
+class ArtifactGCStatus(BaseModel):
+    artifact_results_by_node: Annotated[
+        Optional[Dict[str, ArtifactResultNodeStatus]],
+        Field(
+            alias="artifactResultsByNode",
+            description="ArtifactResultsByNode maps Node name to result",
+        ),
+    ] = None
+
+
+class InfoResponse(BaseModel):
+    links: Optional[List[Link]] = None
+    managed_namespace: Annotated[Optional[str], Field(alias="managedNamespace")] = None
+    modals: Annotated[Optional[Dict[str, bool]], Field(title="which modals to show")] = None
+    nav_color: Annotated[Optional[str], Field(alias="navColor")] = None
+
+
+class Inputs(BaseModel):
+    artifacts: Annotated[
+        Optional[List[Artifact]],
+        Field(description="Artifact are a list of artifacts passed as inputs"),
+    ] = None
+    parameters: Annotated[
+        Optional[List[Parameter]],
+        Field(description="Parameters are a list of parameters passed as inputs"),
+    ] = None
+
+
+class Metrics(BaseModel):
+    prometheus: Annotated[
+        Optional[List[Prometheus]],
+        Field(description="Prometheus is a list of prometheus metrics to be emitted"),
+    ] = None
+
+
+class Outputs(BaseModel):
+    artifacts: Annotated[
+        Optional[List[Artifact]],
+        Field(description=("Artifacts holds the list of output artifacts produced by a step")),
+    ] = None
+    exit_code: Annotated[
+        Optional[str],
+        Field(
+            alias="exitCode",
+            description="ExitCode holds the exit code of a script template",
+        ),
+    ] = None
+    parameters: Annotated[
+        Optional[List[Parameter]],
+        Field(description=("Parameters holds the list of output parameters produced by a step")),
+    ] = None
+    result: Annotated[
+        Optional[str],
+        Field(description="Result holds the result (stdout) of a script template"),
+    ] = None
+
+
+class LifecycleHook(BaseModel):
+    arguments: Annotated[
+        Optional[Arguments],
+        Field(description="Arguments hold arguments to the template"),
+    ] = None
+    expression: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Expression is a condition expression for when a node will be retried."
+                " If it evaluates to false, the node will not be retried and the retry"
+                " strategy will be ignored"
+            )
+        ),
+    ] = None
+    template: Annotated[
+        Optional[str],
+        Field(description="Template is the name of the template to execute by the hook"),
+    ] = None
+    template_ref: Annotated[
+        Optional[TemplateRef],
+        Field(
+            alias="templateRef",
+            description=("TemplateRef is the reference to the template resource to execute by" " the hook"),
+        ),
+    ] = None
+
+
+class HTTP(BaseModel):
+    body: Annotated[Optional[str], Field(description="Body is content of the HTTP Request")] = None
+    body_from: Annotated[
+        Optional[HTTPBodySource],
+        Field(
+            alias="bodyFrom",
+            description="BodyFrom is  content of the HTTP Request as Bytes",
+        ),
+    ] = None
+    headers: Annotated[
+        Optional[List[HTTPHeader]],
+        Field(description=("Headers are an optional list of headers to send with HTTP requests")),
+    ] = None
+    insecure_skip_verify: Annotated[
+        Optional[bool],
+        Field(
+            alias="insecureSkipVerify",
+            description=(
+                "InsecureSkipVerify is a bool when if set to true will skip TLS" " verification for the HTTP client"
+            ),
+        ),
+    ] = None
+    method: Annotated[Optional[str], Field(description="Method is HTTP methods for HTTP Request")] = None
+    success_condition: Annotated[
+        Optional[str],
+        Field(
+            alias="successCondition",
+            description=("SuccessCondition is an expression if evaluated to true is considered" " successful"),
+        ),
+    ] = None
+    timeout_seconds: Annotated[
+        Optional[int],
+        Field(
+            alias="timeoutSeconds",
+            description=("TimeoutSeconds is request timeout for HTTP Request. Default is 30" " seconds"),
+        ),
+    ] = None
+    url: Annotated[str, Field(description="URL of the HTTP Request")]
+
+
+class NodeResult(BaseModel):
+    message: Optional[str] = None
+    outputs: Optional[Outputs] = None
+    phase: Optional[str] = None
+    progress: Optional[str] = None
+
+
+class NodeStatus(BaseModel):
+    boundary_id: Annotated[
+        Optional[str],
+        Field(
+            alias="boundaryID",
+            description=(
+                "BoundaryID indicates the node ID of the associated template root node"
+                " in which this node belongs to"
+            ),
+        ),
+    ] = None
+    children: Annotated[Optional[List[str]], Field(description="Children is a list of child node IDs")] = None
+    daemoned: Annotated[
+        Optional[bool],
+        Field(description=("Daemoned tracks whether or not this node was daemoned and need to be" " terminated")),
+    ] = None
+    display_name: Annotated[
+        Optional[str],
+        Field(
+            alias="displayName",
+            description=(
+                "DisplayName is a human readable representation of the node. Unique" " within a template boundary"
+            ),
+        ),
+    ] = None
+    estimated_duration: Annotated[
+        Optional[int],
+        Field(alias="estimatedDuration", description="EstimatedDuration in seconds."),
+    ] = None
+    finished_at: Annotated[
+        Optional[v1_1.Time],
+        Field(alias="finishedAt", description="Time at which this node completed"),
+    ] = None
+    host_node_name: Annotated[
+        Optional[str],
+        Field(
+            alias="hostNodeName",
+            description=("HostNodeName name of the Kubernetes node on which the Pod is running," " if applicable"),
+        ),
+    ] = None
+    id: Annotated[
+        str,
+        Field(
+            description=(
+                "ID is a unique identifier of a node within the worklow It is"
+                " implemented as a hash of the node name, which makes the ID"
+                " deterministic"
+            )
+        ),
+    ]
+    inputs: Annotated[
+        Optional[Inputs],
+        Field(
+            description=(
+                "Inputs captures input parameter values and artifact locations supplied" " to this template invocation"
+            )
+        ),
+    ] = None
+    memoization_status: Annotated[
+        Optional[MemoizationStatus],
+        Field(
+            alias="memoizationStatus",
+            description="MemoizationStatus holds information about cached nodes",
+        ),
+    ] = None
+    message: Annotated[
+        Optional[str],
+        Field(description=("A human readable message indicating details about why the node is in" " this condition.")),
+    ] = None
+    name: Annotated[
+        str,
+        Field(description=("Name is unique name in the node tree used to generate the node ID")),
+    ]
+    outbound_nodes: Annotated[
+        Optional[List[str]],
+        Field(
+            alias="outboundNodes",
+            description=(
+                'OutboundNodes tracks the node IDs which are considered "outbound"'
+                " nodes to a template invocation. For every invocation of a template,"
+                ' there are nodes which we considered as "outbound". Essentially, these'
+                " are last nodes in the execution sequence to run, before the template"
+                " is considered completed. These nodes are then connected as parents to"
+                " a following step.\n\nIn the case of single pod steps (i.e. container,"
+                " script, resource templates), this list will be nil since the pod"
+                ' itself is already considered the "outbound" node. In the case of'
+                ' DAGs, outbound nodes are the "target" tasks (tasks with no children).'
+                " In the case of steps, outbound nodes are all the containers involved"
+                " in the last step group. NOTE: since templates are composable, the"
+                " list of outbound nodes are carried upwards when a DAG/steps template"
+                " invokes another DAG/steps template. In other words, the outbound"
+                " nodes of a template, will be a superset of the outbound nodes of its"
+                " last children."
+            ),
+        ),
+    ] = None
+    outputs: Annotated[
+        Optional[Outputs],
+        Field(
+            description=(
+                "Outputs captures output parameter values and artifact locations"
+                " produced by this template invocation"
+            )
+        ),
+    ] = None
+    phase: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Phase a simple, high-level summary of where the node is in its"
+                " lifecycle. Can be used as a state machine."
+            )
+        ),
+    ] = None
+    pod_ip: Annotated[
+        Optional[str],
+        Field(
+            alias="podIP",
+            description="PodIP captures the IP of the pod for daemoned steps",
+        ),
+    ] = None
+    progress: Annotated[Optional[str], Field(description="Progress to completion")] = None
+    resources_duration: Annotated[
+        Optional[Dict[str, int]],
+        Field(
+            alias="resourcesDuration",
+            description=(
+                "ResourcesDuration is indicative, but not accurate, resource duration."
+                " This is populated when the nodes completes."
+            ),
+        ),
+    ] = None
+    started_at: Annotated[
+        Optional[v1_1.Time],
+        Field(alias="startedAt", description="Time at which this node started"),
+    ] = None
+    synchronization_status: Annotated[
+        Optional[NodeSynchronizationStatus],
+        Field(
+            alias="synchronizationStatus",
+            description=("SynchronizationStatus is the synchronization status of the node"),
+        ),
+    ] = None
+    template_name: Annotated[
+        Optional[str],
+        Field(
+            alias="templateName",
+            description=(
+                "TemplateName is the template name which this node corresponds to. Not"
+                " applicable to virtual nodes (e.g. Retry, StepGroup)"
+            ),
+        ),
+    ] = None
+    template_ref: Annotated[
+        Optional[TemplateRef],
+        Field(
+            alias="templateRef",
+            description=(
+                "TemplateRef is the reference to the template resource which this node"
+                " corresponds to. Not applicable to virtual nodes (e.g. Retry,"
+                " StepGroup)"
+            ),
+        ),
+    ] = None
+    template_scope: Annotated[
+        Optional[str],
+        Field(
+            alias="templateScope",
+            description=("TemplateScope is the template scope in which the template of this node" " was retrieved."),
+        ),
+    ] = None
+    type: Annotated[str, Field(description="Type indicates type of node")]
+
+
+class PodGC(BaseModel):
+    label_selector: Annotated[
+        Optional[v1_1.LabelSelector],
+        Field(
+            alias="labelSelector",
+            description=(
+                "LabelSelector is the label selector to check if the pods match the"
+                " labels before being added to the pod GC queue."
+            ),
+        ),
+    ] = None
+    strategy: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                'Strategy is the strategy to use. One of "OnPodCompletion",'
+                ' "OnPodSuccess", "OnWorkflowCompletion", "OnWorkflowSuccess"'
+            )
+        ),
+    ] = None
+
+
+class Submit(BaseModel):
+    arguments: Annotated[
+        Optional[Arguments],
+        Field(
+            description=("Arguments extracted from the event and then set as arguments to the" " workflow created.")
+        ),
+    ] = None
+    metadata: Annotated[
+        Optional[v1_1.ObjectMeta],
+        Field(description=("Metadata optional means to customize select fields of the workflow" " metadata")),
+    ] = None
+    workflow_template_ref: Annotated[
+        WorkflowTemplateRef,
+        Field(
+            alias="workflowTemplateRef",
+            description="WorkflowTemplateRef the workflow template to submit",
+        ),
+    ]
+
+
+class WorkflowEventBindingSpec(BaseModel):
+    event: Annotated[Event, Field(description="Event is the event to bind to")]
+    submit: Annotated[Optional[Submit], Field(description="Submit is the workflow template to submit")] = None
+
+
+class WorkflowEventBinding(BaseModel):
+    api_version: Annotated[
+        Optional[str],
+        Field(
+            alias="apiVersion",
+            description=(
+                "APIVersion defines the versioned schema of this representation of an"
+                " object. Servers should convert recognized schemas to the latest"
+                " internal value, and may reject unrecognized values. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
+            ),
+        ),
+    ] = None
+    kind: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Kind is a string value representing the REST resource this object"
+                " represents. Servers may infer this from the endpoint the client"
+                " submits requests to. Cannot be updated. In CamelCase. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+            )
+        ),
+    ] = None
+    metadata: v1_1.ObjectMeta
+    spec: WorkflowEventBindingSpec
 
 
 class ContainerNode(BaseModel):
@@ -2407,140 +2819,6 @@ class ContainerNode(BaseModel):
                 "Container's working directory. If not specified, the container"
                 " runtime's default will be used, which might be configured in the"
                 " container image. Cannot be updated."
-            ),
-        ),
-    ] = None
-
-
-class ContainerSetTemplate(BaseModel):
-    containers: List[ContainerNode]
-    retry_strategy: Annotated[
-        Optional[ContainerSetRetryStrategy],
-        Field(
-            alias="retryStrategy",
-            description=(
-                "RetryStrategy describes how to retry a container nodes in the"
-                " container set if it fails. Nbr of retries(default 0) and sleep"
-                " duration between retries(default 0s, instant retry) can be set."
-            ),
-        ),
-    ] = None
-    volume_mounts: Annotated[Optional[List[v1.VolumeMount]], Field(alias="volumeMounts")] = None
-
-
-class DataSource(BaseModel):
-    artifact_paths: Annotated[
-        Optional[ArtifactPaths],
-        Field(
-            alias="artifactPaths",
-            description=("ArtifactPaths is a data transformation that collects a list of" " artifact paths"),
-        ),
-    ] = None
-
-
-class Inputs(BaseModel):
-    artifacts: Annotated[
-        Optional[List[Artifact]],
-        Field(description="Artifact are a list of artifacts passed as inputs"),
-    ] = None
-    parameters: Annotated[
-        Optional[List[Parameter]],
-        Field(description="Parameters are a list of parameters passed as inputs"),
-    ] = None
-
-
-class ManifestFrom(BaseModel):
-    artifact: Annotated[Artifact, Field(description="Artifact contains the artifact to use")]
-
-
-class Outputs(BaseModel):
-    artifacts: Annotated[
-        Optional[List[Artifact]],
-        Field(description=("Artifacts holds the list of output artifacts produced by a step")),
-    ] = None
-    exit_code: Annotated[
-        Optional[str],
-        Field(
-            alias="exitCode",
-            description="ExitCode holds the exit code of a script template",
-        ),
-    ] = None
-    parameters: Annotated[
-        Optional[List[Parameter]],
-        Field(description=("Parameters holds the list of output parameters produced by a step")),
-    ] = None
-    result: Annotated[
-        Optional[str],
-        Field(description="Result holds the result (stdout) of a script template"),
-    ] = None
-
-
-class ResourceTemplate(BaseModel):
-    action: Annotated[
-        str,
-        Field(
-            description=(
-                "Action is the action to perform to the resource. Must be one of: get,"
-                " create, apply, delete, replace, patch"
-            )
-        ),
-    ]
-    failure_condition: Annotated[
-        Optional[str],
-        Field(
-            alias="failureCondition",
-            description=(
-                "FailureCondition is a label selector expression which describes the"
-                " conditions of the k8s resource in which the step was considered"
-                " failed"
-            ),
-        ),
-    ] = None
-    flags: Annotated[
-        Optional[List[str]],
-        Field(
-            description=(
-                "Flags is a set of additional options passed to kubectl before"
-                " submitting a resource I.e. to disable resource validation: flags:"
-                ' [\n\t"--validate=false"  # disable resource validation\n]'
-            )
-        ),
-    ] = None
-    manifest: Annotated[Optional[str], Field(description="Manifest contains the kubernetes manifest")] = None
-    manifest_from: Annotated[
-        Optional[ManifestFrom],
-        Field(
-            alias="manifestFrom",
-            description="ManifestFrom is the source for a single kubernetes manifest",
-        ),
-    ] = None
-    merge_strategy: Annotated[
-        Optional[str],
-        Field(
-            alias="mergeStrategy",
-            description=(
-                "MergeStrategy is the strategy used to merge a patch. It defaults to"
-                ' "strategic" Must be one of: strategic, merge, json'
-            ),
-        ),
-    ] = None
-    set_owner_reference: Annotated[
-        Optional[bool],
-        Field(
-            alias="setOwnerReference",
-            description=(
-                "SetOwnerReference sets the reference to the workflow on the" " OwnerReference of generated resource."
-            ),
-        ),
-    ] = None
-    success_condition: Annotated[
-        Optional[str],
-        Field(
-            alias="successCondition",
-            description=(
-                "SuccessCondition is a label selector expression which describes the"
-                " conditions of the k8s resource in which it is acceptable to proceed"
-                " to the following step"
             ),
         ),
     ] = None
@@ -3085,302 +3363,8 @@ class UserContainer(BaseModel):
     ] = None
 
 
-class Arguments(BaseModel):
-    artifacts: Annotated[
-        Optional[List[Artifact]],
-        Field(description=("Artifacts is the list of artifacts to pass to the template or workflow")),
-    ] = None
-    parameters: Annotated[
-        Optional[List[Parameter]],
-        Field(description=("Parameters is the list of parameters to pass to the template or" " workflow")),
-    ] = None
-
-
-class ArtifactGCSpec(BaseModel):
-    artifacts_by_node: Annotated[
-        Optional[Dict[str, ArtifactNodeSpec]],
-        Field(
-            alias="artifactsByNode",
-            description=("ArtifactsByNode maps Node name to information pertaining to Artifacts" " on that Node"),
-        ),
-    ] = None
-
-
-class Data(BaseModel):
-    source: Annotated[
-        DataSource,
-        Field(description="Source sources external data into a data template"),
-    ]
-    transformation: Annotated[
-        List[TransformationStep],
-        Field(description="Transformation applies a set of transformations"),
-    ]
-
-
-class LifecycleHook(BaseModel):
-    arguments: Annotated[
-        Optional[Arguments],
-        Field(description="Arguments hold arguments to the template"),
-    ] = None
-    expression: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Expression is a condition expression for when a node will be retried."
-                " If it evaluates to false, the node will not be retried and the retry"
-                " strategy will be ignored"
-            )
-        ),
-    ] = None
-    template: Annotated[
-        Optional[str],
-        Field(description="Template is the name of the template to execute by the hook"),
-    ] = None
-    template_ref: Annotated[
-        Optional[TemplateRef],
-        Field(
-            alias="templateRef",
-            description=("TemplateRef is the reference to the template resource to execute by" " the hook"),
-        ),
-    ] = None
-
-
-class NodeResult(BaseModel):
-    message: Optional[str] = None
-    outputs: Optional[Outputs] = None
-    phase: Optional[str] = None
-    progress: Optional[str] = None
-
-
-class NodeStatus(BaseModel):
-    boundary_id: Annotated[
-        Optional[str],
-        Field(
-            alias="boundaryID",
-            description=(
-                "BoundaryID indicates the node ID of the associated template root node"
-                " in which this node belongs to"
-            ),
-        ),
-    ] = None
-    children: Annotated[Optional[List[str]], Field(description="Children is a list of child node IDs")] = None
-    daemoned: Annotated[
-        Optional[bool],
-        Field(description=("Daemoned tracks whether or not this node was daemoned and need to be" " terminated")),
-    ] = None
-    display_name: Annotated[
-        Optional[str],
-        Field(
-            alias="displayName",
-            description=(
-                "DisplayName is a human readable representation of the node. Unique" " within a template boundary"
-            ),
-        ),
-    ] = None
-    estimated_duration: Annotated[
-        Optional[int],
-        Field(alias="estimatedDuration", description="EstimatedDuration in seconds."),
-    ] = None
-    finished_at: Annotated[
-        Optional[v1_1.Time],
-        Field(alias="finishedAt", description="Time at which this node completed"),
-    ] = None
-    host_node_name: Annotated[
-        Optional[str],
-        Field(
-            alias="hostNodeName",
-            description=("HostNodeName name of the Kubernetes node on which the Pod is running," " if applicable"),
-        ),
-    ] = None
-    id: Annotated[
-        str,
-        Field(
-            description=(
-                "ID is a unique identifier of a node within the worklow It is"
-                " implemented as a hash of the node name, which makes the ID"
-                " deterministic"
-            )
-        ),
-    ]
-    inputs: Annotated[
-        Optional[Inputs],
-        Field(
-            description=(
-                "Inputs captures input parameter values and artifact locations supplied" " to this template invocation"
-            )
-        ),
-    ] = None
-    memoization_status: Annotated[
-        Optional[MemoizationStatus],
-        Field(
-            alias="memoizationStatus",
-            description="MemoizationStatus holds information about cached nodes",
-        ),
-    ] = None
-    message: Annotated[
-        Optional[str],
-        Field(description=("A human readable message indicating details about why the node is in" " this condition.")),
-    ] = None
-    name: Annotated[
-        str,
-        Field(description=("Name is unique name in the node tree used to generate the node ID")),
-    ]
-    outbound_nodes: Annotated[
-        Optional[List[str]],
-        Field(
-            alias="outboundNodes",
-            description=(
-                'OutboundNodes tracks the node IDs which are considered "outbound"'
-                " nodes to a template invocation. For every invocation of a template,"
-                ' there are nodes which we considered as "outbound". Essentially, these'
-                " are last nodes in the execution sequence to run, before the template"
-                " is considered completed. These nodes are then connected as parents to"
-                " a following step.\n\nIn the case of single pod steps (i.e. container,"
-                " script, resource templates), this list will be nil since the pod"
-                ' itself is already considered the "outbound" node. In the case of'
-                ' DAGs, outbound nodes are the "target" tasks (tasks with no children).'
-                " In the case of steps, outbound nodes are all the containers involved"
-                " in the last step group. NOTE: since templates are composable, the"
-                " list of outbound nodes are carried upwards when a DAG/steps template"
-                " invokes another DAG/steps template. In other words, the outbound"
-                " nodes of a template, will be a superset of the outbound nodes of its"
-                " last children."
-            ),
-        ),
-    ] = None
-    outputs: Annotated[
-        Optional[Outputs],
-        Field(
-            description=(
-                "Outputs captures output parameter values and artifact locations"
-                " produced by this template invocation"
-            )
-        ),
-    ] = None
-    phase: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Phase a simple, high-level summary of where the node is in its"
-                " lifecycle. Can be used as a state machine."
-            )
-        ),
-    ] = None
-    pod_ip: Annotated[
-        Optional[str],
-        Field(
-            alias="podIP",
-            description="PodIP captures the IP of the pod for daemoned steps",
-        ),
-    ] = None
-    progress: Annotated[Optional[str], Field(description="Progress to completion")] = None
-    resources_duration: Annotated[
-        Optional[Dict[str, int]],
-        Field(
-            alias="resourcesDuration",
-            description=(
-                "ResourcesDuration is indicative, but not accurate, resource duration."
-                " This is populated when the nodes completes."
-            ),
-        ),
-    ] = None
-    started_at: Annotated[
-        Optional[v1_1.Time],
-        Field(alias="startedAt", description="Time at which this node started"),
-    ] = None
-    synchronization_status: Annotated[
-        Optional[NodeSynchronizationStatus],
-        Field(
-            alias="synchronizationStatus",
-            description=("SynchronizationStatus is the synchronization status of the node"),
-        ),
-    ] = None
-    template_name: Annotated[
-        Optional[str],
-        Field(
-            alias="templateName",
-            description=(
-                "TemplateName is the template name which this node corresponds to. Not"
-                " applicable to virtual nodes (e.g. Retry, StepGroup)"
-            ),
-        ),
-    ] = None
-    template_ref: Annotated[
-        Optional[TemplateRef],
-        Field(
-            alias="templateRef",
-            description=(
-                "TemplateRef is the reference to the template resource which this node"
-                " corresponds to. Not applicable to virtual nodes (e.g. Retry,"
-                " StepGroup)"
-            ),
-        ),
-    ] = None
-    template_scope: Annotated[
-        Optional[str],
-        Field(
-            alias="templateScope",
-            description=("TemplateScope is the template scope in which the template of this node" " was retrieved."),
-        ),
-    ] = None
-    type: Annotated[str, Field(description="Type indicates type of node")]
-
-
-class Submit(BaseModel):
-    arguments: Annotated[
-        Optional[Arguments],
-        Field(
-            description=("Arguments extracted from the event and then set as arguments to the" " workflow created.")
-        ),
-    ] = None
-    metadata: Annotated[
-        Optional[v1_1.ObjectMeta],
-        Field(description=("Metadata optional means to customize select fields of the workflow" " metadata")),
-    ] = None
-    workflow_template_ref: Annotated[
-        WorkflowTemplateRef,
-        Field(
-            alias="workflowTemplateRef",
-            description="WorkflowTemplateRef the workflow template to submit",
-        ),
-    ]
-
-
-class WorkflowEventBindingSpec(BaseModel):
-    event: Annotated[Event, Field(description="Event is the event to bind to")]
-    submit: Annotated[Optional[Submit], Field(description="Submit is the workflow template to submit")] = None
-
-
 class WorkflowTaskSetStatus(BaseModel):
     nodes: Optional[Dict[str, NodeResult]] = None
-
-
-class WorkflowEventBinding(BaseModel):
-    api_version: Annotated[
-        Optional[str],
-        Field(
-            alias="apiVersion",
-            description=(
-                "APIVersion defines the versioned schema of this representation of an"
-                " object. Servers should convert recognized schemas to the latest"
-                " internal value, and may reject unrecognized values. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
-            ),
-        ),
-    ] = None
-    kind: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Kind is a string value representing the REST resource this object"
-                " represents. Servers may infer this from the endpoint the client"
-                " submits requests to. Cannot be updated. In CamelCase. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
-            )
-        ),
-    ] = None
-    metadata: v1_1.ObjectMeta
-    spec: WorkflowEventBindingSpec
 
 
 class WorkflowEventBindingList(BaseModel):
@@ -3411,42 +3395,53 @@ class WorkflowEventBindingList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class ClusterWorkflowTemplate(BaseModel):
-    api_version: Annotated[
-        Optional[str],
+class ContainerSetTemplate(BaseModel):
+    containers: List[ContainerNode]
+    retry_strategy: Annotated[
+        Optional[ContainerSetRetryStrategy],
         Field(
-            alias="apiVersion",
+            alias="retryStrategy",
             description=(
-                "APIVersion defines the versioned schema of this representation of an"
-                " object. Servers should convert recognized schemas to the latest"
-                " internal value, and may reject unrecognized values. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
+                "RetryStrategy describes how to retry a container nodes in the"
+                " container set if it fails. Nbr of retries(default 0) and sleep"
+                " duration between retries(default 0s, instant retry) can be set."
             ),
         ),
     ] = None
-    kind: Annotated[
-        Optional[str],
+    volume_mounts: Annotated[Optional[List[v1.VolumeMount]], Field(alias="volumeMounts")] = None
+
+
+class DAGTemplate(BaseModel):
+    fail_fast: Annotated[
+        Optional[bool],
         Field(
+            alias="failFast",
             description=(
-                "Kind is a string value representing the REST resource this object"
-                " represents. Servers may infer this from the endpoint the client"
-                " submits requests to. Cannot be updated. In CamelCase. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
-            )
+                'This flag is for DAG logic. The DAG logic has a built-in "fail fast"'
+                " feature to stop scheduling new steps, as soon as it detects that one"
+                " of the DAG nodes is failed. Then it waits until all DAG nodes are"
+                " completed before failing the DAG itself. The FailFast flag default is"
+                " true,  if set to false, it will allow a DAG to run all branches of"
+                " the DAG to completion (either success or failure), regardless of the"
+                " failed outcomes of branches in the DAG. More info and example about"
+                " this feature at"
+                " https://github.com/argoproj/argo-workflows/issues/1442"
+            ),
         ),
     ] = None
-    metadata: v1_1.ObjectMeta
-    spec: WorkflowSpec
+    target: Annotated[
+        Optional[str],
+        Field(description="Target are one or more names of targets to execute in a DAG"),
+    ] = None
+    tasks: Annotated[List[DAGTask], Field(description="Tasks are a list of DAG tasks")]
 
 
-class ClusterWorkflowTemplateCreateRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    template: Optional[ClusterWorkflowTemplate] = None
+class ParallelSteps(BaseModel):
+    __root__: List[WorkflowStep]
 
 
-class ClusterWorkflowTemplateLintRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    template: Optional[ClusterWorkflowTemplate] = None
+class WorkflowTaskSetSpec(BaseModel):
+    tasks: Optional[Dict[str, Template]] = None
 
 
 class ClusterWorkflowTemplateList(BaseModel):
@@ -3477,46 +3472,6 @@ class ClusterWorkflowTemplateList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class ClusterWorkflowTemplateUpdateRequest(BaseModel):
-    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
-    template: Optional[ClusterWorkflowTemplate] = None
-
-
-class CreateCronWorkflowRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
-    namespace: Optional[str] = None
-
-
-class CronWorkflow(BaseModel):
-    api_version: Annotated[
-        Optional[str],
-        Field(
-            alias="apiVersion",
-            description=(
-                "APIVersion defines the versioned schema of this representation of an"
-                " object. Servers should convert recognized schemas to the latest"
-                " internal value, and may reject unrecognized values. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
-            ),
-        ),
-    ] = None
-    kind: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Kind is a string value representing the REST resource this object"
-                " represents. Servers may infer this from the endpoint the client"
-                " submits requests to. Cannot be updated. In CamelCase. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
-            )
-        ),
-    ] = None
-    metadata: v1_1.ObjectMeta
-    spec: CronWorkflowSpec
-    status: Optional[CronWorkflowStatus] = None
-
-
 class CronWorkflowList(BaseModel):
     api_version: Annotated[
         Optional[str],
@@ -3545,191 +3500,60 @@ class CronWorkflowList(BaseModel):
     metadata: v1_1.ListMeta
 
 
-class CronWorkflowSpec(BaseModel):
-    concurrency_policy: Annotated[
+class WorkflowList(BaseModel):
+    api_version: Annotated[
         Optional[str],
         Field(
-            alias="concurrencyPolicy",
-            description=("ConcurrencyPolicy is the K8s-style concurrency policy that will be" " used"),
-        ),
-    ] = None
-    failed_jobs_history_limit: Annotated[
-        Optional[int],
-        Field(
-            alias="failedJobsHistoryLimit",
-            description=("FailedJobsHistoryLimit is the number of failed jobs to be kept at a" " time"),
-        ),
-    ] = None
-    schedule: Annotated[
-        str,
-        Field(description="Schedule is a schedule to run the Workflow in Cron format"),
-    ]
-    starting_deadline_seconds: Annotated[
-        Optional[int],
-        Field(
-            alias="startingDeadlineSeconds",
+            alias="apiVersion",
             description=(
-                "StartingDeadlineSeconds is the K8s-style deadline that will limit the"
-                " time a CronWorkflow will be run after its original scheduled time if"
-                " it is missed."
+                "APIVersion defines the versioned schema of this representation of an"
+                " object. Servers should convert recognized schemas to the latest"
+                " internal value, and may reject unrecognized values. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
             ),
         ),
     ] = None
-    successful_jobs_history_limit: Annotated[
-        Optional[int],
-        Field(
-            alias="successfulJobsHistoryLimit",
-            description=("SuccessfulJobsHistoryLimit is the number of successful jobs to be kept" " at a time"),
-        ),
-    ] = None
-    suspend: Annotated[
-        Optional[bool],
-        Field(description=("Suspend is a flag that will stop new CronWorkflows from running if set" " to true")),
-    ] = None
-    timezone: Annotated[
+    items: Optional[List[Workflow]] = None
+    kind: Annotated[
         Optional[str],
         Field(
             description=(
-                "Timezone is the timezone against which the cron schedule will be"
-                ' calculated, e.g. "Asia/Tokyo". Default is machine\'s local time.'
+                "Kind is a string value representing the REST resource this object"
+                " represents. Servers may infer this from the endpoint the client"
+                " submits requests to. Cannot be updated. In CamelCase. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
             )
         ),
     ] = None
-    workflow_metadata: Annotated[
-        Optional[v1_1.ObjectMeta],
-        Field(
-            alias="workflowMetadata",
-            description=("WorkflowMetadata contains some metadata of the workflow to be run"),
-        ),
-    ] = None
-    workflow_spec: Annotated[
-        WorkflowSpec,
-        Field(
-            alias="workflowSpec",
-            description="WorkflowSpec is the spec of the workflow to be run",
-        ),
-    ]
+    metadata: v1_1.ListMeta
 
 
-class DAGTask(BaseModel):
-    arguments: Annotated[
-        Optional[Arguments],
-        Field(description=("Arguments are the parameter and artifact arguments to the template")),
-    ] = None
-    continue_on: Annotated[
-        Optional[ContinueOn],
+class WorkflowTemplateList(BaseModel):
+    api_version: Annotated[
+        Optional[str],
         Field(
-            alias="continueOn",
+            alias="apiVersion",
             description=(
-                "ContinueOn makes argo to proceed with the following step even if this"
-                " step fails. Errors and Failed states can be specified"
+                "APIVersion defines the versioned schema of this representation of an"
+                " object. Servers should convert recognized schemas to the latest"
+                " internal value, and may reject unrecognized values. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
             ),
         ),
     ] = None
-    dependencies: Annotated[
-        Optional[List[str]],
-        Field(description="Dependencies are name of other targets which this depends on"),
-    ] = None
-    depends: Annotated[
+    items: Optional[List[WorkflowTemplate]] = None
+    kind: Annotated[
         Optional[str],
-        Field(description="Depends are name of other targets which this depends on"),
-    ] = None
-    hooks: Annotated[
-        Optional[Dict[str, LifecycleHook]],
         Field(
             description=(
-                "Hooks hold the lifecycle hook which is invoked at lifecycle of task,"
-                " irrespective of the success, failure, or error status of the primary"
-                " task"
+                "Kind is a string value representing the REST resource this object"
+                " represents. Servers may infer this from the endpoint the client"
+                " submits requests to. Cannot be updated. In CamelCase. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
             )
         ),
     ] = None
-    inline: Annotated[
-        Optional[Template],
-        Field(description=("Inline is the template. Template must be empty if this is declared" " (and vice-versa).")),
-    ] = None
-    name: Annotated[str, Field(description="Name is the name of the target")]
-    on_exit: Annotated[
-        Optional[str],
-        Field(
-            alias="onExit",
-            description=(
-                "OnExit is a template reference which is invoked at the end of the"
-                " template, irrespective of the success, failure, or error of the"
-                " primary template. DEPRECATED: Use Hooks[exit].Template instead."
-            ),
-        ),
-    ] = None
-    template: Annotated[Optional[str], Field(description="Name of template to execute")] = None
-    template_ref: Annotated[
-        Optional[TemplateRef],
-        Field(
-            alias="templateRef",
-            description=("TemplateRef is the reference to the template resource to execute."),
-        ),
-    ] = None
-    when: Annotated[
-        Optional[str],
-        Field(description=("When is an expression in which the task should conditionally execute")),
-    ] = None
-    with_items: Annotated[
-        Optional[List[Item]],
-        Field(
-            alias="withItems",
-            description=("WithItems expands a task into multiple parallel tasks from the items" " in the list"),
-        ),
-    ] = None
-    with_param: Annotated[
-        Optional[str],
-        Field(
-            alias="withParam",
-            description=(
-                "WithParam expands a task into multiple parallel tasks from the value"
-                " in the parameter, which is expected to be a JSON list."
-            ),
-        ),
-    ] = None
-    with_sequence: Annotated[
-        Optional[Sequence],
-        Field(
-            alias="withSequence",
-            description="WithSequence expands a task into a numeric sequence",
-        ),
-    ] = None
-
-
-class DAGTemplate(BaseModel):
-    fail_fast: Annotated[
-        Optional[bool],
-        Field(
-            alias="failFast",
-            description=(
-                'This flag is for DAG logic. The DAG logic has a built-in "fail fast"'
-                " feature to stop scheduling new steps, as soon as it detects that one"
-                " of the DAG nodes is failed. Then it waits until all DAG nodes are"
-                " completed before failing the DAG itself. The FailFast flag default is"
-                " true,  if set to false, it will allow a DAG to run all branches of"
-                " the DAG to completion (either success or failure), regardless of the"
-                " failed outcomes of branches in the DAG. More info and example about"
-                " this feature at"
-                " https://github.com/argoproj/argo-workflows/issues/1442"
-            ),
-        ),
-    ] = None
-    target: Annotated[
-        Optional[str],
-        Field(description="Target are one or more names of targets to execute in a DAG"),
-    ] = None
-    tasks: Annotated[List[DAGTask], Field(description="Tasks are a list of DAG tasks")]
-
-
-class LintCronWorkflowRequest(BaseModel):
-    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
-    namespace: Optional[str] = None
-
-
-class ParallelSteps(BaseModel):
-    __root__: List[WorkflowStep]
+    metadata: v1_1.ListMeta
 
 
 class Template(BaseModel):
@@ -3985,83 +3809,91 @@ class Template(BaseModel):
     ] = None
 
 
-class UpdateCronWorkflowRequest(BaseModel):
-    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
-    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
-    namespace: Optional[str] = None
-
-
-class Workflow(BaseModel):
-    api_version: Annotated[
-        Optional[str],
+class DAGTask(BaseModel):
+    arguments: Annotated[
+        Optional[Arguments],
+        Field(description=("Arguments are the parameter and artifact arguments to the template")),
+    ] = None
+    continue_on: Annotated[
+        Optional[ContinueOn],
         Field(
-            alias="apiVersion",
+            alias="continueOn",
             description=(
-                "APIVersion defines the versioned schema of this representation of an"
-                " object. Servers should convert recognized schemas to the latest"
-                " internal value, and may reject unrecognized values. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
+                "ContinueOn makes argo to proceed with the following step even if this"
+                " step fails. Errors and Failed states can be specified"
             ),
         ),
     ] = None
-    kind: Annotated[
+    dependencies: Annotated[
+        Optional[List[str]],
+        Field(description="Dependencies are name of other targets which this depends on"),
+    ] = None
+    depends: Annotated[
         Optional[str],
+        Field(description="Depends are name of other targets which this depends on"),
+    ] = None
+    hooks: Annotated[
+        Optional[Dict[str, LifecycleHook]],
         Field(
             description=(
-                "Kind is a string value representing the REST resource this object"
-                " represents. Servers may infer this from the endpoint the client"
-                " submits requests to. Cannot be updated. In CamelCase. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+                "Hooks hold the lifecycle hook which is invoked at lifecycle of task,"
+                " irrespective of the success, failure, or error status of the primary"
+                " task"
             )
         ),
     ] = None
-    metadata: v1_1.ObjectMeta
-    spec: WorkflowSpec
-    status: Optional[WorkflowStatus] = None
-
-
-class WorkflowCreateRequest(BaseModel):
-    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    instance_id: Annotated[
-        Optional[str],
-        Field(alias="instanceID", description="This field is no longer used."),
+    inline: Annotated[
+        Optional[Template],
+        Field(description=("Inline is the template. Template must be empty if this is declared" " (and vice-versa).")),
     ] = None
-    namespace: Optional[str] = None
-    server_dry_run: Annotated[Optional[bool], Field(alias="serverDryRun")] = None
-    workflow: Optional[Workflow] = None
-
-
-class WorkflowLintRequest(BaseModel):
-    namespace: Optional[str] = None
-    workflow: Optional[Workflow] = None
-
-
-class WorkflowList(BaseModel):
-    api_version: Annotated[
+    name: Annotated[str, Field(description="Name is the name of the target")]
+    on_exit: Annotated[
         Optional[str],
         Field(
-            alias="apiVersion",
+            alias="onExit",
             description=(
-                "APIVersion defines the versioned schema of this representation of an"
-                " object. Servers should convert recognized schemas to the latest"
-                " internal value, and may reject unrecognized values. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
+                "OnExit is a template reference which is invoked at the end of the"
+                " template, irrespective of the success, failure, or error of the"
+                " primary template. DEPRECATED: Use Hooks[exit].Template instead."
             ),
         ),
     ] = None
-    items: Optional[List[Workflow]] = None
-    kind: Annotated[
-        Optional[str],
+    template: Annotated[Optional[str], Field(description="Name of template to execute")] = None
+    template_ref: Annotated[
+        Optional[TemplateRef],
         Field(
-            description=(
-                "Kind is a string value representing the REST resource this object"
-                " represents. Servers may infer this from the endpoint the client"
-                " submits requests to. Cannot be updated. In CamelCase. More info:"
-                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
-            )
+            alias="templateRef",
+            description=("TemplateRef is the reference to the template resource to execute."),
         ),
     ] = None
-    metadata: v1_1.ListMeta
+    when: Annotated[
+        Optional[str],
+        Field(description=("When is an expression in which the task should conditionally execute")),
+    ] = None
+    with_items: Annotated[
+        Optional[List[Item]],
+        Field(
+            alias="withItems",
+            description=("WithItems expands a task into multiple parallel tasks from the items" " in the list"),
+        ),
+    ] = None
+    with_param: Annotated[
+        Optional[str],
+        Field(
+            alias="withParam",
+            description=(
+                "WithParam expands a task into multiple parallel tasks from the value"
+                " in the parameter, which is expected to be a JSON list."
+            ),
+        ),
+    ] = None
+    with_sequence: Annotated[
+        Optional[Sequence],
+        Field(
+            alias="withSequence",
+            description="WithSequence expands a task into a numeric sequence",
+        ),
+    ] = None
 
 
 class WorkflowSpec(BaseModel):
@@ -4433,6 +4265,182 @@ class WorkflowSpec(BaseModel):
     ] = None
 
 
+class WorkflowStep(BaseModel):
+    arguments: Annotated[
+        Optional[Arguments],
+        Field(description="Arguments hold arguments to the template"),
+    ] = None
+    continue_on: Annotated[
+        Optional[ContinueOn],
+        Field(
+            alias="continueOn",
+            description=(
+                "ContinueOn makes argo to proceed with the following step even if this"
+                " step fails. Errors and Failed states can be specified"
+            ),
+        ),
+    ] = None
+    hooks: Annotated[
+        Optional[Dict[str, LifecycleHook]],
+        Field(
+            description=(
+                "Hooks holds the lifecycle hook which is invoked at lifecycle of step,"
+                " irrespective of the success, failure, or error status of the primary"
+                " step"
+            )
+        ),
+    ] = None
+    inline: Annotated[
+        Optional[Template],
+        Field(description=("Inline is the template. Template must be empty if this is declared" " (and vice-versa).")),
+    ] = None
+    name: Annotated[Optional[str], Field(description="Name of the step")] = None
+    on_exit: Annotated[
+        Optional[str],
+        Field(
+            alias="onExit",
+            description=(
+                "OnExit is a template reference which is invoked at the end of the"
+                " template, irrespective of the success, failure, or error of the"
+                " primary template. DEPRECATED: Use Hooks[exit].Template instead."
+            ),
+        ),
+    ] = None
+    template: Annotated[
+        Optional[str],
+        Field(description="Template is the name of the template to execute as the step"),
+    ] = None
+    template_ref: Annotated[
+        Optional[TemplateRef],
+        Field(
+            alias="templateRef",
+            description=("TemplateRef is the reference to the template resource to execute as" " the step."),
+        ),
+    ] = None
+    when: Annotated[
+        Optional[str],
+        Field(description=("When is an expression in which the step should conditionally execute")),
+    ] = None
+    with_items: Annotated[
+        Optional[List[Item]],
+        Field(
+            alias="withItems",
+            description=("WithItems expands a step into multiple parallel steps from the items" " in the list"),
+        ),
+    ] = None
+    with_param: Annotated[
+        Optional[str],
+        Field(
+            alias="withParam",
+            description=(
+                "WithParam expands a step into multiple parallel steps from the value"
+                " in the parameter, which is expected to be a JSON list."
+            ),
+        ),
+    ] = None
+    with_sequence: Annotated[
+        Optional[Sequence],
+        Field(
+            alias="withSequence",
+            description="WithSequence expands a step into a numeric sequence",
+        ),
+    ] = None
+
+
+class ClusterWorkflowTemplate(BaseModel):
+    api_version: Annotated[
+        Optional[str],
+        Field(
+            alias="apiVersion",
+            description=(
+                "APIVersion defines the versioned schema of this representation of an"
+                " object. Servers should convert recognized schemas to the latest"
+                " internal value, and may reject unrecognized values. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
+            ),
+        ),
+    ] = None
+    kind: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Kind is a string value representing the REST resource this object"
+                " represents. Servers may infer this from the endpoint the client"
+                " submits requests to. Cannot be updated. In CamelCase. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+            )
+        ),
+    ] = None
+    metadata: v1_1.ObjectMeta
+    spec: WorkflowSpec
+
+
+class CronWorkflowSpec(BaseModel):
+    concurrency_policy: Annotated[
+        Optional[str],
+        Field(
+            alias="concurrencyPolicy",
+            description=("ConcurrencyPolicy is the K8s-style concurrency policy that will be" " used"),
+        ),
+    ] = None
+    failed_jobs_history_limit: Annotated[
+        Optional[int],
+        Field(
+            alias="failedJobsHistoryLimit",
+            description=("FailedJobsHistoryLimit is the number of failed jobs to be kept at a" " time"),
+        ),
+    ] = None
+    schedule: Annotated[
+        str,
+        Field(description="Schedule is a schedule to run the Workflow in Cron format"),
+    ]
+    starting_deadline_seconds: Annotated[
+        Optional[int],
+        Field(
+            alias="startingDeadlineSeconds",
+            description=(
+                "StartingDeadlineSeconds is the K8s-style deadline that will limit the"
+                " time a CronWorkflow will be run after its original scheduled time if"
+                " it is missed."
+            ),
+        ),
+    ] = None
+    successful_jobs_history_limit: Annotated[
+        Optional[int],
+        Field(
+            alias="successfulJobsHistoryLimit",
+            description=("SuccessfulJobsHistoryLimit is the number of successful jobs to be kept" " at a time"),
+        ),
+    ] = None
+    suspend: Annotated[
+        Optional[bool],
+        Field(description=("Suspend is a flag that will stop new CronWorkflows from running if set" " to true")),
+    ] = None
+    timezone: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Timezone is the timezone against which the cron schedule will be"
+                ' calculated, e.g. "Asia/Tokyo". Default is machine\'s local time.'
+            )
+        ),
+    ] = None
+    workflow_metadata: Annotated[
+        Optional[v1_1.ObjectMeta],
+        Field(
+            alias="workflowMetadata",
+            description=("WorkflowMetadata contains some metadata of the workflow to be run"),
+        ),
+    ] = None
+    workflow_spec: Annotated[
+        WorkflowSpec,
+        Field(
+            alias="workflowSpec",
+            description="WorkflowSpec is the spec of the workflow to be run",
+        ),
+    ]
+
+
 class WorkflowStatus(BaseModel):
     artifact_gc_status: Annotated[
         Optional[ArtGCStatus],
@@ -4546,92 +4554,6 @@ class WorkflowStatus(BaseModel):
     ] = None
 
 
-class WorkflowStep(BaseModel):
-    arguments: Annotated[
-        Optional[Arguments],
-        Field(description="Arguments hold arguments to the template"),
-    ] = None
-    continue_on: Annotated[
-        Optional[ContinueOn],
-        Field(
-            alias="continueOn",
-            description=(
-                "ContinueOn makes argo to proceed with the following step even if this"
-                " step fails. Errors and Failed states can be specified"
-            ),
-        ),
-    ] = None
-    hooks: Annotated[
-        Optional[Dict[str, LifecycleHook]],
-        Field(
-            description=(
-                "Hooks holds the lifecycle hook which is invoked at lifecycle of step,"
-                " irrespective of the success, failure, or error status of the primary"
-                " step"
-            )
-        ),
-    ] = None
-    inline: Annotated[
-        Optional[Template],
-        Field(description=("Inline is the template. Template must be empty if this is declared" " (and vice-versa).")),
-    ] = None
-    name: Annotated[Optional[str], Field(description="Name of the step")] = None
-    on_exit: Annotated[
-        Optional[str],
-        Field(
-            alias="onExit",
-            description=(
-                "OnExit is a template reference which is invoked at the end of the"
-                " template, irrespective of the success, failure, or error of the"
-                " primary template. DEPRECATED: Use Hooks[exit].Template instead."
-            ),
-        ),
-    ] = None
-    template: Annotated[
-        Optional[str],
-        Field(description="Template is the name of the template to execute as the step"),
-    ] = None
-    template_ref: Annotated[
-        Optional[TemplateRef],
-        Field(
-            alias="templateRef",
-            description=("TemplateRef is the reference to the template resource to execute as" " the step."),
-        ),
-    ] = None
-    when: Annotated[
-        Optional[str],
-        Field(description=("When is an expression in which the step should conditionally execute")),
-    ] = None
-    with_items: Annotated[
-        Optional[List[Item]],
-        Field(
-            alias="withItems",
-            description=("WithItems expands a step into multiple parallel steps from the items" " in the list"),
-        ),
-    ] = None
-    with_param: Annotated[
-        Optional[str],
-        Field(
-            alias="withParam",
-            description=(
-                "WithParam expands a step into multiple parallel steps from the value"
-                " in the parameter, which is expected to be a JSON list."
-            ),
-        ),
-    ] = None
-    with_sequence: Annotated[
-        Optional[Sequence],
-        Field(
-            alias="withSequence",
-            description="WithSequence expands a step into a numeric sequence",
-        ),
-    ] = None
-
-
-class WorkflowTaskSetSpec(BaseModel):
-    tasks: Optional[Dict[str, Template]] = None
-
-
 class WorkflowTemplate(BaseModel):
     api_version: Annotated[
         Optional[str],
@@ -4660,19 +4582,22 @@ class WorkflowTemplate(BaseModel):
     spec: WorkflowSpec
 
 
-class WorkflowTemplateCreateRequest(BaseModel):
+class ClusterWorkflowTemplateCreateRequest(BaseModel):
     create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    namespace: Optional[str] = None
-    template: Optional[WorkflowTemplate] = None
+    template: Optional[ClusterWorkflowTemplate] = None
 
 
-class WorkflowTemplateLintRequest(BaseModel):
+class ClusterWorkflowTemplateLintRequest(BaseModel):
     create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
-    namespace: Optional[str] = None
-    template: Optional[WorkflowTemplate] = None
+    template: Optional[ClusterWorkflowTemplate] = None
 
 
-class WorkflowTemplateList(BaseModel):
+class ClusterWorkflowTemplateUpdateRequest(BaseModel):
+    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
+    template: Optional[ClusterWorkflowTemplate] = None
+
+
+class CronWorkflow(BaseModel):
     api_version: Annotated[
         Optional[str],
         Field(
@@ -4685,7 +4610,6 @@ class WorkflowTemplateList(BaseModel):
             ),
         ),
     ] = None
-    items: Optional[List[WorkflowTemplate]] = None
     kind: Annotated[
         Optional[str],
         Field(
@@ -4697,7 +4621,50 @@ class WorkflowTemplateList(BaseModel):
             )
         ),
     ] = None
-    metadata: v1_1.ListMeta
+    metadata: v1_1.ObjectMeta
+    spec: CronWorkflowSpec
+    status: Optional[CronWorkflowStatus] = None
+
+
+class Workflow(BaseModel):
+    api_version: Annotated[
+        Optional[str],
+        Field(
+            alias="apiVersion",
+            description=(
+                "APIVersion defines the versioned schema of this representation of an"
+                " object. Servers should convert recognized schemas to the latest"
+                " internal value, and may reject unrecognized values. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#resources"
+            ),
+        ),
+    ] = None
+    kind: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Kind is a string value representing the REST resource this object"
+                " represents. Servers may infer this from the endpoint the client"
+                " submits requests to. Cannot be updated. In CamelCase. More info:"
+                " https://git.io.k8s.community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+            )
+        ),
+    ] = None
+    metadata: v1_1.ObjectMeta
+    spec: WorkflowSpec
+    status: Optional[WorkflowStatus] = None
+
+
+class WorkflowTemplateCreateRequest(BaseModel):
+    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
+    namespace: Optional[str] = None
+    template: Optional[WorkflowTemplate] = None
+
+
+class WorkflowTemplateLintRequest(BaseModel):
+    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
+    namespace: Optional[str] = None
+    template: Optional[WorkflowTemplate] = None
 
 
 class WorkflowTemplateUpdateRequest(BaseModel):
@@ -4706,15 +4673,48 @@ class WorkflowTemplateUpdateRequest(BaseModel):
     template: Optional[WorkflowTemplate] = None
 
 
+class CreateCronWorkflowRequest(BaseModel):
+    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
+    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
+    namespace: Optional[str] = None
+
+
+class LintCronWorkflowRequest(BaseModel):
+    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
+    namespace: Optional[str] = None
+
+
+class UpdateCronWorkflowRequest(BaseModel):
+    cron_workflow: Annotated[Optional[CronWorkflow], Field(alias="cronWorkflow")] = None
+    name: Annotated[Optional[str], Field(description="DEPRECATED: This field is ignored.")] = None
+    namespace: Optional[str] = None
+
+
+class WorkflowCreateRequest(BaseModel):
+    create_options: Annotated[Optional[v1_1.CreateOptions], Field(alias="createOptions")] = None
+    instance_id: Annotated[
+        Optional[str],
+        Field(alias="instanceID", description="This field is no longer used."),
+    ] = None
+    namespace: Optional[str] = None
+    server_dry_run: Annotated[Optional[bool], Field(alias="serverDryRun")] = None
+    workflow: Optional[Workflow] = None
+
+
+class WorkflowLintRequest(BaseModel):
+    namespace: Optional[str] = None
+    workflow: Optional[Workflow] = None
+
+
 class WorkflowWatchEvent(BaseModel):
     object: Annotated[Optional[Workflow], Field(title="the workflow")] = None
     type: Annotated[Optional[str], Field(title="the type of change")] = None
 
 
-ClusterWorkflowTemplate.update_forward_refs()
-CreateCronWorkflowRequest.update_forward_refs()
-CronWorkflow.update_forward_refs()
-CronWorkflowSpec.update_forward_refs()
-DAGTask.update_forward_refs()
+DAGTemplate.update_forward_refs()
 ParallelSteps.update_forward_refs()
-Workflow.update_forward_refs()
+WorkflowTaskSetSpec.update_forward_refs()
+ClusterWorkflowTemplateList.update_forward_refs()
+CronWorkflowList.update_forward_refs()
+WorkflowList.update_forward_refs()
+WorkflowTemplateList.update_forward_refs()

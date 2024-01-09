@@ -11,91 +11,17 @@ from typing_extensions import Annotated
 from hera.shared._pydantic import BaseModel, Field
 
 
-class CreateOptions(BaseModel):
-    dry_run: Annotated[
-        Optional[List[str]],
-        Field(
-            alias="dryRun",
-            title=(
-                "When present, indicates that modifications should not be\npersisted."
-                " An invalid or unrecognized dryRun directive will\nresult in an error"
-                " response and no further processing of the\nrequest. Valid values"
-                " are:\n- All: all dry run stages will be processed\n+optional"
-            ),
-        ),
-    ] = None
-    field_manager: Annotated[
-        Optional[str],
-        Field(
-            alias="fieldManager",
-            title=(
-                "fieldManager is a name associated with the actor or entity\nthat is"
-                " making these changes. The value must be less than or\n128 characters"
-                " long, and only contain printable characters,\nas defined by"
-                " https://golang.org/pkg/unicode/#IsPrint.\n+optional"
-            ),
-        ),
-    ] = None
-    field_validation: Annotated[
-        Optional[str],
-        Field(
-            alias="fieldValidation",
-            title=(
-                "fieldValidation instructs the server on how to handle\nobjects in the"
-                " request (POST/PUT/PATCH) containing unknown\nor duplicate fields,"
-                " provided that the `ServerSideFieldValidation`\nfeature gate is also"
-                " enabled. Valid values are:\n- Ignore: This will ignore any unknown"
-                " fields that are silently\ndropped from the object, and will ignore"
-                " all but the last duplicate\nfield that the decoder encounters. This"
-                " is the default behavior\nprior to v1.23 and is the default behavior"
-                " when the\n`ServerSideFieldValidation` feature gate is disabled.\n-"
-                " Warn: This will send a warning via the standard warning"
-                " response\nheader for each unknown field that is dropped from the"
-                " object, and\nfor each duplicate field that is encountered. The"
-                " request will\nstill succeed if there are no other errors, and will"
-                " only persist\nthe last of any duplicate fields. This is the default"
-                " when the\n`ServerSideFieldValidation` feature gate is enabled.\n-"
-                " Strict: This will fail the request with a BadRequest error if\nany"
-                " unknown fields would be dropped from the object, or if any\nduplicate"
-                " fields are present. The error returned from the server\nwill contain"
-                " all unknown and duplicate fields encountered.\n+optional"
-            ),
-        ),
-    ] = None
-
-
-class FieldsV1(BaseModel):
-    pass
-
-
-class GroupVersionResource(BaseModel):
-    group: Optional[str] = None
-    resource: Optional[str] = None
-    version: Optional[str] = None
-
-
-class LabelSelectorRequirement(BaseModel):
-    key: Annotated[str, Field(description="key is the label key that the selector applies to.")]
-    operator: Annotated[
-        str,
+class Time(BaseModel):
+    __root__: Annotated[
+        datetime,
         Field(
             description=(
-                "operator represents a key's relationship to a set of values. Valid"
-                " operators are In, NotIn, Exists and DoesNotExist."
+                "Time is a wrapper around time.Time which supports correct marshaling"
+                " to YAML and JSON.  Wrappers are provided for many of the factory"
+                " methods that the time package offers."
             )
         ),
     ]
-    values: Annotated[
-        Optional[List[str]],
-        Field(
-            description=(
-                "values is an array of string values. If the operator is In or NotIn,"
-                " the values array must be non-empty. If the operator is Exists or"
-                " DoesNotExist, the values array must be empty. This array is replaced"
-                " during a strategic merge patch."
-            )
-        ),
-    ] = None
 
 
 class ListMeta(BaseModel):
@@ -162,11 +88,63 @@ class ListMeta(BaseModel):
     ] = None
 
 
-class MicroTime(BaseModel):
-    __root__: Annotated[
-        datetime,
-        Field(description="MicroTime is version of Time with microsecond level precision."),
-    ]
+class GroupVersionResource(BaseModel):
+    group: Optional[str] = None
+    resource: Optional[str] = None
+    version: Optional[str] = None
+
+
+class CreateOptions(BaseModel):
+    dry_run: Annotated[
+        Optional[List[str]],
+        Field(
+            alias="dryRun",
+            title=(
+                "When present, indicates that modifications should not be\npersisted."
+                " An invalid or unrecognized dryRun directive will\nresult in an error"
+                " response and no further processing of the\nrequest. Valid values"
+                " are:\n- All: all dry run stages will be processed\n+optional"
+            ),
+        ),
+    ] = None
+    field_manager: Annotated[
+        Optional[str],
+        Field(
+            alias="fieldManager",
+            title=(
+                "fieldManager is a name associated with the actor or entity\nthat is"
+                " making these changes. The value must be less than or\n128 characters"
+                " long, and only contain printable characters,\nas defined by"
+                " https://golang.org/pkg/unicode/#IsPrint.\n+optional"
+            ),
+        ),
+    ] = None
+    field_validation: Annotated[
+        Optional[str],
+        Field(
+            alias="fieldValidation",
+            title=(
+                "fieldValidation instructs the server on how to handle\nobjects in the"
+                " request (POST/PUT/PATCH) containing unknown\nor duplicate fields,"
+                " provided that the `ServerSideFieldValidation`\nfeature gate is also"
+                " enabled. Valid values are:\n- Ignore: This will ignore any unknown"
+                " fields that are silently\ndropped from the object, and will ignore"
+                " all but the last duplicate\nfield that the decoder encounters. This"
+                " is the default behavior\nprior to v1.23 and is the default behavior"
+                " when the\n`ServerSideFieldValidation` feature gate is disabled.\n-"
+                " Warn: This will send a warning via the standard warning"
+                " response\nheader for each unknown field that is dropped from the"
+                " object, and\nfor each duplicate field that is encountered. The"
+                " request will\nstill succeed if there are no other errors, and will"
+                " only persist\nthe last of any duplicate fields. This is the default"
+                " when the\n`ServerSideFieldValidation` feature gate is enabled.\n-"
+                " Strict: This will fail the request with a BadRequest error if\nany"
+                " unknown fields would be dropped from the object, or if any\nduplicate"
+                " fields are present. The error returned from the server\nwill contain"
+                " all unknown and duplicate fields encountered.\n+optional"
+            ),
+        ),
+    ] = None
 
 
 class OwnerReference(BaseModel):
@@ -211,6 +189,41 @@ class OwnerReference(BaseModel):
     ]
 
 
+class MicroTime(BaseModel):
+    __root__: Annotated[
+        datetime,
+        Field(description="MicroTime is version of Time with microsecond level precision."),
+    ]
+
+
+class FieldsV1(BaseModel):
+    pass
+
+
+class LabelSelectorRequirement(BaseModel):
+    key: Annotated[str, Field(description="key is the label key that the selector applies to.")]
+    operator: Annotated[
+        str,
+        Field(
+            description=(
+                "operator represents a key's relationship to a set of values. Valid"
+                " operators are In, NotIn, Exists and DoesNotExist."
+            )
+        ),
+    ]
+    values: Annotated[
+        Optional[List[str]],
+        Field(
+            description=(
+                "values is an array of string values. If the operator is In or NotIn,"
+                " the values array must be non-empty. If the operator is Exists or"
+                " DoesNotExist, the values array must be empty. This array is replaced"
+                " during a strategic merge patch."
+            )
+        ),
+    ] = None
+
+
 class StatusCause(BaseModel):
     field: Annotated[
         Optional[str],
@@ -242,41 +255,6 @@ class StatusCause(BaseModel):
                 "A machine-readable description of the cause of the error. If this"
                 " value is empty there is no information available."
             )
-        ),
-    ] = None
-
-
-class Time(BaseModel):
-    __root__: Annotated[
-        datetime,
-        Field(
-            description=(
-                "Time is a wrapper around time.Time which supports correct marshaling"
-                " to YAML and JSON.  Wrappers are provided for many of the factory"
-                " methods that the time package offers."
-            )
-        ),
-    ]
-
-
-class LabelSelector(BaseModel):
-    match_expressions: Annotated[
-        Optional[List[LabelSelectorRequirement]],
-        Field(
-            alias="matchExpressions",
-            description=("matchExpressions is a list of label selector requirements. The" " requirements are ANDed."),
-        ),
-    ] = None
-    match_labels: Annotated[
-        Optional[Dict[str, str]],
-        Field(
-            alias="matchLabels",
-            description=(
-                "matchLabels is a map of {key,value} pairs. A single {key,value} in the"
-                " matchLabels map is equivalent to an element of matchExpressions,"
-                ' whose key field is "key", the operator is "In", and the values array'
-                ' contains only "value". The requirements are ANDed.'
-            ),
         ),
     ] = None
 
@@ -345,6 +323,28 @@ class ManagedFieldsEntry(BaseModel):
             description=(
                 "Time is timestamp of when these fields were set. It should always be" " empty if Operation is 'Apply'"
             )
+        ),
+    ] = None
+
+
+class LabelSelector(BaseModel):
+    match_expressions: Annotated[
+        Optional[List[LabelSelectorRequirement]],
+        Field(
+            alias="matchExpressions",
+            description=("matchExpressions is a list of label selector requirements. The" " requirements are ANDed."),
+        ),
+    ] = None
+    match_labels: Annotated[
+        Optional[Dict[str, str]],
+        Field(
+            alias="matchLabels",
+            description=(
+                "matchLabels is a map of {key,value} pairs. A single {key,value} in the"
+                " matchLabels map is equivalent to an element of matchExpressions,"
+                ' whose key field is "key", the operator is "In", and the values array'
+                ' contains only "value". The requirements are ANDed.'
+            ),
         ),
     ] = None
 

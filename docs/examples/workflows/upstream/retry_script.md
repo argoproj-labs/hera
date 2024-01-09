@@ -14,7 +14,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     from hera.workflows import RetryStrategy, Workflow, script
 
 
-    @script(image="python:alpine3.6", retry_strategy=RetryStrategy(limit=10), add_cwd_to_sys_path=False)
+    @script(image="python:alpine3.6", retry_strategy=RetryStrategy(limit="10"), add_cwd_to_sys_path=False)
     def retry_script():
         import random
         import sys

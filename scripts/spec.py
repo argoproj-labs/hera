@@ -7,10 +7,16 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import requests
 
+try:
+    from graphlib import TopologicalSorter
+except ImportError:
+    from .graphlib import TopologicalSorter
+
 logger: logging.Logger = logging.getLogger(__name__)
 
 # get the OpenAPI spec URI from the command line, along with the output file
 open_api_spec_url = sys.argv[1]
+
 assert open_api_spec_url is not None, "Expected the OpenAPI spec URL to be passed as the first argument"
 
 output_file = sys.argv[2]
@@ -142,6 +148,30 @@ MANUAL_SPECIFICATIONS: List[Tuple[str, Dict]] = [
 ]
 for obj_name, obj_spec in MANUAL_SPECIFICATIONS:
     spec["definitions"][obj_name] = obj_spec
+
+
+# Reorder spec topologically because pydantic only resolves forward refs to a certain depth (2 by default)
+topo_sorter = TopologicalSorter()
+prefix_len = len("#/definitions/")
+
+# Create "nodes" for the sorter from definition names and any "properties" that reference other definitions
+for definition, metadata in spec["definitions"].items():
+    if "properties" not in metadata:
+        topo_sorter.add(definition)
+        continue
+
+    object_references = []
+    for prop, attrs in metadata["properties"].items():
+        if "$ref" in attrs:
+            object_references.append(attrs["$ref"][prefix_len:])
+    topo_sorter.add(definition, *object_references)
+
+# Rebuild definitions as a new dictionary to maintain ordering
+ordered_defs = {}
+for definition in topo_sorter.static_order():
+    ordered_defs[definition] = spec["definitions"][definition]
+
+spec["definitions"] = ordered_defs
 
 # finally, we write the spec to the output file that is passed to use assuming the client wants to perform
 # something with this file

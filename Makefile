@@ -14,7 +14,7 @@ install: ## Run poetry install with all extras for development
 .PHONY: install-3.8
 install-3.8: ## Install python3.8 for generating test data
 	@poetry env use 3.8
-	@poetry install
+	@poetry install --all-extras
 
 .PHONY: ci
 ci: ## Run all the CI checks

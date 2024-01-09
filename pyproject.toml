@@ -142,6 +142,7 @@ src = ["src"]
 "src/hera/workflows/_unparse.py" = ["D"]
 "src/hera/workflows/models/**" = ["D"]
 "tests/**" = ["D"]
+"scripts/graphlib.py" = ["D"]
 
 [tool.ruff.isort]
 force-wrap-aliases = true

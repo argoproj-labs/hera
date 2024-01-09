@@ -4,7 +4,7 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 from pathlib import Path
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union, cast
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
@@ -25,6 +25,7 @@ from hera.workflows.models import (
     CronWorkflowStatus,
     LintCronWorkflowRequest,
     UpdateCronWorkflowRequest,
+    Workflow as _ModelWorkflow,
 )
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow, _WorkflowModelMapper
@@ -144,12 +145,12 @@ class CronWorkflow(Workflow):
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
-        model_workflow = super().build()
+        model_workflow = cast(_ModelWorkflow, super().build())
         model_cron_workflow = _ModelCronWorkflow(
             metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(
                 schedule=self.schedule,
-                workflow_spec=model_workflow.spec,  # type: ignore
+                workflow_spec=model_workflow.spec,
             ),
         )
 

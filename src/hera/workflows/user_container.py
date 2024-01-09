@@ -17,6 +17,7 @@ from hera.workflows.volume import _BaseVolume
 class UserContainer(_ModelUserContainer):
     """`UserContainer` is a container type that is specifically used as a side container."""
 
+    # TODO: Use EnvMixin (currently a circular import)
     env: Optional[List[Union[_BaseEnv, EnvVar]]] = None  # type: ignore[assignment]
     env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None  # type: ignore[assignment]
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None  # type: ignore[assignment]
@@ -59,8 +60,8 @@ class UserContainer(_ModelUserContainer):
         return _ModelUserContainer(
             args=self.args,
             command=self.command,
-            env=env,
-            env_from=env_from,
+            env=env or None,
+            env_from=env_from or None,
             image=self.image,
             image_pull_policy=self._build_image_pull_policy(),
             lifecycle=self.lifecycle,

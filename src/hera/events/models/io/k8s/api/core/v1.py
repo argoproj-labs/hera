@@ -15,6 +15,43 @@ from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr
 
 
+class SecretKeySelector(BaseModel):
+    key: Annotated[
+        str,
+        Field(description=("The key of the secret to select from.  Must be a valid secret key.")),
+    ]
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+    optional: Annotated[
+        Optional[bool],
+        Field(description="Specify whether the Secret or its key must be defined"),
+    ] = None
+
+
+class ConfigMapKeySelector(BaseModel):
+    key: Annotated[str, Field(description="The key to select.")]
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+    optional: Annotated[
+        Optional[bool],
+        Field(description="Specify whether the ConfigMap or its key must be defined"),
+    ] = None
+
+
 class AWSElasticBlockStoreVolumeSource(BaseModel):
     fs_type: Annotated[
         Optional[str],
@@ -136,6 +173,18 @@ class AzureFileVolumeSource(BaseModel):
     share_name: Annotated[str, Field(alias="shareName", description="Share Name")]
 
 
+class LocalObjectReference(BaseModel):
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+
+
 class Capabilities(BaseModel):
     add: Annotated[Optional[List[str]], Field(description="Added capabilities")] = None
     drop: Annotated[Optional[List[str]], Field(description="Removed capabilities")] = None
@@ -155,28 +204,6 @@ class ConfigMapEnvSource(BaseModel):
         Optional[bool],
         Field(description="Specify whether the ConfigMap must be defined"),
     ] = None
-
-
-class ConfigMapKeySelector(BaseModel):
-    key: Annotated[str, Field(description="The key to select.")]
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-    optional: Annotated[
-        Optional[bool],
-        Field(description="Specify whether the ConfigMap or its key must be defined"),
-    ] = None
-
-
-class TerminationMessagePolicy(Enum):
-    fallback_to_logs_on_error = "FallbackToLogsOnError"
-    file = "File"
 
 
 class Protocol(Enum):
@@ -227,6 +254,107 @@ class ContainerPort(BaseModel):
                 "Protocol for port. Must be UDP, TCP, or SCTP. Defaults to"
                 ' "TCP".\n\nPossible enum values:\n - `"SCTP"` is the SCTP protocol.\n'
                 ' - `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP protocol.'
+            )
+        ),
+    ] = None
+
+
+class ObjectFieldSelector(BaseModel):
+    api_version: Annotated[
+        Optional[str],
+        Field(
+            alias="apiVersion",
+            description=("Version of the schema the FieldPath is written in terms of, defaults" ' to "v1".'),
+        ),
+    ] = None
+    field_path: Annotated[
+        str,
+        Field(
+            alias="fieldPath",
+            description="Path of the field to select in the specified API version.",
+        ),
+    ]
+
+
+class SecretEnvSource(BaseModel):
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+    optional: Annotated[Optional[bool], Field(description="Specify whether the Secret must be defined")] = None
+
+
+class ObjectReference(BaseModel):
+    api_version: Annotated[
+        Optional[str],
+        Field(alias="apiVersion", description="API version of the referent."),
+    ] = None
+    field_path: Annotated[
+        Optional[str],
+        Field(
+            alias="fieldPath",
+            description=(
+                "If referring to a piece of an object instead of an entire object, this"
+                " string should contain a valid JSON/Go field access statement, such as"
+                " desiredState.manifest.containers[2]. For example, if the object"
+                " reference is to a container within a pod, this would take on a value"
+                ' like: "spec.containers{name}" (where "name" refers to the name of the'
+                " container that triggered the event) or if no container name is"
+                ' specified "spec.containers[2]" (container with index 2 in this pod).'
+                " This syntax is chosen only to have some well-defined way of"
+                " referencing a part of an object."
+            ),
+        ),
+    ] = None
+    kind: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Kind of the referent. More info:"
+                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+            )
+        ),
+    ] = None
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+    namespace: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Namespace of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"
+            )
+        ),
+    ] = None
+    resource_version: Annotated[
+        Optional[str],
+        Field(
+            alias="resourceVersion",
+            description=(
+                "Specific resourceVersion to which this reference is made, if any. More"
+                " info:"
+                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency"
+            ),
+        ),
+    ] = None
+    uid: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "UID of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids"
             )
         ),
     ] = None
@@ -494,18 +622,6 @@ class KeyToPath(BaseModel):
     ]
 
 
-class LocalObjectReference(BaseModel):
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-
-
 class NFSVolumeSource(BaseModel):
     path: Annotated[
         str,
@@ -591,103 +707,26 @@ class NodeSelectorTerm(BaseModel):
     ] = None
 
 
-class ObjectFieldSelector(BaseModel):
-    api_version: Annotated[
-        Optional[str],
-        Field(
-            alias="apiVersion",
-            description=("Version of the schema the FieldPath is written in terms of, defaults" ' to "v1".'),
-        ),
-    ] = None
-    field_path: Annotated[
-        str,
-        Field(
-            alias="fieldPath",
-            description="Path of the field to select in the specified API version.",
-        ),
-    ]
-
-
-class ObjectReference(BaseModel):
-    api_version: Annotated[
-        Optional[str],
-        Field(alias="apiVersion", description="API version of the referent."),
-    ] = None
-    field_path: Annotated[
-        Optional[str],
-        Field(
-            alias="fieldPath",
-            description=(
-                "If referring to a piece of an object instead of an entire object, this"
-                " string should contain a valid JSON/Go field access statement, such as"
-                " desiredState.manifest.containers[2]. For example, if the object"
-                " reference is to a container within a pod, this would take on a value"
-                ' like: "spec.containers{name}" (where "name" refers to the name of the'
-                " container that triggered the event) or if no container name is"
-                ' specified "spec.containers[2]" (container with index 2 in this pod).'
-                " This syntax is chosen only to have some well-defined way of"
-                " referencing a part of an object."
-            ),
-        ),
-    ] = None
-    kind: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Kind of the referent. More info:"
-                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
-            )
-        ),
-    ] = None
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-    namespace: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Namespace of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/"
-            )
-        ),
-    ] = None
-    resource_version: Annotated[
-        Optional[str],
-        Field(
-            alias="resourceVersion",
-            description=(
-                "Specific resourceVersion to which this reference is made, if any. More"
-                " info:"
-                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency"
-            ),
-        ),
-    ] = None
-    uid: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "UID of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids"
-            )
-        ),
-    ] = None
-
-
-class Type(Enum):
-    file_system_resize_pending = "FileSystemResizePending"
-    resizing = "Resizing"
-
-
 class Phase(Enum):
     bound = "Bound"
     lost = "Lost"
     pending = "Pending"
+
+
+class TypedLocalObjectReference(BaseModel):
+    api_group: Annotated[
+        Optional[str],
+        Field(
+            alias="apiGroup",
+            description=(
+                "APIGroup is the group for the resource being referenced. If APIGroup"
+                " is not specified, the specified Kind must be in the core API group."
+                " For any other third-party types, APIGroup is required."
+            ),
+        ),
+    ] = None
+    kind: Annotated[str, Field(description="Kind is the type of resource being referenced")]
+    name: Annotated[str, Field(description="Name is the name of resource being referenced")]
 
 
 class PersistentVolumeClaimVolumeSource(BaseModel):
@@ -737,6 +776,116 @@ class PodDNSConfigOption(BaseModel):
     value: Optional[str] = None
 
 
+class SELinuxOptions(BaseModel):
+    level: Annotated[
+        Optional[str],
+        Field(description="Level is SELinux level label that applies to the container."),
+    ] = None
+    role: Annotated[
+        Optional[str],
+        Field(description="Role is a SELinux role label that applies to the container."),
+    ] = None
+    type: Annotated[
+        Optional[str],
+        Field(description="Type is a SELinux type label that applies to the container."),
+    ] = None
+    user: Annotated[
+        Optional[str],
+        Field(description="User is a SELinux user label that applies to the container."),
+    ] = None
+
+
+class Type(Enum):
+    localhost = "Localhost"
+    runtime_default = "RuntimeDefault"
+    unconfined = "Unconfined"
+
+
+class SeccompProfile(BaseModel):
+    localhost_profile: Annotated[
+        Optional[str],
+        Field(
+            alias="localhostProfile",
+            description=(
+                "localhostProfile indicates a profile defined in a file on the node"
+                " should be used. The profile must be preconfigured on the node to"
+                " work. Must be a descending path, relative to the kubelet's"
+                " configured seccomp profile location. Must only be set if type is"
+                ' "Localhost".'
+            ),
+        ),
+    ] = None
+    type: Annotated[
+        Type,
+        Field(
+            description=(
+                "type indicates which kind of seccomp profile will be applied. Valid"
+                " options are:\n\nLocalhost - a profile defined in a file on the node"
+                " should be used. RuntimeDefault - the container runtime default"
+                " profile should be used. Unconfined - no profile should be"
+                ' applied.\n\nPossible enum values:\n - `"Localhost"` indicates a'
+                " profile defined in a file on the node should be used. The file's"
+                " location relative to <kubelet-root-dir>/seccomp.\n -"
+                ' `"RuntimeDefault"` represents the default container runtime seccomp'
+                ' profile.\n - `"Unconfined"` indicates no seccomp profile is applied'
+                " (A.K.A. unconfined)."
+            )
+        ),
+    ]
+
+
+class WindowsSecurityContextOptions(BaseModel):
+    gmsa_credential_spec: Annotated[
+        Optional[str],
+        Field(
+            alias="gmsaCredentialSpec",
+            description=(
+                "GMSACredentialSpec is where the GMSA admission webhook"
+                " (https://github.com/kubernetes-sigs/windows-gmsa) inlines the"
+                " contents of the GMSA credential spec named by the"
+                " GMSACredentialSpecName field."
+            ),
+        ),
+    ] = None
+    gmsa_credential_spec_name: Annotated[
+        Optional[str],
+        Field(
+            alias="gmsaCredentialSpecName",
+            description=("GMSACredentialSpecName is the name of the GMSA credential spec to use."),
+        ),
+    ] = None
+    host_process: Annotated[
+        Optional[bool],
+        Field(
+            alias="hostProcess",
+            description=(
+                "HostProcess determines if a container should be run as a 'Host"
+                " Process' container. This field is alpha-level and will only be"
+                " honored by components that enable the WindowsHostProcessContainers"
+                " feature flag. Setting this field without the feature flag will result"
+                " in errors when validating the Pod. All of a Pod's containers must"
+                " have the same effective HostProcess value (it is not allowed to have"
+                " a mix of HostProcess containers and non-HostProcess containers).  In"
+                " addition, if HostProcess is true then HostNetwork must also be set to"
+                " true."
+            ),
+        ),
+    ] = None
+    run_as_user_name: Annotated[
+        Optional[str],
+        Field(
+            alias="runAsUserName",
+            description=(
+                "The UserName in Windows to run the entrypoint of the container"
+                " process. Defaults to the user specified in image metadata if"
+                " unspecified. May also be set in PodSecurityContext. If set in both"
+                " SecurityContext and PodSecurityContext, the value specified in"
+                " SecurityContext takes precedence."
+            ),
+        ),
+    ] = None
+
+
 class PortworxVolumeSource(BaseModel):
     fs_type: Annotated[
         Optional[str],
@@ -763,19 +912,6 @@ class PortworxVolumeSource(BaseModel):
         Field(
             alias="volumeID",
             description="VolumeID uniquely identifies a Portworx volume",
-        ),
-    ]
-
-
-class PreferredSchedulingTerm(BaseModel):
-    preference: Annotated[
-        NodeSelectorTerm,
-        Field(description=("A node selector term, associated with the corresponding weight.")),
-    ]
-    weight: Annotated[
-        int,
-        Field(
-            description=("Weight associated with matching the corresponding nodeSelectorTerm, in" " the range 1-100.")
         ),
     ]
 
@@ -822,259 +958,6 @@ class QuobyteVolumeSource(BaseModel):
         str,
         Field(description=("Volume is a string that references an already created Quobyte volume" " by name.")),
     ]
-
-
-class RBDVolumeSource(BaseModel):
-    fs_type: Annotated[
-        Optional[str],
-        Field(
-            alias="fsType",
-            description=(
-                "Filesystem type of the volume that you want to mount. Tip: Ensure that"
-                " the filesystem type is supported by the host operating system."
-                ' Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if'
-                " unspecified. More info:"
-                " https://kubernetes.io/docs/concepts/storage/volumes#rbd"
-            ),
-        ),
-    ] = None
-    image: Annotated[
-        str,
-        Field(
-            description=(
-                "The rados image name. More info:" " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            )
-        ),
-    ]
-    keyring: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Keyring is the path to key ring for RBDUser. Default is"
-                " /etc/ceph/keyring. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            )
-        ),
-    ] = None
-    monitors: Annotated[
-        List[str],
-        Field(
-            description=(
-                "A collection of Ceph monitors. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            )
-        ),
-    ]
-    pool: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "The rados pool name. Default is rbd. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            )
-        ),
-    ] = None
-    read_only: Annotated[
-        Optional[bool],
-        Field(
-            alias="readOnly",
-            description=(
-                "ReadOnly here will force the ReadOnly setting in VolumeMounts."
-                " Defaults to false. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            ),
-        ),
-    ] = None
-    secret_ref: Annotated[
-        Optional[LocalObjectReference],
-        Field(
-            alias="secretRef",
-            description=(
-                "SecretRef is name of the authentication secret for RBDUser. If"
-                " provided overrides keyring. Default is nil. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            ),
-        ),
-    ] = None
-    user: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "The rados user name. Default is admin. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
-            )
-        ),
-    ] = None
-
-
-class SELinuxOptions(BaseModel):
-    level: Annotated[
-        Optional[str],
-        Field(description="Level is SELinux level label that applies to the container."),
-    ] = None
-    role: Annotated[
-        Optional[str],
-        Field(description="Role is a SELinux role label that applies to the container."),
-    ] = None
-    type: Annotated[
-        Optional[str],
-        Field(description="Type is a SELinux type label that applies to the container."),
-    ] = None
-    user: Annotated[
-        Optional[str],
-        Field(description="User is a SELinux user label that applies to the container."),
-    ] = None
-
-
-class ScaleIOVolumeSource(BaseModel):
-    fs_type: Annotated[
-        Optional[str],
-        Field(
-            alias="fsType",
-            description=(
-                "Filesystem type to mount. Must be a filesystem type supported by the"
-                ' host operating system. Ex. "ext4", "xfs", "ntfs". Default is "xfs".'
-            ),
-        ),
-    ] = None
-    gateway: Annotated[str, Field(description="The host address of the ScaleIO API Gateway.")]
-    protection_domain: Annotated[
-        Optional[str],
-        Field(
-            alias="protectionDomain",
-            description=("The name of the ScaleIO Protection Domain for the configured storage."),
-        ),
-    ] = None
-    read_only: Annotated[
-        Optional[bool],
-        Field(
-            alias="readOnly",
-            description=(
-                "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
-            ),
-        ),
-    ] = None
-    secret_ref: Annotated[
-        LocalObjectReference,
-        Field(
-            alias="secretRef",
-            description=(
-                "SecretRef references to the secret for ScaleIO user and other"
-                " sensitive information. If this is not provided, Login operation will"
-                " fail."
-            ),
-        ),
-    ]
-    ssl_enabled: Annotated[
-        Optional[bool],
-        Field(
-            alias="sslEnabled",
-            description=("Flag to enable/disable SSL communication with Gateway, default false"),
-        ),
-    ] = None
-    storage_mode: Annotated[
-        Optional[str],
-        Field(
-            alias="storageMode",
-            description=(
-                "Indicates whether the storage for a volume should be ThickProvisioned"
-                " or ThinProvisioned. Default is ThinProvisioned."
-            ),
-        ),
-    ] = None
-    storage_pool: Annotated[
-        Optional[str],
-        Field(
-            alias="storagePool",
-            description=("The ScaleIO Storage Pool associated with the protection domain."),
-        ),
-    ] = None
-    system: Annotated[
-        str,
-        Field(description="The name of the storage system as configured in ScaleIO."),
-    ]
-    volume_name: Annotated[
-        Optional[str],
-        Field(
-            alias="volumeName",
-            description=(
-                "The name of a volume already created in the ScaleIO system that is"
-                " associated with this volume source."
-            ),
-        ),
-    ] = None
-
-
-class TypeModel(Enum):
-    localhost = "Localhost"
-    runtime_default = "RuntimeDefault"
-    unconfined = "Unconfined"
-
-
-class SeccompProfile(BaseModel):
-    localhost_profile: Annotated[
-        Optional[str],
-        Field(
-            alias="localhostProfile",
-            description=(
-                "localhostProfile indicates a profile defined in a file on the node"
-                " should be used. The profile must be preconfigured on the node to"
-                " work. Must be a descending path, relative to the kubelet's"
-                " configured seccomp profile location. Must only be set if type is"
-                ' "Localhost".'
-            ),
-        ),
-    ] = None
-    type: Annotated[
-        TypeModel,
-        Field(
-            description=(
-                "type indicates which kind of seccomp profile will be applied. Valid"
-                " options are:\n\nLocalhost - a profile defined in a file on the node"
-                " should be used. RuntimeDefault - the container runtime default"
-                " profile should be used. Unconfined - no profile should be"
-                ' applied.\n\nPossible enum values:\n - `"Localhost"` indicates a'
-                " profile defined in a file on the node should be used. The file's"
-                " location relative to <kubelet-root-dir>/seccomp.\n -"
-                ' `"RuntimeDefault"` represents the default container runtime seccomp'
-                ' profile.\n - `"Unconfined"` indicates no seccomp profile is applied'
-                " (A.K.A. unconfined)."
-            )
-        ),
-    ]
-
-
-class SecretEnvSource(BaseModel):
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-    optional: Annotated[Optional[bool], Field(description="Specify whether the Secret must be defined")] = None
-
-
-class SecretKeySelector(BaseModel):
-    key: Annotated[
-        str,
-        Field(description=("The key of the secret to select from.  Must be a valid secret key.")),
-    ]
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-    optional: Annotated[
-        Optional[bool],
-        Field(description="Specify whether the Secret or its key must be defined"),
-    ] = None
 
 
 class SecretProjection(BaseModel):
@@ -1187,64 +1070,6 @@ class ServiceAccountTokenProjection(BaseModel):
     ]
 
 
-class StorageOSVolumeSource(BaseModel):
-    fs_type: Annotated[
-        Optional[str],
-        Field(
-            alias="fsType",
-            description=(
-                "Filesystem type to mount. Must be a filesystem type supported by the"
-                ' host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred'
-                ' to be "ext4" if unspecified.'
-            ),
-        ),
-    ] = None
-    read_only: Annotated[
-        Optional[bool],
-        Field(
-            alias="readOnly",
-            description=(
-                "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
-            ),
-        ),
-    ] = None
-    secret_ref: Annotated[
-        Optional[LocalObjectReference],
-        Field(
-            alias="secretRef",
-            description=(
-                "SecretRef specifies the secret to use for obtaining the StorageOS API"
-                " credentials.  If not specified, default values will be attempted."
-            ),
-        ),
-    ] = None
-    volume_name: Annotated[
-        Optional[str],
-        Field(
-            alias="volumeName",
-            description=(
-                "VolumeName is the human-readable name of the StorageOS volume.  Volume"
-                " names are only unique within a namespace."
-            ),
-        ),
-    ] = None
-    volume_namespace: Annotated[
-        Optional[str],
-        Field(
-            alias="volumeNamespace",
-            description=(
-                "VolumeNamespace specifies the scope of the volume within StorageOS. "
-                " If no namespace is specified then the Pod's namespace will be used. "
-                " This allows the Kubernetes name scoping to be mirrored within"
-                " StorageOS for tighter integration. Set VolumeName to any name to"
-                ' override the default behaviour. Set to "default" if you are not using'
-                " namespaces within StorageOS. Namespaces that do not pre-exist within"
-                " StorageOS will be created."
-            ),
-        ),
-    ] = None
-
-
 class Sysctl(BaseModel):
     name: Annotated[str, Field(description="Name of a property to set")]
     value: Annotated[str, Field(description="Value of a property to set")]
@@ -1327,20 +1152,38 @@ class Toleration(BaseModel):
     ] = None
 
 
-class TypedLocalObjectReference(BaseModel):
-    api_group: Annotated[
+class VsphereVirtualDiskVolumeSource(BaseModel):
+    fs_type: Annotated[
         Optional[str],
         Field(
-            alias="apiGroup",
+            alias="fsType",
             description=(
-                "APIGroup is the group for the resource being referenced. If APIGroup"
-                " is not specified, the specified Kind must be in the core API group."
-                " For any other third-party types, APIGroup is required."
+                "Filesystem type to mount. Must be a filesystem type supported by the"
+                ' host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred'
+                ' to be "ext4" if unspecified.'
             ),
         ),
     ] = None
-    kind: Annotated[str, Field(description="Kind is the type of resource being referenced")]
-    name: Annotated[str, Field(description="Name is the name of resource being referenced")]
+    storage_policy_id: Annotated[
+        Optional[str],
+        Field(
+            alias="storagePolicyID",
+            description=(
+                "Storage Policy Based Management (SPBM) profile ID associated with the" " StoragePolicyName."
+            ),
+        ),
+    ] = None
+    storage_policy_name: Annotated[
+        Optional[str],
+        Field(
+            alias="storagePolicyName",
+            description="Storage Policy Based Management (SPBM) profile name.",
+        ),
+    ] = None
+    volume_path: Annotated[
+        str,
+        Field(alias="volumePath", description="Path that identifies vSphere volume vmdk"),
+    ]
 
 
 class VolumeDevice(BaseModel):
@@ -1411,96 +1254,145 @@ class VolumeMount(BaseModel):
     ] = None
 
 
-class VsphereVirtualDiskVolumeSource(BaseModel):
-    fs_type: Annotated[
-        Optional[str],
-        Field(
-            alias="fsType",
-            description=(
-                "Filesystem type to mount. Must be a filesystem type supported by the"
-                ' host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred'
-                ' to be "ext4" if unspecified.'
-            ),
-        ),
-    ] = None
-    storage_policy_id: Annotated[
-        Optional[str],
-        Field(
-            alias="storagePolicyID",
-            description=(
-                "Storage Policy Based Management (SPBM) profile ID associated with the" " StoragePolicyName."
-            ),
-        ),
-    ] = None
-    storage_policy_name: Annotated[
-        Optional[str],
-        Field(
-            alias="storagePolicyName",
-            description="Storage Policy Based Management (SPBM) profile name.",
-        ),
-    ] = None
-    volume_path: Annotated[
-        str,
-        Field(alias="volumePath", description="Path that identifies vSphere volume vmdk"),
-    ]
-
-
-class WindowsSecurityContextOptions(BaseModel):
-    gmsa_credential_spec: Annotated[
-        Optional[str],
-        Field(
-            alias="gmsaCredentialSpec",
-            description=(
-                "GMSACredentialSpec is where the GMSA admission webhook"
-                " (https://github.com/kubernetes-sigs/windows-gmsa) inlines the"
-                " contents of the GMSA credential spec named by the"
-                " GMSACredentialSpecName field."
-            ),
-        ),
-    ] = None
-    gmsa_credential_spec_name: Annotated[
-        Optional[str],
-        Field(
-            alias="gmsaCredentialSpecName",
-            description=("GMSACredentialSpecName is the name of the GMSA credential spec to use."),
-        ),
-    ] = None
-    host_process: Annotated[
-        Optional[bool],
-        Field(
-            alias="hostProcess",
-            description=(
-                "HostProcess determines if a container should be run as a 'Host"
-                " Process' container. This field is alpha-level and will only be"
-                " honored by components that enable the WindowsHostProcessContainers"
-                " feature flag. Setting this field without the feature flag will result"
-                " in errors when validating the Pod. All of a Pod's containers must"
-                " have the same effective HostProcess value (it is not allowed to have"
-                " a mix of HostProcess containers and non-HostProcess containers).  In"
-                " addition, if HostProcess is true then HostNetwork must also be set to"
-                " true."
-            ),
-        ),
-    ] = None
-    run_as_user_name: Annotated[
-        Optional[str],
-        Field(
-            alias="runAsUserName",
-            description=(
-                "The UserName in Windows to run the entrypoint of the container"
-                " process. Defaults to the user specified in image metadata if"
-                " unspecified. May also be set in PodSecurityContext. If set in both"
-                " SecurityContext and PodSecurityContext, the value specified in"
-                " SecurityContext takes precedence."
-            ),
-        ),
-    ] = None
-
-
 class ImagePullPolicy(Enum):
     always = "Always"
     never = "Never"
     if_not_present = "IfNotPresent"
+
+
+class TypeModel(Enum):
+    file_system_resize_pending = "FileSystemResizePending"
+    resizing = "Resizing"
+
+
+class PersistentVolumeClaimCondition(BaseModel):
+    last_probe_time: Annotated[
+        Optional[v1.Time],
+        Field(alias="lastProbeTime", description="Last time we probed the condition."),
+    ] = None
+    last_transition_time: Annotated[
+        Optional[v1.Time],
+        Field(
+            alias="lastTransitionTime",
+            description=("Last time the condition transitioned from one status to another."),
+        ),
+    ] = None
+    message: Annotated[
+        Optional[str],
+        Field(description=("Human-readable message indicating details about last transition.")),
+    ] = None
+    reason: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Unique, this should be a short, machine understandable string that"
+                " gives the reason for condition's last transition. If it reports"
+                ' "ResizeStarted" that means the underlying persistent volume is being'
+                " resized."
+            )
+        ),
+    ] = None
+    status: str
+    type: Annotated[
+        TypeModel,
+        Field(
+            description=(
+                '\n\n\nPossible enum values:\n - `"FileSystemResizePending"` -'
+                " controller resize is finished and a file system resize is pending on"
+                ' node\n - `"Resizing"` - a user trigger resize of pvc has been started'
+            )
+        ),
+    ]
+
+
+class ServicePort(BaseModel):
+    app_protocol: Annotated[
+        Optional[str],
+        Field(
+            alias="appProtocol",
+            description=(
+                "The application protocol for this port. This field follows standard"
+                " Kubernetes label syntax. Un-prefixed names are reserved for IANA"
+                " standard service names (as per RFC-6335 and"
+                " http://www.iana.org/assignments/service-names). Non-standard"
+                " protocols should use prefixed names such as"
+                " mycompany.com/my-custom-protocol."
+            ),
+        ),
+    ] = None
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "The name of this port within the service. This must be a DNS_LABEL."
+                " All ports within a ServiceSpec must have unique names. When"
+                " considering the endpoints for a Service, this must match the 'name'"
+                " field in the EndpointPort. Optional if only one ServicePort is"
+                " defined on this service."
+            )
+        ),
+    ] = None
+    node_port: Annotated[
+        Optional[int],
+        Field(
+            alias="nodePort",
+            description=(
+                "The port on each node on which this service is exposed when type is"
+                " NodePort or LoadBalancer.  Usually assigned by the system. If a value"
+                " is specified, in-range, and not in use it will be used, otherwise the"
+                " operation will fail.  If not specified, a port will be allocated if"
+                " this Service requires one.  If this field is specified when creating"
+                " a Service which does not need it, creation will fail. This field will"
+                " be wiped when updating a Service to no longer need it (e.g. changing"
+                " type from NodePort to ClusterIP). More info:"
+                " https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport"
+            ),
+        ),
+    ] = None
+    port: Annotated[int, Field(description="The port that will be exposed by this service.")]
+    protocol: Annotated[
+        Optional[Protocol],
+        Field(
+            description=(
+                'The IP protocol for this port. Supports "TCP", "UDP", and "SCTP".'
+                ' Default is TCP.\n\nPossible enum values:\n - `"SCTP"` is the SCTP'
+                ' protocol.\n - `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP'
+                " protocol."
+            )
+        ),
+    ] = None
+    target_port: Annotated[
+        Optional[intstr.IntOrString],
+        Field(
+            alias="targetPort",
+            description=(
+                "Number or name of the port to access on the pods targeted by the"
+                " service. Number must be in the range 1 to 65535. Name must be an"
+                " IANA_SVC_NAME. If this is a string, it will be looked up as a named"
+                " port in the target Pod's container ports. If this is not specified,"
+                " the value of the 'port' field is used (an identity map). This field"
+                " is ignored for services with clusterIP=None, and should be omitted or"
+                " set equal to the 'port' field. More info:"
+                " https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service"
+            ),
+        ),
+    ] = None
+
+
+class TCPSocketAction(BaseModel):
+    host: Annotated[
+        Optional[str],
+        Field(description="Optional: Host name to connect to, defaults to the pod IP."),
+    ] = None
+    port: Annotated[
+        intstr.IntOrString,
+        Field(
+            description=(
+                "Number or name of the port to access on the container. Number must be"
+                " in the range 1 to 65535. Name must be an IANA_SVC_NAME."
+            )
+        ),
+    ]
 
 
 class CSIVolumeSource(BaseModel):
@@ -1659,140 +1551,6 @@ class CinderVolumeSource(BaseModel):
     ]
 
 
-class ConfigMapProjection(BaseModel):
-    items: Annotated[
-        Optional[List[KeyToPath]],
-        Field(
-            description=(
-                "If unspecified, each key-value pair in the Data field of the"
-                " referenced ConfigMap will be projected into the volume as a file"
-                " whose name is the key and content is the value. If specified, the"
-                " listed keys will be projected into the specified paths, and unlisted"
-                " keys will not be present. If a key is specified which is not present"
-                " in the ConfigMap, the volume setup will error unless it is marked"
-                " optional. Paths must be relative and may not contain the '..' path or"
-                " start with '..'."
-            )
-        ),
-    ] = None
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-    optional: Annotated[
-        Optional[bool],
-        Field(description="Specify whether the ConfigMap or its keys must be defined"),
-    ] = None
-
-
-class ConfigMapVolumeSource(BaseModel):
-    default_mode: Annotated[
-        Optional[int],
-        Field(
-            alias="defaultMode",
-            description=(
-                "Optional: mode bits used to set permissions on created files by"
-                " default. Must be an octal value between 0000 and 0777 or a decimal"
-                " value between 0 and 511. YAML accepts both octal and decimal values,"
-                " JSON requires decimal values for mode bits. Defaults to 0644."
-                " Directories within the path are not affected by this setting. This"
-                " might be in conflict with other options that affect the file mode,"
-                " like fsGroup, and the result can be other mode bits set."
-            ),
-        ),
-    ] = None
-    items: Annotated[
-        Optional[List[KeyToPath]],
-        Field(
-            description=(
-                "If unspecified, each key-value pair in the Data field of the"
-                " referenced ConfigMap will be projected into the volume as a file"
-                " whose name is the key and content is the value. If specified, the"
-                " listed keys will be projected into the specified paths, and unlisted"
-                " keys will not be present. If a key is specified which is not present"
-                " in the ConfigMap, the volume setup will error unless it is marked"
-                " optional. Paths must be relative and may not contain the '..' path or"
-                " start with '..'."
-            )
-        ),
-    ] = None
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Name of the referent. More info:"
-                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-            )
-        ),
-    ] = None
-    optional: Annotated[
-        Optional[bool],
-        Field(description="Specify whether the ConfigMap or its keys must be defined"),
-    ] = None
-
-
-class EmptyDirVolumeSource(BaseModel):
-    medium: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "What type of storage medium should back this directory. The default is"
-                ' "" which means to use the node\'s default medium. Must be an empty'
-                " string (default) or Memory. More info:"
-                " https://kubernetes.io/docs/concepts/storage/volumes#emptydir"
-            )
-        ),
-    ] = None
-    size_limit: Annotated[
-        Optional[resource.Quantity],
-        Field(
-            alias="sizeLimit",
-            description=(
-                "Total amount of local storage required for this EmptyDir volume. The"
-                " size limit is also applicable for memory medium. The maximum usage on"
-                " memory medium EmptyDir would be the minimum value between the"
-                " SizeLimit specified here and the sum of memory limits of all"
-                " containers in a pod. The default is nil which means that the limit is"
-                " undefined. More info:"
-                " http://kubernetes.io/docs/user-guide/volumes#emptydir"
-            ),
-        ),
-    ] = None
-
-
-class EnvFromSource(BaseModel):
-    config_map_ref: Annotated[
-        Optional[ConfigMapEnvSource],
-        Field(alias="configMapRef", description="The ConfigMap to select from"),
-    ] = None
-    prefix: Annotated[
-        Optional[str],
-        Field(
-            description=("An optional identifier to prepend to each key in the ConfigMap. Must" " be a C_IDENTIFIER.")
-        ),
-    ] = None
-    secret_ref: Annotated[
-        Optional[SecretEnvSource],
-        Field(alias="secretRef", description="The Secret to select from"),
-    ] = None
-
-
-class EventSeries(BaseModel):
-    count: Annotated[
-        Optional[int],
-        Field(description=("Number of occurrences in this series up to the last heartbeat time")),
-    ] = None
-    last_observed_time: Annotated[
-        Optional[v1.MicroTime],
-        Field(alias="lastObservedTime", description="Time of the last occurrence observed"),
-    ] = None
-
-
 class FlexVolumeSource(BaseModel):
     driver: Annotated[
         str,
@@ -1833,46 +1591,6 @@ class FlexVolumeSource(BaseModel):
                 " empty if no secret object is specified. If the secret object contains"
                 " more than one secret, all secrets are passed to the plugin scripts."
             ),
-        ),
-    ] = None
-
-
-class HTTPGetAction(BaseModel):
-    host: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "Host name to connect to, defaults to the pod IP. You probably want to"
-                ' set "Host" in httpHeaders instead.'
-            )
-        ),
-    ] = None
-    http_headers: Annotated[
-        Optional[List[HTTPHeader]],
-        Field(
-            alias="httpHeaders",
-            description=("Custom headers to set in the request. HTTP allows repeated headers."),
-        ),
-    ] = None
-    path: Annotated[Optional[str], Field(description="Path to access on the HTTP server.")] = None
-    port: Annotated[
-        int,
-        Field(
-            description=(
-                "Name or number of the port to access on the container. Number must be"
-                " in the range 1 to 65535. Name must be an IANA_SVC_NAME."
-            )
-        ),
-    ]
-    scheme: Annotated[
-        Optional[Scheme],
-        Field(
-            description=(
-                "Scheme to use for connecting to the host. Defaults to"
-                ' HTTP.\n\nPossible enum values:\n - `"HTTP"` means that the scheme'
-                ' used will be http://\n - `"HTTPS"` means that the scheme used will be'
-                " https://"
-            )
         ),
     ] = None
 
@@ -1960,160 +1678,309 @@ class ISCSIVolumeSource(BaseModel):
     ]
 
 
-class NodeSelector(BaseModel):
-    node_selector_terms: Annotated[
-        List[NodeSelectorTerm],
-        Field(
-            alias="nodeSelectorTerms",
-            description="Required. A list of node selector terms. The terms are ORed.",
-        ),
-    ]
-
-
-class PersistentVolumeClaimCondition(BaseModel):
-    last_probe_time: Annotated[
-        Optional[v1.Time],
-        Field(alias="lastProbeTime", description="Last time we probed the condition."),
-    ] = None
-    last_transition_time: Annotated[
-        Optional[v1.Time],
-        Field(
-            alias="lastTransitionTime",
-            description=("Last time the condition transitioned from one status to another."),
-        ),
-    ] = None
-    message: Annotated[
-        Optional[str],
-        Field(description=("Human-readable message indicating details about last transition.")),
-    ] = None
-    reason: Annotated[
+class RBDVolumeSource(BaseModel):
+    fs_type: Annotated[
         Optional[str],
         Field(
+            alias="fsType",
             description=(
-                "Unique, this should be a short, machine understandable string that"
-                " gives the reason for condition's last transition. If it reports"
-                ' "ResizeStarted" that means the underlying persistent volume is being'
-                " resized."
-            )
+                "Filesystem type of the volume that you want to mount. Tip: Ensure that"
+                " the filesystem type is supported by the host operating system."
+                ' Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if'
+                " unspecified. More info:"
+                " https://kubernetes.io/docs/concepts/storage/volumes#rbd"
+            ),
         ),
     ] = None
-    status: str
-    type: Annotated[
-        Type,
+    image: Annotated[
+        str,
         Field(
             description=(
-                '\n\n\nPossible enum values:\n - `"FileSystemResizePending"` -'
-                " controller resize is finished and a file system resize is pending on"
-                ' node\n - `"Resizing"` - a user trigger resize of pvc has been started'
+                "The rados image name. More info:" " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
             )
         ),
     ]
-
-
-class PersistentVolumeClaimStatus(BaseModel):
-    access_modes: Annotated[
-        Optional[List[str]],
-        Field(
-            alias="accessModes",
-            description=(
-                "AccessModes contains the actual access modes the volume backing the"
-                " PVC has. More info:"
-                " https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
-            ),
-        ),
-    ] = None
-    allocated_resources: Annotated[
-        Optional[Dict[str, resource.Quantity]],
-        Field(
-            alias="allocatedResources",
-            description=(
-                "The storage resource within AllocatedResources tracks the capacity"
-                " allocated to a PVC. It may be larger than the actual capacity when a"
-                " volume expansion operation is requested. For storage quota, the"
-                " larger value from allocatedResources and PVC.spec.resources is used."
-                " If allocatedResources is not set, PVC.spec.resources alone is used"
-                " for quota calculation. If a volume expansion capacity request is"
-                " lowered, allocatedResources is only lowered if there are no expansion"
-                " operations in progress and if the actual volume capacity is equal or"
-                " lower than the requested capacity. This is an alpha field and"
-                " requires enabling RecoverVolumeExpansionFailure feature."
-            ),
-        ),
-    ] = None
-    capacity: Annotated[
-        Optional[Dict[str, resource.Quantity]],
-        Field(description="Represents the actual resources of the underlying volume."),
-    ] = None
-    conditions: Annotated[
-        Optional[List[PersistentVolumeClaimCondition]],
-        Field(
-            description=(
-                "Current Condition of persistent volume claim. If underlying persistent"
-                " volume is being resized then the Condition will be set to"
-                " 'ResizeStarted'."
-            )
-        ),
-    ] = None
-    phase: Annotated[
-        Optional[Phase],
-        Field(
-            description=(
-                "Phase represents the current phase of"
-                ' PersistentVolumeClaim.\n\nPossible enum values:\n - `"Bound"` used'
-                ' for PersistentVolumeClaims that are bound\n - `"Lost"` used for'
-                " PersistentVolumeClaims that lost their underlying PersistentVolume."
-                " The claim was bound to a PersistentVolume and this volume does not"
-                ' exist any longer and all data on it was lost.\n - `"Pending"` used'
-                " for PersistentVolumeClaims that are not yet bound"
-            )
-        ),
-    ] = None
-    resize_status: Annotated[
+    keyring: Annotated[
         Optional[str],
         Field(
-            alias="resizeStatus",
             description=(
-                "ResizeStatus stores status of resize operation. ResizeStatus is not"
-                " set by default but when expansion is complete resizeStatus is set to"
-                " empty string by resize controller or kubelet. This is an alpha field"
-                " and requires enabling RecoverVolumeExpansionFailure feature."
+                "Keyring is the path to key ring for RBDUser. Default is"
+                " /etc/ceph/keyring. More info:"
+                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            )
+        ),
+    ] = None
+    monitors: Annotated[
+        List[str],
+        Field(
+            description=(
+                "A collection of Ceph monitors. More info:"
+                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            )
+        ),
+    ]
+    pool: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "The rados pool name. Default is rbd. More info:"
+                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            )
+        ),
+    ] = None
+    read_only: Annotated[
+        Optional[bool],
+        Field(
+            alias="readOnly",
+            description=(
+                "ReadOnly here will force the ReadOnly setting in VolumeMounts."
+                " Defaults to false. More info:"
+                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            ),
+        ),
+    ] = None
+    secret_ref: Annotated[
+        Optional[LocalObjectReference],
+        Field(
+            alias="secretRef",
+            description=(
+                "SecretRef is name of the authentication secret for RBDUser. If"
+                " provided overrides keyring. Default is nil. More info:"
+                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            ),
+        ),
+    ] = None
+    user: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "The rados user name. Default is admin. More info:"
+                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+            )
+        ),
+    ] = None
+
+
+class ScaleIOVolumeSource(BaseModel):
+    fs_type: Annotated[
+        Optional[str],
+        Field(
+            alias="fsType",
+            description=(
+                "Filesystem type to mount. Must be a filesystem type supported by the"
+                ' host operating system. Ex. "ext4", "xfs", "ntfs". Default is "xfs".'
+            ),
+        ),
+    ] = None
+    gateway: Annotated[str, Field(description="The host address of the ScaleIO API Gateway.")]
+    protection_domain: Annotated[
+        Optional[str],
+        Field(
+            alias="protectionDomain",
+            description=("The name of the ScaleIO Protection Domain for the configured storage."),
+        ),
+    ] = None
+    read_only: Annotated[
+        Optional[bool],
+        Field(
+            alias="readOnly",
+            description=(
+                "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+            ),
+        ),
+    ] = None
+    secret_ref: Annotated[
+        LocalObjectReference,
+        Field(
+            alias="secretRef",
+            description=(
+                "SecretRef references to the secret for ScaleIO user and other"
+                " sensitive information. If this is not provided, Login operation will"
+                " fail."
+            ),
+        ),
+    ]
+    ssl_enabled: Annotated[
+        Optional[bool],
+        Field(
+            alias="sslEnabled",
+            description=("Flag to enable/disable SSL communication with Gateway, default false"),
+        ),
+    ] = None
+    storage_mode: Annotated[
+        Optional[str],
+        Field(
+            alias="storageMode",
+            description=(
+                "Indicates whether the storage for a volume should be ThickProvisioned"
+                " or ThinProvisioned. Default is ThinProvisioned."
+            ),
+        ),
+    ] = None
+    storage_pool: Annotated[
+        Optional[str],
+        Field(
+            alias="storagePool",
+            description=("The ScaleIO Storage Pool associated with the protection domain."),
+        ),
+    ] = None
+    system: Annotated[
+        str,
+        Field(description="The name of the storage system as configured in ScaleIO."),
+    ]
+    volume_name: Annotated[
+        Optional[str],
+        Field(
+            alias="volumeName",
+            description=(
+                "The name of a volume already created in the ScaleIO system that is"
+                " associated with this volume source."
             ),
         ),
     ] = None
 
 
-class PodDNSConfig(BaseModel):
-    nameservers: Annotated[
-        Optional[List[str]],
+class StorageOSVolumeSource(BaseModel):
+    fs_type: Annotated[
+        Optional[str],
+        Field(
+            alias="fsType",
+            description=(
+                "Filesystem type to mount. Must be a filesystem type supported by the"
+                ' host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred'
+                ' to be "ext4" if unspecified.'
+            ),
+        ),
+    ] = None
+    read_only: Annotated[
+        Optional[bool],
+        Field(
+            alias="readOnly",
+            description=(
+                "Defaults to false (read/write). ReadOnly here will force the ReadOnly" " setting in VolumeMounts."
+            ),
+        ),
+    ] = None
+    secret_ref: Annotated[
+        Optional[LocalObjectReference],
+        Field(
+            alias="secretRef",
+            description=(
+                "SecretRef specifies the secret to use for obtaining the StorageOS API"
+                " credentials.  If not specified, default values will be attempted."
+            ),
+        ),
+    ] = None
+    volume_name: Annotated[
+        Optional[str],
+        Field(
+            alias="volumeName",
+            description=(
+                "VolumeName is the human-readable name of the StorageOS volume.  Volume"
+                " names are only unique within a namespace."
+            ),
+        ),
+    ] = None
+    volume_namespace: Annotated[
+        Optional[str],
+        Field(
+            alias="volumeNamespace",
+            description=(
+                "VolumeNamespace specifies the scope of the volume within StorageOS. "
+                " If no namespace is specified then the Pod's namespace will be used. "
+                " This allows the Kubernetes name scoping to be mirrored within"
+                " StorageOS for tighter integration. Set VolumeName to any name to"
+                ' override the default behaviour. Set to "default" if you are not using'
+                " namespaces within StorageOS. Namespaces that do not pre-exist within"
+                " StorageOS will be created."
+            ),
+        ),
+    ] = None
+
+
+class EmptyDirVolumeSource(BaseModel):
+    medium: Annotated[
+        Optional[str],
         Field(
             description=(
-                "A list of DNS name server IP addresses. This will be appended to the"
-                " base nameservers generated from DNSPolicy. Duplicated nameservers"
-                " will be removed."
+                "What type of storage medium should back this directory. The default is"
+                ' "" which means to use the node\'s default medium. Must be an empty'
+                " string (default) or Memory. More info:"
+                " https://kubernetes.io/docs/concepts/storage/volumes#emptydir"
             )
         ),
     ] = None
-    options: Annotated[
-        Optional[List[PodDNSConfigOption]],
+    size_limit: Annotated[
+        Optional[resource.Quantity],
         Field(
+            alias="sizeLimit",
             description=(
-                "A list of DNS resolver options. This will be merged with the base"
-                " options generated from DNSPolicy. Duplicated entries will be removed."
-                " Resolution options given in Options will override those that appear"
-                " in the base DNSPolicy."
-            )
+                "Total amount of local storage required for this EmptyDir volume. The"
+                " size limit is also applicable for memory medium. The maximum usage on"
+                " memory medium EmptyDir would be the minimum value between the"
+                " SizeLimit specified here and the sum of memory limits of all"
+                " containers in a pod. The default is nil which means that the limit is"
+                " undefined. More info:"
+                " http://kubernetes.io/docs/user-guide/volumes#emptydir"
+            ),
         ),
     ] = None
-    searches: Annotated[
-        Optional[List[str]],
+
+
+class ResourceFieldSelector(BaseModel):
+    container_name: Annotated[
+        Optional[str],
         Field(
-            description=(
-                "A list of DNS search domains for host-name lookup. This will be"
-                " appended to the base search paths generated from DNSPolicy."
-                " Duplicated search paths will be removed."
-            )
+            alias="containerName",
+            description="Container name: required for volumes, optional for env vars",
         ),
     ] = None
+    divisor: Annotated[
+        Optional[resource.Quantity],
+        Field(description=('Specifies the output format of the exposed resources, defaults to "1"')),
+    ] = None
+    resource: Annotated[str, Field(description="Required: resource to select")]
+
+
+class EnvFromSource(BaseModel):
+    config_map_ref: Annotated[
+        Optional[ConfigMapEnvSource],
+        Field(alias="configMapRef", description="The ConfigMap to select from"),
+    ] = None
+    prefix: Annotated[
+        Optional[str],
+        Field(
+            description=("An optional identifier to prepend to each key in the ConfigMap. Must" " be a C_IDENTIFIER.")
+        ),
+    ] = None
+    secret_ref: Annotated[
+        Optional[SecretEnvSource],
+        Field(alias="secretRef", description="The Secret to select from"),
+    ] = None
+
+
+class EventSeries(BaseModel):
+    count: Annotated[
+        Optional[int],
+        Field(description=("Number of occurrences in this series up to the last heartbeat time")),
+    ] = None
+    last_observed_time: Annotated[
+        Optional[v1.MicroTime],
+        Field(alias="lastObservedTime", description="Time of the last occurrence observed"),
+    ] = None
+
+
+class PreferredSchedulingTerm(BaseModel):
+    preference: Annotated[
+        NodeSelectorTerm,
+        Field(description=("A node selector term, associated with the corresponding weight.")),
+    ]
+    weight: Annotated[
+        int,
+        Field(
+            description=("Weight associated with matching the corresponding nodeSelectorTerm, in" " the range 1-100.")
+        ),
+    ]
 
 
 class PodSecurityContext(BaseModel):
@@ -2248,46 +2115,6 @@ class PodSecurityContext(BaseModel):
                 " value specified in SecurityContext takes precedence. Note that this"
                 " field cannot be set when spec.os.name is linux."
             ),
-        ),
-    ] = None
-
-
-class ResourceFieldSelector(BaseModel):
-    container_name: Annotated[
-        Optional[str],
-        Field(
-            alias="containerName",
-            description="Container name: required for volumes, optional for env vars",
-        ),
-    ] = None
-    divisor: Annotated[
-        Optional[resource.Quantity],
-        Field(description=('Specifies the output format of the exposed resources, defaults to "1"')),
-    ] = None
-    resource: Annotated[str, Field(description="Required: resource to select")]
-
-
-class ResourceRequirements(BaseModel):
-    limits: Annotated[
-        Optional[Dict[str, resource.Quantity]],
-        Field(
-            description=(
-                "Limits describes the maximum amount of compute resources allowed. More"
-                " info:"
-                " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
-            )
-        ),
-    ] = None
-    requests: Annotated[
-        Optional[Dict[str, resource.Quantity]],
-        Field(
-            description=(
-                "Requests describes the minimum amount of compute resources required."
-                " If Requests is omitted for a container, it defaults to Limits if that"
-                " is explicitly specified, otherwise to an implementation-defined"
-                " value. More info:"
-                " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
-            )
         ),
     ] = None
 
@@ -2434,96 +2261,6 @@ class SecurityContext(BaseModel):
     ] = None
 
 
-class ServicePort(BaseModel):
-    app_protocol: Annotated[
-        Optional[str],
-        Field(
-            alias="appProtocol",
-            description=(
-                "The application protocol for this port. This field follows standard"
-                " Kubernetes label syntax. Un-prefixed names are reserved for IANA"
-                " standard service names (as per RFC-6335 and"
-                " http://www.iana.org/assignments/service-names). Non-standard"
-                " protocols should use prefixed names such as"
-                " mycompany.com/my-custom-protocol."
-            ),
-        ),
-    ] = None
-    name: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "The name of this port within the service. This must be a DNS_LABEL."
-                " All ports within a ServiceSpec must have unique names. When"
-                " considering the endpoints for a Service, this must match the 'name'"
-                " field in the EndpointPort. Optional if only one ServicePort is"
-                " defined on this service."
-            )
-        ),
-    ] = None
-    node_port: Annotated[
-        Optional[int],
-        Field(
-            alias="nodePort",
-            description=(
-                "The port on each node on which this service is exposed when type is"
-                " NodePort or LoadBalancer.  Usually assigned by the system. If a value"
-                " is specified, in-range, and not in use it will be used, otherwise the"
-                " operation will fail.  If not specified, a port will be allocated if"
-                " this Service requires one.  If this field is specified when creating"
-                " a Service which does not need it, creation will fail. This field will"
-                " be wiped when updating a Service to no longer need it (e.g. changing"
-                " type from NodePort to ClusterIP). More info:"
-                " https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport"
-            ),
-        ),
-    ] = None
-    port: Annotated[int, Field(description="The port that will be exposed by this service.")]
-    protocol: Annotated[
-        Optional[Protocol],
-        Field(
-            description=(
-                'The IP protocol for this port. Supports "TCP", "UDP", and "SCTP".'
-                ' Default is TCP.\n\nPossible enum values:\n - `"SCTP"` is the SCTP'
-                ' protocol.\n - `"TCP"` is the TCP protocol.\n - `"UDP"` is the UDP'
-                " protocol."
-            )
-        ),
-    ] = None
-    target_port: Annotated[
-        Optional[intstr.IntOrString],
-        Field(
-            alias="targetPort",
-            description=(
-                "Number or name of the port to access on the pods targeted by the"
-                " service. Number must be in the range 1 to 65535. Name must be an"
-                " IANA_SVC_NAME. If this is a string, it will be looked up as a named"
-                " port in the target Pod's container ports. If this is not specified,"
-                " the value of the 'port' field is used (an identity map). This field"
-                " is ignored for services with clusterIP=None, and should be omitted or"
-                " set equal to the 'port' field. More info:"
-                " https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service"
-            ),
-        ),
-    ] = None
-
-
-class TCPSocketAction(BaseModel):
-    host: Annotated[
-        Optional[str],
-        Field(description="Optional: Host name to connect to, defaults to the pod IP."),
-    ] = None
-    port: Annotated[
-        intstr.IntOrString,
-        Field(
-            description=(
-                "Number or name of the port to access on the container. Number must be"
-                " in the range 1 to 65535. Name must be an IANA_SVC_NAME."
-            )
-        ),
-    ]
-
-
 class DownwardAPIVolumeFile(BaseModel):
     field_ref: Annotated[
         Optional[ObjectFieldSelector],
@@ -2571,29 +2308,6 @@ class DownwardAPIVolumeFile(BaseModel):
     ] = None
 
 
-class DownwardAPIVolumeSource(BaseModel):
-    default_mode: Annotated[
-        Optional[int],
-        Field(
-            alias="defaultMode",
-            description=(
-                "Optional: mode bits to use on created files by default. Must be a"
-                " Optional: mode bits used to set permissions on created files by"
-                " default. Must be an octal value between 0000 and 0777 or a decimal"
-                " value between 0 and 511. YAML accepts both octal and decimal values,"
-                " JSON requires decimal values for mode bits. Defaults to 0644."
-                " Directories within the path are not affected by this setting. This"
-                " might be in conflict with other options that affect the file mode,"
-                " like fsGroup, and the result can be other mode bits set."
-            ),
-        ),
-    ] = None
-    items: Annotated[
-        Optional[List[DownwardAPIVolumeFile]],
-        Field(description="Items is a list of downward API volume file"),
-    ] = None
-
-
 class EnvVarSource(BaseModel):
     config_map_key_ref: Annotated[
         Optional[ConfigMapKeySelector],
@@ -2632,134 +2346,376 @@ class EnvVarSource(BaseModel):
     ] = None
 
 
-class Event(BaseModel):
-    action: Annotated[
-        Optional[str],
-        Field(description=("What action was taken/failed regarding to the Regarding object.")),
-    ] = None
-    api_version: Annotated[
-        Optional[str],
-        Field(
-            alias="apiVersion",
-            description=(
-                "APIVersion defines the versioned schema of this representation of an"
-                " object. Servers should convert recognized schemas to the latest"
-                " internal value, and may reject unrecognized values. More info:"
-                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
-            ),
-        ),
-    ] = None
-    count: Annotated[Optional[int], Field(description="The number of times this event has occurred.")] = None
-    event_time: Annotated[
-        Optional[v1.MicroTime],
-        Field(alias="eventTime", description="Time when this Event was first observed."),
-    ] = None
-    first_timestamp: Annotated[
-        Optional[v1.Time],
-        Field(
-            alias="firstTimestamp",
-            description=(
-                "The time at which the event was first recorded. (Time of server" " receipt is in TypeMeta.)"
-            ),
-        ),
-    ] = None
-    involved_object: Annotated[
-        ObjectReference,
-        Field(alias="involvedObject", description="The object that this event is about."),
+class EnvVar(BaseModel):
+    name: Annotated[
+        str,
+        Field(description="Name of the environment variable. Must be a C_IDENTIFIER."),
     ]
-    kind: Annotated[
+    value: Annotated[
         Optional[str],
         Field(
             description=(
-                "Kind is a string value representing the REST resource this object"
-                " represents. Servers may infer this from the endpoint the client"
-                " submits requests to. Cannot be updated. In CamelCase. More info:"
-                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
+                "Variable references $(VAR_NAME) are expanded using the previously"
+                " defined environment variables in the container and any service"
+                " environment variables. If a variable cannot be resolved, the"
+                " reference in the input string will be unchanged. Double $$ are"
+                " reduced to a single $, which allows for escaping the $(VAR_NAME)"
+                ' syntax: i.e. "$$(VAR_NAME)" will produce the string literal'
+                ' "$(VAR_NAME)". Escaped references will never be expanded, regardless'
+                ' of whether the variable exists or not. Defaults to "".'
             )
         ),
     ] = None
-    last_timestamp: Annotated[
-        Optional[v1.Time],
+    value_from: Annotated[
+        Optional[EnvVarSource],
         Field(
-            alias="lastTimestamp",
-            description=("The time at which the most recent occurrence of this event was" " recorded."),
+            alias="valueFrom",
+            description=("Source for the environment variable's value. Cannot be used if value" " is not empty."),
         ),
-    ] = None
-    message: Annotated[
-        Optional[str],
-        Field(description="A human-readable description of the status of this operation."),
-    ] = None
-    metadata: Annotated[
-        v1.ObjectMeta,
-        Field(
-            description=(
-                "Standard object's metadata. More info:"
-                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata"
-            )
-        ),
-    ]
-    reason: Annotated[
-        Optional[str],
-        Field(
-            description=(
-                "This should be a short, machine understandable string that gives the"
-                " reason for the transition into the object's current status."
-            )
-        ),
-    ] = None
-    related: Annotated[
-        Optional[ObjectReference],
-        Field(description="Optional secondary object for more complex actions."),
-    ] = None
-    reporting_component: Annotated[
-        Optional[str],
-        Field(
-            alias="reportingComponent",
-            description=("Name of the controller that emitted this Event, e.g." " `kubernetes.io/kubelet`."),
-        ),
-    ] = None
-    reporting_instance: Annotated[
-        Optional[str],
-        Field(
-            alias="reportingInstance",
-            description="ID of the controller instance, e.g. `kubelet-xyzf`.",
-        ),
-    ] = None
-    series: Annotated[
-        Optional[EventSeries],
-        Field(description=("Data about the Event series this event represents or nil if it's a" " singleton Event.")),
-    ] = None
-    source: Annotated[
-        Optional[EventSource],
-        Field(description=("The component reporting this event. Should be a short machine" " understandable string.")),
-    ] = None
-    type: Annotated[
-        Optional[str],
-        Field(description=("Type of this event (Normal, Warning), new types could be added in the" " future")),
     ] = None
 
 
-class LifecycleHandler(BaseModel):
-    exec: Annotated[Optional[ExecAction], Field(description="Exec specifies the action to take.")] = None
-    http_get: Annotated[
-        Optional[HTTPGetAction],
+class TerminationMessagePolicy(Enum):
+    fallback_to_logs_on_error = "FallbackToLogsOnError"
+    file = "File"
+
+
+class ResourceRequirements(BaseModel):
+    limits: Annotated[
+        Optional[Dict[str, resource.Quantity]],
         Field(
-            alias="httpGet",
-            description="HTTPGet specifies the http request to perform.",
+            description=(
+                "Limits describes the maximum amount of compute resources allowed. More"
+                " info:"
+                " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+            )
         ),
     ] = None
-    tcp_socket: Annotated[
-        Optional[TCPSocketAction],
+    requests: Annotated[
+        Optional[Dict[str, resource.Quantity]],
         Field(
-            alias="tcpSocket",
             description=(
-                "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept"
-                " for the backward compatibility. There are no validation of this field"
-                " and lifecycle hooks will fail in runtime when tcp handler is"
-                " specified."
+                "Requests describes the minimum amount of compute resources required."
+                " If Requests is omitted for a container, it defaults to Limits if that"
+                " is explicitly specified, otherwise to an implementation-defined"
+                " value. More info:"
+                " https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+            )
+        ),
+    ] = None
+
+
+class PodDNSConfig(BaseModel):
+    nameservers: Annotated[
+        Optional[List[str]],
+        Field(
+            description=(
+                "A list of DNS name server IP addresses. This will be appended to the"
+                " base nameservers generated from DNSPolicy. Duplicated nameservers"
+                " will be removed."
+            )
+        ),
+    ] = None
+    options: Annotated[
+        Optional[List[PodDNSConfigOption]],
+        Field(
+            description=(
+                "A list of DNS resolver options. This will be merged with the base"
+                " options generated from DNSPolicy. Duplicated entries will be removed."
+                " Resolution options given in Options will override those that appear"
+                " in the base DNSPolicy."
+            )
+        ),
+    ] = None
+    searches: Annotated[
+        Optional[List[str]],
+        Field(
+            description=(
+                "A list of DNS search domains for host-name lookup. This will be"
+                " appended to the base search paths generated from DNSPolicy."
+                " Duplicated search paths will be removed."
+            )
+        ),
+    ] = None
+
+
+class ConfigMapProjection(BaseModel):
+    items: Annotated[
+        Optional[List[KeyToPath]],
+        Field(
+            description=(
+                "If unspecified, each key-value pair in the Data field of the"
+                " referenced ConfigMap will be projected into the volume as a file"
+                " whose name is the key and content is the value. If specified, the"
+                " listed keys will be projected into the specified paths, and unlisted"
+                " keys will not be present. If a key is specified which is not present"
+                " in the ConfigMap, the volume setup will error unless it is marked"
+                " optional. Paths must be relative and may not contain the '..' path or"
+                " start with '..'."
+            )
+        ),
+    ] = None
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+    optional: Annotated[
+        Optional[bool],
+        Field(description="Specify whether the ConfigMap or its keys must be defined"),
+    ] = None
+
+
+class ConfigMapVolumeSource(BaseModel):
+    default_mode: Annotated[
+        Optional[int],
+        Field(
+            alias="defaultMode",
+            description=(
+                "Optional: mode bits used to set permissions on created files by"
+                " default. Must be an octal value between 0000 and 0777 or a decimal"
+                " value between 0 and 511. YAML accepts both octal and decimal values,"
+                " JSON requires decimal values for mode bits. Defaults to 0644."
+                " Directories within the path are not affected by this setting. This"
+                " might be in conflict with other options that affect the file mode,"
+                " like fsGroup, and the result can be other mode bits set."
             ),
         ),
     ] = None
+    items: Annotated[
+        Optional[List[KeyToPath]],
+        Field(
+            description=(
+                "If unspecified, each key-value pair in the Data field of the"
+                " referenced ConfigMap will be projected into the volume as a file"
+                " whose name is the key and content is the value. If specified, the"
+                " listed keys will be projected into the specified paths, and unlisted"
+                " keys will not be present. If a key is specified which is not present"
+                " in the ConfigMap, the volume setup will error unless it is marked"
+                " optional. Paths must be relative and may not contain the '..' path or"
+                " start with '..'."
+            )
+        ),
+    ] = None
+    name: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Name of the referent. More info:"
+                " https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+            )
+        ),
+    ] = None
+    optional: Annotated[
+        Optional[bool],
+        Field(description="Specify whether the ConfigMap or its keys must be defined"),
+    ] = None
+
+
+class DownwardAPIProjection(BaseModel):
+    items: Annotated[
+        Optional[List[DownwardAPIVolumeFile]],
+        Field(description="Items is a list of DownwardAPIVolume file"),
+    ] = None
+
+
+class DownwardAPIVolumeSource(BaseModel):
+    default_mode: Annotated[
+        Optional[int],
+        Field(
+            alias="defaultMode",
+            description=(
+                "Optional: mode bits to use on created files by default. Must be a"
+                " Optional: mode bits used to set permissions on created files by"
+                " default. Must be an octal value between 0000 and 0777 or a decimal"
+                " value between 0 and 511. YAML accepts both octal and decimal values,"
+                " JSON requires decimal values for mode bits. Defaults to 0644."
+                " Directories within the path are not affected by this setting. This"
+                " might be in conflict with other options that affect the file mode,"
+                " like fsGroup, and the result can be other mode bits set."
+            ),
+        ),
+    ] = None
+    items: Annotated[
+        Optional[List[DownwardAPIVolumeFile]],
+        Field(description="Items is a list of downward API volume file"),
+    ] = None
+
+
+class HTTPGetAction(BaseModel):
+    host: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Host name to connect to, defaults to the pod IP. You probably want to"
+                ' set "Host" in httpHeaders instead.'
+            )
+        ),
+    ] = None
+    http_headers: Annotated[
+        Optional[List[HTTPHeader]],
+        Field(
+            alias="httpHeaders",
+            description=("Custom headers to set in the request. HTTP allows repeated headers."),
+        ),
+    ] = None
+    path: Annotated[Optional[str], Field(description="Path to access on the HTTP server.")] = None
+    port: Annotated[
+        int,
+        Field(
+            description=(
+                "Name or number of the port to access on the container. Number must be"
+                " in the range 1 to 65535. Name must be an IANA_SVC_NAME."
+            )
+        ),
+    ]
+    scheme: Annotated[
+        Optional[Scheme],
+        Field(
+            description=(
+                "Scheme to use for connecting to the host. Defaults to"
+                ' HTTP.\n\nPossible enum values:\n - `"HTTP"` means that the scheme'
+                ' used will be http://\n - `"HTTPS"` means that the scheme used will be'
+                " https://"
+            )
+        ),
+    ] = None
+
+
+class NodeSelector(BaseModel):
+    node_selector_terms: Annotated[
+        List[NodeSelectorTerm],
+        Field(
+            alias="nodeSelectorTerms",
+            description="Required. A list of node selector terms. The terms are ORed.",
+        ),
+    ]
+
+
+class PersistentVolumeClaimStatus(BaseModel):
+    access_modes: Annotated[
+        Optional[List[str]],
+        Field(
+            alias="accessModes",
+            description=(
+                "AccessModes contains the actual access modes the volume backing the"
+                " PVC has. More info:"
+                " https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
+            ),
+        ),
+    ] = None
+    allocated_resources: Annotated[
+        Optional[Dict[str, resource.Quantity]],
+        Field(
+            alias="allocatedResources",
+            description=(
+                "The storage resource within AllocatedResources tracks the capacity"
+                " allocated to a PVC. It may be larger than the actual capacity when a"
+                " volume expansion operation is requested. For storage quota, the"
+                " larger value from allocatedResources and PVC.spec.resources is used."
+                " If allocatedResources is not set, PVC.spec.resources alone is used"
+                " for quota calculation. If a volume expansion capacity request is"
+                " lowered, allocatedResources is only lowered if there are no expansion"
+                " operations in progress and if the actual volume capacity is equal or"
+                " lower than the requested capacity. This is an alpha field and"
+                " requires enabling RecoverVolumeExpansionFailure feature."
+            ),
+        ),
+    ] = None
+    capacity: Annotated[
+        Optional[Dict[str, resource.Quantity]],
+        Field(description="Represents the actual resources of the underlying volume."),
+    ] = None
+    conditions: Annotated[
+        Optional[List[PersistentVolumeClaimCondition]],
+        Field(
+            description=(
+                "Current Condition of persistent volume claim. If underlying persistent"
+                " volume is being resized then the Condition will be set to"
+                " 'ResizeStarted'."
+            )
+        ),
+    ] = None
+    phase: Annotated[
+        Optional[Phase],
+        Field(
+            description=(
+                "Phase represents the current phase of"
+                ' PersistentVolumeClaim.\n\nPossible enum values:\n - `"Bound"` used'
+                ' for PersistentVolumeClaims that are bound\n - `"Lost"` used for'
+                " PersistentVolumeClaims that lost their underlying PersistentVolume."
+                " The claim was bound to a PersistentVolume and this volume does not"
+                ' exist any longer and all data on it was lost.\n - `"Pending"` used'
+                " for PersistentVolumeClaims that are not yet bound"
+            )
+        ),
+    ] = None
+    resize_status: Annotated[
+        Optional[str],
+        Field(
+            alias="resizeStatus",
+            description=(
+                "ResizeStatus stores status of resize operation. ResizeStatus is not"
+                " set by default but when expansion is complete resizeStatus is set to"
+                " empty string by resize controller or kubelet. This is an alpha field"
+                " and requires enabling RecoverVolumeExpansionFailure feature."
+            ),
+        ),
+    ] = None
+
+
+class PodAffinityTerm(BaseModel):
+    label_selector: Annotated[
+        Optional[v1.LabelSelector],
+        Field(
+            alias="labelSelector",
+            description="A label query over a set of resources, in this case pods.",
+        ),
+    ] = None
+    namespace_selector: Annotated[
+        Optional[v1.LabelSelector],
+        Field(
+            alias="namespaceSelector",
+            description=(
+                "A label query over the set of namespaces that the term applies to. The"
+                " term is applied to the union of the namespaces selected by this field"
+                " and the ones listed in the namespaces field. null selector and null"
+                ' or empty namespaces list means "this pod\'s namespace". An empty'
+                " selector ({}) matches all namespaces. This field is beta-level and is"
+                " only honored when PodAffinityNamespaceSelector feature is enabled."
+            ),
+        ),
+    ] = None
+    namespaces: Annotated[
+        Optional[List[str]],
+        Field(
+            description=(
+                "namespaces specifies a static list of namespace names that the term"
+                " applies to. The term is applied to the union of the namespaces listed"
+                " in this field and the ones selected by namespaceSelector. null or"
+                " empty namespaces list and null namespaceSelector means \"this pod's"
+                ' namespace"'
+            )
+        ),
+    ] = None
+    topology_key: Annotated[
+        str,
+        Field(
+            alias="topologyKey",
+            description=(
+                "This pod should be co-located (affinity) or not co-located"
+                " (anti-affinity) with the pods matching the labelSelector in the"
+                " specified namespaces, where co-located is defined as running on a"
+                " node whose value of the label with key topologyKey matches that of"
+                " any node on which any of the selected pods is running. Empty"
+                " topologyKey is not allowed."
+            ),
+        ),
+    ]
 
 
 class NodeAffinity(BaseModel):
@@ -2895,77 +2851,55 @@ class PersistentVolumeClaimSpec(BaseModel):
     ] = None
 
 
-class PersistentVolumeClaimTemplate(BaseModel):
-    metadata: Annotated[
-        Optional[v1.ObjectMeta],
+class VolumeProjection(BaseModel):
+    config_map: Annotated[
+        Optional[ConfigMapProjection],
         Field(
-            description=(
-                "May contain labels and annotations that will be copied into the PVC"
-                " when creating it. No other fields are allowed and will be rejected"
-                " during validation."
-            )
+            alias="configMap",
+            description="information about the configMap data to project",
         ),
     ] = None
-    spec: Annotated[
-        PersistentVolumeClaimSpec,
+    downward_api: Annotated[
+        Optional[DownwardAPIProjection],
         Field(
-            description=(
-                "The specification for the PersistentVolumeClaim. The entire content is"
-                " copied unchanged into the PVC that gets created from this template."
-                " The same fields as in a PersistentVolumeClaim are also valid here."
-            )
-        ),
-    ]
-
-
-class PodAffinityTerm(BaseModel):
-    label_selector: Annotated[
-        Optional[v1.LabelSelector],
-        Field(
-            alias="labelSelector",
-            description="A label query over a set of resources, in this case pods.",
+            alias="downwardAPI",
+            description="information about the downwardAPI data to project",
         ),
     ] = None
-    namespace_selector: Annotated[
-        Optional[v1.LabelSelector],
+    secret: Annotated[
+        Optional[SecretProjection],
+        Field(description="information about the secret data to project"),
+    ] = None
+    service_account_token: Annotated[
+        Optional[ServiceAccountTokenProjection],
         Field(
-            alias="namespaceSelector",
+            alias="serviceAccountToken",
+            description="information about the serviceAccountToken data to project",
+        ),
+    ] = None
+
+
+class LifecycleHandler(BaseModel):
+    exec: Annotated[Optional[ExecAction], Field(description="Exec specifies the action to take.")] = None
+    http_get: Annotated[
+        Optional[HTTPGetAction],
+        Field(
+            alias="httpGet",
+            description="HTTPGet specifies the http request to perform.",
+        ),
+    ] = None
+    tcp_socket: Annotated[
+        Optional[TCPSocketAction],
+        Field(
+            alias="tcpSocket",
             description=(
-                "A label query over the set of namespaces that the term applies to. The"
-                " term is applied to the union of the namespaces selected by this field"
-                " and the ones listed in the namespaces field. null selector and null"
-                ' or empty namespaces list means "this pod\'s namespace". An empty'
-                " selector ({}) matches all namespaces. This field is beta-level and is"
-                " only honored when PodAffinityNamespaceSelector feature is enabled."
+                "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept"
+                " for the backward compatibility. There are no validation of this field"
+                " and lifecycle hooks will fail in runtime when tcp handler is"
+                " specified."
             ),
         ),
     ] = None
-    namespaces: Annotated[
-        Optional[List[str]],
-        Field(
-            description=(
-                "namespaces specifies a static list of namespace names that the term"
-                " applies to. The term is applied to the union of the namespaces listed"
-                " in this field and the ones selected by namespaceSelector. null or"
-                " empty namespaces list and null namespaceSelector means \"this pod's"
-                ' namespace"'
-            )
-        ),
-    ] = None
-    topology_key: Annotated[
-        str,
-        Field(
-            alias="topologyKey",
-            description=(
-                "This pod should be co-located (affinity) or not co-located"
-                " (anti-affinity) with the pods matching the labelSelector in the"
-                " specified namespaces, where co-located is defined as running on a"
-                " node whose value of the label with key topologyKey matches that of"
-                " any node on which any of the selected pods is running. Empty"
-                " topologyKey is not allowed."
-            ),
-        ),
-    ]
 
 
 class Probe(BaseModel):
@@ -3082,101 +3016,110 @@ class WeightedPodAffinityTerm(BaseModel):
     ]
 
 
-class DownwardAPIProjection(BaseModel):
-    items: Annotated[
-        Optional[List[DownwardAPIVolumeFile]],
-        Field(description="Items is a list of DownwardAPIVolume file"),
+class Event(BaseModel):
+    action: Annotated[
+        Optional[str],
+        Field(description=("What action was taken/failed regarding to the Regarding object.")),
     ] = None
-
-
-class EnvVar(BaseModel):
-    name: Annotated[
-        str,
-        Field(description="Name of the environment variable. Must be a C_IDENTIFIER."),
+    api_version: Annotated[
+        Optional[str],
+        Field(
+            alias="apiVersion",
+            description=(
+                "APIVersion defines the versioned schema of this representation of an"
+                " object. Servers should convert recognized schemas to the latest"
+                " internal value, and may reject unrecognized values. More info:"
+                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
+            ),
+        ),
+    ] = None
+    count: Annotated[Optional[int], Field(description="The number of times this event has occurred.")] = None
+    event_time: Annotated[
+        Optional[v1.MicroTime],
+        Field(alias="eventTime", description="Time when this Event was first observed."),
+    ] = None
+    first_timestamp: Annotated[
+        Optional[v1.Time],
+        Field(
+            alias="firstTimestamp",
+            description=(
+                "The time at which the event was first recorded. (Time of server" " receipt is in TypeMeta.)"
+            ),
+        ),
+    ] = None
+    involved_object: Annotated[
+        ObjectReference,
+        Field(alias="involvedObject", description="The object that this event is about."),
     ]
-    value: Annotated[
+    kind: Annotated[
         Optional[str],
         Field(
             description=(
-                "Variable references $(VAR_NAME) are expanded using the previously"
-                " defined environment variables in the container and any service"
-                " environment variables. If a variable cannot be resolved, the"
-                " reference in the input string will be unchanged. Double $$ are"
-                " reduced to a single $, which allows for escaping the $(VAR_NAME)"
-                ' syntax: i.e. "$$(VAR_NAME)" will produce the string literal'
-                ' "$(VAR_NAME)". Escaped references will never be expanded, regardless'
-                ' of whether the variable exists or not. Defaults to "".'
+                "Kind is a string value representing the REST resource this object"
+                " represents. Servers may infer this from the endpoint the client"
+                " submits requests to. Cannot be updated. In CamelCase. More info:"
+                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
             )
         ),
     ] = None
-    value_from: Annotated[
-        Optional[EnvVarSource],
+    last_timestamp: Annotated[
+        Optional[v1.Time],
         Field(
-            alias="valueFrom",
-            description=("Source for the environment variable's value. Cannot be used if value" " is not empty."),
+            alias="lastTimestamp",
+            description=("The time at which the most recent occurrence of this event was" " recorded."),
         ),
     ] = None
-
-
-class EphemeralVolumeSource(BaseModel):
-    volume_claim_template: Annotated[
-        Optional[PersistentVolumeClaimTemplate],
+    message: Annotated[
+        Optional[str],
+        Field(description="A human-readable description of the status of this operation."),
+    ] = None
+    metadata: Annotated[
+        v1.ObjectMeta,
         Field(
-            alias="volumeClaimTemplate",
             description=(
-                "Will be used to create a stand-alone PVC to provision the volume. The"
-                " pod in which this EphemeralVolumeSource is embedded will be the owner"
-                " of the PVC, i.e. the PVC will be deleted together with the pod.  The"
-                " name of the PVC will be `<pod name>-<volume name>` where `<volume"
-                " name>` is the name from the `PodSpec.Volumes` array entry. Pod"
-                " validation will reject the pod if the concatenated name is not valid"
-                " for a PVC (for example, too long).\n\nAn existing PVC with that name"
-                " that is not owned by the pod will *not* be used for the pod to avoid"
-                " using an unrelated volume by mistake. Starting the pod is then"
-                " blocked until the unrelated PVC is removed. If such a pre-created PVC"
-                " is meant to be used by the pod, the PVC has to updated with an owner"
-                " reference to the pod once the pod exists. Normally this should not be"
-                " necessary, but it may be useful when manually reconstructing a broken"
-                " cluster.\n\nThis field is read-only and no changes will be made by"
-                " Kubernetes to the PVC after it has been created.\n\nRequired, must"
-                " not be nil."
-            ),
+                "Standard object's metadata. More info:"
+                " https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata"
+            )
+        ),
+    ]
+    reason: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "This should be a short, machine understandable string that gives the"
+                " reason for the transition into the object's current status."
+            )
         ),
     ] = None
-
-
-class Lifecycle(BaseModel):
-    post_start: Annotated[
-        Optional[LifecycleHandler],
+    related: Annotated[
+        Optional[ObjectReference],
+        Field(description="Optional secondary object for more complex actions."),
+    ] = None
+    reporting_component: Annotated[
+        Optional[str],
         Field(
-            alias="postStart",
-            description=(
-                "PostStart is called immediately after a container is created. If the"
-                " handler fails, the container is terminated and restarted according to"
-                " its restart policy. Other management of the container blocks until"
-                " the hook completes. More info:"
-                " https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
-            ),
+            alias="reportingComponent",
+            description=("Name of the controller that emitted this Event, e.g." " `kubernetes.io/kubelet`."),
         ),
     ] = None
-    pre_stop: Annotated[
-        Optional[LifecycleHandler],
+    reporting_instance: Annotated[
+        Optional[str],
         Field(
-            alias="preStop",
-            description=(
-                "PreStop is called immediately before a container is terminated due to"
-                " an API request or management event such as liveness/startup probe"
-                " failure, preemption, resource contention, etc. The handler is not"
-                " called if the container crashes or exits. The Pod's termination grace"
-                " period countdown begins before the PreStop hook is executed."
-                " Regardless of the outcome of the handler, the container will"
-                " eventually terminate within the Pod's termination grace period"
-                " (unless delayed by finalizers). Other management of the container"
-                " blocks until the hook completes or until the termination grace period"
-                " is reached. More info:"
-                " https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
-            ),
+            alias="reportingInstance",
+            description="ID of the controller instance, e.g. `kubelet-xyzf`.",
         ),
+    ] = None
+    series: Annotated[
+        Optional[EventSeries],
+        Field(description=("Data about the Event series this event represents or nil if it's a" " singleton Event.")),
+    ] = None
+    source: Annotated[
+        Optional[EventSource],
+        Field(description=("The component reporting this event. Should be a short machine" " understandable string.")),
+    ] = None
+    type: Annotated[
+        Optional[str],
+        Field(description=("Type of this event (Normal, Warning), new types could be added in the" " future")),
     ] = None
 
 
@@ -3235,133 +3178,86 @@ class PersistentVolumeClaim(BaseModel):
     ] = None
 
 
-class PodAffinity(BaseModel):
-    preferred_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[WeightedPodAffinityTerm]],
+class PersistentVolumeClaimTemplate(BaseModel):
+    metadata: Annotated[
+        Optional[v1.ObjectMeta],
         Field(
-            alias="preferredDuringSchedulingIgnoredDuringExecution",
             description=(
-                "The scheduler will prefer to schedule pods to nodes that satisfy the"
-                " affinity expressions specified by this field, but it may choose a"
-                " node that violates one or more of the expressions. The node that is"
-                " most preferred is the one with the greatest sum of weights, i.e. for"
-                " each node that meets all of the scheduling requirements (resource"
-                " request, requiredDuringScheduling affinity expressions, etc.),"
-                " compute a sum by iterating through the elements of this field and"
-                ' adding "weight" to the sum if the node has pods which matches the'
-                " corresponding podAffinityTerm; the node(s) with the highest sum are"
-                " the most preferred."
-            ),
+                "May contain labels and annotations that will be copied into the PVC"
+                " when creating it. No other fields are allowed and will be rejected"
+                " during validation."
+            )
         ),
     ] = None
-    required_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[PodAffinityTerm]],
+    spec: Annotated[
+        PersistentVolumeClaimSpec,
         Field(
-            alias="requiredDuringSchedulingIgnoredDuringExecution",
             description=(
-                "If the affinity requirements specified by this field are not met at"
-                " scheduling time, the pod will not be scheduled onto the node. If the"
-                " affinity requirements specified by this field cease to be met at some"
-                " point during pod execution (e.g. due to a pod label update), the"
-                " system may or may not try to eventually evict the pod from its node."
-                " When there are multiple elements, the lists of nodes corresponding to"
-                " each podAffinityTerm are intersected, i.e. all terms must be"
-                " satisfied."
-            ),
+                "The specification for the PersistentVolumeClaim. The entire content is"
+                " copied unchanged into the PVC that gets created from this template."
+                " The same fields as in a PersistentVolumeClaim are also valid here."
+            )
         ),
-    ] = None
+    ]
 
 
-class PodAntiAffinity(BaseModel):
-    preferred_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[WeightedPodAffinityTerm]],
+class Lifecycle(BaseModel):
+    post_start: Annotated[
+        Optional[LifecycleHandler],
         Field(
-            alias="preferredDuringSchedulingIgnoredDuringExecution",
+            alias="postStart",
             description=(
-                "The scheduler will prefer to schedule pods to nodes that satisfy the"
-                " anti-affinity expressions specified by this field, but it may choose"
-                " a node that violates one or more of the expressions. The node that is"
-                " most preferred is the one with the greatest sum of weights, i.e. for"
-                " each node that meets all of the scheduling requirements (resource"
-                " request, requiredDuringScheduling anti-affinity expressions, etc.),"
-                " compute a sum by iterating through the elements of this field and"
-                ' adding "weight" to the sum if the node has pods which matches the'
-                " corresponding podAffinityTerm; the node(s) with the highest sum are"
-                " the most preferred."
+                "PostStart is called immediately after a container is created. If the"
+                " handler fails, the container is terminated and restarted according to"
+                " its restart policy. Other management of the container blocks until"
+                " the hook completes. More info:"
+                " https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
             ),
         ),
     ] = None
-    required_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[PodAffinityTerm]],
+    pre_stop: Annotated[
+        Optional[LifecycleHandler],
         Field(
-            alias="requiredDuringSchedulingIgnoredDuringExecution",
+            alias="preStop",
             description=(
-                "If the anti-affinity requirements specified by this field are not met"
-                " at scheduling time, the pod will not be scheduled onto the node. If"
-                " the anti-affinity requirements specified by this field cease to be"
-                " met at some point during pod execution (e.g. due to a pod label"
-                " update), the system may or may not try to eventually evict the pod"
-                " from its node. When there are multiple elements, the lists of nodes"
-                " corresponding to each podAffinityTerm are intersected, i.e. all terms"
-                " must be satisfied."
+                "PreStop is called immediately before a container is terminated due to"
+                " an API request or management event such as liveness/startup probe"
+                " failure, preemption, resource contention, etc. The handler is not"
+                " called if the container crashes or exits. The Pod's termination grace"
+                " period countdown begins before the PreStop hook is executed."
+                " Regardless of the outcome of the handler, the container will"
+                " eventually terminate within the Pod's termination grace period"
+                " (unless delayed by finalizers). Other management of the container"
+                " blocks until the hook completes or until the termination grace period"
+                " is reached. More info:"
+                " https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
             ),
         ),
     ] = None
 
 
-class VolumeProjection(BaseModel):
-    config_map: Annotated[
-        Optional[ConfigMapProjection],
+class EphemeralVolumeSource(BaseModel):
+    volume_claim_template: Annotated[
+        Optional[PersistentVolumeClaimTemplate],
         Field(
-            alias="configMap",
-            description="information about the configMap data to project",
-        ),
-    ] = None
-    downward_api: Annotated[
-        Optional[DownwardAPIProjection],
-        Field(
-            alias="downwardAPI",
-            description="information about the downwardAPI data to project",
-        ),
-    ] = None
-    secret: Annotated[
-        Optional[SecretProjection],
-        Field(description="information about the secret data to project"),
-    ] = None
-    service_account_token: Annotated[
-        Optional[ServiceAccountTokenProjection],
-        Field(
-            alias="serviceAccountToken",
-            description="information about the serviceAccountToken data to project",
-        ),
-    ] = None
-
-
-class Affinity(BaseModel):
-    node_affinity: Annotated[
-        Optional[NodeAffinity],
-        Field(
-            alias="nodeAffinity",
-            description="Describes node affinity scheduling rules for the pod.",
-        ),
-    ] = None
-    pod_affinity: Annotated[
-        Optional[PodAffinity],
-        Field(
-            alias="podAffinity",
+            alias="volumeClaimTemplate",
             description=(
-                "Describes pod affinity scheduling rules (e.g. co-locate this pod in"
-                " the same node, zone, etc. as some other pod(s))."
-            ),
-        ),
-    ] = None
-    pod_anti_affinity: Annotated[
-        Optional[PodAntiAffinity],
-        Field(
-            alias="podAntiAffinity",
-            description=(
-                "Describes pod anti-affinity scheduling rules (e.g. avoid putting this"
-                " pod in the same node, zone, etc. as some other pod(s))."
+                "Will be used to create a stand-alone PVC to provision the volume. The"
+                " pod in which this EphemeralVolumeSource is embedded will be the owner"
+                " of the PVC, i.e. the PVC will be deleted together with the pod.  The"
+                " name of the PVC will be `<pod name>-<volume name>` where `<volume"
+                " name>` is the name from the `PodSpec.Volumes` array entry. Pod"
+                " validation will reject the pod if the concatenated name is not valid"
+                " for a PVC (for example, too long).\n\nAn existing PVC with that name"
+                " that is not owned by the pod will *not* be used for the pod to avoid"
+                " using an unrelated volume by mistake. Starting the pod is then"
+                " blocked until the unrelated PVC is removed. If such a pre-created PVC"
+                " is meant to be used by the pod, the PVC has to updated with an owner"
+                " reference to the pod once the pod exists. Normally this should not be"
+                " necessary, but it may be useful when manually reconstructing a broken"
+                " cluster.\n\nThis field is read-only and no changes will be made by"
+                " Kubernetes to the PVC after it has been created.\n\nRequired, must"
+                " not be nil."
             ),
         ),
     ] = None
@@ -3641,6 +3537,80 @@ class Container(BaseModel):
     ] = None
 
 
+class PodAffinity(BaseModel):
+    preferred_during_scheduling_ignored_during_execution: Annotated[
+        Optional[List[WeightedPodAffinityTerm]],
+        Field(
+            alias="preferredDuringSchedulingIgnoredDuringExecution",
+            description=(
+                "The scheduler will prefer to schedule pods to nodes that satisfy the"
+                " affinity expressions specified by this field, but it may choose a"
+                " node that violates one or more of the expressions. The node that is"
+                " most preferred is the one with the greatest sum of weights, i.e. for"
+                " each node that meets all of the scheduling requirements (resource"
+                " request, requiredDuringScheduling affinity expressions, etc.),"
+                " compute a sum by iterating through the elements of this field and"
+                ' adding "weight" to the sum if the node has pods which matches the'
+                " corresponding podAffinityTerm; the node(s) with the highest sum are"
+                " the most preferred."
+            ),
+        ),
+    ] = None
+    required_during_scheduling_ignored_during_execution: Annotated[
+        Optional[List[PodAffinityTerm]],
+        Field(
+            alias="requiredDuringSchedulingIgnoredDuringExecution",
+            description=(
+                "If the affinity requirements specified by this field are not met at"
+                " scheduling time, the pod will not be scheduled onto the node. If the"
+                " affinity requirements specified by this field cease to be met at some"
+                " point during pod execution (e.g. due to a pod label update), the"
+                " system may or may not try to eventually evict the pod from its node."
+                " When there are multiple elements, the lists of nodes corresponding to"
+                " each podAffinityTerm are intersected, i.e. all terms must be"
+                " satisfied."
+            ),
+        ),
+    ] = None
+
+
+class PodAntiAffinity(BaseModel):
+    preferred_during_scheduling_ignored_during_execution: Annotated[
+        Optional[List[WeightedPodAffinityTerm]],
+        Field(
+            alias="preferredDuringSchedulingIgnoredDuringExecution",
+            description=(
+                "The scheduler will prefer to schedule pods to nodes that satisfy the"
+                " anti-affinity expressions specified by this field, but it may choose"
+                " a node that violates one or more of the expressions. The node that is"
+                " most preferred is the one with the greatest sum of weights, i.e. for"
+                " each node that meets all of the scheduling requirements (resource"
+                " request, requiredDuringScheduling anti-affinity expressions, etc.),"
+                " compute a sum by iterating through the elements of this field and"
+                ' adding "weight" to the sum if the node has pods which matches the'
+                " corresponding podAffinityTerm; the node(s) with the highest sum are"
+                " the most preferred."
+            ),
+        ),
+    ] = None
+    required_during_scheduling_ignored_during_execution: Annotated[
+        Optional[List[PodAffinityTerm]],
+        Field(
+            alias="requiredDuringSchedulingIgnoredDuringExecution",
+            description=(
+                "If the anti-affinity requirements specified by this field are not met"
+                " at scheduling time, the pod will not be scheduled onto the node. If"
+                " the anti-affinity requirements specified by this field cease to be"
+                " met at some point during pod execution (e.g. due to a pod label"
+                " update), the system may or may not try to eventually evict the pod"
+                " from its node. When there are multiple elements, the lists of nodes"
+                " corresponding to each podAffinityTerm are intersected, i.e. all terms"
+                " must be satisfied."
+            ),
+        ),
+    ] = None
+
+
 class ProjectedVolumeSource(BaseModel):
     default_mode: Annotated[
         Optional[int],
@@ -3660,6 +3630,36 @@ class ProjectedVolumeSource(BaseModel):
     sources: Annotated[
         Optional[List[VolumeProjection]],
         Field(description="list of volume projections"),
+    ] = None
+
+
+class Affinity(BaseModel):
+    node_affinity: Annotated[
+        Optional[NodeAffinity],
+        Field(
+            alias="nodeAffinity",
+            description="Describes node affinity scheduling rules for the pod.",
+        ),
+    ] = None
+    pod_affinity: Annotated[
+        Optional[PodAffinity],
+        Field(
+            alias="podAffinity",
+            description=(
+                "Describes pod affinity scheduling rules (e.g. co-locate this pod in"
+                " the same node, zone, etc. as some other pod(s))."
+            ),
+        ),
+    ] = None
+    pod_anti_affinity: Annotated[
+        Optional[PodAntiAffinity],
+        Field(
+            alias="podAntiAffinity",
+            description=(
+                "Describes pod anti-affinity scheduling rules (e.g. avoid putting this"
+                " pod in the same node, zone, etc. as some other pod(s))."
+            ),
+        ),
     ] = None
 
 

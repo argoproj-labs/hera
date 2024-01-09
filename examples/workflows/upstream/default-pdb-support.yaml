@@ -5,7 +5,7 @@ metadata:
 spec:
   entrypoint: pdbcreate
   podDisruptionBudget:
-    minAvailable: '9999'
+    minAvailable: 9999
   serviceAccountName: default
   templates:
   - container:
