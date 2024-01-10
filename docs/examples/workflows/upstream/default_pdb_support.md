@@ -41,7 +41,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: pdbcreate
       podDisruptionBudget:
-        minAvailable: '9999'
+        minAvailable: 9999
       serviceAccountName: default
       templates:
       - container:

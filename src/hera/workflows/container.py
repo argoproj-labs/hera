@@ -46,6 +46,7 @@ class Container(
 
     def _build_container(self) -> _ModelContainer:
         """Builds the generated `Container` representation."""
+        assert self.image
         return _ModelContainer(
             args=self.args,
             command=self.command,

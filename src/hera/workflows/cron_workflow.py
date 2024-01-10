@@ -4,7 +4,7 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 from pathlib import Path
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union, cast
 
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
@@ -25,6 +25,7 @@ from hera.workflows.models import (
     CronWorkflowStatus,
     LintCronWorkflowRequest,
     UpdateCronWorkflowRequest,
+    Workflow as _ModelWorkflow,
 )
 from hera.workflows.protocol import TWorkflow
 from hera.workflows.workflow import Workflow, _WorkflowModelMapper
@@ -92,7 +93,8 @@ class CronWorkflow(Workflow):
         assert self.namespace, "workflow namespace not defined"
 
         wf = self.workflows_service.create_cron_workflow(
-            CreateCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
+            CreateCronWorkflowRequest(cron_workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
         )
         # set the name on the object so that we can do a get/update later
         self.name = wf.metadata.name
@@ -126,7 +128,7 @@ class CronWorkflow(Workflow):
             return self.create()
         return self.workflows_service.update_cron_workflow(
             self.name,
-            UpdateCronWorkflowRequest(cron_workflow=template),
+            UpdateCronWorkflowRequest(cron_workflow=template),  # type: ignore
             namespace=self.namespace,
         )
 
@@ -135,14 +137,15 @@ class CronWorkflow(Workflow):
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cron_workflow(
-            LintCronWorkflowRequest(cron_workflow=self.build()), namespace=self.namespace
+            LintCronWorkflowRequest(cron_workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
         )
 
     def build(self) -> TWorkflow:
         """Builds the CronWorkflow and its components into an Argo schema CronWorkflow object."""
         self = self._dispatch_hooks()
 
-        model_workflow = super().build()
+        model_workflow = cast(_ModelWorkflow, super().build())
         model_cron_workflow = _ModelCronWorkflow(
             metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(

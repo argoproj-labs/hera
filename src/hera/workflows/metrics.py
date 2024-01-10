@@ -121,7 +121,7 @@ class Metric(_BaseMetric):
             gauge=_ModelGauge(realtime=self.gauge.realtime, value=self.gauge.value) if self.gauge else None,
             help=self.help,
             histogram=_ModelHistogram(
-                buckets=self.histogram.buckets,
+                buckets=self.histogram._build_buckets(),
                 value=self.histogram.value,
             )
             if self.histogram

@@ -219,7 +219,7 @@ class EventsService:
         )
 
         if resp.ok:
-            return InfoResponse()
+            return InfoResponse(**resp.json())
 
         raise exception_from_server_response(resp)
 
@@ -586,7 +586,7 @@ class EventsService:
         )
 
         if resp.ok:
-            return GetUserInfoResponse()
+            return GetUserInfoResponse(**resp.json())
 
         raise exception_from_server_response(resp)
 

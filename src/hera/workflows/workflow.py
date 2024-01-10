@@ -132,7 +132,7 @@ class Workflow(
                 raise InvalidType(f"{type(template)} is not a valid template type")
 
             if isinstance(template, VolumeClaimable):
-                claims = template._build_persistent_volume_claims()
+                claims = template._build_persistent_volume_claims()  # type: ignore
                 # If there are no claims, continue, nothing to add
                 if not claims:
                     continue
@@ -380,7 +380,8 @@ class Workflow(
         assert self.namespace, "workflow namespace not defined"
 
         wf = self.workflows_service.create_workflow(
-            WorkflowCreateRequest(workflow=self.build()), namespace=self.namespace
+            WorkflowCreateRequest(workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
         )
         # set the workflow name to the name returned by the API, which helps cover the case of users relying on
         # `generate_name=True`
@@ -430,7 +431,8 @@ class Workflow(
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow(
-            WorkflowLintRequest(workflow=self.build()), namespace=self.namespace
+            WorkflowLintRequest(workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
         )
 
     def _add_sub(self, node: Any):

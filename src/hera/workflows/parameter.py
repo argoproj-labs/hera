@@ -79,6 +79,7 @@ class Parameter(_ModelParameter):
     def as_input(self) -> _ModelParameter:
         """Assembles the parameter for use as an input of a template."""
         self._check_name()
+        assert self.name
         return _ModelParameter(
             name=self.name,
             description=self.description,
@@ -95,6 +96,7 @@ class Parameter(_ModelParameter):
         # Overwrite ref: https://github.com/argoproj/argo-workflows/blob/781675ddcf6f1138d697cb9c71dae484daa0548b/workflow/common/util.go#L126-L139
         # One of value/value_from required ref: https://github.com/argoproj/argo-workflows/blob/ab178bb0b36a5ce34b4c1302cf4855879a0e8cf5/workflow/validate/validate.go#L794-L798
         self._check_name()
+        assert self.name
         return _ModelParameter(
             name=self.name,
             global_name=self.global_name,
@@ -109,6 +111,7 @@ class Parameter(_ModelParameter):
         # Only `value` and `value_from` are valid here
         # see https://github.com/argoproj/argo-workflows/blob/e3254eca115c9dd358e55d16c6a3d41403c29cae/workflow/validate/validate.go#L1067
         self._check_name()
+        assert self.name
         return _ModelParameter(
             name=self.name,
             global_name=self.global_name,

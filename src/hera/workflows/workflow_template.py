@@ -55,7 +55,8 @@ class WorkflowTemplate(Workflow):
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.create_workflow_template(
-            WorkflowTemplateCreateRequest(template=self.build()), namespace=self.namespace
+            WorkflowTemplateCreateRequest(template=self.build()),  # type: ignore
+            namespace=self.namespace,
         )
 
     def get(self) -> TWorkflow:
@@ -86,7 +87,7 @@ class WorkflowTemplate(Workflow):
             return self.create()
         return self.workflows_service.update_workflow_template(
             self.name,
-            WorkflowTemplateUpdateRequest(template=template),
+            WorkflowTemplateUpdateRequest(template=template),  # type: ignore
             namespace=self.namespace,
         )
 
@@ -95,7 +96,8 @@ class WorkflowTemplate(Workflow):
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow_template(
-            WorkflowTemplateLintRequest(template=self.build()), namespace=self.namespace
+            WorkflowTemplateLintRequest(template=self.build()),  # type: ignore
+            namespace=self.namespace,
         )
 
     def build(self) -> TWorkflow:

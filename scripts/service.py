@@ -167,7 +167,7 @@ class ServiceEndpoint:
         # return value
         if self.response.ref == "str":
             ret_val = "str(resp.content)"
-        elif "Response" in self.response.ref:
+        elif "Response" in self.response.ref and "InfoResponse" not in self.response.ref:
             ret_val = f"{self.response}()"
         else:
             ret_val = f"{self.response}(**resp.json())"

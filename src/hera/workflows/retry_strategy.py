@@ -49,7 +49,7 @@ class RetryStrategy(_BaseModel):
     expression: Optional[str] = None
     """the expression field supports the expression of complex rules regarding retry behavior"""
 
-    limit: Optional[Union[str, int, IntOrString]] = None
+    limit: Optional[Union[int, str, IntOrString]] = None
     """the hard numeric limit of how many times a jobs should retry"""
 
     retry_policy: Optional[Union[str, RetryPolicy]] = None
@@ -65,12 +65,12 @@ class RetryStrategy(_BaseModel):
         return v.value
 
     @validator("limit", pre=True)
-    def _convert_limit(cls, v):
+    def _convert_limit(cls, v) -> Optional[IntOrString]:
         """Converts the `limit` field from the union specification into a `str`."""
         if v is None or isinstance(v, IntOrString):
             return v
 
-        return str(v)  # int or str
+        return IntOrString(__root__=v)
 
     def build(self) -> _ModelRetryStrategy:
         """Builds the generated `RetryStrategy` representation of the retry strategy."""
@@ -78,8 +78,8 @@ class RetryStrategy(_BaseModel):
             affinity=self.affinity,
             backoff=self.backoff,
             expression=self.expression,
-            limit=self.limit,
-            retry_policy=self.retry_policy,
+            limit=self.limit,  # type: ignore
+            retry_policy=str(self.retry_policy) if self.retry_policy is not None else None,
         )
 
 

@@ -6,7 +6,7 @@ from hera.workflows.models import (
     HTTP as _ModelHTTP,
     HTTPBodySource,
     Template as _ModelTemplate,
-    V1HTTPHeader as HTTPHeader,
+    V1alpha1HTTPHeader as HTTPHeader,
 )
 
 

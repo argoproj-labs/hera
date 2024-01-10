@@ -334,10 +334,10 @@ class GetItem(Node):
             stop = attribute.stop if attribute.stop is not None else ""
             self.attribute = f"{start}:{stop}"
         else:
-            self.attribute = repr(attribute)
+            self.attribute = repr(attribute)  # type: ignore
 
     def __repr__(self) -> str:
-        return f"{self.value}[{self.attribute}]"
+        return f"{self.value}[{self.attribute}]"  # type: ignore
 
 
 class Builtin(Node):
