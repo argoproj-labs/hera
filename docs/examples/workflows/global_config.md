@@ -16,7 +16,7 @@
     global_config.service_account_name = "argo-account"
     global_config.image = "image-say"
     global_config.script_command = ["python3"]
-    global_config.set_class_defaults(Container, active_deadline_seconds="100", command=["cowsay"])
+    global_config.set_class_defaults(Container, active_deadline_seconds=100, command=["cowsay"])
 
 
     @script()
@@ -41,7 +41,7 @@
       entrypoint: whalesay
       serviceAccountName: argo-account
       templates:
-      - activeDeadlineSeconds: '100'
+      - activeDeadlineSeconds: 100
         container:
           command:
           - cowsay
