@@ -23,8 +23,6 @@ from typing import (
     overload,
 )
 
-from typing_extensions import ParamSpec, get_args, get_origin
-
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
@@ -41,6 +39,7 @@ from hera.workflows._unparse import roundtrip
 from hera.workflows.artifact import (
     Artifact,
 )
+from hera.workflows.io import RunnerInput, RunnerOutput
 from hera.workflows.models import (
     EnvVar,
     Inputs as ModelInputs,
@@ -57,9 +56,9 @@ from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
 
 try:
-    from typing import Annotated  # type: ignore
+    from typing import Annotated, ParamSpec, get_args, get_origin  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated  # type: ignore
+    from typing_extensions import Annotated, ParamSpec, get_args, get_origin  # type: ignore
 
 
 class ScriptConstructor(BaseMixin):
@@ -363,6 +362,16 @@ def _get_outputs_from_return_annotation(
     elif get_origin(inspect.signature(source).return_annotation) is tuple:
         for annotation in get_args(inspect.signature(source).return_annotation):
             append_annotation(get_args(annotation)[1])
+    elif inspect.signature(source).return_annotation and issubclass(
+        inspect.signature(source).return_annotation, RunnerOutput
+    ):
+        if not global_config.experimental_features["script_pydantic_io"]:
+            raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
+
+        output_class = inspect.signature(source).return_annotation
+        for output in output_class._get_outputs():
+            append_annotation(output)
+
     return parameters, artifacts
 
 
@@ -408,12 +417,22 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     """Return all inputs from the function.
 
     This includes all basic Python function parameters, and all parameters with a Parameter or Artifact annotation.
+    For the Pydantic IO experimental feature, any input parameter which is a subclass of RunnerInput, the fields of the
+    class will be used as inputs, rather than the class itself. Note, the fields of different types could clash
+    (TODO: can we resolve clashes with a top-level arg name prefix?).
     """
     parameters = []
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if get_origin(func_param.annotation) is not Annotated or not isinstance(
+        if issubclass(func_param.annotation, RunnerInput):
+            if not global_config.experimental_features["script_pydantic_io"]:
+                raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
+
+            input_class = func_param.annotation
+            for input in input_class._get_inputs():
+                parameters.append(input)
+        elif get_origin(func_param.annotation) is not Annotated or not isinstance(
             get_args(func_param.annotation)[1], (Artifact, Parameter)
         ):
             if (

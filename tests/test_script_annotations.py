@@ -177,3 +177,50 @@ def test_configmap(global_config_fixture):
 
     # THEN
     _compare_workflows(workflow_old, output_old, output_new)
+
+
+@pytest.mark.parametrize(
+    "function_name,expected_input,expected_output",
+    [
+        (
+            "pydantic_io_function",
+            {
+                "parameters": [
+                    {"name": "my_int", "default": "1"},
+                    {"name": "another-int", "default": "42", "description": "my desc"},
+                    {"name": "another_param_inline"},
+                ]
+            },
+            {
+                "parameters": [
+                    {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
+                    {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                ],
+                "artifacts": [
+                    {"name": "artifact-output", "path": "/tmp/hera-outputs/artifacts/artifact-output"},
+                ],
+            },
+        ),
+    ],
+)
+def test_script_pydantic_io(function_name, expected_input, expected_output, global_config_fixture):
+    """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_annotations.outputs as module
+
+    importlib.reload(module)
+    workflow = importlib.import_module("tests.script_annotations.pydantic_io").w
+
+    # WHEN
+    workflow_dict = workflow.to_dict()
+    assert workflow == Workflow.from_dict(workflow_dict)
+    assert workflow == Workflow.from_yaml(workflow.to_yaml())
+
+    # THEN
+    template = next(filter(lambda t: t["name"] == function_name.replace("_", "-"), workflow_dict["spec"]["templates"]))
+    assert template["inputs"] == expected_input
+    assert template["outputs"] == expected_output

@@ -6,12 +6,13 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
+from hera.workflows.io import RunnerInput
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
@@ -162,6 +163,15 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
             elif artifact_annotation.loader is None:
                 mapped_kwargs[param_name] = artifact_annotation.path
 
+    T = TypeVar("T", bound=RunnerInput)
+    def map_runner_input(param_name: str, runner_input_class: T):
+        input_obj = runner_input_class()
+        for field in input_obj.__fields__:
+            print(field)
+
+        mapped_kwargs[param_name] = input_obj
+        
+
     for param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:
             func_param_annotation = get_args(func_param.annotation)[1]
@@ -172,6 +182,8 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
                 map_annotated_artifact(param_name, func_param_annotation)
             else:
                 mapped_kwargs[param_name] = kwargs[param_name]
+        elif issubclass(func_param.annotation, RunnerInput):
+            map_runner_input(param_name, func_param.annotation)
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
 

@@ -616,3 +616,45 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
     # THEN
     mock_parse_args.assert_called_once()
     mock_runner.assert_called_once_with("my_entrypoint", [])
+
+
+@pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_output,pydantic_mode",
+    [
+        (
+            "tests.script_runner.pydantic_io:pydantic_io_function",
+            [
+                {"name": "my_int", "value": "3"},
+                {"name": "another-int", "value": "2"},
+                {"name": "another_param_inline", "value": "1"},
+            ],
+            '{"my_output_str": "", "second-output": "tmp/hera/outputs/second-output"}',
+            _PYDANTIC_VERSION,
+        ),
+    ],
+)
+def test_runner_pydantic_input(
+    entrypoint,
+    kwargs_list: List[Dict[str, str]],
+    expected_output,
+    global_config_fixture: GlobalConfig,
+    pydantic_mode,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+
+    outputs_directory = str(tmp_path / "tmp/hera/outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
