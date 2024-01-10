@@ -36,7 +36,7 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     def _build_template(self) -> m.Template:
         """Builds the generated `Template` from the fields of `Data`."""
         return m.Template(
-            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
+            active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

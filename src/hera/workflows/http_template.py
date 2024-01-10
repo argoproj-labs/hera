@@ -38,7 +38,7 @@ class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
     def _build_template(self) -> _ModelTemplate:
         """Builds the HTTP generated `Template`."""
         return _ModelTemplate(
-            active_deadline_seconds=self.active_deadline_seconds,  # type: ignore
+            active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
             archive_location=self.archive_location,
             automount_service_account_token=self.automount_service_account_token,

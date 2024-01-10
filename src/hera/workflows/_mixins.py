@@ -464,9 +464,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     The supported sub-template fields are `Script`, `Data`, `DAG`, `Resource`, `Container`, `ContainerSet`, etc.
     """
 
-    active_deadline_seconds: Optional[
-        Union[int, str, IntOrString]
-    ] = None  # TODO: This type blocks YAML roundtrip. Consider using type: Optional[int]
+    active_deadline_seconds: Optional[IntOrString] = None
     affinity: Optional[Affinity] = None
     archive_location: Optional[ArtifactLocation] = None
     automount_service_account_token: Optional[bool] = None
@@ -510,13 +508,6 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
             return [self.sidecars.build()]
 
         return [s.build() for s in self.sidecars]
-
-    def _build_active_deadline_seconds(self) -> Optional[IntOrString]:
-        """Builds the `active_deadline_seconds` field and optionally returns a generated `IntOrString`."""
-        if self.active_deadline_seconds is None:
-            return None
-
-        return IntOrString(__root__=str(self.active_deadline_seconds))
 
     def _build_metadata(self) -> Optional[Metadata]:
         """Builds the `metadata` field of the template since the `annotations` and `labels` fields are separated."""
