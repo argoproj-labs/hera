@@ -12,7 +12,7 @@ from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.io import RunnerInput
+from hera.workflows.io import RunnerInput, RunnerOutput
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
@@ -33,8 +33,21 @@ def _ignore_unmatched_kwargs(f):
     def inner(**kwargs):
         # filter out kwargs that are not part of the function signature
         # and transform them to the correct type
-        filtered_kwargs = {key: _parse(value, key, f) for key, value in kwargs.items() if _is_kwarg_of(key, f)}
-        return f(**filtered_kwargs)
+        if os.environ.get("hera__script_pydantic_io", None) is None:
+            filtered_kwargs = {key: _parse(value, key, f) for key, value in kwargs.items() if _is_kwarg_of(key, f)}
+            return f(**filtered_kwargs)
+        else:
+            filtered_kwargs = {}
+            for key, value in kwargs.items():
+                if _is_kwarg_of(key, f):
+                    filtered_kwargs[key] = (
+                        value if issubclass(_get_type(key, f), RunnerInput) else _parse(value, key, f)
+                    )
+            output = f(**filtered_kwargs)
+            if isinstance(output, RunnerOutput):
+                # TODO: process exit_code and result
+                pass
+            return output
 
     return inner
 
@@ -164,13 +177,32 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
                 mapped_kwargs[param_name] = artifact_annotation.path
 
     T = TypeVar("T", bound=RunnerInput)
-    def map_runner_input(param_name: str, runner_input_class: T):
-        input_obj = runner_input_class()
-        for field in input_obj.__fields__:
-            print(field)
 
-        mapped_kwargs[param_name] = input_obj
-        
+    def get_matching_kwarg(runner_input_class: T, field: str) -> str:
+        annotation = runner_input_class.__annotations__[field]
+        if get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], (Artifact, Parameter)):
+            name_to_match = get_args(annotation)[1].name
+        else:
+            name_to_match = field
+
+        for kwarg in kwargs:
+            if kwarg == name_to_match:
+                return kwarg
+
+        raise ValueError(f"Parameter {name_to_match} not provided in kwargs")
+
+    def map_runner_input(param_name: str, runner_input_class: T):
+        """Map argo input kwargs to the fields of the given RunnerInput.
+
+        If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
+        Otherwise, we look for the kwarg with the name of the field.
+        """
+        input_model_obj = {}
+        for field in runner_input_class.__fields__:
+            matched_kwarg = get_matching_kwarg(runner_input_class, field)
+            input_model_obj[field] = kwargs[matched_kwarg]
+
+        mapped_kwargs[param_name] = runner_input_class(**input_model_obj)
 
     for param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:
@@ -182,7 +214,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
                 map_annotated_artifact(param_name, func_param_annotation)
             else:
                 mapped_kwargs[param_name] = kwargs[param_name]
-        elif issubclass(func_param.annotation, RunnerInput):
+        elif get_origin(func_param.annotation) is None and issubclass(func_param.annotation, RunnerInput):
             map_runner_input(param_name, func_param.annotation)
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
@@ -290,7 +322,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     if _pydantic_mode == 2:
         from pydantic import validate_call  # type: ignore
 
-        function = validate_call(function)
+        function = validate_call(function)  # TODO: v2 function blocks pydantic IO
     else:
         if _PYDANTIC_VERSION == 1:
             from pydantic import validate_arguments

@@ -189,6 +189,7 @@ def test_configmap(global_config_fixture):
                     {"name": "my_int", "default": "1"},
                     {"name": "another-int", "default": "42", "description": "my desc"},
                     {"name": "another_param_inline"},
+                    {"name": "a-str-param"},
                 ]
             },
             {

@@ -425,7 +425,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if issubclass(func_param.annotation, RunnerInput):
+        if get_origin(func_param.annotation) is None and issubclass(func_param.annotation, RunnerInput):
             if not global_config.experimental_features["script_pydantic_io"]:
                 raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
 

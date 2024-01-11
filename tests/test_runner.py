@@ -624,12 +624,14 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
         (
             "tests.script_runner.pydantic_io:pydantic_io_function",
             [
+                {"name": "my_required_int", "value": "4"},
                 {"name": "my_int", "value": "3"},
                 {"name": "another-int", "value": "2"},
                 {"name": "another_param_inline", "value": "1"},
+                {"name": "a-str-param", "value": "a string!"},
             ],
-            '{"my_output_str": "", "second-output": "tmp/hera/outputs/second-output"}',
-            _PYDANTIC_VERSION,
+            '{"exit_code": 10, "result": 2, "my_output_str": "3"}',
+            1,
         ),
     ],
 )
@@ -648,6 +650,7 @@ def test_runner_pydantic_input(
     global_config_fixture.experimental_features["script_pydantic_io"] = True
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
 
     outputs_directory = str(tmp_path / "tmp/hera/outputs")
     global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
@@ -657,4 +660,3 @@ def test_runner_pydantic_input(
 
     # THEN
     assert serialize(output) == expected_output
-
