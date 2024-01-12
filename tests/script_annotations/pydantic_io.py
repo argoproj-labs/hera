@@ -1,8 +1,7 @@
 from pathlib import Path
 
 from hera.shared import global_config
-from hera.workflows import Parameter, Steps, Workflow, script
-from hera.workflows.artifact import Artifact
+from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
 from hera.workflows.io import RunnerInput, RunnerOutput
 
 try:
@@ -14,31 +13,44 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class MyInput(RunnerInput):
+class ParamOnlyInput(RunnerInput):
     my_int: int = 1
     my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
 
 
-class MyOutput(RunnerOutput):
+class ParamOnlyOutput(RunnerOutput):
     my_output_str: str = "my-default-str"
     another_output: Annotated[Path, Parameter(name="second-output")]
-    an_artifact: Annotated[Path, Artifact(name="artifact-output")]
 
 
 @script(constructor="runner")
-def pydantic_io_function(
-    my_input: MyInput,
+def pydantic_io_params(
+    my_input: ParamOnlyInput,
     another_param_inline: int,
     another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
-) -> MyOutput:
+) -> ParamOnlyOutput:
     pass
 
 
-with Workflow(generate_name="pydantic-io-", entrypoint="my-steps") as w:
-    with Steps(name="my-steps") as s:
-        my_step = pydantic_io_function(
-            arguments={
-                "my_input": MyInput(my_param=2),
-                "another_param_inline": 3,
-            },
-        )
+class ArtifactOnlyInput(RunnerInput):
+    my_file_artifact: Annotated[Path, Artifact(name="file-artifact")]
+    my_int_artifact: Annotated[
+        int, Artifact(name="an-int-artifact", description="my desc", loader=ArtifactLoader.json)
+    ]
+
+
+class ArtifactOnlyOutput(RunnerOutput):
+    an_artifact: Annotated[str, Artifact(name="artifact-output")]
+
+
+@script(constructor="runner")
+def pydantic_io_artifacts(
+    my_input: ArtifactOnlyInput,
+    annotated_artifact_inline: Annotated[str, Artifact(name="inline-artifact")],
+) -> ArtifactOnlyOutput:
+    pass
+
+
+with Workflow(generate_name="pydantic-io-") as w:
+    pydantic_io_params()
+    pydantic_io_artifacts()

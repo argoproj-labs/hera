@@ -15,8 +15,8 @@ class RunnerInput(BaseModel):
     """Input model."""
 
     @classmethod
-    def _get_inputs(cls) -> List[Union[Artifact, Parameter]]:
-        inputs = []
+    def _get_parameters(cls) -> List[Parameter]:
+        parameters = []
         annotations = {k: v for k, v in cls.__annotations__.items()}
 
         for field in cls.__fields__:
@@ -25,13 +25,25 @@ class RunnerInput(BaseModel):
                     param = get_args(annotations[field])[1]
                     if cls.__fields__[field].default:
                         param.default = cls.__fields__[field].default
-                    inputs.append(param)
-                elif isinstance(get_args(annotations[field])[1], Artifact):
-                    inputs.append(get_args(annotations[field])[1])
+                    parameters.append(param)
             else:
                 # Create a Parameter from basic type annotations
-                inputs.append(Parameter(name=field, default=cls.__fields__[field].default))
-        return inputs
+                parameters.append(Parameter(name=field, default=cls.__fields__[field].default))
+        return parameters
+
+    @classmethod
+    def _get_artifacts(cls) -> List[Artifact]:
+        artifacts = []
+        annotations = {k: v for k, v in cls.__annotations__.items()}
+
+        for field in cls.__fields__:
+            if get_origin(annotations[field]) is Annotated:
+                if isinstance(get_args(annotations[field])[1], Artifact):
+                    artifact = get_args(annotations[field])[1]
+                    if artifact.path is None:
+                        artifact.path = artifact._get_default_inputs_path()
+                    artifacts.append(artifact)
+        return artifacts
 
 
 class RunnerOutput(BaseModel):

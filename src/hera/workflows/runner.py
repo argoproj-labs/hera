@@ -40,9 +40,8 @@ def _ignore_unmatched_kwargs(f):
             filtered_kwargs = {}
             for key, value in kwargs.items():
                 if _is_kwarg_of(key, f):
-                    filtered_kwargs[key] = (
-                        value if issubclass(_get_type(key, f), RunnerInput) else _parse(value, key, f)
-                    )
+                    type_ = _get_type(key, f)
+                    filtered_kwargs[key] = value if type_ and issubclass(type_, RunnerInput) else _parse(value, key, f)
             output = f(**filtered_kwargs)
             if isinstance(output, RunnerOutput):
                 # TODO: process exit_code and result
@@ -178,31 +177,32 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
 
     T = TypeVar("T", bound=RunnerInput)
 
-    def get_matching_kwarg(runner_input_class: T, field: str) -> str:
-        annotation = runner_input_class.__annotations__[field]
-        if get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], (Artifact, Parameter)):
-            name_to_match = get_args(annotation)[1].name
-        else:
-            name_to_match = field
-
-        for kwarg in kwargs:
-            if kwarg == name_to_match:
-                return kwarg
-
-        raise ValueError(f"Parameter {name_to_match} not provided in kwargs")
-
     def map_runner_input(param_name: str, runner_input_class: T):
         """Map argo input kwargs to the fields of the given RunnerInput.
 
         If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
         Otherwise, we look for the kwarg with the name of the field.
         """
+
+        def get_matching_kwarg(field: str) -> str:
+            annotation = runner_input_class.__annotations__[field]
+            if get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], (Artifact, Parameter)):
+                name_to_match = get_args(annotation)[1].name
+            else:
+                name_to_match = field
+
+            for kwarg in kwargs:
+                if kwarg == name_to_match:
+                    return kwarg
+
+            raise ValueError(f"Parameter {name_to_match} not provided in kwargs")
+
         input_model_obj = {}
         for field in runner_input_class.__fields__:
-            matched_kwarg = get_matching_kwarg(runner_input_class, field)
+            matched_kwarg = get_matching_kwarg(field)
             input_model_obj[field] = kwargs[matched_kwarg]
 
-        mapped_kwargs[param_name] = runner_input_class(**input_model_obj)
+        mapped_kwargs[param_name] = runner_input_class.parse_obj(input_model_obj)
 
     for param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:

@@ -23,6 +23,8 @@ from typing import (
     overload,
 )
 
+from typing_extensions import ParamSpec, get_args, get_origin
+
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
@@ -56,9 +58,9 @@ from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
 
 try:
-    from typing import Annotated, ParamSpec, get_args, get_origin  # type: ignore
+    from typing import Annotated  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated, ParamSpec, get_args, get_origin  # type: ignore
+    from typing_extensions import Annotated  # type: ignore
 
 
 class ScriptConstructor(BaseMixin):
@@ -430,8 +432,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                 raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
 
             input_class = func_param.annotation
-            for input in input_class._get_inputs():
-                parameters.append(input)
+            parameters.extend(input_class._get_parameters())
+            artifacts.extend(input_class._get_artifacts())
+
         elif get_origin(func_param.annotation) is not Annotated or not isinstance(
             get_args(func_param.annotation)[1], (Artifact, Parameter)
         ):

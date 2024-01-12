@@ -1,4 +1,3 @@
-
 from hera.shared import global_config
 from hera.workflows import Parameter, Steps, Workflow, script
 from hera.workflows.io import RunnerInput, RunnerOutput

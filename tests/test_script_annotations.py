@@ -148,7 +148,7 @@ def test_script_annotated_outputs(function_name, expected_input, expected_output
     import tests.script_annotations.outputs as module
 
     importlib.reload(module)
-    workflow = importlib.import_module("tests.script_annotations.outputs").w
+    workflow = importlib.import_module(module.__name__).w
 
     # WHEN
     workflow_dict = workflow.to_dict()
@@ -182,8 +182,8 @@ def test_configmap(global_config_fixture):
 @pytest.mark.parametrize(
     "function_name,expected_input,expected_output",
     [
-        (
-            "pydantic_io_function",
+        pytest.param(
+            "pydantic_io_params",
             {
                 "parameters": [
                     {"name": "my_int", "default": "1"},
@@ -197,10 +197,24 @@ def test_configmap(global_config_fixture):
                     {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
                     {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
                 ],
+            },
+            id="param-only-io",
+        ),
+        pytest.param(
+            "pydantic_io_artifacts",
+            {
+                "artifacts": [
+                    {"name": "file-artifact", "path": "/tmp/hera-inputs/artifacts/file-artifact"},
+                    {"name": "an-int-artifact", "path": "/tmp/hera-inputs/artifacts/an-int-artifact"},
+                    {"name": "inline-artifact", "path": "/tmp/hera-inputs/artifacts/inline-artifact"},
+                ]
+            },
+            {
                 "artifacts": [
                     {"name": "artifact-output", "path": "/tmp/hera-outputs/artifacts/artifact-output"},
                 ],
             },
+            id="artifact-only-io",
         ),
     ],
 )
@@ -211,10 +225,10 @@ def test_script_pydantic_io(function_name, expected_input, expected_output, glob
     global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
-    import tests.script_annotations.outputs as module
+    import tests.script_annotations.pydantic_io as module
 
     importlib.reload(module)
-    workflow = importlib.import_module("tests.script_annotations.pydantic_io").w
+    workflow = importlib.import_module(module.__name__).w
 
     # WHEN
     workflow_dict = workflow.to_dict()
