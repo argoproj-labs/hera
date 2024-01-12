@@ -630,12 +630,12 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
                 {"name": "another_param_inline", "value": "1"},
                 {"name": "a-str-param", "value": "a string!"},
             ],
-            '{"exit_code": 10, "result": 2, "my_output_str": "3"}',
+            '{"exit_code": 10, "result": 2, "my_output_str": "3", "second-output": "my-val", "artifact-str-output": "test!"}',
             1,
         ),
     ],
 )
-def test_runner_pydantic_input(
+def test_runner_pydantic_io(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,

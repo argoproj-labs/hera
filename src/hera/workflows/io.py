@@ -1,5 +1,5 @@
 """Input/output models for the Hera runner. TODO move to hera.workflows.runner package."""
-from typing import Any, List, Union
+from typing import Any, Dict, List, Tuple, Type, Union
 
 from hera.shared._pydantic import BaseModel
 from hera.workflows.artifact import Artifact
@@ -9,6 +9,10 @@ try:
     from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
+
+
+def _is_annotated_as(annotation: Any, class_or_tuple: Union[Type, Tuple[Type, ...]]):
+    return get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], class_or_tuple)
 
 
 class RunnerInput(BaseModel):
@@ -67,3 +71,15 @@ class RunnerOutput(BaseModel):
                 # Create a Parameter from basic type annotations
                 outputs.append(Parameter(name=field, default=cls.__fields__[field].default))
         return outputs
+
+    @classmethod
+    def replace_keys(cls, obj: Dict) -> Dict:
+        """Replaces keys in obj with Annotated Parameter/Artifact names for Argo."""
+        for key, annotation in cls.__annotations__.items():
+            if key in {"exit_code", "result"} or not _is_annotated_as(annotation, (Artifact, Parameter)):
+                continue
+            argo_name = get_args(annotation)[1].name
+
+            obj[argo_name] = obj[key]
+            del obj[key]
+        return obj

@@ -1,5 +1,5 @@
 from hera.shared import global_config
-from hera.workflows import Parameter, Steps, Workflow, script
+from hera.workflows import Artifact, Parameter, Steps, Workflow, script
 from hera.workflows.io import RunnerInput, RunnerOutput
 
 try:
@@ -19,8 +19,8 @@ class MyInput(RunnerInput):
 
 class MyOutput(RunnerOutput):
     my_output_str: str = "my-default-str"
-    # another_output: Annotated[Path, Parameter(name="second-output")]
-    # an_artifact: Annotated[Path, Artifact(name="artifact-output")]
+    annotated_str: Annotated[str, Parameter(name="second-output")]
+    an_artifact: Annotated[str, Artifact(name="artifact-str-output")] = ""
 
 
 @script(constructor="runner")
@@ -29,9 +29,9 @@ def pydantic_io_function(
     another_param_inline: int,
     another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
 ) -> MyOutput:
-    outputs = MyOutput(exit_code=10)
+    outputs = MyOutput(exit_code=10, annotated_str="my-val")
     outputs.my_output_str = str(my_input.my_int)
-    # outputs.another_output.write("foo")
+    outputs.an_artifact = "test!"
     outputs.result = another_param_inline * 2
 
     return outputs

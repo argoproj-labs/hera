@@ -30,10 +30,18 @@ class PydanticEncoder(JSONEncoder):
         # Note that these are slightly different outputs b/w v1 and v2
         # v1 will give the actual python object whereas v2 will serialize it into
         # a json compatible format.
+        from hera.workflows.io import RunnerOutput
+
         if _PYDANTIC_VERSION == 1:
+            if isinstance(o, RunnerOutput):
+                obj = o.dict(by_alias=True)
+                return o.replace_keys(obj)
             if isinstance(o, BaseModel):
                 return o.dict(by_alias=True)
         else:
+            if isinstance(o, RunnerOutput):
+                obj = o.dict(by_alias=True)
+                return o.replace_keys(obj)
             if isinstance(o, BaseModel):
                 return o.model_dump(by_alias=True, mode="json")  # type: ignore
             if isinstance(o, V1BaseModel):
