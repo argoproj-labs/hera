@@ -41,7 +41,7 @@
       entrypoint: whalesay
       serviceAccountName: argo-account
       templates:
-      - activeDeadlineSeconds: '100'
+      - activeDeadlineSeconds: 100
         container:
           command:
           - cowsay

@@ -19,15 +19,9 @@ UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
 UPSTREAM_EXAMPLE_XFAIL_FILES = [
     "cluster-workflow-template__clustertemplates.upstream.yaml",
     "cron-backfill.upstream.yaml",
-    "daemon-nginx.upstream.yaml",
-    "daemon-step.upstream.yaml",
-    "dag-daemon-task.upstream.yaml",
-    "default-pdb-support.upstream.yaml",
-    "influxdb-ci.upstream.yaml",
     "memoize-simple.upstream.yaml",
     "pod-gc-strategy-with-label-selector.upstream.yaml",
     "pod-gc-strategy.upstream.yaml",
-    "timeouts-step.upstream.yaml",
     "webhdfs-input-output-artifacts.upstream.yaml",
     "workflow-template__templates.upstream.yaml",
 ]

@@ -4,8 +4,9 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+from fnmatch import fnmatch
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Iterable, List
 
 from hera._cli.base import GenerateYaml
 from hera.workflows.workflow import Workflow
@@ -21,7 +22,7 @@ def generate_yaml(options: GenerateYaml):
 
     # Generate a collection of source file paths and their resultant yaml.
     path_to_output: list[tuple[str, str]] = []
-    for path in paths:
+    for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
         yaml_outputs = []
         for workflow in load_workflows_from_module(path):
             yaml_outputs.append(workflow.to_yaml())
@@ -73,6 +74,26 @@ def expand_paths(source: Path, recursive: bool = False) -> Generator[Path, None,
                 yield path
 
 
+def filter_paths(
+    paths: List[Path],
+    includes: List[str],
+    excludes: List[str],
+) -> Iterable[Path]:
+    for path in paths:
+        raw_path = str(path)
+        if includes:
+            any_includes_match = any(fnmatch(raw_path, include) for include in includes)
+            if not any_includes_match:
+                continue
+
+        if excludes:
+            any_excludes_match = any(fnmatch(raw_path, exclude) for exclude in excludes)
+            if any_excludes_match:
+                continue
+
+        yield path
+
+
 def load_workflows_from_module(path: Path) -> list[Workflow]:
     """Load the set of `Workflow` objects defined within a given module.
 
@@ -82,10 +103,12 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
     Returns:
         A list containing all `Workflow` objects defined within that module.
     """
-    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module_name = path.stem
+    spec = importlib.util.spec_from_file_location(module_name, path, submodule_search_locations=[str(path.parent)])
     assert spec
 
     module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
 
     assert spec.loader
     spec.loader.exec_module(module)

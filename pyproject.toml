@@ -33,7 +33,7 @@ python = ">=3.8,<4"
 pyyaml = { version = ">=6.0", optional = true }
 requests = "*"
 pydantic = { extras = ["email"], version = ">=1.7,<3.0" }
-cappa = {version = "^0.14.3", optional = true}
+cappa = {version = ">=0.14.3,<0.16.0", optional = true}
 
 [tool.poetry.extras]
 yaml = ["PyYAML"]
@@ -42,7 +42,7 @@ cli = ["cappa", "PyYAML"]
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 pytest-cov = "*"
-mypy = "1.0.1"
+mypy = "*"
 build = "*"
 ruff = "*"
 types-PyYAML = "*"
@@ -80,6 +80,10 @@ mypy_path = "src"
 check_untyped_defs = true
 no_implicit_optional = true
 strict_optional = false
+
+plugins = [
+  "pydantic.mypy"
+]
 
 
 [[tool.mypy.overrides]]
@@ -138,6 +142,7 @@ src = ["src"]
 "src/hera/workflows/_unparse.py" = ["D"]
 "src/hera/workflows/models/**" = ["D"]
 "tests/**" = ["D"]
+"scripts/graphlib.py" = ["D"]
 
 [tool.ruff.isort]
 force-wrap-aliases = true

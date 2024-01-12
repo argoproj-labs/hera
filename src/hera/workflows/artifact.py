@@ -17,6 +17,7 @@ from hera.workflows.models import (
     ArtifactoryArtifact as _ModelArtifactoryArtifact,
     ArtifactPaths as _ModelArtifactPaths,
     AzureArtifact as _ModelAzureArtifact,
+    ConfigMapKeySelector,
     GCSArtifact as _ModelGCSArtifact,
     GitArtifact as _ModelGitArtifact,
     HDFSArtifact as _ModelHDFSArtifact,
@@ -73,7 +74,7 @@ class Artifact(BaseModel):
     path: Optional[str] = None
     """path where the artifact should be placed/loaded from"""
 
-    recurse_mode: Optional[str] = None
+    recurse_mode: Optional[bool] = None
     """recursion mode when applying the permissions of the artifact if it is an artifact folder"""
 
     sub_path: Optional[str] = None
@@ -109,6 +110,7 @@ class Artifact(BaseModel):
 
     def _build_artifact(self) -> _ModelArtifact:
         self._check_name()
+        assert self.name
         return _ModelArtifact(
             name=self.name,
             archive=self._build_archive(),
@@ -270,7 +272,7 @@ class HDFSArtifact(Artifact):
     force: Optional[bool] = None
     hdfs_user: Optional[str]
     krb_c_cache_secret: Optional[SecretKeySelector] = None
-    krb_config_config_map: Optional[SecretKeySelector] = None
+    krb_config_config_map: Optional[ConfigMapKeySelector] = None
     krb_keytab_secret: Optional[SecretKeySelector] = None
     krb_realm: Optional[str] = None
     krb_service_principal_name: Optional[str] = None

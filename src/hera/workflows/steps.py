@@ -18,6 +18,7 @@ from hera.workflows._mixins import (
 )
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
+    ParallelSteps,
     Template as _ModelTemplate,
     WorkflowStep as _ModelWorkflowStep,
 )
@@ -129,13 +130,13 @@ class Steps(
         ]
     ] = []
 
-    def _build_steps(self) -> Optional[List[List[_ModelWorkflowStep]]]:
+    def _build_steps(self) -> Optional[List[ParallelSteps]]:
         steps = []
         for workflow_step in self.sub_steps:
             if isinstance(workflow_step, Steppable):
-                steps.append(workflow_step._build_step())
+                steps.append(ParallelSteps(__root__=workflow_step._build_step()))
             elif isinstance(workflow_step, _ModelWorkflowStep):
-                steps.append([workflow_step])
+                steps.append(ParallelSteps(__root__=[workflow_step]))
             elif isinstance(workflow_step, List):
                 substeps = []
                 for s in workflow_step:
@@ -145,7 +146,7 @@ class Steps(
                         substeps.append(s)
                     else:
                         raise InvalidType(type(s))
-                steps.append(substeps)
+                steps.append(ParallelSteps(__root__=substeps))
             else:
                 raise InvalidType(type(workflow_step))
 

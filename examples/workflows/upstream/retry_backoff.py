@@ -37,7 +37,7 @@ with Workflow(
         command=["python", "-c"],
         args=["import random; import sys; exit_code = random.choice([0, 1, 1]); sys.exit(exit_code)"],
         retry_strategy=RetryStrategy(
-            limit=10,
+            limit="10",
             backoff=m.Backoff(
                 duration="1",
                 factor="2",

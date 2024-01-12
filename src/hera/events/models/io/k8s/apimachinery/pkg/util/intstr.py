@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+from typing import Union
+
 from hera.shared._pydantic import BaseModel
 
 
 class IntOrString(BaseModel):
-    __root__: str
+    __root__: Union[str, int]

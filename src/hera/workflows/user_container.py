@@ -1,5 +1,5 @@
 """The user container module provides user container functionality and objects."""
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from hera.workflows.env import _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
@@ -17,6 +17,7 @@ from hera.workflows.volume import _BaseVolume
 class UserContainer(_ModelUserContainer):
     """`UserContainer` is a container type that is specifically used as a side container."""
 
+    # TODO: Use EnvMixin (currently a circular import)
     env: Optional[List[Union[_BaseEnv, EnvVar]]] = None  # type: ignore[assignment]
     env_from: Optional[List[Union[_BaseEnvFrom, EnvFromSource]]] = None  # type: ignore[assignment]
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None  # type: ignore[assignment]
@@ -50,11 +51,17 @@ class UserContainer(_ModelUserContainer):
 
     def build(self) -> _ModelUserContainer:
         """Builds the Hera auto-generated model of the user container."""
+        env: List[EnvVar] = [
+            var if isinstance(var, EnvVar) else cast(_BaseEnv, var).build() for var in (self.env or [])
+        ]
+        env_from: List[EnvFromSource] = [
+            var if isinstance(var, EnvFromSource) else cast(_BaseEnvFrom, var).build() for var in (self.env_from or [])
+        ]
         return _ModelUserContainer(
             args=self.args,
             command=self.command,
-            env=self.env,
-            env_from=self.env_from,
+            env=env or None,
+            env_from=env_from or None,
             image=self.image,
             image_pull_policy=self._build_image_pull_policy(),
             lifecycle=self.lifecycle,
@@ -63,7 +70,11 @@ class UserContainer(_ModelUserContainer):
             name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
-            resources=self.resources,
+            resources=self.resources
+            if isinstance(self.resources, ResourceRequirements)
+            else self.resources.build()
+            if self.resources
+            else None,
             security_context=self.security_context,
             startup_probe=self.startup_probe,
             stdin=self.stdin,
