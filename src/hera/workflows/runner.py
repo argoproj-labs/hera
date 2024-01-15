@@ -183,26 +183,28 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
         If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
         Otherwise, we look for the kwarg with the name of the field.
         """
-
-        def get_matching_kwarg(field: str) -> str:
-            annotation = runner_input_class.__annotations__[field]
-            if get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], (Artifact, Parameter)):
-                name_to_match = get_args(annotation)[1].name
-            else:
-                name_to_match = field
-
-            for kwarg in kwargs:
-                if kwarg == name_to_match:
-                    return kwarg
-
-            raise ValueError(f"Parameter {name_to_match} not provided in kwargs")
-
         input_model_obj = {}
-        for field in runner_input_class.__fields__:
-            matched_kwarg = get_matching_kwarg(field)
-            input_model_obj[field] = kwargs[matched_kwarg]
 
-        mapped_kwargs[param_name] = runner_input_class.parse_obj(input_model_obj)
+        def map_field(field: str) -> Optional[str]:
+            annotation = runner_input_class.__annotations__[field]
+            if get_origin(annotation) is Annotated:
+                annotation = get_args(annotation)[1]
+                if isinstance(annotation, Parameter):
+                    map_annotated_param(field, annotation)
+                    mapped_kwargs[field] = json.loads(mapped_kwargs[field])
+                elif isinstance(annotation, Artifact):
+                    map_annotated_artifact(field, annotation)
+            else:
+                mapped_kwargs[field] = json.loads(kwargs[field])
+
+            return field
+
+        for field in runner_input_class.__fields__:
+            matched_field = map_field(field)
+            if matched_field:
+                input_model_obj[field] = mapped_kwargs[matched_field]
+
+        mapped_kwargs[param_name] = runner_input_class.parse_raw(json.dumps(input_model_obj))
 
     for param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:

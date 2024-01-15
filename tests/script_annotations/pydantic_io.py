@@ -51,6 +51,24 @@ def pydantic_io_artifacts(
     pass
 
 
+class BothInput(RunnerInput):
+    param_int: Annotated[int, Parameter(name="param-int")] = 42
+    artifact_int: Annotated[int, Artifact(name="artifact-int", loader=ArtifactLoader.json)]
+
+
+class BothOutput(RunnerOutput):
+    param_int: Annotated[int, Parameter(name="param-int")]
+    artifact_int: Annotated[int, Artifact(name="artifact-int")]
+
+
+@script(constructor="runner")
+def pydantic_io(
+    my_input: BothInput,
+) -> BothOutput:
+    pass
+
+
 with Workflow(generate_name="pydantic-io-") as w:
     pydantic_io_params()
     pydantic_io_artifacts()
+    pydantic_io()

@@ -1,5 +1,11 @@
+from pathlib import Path
+from typing import List
+
+from tests.helper import ARTIFACT_PATH
+
 from hera.shared import global_config
-from hera.workflows import Artifact, Parameter, Steps, Workflow, script
+from hera.shared._pydantic import BaseModel
+from hera.workflows import Artifact, ArtifactLoader, Parameter, script
 from hera.workflows.io import RunnerInput, RunnerOutput
 
 try:
@@ -11,52 +17,68 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class MyInput(RunnerInput):
+class ParamOnlyInput(RunnerInput):
     my_required_int: int
     my_int: int = 1
     my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
+    my_ints: Annotated[List[int], Parameter(name="multiple-ints")] = []
 
 
-class MyOutput(RunnerOutput):
+class ParamOnlyOutput(RunnerOutput):
     my_output_str: str = "my-default-str"
     annotated_str: Annotated[str, Parameter(name="second-output")]
-    an_artifact: Annotated[str, Artifact(name="artifact-str-output")] = ""
 
 
 @script(constructor="runner")
-def pydantic_io_function(
-    my_input: MyInput,
+def pydantic_io_parameters(
+    my_input: ParamOnlyInput,
     another_param_inline: int,
     another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
-) -> MyOutput:
-    outputs = MyOutput(exit_code=10, annotated_str="my-val")
+) -> ParamOnlyOutput:
+    outputs = ParamOnlyOutput(exit_code=10, annotated_str="my-val")
     outputs.my_output_str = str(my_input.my_int)
-    outputs.an_artifact = "test!"
     outputs.result = another_param_inline * 2
 
     return outputs
 
 
 @script(constructor="runner")
-def echo(
-    my_output: str,
-    another_param: str,
-) -> None:
-    print(my_output)
-    print(another_param)
+def pydantic_io_in_generic(
+    my_inputs: List[ParamOnlyInput],
+) -> str:
+    """my_inputs is a `list` type, we cannot infer its sub-type in the runner
+    so it should behave like a normal Pydantic input class.
+    """
+    return len(my_inputs)
 
 
-with Workflow(generate_name="pydantic-io-", entrypoint="my-steps") as w:
-    with Steps(name="my-steps") as s:
-        my_step = pydantic_io_function(
-            arguments={
-                "my_input": MyInput(my_param=2, my_required_int=1),
-                "another_param_inline": 3,
-            },
-        )
-        echo(
-            arguments={
-                "my_output": my_step.get_parameter("my_output_str"),
-                "another_param": my_step.result,
-            },
-        )
+class MyArtifact(BaseModel):
+    a: str = "a"
+    b: str = "b"
+
+
+class ArtifactOnlyInput(RunnerInput):
+    json_artifact: Annotated[
+        MyArtifact, Artifact(name="json-artifact", path=ARTIFACT_PATH + "/json", loader=ArtifactLoader.json)
+    ]
+    path_artifact: Annotated[Path, Artifact(name="path-artifact", path=ARTIFACT_PATH + "/path", loader=None)]
+    str_path_artifact: Annotated[
+        str, Artifact(name="str-path-artifact", path=ARTIFACT_PATH + "/str-path", loader=None)
+    ]
+    file_artifact: Annotated[
+        str, Artifact(name="file-artifact", path=ARTIFACT_PATH + "/file", loader=ArtifactLoader.file)
+    ]
+
+
+class ArtifactOnlyOutput(RunnerOutput):
+    an_artifact: Annotated[str, Artifact(name="artifact-str-output")] = ""
+
+
+@script(constructor="runner")
+def pydantic_io_artifacts(
+    my_input: ArtifactOnlyInput,
+) -> ArtifactOnlyOutput:
+    outputs = ArtifactOnlyOutput(exit_code=10)
+    outputs.an_artifact = "a string"
+
+    return outputs

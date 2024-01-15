@@ -216,6 +216,26 @@ def test_configmap(global_config_fixture):
             },
             id="artifact-only-io",
         ),
+        pytest.param(
+            "pydantic_io",
+            {
+                "parameters": [
+                    {"name": "param-int", "default": "42"},
+                ],
+                "artifacts": [
+                    {"name": "artifact-int", "path": "/tmp/hera-inputs/artifacts/artifact-int"},
+                ],
+            },
+            {
+                "parameters": [
+                    {"name": "param-int", "valueFrom": {"path": "/tmp/hera-outputs/parameters/param-int"}},
+                ],
+                "artifacts": [
+                    {"name": "artifact-int", "path": "/tmp/hera-outputs/artifacts/artifact-int"},
+                ],
+            },
+            id="artifact-only-io",
+        ),
     ],
 )
 def test_script_pydantic_io(function_name, expected_input, expected_output, global_config_fixture):

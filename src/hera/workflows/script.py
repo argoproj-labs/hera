@@ -359,18 +359,17 @@ def _get_outputs_from_return_annotation(
                 annotation.value_from = ValueFrom(path=outputs_directory + f"/parameters/{annotation.name}")
             parameters.append(annotation)
 
-    if get_origin(inspect.signature(source).return_annotation) is Annotated:
-        append_annotation(get_args(inspect.signature(source).return_annotation)[1])
-    elif get_origin(inspect.signature(source).return_annotation) is tuple:
-        for annotation in get_args(inspect.signature(source).return_annotation):
+    return_annotation = inspect.signature(source).return_annotation
+    if get_origin(return_annotation) is Annotated:
+        append_annotation(get_args(return_annotation)[1])
+    elif get_origin(return_annotation) is tuple:
+        for annotation in get_args(return_annotation):
             append_annotation(get_args(annotation)[1])
-    elif inspect.signature(source).return_annotation and issubclass(
-        inspect.signature(source).return_annotation, RunnerOutput
-    ):
+    elif return_annotation and issubclass(return_annotation, RunnerOutput):
         if not global_config.experimental_features["script_pydantic_io"]:
             raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
 
-        output_class = inspect.signature(source).return_annotation
+        output_class = return_annotation
         for output in output_class._get_outputs():
             append_annotation(output)
 
@@ -479,13 +478,17 @@ def _extract_return_annotation_output(source: Callable) -> List:
     """Extract the output annotations from the return annotation of the function signature."""
     output = []
 
-    origin_type = get_origin(inspect.signature(source).return_annotation)
-    annotation_args = get_args(inspect.signature(source).return_annotation)
+    return_annotation = inspect.signature(source).return_annotation
+    origin_type = get_origin(return_annotation)
+    annotation_args = get_args(return_annotation)
     if origin_type is Annotated:
         output.append(annotation_args)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
             output.append(get_args(annotated_type))
+    # elif origin_type is None and return_annotation and issubclass(return_annotation, RunnerOutput):
+    #     print("TODO")
+    #     raise NotImplementedError()
 
     return output
 
