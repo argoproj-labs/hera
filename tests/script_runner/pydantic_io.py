@@ -86,11 +86,16 @@ class ArtifactOnlyInput(RunnerInput):
 
 
 class ArtifactOnlyOutput(RunnerOutput):
-    an_artifact: Annotated[str, Artifact(name="artifact-str-output")] = ""
+    an_artifact: Annotated[str, Artifact(name="artifact-str-output")]
 
 
 @script(constructor="runner")
 def pydantic_input_artifact(
     my_input: ArtifactOnlyInput,
 ) -> str:
-    return my_input.an_artifact
+    return my_input.json_artifact
+
+
+@script(constructor="runner")
+def pydantic_output_artifact() -> ArtifactOnlyOutput:
+    return ArtifactOnlyOutput(an_artifact="test")

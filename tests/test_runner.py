@@ -732,56 +732,110 @@ def test_runner_pydantic_output_params(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-# @pytest.mark.parametrize(
-#     "entrypoint,files,expected_files,pydantic_mode",
-#     [
-#         pytest.param(
-#             "tests.script_runner.pydantic_io:pydantic_io_artifacts",
-#             {
-#                 "json": '{"a": 3, "b": "bar"}',
-#                 "path": "dummy",
-#                 "str-path": "dummy",
-#                 "file": "dummy",
-#             },
-#             [{"subpath": "tmp/hera/outputs/artifacts/artifact-str-output", "value": "a string"}],
-#             1,
-#             id="test artifact only input variations",
-#         ),
-#     ],
-# )
-# def test_runner_pydantic_artifacts(
-#     entrypoint,
-#     files: Dict,
-#     expected_files,
-#     pydantic_mode,
-#     global_config_fixture: GlobalConfig,
-#     environ_annotations_fixture: None,
-#     monkeypatch,
-#     tmp_path: Path,
-# ):
-#     # GIVEN
-#     for file, contents in files.items():
-#         filepath = tmp_path / file
-#         filepath.write_text(contents)
+@pytest.mark.parametrize(
+    "entrypoint,input_files,expected_output,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_input_artifact",
+            {
+                "json": '{"a": 3, "b": "bar"}',
+                "path": "dummy",
+                "str-path": "dummy",
+                "file": "dummy",
+            },
+            '{"a": "3", "b": "bar"}',
+            1,
+            id="pydantic io artifact input variations",
+        ),
+    ],
+)
+def test_runner_pydantic_input_artifacts(
+    entrypoint,
+    input_files: Dict,
+    expected_output,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    for file, contents in input_files.items():
+        filepath = tmp_path / file
+        filepath.write_text(contents)
 
-#     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
-#     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-#     os.environ["hera__script_annotations"] = ""
-#     os.environ["hera__script_pydantic_io"] = ""
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
 
-#     import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io as module
 
-#     importlib.reload(module)
+    importlib.reload(module)
 
-#     outputs_directory = str(tmp_path / "tmp/hera/outputs")
-#     global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+    outputs_directory = str(tmp_path / "tmp/hera/outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
 
-#     # WHEN
-#     output = _runner(entrypoint, [])
+    # WHEN
+    output = _runner(entrypoint, [])
 
-#     # THEN
-#     assert output is None, "Runner should not return values directly when using RunnerOutput"
-#     for file in expected_files:
-#         assert Path(tmp_path / file["subpath"]).is_file()
-#         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "entrypoint,input_files,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_artifact",
+            {
+                "json": '{"a": 3, "b": "bar"}',
+                "path": "dummy",
+                "str-path": "dummy",
+                "file": "dummy",
+            },
+            [
+                {"subpath": "tmp/hera-outputs/artifacts/artifact-str-output", "value": "test"},
+            ],
+            1,
+            id="pydantic io artifact output variations",
+        ),
+    ],
+)
+def test_runner_pydantic_output_artifacts(
+    entrypoint,
+    input_files: Dict,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    for file, contents in input_files.items():
+        filepath = tmp_path / file
+        filepath.write_text(contents)
+
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN
+    output = _runner(entrypoint, [])
+
+    # THEN
+    assert output is None, "Runner should not return values directly when using RunnerOutput"
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
