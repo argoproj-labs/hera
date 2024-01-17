@@ -9,6 +9,7 @@ from hera.workflows.models import (
     ImagePullPolicy,
     ResourceRequirements,
     UserContainer as _ModelUserContainer,
+    VolumeMount as _ModelVolumeMount,
 )
 from hera.workflows.resources import Resources
 from hera.workflows.volume import _BaseVolume
@@ -49,6 +50,18 @@ class UserContainer(_ModelUserContainer):
                 "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
+    def _build_volume_mounts(self) -> Optional[List[_ModelVolumeMount]]:
+        """Processes the volume mounts field and returns a generated `VolumeMount`."""
+        volume_mounts = self.volume_mounts
+        # extra volume mounts stem from using custom Hera volumes, which dynamically provision PVs + PVCs
+        extra_volume_mounts = None if self.volumes is None else [v._build_volume_mount() for v in self.volumes]
+        if volume_mounts is None:
+            volume_mounts = extra_volume_mounts
+        elif extra_volume_mounts is not None:
+            volume_mounts.extend(extra_volume_mounts)
+
+        return volume_mounts
+
     def build(self) -> _ModelUserContainer:
         """Builds the Hera auto-generated model of the user container."""
         env: List[EnvVar] = [
@@ -57,6 +70,7 @@ class UserContainer(_ModelUserContainer):
         env_from: List[EnvFromSource] = [
             var if isinstance(var, EnvFromSource) else cast(_BaseEnvFrom, var).build() for var in (self.env_from or [])
         ]
+
         return _ModelUserContainer(
             args=self.args,
             command=self.command,
@@ -83,7 +97,7 @@ class UserContainer(_ModelUserContainer):
             termination_message_policy=self.termination_message_policy,
             tty=self.tty,
             volume_devices=self.volume_devices,
-            volume_mounts=None if self.volumes is None else [v._build_volume_mount() for v in self.volumes],
+            volume_mounts=self._build_volume_mounts(),
             working_dir=self.working_dir,
         )
 

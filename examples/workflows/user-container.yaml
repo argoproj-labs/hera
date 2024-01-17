@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: sidecar-volume-mount-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - name: foo
+        template: foo
+    name: d
+  - name: foo
+    script:
+      command:
+      - python
+      image: python:3.8
+      source: 'import os
+
+        import sys
+
+        sys.path.append(os.getcwd())
+
+        print(''hi'')'
+    sidecars:
+    - name: sidecar-name
+      volumeMounts:
+      - mountPath: /whatever
+        name: something
