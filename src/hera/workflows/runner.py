@@ -42,11 +42,7 @@ def _ignore_unmatched_kwargs(f):
                 if _is_kwarg_of(key, f):
                     type_ = _get_type(key, f)
                     filtered_kwargs[key] = value if type_ and issubclass(type_, RunnerInput) else _parse(value, key, f)
-            output = f(**filtered_kwargs)
-            if isinstance(output, RunnerOutput):
-                # TODO: process exit_code and result
-                pass
-            return output
+            return f(**filtered_kwargs)
 
     return inner
 
@@ -227,7 +223,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
 def _save_annotated_return_outputs(
     function_outputs: Union[Tuple[Any], Any],
     output_annotations: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[RunnerOutput]]],
-) -> None:
+) -> Optional[RunnerOutput]:
     """Save the outputs of the function to the specified output destinations.
 
     The output values are matched with the output annotations and saved using the schema:
@@ -241,14 +237,20 @@ def _save_annotated_return_outputs(
     if len(function_outputs) != len(output_annotations):
         raise ValueError("The number of outputs does not match the annotation")
 
+    if os.environ.get("hera__script_pydantic_io", None) is not None:
+        return_obj = None
+
     for output_value, dest in zip(function_outputs, output_annotations):
         if isinstance(output_value, RunnerOutput):
             if os.environ.get("hera__script_pydantic_io", None) is None:
                 raise ValueError("hera__script_pydantic_io environment variable is not set")
 
+            return_obj = output_value
+
             for field, value in output_value.dict().items():
                 if field in {"exit_code", "result"}:
                     continue
+
                 matching_output = output_value._get_output(field)
                 path = _get_outputs_path(matching_output)
                 _write_to_path(path, value)
@@ -273,6 +275,9 @@ def _save_annotated_return_outputs(
 
             path = _get_outputs_path(dest[1])
             _write_to_path(path, output_value)
+
+    if os.environ.get("hera__script_pydantic_io", None) is not None:
+        return return_obj
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
@@ -352,8 +357,8 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         if output_annotations:
             # This will save outputs returned from the function only. Any function parameters/artifacts marked as
             # outputs should be written to within the function itself.
-            _save_annotated_return_outputs(function(**kwargs), output_annotations)
-            return None
+            output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+            return output or None
 
     return function(**kwargs)
 
@@ -384,6 +389,11 @@ def _run():
     result = _runner(args.entrypoint, kwargs_list)
     if not result:
         return
+
+    if isinstance(result, RunnerOutput):
+        print(serialize(result.result))
+        exit(result.exit_code)
+
     print(serialize(result))
 
 

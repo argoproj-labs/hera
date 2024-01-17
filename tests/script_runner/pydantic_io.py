@@ -53,7 +53,7 @@ def pydantic_output_parameters(
     int_param_inline: int,
     another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
 ) -> ParamOnlyOutput:
-    outputs = ParamOnlyOutput(exit_code=10, annotated_str="my-val")
+    outputs = ParamOnlyOutput(annotated_str="my-val")
     outputs.my_output_str = another_annotated_param_inline
 
     return outputs
@@ -61,10 +61,26 @@ def pydantic_output_parameters(
 
 @script(constructor="runner")
 def pydantic_output_parameters_in_tuple() -> Tuple[ParamOnlyOutput, Annotated[int, Parameter(name="inline-output")]]:
-    outputs = ParamOnlyOutput(exit_code=10, annotated_str="my-val")
+    outputs = ParamOnlyOutput(annotated_str="my-val")
     outputs.my_output_str = "a string!"
 
     return outputs, 42
+
+
+@script(constructor="runner")
+def pydantic_output_using_exit_code() -> ParamOnlyOutput:
+    outputs = ParamOnlyOutput(exit_code=42, annotated_str="my-val")
+    outputs.my_output_str = "a string!"
+
+    return outputs
+
+
+@script(constructor="runner")
+def pydantic_output_using_result() -> ParamOnlyOutput:
+    outputs = ParamOnlyOutput(result=42, annotated_str="my-val")
+    outputs.my_output_str = "a string!"
+
+    return outputs
 
 
 class MyArtifact(BaseModel):

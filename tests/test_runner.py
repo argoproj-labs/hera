@@ -839,3 +839,149 @@ def test_runner_pydantic_output_artifacts(
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_using_exit_code",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            1,
+            id="pydantic output with exit code",
+        ),
+    ],
+)
+def test_runner_pydantic_output_with_exit_code(
+    entrypoint,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    output = _runner(entrypoint, [])
+
+    assert output.exit_code == 42
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_using_exit_code",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            1,
+            id="use _run to check actual system exit",
+        ),
+    ],
+)
+@patch("hera.workflows.runner._parse_args")
+def test_run_pydantic_output_with_exit_code(
+    mock_parse_args,
+    entrypoint,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    file_path = Path(tmp_path / "test_params")
+    file_path.write_text("")
+    args = MagicMock(entrypoint=entrypoint, args_path=file_path)
+    mock_parse_args.return_value = args
+
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    with pytest.raises(SystemExit) as e:
+        _run()
+
+    assert e.value.code == 42
+    mock_parse_args.assert_called_once()
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files,expected_result,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_using_result",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            "42",
+            1,
+            id="pydantic output with result output",
+        ),
+    ],
+)
+def test_runner_pydantic_output_with_result(
+    entrypoint,
+    expected_files,
+    expected_result,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    output = _runner(entrypoint, [])
+
+    assert serialize(output.result) == serialize(expected_result)
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
