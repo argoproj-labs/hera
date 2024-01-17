@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from tests.helper import ARTIFACT_PATH
 
@@ -30,16 +30,12 @@ class ParamOnlyOutput(RunnerOutput):
 
 
 @script(constructor="runner")
-def pydantic_io_parameters(
+def pydantic_input_parameters(
     my_input: ParamOnlyInput,
     another_param_inline: int,
     another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
-) -> ParamOnlyOutput:
-    outputs = ParamOnlyOutput(exit_code=10, annotated_str="my-val")
-    outputs.my_output_str = str(my_input.my_int)
-    outputs.result = another_param_inline * 2
-
-    return outputs
+) -> int:
+    return another_param_inline
 
 
 @script(constructor="runner")
@@ -50,6 +46,25 @@ def pydantic_io_in_generic(
     so it should behave like a normal Pydantic input class.
     """
     return len(my_inputs)
+
+
+@script(constructor="runner")
+def pydantic_output_parameters(
+    int_param_inline: int,
+    another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
+) -> ParamOnlyOutput:
+    outputs = ParamOnlyOutput(exit_code=10, annotated_str="my-val")
+    outputs.my_output_str = another_annotated_param_inline
+
+    return outputs
+
+
+@script(constructor="runner")
+def pydantic_output_parameters_in_tuple() -> Tuple[ParamOnlyOutput, Annotated[int, Parameter(name="inline-output")]]:
+    outputs = ParamOnlyOutput(exit_code=10, annotated_str="my-val")
+    outputs.my_output_str = "a string!"
+
+    return outputs, 42
 
 
 class MyArtifact(BaseModel):
@@ -75,10 +90,7 @@ class ArtifactOnlyOutput(RunnerOutput):
 
 
 @script(constructor="runner")
-def pydantic_io_artifacts(
+def pydantic_input_artifact(
     my_input: ArtifactOnlyInput,
-) -> ArtifactOnlyOutput:
-    outputs = ArtifactOnlyOutput(exit_code=10)
-    outputs.an_artifact = "a string"
-
-    return outputs
+) -> str:
+    return my_input.an_artifact

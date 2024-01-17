@@ -6,7 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
@@ -226,7 +226,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
 
 def _save_annotated_return_outputs(
     function_outputs: Union[Tuple[Any], Any],
-    output_destinations: List[Tuple[type, Union[Parameter, Artifact]]],
+    output_annotations: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[RunnerOutput]]],
 ) -> None:
     """Save the outputs of the function to the specified output destinations.
 
@@ -238,29 +238,41 @@ def _save_annotated_return_outputs(
     """
     if not isinstance(function_outputs, tuple):
         function_outputs = [function_outputs]
-    if len(function_outputs) != len(output_destinations):
+    if len(function_outputs) != len(output_annotations):
         raise ValueError("The number of outputs does not match the annotation")
 
-    for output_value, dest in zip(function_outputs, output_destinations):
-        if get_origin(dest[0]) is None:
-            # Built-in types return None from get_origin, so we can check isinstance directly
-            if not isinstance(output_value, dest[0]):
-                raise ValueError(
-                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                )
+    for output_value, dest in zip(function_outputs, output_annotations):
+        if isinstance(output_value, RunnerOutput):
+            if os.environ.get("hera__script_pydantic_io", None) is None:
+                raise ValueError("hera__script_pydantic_io environment variable is not set")
+
+            for field, value in output_value.dict().items():
+                if field in {"exit_code", "result"}:
+                    continue
+                matching_output = output_value._get_output(field)
+                path = _get_outputs_path(matching_output)
+                _write_to_path(path, value)
         else:
-            # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
-            origin_type = cast(type, get_origin(dest[0]))
-            if not isinstance(output_value, origin_type):
-                raise ValueError(
-                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                )
+            assert isinstance(dest, tuple)
+            if get_origin(dest[0]) is None:
+                # Built-in types return None from get_origin, so we can check isinstance directly
+                if not isinstance(output_value, dest[0]):
+                    raise ValueError(
+                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                    )
+            else:
+                # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
+                origin_type = cast(type, get_origin(dest[0]))
+                if not isinstance(output_value, origin_type):
+                    raise ValueError(
+                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                    )
 
-        if not dest[1].name:
-            raise ValueError("The name was not provided for one of the outputs.")
+            if not dest[1].name:
+                raise ValueError("The name was not provided for one of the outputs.")
 
-        path = _get_outputs_path(dest[1])
-        _write_to_path(path, output_value)
+            path = _get_outputs_path(dest[1])
+            _write_to_path(path, output_value)
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:

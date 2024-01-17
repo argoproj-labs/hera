@@ -622,16 +622,16 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
     "entrypoint,kwargs_list,expected_output,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_io_parameters",
+            "tests.script_runner.pydantic_io:pydantic_input_parameters",
             [
                 {"name": "my_required_int", "value": "4"},
                 {"name": "my_int", "value": "3"},
                 {"name": "another-int", "value": "2"},
-                {"name": "another_param_inline", "value": "1"},
+                {"name": "another_param_inline", "value": "42"},
                 {"name": "a-str-param", "value": "a string!"},
                 {"name": "multiple-ints", "value": "[1, 2, 3]"},
             ],
-            '{"exit_code": 10, "result": 2, "my_output_str": "3", "second-output": "my-val"}',
+            "42",
             1,
             id="test parameter only input variations",
         ),
@@ -646,7 +646,7 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
         ),
     ],
 )
-def test_runner_pydantic_params(
+def test_runner_pydantic_inputs_params(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
@@ -669,6 +669,67 @@ def test_runner_pydantic_params(
 
     # THEN
     assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_parameters",
+            [
+                {"name": "int_param_inline", "value": "42"},
+                {"name": "a-str-param", "value": "a string!"},
+            ],
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            1,
+            id="pydantic output parameter variations",
+        ),
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_parameters_in_tuple",
+            [],
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+                {"subpath": "tmp/hera-outputs/parameters/inline-output", "value": "42"},
+            ],
+            1,
+            id="pydantic output parameter in tuple with inline",
+        ),
+    ],
+)
+def test_runner_pydantic_output_params(
+    entrypoint,
+    kwargs_list,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert output is None, "Runner should not return values directly when using RunnerOutput"
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
 # @pytest.mark.parametrize(

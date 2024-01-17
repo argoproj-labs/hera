@@ -476,7 +476,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
 def _extract_return_annotation_output(source: Callable) -> List:
     """Extract the output annotations from the return annotation of the function signature."""
-    output = []
+    output: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[RunnerOutput]]] = []
 
     return_annotation = inspect.signature(source).return_annotation
     origin_type = get_origin(return_annotation)
@@ -485,10 +485,12 @@ def _extract_return_annotation_output(source: Callable) -> List:
         output.append(annotation_args)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
-            output.append(get_args(annotated_type))
-    # elif origin_type is None and return_annotation and issubclass(return_annotation, RunnerOutput):
-    #     print("TODO")
-    #     raise NotImplementedError()
+            if isinstance(annotated_type, type) and issubclass(annotated_type, RunnerOutput):
+                output.append(annotated_type)
+            else:
+                output.append(get_args(annotated_type))
+    elif origin_type is None and isinstance(return_annotation, type) and issubclass(return_annotation, RunnerOutput):
+        output.append(return_annotation)
 
     return output
 
