@@ -36,13 +36,16 @@ def _ignore_unmatched_kwargs(f):
         if os.environ.get("hera__script_pydantic_io", None) is None:
             filtered_kwargs = {key: _parse(value, key, f) for key, value in kwargs.items() if _is_kwarg_of(key, f)}
             return f(**filtered_kwargs)
-        else:
-            filtered_kwargs = {}
-            for key, value in kwargs.items():
-                if _is_kwarg_of(key, f):
-                    type_ = _get_type(key, f)
-                    filtered_kwargs[key] = value if type_ and issubclass(type_, RunnerInput) else _parse(value, key, f)
-            return f(**filtered_kwargs)
+
+        # filter out kwargs that are not part of the function signature
+        # and transform them to the correct type. If any kwarg values are
+        # of RunnerType, pass them through without parsing.
+        filtered_kwargs = {}
+        for key, value in kwargs.items():
+            if _is_kwarg_of(key, f):
+                type_ = _get_type(key, f)
+                filtered_kwargs[key] = value if type_ and issubclass(type_, RunnerInput) else _parse(value, key, f)
+        return f(**filtered_kwargs)
 
     return inner
 

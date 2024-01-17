@@ -422,8 +422,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
     This includes all basic Python function parameters, and all parameters with a Parameter or Artifact annotation.
     For the Pydantic IO experimental feature, any input parameter which is a subclass of RunnerInput, the fields of the
-    class will be used as inputs, rather than the class itself. Note, the fields of different types could clash
-    (TODO: can we resolve clashes with a top-level arg name prefix?).
+    class will be used as inputs, rather than the class itself.
+
+    Note, the given Parameter/Artifact names in annotations of different inputs could clash, which will raise a ValueError.
     """
     parameters = []
     artifacts = []
@@ -473,6 +474,12 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                         )
                     new_object.default = str(func_param.default)
                 parameters.append(new_object)
+
+    for inputs, arg_type in zip([parameters, artifacts], ["Parameter(s)", "Artifact(s)"]):
+        names_list = [i.name for i in inputs]
+        if len(set(names_list)) != len(inputs):
+            duplicates = set([name for name in names_list if names_list.count(name) > 1])
+            raise ValueError(f"{arg_type} using same names: {sorted(duplicates)}")
 
     return parameters, artifacts
 
