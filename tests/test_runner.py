@@ -18,6 +18,7 @@ import tests.helper as test_module
 from hera.shared import GlobalConfig
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
+from hera.workflows.io import RunnerOutput
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor
 
@@ -687,17 +688,6 @@ def test_runner_pydantic_inputs_params(
             1,
             id="pydantic output parameter variations",
         ),
-        pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_output_parameters_in_tuple",
-            [],
-            [
-                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
-                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
-                {"subpath": "tmp/hera-outputs/parameters/inline-output", "value": "42"},
-            ],
-            1,
-            id="pydantic output parameter in tuple with inline",
-        ),
     ],
 )
 def test_runner_pydantic_output_params(
@@ -726,7 +716,7 @@ def test_runner_pydantic_output_params(
     output = _runner(entrypoint, kwargs_list)
 
     # THEN
-    assert output is None, "Runner should not return values directly when using RunnerOutput"
+    assert isinstance(output, RunnerOutput)
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
@@ -835,7 +825,7 @@ def test_runner_pydantic_output_artifacts(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert output is None, "Runner should not return values directly when using RunnerOutput"
+    assert isinstance(output, RunnerOutput)
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]

@@ -279,6 +279,8 @@ def _save_annotated_return_outputs(
     if os.environ.get("hera__script_pydantic_io", None) is not None:
         return return_obj
 
+    return None
+
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     """Get the path from the destination annotation using the defined outputs directory."""

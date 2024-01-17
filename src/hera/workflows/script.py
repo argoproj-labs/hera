@@ -364,6 +364,9 @@ def _get_outputs_from_return_annotation(
         append_annotation(get_args(return_annotation)[1])
     elif get_origin(return_annotation) is tuple:
         for annotation in get_args(return_annotation):
+            if isinstance(annotation, type) and issubclass(annotation, RunnerOutput):
+                raise ValueError("RunnerOutput cannot be part of a tuple output")
+
             append_annotation(get_args(annotation)[1])
     elif return_annotation and issubclass(return_annotation, RunnerOutput):
         if not global_config.experimental_features["script_pydantic_io"]:
@@ -485,10 +488,7 @@ def _extract_return_annotation_output(source: Callable) -> List:
         output.append(annotation_args)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
-            if isinstance(annotated_type, type) and issubclass(annotated_type, RunnerOutput):
-                output.append(annotated_type)
-            else:
-                output.append(get_args(annotated_type))
+            output.append(get_args(annotated_type))
     elif origin_type is None and isinstance(return_annotation, type) and issubclass(return_annotation, RunnerOutput):
         output.append(return_annotation)
 

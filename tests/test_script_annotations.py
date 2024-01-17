@@ -259,3 +259,22 @@ def test_script_pydantic_io(function_name, expected_input, expected_output, glob
     template = next(filter(lambda t: t["name"] == function_name.replace("_", "-"), workflow_dict["spec"]["templates"]))
     assert template["inputs"] == expected_input
     assert template["outputs"] == expected_output
+
+
+def test_script_pydantic_invalid_outputs(global_config_fixture):
+    """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_annotations.pydantic_io_invalid_outputs as module
+
+    importlib.reload(module)
+    workflow = importlib.import_module(module.__name__).w
+
+    # WHEN / THEN
+    with pytest.raises(ValueError) as e:
+        workflow.to_dict()
+
+    assert "RunnerOutput cannot be part of a tuple output" in str(e.value)

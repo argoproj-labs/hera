@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 from tests.helper import ARTIFACT_PATH
 
@@ -57,14 +57,6 @@ def pydantic_output_parameters(
     outputs.my_output_str = another_annotated_param_inline
 
     return outputs
-
-
-@script(constructor="runner")
-def pydantic_output_parameters_in_tuple() -> Tuple[ParamOnlyOutput, Annotated[int, Parameter(name="inline-output")]]:
-    outputs = ParamOnlyOutput(annotated_str="my-val")
-    outputs.my_output_str = "a string!"
-
-    return outputs, 42
 
 
 @script(constructor="runner")
