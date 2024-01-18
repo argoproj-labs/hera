@@ -8,6 +8,11 @@
 === "Hera"
 
     ```python linenums="1"
+    try:
+        from pydantic.v1 import BaseModel
+    except ImportError:
+        from pydantic import BaseModel
+
     from hera.shared import global_config
     from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
     from hera.workflows.io import RunnerInput, RunnerOutput
@@ -21,8 +26,16 @@
     global_config.experimental_features["script_pydantic_io"] = True
 
 
+    class MyObject(BaseModel):
+        a_dict: dict = {}
+        a_str: str = "a default string"
+
+
     class MyInput(RunnerInput):
         param_int: Annotated[int, Parameter(name="param-input")] = 42
+        an_object: Annotated[MyObject, Parameter(name="obj-input")] = MyObject(
+            a_dict={"my-key": "a-value"}, a_str="hello world!"
+        )
         artifact_int: Annotated[int, Artifact(name="artifact-input", loader=ArtifactLoader.json)]
 
 
@@ -58,6 +71,8 @@
           parameters:
           - default: '42'
             name: param-input
+          - default: '{"a_dict": {"my-key": "a-value"}, "a_str": "hello world!"}'
+            name: obj-input
         name: pydantic-io
         outputs:
           artifacts:

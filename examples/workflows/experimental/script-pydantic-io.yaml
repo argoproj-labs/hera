@@ -11,6 +11,8 @@ spec:
       parameters:
       - default: '42'
         name: param-input
+      - default: '{"a_dict": {"my-key": "a-value"}, "a_str": "hello world!"}'
+        name: obj-input
     name: pydantic-io
     outputs:
       artifacts:

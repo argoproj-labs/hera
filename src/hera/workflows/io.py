@@ -3,6 +3,7 @@ from collections import ChainMap
 from typing import Any, List, Union
 
 from hera.shared._pydantic import BaseModel
+from hera.shared.serialization import serialize
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
 
@@ -30,7 +31,8 @@ class RunnerInput(BaseModel):
                 if isinstance(get_args(annotations[field])[1], Parameter):
                     param = get_args(annotations[field])[1]
                     if cls.__fields__[field].default:
-                        param.default = cls.__fields__[field].default
+                        # Serialize the value (usually done in Parameter's validator)
+                        param.default = serialize(cls.__fields__[field].default)
                     parameters.append(param)
             else:
                 # Create a Parameter from basic type annotations
