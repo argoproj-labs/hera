@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pydantic-io-
+spec:
+  templates:
+  - inputs:
+      artifacts:
+      - name: artifact-input
+        path: /tmp/hera-inputs/artifacts/artifact-input
+      parameters:
+      - default: '42'
+        name: param-input
+    name: pydantic-io
+    outputs:
+      artifacts:
+      - name: artifact-output
+        path: /tmp/hera-outputs/artifacts/artifact-output
+      parameters:
+      - name: param-output
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/param-output
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.script_pydantic_io:pydantic_io
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'

@@ -1,4 +1,4 @@
-"""Input/output models for the Hera runner. TODO move to hera.workflows.runner package."""
+"""Input/output models for the Hera runner."""
 from collections import ChainMap
 from typing import Any, List, Union
 

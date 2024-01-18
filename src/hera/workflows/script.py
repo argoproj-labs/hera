@@ -370,7 +370,14 @@ def _get_outputs_from_return_annotation(
             append_annotation(get_args(annotation)[1])
     elif return_annotation and issubclass(return_annotation, RunnerOutput):
         if not global_config.experimental_features["script_pydantic_io"]:
-            raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
+            raise ValueError(
+                (
+                    "Unable to instantiate {} since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format(return_annotation, "script_pydantic_io")
+            )
 
         output_class = return_annotation
         for output in output_class._get_outputs():
@@ -432,7 +439,14 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     for func_param in inspect.signature(source).parameters.values():
         if get_origin(func_param.annotation) is None and issubclass(func_param.annotation, RunnerInput):
             if not global_config.experimental_features["script_pydantic_io"]:
-                raise ValueError("Unable to instantiate (...TODO...) enable experimental feature")
+                raise ValueError(
+                    (
+                        "Unable to instantiate {} since it is an experimental feature."
+                        " Please turn on experimental features by setting "
+                        '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                        " Note that experimental features are unstable and subject to breaking changes."
+                    ).format(func_param.annotation, "script_pydantic_io")
+                )
 
             input_class = func_param.annotation
             parameters.extend(input_class._get_parameters())
@@ -790,6 +804,8 @@ class RunnerScriptConstructor(ScriptConstructor):
                 script.env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
             if self.pydantic_mode:
                 script.env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
+            if global_config.experimental_features["script_pydantic_io"]:
+                script.env.append(EnvVar(name="hera__script_pydantic_io", value=""))
         return script
 
 

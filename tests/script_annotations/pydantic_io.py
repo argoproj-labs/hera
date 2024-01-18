@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
 from hera.workflows.io import RunnerInput, RunnerOutput
 
@@ -8,9 +7,6 @@ try:
     from typing import Annotated  # type: ignore
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
-
-global_config.experimental_features["script_annotations"] = True
-global_config.experimental_features["script_pydantic_io"] = True
 
 
 class ParamOnlyInput(RunnerInput):
