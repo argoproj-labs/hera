@@ -7,17 +7,12 @@ spec:
     artifacts:
     - name: text
       raw:
-        data: '1
-
+        data: |
+          1
           2
-
           3
-
           4
-
           5
-
-          '
     parameters:
     - name: lines-count
       value: '3'

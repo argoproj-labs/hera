@@ -84,10 +84,18 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-            try: a = json.loads(r'''{{inputs.parameters.a}}''')\nexcept: a = r'''{{inputs.parameters.a}}'''\n\
-            \nimport random\nrandom.seed(a)\nif random.random() < 0.5:\n    raise Exception('Oh,\
-            \ no!')"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+
+            import random
+            random.seed(a)
+            if random.random() < 0.5:
+                raise Exception('Oh, no!')
       - inputs:
           parameters:
           - name: a
@@ -96,20 +104,15 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
 
-            try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
-
-            except: a = r''''''{{inputs.parameters.a}}''''''
-
-
-            raise Exception(a)'
+            raise Exception(a)
       - inputs:
           parameters:
           - name: a
@@ -118,19 +121,14 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
 
-            try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
-
-            except: a = r''''''{{inputs.parameters.a}}''''''
-
-
-            print(a)'
+            print(a)
     ```
 

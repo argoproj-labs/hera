@@ -18,17 +18,12 @@ spec:
       command:
       - python
       image: python:3.8
-      source: 'import os
-
+      source: |-
+        import os
         import sys
-
         sys.path.append(os.getcwd())
-
         import json
+        try: v = json.loads(r'''{{inputs.parameters.v}}''')
+        except: v = r'''{{inputs.parameters.v}}'''
 
-        try: v = json.loads(r''''''{{inputs.parameters.v}}'''''')
-
-        except: v = r''''''{{inputs.parameters.v}}''''''
-
-
-        print(v)'
+        print(v)

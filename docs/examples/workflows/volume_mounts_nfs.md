@@ -73,19 +73,14 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
-            import sys
-
-            sys.path.append(os.getcwd())
-
+          source: |-
             import os
-
+            import sys
+            sys.path.append(os.getcwd())
+            import os
             import subprocess
-
-            print(os.listdir(''/mnt''))
-
-            print(subprocess.run(''cd /mnt && df -h'', shell=True, capture_output=True).stdout.decode())'
+            print(os.listdir('/mnt'))
+            print(subprocess.run('cd /mnt && df -h', shell=True, capture_output=True).stdout.decode())
           volumeMounts:
           - mountPath: /mnt/nfs
             name: '{{inputs.parameters.vol}}'

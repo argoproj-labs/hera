@@ -55,13 +55,11 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(42)'
+            print(42)
       - inputs:
           parameters:
           - name: a
@@ -70,19 +68,14 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
 
-            try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
-
-            except: a = r''''''{{inputs.parameters.a}}''''''
-
-
-            print(a)'
+            print(a)
     ```
 

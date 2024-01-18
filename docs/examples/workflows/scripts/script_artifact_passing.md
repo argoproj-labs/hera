@@ -62,8 +62,12 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/hello_world.txt',\
-            \ 'w') as f:\n    f.write('hello world')"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            with open('/tmp/hello_world.txt', 'w') as f:
+                f.write('hello world')
       - inputs:
           artifacts:
           - name: message
@@ -73,7 +77,12 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/message',\
-            \ 'r') as f:\n    message = f.readline()\nprint(message)"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            with open('/tmp/message', 'r') as f:
+                message = f.readline()
+            print(message)
     ```
 

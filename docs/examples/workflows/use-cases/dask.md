@@ -78,44 +78,25 @@ This example showcases how to run Dask within a Hera submitted Argo workflow.
           command:
           - python
           image: ghcr.io/dask/dask:latest
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
-            try: n_workers = json.loads(r''''''{{inputs.parameters.n_workers}}'''''')
-
-            except: n_workers = r''''''{{inputs.parameters.n_workers}}''''''
-
-            try: namespace = json.loads(r''''''{{inputs.parameters.namespace}}'''''')
-
-            except: namespace = r''''''{{inputs.parameters.namespace}}''''''
-
+            try: n_workers = json.loads(r'''{{inputs.parameters.n_workers}}''')
+            except: n_workers = r'''{{inputs.parameters.n_workers}}'''
+            try: namespace = json.loads(r'''{{inputs.parameters.namespace}}''')
+            except: namespace = r'''{{inputs.parameters.namespace}}'''
 
             import subprocess
-
-            subprocess.run([''pip'', ''install'', ''dask-kubernetes'', ''dask[distributed]''],
-            stdout=subprocess.PIPE, universal_newlines=True)
-
+            subprocess.run(['pip', 'install', 'dask-kubernetes', 'dask[distributed]'], stdout=subprocess.PIPE, universal_newlines=True)
             import dask.array as da
-
             from dask.distributed import Client
-
             from dask_kubernetes.classic import KubeCluster, make_pod_spec
-
-            cluster = KubeCluster(pod_template=make_pod_spec(image=''ghcr.io/dask/dask:latest'',
-            memory_limit=''4G'', memory_request=''2G'', cpu_limit=1, cpu_request=1), namespace=namespace,
-            n_workers=n_workers)
-
+            cluster = KubeCluster(pod_template=make_pod_spec(image='ghcr.io/dask/dask:latest', memory_limit='4G', memory_request='2G', cpu_limit=1, cpu_request=1), namespace=namespace, n_workers=n_workers)
             client = Client(cluster)
-
             array = da.ones((1000, 1000, 1000))
-
-            print(''Array mean = {array_mean}, expected = 1.0''.format(array_mean=array.mean().compute()))
-
-            client.close()'
+            print('Array mean = {array_mean}, expected = 1.0'.format(array_mean=array.mean().compute()))
+            client.close()
     ```
 

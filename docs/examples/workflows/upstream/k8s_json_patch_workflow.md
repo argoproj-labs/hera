@@ -47,7 +47,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           flags:
           - workflow
           - '{{workflow.name}}'
-          manifest: "- op: add\n  path: /metadata/labels/foo\n  value: bar\n"
+          manifest: |
+            - op: add
+              path: /metadata/labels/foo
+              value: bar
           mergeStrategy: json
     ```
 

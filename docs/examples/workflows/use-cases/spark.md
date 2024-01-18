@@ -123,62 +123,35 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
             requests:
               cpu: '4'
               memory: 8Gi
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
-            try: n = json.loads(r''''''{{inputs.parameters.n}}'''''')
-
-            except: n = r''''''{{inputs.parameters.n}}''''''
-
+            try: n = json.loads(r'''{{inputs.parameters.n}}''')
+            except: n = r'''{{inputs.parameters.n}}'''
 
             import random
-
             import subprocess
-
             import time
-
-            subprocess.run([''pip'', ''install'', ''pyspark'', ''pandas''], stdout=subprocess.PIPE,
-            universal_newlines=True)
-
+            subprocess.run(['pip', 'install', 'pyspark', 'pandas'], stdout=subprocess.PIPE, universal_newlines=True)
             import pandas as pd
-
             from pyspark.sql import SparkSession
-
-            spark = SparkSession.builder.master(''local[1]'').appName(''my-spark-example-running-in-hera.com'').getOrCreate()
-
-            (data, columns) = ([random.randint(0, n) for _ in range(n)], [''value''])
-
+            spark = SparkSession.builder.master('local[1]').appName('my-spark-example-running-in-hera.com').getOrCreate()
+            (data, columns) = ([random.randint(0, n) for _ in range(n)], ['value'])
             pandas_df = pd.DataFrame(data=data, columns=columns)
-
             start = time.time()
-
             pandas_result = pandas_df.describe()
-
             pandas_elapsed = time.time() - start
-
-            print(''Pandas dataframe: '')
-
+            print('Pandas dataframe: ')
             print(pandas_result)
-
-            print(''Pandas dataframe took {pandas_elapsed} seconds to compute''.format(pandas_elapsed=pandas_elapsed))
-
+            print('Pandas dataframe took {pandas_elapsed} seconds to compute'.format(pandas_elapsed=pandas_elapsed))
             spark_df = spark.createDataFrame(data=pandas_df, schema=columns)
-
             start = time.time()
-
             spark_result = spark_df.describe()
-
             spark_elapsed = time.time() - start
-
-            print(''Spark dataframe: '')
-
+            print('Spark dataframe: ')
             print(spark_result)
-
-            print(''Spark dataframe took {spark_elapsed} seconds to compute''.format(spark_elapsed=spark_elapsed))'
+            print('Spark dataframe took {spark_elapsed} seconds to compute'.format(spark_elapsed=spark_elapsed))
     ```
 

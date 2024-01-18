@@ -83,10 +83,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           command:
           - python
           image: python:alpine3.6
-          source: 'import json
-
+          source: |-
+            import json
             import sys
-
-            json.dump([i for i in range(20, 31)], sys.stdout)'
+            json.dump([i for i in range(20, 31)], sys.stdout)
     ```
 

@@ -65,8 +65,12 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/file',\
-            \ 'w+') as f:\n    f.write('Hello, world!')"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            with open('/tmp/file', 'w+') as f:
+                f.write('Hello, world!')
       - inputs:
           artifacts:
           - name: in-art
@@ -76,7 +80,11 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/tmp/file',\
-            \ 'r') as f:\n    print(f.readlines())"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            with open('/tmp/file', 'r') as f:
+                print(f.readlines())
     ```
 

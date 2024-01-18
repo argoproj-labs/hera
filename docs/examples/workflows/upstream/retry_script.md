@@ -44,12 +44,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           command:
           - python
           image: python:alpine3.6
-          source: 'import random
-
+          source: |-
+            import random
             import sys
-
             exit_code = random.choice([0, 1, 1])
-
-            sys.exit(exit_code)'
+            sys.exit(exit_code)
     ```
 

@@ -190,15 +190,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - container:
           args:
-          - 'mkdir -p $(go env GOMODCACHE)
-
+          - |
+            mkdir -p $(go env GOMODCACHE)
             [ -e /mnt/GOMODCACHE ] && cp -Rf /mnt/GOMODCACHE $(go env GOMODCACHE)
-
             mkdir -p $(go env GOCACHE)
-
             [ -e /mnt/GOCACHE ] &&  cp -Rf /mnt/GOCACHE $(go env GOCACHE)
-
-            '
           command:
           - sh
           - -euxc
@@ -226,10 +222,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         name: cache-restore
       - container:
           args:
-          - 'git clone -v -b "{{workflow.parameters.branch}}" --single-branch --depth
-            1 https://github.com/golang/example.git .
-
-            '
+          - |
+            git clone -v -b "{{workflow.parameters.branch}}" --single-branch --depth 1 https://github.com/golang/example.git .
           command:
           - sh
           - -euxc
@@ -248,9 +242,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         name: clone
       - container:
           args:
-          - 'go mod download -x
-
-            '
+          - |
+            go mod download -x
           command:
           - sh
           - -xuce
@@ -269,9 +262,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         name: deps
       - container:
           args:
-          - 'go build ./...
-
-            '
+          - |
+            go build ./...
           command:
           - sh
           - -xuce
@@ -290,17 +282,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         name: build
       - container:
           args:
-          - 'go install github.com/jstemmer/go-junit-report@latest
-
+          - |
+            go install github.com/jstemmer/go-junit-report@latest
             go install github.com/alexec/junit2html@v0.0.2
 
-
-            trap ''cat test.out | go-junit-report | junit2html > test-report.html'' EXIT
-
+            trap 'cat test.out | go-junit-report | junit2html > test-report.html' EXIT
 
             go test -v ./... 2>&1 > test.out
-
-            '
           command:
           - sh
           - -euxc

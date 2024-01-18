@@ -45,13 +45,11 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''Bye Hera'')'
+            print('Bye Hera')
       - dag:
           tasks:
           - arguments:
@@ -77,19 +75,14 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: s = json.loads(r'''{{inputs.parameters.s}}''')
+            except: s = r'''{{inputs.parameters.s}}'''
 
-            try: s = json.loads(r''''''{{inputs.parameters.s}}'''''')
-
-            except: s = r''''''{{inputs.parameters.s}}''''''
-
-
-            print(''Hello Hera, {s}''.format(s=s))'
+            print('Hello Hera, {s}'.format(s=s))
     ```
 

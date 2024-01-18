@@ -9,11 +9,9 @@ spec:
   templates:
   - container:
       args:
-      - 'echo "hello world" > /tmp/on-completion.txt
-
+      - |
+        echo "hello world" > /tmp/on-completion.txt
         echo "hello world" > /tmp/on-deletion.txt
-
-        '
       command:
       - sh
       - -c

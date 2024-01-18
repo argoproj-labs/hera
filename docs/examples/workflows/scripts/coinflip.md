@@ -64,40 +64,32 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import random
-
-            result = ''heads'' if random.randint(0, 1) == 0 else ''tails''
-
-            print(result)'
+            result = 'heads' if random.randint(0, 1) == 0 else 'tails'
+            print(result)
       - name: heads
         script:
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''it was heads'')'
+            print('it was heads')
       - name: tails
         script:
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''it was tails'')'
+            print('it was tails')
     ```
 

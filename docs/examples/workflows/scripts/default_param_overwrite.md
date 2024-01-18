@@ -60,13 +60,11 @@ conditionally.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''Another message for the world!'')'
+            print('Another message for the world!')
       - inputs:
           parameters:
           - default: Hello, world!
@@ -76,19 +74,14 @@ conditionally.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
 
-            try: message = json.loads(r''''''{{inputs.parameters.message}}'''''')
-
-            except: message = r''''''{{inputs.parameters.message}}''''''
-
-
-            print(message)'
+            print(message)
     ```
 

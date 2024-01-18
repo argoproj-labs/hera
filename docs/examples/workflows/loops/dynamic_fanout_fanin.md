@@ -78,17 +78,13 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
             import sys
-
-            json.dump([{''value'': i} for i in range(10)], sys.stdout)'
+            json.dump([{'value': i} for i in range(10)], sys.stdout)
       - inputs:
           parameters:
           - name: object
@@ -102,10 +98,18 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-            try: object = json.loads(r'''{{inputs.parameters.object}}''')\nexcept: object\
-            \ = r'''{{inputs.parameters.object}}'''\n\nprint('Received object: {object}!'.format(object=object))\n\
-            value = object['value']\nwith open('/tmp/value', 'w') as f:\n    f.write(str(value))"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: object = json.loads(r'''{{inputs.parameters.object}}''')
+            except: object = r'''{{inputs.parameters.object}}'''
+
+            print('Received object: {object}!'.format(object=object))
+            value = object['value']
+            with open('/tmp/value', 'w') as f:
+                f.write(str(value))
       - inputs:
           parameters:
           - name: values
@@ -114,19 +118,14 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: values = json.loads(r'''{{inputs.parameters.values}}''')
+            except: values = r'''{{inputs.parameters.values}}'''
 
-            try: values = json.loads(r''''''{{inputs.parameters.values}}'''''')
-
-            except: values = r''''''{{inputs.parameters.values}}''''''
-
-
-            print(''Received values: {values}!''.format(values=values))'
+            print('Received values: {values}!'.format(values=values))
     ```
 

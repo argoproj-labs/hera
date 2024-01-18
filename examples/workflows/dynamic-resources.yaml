@@ -35,11 +35,17 @@ spec:
       command:
       - python
       image: python:3.10
-      source: "import os\nimport sys\nsys.path.append(os.getcwd())\n\"\"\"Computes\
-        \ the resources necessary by the following job, which could be anything.\"\
-        \"\"\nimport json\nimport sys\nresources = []\nfor i in range(1, 4):\n   \
-        \ resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})\njson.dump(resources,\
-        \ sys.stdout)"
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        """Computes the resources necessary by the following job, which could be anything."""
+        import json
+        import sys
+        resources = []
+        for i in range(1, 4):
+            resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})
+        json.dump(resources, sys.stdout)
   - inputs:
       parameters:
       - name: cpu
@@ -52,26 +58,18 @@ spec:
       command:
       - python
       image: python:3.10
-      source: 'import os
-
+      source: |-
+        import os
         import sys
-
         sys.path.append(os.getcwd())
-
         import json
-
-        try: cpu = json.loads(r''''''{{inputs.parameters.cpu}}'''''')
-
-        except: cpu = r''''''{{inputs.parameters.cpu}}''''''
-
-        try: mem = json.loads(r''''''{{inputs.parameters.mem}}'''''')
-
-        except: mem = r''''''{{inputs.parameters.mem}}''''''
-
+        try: cpu = json.loads(r'''{{inputs.parameters.cpu}}''')
+        except: cpu = r'''{{inputs.parameters.cpu}}'''
+        try: mem = json.loads(r'''{{inputs.parameters.mem}}''')
+        except: mem = r'''{{inputs.parameters.mem}}'''
 
         """Perform some computation."""
-
-        print(''received cpu {cpu} and mem {mem}''.format(cpu=cpu, mem=mem))'
+        print('received cpu {cpu} and mem {mem}'.format(cpu=cpu, mem=mem))
   - inputs:
       parameters:
       - default: '1'
@@ -86,23 +84,15 @@ spec:
       command:
       - python
       image: python:3.10
-      source: 'import os
-
+      source: |-
+        import os
         import sys
-
         sys.path.append(os.getcwd())
-
         import json
-
-        try: cpu = json.loads(r''''''{{inputs.parameters.cpu}}'''''')
-
-        except: cpu = r''''''{{inputs.parameters.cpu}}''''''
-
-        try: mem = json.loads(r''''''{{inputs.parameters.mem}}'''''')
-
-        except: mem = r''''''{{inputs.parameters.mem}}''''''
-
+        try: cpu = json.loads(r'''{{inputs.parameters.cpu}}''')
+        except: cpu = r'''{{inputs.parameters.cpu}}'''
+        try: mem = json.loads(r'''{{inputs.parameters.mem}}''')
+        except: mem = r'''{{inputs.parameters.mem}}'''
 
         """Perform some computation."""
-
-        print(''received cpu {cpu} and mem {mem}''.format(cpu=cpu, mem=mem))'
+        print('received cpu {cpu} and mem {mem}'.format(cpu=cpu, mem=mem))

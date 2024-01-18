@@ -71,8 +71,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - name: create-configmap
         resource:
           action: create
-          manifest: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: resource-delete-with-flags\n\
-            \  labels:\n    cleanup: \"true\"\ndata:\n  key: value\n"
+          manifest: |
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: resource-delete-with-flags
+              labels:
+                cleanup: "true"
+            data:
+              key: value
       - inputs:
           parameters:
           - name: selector

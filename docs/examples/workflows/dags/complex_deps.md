@@ -76,8 +76,16 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-            try: p = json.loads(r'''{{inputs.parameters.p}}''')\nexcept: p = r'''{{inputs.parameters.p}}'''\n\
-            \nif p < 0.5:\n    raise Exception(p)\nprint(42)"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: p = json.loads(r'''{{inputs.parameters.p}}''')
+            except: p = r'''{{inputs.parameters.p}}'''
+
+            if p < 0.5:
+                raise Exception(p)
+            print(42)
     ```
 

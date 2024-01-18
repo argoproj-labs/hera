@@ -75,13 +75,11 @@ This example showcases how to generate and parallelize generated sequences
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(3)'
+            print(3)
       - inputs:
           parameters:
           - name: message
@@ -90,19 +88,14 @@ This example showcases how to generate and parallelize generated sequences
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
 
-            try: message = json.loads(r''''''{{inputs.parameters.message}}'''''')
-
-            except: message = r''''''{{inputs.parameters.message}}''''''
-
-
-            print(message)'
+            print(message)
     ```
 

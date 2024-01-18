@@ -17,11 +17,8 @@ spec:
       - name: myfile
         path: /tmp/file
         raw:
-          data: 'this is
-
+          data: |
+            this is
             the raw file
-
             contents
-
-            '
     name: raw-contents

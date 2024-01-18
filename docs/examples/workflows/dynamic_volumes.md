@@ -43,15 +43,12 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import subprocess
-
-            print(subprocess.run(''cd && /mnt && df -h'', shell=True, capture_output=True).stdout.decode())'
+            print(subprocess.run('cd && /mnt && df -h', shell=True, capture_output=True).stdout.decode())
           volumeMounts:
           - mountPath: /mnt/vol
             name: v

@@ -66,9 +66,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - containerSet:
           containers:
           - args:
-            - 'print("hi")
-
-              '
+            - |
+              print("hi")
             command:
             - python
             - -c

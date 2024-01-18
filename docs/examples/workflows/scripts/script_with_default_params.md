@@ -81,27 +81,18 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: a = json.loads(r'''{{inputs.parameters.a}}''')
+            except: a = r'''{{inputs.parameters.a}}'''
+            try: b = json.loads(r'''{{inputs.parameters.b}}''')
+            except: b = r'''{{inputs.parameters.b}}'''
+            try: c = json.loads(r'''{{inputs.parameters.c}}''')
+            except: c = r'''{{inputs.parameters.c}}'''
 
-            try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
-
-            except: a = r''''''{{inputs.parameters.a}}''''''
-
-            try: b = json.loads(r''''''{{inputs.parameters.b}}'''''')
-
-            except: b = r''''''{{inputs.parameters.b}}''''''
-
-            try: c = json.loads(r''''''{{inputs.parameters.c}}'''''')
-
-            except: c = r''''''{{inputs.parameters.c}}''''''
-
-
-            print(a, b, c)'
+            print(a, b, c)
     ```
 

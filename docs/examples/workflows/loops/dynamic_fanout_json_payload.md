@@ -68,18 +68,13 @@ they may need to process. The fanout occurs over independent JSON payloads comin
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
             import sys
-
-            json.dump([{''p1'': i + 1, ''p2'': i + 2, ''p3'': i + 3} for i in range(10)],
-            sys.stdout)'
+            json.dump([{'p1': i + 1, 'p2': i + 2, 'p3': i + 3} for i in range(10)], sys.stdout)
       - inputs:
           parameters:
           - name: p1
@@ -90,27 +85,18 @@ they may need to process. The fanout occurs over independent JSON payloads comin
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: p1 = json.loads(r'''{{inputs.parameters.p1}}''')
+            except: p1 = r'''{{inputs.parameters.p1}}'''
+            try: p2 = json.loads(r'''{{inputs.parameters.p2}}''')
+            except: p2 = r'''{{inputs.parameters.p2}}'''
+            try: p3 = json.loads(r'''{{inputs.parameters.p3}}''')
+            except: p3 = r'''{{inputs.parameters.p3}}'''
 
-            try: p1 = json.loads(r''''''{{inputs.parameters.p1}}'''''')
-
-            except: p1 = r''''''{{inputs.parameters.p1}}''''''
-
-            try: p2 = json.loads(r''''''{{inputs.parameters.p2}}'''''')
-
-            except: p2 = r''''''{{inputs.parameters.p2}}''''''
-
-            try: p3 = json.loads(r''''''{{inputs.parameters.p3}}'''''')
-
-            except: p3 = r''''''{{inputs.parameters.p3}}''''''
-
-
-            print(''Received p1={p1}, p2={p2}, p3={p3}''.format(p1=p1, p2=p2, p3=p3))'
+            print('Received p1={p1}, p2={p2}, p3={p3}'.format(p1=p1, p2=p2, p3=p3))
     ```
 

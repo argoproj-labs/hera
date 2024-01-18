@@ -67,9 +67,14 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport pickle\n\
-            result = 'foo testing'\nwith open('/tmp/result', 'wb') as f:\n    pickle.dump(result,\
-            \ f)"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import pickle
+            result = 'foo testing'
+            with open('/tmp/result', 'wb') as f:
+                pickle.dump(result, f)
       - inputs:
           artifacts:
           - name: i
@@ -79,7 +84,13 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport pickle\n\
-            with open('/tmp/i', 'rb') as f:\n    i = pickle.load(f)\nprint(i)"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import pickle
+            with open('/tmp/i', 'rb') as f:
+                i = pickle.load(f)
+            print(i)
     ```
 

@@ -50,8 +50,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         - name: mem-limit
           value: 100Mi
       entrypoint: whalesay
-      podSpecPatch: "containers:\n  - name: main\n    resources:\n      limits:\n    \
-        \    memory: \"{{workflow.parameters.mem-limit}}\"\n"
+      podSpecPatch: |
+        containers:
+          - name: main
+            resources:
+              limits:
+                memory: "{{workflow.parameters.mem-limit}}"
       templates:
       - container:
           args:
