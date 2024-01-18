@@ -30,8 +30,9 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
     # remove the module docstring at the top of the python file using regex
     py_contents = re.sub(r'^(""".*?""")', "", py_contents, 1, re.DOTALL)
     title = path.stem.replace("_", " ").title()
-    yaml_contents = Path(str(path).replace(".py", ".yaml").replace("_", "-")).read_text()
-    upstream_example = Path(str(path).replace(".py", ".upstream.yaml").replace("_", "-")).exists()
+    yaml_filename = path.stem.replace("_", "-")
+    yaml_contents = (path.parent / (yaml_filename + ".yaml")).read_text()
+    upstream_example = (path.parent / (yaml_filename + ".upstream.yaml")).exists()
     upstream_link = ""
     if upstream_example:
         upstream_link = (
@@ -59,23 +60,24 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
     ```
 
 """
-    (Path("examples") / sub_folder / path.stem).with_suffix(".md").write_text(contents)
+    (Path(sub_folder) / path.stem).with_suffix(".md").write_text(contents)
 
 
 def _main():
     """Go through example python files and generate markdown for the readthedocs website."""
     examples_workflows = "examples/workflows"
-    for sub_folder in ["workflows"] + [
+    for example_sub_folder in ["workflows"] + [
         f"workflows/{name}"
         for name in os.listdir(f"../{examples_workflows}")
         if os.path.isdir(os.path.join(f"../{examples_workflows}", name)) and name != "__pycache__"
     ]:
-        example_sub_folder = f"examples/{sub_folder}"
-        shutil.rmtree(example_sub_folder, ignore_errors=True)
-        Path(example_sub_folder).mkdir(parents=True, exist_ok=True)
-        for path in Path(f"../{example_sub_folder}").glob("*.py"):
+        # Use hyphens for website URL paths
+        docs_example_sub_folder = f'examples/{example_sub_folder.replace("_", "-")}'
+        shutil.rmtree(docs_example_sub_folder, ignore_errors=True)
+        Path(docs_example_sub_folder).mkdir(parents=True, exist_ok=True)
+        for path in Path(f"../examples/{example_sub_folder}").glob("*.py"):
             if path.stem != "__init__":
-                generate_markdown(path, sub_folder)
+                generate_markdown(path, docs_example_sub_folder)
 
 
 if __name__ == "__main__":
