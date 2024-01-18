@@ -5,7 +5,6 @@ for more on Workflows.
 """
 import time
 from pathlib import Path
-from types import ModuleType
 from typing import Any, Dict, List, Optional, Type, Union
 
 try:
@@ -13,6 +12,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args  # type: ignore
 
+from hera import _yaml
 from hera.shared import global_config
 from hera.shared._pydantic import BaseModel, validator
 from hera.workflows._mixins import (
@@ -63,14 +63,6 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow_status import WorkflowStatus
-
-_yaml: Optional[ModuleType] = None
-try:
-    import yaml
-
-    _yaml = yaml
-except ImportError:
-    _yaml = None
 
 ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
@@ -358,11 +350,6 @@ class Workflow(
 
     def to_yaml(self, *args, **kwargs) -> str:
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
-        if not _yaml:
-            raise ImportError("`PyYAML` is not installed. Install `hera[yaml]` to bring in the extra dependency")
-        # Set some default options if not provided by the user
-        kwargs.setdefault("default_flow_style", False)
-        kwargs.setdefault("sort_keys", False)
         return _yaml.dump(self.to_dict(), *args, **kwargs)
 
     def create(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
