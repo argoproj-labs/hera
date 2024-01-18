@@ -170,7 +170,7 @@ wandb server!
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.use-cases.wandb_ml_monitoring:train_model
+          - examples.workflows.use_cases.wandb_ml_monitoring:train_model
           command:
           - python
           env:
