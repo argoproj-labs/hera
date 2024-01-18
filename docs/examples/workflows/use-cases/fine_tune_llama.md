@@ -22,8 +22,6 @@ There are several implicit dependencies in this script:
 === "Hera"
 
     ```python linenums="1"
-    from random import randint
-
     from hera.workflows import (
         DAG,
         Container,
@@ -181,7 +179,8 @@ There are several implicit dependencies in this script:
             FieldEnv(name="LOCAL_IP", field_path="status.podIP"),
         ],
         # the following is a public image built for the talk. It only contains the files in this repo along with an update
-        # to a torch dev / nightly version so that we can use the latest FSDP features and PEFT
+        # to a torch dev / nightly version so that we can use the latest FSDP features and PEFT. Ofc, you can build your
+        # own image with the same files and use that instead! See repo linked at the top of the file for more details.
         image="flaviuvadan/kubecon-na-23-finetune-llama2:latest",
         image_pull_policy="Always",
         # https://pytorch.org/docs/stable/elastic/run.html
@@ -278,7 +277,7 @@ There are several implicit dependencies in this script:
         ],
     ) as w:
         # a random ID for the training job. This is used to coordinate the training job and it can be any integer
-        rdvz_id = randint(1, 10_000)
+        rdvz_id = 42
         with DAG(name="fine-tune"):
             (
                 create_ssd_storage_class()
@@ -341,7 +340,7 @@ There are several implicit dependencies in this script:
           - arguments:
               parameters:
               - name: rdvz-id
-                value: '154'
+                value: '42'
               - name: node-rank
                 value: '0'
               - name: node-vol
@@ -354,7 +353,7 @@ There are several implicit dependencies in this script:
           - arguments:
               parameters:
               - name: rdvz-id
-                value: '154'
+                value: '42'
               - name: node-rank
                 value: '1'
               - name: node-vol
@@ -367,7 +366,7 @@ There are several implicit dependencies in this script:
           - arguments:
               parameters:
               - name: rdvz-id
-                value: '154'
+                value: '42'
               - name: node-rank
                 value: '2'
               - name: node-vol
@@ -380,7 +379,7 @@ There are several implicit dependencies in this script:
           - arguments:
               parameters:
               - name: rdvz-id
-                value: '154'
+                value: '42'
               - name: node-rank
                 value: '3'
               - name: node-vol

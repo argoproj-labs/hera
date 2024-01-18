@@ -14,8 +14,6 @@ There are several implicit dependencies in this script:
    token for the talk purposes :) your own infrastructure might have more secure ways to provide this token, such as
    a secret vault that uses a specific service account for authentication/authorization to fetch the token
 """
-from random import randint
-
 from hera.workflows import (
     DAG,
     Container,
@@ -271,7 +269,7 @@ with Workflow(
     ],
 ) as w:
     # a random ID for the training job. This is used to coordinate the training job and it can be any integer
-    rdvz_id = randint(1, 10_000)
+    rdvz_id = 42
     with DAG(name="fine-tune"):
         (
             create_ssd_storage_class()

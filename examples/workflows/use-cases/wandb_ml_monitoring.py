@@ -10,8 +10,6 @@ wandb server!
 
 import random
 
-import wandb
-
 from hera.workflows import DAG, SecretEnv, Workflow, script
 
 
@@ -23,6 +21,10 @@ from hera.workflows import DAG, SecretEnv, Workflow, script
     env=SecretEnv(name="WANDB_API_KEY", secret_name="wandb-api-key", secret_key="wandb-api-key"),
 )
 def train_model(project_name: str, learning_rate: float, architecture: str, dataset: str, epochs: int) -> None:
+    # TODO: move this import outside of the script. It is added here so that `wandb` does not need to be added as a
+    #       dependency to Hera
+    import wandb
+
     # start a new wandb run to track this script
     wandb.init(
         # set the wandb project where this run will be logged
