@@ -50,9 +50,11 @@ and its crew were specially protected by the goddess Hera.
 ```python
 from hera.workflows import Steps, Workflow, script
 
+
 @script()
 def echo(message: str):
     print(message)
+
 
 with Workflow(
     generate_name="single-script-",
@@ -73,9 +75,11 @@ w.create()
 ```python
 from hera.workflows import DAG, Workflow, script
 
+
 @script()
 def echo(message: str):
     print(message)
+
 
 with Workflow(
     generate_name="dag-diamond-",
@@ -91,7 +95,8 @@ with Workflow(
 w.create()
 ```
 
-See the [examples](./examples/workflows-examples.md) for a collection of Argo workflow construction and submission via Hera!
+See the [examples](./examples/workflows-examples.md) for a collection of Argo workflow construction and submission via
+Hera!
 
 ## Requirements
 
@@ -124,7 +129,7 @@ global_config.host = "http://localhost:2746"
 global_config.token = ArgoCLITokenGenerator
 
 with Workflow(generate_name="local-test-", entrypoint="c") as w:
-    Container( name="c", image="docker/whalesay", command=["cowsay", "hello"])
+    Container(name="c", image="docker/whalesay", command=["cowsay", "hello"])
 
 w.create()
 ```
@@ -143,6 +148,14 @@ w.create()
 | [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
 
 ### Optional dependencies
+
+#### cli
+
+- Install via `hera[cli]`
+- [Cappa](https://github.com/DanCardin/cappa) is required for the `cli`. The CLI aims to enable GitOps practices,
+  easier debugging, and a more seamless experience with Argo Workflows.
+- The CLI is an experimental feature. At the moment it only supports generating YAML files from workflows via
+  `hera generate yaml`. See `hera generate yaml --help` for more information
 
 #### yaml
 
