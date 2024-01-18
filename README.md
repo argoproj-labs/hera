@@ -154,7 +154,7 @@ w.create()
 - Install via `hera[cli]`. The `[cli]` option installs the extra dependency [Cappa](https://github.com/DanCardin/cappa) required for the CLI
 - The CLI aims to enable GitOps practices,
   easier debugging, and a more seamless experience with Argo Workflows.
-- The CLI is an experimental feature. At the moment it only supports generating YAML files from workflows via
+- **_The CLI is an experimental feature and subject to change!_** At the moment it only supports generating YAML files from workflows via
   `hera generate yaml`. See `hera generate yaml --help` for more information
 
 #### yaml
