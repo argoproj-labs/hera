@@ -621,12 +621,11 @@ class ArgumentsMixin(BaseMixin):
         for arg in self.arguments:
             if isinstance(arg, dict):
                 for k, v in arg.items():
-                    value = Parameter(name=k, value=v)
-                    result.parameters = (
-                        [value.as_argument()]
-                        if result.parameters is None
-                        else result.parameters + [value.as_argument()]
-                    )
+                    value = v if isinstance(v, (Parameter, ModelParameter)) else Parameter(name=k, value=v)
+                    if result.parameters is None:
+                        result.parameters = [value.as_argument() if isinstance(value, Parameter) else value]
+                    else:
+                        result.parameters.extend([value.as_argument() if isinstance(value, Parameter) else value])
             elif isinstance(arg, ModelArtifact):
                 result.artifacts = [arg] if result.artifacts is None else result.artifacts + [arg]
             elif isinstance(arg, Artifact):
