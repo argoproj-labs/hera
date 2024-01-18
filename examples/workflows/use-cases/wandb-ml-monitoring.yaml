@@ -1,0 +1,84 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: wandb-ml-monitoring
+spec:
+  entrypoint: train
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: project_name
+            value: wandb-ml-monitoring
+          - name: learning_rate
+            value: '0.1'
+          - name: architecture
+            value: CNN
+          - name: dataset
+            value: MNIST
+          - name: epochs
+            value: '10'
+        name: train-1
+        template: train-model
+      - arguments:
+          parameters:
+          - name: project_name
+            value: wandb-ml-monitoring
+          - name: learning_rate
+            value: '0.01'
+          - name: architecture
+            value: CNN
+          - name: dataset
+            value: MNIST
+          - name: epochs
+            value: '10'
+        name: train-2
+        template: train-model
+      - arguments:
+          parameters:
+          - name: project_name
+            value: wandb-ml-monitoring
+          - name: learning_rate
+            value: '0.001'
+          - name: architecture
+            value: CNN
+          - name: dataset
+            value: MNIST
+          - name: epochs
+            value: '10'
+        name: train-3
+        template: train-model
+    name: train
+  - inputs:
+      parameters:
+      - name: project_name
+      - name: learning_rate
+      - name: architecture
+      - name: dataset
+      - name: epochs
+    name: train-model
+    script:
+      command:
+      - python
+      env:
+      - name: WANDB_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: wandb-api-key
+            name: wandb-api-key
+      image: python:3.8
+      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
+        try: architecture = json.loads(r'''{{inputs.parameters.architecture}}''')\n\
+        except: architecture = r'''{{inputs.parameters.architecture}}'''\ntry: dataset\
+        \ = json.loads(r'''{{inputs.parameters.dataset}}''')\nexcept: dataset = r'''{{inputs.parameters.dataset}}'''\n\
+        try: epochs = json.loads(r'''{{inputs.parameters.epochs}}''')\nexcept: epochs\
+        \ = r'''{{inputs.parameters.epochs}}'''\ntry: learning_rate = json.loads(r'''{{inputs.parameters.learning_rate}}''')\n\
+        except: learning_rate = r'''{{inputs.parameters.learning_rate}}'''\ntry: project_name\
+        \ = json.loads(r'''{{inputs.parameters.project_name}}''')\nexcept: project_name\
+        \ = r'''{{inputs.parameters.project_name}}'''\n\nwandb.init(project=project_name,\
+        \ config={'learning_rate': learning_rate, 'architecture': architecture, 'dataset':\
+        \ dataset, 'epochs': epochs})\nepochs = 10\noffset = random.random() / 5\n\
+        for epoch in range(2, epochs):\n    acc = 1 - 2 ** (-epoch) - random.random()\
+        \ / epoch - offset\n    loss = 2 ** (-epoch) + random.random() / epoch + offset\n\
+        \    wandb.log({'acc': acc, 'loss': loss})\nwandb.finish()"
