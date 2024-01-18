@@ -22,7 +22,13 @@ wandb server!
     from hera.workflows import DAG, SecretEnv, Workflow, script
 
 
-    @script(env=SecretEnv(name="WANDB_API_KEY", secret_name="wandb-api-key", secret_key="wandb-api-key"))
+    @script(
+        # we use the `runner` constructor so that Hera automatically infers the path to our method, and assembles a
+        # container for us, which will run remotely, on Argo / K8s.
+        constructor="runner",
+        # here we set the environment variable that contains the W&B API key
+        env=SecretEnv(name="WANDB_API_KEY", secret_name="wandb-api-key", secret_key="wandb-api-key"),
+    )
     def train_model(project_name: str, learning_rate: float, architecture: str, dataset: str, epochs: int) -> None:
         # start a new wandb run to track this script
         wandb.init(
@@ -41,7 +47,7 @@ wandb server!
         epochs = 10
         offset = random.random() / 5
         for epoch in range(2, epochs):
-            # mock accuracy and loss
+            # mock accuracy and loss, this is where you'd actually have a model training
             acc = 1 - 2**-epoch - random.random() / epoch - offset
             loss = 2**-epoch + random.random() / epoch + offset
 
@@ -158,6 +164,11 @@ wandb server!
           - name: epochs
         name: train-model
         script:
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.use-cases.wandb_ml_monitoring:train_model
           command:
           - python
           env:
@@ -167,19 +178,6 @@ wandb server!
                 key: wandb-api-key
                 name: wandb-api-key
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-            try: architecture = json.loads(r'''{{inputs.parameters.architecture}}''')\n\
-            except: architecture = r'''{{inputs.parameters.architecture}}'''\ntry: dataset\
-            \ = json.loads(r'''{{inputs.parameters.dataset}}''')\nexcept: dataset = r'''{{inputs.parameters.dataset}}'''\n\
-            try: epochs = json.loads(r'''{{inputs.parameters.epochs}}''')\nexcept: epochs\
-            \ = r'''{{inputs.parameters.epochs}}'''\ntry: learning_rate = json.loads(r'''{{inputs.parameters.learning_rate}}''')\n\
-            except: learning_rate = r'''{{inputs.parameters.learning_rate}}'''\ntry: project_name\
-            \ = json.loads(r'''{{inputs.parameters.project_name}}''')\nexcept: project_name\
-            \ = r'''{{inputs.parameters.project_name}}'''\n\nwandb.init(project=project_name,\
-            \ config={'learning_rate': learning_rate, 'architecture': architecture, 'dataset':\
-            \ dataset, 'epochs': epochs})\nepochs = 10\noffset = random.random() / 5\n\
-            for epoch in range(2, epochs):\n    acc = 1 - 2 ** (-epoch) - random.random()\
-            \ / epoch - offset\n    loss = 2 ** (-epoch) + random.random() / epoch + offset\n\
-            \    wandb.log({'acc': acc, 'loss': loss})\nwandb.finish()"
+          source: '{{inputs.parameters}}'
     ```
 

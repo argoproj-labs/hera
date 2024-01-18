@@ -1,0 +1,260 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: fine-tune-llm-
+spec:
+  entrypoint: fine-tune
+  onExit: exit
+  templates:
+  - dag:
+      tasks:
+      - name: create-ssd-storage-class
+        template: create-ssd-storage-class
+      - depends: create-ssd-storage-class
+        name: create-etcd-stateful-set
+        template: create-etcd-stateful-set
+      - depends: create-ssd-storage-class
+        name: create-etcd-load-balancer
+        template: create-etcd-load-balancer
+      - arguments:
+          parameters:
+          - name: service-name
+            value: '{{tasks.create-etcd-load-balancer.outputs.parameters.etcd-svc-name}}'
+        depends: create-etcd-stateful-set && create-etcd-load-balancer
+        name: wait-for-etcd-load-balancer-ip
+        template: wait-for-etcd-load-balancer-ip
+      - arguments:
+          parameters:
+          - name: rdvz-id
+            value: '154'
+          - name: node-rank
+            value: '0'
+          - name: node-vol
+            value: rank-0
+          - name: etcd-ip
+            value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+        depends: wait-for-etcd-load-balancer-ip
+        name: finetune-rank-0
+        template: fine-tune-rank-n
+      - arguments:
+          parameters:
+          - name: rdvz-id
+            value: '154'
+          - name: node-rank
+            value: '1'
+          - name: node-vol
+            value: rank-1
+          - name: etcd-ip
+            value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+        depends: wait-for-etcd-load-balancer-ip
+        name: finetune-rank-1
+        template: fine-tune-rank-n
+      - arguments:
+          parameters:
+          - name: rdvz-id
+            value: '154'
+          - name: node-rank
+            value: '2'
+          - name: node-vol
+            value: rank-2
+          - name: etcd-ip
+            value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+        depends: wait-for-etcd-load-balancer-ip
+        name: finetune-rank-2
+        template: fine-tune-rank-n
+      - arguments:
+          parameters:
+          - name: rdvz-id
+            value: '154'
+          - name: node-rank
+            value: '3'
+          - name: node-vol
+            value: rank-3
+          - name: etcd-ip
+            value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+        depends: wait-for-etcd-load-balancer-ip
+        name: finetune-rank-3
+        template: fine-tune-rank-n
+    name: fine-tune
+  - name: create-ssd-storage-class
+    resource:
+      action: create
+      manifest: "\nkind: StorageClass\napiVersion: storage.k8s.io/v1\nmetadata:\n\
+        \  name: ssd\nprovisioner: kubernetes.io/gce-pd\nvolumeBindingMode: WaitForFirstConsumer\n\
+        parameters:\n  type: pd-ssd\n"
+  - name: create-etcd-stateful-set
+    resource:
+      action: create
+      manifest: "\napiVersion: apps/v1\nkind: StatefulSet\nmetadata:\n  name: etcd\n\
+        \  labels:\n    app: etcd\nspec:\n  serviceName: etcd\n  selector:\n    matchLabels:\n\
+        \      app: etcd\n  replicas: 3\n  template:\n    metadata:\n      name: etcd\n\
+        \      labels:\n        app: etcd\n    spec:\n      containers:\n        -\
+        \ name: etcd\n          image: quay.io/coreos/etcd:latest\n          ports:\n\
+        \            - containerPort: 2379\n              name: client\n         \
+        \   - containerPort: 2380\n              name: peer\n          volumeMounts:\n\
+        \            - name: data\n              mountPath: /var/run/etcd\n      \
+        \    command:\n            - /bin/sh\n            - -c\n            - |\n\
+        \              PEERS=\"etcd-0=http://etcd-0.etcd:2380,etcd-1=http://etcd-1.etcd:2380,etcd-2=http://etcd-2.etcd:2380\"\
+        \n              exec etcd --name ${HOSTNAME}                 --listen-peer-urls\
+        \ http://0.0.0.0:2380                 --listen-client-urls http://0.0.0.0:2379\
+        \                 --advertise-client-urls http://${HOSTNAME}.etcd:2379   \
+        \              --initial-advertise-peer-urls http://${HOSTNAME}:2380     \
+        \            --initial-cluster-token etcd-cluster-1                 --initial-cluster\
+        \ ${PEERS}                 --initial-cluster-state new                 --data-dir\
+        \ /var/run/etcd/default.etcd\n  volumeClaimTemplates:\n    - metadata:\n \
+        \       name: data\n      spec:\n        storageClassName: ssd\n        accessModes:\
+        \ [\"ReadWriteOnce\"]\n        resources:\n          requests:\n         \
+        \   storage: 1Gi"
+  - name: create-etcd-load-balancer
+    outputs:
+      parameters:
+      - name: etcd-svc-name
+        valueFrom:
+          jsonPath: metadata.name
+    resource:
+      action: create
+      manifest: "\napiVersion: v1\nkind: Service\nmetadata:\n  name: etcd-client\n\
+        spec:\n  type: LoadBalancer\n  ports:\n    - name: etcd-client\n      port:\
+        \ 2379\n      protocol: TCP\n      targetPort: 2379\n  selector:\n    app:\
+        \ etcd"
+  - container:
+      args:
+      - etcd_ip=""; while [ -z $etcd_ip ]; do echo "Waiting for end point..."; etcd_ip=$(kubectl
+        get svc etcd-client --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}");
+        [ -z "$etcd_ip" ] && sleep 10; done; echo "End point ready-" && echo $etcd_ip
+        > /etcd-ip;
+      command:
+      - bash -c
+      image: alpine/k8s:1.23.17
+    inputs:
+      parameters:
+      - name: service-name
+    name: wait-for-etcd-load-balancer-ip
+    outputs:
+      parameters:
+      - name: etcd-ip
+        valueFrom:
+          path: /etcd-ip
+  - container:
+      args:
+      - --nnodes
+      - '4'
+      - --nproc-per-node
+      - '4'
+      - --rdzv-backend
+      - etcd-v2
+      - --rdzv-endpoint
+      - '{{inputs.parameters.etcd-ip}}:2379'
+      - --rdzv-id
+      - '{{inputs.parameters.rdvz-id}}'
+      - --node-rank
+      - '{{inputs.parameters.node-rank}}'
+      - --local-addr
+      - $(LOCAL_IP)
+      - --max-restarts
+      - '3'
+      - /kubecon_na_23_llama2_finetune/src/talk/finetune.py
+      command:
+      - torchrun
+      env:
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: token
+            name: hf-token
+      - name: LOCAL_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
+      image: flaviuvadan/kubecon-na-23-finetune-llama2:latest
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: '12'
+          memory: 120Gi
+          nvidia.com/gpu: '4'
+        requests:
+          cpu: '8'
+          memory: 112Gi
+          nvidia.com/gpu: '4'
+      volumeMounts:
+      - mountPath: /kubecon_na_23_llama2_finetune/finetune
+        name: '{{inputs.parameters.node-vol}}'
+      - mountPath: /dev/shm
+        name: gpu-comm
+      - mountPath: /dev/shm
+        name: gpu-comm
+    inputs:
+      parameters:
+      - name: rdvz-id
+      - name: node-rank
+      - name: node-vol
+      - name: etcd-ip
+    name: fine-tune-rank-n
+    nodeSelector:
+      cloud.google.com/gke-accelerator: nvidia-tesla-v100
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Equal
+      value: present
+    volumes:
+    - emptyDir:
+        sizeLimit: 50Gi
+      name: gpu-comm
+  - dag:
+      tasks:
+      - name: delete-etcd-pod
+        template: delete-etcd-pod
+    name: exit
+  - name: delete-etcd-pod
+    resource:
+      action: delete
+      flags:
+      - svc/etcd-client
+      - sts/etcd
+  volumeClaimTemplates:
+  - metadata:
+      name: rank-0
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        limits:
+          storage: 20Gi
+        requests:
+          storage: 20Gi
+      storageClassName: ssd
+  - metadata:
+      name: rank-1
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        limits:
+          storage: 20Gi
+        requests:
+          storage: 20Gi
+      storageClassName: ssd
+  - metadata:
+      name: rank-2
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        limits:
+          storage: 20Gi
+        requests:
+          storage: 20Gi
+      storageClassName: ssd
+  - metadata:
+      name: rank-3
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        limits:
+          storage: 20Gi
+        requests:
+          storage: 20Gi
+      storageClassName: ssd
