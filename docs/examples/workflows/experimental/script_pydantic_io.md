@@ -15,7 +15,7 @@
 
     from hera.shared import global_config
     from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
-    from hera.workflows.io import RunnerInput, RunnerOutput
+    from hera.workflows.io.v1 import RunnerInput, RunnerOutput
 
     try:
         from typing import Annotated  # type: ignore
