@@ -23,9 +23,12 @@ else:
     _yaml.representer.SafeRepresenter.add_representer(str, str_presenter)
 
 
-def dump(*args, default_flow_style: bool = False, sort_keys: bool = False, **kwargs) -> str:
+def dump(*args, **kwargs) -> str:
     """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
     if not _yaml:
         raise ImportError("`PyYAML` is not installed. Install `hera[yaml]` to bring in the extra dependency")
 
-    return _yaml.dump(*args, default_flow_style=default_flow_style, sort_keys=sort_keys, **kwargs)
+    # Set some default options if not provided by the user
+    kwargs.setdefault("default_flow_style", False)
+    kwargs.setdefault("sort_keys", False)
+    return _yaml.dump(*args, **kwargs)
