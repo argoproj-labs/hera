@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: wandb-ml-monitoring
+spec:
+  entrypoint: train
+  templates:
+  - dag:
+      tasks:
+      - arguments:
+          parameters:
+          - name: project_name
+            value: wandb-ml-monitoring
+          - name: learning_rate
+            value: '0.1'
+          - name: architecture
+            value: CNN
+          - name: dataset
+            value: MNIST
+          - name: epochs
+            value: '10'
+        name: train-1
+        template: train-model
+      - arguments:
+          parameters:
+          - name: project_name
+            value: wandb-ml-monitoring
+          - name: learning_rate
+            value: '0.01'
+          - name: architecture
+            value: CNN
+          - name: dataset
+            value: MNIST
+          - name: epochs
+            value: '10'
+        name: train-2
+        template: train-model
+      - arguments:
+          parameters:
+          - name: project_name
+            value: wandb-ml-monitoring
+          - name: learning_rate
+            value: '0.001'
+          - name: architecture
+            value: CNN
+          - name: dataset
+            value: MNIST
+          - name: epochs
+            value: '10'
+        name: train-3
+        template: train-model
+    name: train
+  - inputs:
+      parameters:
+      - name: project_name
+      - name: learning_rate
+      - name: architecture
+      - name: dataset
+      - name: epochs
+    name: train-model
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.use_cases.wandb_ml_monitoring:train_model
+      command:
+      - python
+      env:
+      - name: WANDB_API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: wandb-api-key
+            name: wandb-api-key
+      image: python:3.8
+      source: '{{inputs.parameters}}'
