@@ -19,7 +19,13 @@ except ImportError:
 
 
 class RunnerInput(BaseModel):
-    """Input model."""
+    """Input model usable by the Hera Runner.
+
+    RunnerInput is a Pydantic model which users can create a subclass of. When a subclass
+    of RunnerInput is used as a function parameter type, the Hera Runner will take the fields
+    of the user's subclass to create template input parameters and artifacts. See the example
+    for the script_pydantic_io experimental feature.
+    """
 
     @classmethod
     def _get_parameters(cls) -> List[Parameter]:
@@ -55,7 +61,13 @@ class RunnerInput(BaseModel):
 
 
 class RunnerOutput(BaseModel):
-    """Output model."""
+    """Output model usable by the Hera Runner.
+
+    RunnerOutput is a Pydantic model which users can create a subclass of. When a subclass
+    of RunnerOutput is used as a function return type, the Hera Runner will take the fields
+    of the user's subclass to create template output parameters and artifacts. See the example
+    for the script_pydantic_io experimental feature.
+    """
 
     exit_code: int = 0
     result: Any
