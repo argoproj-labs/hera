@@ -3,7 +3,7 @@ from typing import Tuple
 
 from hera.shared import global_config
 from hera.workflows import Parameter, Workflow, script
-from hera.workflows.io import RunnerOutput
+from hera.workflows.io.v1 import RunnerOutput
 
 try:
     from typing import Annotated  # type: ignore

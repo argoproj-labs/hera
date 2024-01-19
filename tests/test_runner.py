@@ -18,7 +18,7 @@ import tests.helper as test_module
 from hera.shared import GlobalConfig
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
-from hera.workflows.io import RunnerOutput
+from hera.workflows.io.v1 import RunnerOutput
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor
 
@@ -619,11 +619,12 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
     mock_runner.assert_called_once_with("my_entrypoint", [])
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,expected_output,pydantic_mode",
+    "entrypoint,kwargs_list,expected_output",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_input_parameters",
+            "tests.script_runner.pydantic_io_vX:pydantic_input_parameters",
             [
                 {"name": "my_required_int", "value": "4"},
                 {"name": "my_int", "value": "3"},
@@ -631,16 +632,14 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
                 {"name": "multiple-ints", "value": "[1, 2, 3]"},
             ],
             "42",
-            1,
             id="test parameter only input variations",
         ),
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_io_in_generic",
+            "tests.script_runner.pydantic_io_vX:pydantic_io_in_generic",
             [
                 {"name": "my_inputs", "value": '[{"my_required_int": 2, "my_annotated_int": 3}]'},
             ],
             "1",
-            1,
             id="test generic usage (reverts to regular pydantic class implementation)",
         ),
     ],
@@ -656,6 +655,7 @@ def test_runner_pydantic_inputs_params(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
@@ -674,7 +674,7 @@ def test_runner_pydantic_inputs_params(
     "entrypoint,kwargs_list,expected_files,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_output_parameters",
+            "tests.script_runner.pydantic_io_v1:pydantic_output_parameters",
             [],
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
@@ -700,7 +700,7 @@ def test_runner_pydantic_output_params(
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
 
-    import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
@@ -721,14 +721,14 @@ def test_runner_pydantic_output_params(
     "entrypoint,input_files,expected_output,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_input_artifact",
+            "tests.script_runner.pydantic_io_v1:pydantic_input_artifact",
             {
                 "json": '{"a": 3, "b": "bar"}',
                 "path": "dummy",
                 "str-path": "dummy",
                 "file": "dummy",
             },
-            '{"a": "3", "b": "bar"}',
+            '{"a": 3, "b": "bar"}',
             1,
             id="pydantic io artifact input variations",
         ),
@@ -755,7 +755,7 @@ def test_runner_pydantic_input_artifacts(
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
 
-    import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
@@ -773,7 +773,7 @@ def test_runner_pydantic_input_artifacts(
     "entrypoint,input_files,expected_files,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_output_artifact",
+            "tests.script_runner.pydantic_io_v1:pydantic_output_artifact",
             {
                 "json": '{"a": 3, "b": "bar"}',
                 "path": "dummy",
@@ -809,7 +809,7 @@ def test_runner_pydantic_output_artifacts(
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
 
-    import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
@@ -830,7 +830,7 @@ def test_runner_pydantic_output_artifacts(
     "entrypoint,expected_files,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_output_using_exit_code",
+            "tests.script_runner.pydantic_io_v1:pydantic_output_using_exit_code",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
@@ -854,7 +854,7 @@ def test_runner_pydantic_output_with_exit_code(
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
 
-    import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
@@ -875,7 +875,7 @@ def test_runner_pydantic_output_with_exit_code(
     "entrypoint,expected_files,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_output_using_exit_code",
+            "tests.script_runner.pydantic_io_v1:pydantic_output_using_exit_code",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
@@ -906,7 +906,7 @@ def test_run_pydantic_output_with_exit_code(
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
 
-    import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
@@ -929,7 +929,7 @@ def test_run_pydantic_output_with_exit_code(
     "entrypoint,expected_files,expected_result,pydantic_mode",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io:pydantic_output_using_result",
+            "tests.script_runner.pydantic_io_v1:pydantic_output_using_result",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
@@ -955,7 +955,7 @@ def test_runner_pydantic_output_with_result(
     os.environ["hera__script_annotations"] = ""
     os.environ["hera__script_pydantic_io"] = ""
 
-    import tests.script_runner.pydantic_io as module
+    import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 

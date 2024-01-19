@@ -4,9 +4,13 @@ from typing import List
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
-from hera.shared._pydantic import BaseModel
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
-from hera.workflows.io import RunnerInput, RunnerOutput
+from hera.workflows.io.v1 import RunnerInput, RunnerOutput
+
+try:
+    from pydantic.v1 import BaseModel
+except ImportError:
+    from pydantic import BaseModel
 
 try:
     from typing import Annotated  # type: ignore
@@ -71,7 +75,7 @@ def pydantic_output_using_result() -> ParamOnlyOutput:
 
 
 class MyArtifact(BaseModel):
-    a: str = "a"
+    a: int = 42
     b: str = "b"
 
 

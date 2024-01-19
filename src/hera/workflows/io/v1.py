@@ -1,4 +1,4 @@
-"""Input/output models for the Hera runner."""
+"""Pydantic V1 input/output models for the Hera runner."""
 from collections import ChainMap
 from typing import Any, List, Optional, Union
 
@@ -81,7 +81,7 @@ class RunnerOutput(BaseModel):
     """
 
     exit_code: int = 0
-    result: Any
+    result: Any = None
 
     @classmethod
     def _get_outputs(cls) -> List[Union[Artifact, Parameter]]:
