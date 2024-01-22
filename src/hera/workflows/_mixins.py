@@ -626,12 +626,12 @@ class ArgumentsMixin(BaseMixin):
                     elif isinstance(v, ModelParameter):
                         value = Parameter.from_model(v).as_argument()
                     else:
-                        value = v
+                        value = Parameter(name=k, value=v).as_argument()
 
                     if result.parameters is None:
                         result.parameters = [value]
                     else:
-                        result.parameters.extend([value])
+                        result.parameters.append(value)
             elif isinstance(arg, ModelArtifact):
                 result.artifacts = [arg] if result.artifacts is None else result.artifacts + [arg]
             elif isinstance(arg, Artifact):
