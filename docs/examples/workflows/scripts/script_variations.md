@@ -56,13 +56,11 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''Hello World!'')'
+            print('Hello World!')
       - inputs:
           parameters:
           - name: test
@@ -72,25 +70,17 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
-            try: another_test = json.loads(r''''''{{inputs.parameters.another_test}}'''''')
-
-            except: another_test = r''''''{{inputs.parameters.another_test}}''''''
-
-            try: test = json.loads(r''''''{{inputs.parameters.test}}'''''')
-
-            except: test = r''''''{{inputs.parameters.test}}''''''
-
+            try: another_test = json.loads(r'''{{inputs.parameters.another_test}}''')
+            except: another_test = r'''{{inputs.parameters.another_test}}'''
+            try: test = json.loads(r'''{{inputs.parameters.test}}''')
+            except: test = r'''{{inputs.parameters.test}}'''
 
             print(test)
-
-            print(another_test)'
+            print(another_test)
     ```
 

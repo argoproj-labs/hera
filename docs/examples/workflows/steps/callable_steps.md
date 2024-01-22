@@ -64,20 +64,15 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: name = json.loads(r'''{{inputs.parameters.name}}''')
+            except: name = r'''{{inputs.parameters.name}}'''
 
-            try: name = json.loads(r''''''{{inputs.parameters.name}}'''''')
-
-            except: name = r''''''{{inputs.parameters.name}}''''''
-
-
-            print(''Hello, {name}!''.format(name=name))'
+            print('Hello, {name}!'.format(name=name))
       - name: calling-steps
         steps:
         - - arguments:

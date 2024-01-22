@@ -53,18 +53,13 @@
           - name: c
             value: '3'
           image: python:3.8
-          source: 'import os
-
-            import sys
-
-            sys.path.append(os.getcwd())
-
+          source: |-
             import os
-
-            assert os.environ[''a''] == ''1'', os.environ[''a'']
-
-            assert os.environ[''b''] == ''2'', os.environ[''b'']
-
-            assert os.environ[''c''] == ''3'', os.environ[''c'']'
+            import sys
+            sys.path.append(os.getcwd())
+            import os
+            assert os.environ['a'] == '1', os.environ['a']
+            assert os.environ['b'] == '2', os.environ['b']
+            assert os.environ['c'] == '3', os.environ['c']
     ```
 

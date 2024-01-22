@@ -67,11 +67,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       arguments:
         parameters:
         - name: step_params
-          value: "[\n  { \"exit_code\": 0, \"message\": \"succeeds 1\" },\n  { \"exit_code\"\
-            : 0, \"message\": \"succeeds 2\" },\n  { \"exit_code\": 0, \"message\": \"\
-            succeeds 3\" },\n  { \"exit_code\": 1, \"message\": \"will fail and stop here\"\
-            \ },\n  { \"exit_code\": 0, \"message\": \"will not run\" },\n  { \"exit_code\"\
-            : 0, \"message\": \"will not run\" }\n]\n"
+          value: |
+            [
+              { "exit_code": 0, "message": "succeeds 1" },
+              { "exit_code": 0, "message": "succeeds 2" },
+              { "exit_code": 0, "message": "succeeds 3" },
+              { "exit_code": 1, "message": "will fail and stop here" },
+              { "exit_code": 0, "message": "will not run" },
+              { "exit_code": 0, "message": "will not run" }
+            ]
       entrypoint: loop-arbitrary-sequential-steps-example
       templates:
       - container:

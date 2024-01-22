@@ -77,13 +77,11 @@
           command:
           - python
           image: python:alpine3.6
-          source: 'import json
+          source: |-
+            import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
 
-            try: message = json.loads(r''''''{{inputs.parameters.message}}'''''')
-
-            except: message = r''''''{{inputs.parameters.message}}''''''
-
-
-            print(message)'
+            print(message)
     ```
 

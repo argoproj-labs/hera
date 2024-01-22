@@ -37,12 +37,10 @@
           - python
           image: python:3.8
           imagePullPolicy: Always
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''ok'')'
+            print('ok')
     ```
 

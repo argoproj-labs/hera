@@ -47,20 +47,15 @@ spec:
       command:
       - python
       image: python:3.8
-      source: 'import os
-
+      source: |-
+        import os
         import sys
-
         sys.path.append(os.getcwd())
-
         import json
+        try: s = json.loads(r'''{{inputs.parameters.s}}''')
+        except: s = r'''{{inputs.parameters.s}}'''
 
-        try: s = json.loads(r''''''{{inputs.parameters.s}}'''''')
-
-        except: s = r''''''{{inputs.parameters.s}}''''''
-
-
-        print(s)'
+        print(s)
   - dag:
       tasks:
       - arguments:

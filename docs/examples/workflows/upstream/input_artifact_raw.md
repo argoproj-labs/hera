@@ -51,13 +51,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - name: myfile
             path: /tmp/file
             raw:
-              data: 'this is
-
+              data: |
+                this is
                 the raw file
-
                 contents
-
-                '
         name: raw-contents
     ```
 

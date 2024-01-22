@@ -59,17 +59,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         artifacts:
         - name: text
           raw:
-            data: '1
-
+            data: |
+              1
               2
-
               3
-
               4
-
               5
-
-              '
         parameters:
         - name: lines-count
           value: '3'

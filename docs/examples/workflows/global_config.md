@@ -52,12 +52,10 @@
           command:
           - python3
           image: image-say
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''hello'')'
+            print('hello')
     ```
 

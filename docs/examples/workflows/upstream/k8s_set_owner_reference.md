@@ -45,8 +45,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - name: k8s-set-owner-reference
         resource:
           action: create
-          manifest: "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  generateName: owned-eg-\n\
-            data:\n  some: value\n"
+          manifest: |
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              generateName: owned-eg-
+            data:
+              some: value
           setOwnerReference: true
     ```
 

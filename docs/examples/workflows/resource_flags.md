@@ -59,15 +59,29 @@
       - name: create-route
         resource:
           action: create
-          manifest: "apiVersion: route.openshift.io/v1\nkind: Route\nmetadata:\n  name:\
-            \ host-route\nspec:\n  to:\n    kind: Service\n    name: service-name\n"
+          manifest: |
+            apiVersion: route.openshift.io/v1
+            kind: Route
+            metadata:
+              name: host-route
+            spec:
+              to:
+                kind: Service
+                name: service-name
       - name: create-route-without-validation
         resource:
           action: create
           flags:
           - --validate=false
-          manifest: "apiVersion: route.openshift.io/v1\nkind: Route\nmetadata:\n  name:\
-            \ host-route\nspec:\n  to:\n    kind: Service\n    name: service-name\n"
+          manifest: |
+            apiVersion: route.openshift.io/v1
+            kind: Route
+            metadata:
+              name: host-route
+            spec:
+              to:
+                kind: Service
+                name: service-name
       - name: resource-validate-example
         steps:
         - - continueOn:

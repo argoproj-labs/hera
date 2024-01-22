@@ -86,9 +86,14 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-            with open('/tmp/file', 'w+') as f:\n    for i in range(10):\n        f.write(json.dumps(i)\
-            \ + '\\n')"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            with open('/tmp/file', 'w+') as f:
+                for i in range(10):
+                    f.write(json.dumps(i) + '\n')
       - inputs:
           artifacts:
           - name: in-art
@@ -98,10 +103,17 @@
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport json\n\
-            import sys\nindices = []\nwith open('/tmp/file', 'r') as f:\n    for line\
-            \ in f.readlines():\n        indices.append(line.strip())\njson.dump(indices,\
-            \ sys.stdout)"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            import sys
+            indices = []
+            with open('/tmp/file', 'r') as f:
+                for line in f.readlines():
+                    indices.append(line.strip())
+            json.dump(indices, sys.stdout)
       - inputs:
           parameters:
           - name: i
@@ -110,19 +122,14 @@
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: i = json.loads(r'''{{inputs.parameters.i}}''')
+            except: i = r'''{{inputs.parameters.i}}'''
 
-            try: i = json.loads(r''''''{{inputs.parameters.i}}'''''')
-
-            except: i = r''''''{{inputs.parameters.i}}''''''
-
-
-            print(i)'
+            print(i)
     ```
 

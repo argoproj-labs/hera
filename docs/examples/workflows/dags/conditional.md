@@ -67,31 +67,34 @@ This example showcases conditional execution on success, failure, and error
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nimport random\n\
-            p = random.random()\nif p <= 0.5:\n    raise Exception('failure')\nprint('success')"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import random
+            p = random.random()
+            if p <= 0.5:
+                raise Exception('failure')
+            print('success')
       - name: success
         script:
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''success'')'
+            print('success')
       - name: failure
         script:
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''failure'')'
+            print('failure')
     ```
 

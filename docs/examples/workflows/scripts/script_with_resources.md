@@ -38,12 +38,10 @@
           resources:
             requests:
               memory: 5Gi
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''ok'')'
+            print('ok')
     ```
 

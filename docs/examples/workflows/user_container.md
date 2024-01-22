@@ -51,13 +51,11 @@ This example showcases the user of a user container with a volume mount.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
-            print(''hi'')'
+            print('hi')
         sidecars:
         - name: sidecar-name
           volumeMounts:

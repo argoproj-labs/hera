@@ -27,8 +27,12 @@ spec:
       command:
       - python
       image: python:3.8
-      source: "import os\nimport sys\nsys.path.append(os.getcwd())\nwith open('/test',\
-        \ 'w') as f_out:\n    f_out.write('test')"
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        with open('/test', 'w') as f_out:
+            f_out.write('test')
   - inputs:
       parameters:
       - name: a
@@ -37,17 +41,12 @@ spec:
       command:
       - python
       image: python:3.8
-      source: 'import os
-
+      source: |-
+        import os
         import sys
-
         sys.path.append(os.getcwd())
-
         import json
+        try: a = json.loads(r'''{{inputs.parameters.a}}''')
+        except: a = r'''{{inputs.parameters.a}}'''
 
-        try: a = json.loads(r''''''{{inputs.parameters.a}}'''''')
-
-        except: a = r''''''{{inputs.parameters.a}}''''''
-
-
-        print(a)'
+        print(a)

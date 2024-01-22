@@ -77,12 +77,21 @@ http requests to the server.
           command:
           - python
           image: python:3.8
-          source: "import os\nimport sys\nsys.path.append(os.getcwd())\nfrom http.server\
-            \ import BaseHTTPRequestHandler, HTTPServer\n\nclass MyServer(BaseHTTPRequestHandler):\n\
-            \n    def do_GET(self):\n        self.send_response(200)\n        self.send_header('Content-type',\
-            \ 'application/json')\n        self.end_headers()\n        self.wfile.write(bytes(\"\
-            {'name':'John'}\", 'utf-8'))\nwebServer = HTTPServer(('0.0.0.0', 8080), MyServer)\n\
-            webServer.serve_forever()"
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            from http.server import BaseHTTPRequestHandler, HTTPServer
+
+            class MyServer(BaseHTTPRequestHandler):
+
+                def do_GET(self):
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(bytes("{'name':'John'}", 'utf-8'))
+            webServer = HTTPServer(('0.0.0.0', 8080), MyServer)
+            webServer.serve_forever()
       - inputs:
           parameters:
           - name: ip
@@ -91,33 +100,21 @@ http requests to the server.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
-            try: ip = json.loads(r''''''{{inputs.parameters.ip}}'''''')
-
-            except: ip = r''''''{{inputs.parameters.ip}}''''''
-
+            try: ip = json.loads(r'''{{inputs.parameters.ip}}''')
+            except: ip = r'''{{inputs.parameters.ip}}'''
 
             import http.client
-
             import os
-
             print(os.environ)
-
-            server_ip = ip.replace(''"'', '''')
-
-            connection = http.client.HTTPConnection(''{server_ip}:8080''.format(server_ip=server_ip))
-
-            connection.request(''GET'', ''/'')
-
+            server_ip = ip.replace('"', '')
+            connection = http.client.HTTPConnection('{server_ip}:8080'.format(server_ip=server_ip))
+            connection.request('GET', '/')
             response = connection.getresponse()
-
-            print(response.read())'
+            print(response.read())
     ```
 

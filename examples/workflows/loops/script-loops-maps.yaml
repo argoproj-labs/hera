@@ -33,21 +33,14 @@ spec:
       command:
       - python
       image: python:3.8
-      source: 'import os
-
+      source: |-
+        import os
         import sys
-
         sys.path.append(os.getcwd())
-
         import json
+        try: key_1 = json.loads(r'''{{inputs.parameters.key_1}}''')
+        except: key_1 = r'''{{inputs.parameters.key_1}}'''
+        try: key_2 = json.loads(r'''{{inputs.parameters.key_2}}''')
+        except: key_2 = r'''{{inputs.parameters.key_2}}'''
 
-        try: key_1 = json.loads(r''''''{{inputs.parameters.key_1}}'''''')
-
-        except: key_1 = r''''''{{inputs.parameters.key_1}}''''''
-
-        try: key_2 = json.loads(r''''''{{inputs.parameters.key_2}}'''''')
-
-        except: key_2 = r''''''{{inputs.parameters.key_2}}''''''
-
-
-        print(''{key_1}, {key_2}''.format(key_1=key_1, key_2=key_2))'
+        print('{key_1}, {key_2}'.format(key_1=key_1, key_2=key_2))

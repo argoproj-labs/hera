@@ -67,13 +67,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       arguments:
         parameters:
         - name: seq-list
-          value: '["a","b","c","d"]
-
-            '
+          value: |
+            ["a","b","c","d"]
         - name: parallel-list
-          value: '[1,2,3,4]
-
-            '
+          value: |
+            [1,2,3,4]
       entrypoint: parallel-worker
       templates:
       - container:

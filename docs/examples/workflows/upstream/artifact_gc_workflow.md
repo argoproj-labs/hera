@@ -56,11 +56,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - container:
           args:
-          - 'echo "hello world" > /tmp/on-completion.txt
-
+          - |
+            echo "hello world" > /tmp/on-completion.txt
             echo "hello world" > /tmp/on-deletion.txt
-
-            '
           command:
           - sh
           - -c

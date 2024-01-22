@@ -64,17 +64,13 @@ they may need to process.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
             import sys
-
-            json.dump([i for i in range(10)], sys.stdout)'
+            json.dump([i for i in range(10)], sys.stdout)
       - inputs:
           parameters:
           - name: value
@@ -83,19 +79,14 @@ they may need to process.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: value = json.loads(r'''{{inputs.parameters.value}}''')
+            except: value = r'''{{inputs.parameters.value}}'''
 
-            try: value = json.loads(r''''''{{inputs.parameters.value}}'''''')
-
-            except: value = r''''''{{inputs.parameters.value}}''''''
-
-
-            print(''Received value: {value}!''.format(value=value))'
+            print('Received value: {value}!'.format(value=value))
     ```
 

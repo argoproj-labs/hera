@@ -96,17 +96,13 @@ the job to dictate what the fanout should execute over.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
-
             import sys
-
-            json.dump([i for i in range(10)], sys.stdout)'
+            json.dump([i for i in range(10)], sys.stdout)
       - inputs:
           parameters:
           - name: value
@@ -118,28 +114,18 @@ the job to dictate what the fanout should execute over.
           command:
           - python
           image: python:3.8
-          source: 'import os
-
+          source: |-
+            import os
             import sys
-
             sys.path.append(os.getcwd())
-
             import json
+            try: extra_param1 = json.loads(r'''{{inputs.parameters.extra_param1}}''')
+            except: extra_param1 = r'''{{inputs.parameters.extra_param1}}'''
+            try: extra_param2 = json.loads(r'''{{inputs.parameters.extra_param2}}''')
+            except: extra_param2 = r'''{{inputs.parameters.extra_param2}}'''
+            try: value = json.loads(r'''{{inputs.parameters.value}}''')
+            except: value = r'''{{inputs.parameters.value}}'''
 
-            try: extra_param1 = json.loads(r''''''{{inputs.parameters.extra_param1}}'''''')
-
-            except: extra_param1 = r''''''{{inputs.parameters.extra_param1}}''''''
-
-            try: extra_param2 = json.loads(r''''''{{inputs.parameters.extra_param2}}'''''')
-
-            except: extra_param2 = r''''''{{inputs.parameters.extra_param2}}''''''
-
-            try: value = json.loads(r''''''{{inputs.parameters.value}}'''''')
-
-            except: value = r''''''{{inputs.parameters.value}}''''''
-
-
-            print(''Received value={value}, extra_param1={extra_param1}, extra_param2={extra_param2}!''.format(value=value,
-            extra_param1=extra_param1, extra_param2=extra_param2))'
+            print('Received value={value}, extra_param1={extra_param1}, extra_param2={extra_param2}!'.format(value=value, extra_param1=extra_param1, extra_param2=extra_param2))
     ```
 

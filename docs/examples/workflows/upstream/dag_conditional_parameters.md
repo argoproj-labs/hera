@@ -85,9 +85,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           command:
           - python
           image: python:alpine3.6
-          source: 'import random
-
-            print(''heads'' if random.randint(0, 1) == 0 else ''tails'')'
+          source: |-
+            import random
+            print('heads' if random.randint(0, 1) == 0 else 'tails')
       - dag:
           tasks:
           - name: flip-coin
