@@ -32,10 +32,8 @@ class ParamOnlyOutput(RunnerOutput):
 @script(constructor="runner")
 def pydantic_input_parameters(
     my_input: ParamOnlyInput,
-    another_param_inline: int,
-    another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
 ) -> int:
-    return another_param_inline
+    return 42
 
 
 @script(constructor="runner")
@@ -49,12 +47,9 @@ def pydantic_io_in_generic(
 
 
 @script(constructor="runner")
-def pydantic_output_parameters(
-    int_param_inline: int,
-    another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
-) -> ParamOnlyOutput:
+def pydantic_output_parameters() -> ParamOnlyOutput:
     outputs = ParamOnlyOutput(annotated_str="my-val")
-    outputs.my_output_str = another_annotated_param_inline
+    outputs.my_output_str = "a string!"
 
     return outputs
 

@@ -17,12 +17,12 @@ class ParamOnlyInput(RunnerInput):
 
 
 @script(constructor="runner")
-def pydantic_duplicate_input_names(
+def pydantic_multiple_inputs(
     my_obj: ParamOnlyInput,
-    my_other_obj: ParamOnlyInput,
+    my_inline_int: int,
 ) -> None:
     pass
 
 
-with Workflow(generate_name="pydantic-duplicate-input-") as w:
-    pydantic_duplicate_input_names()
+with Workflow(generate_name="pydantic-invalid-inputs-") as w:
+    pydantic_multiple_inputs()

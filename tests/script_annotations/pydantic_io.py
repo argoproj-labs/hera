@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
 from hera.workflows.io import RunnerInput, RunnerOutput
@@ -22,8 +23,6 @@ class ParamOnlyOutput(RunnerOutput):
 @script(constructor="runner")
 def pydantic_io_params(
     my_input: ParamOnlyInput,
-    another_param_inline: int,
-    another_annotated_param_inline: Annotated[str, Parameter(name="a-str-param")],
 ) -> ParamOnlyOutput:
     pass
 
@@ -42,7 +41,6 @@ class ArtifactOnlyOutput(RunnerOutput):
 @script(constructor="runner")
 def pydantic_io_artifacts(
     my_input: ArtifactOnlyInput,
-    annotated_artifact_inline: Annotated[str, Artifact(name="inline-artifact")],
 ) -> ArtifactOnlyOutput:
     pass
 
@@ -64,7 +62,23 @@ def pydantic_io(
     pass
 
 
+@script(constructor="runner")
+def pydantic_io_with_defaults(
+    my_input: ParamOnlyInput = ParamOnlyInput(my_int=2, my_annotated_int=24),
+) -> ParamOnlyOutput:
+    pass
+
+
+@script(constructor="runner")
+def pydantic_io_within_generic(
+    my_inputs: List[ParamOnlyInput] = [ParamOnlyInput(), ParamOnlyInput(my_int=2)],
+) -> ParamOnlyOutput:
+    pass
+
+
 with Workflow(generate_name="pydantic-io-") as w:
     pydantic_io_params()
     pydantic_io_artifacts()
     pydantic_io()
+    pydantic_io_with_defaults()
+    pydantic_io_within_generic()

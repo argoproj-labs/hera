@@ -1,6 +1,6 @@
 """Input/output models for the Hera runner."""
 from collections import ChainMap
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 from hera.shared._pydantic import BaseModel
 from hera.shared.serialization import serialize
@@ -28,7 +28,7 @@ class RunnerInput(BaseModel):
     """
 
     @classmethod
-    def _get_parameters(cls) -> List[Parameter]:
+    def _get_parameters(cls, object_override: "Optional[RunnerInput]" = None) -> List[Parameter]:
         parameters = []
         annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
@@ -36,13 +36,18 @@ class RunnerInput(BaseModel):
             if get_origin(annotations[field]) is Annotated:
                 if isinstance(get_args(annotations[field])[1], Parameter):
                     param = get_args(annotations[field])[1]
-                    if cls.__fields__[field].default:
+                    if object_override:
+                        param.default = serialize(getattr(object_override, field))
+                    elif cls.__fields__[field].default:
                         # Serialize the value (usually done in Parameter's validator)
                         param.default = serialize(cls.__fields__[field].default)
                     parameters.append(param)
             else:
                 # Create a Parameter from basic type annotations
-                parameters.append(Parameter(name=field, default=cls.__fields__[field].default))
+                if object_override:
+                    parameters.append(Parameter(name=field, default=serialize(getattr(object_override, field))))
+                else:
+                    parameters.append(Parameter(name=field, default=cls.__fields__[field].default))
         return parameters
 
     @classmethod

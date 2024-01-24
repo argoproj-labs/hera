@@ -628,8 +628,6 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
                 {"name": "my_required_int", "value": "4"},
                 {"name": "my_int", "value": "3"},
                 {"name": "another-int", "value": "2"},
-                {"name": "another_param_inline", "value": "42"},
-                {"name": "a-str-param", "value": "a string!"},
                 {"name": "multiple-ints", "value": "[1, 2, 3]"},
             ],
             "42",
@@ -677,10 +675,7 @@ def test_runner_pydantic_inputs_params(
     [
         pytest.param(
             "tests.script_runner.pydantic_io:pydantic_output_parameters",
-            [
-                {"name": "int_param_inline", "value": "42"},
-                {"name": "a-str-param", "value": "a string!"},
-            ],
+            [],
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},

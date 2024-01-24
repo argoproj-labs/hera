@@ -27,5 +27,5 @@ def pydantic_output_parameters_in_tuple() -> Tuple[ParamOnlyOutput, Annotated[in
     return outputs, 42
 
 
-with Workflow(generate_name="pydantic-io-") as w:
+with Workflow(generate_name="pydantic-invalid-outputs-") as w:
     pydantic_output_parameters_in_tuple()

@@ -188,8 +188,6 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_int", "default": "1"},
                     {"name": "another-int", "default": "42", "description": "my desc"},
-                    {"name": "another_param_inline"},
-                    {"name": "a-str-param"},
                 ]
             },
             {
@@ -206,7 +204,6 @@ def test_configmap(global_config_fixture):
                 "artifacts": [
                     {"name": "file-artifact", "path": "/tmp/hera-inputs/artifacts/file-artifact"},
                     {"name": "an-int-artifact", "path": "/tmp/hera-inputs/artifacts/an-int-artifact"},
-                    {"name": "inline-artifact", "path": "/tmp/hera-inputs/artifacts/inline-artifact"},
                 ]
             },
             {
@@ -235,6 +232,40 @@ def test_configmap(global_config_fixture):
                 ],
             },
             id="artifact-and-parameter-io",
+        ),
+        pytest.param(
+            "pydantic_io_with_defaults",
+            {
+                "parameters": [
+                    {"name": "my_int", "default": "2"},
+                    {"name": "another-int", "default": "24", "description": "my desc"},
+                ],
+            },
+            {
+                "parameters": [
+                    {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
+                    {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                ],
+            },
+            id="runnerinput-change-default",
+        ),
+        pytest.param(
+            "pydantic_io_within_generic",
+            {
+                "parameters": [
+                    {
+                        "name": "my_inputs",
+                        "default": '[{"my_int": 1, "my_annotated_int": 42}, {"my_int": 2, "my_annotated_int": 42}]',
+                    },
+                ],
+            },
+            {
+                "parameters": [
+                    {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
+                    {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                ],
+            },
+            id="runnerinput-within-generic",
         ),
     ],
 )
@@ -280,61 +311,23 @@ def test_script_pydantic_invalid_outputs(global_config_fixture):
     assert "RunnerOutput cannot be part of a tuple output" in str(e.value)
 
 
-def test_script_duplicate_inputs(global_config_fixture):
+def test_script_pydantic_multiple_inputs(global_config_fixture):
     """Test that parameters with same annotated name raises ValueError."""
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
-    import tests.script_annotations.duplicate_input_names as module
+    import tests.script_annotations.pydantic_io_invalid_multiple_inputs as module
 
     importlib.reload(module)
     workflow = importlib.import_module(module.__name__).w
 
     # WHEN / THEN
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(SyntaxError) as e:
         workflow.to_dict()
 
-    assert "Parameter(s) using same names: ['same-name']" in str(e.value)
-
-
-def test_script_pydantic_duplicate_input_parameters(global_config_fixture):
-    """Test that parameters with same annotated name raises ValueError."""
-    # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
-    # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
-    import tests.script_annotations.pydantic_duplicate_input_parameter_names as module
-
-    importlib.reload(module)
-    workflow = importlib.import_module(module.__name__).w
-
-    # WHEN / THEN
-    with pytest.raises(ValueError) as e:
-        workflow.to_dict()
-
-    assert "Parameter(s) using same names: ['another-int', 'my_int']" in str(e.value)
-
-
-def test_script_pydantic_duplicate_input_artifacts(global_config_fixture):
-    """Test that artifacts with same annotated name raises ValueError."""
-    # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_pydantic_io"] = True
-    # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
-    import tests.script_annotations.pydantic_duplicate_input_artifact_names as module
-
-    importlib.reload(module)
-    workflow = importlib.import_module(module.__name__).w
-
-    # WHEN / THEN
-    with pytest.raises(ValueError) as e:
-        workflow.to_dict()
-
-    assert "Artifact(s) using same names: ['file-artifact', 'str-path-artifact']" in str(e.value)
+    assert "Only one function parameter can be specified when using a RunnerInput" in str(e.value)
 
 
 def test_script_pydantic_without_experimental_flag(global_config_fixture):

@@ -448,8 +448,19 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                     ).format(func_param.annotation, "script_pydantic_io")
                 )
 
+            if len(inspect.signature(source).parameters) != 1:
+                raise SyntaxError("Only one function parameter can be specified when using a RunnerInput.")
+
             input_class = func_param.annotation
-            parameters.extend(input_class._get_parameters())
+            if (
+                func_param.default != inspect.Parameter.empty
+                and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+            ):
+                object_override = func_param.default
+                parameters.extend(input_class._get_parameters(object_override=object_override))
+            else:
+                parameters.extend(input_class._get_parameters())
+
             artifacts.extend(input_class._get_artifacts())
 
         elif get_origin(func_param.annotation) is not Annotated or not isinstance(
@@ -488,12 +499,6 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                         )
                     new_object.default = str(func_param.default)
                 parameters.append(new_object)
-
-    for inputs, arg_type in zip([parameters, artifacts], ["Parameter(s)", "Artifact(s)"]):
-        names_list = [i.name for i in inputs]
-        if len(set(names_list)) != len(inputs):
-            duplicates = set([name for name in names_list if names_list.count(name) > 1])
-            raise ValueError(f"{arg_type} using same names: {sorted(duplicates)}")
 
     return parameters, artifacts
 

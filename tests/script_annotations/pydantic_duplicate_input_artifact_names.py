@@ -17,7 +17,7 @@ class ArtifactOnlyInput(RunnerInput):
 
 
 @script(constructor="runner")
-def pydantic_duplicate_input_names(
+def pydantic_multiple_inputs(
     my_obj: ArtifactOnlyInput,
     my_other_obj: ArtifactOnlyInput,
 ) -> None:
@@ -25,4 +25,4 @@ def pydantic_duplicate_input_names(
 
 
 with Workflow(generate_name="pydantic-duplicate-input-") as w:
-    pydantic_duplicate_input_names()
+    pydantic_multiple_inputs()
