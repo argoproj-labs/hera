@@ -28,7 +28,7 @@ def convert_decimal_units(value: str) -> float:
         value (str): The value to convert the decimal units of.
 
     Raises:
-        ValueError: When the identified unit is not a supported one. The supported optional units are [m, k, M, G, T, P, E].
+        ValueError: When the identified unit is not a supported one. The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E'].
 
     Returns:
         float: Float value of the given decimal units.
@@ -41,7 +41,7 @@ def convert_decimal_units(value: str) -> float:
         return float(value) * _decimal_multipliers.get(unit, 1)
     else:
         raise ValueError(
-            f"Invalid decimal units for input: {value}. Supported optional units are [m, k, M, G, T, P, E]."
+            f"Invalid decimal units for input: {value}. Supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']."
         )
 
 

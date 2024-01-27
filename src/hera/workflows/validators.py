@@ -80,10 +80,10 @@ def validate_decimal_units(value: str) -> None:
     Raises:
     ------
     ValueError
-        When the identified unit is not a supported one. The supported units are [m, k, M, G, T, P, E].
+        When the identified unit is not a supported one. The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E'].
     """
     pattern = r"^\s*(\d+(?:\.\d+)?)([mkMGTPE]?)\s*$"
     if not re.match(pattern, value):
         raise ValueError(
-            f"Invalid decimal unit for input: {value}. Supported optional units are [m, k, M, G, T, P, E]."
+            f"Invalid decimal unit for input: {value}. Supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']."
         )
