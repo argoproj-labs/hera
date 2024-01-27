@@ -41,7 +41,7 @@ from hera.workflows.models import (
     VolumeMount as _ModelVolumeMount,
     VsphereVirtualDiskVolumeSource as _ModelVsphereVirtualDiskVolumeSource,
 )
-from hera.workflows.validators import validate_binary_units
+from hera.workflows.validators import validate_storage_units
 
 
 class AccessMode(Enum):
@@ -573,14 +573,14 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
             values["resources"] = resources
         elif "resources" not in values:
             assert "size" in values, "at least one of `size` or `resources` must be specified"
-            validate_binary_units(cast(str, values.get("size")))
+            validate_storage_units(cast(str, values.get("size")))
             values["resources"] = ResourceRequirements(requests={"storage": values.get("size")})
         elif "resources" in values:
             resources = cast(ResourceRequirements, values.get("resources"))
             assert resources.requests is not None, "Resource requests are required"
             storage = resources.requests.get("storage")
             assert storage is not None, "At least one of `size` or `resources.requests.storage` must be specified"
-            validate_binary_units(cast(str, storage))
+            validate_storage_units(cast(str, storage))
         return values
 
     def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:

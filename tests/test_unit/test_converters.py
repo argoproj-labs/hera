@@ -1,6 +1,6 @@
 import pytest
 
-from hera.workflows.converters import convert_binary_units, convert_decimal_units
+from hera.workflows.converters import _convert_binary_units, _convert_decimal_units
 
 
 @pytest.mark.parametrize(
@@ -13,7 +13,7 @@ from hera.workflows.converters import convert_binary_units, convert_decimal_unit
     ],
 )
 def test_convert_decimal_units(value, expected):
-    assert expected == convert_decimal_units(value)
+    assert expected == _convert_decimal_units(value)
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,7 @@ def test_convert_decimal_units(value, expected):
     ],
 )
 def test_convert_binary_units(value, expected):
-    assert expected == convert_binary_units(value)
+    assert expected == _convert_binary_units(value)
 
 
 @pytest.mark.parametrize(
@@ -41,7 +41,7 @@ def test_convert_binary_units(value, expected):
 )
 def test_convert_decimal_units_invalid(value):
     with pytest.raises(ValueError, match="Invalid decimal units"):
-        convert_decimal_units(value)
+        _convert_decimal_units(value)
 
 
 @pytest.mark.parametrize(
@@ -55,4 +55,4 @@ def test_convert_decimal_units_invalid(value):
 )
 def test_convert_binary_units_invalid(value):
     with pytest.raises(ValueError, match="Invalid binary units"):
-        convert_binary_units(value)
+        _convert_binary_units(value)

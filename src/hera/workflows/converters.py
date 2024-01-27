@@ -21,8 +21,10 @@ _binary_multipliers = {
 }
 
 
-def convert_decimal_units(value: str) -> float:
+def _convert_decimal_units(value: str) -> float:
     """Converts the given decimal units to a float value. If no unit is given, the value is multiplied by 1.
+
+    The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']. Note that the units are case sensitive.
 
     Args:
         value (str): The value to convert the decimal units of.
@@ -45,8 +47,10 @@ def convert_decimal_units(value: str) -> float:
         )
 
 
-def convert_binary_units(value: str) -> float:
+def _convert_binary_units(value: str) -> float:
     """Converts the given binary units to a float value. If no unit is given, the value is multiplied by 1.
+
+    The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']. Note that the units are case sensitive.
 
     Args:
         value (str): The value to convert the binary unit of.
@@ -67,3 +71,8 @@ def convert_binary_units(value: str) -> float:
         raise ValueError(
             f"Invalid binary units for input: {value}. Supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']."
         )
+
+
+convert_memory_units = _convert_binary_units
+convert_storage_units = _convert_binary_units
+convert_cpu_units = _convert_decimal_units

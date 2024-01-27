@@ -43,11 +43,11 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
     return name
 
 
-def validate_binary_units(value: str) -> None:
+def _validate_binary_units(value: str) -> None:
     """Validates the binary units of the given value.
 
     The given value is expected to satisfy a unit/value format that specifies a binary resource requirement such as 500Mi,
-    1Gi, etc.
+    1Gi, etc. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']. Note that the units are case sensitive.
 
     Parameters
     ----------
@@ -66,11 +66,12 @@ def validate_binary_units(value: str) -> None:
         )
 
 
-def validate_decimal_units(value: str) -> None:
+def _validate_decimal_units(value: str) -> None:
     """Validates the decimal units of the given value.
 
     The given value is expected to satisfy a unit/value format that specifies a decimal resource requirement such as 500m,
     2k, etc. Note that the units are optional and accepts values such as int and float values in string e.g. "0.5" and "1".
+    The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']. Note that the units are case sensitive.
 
     Parameters
     ----------
@@ -87,3 +88,8 @@ def validate_decimal_units(value: str) -> None:
         raise ValueError(
             f"Invalid decimal unit for input: {value}. Supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']."
         )
+
+
+validate_storage_units = _validate_binary_units
+validate_memory_units = _validate_binary_units
+validate_cpu_units = _validate_decimal_units
