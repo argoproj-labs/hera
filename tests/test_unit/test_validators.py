@@ -2,6 +2,7 @@ import pytest
 
 from hera.workflows.validators import validate_binary_units, validate_decimal_units
 
+
 @pytest.mark.parametrize("value", ["500Ki", "1Mi", "2Gi", "1Ti", "1.5Pi", "1.5Ei"])
 def test_validate_binary_units_valid(value):
     validate_binary_units(value)
