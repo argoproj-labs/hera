@@ -43,30 +43,47 @@ def validate_name(name: str, max_length: Optional[int] = None, generate_name: bo
     return name
 
 
-def validate_storage_units(value: str) -> None:
-    """Validates the units of the given value.
+def validate_binary_units(value: str) -> None:
+    """Validates the binary units of the given value.
 
-    The given value is expected to satisfy a unit/value format that specifies a resource requirement such as 500Mi,
+    The given value is expected to satisfy a unit/value format that specifies a binary resource requirement such as 500Mi,
     1Gi, etc.
 
     Parameters
     ----------
     value: str
-        The value to validate the units of.
+        The value to validate the binary unit of.
 
     Raises:
     ------
     ValueError
-        When the units cannot be extracted from the given value.
-    AssertionError
         When the identified unit is not a supported one. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'].
     """
-    supported_units = ["Ki", "Mi", "Gi", "Ti", "Pi", "Ei"]
+    pattern = r"^\s*(\d+(?:\.\d+)?)([KMGTPE]i)\s*$"
+    if not re.match(pattern, value):
+        raise ValueError(
+            f"Invalid binary unit for input: {value}. Supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']."
+        )
 
-    pattern = r"[A-Za-z]+"
-    unit_search = re.search(pattern, value)
-    if not unit_search:
-        raise ValueError("could not extract units out of the passed in value")
-    else:
-        unit = unit_search.group(0)
-        assert unit in supported_units, f"unsupported unit for parsed value {value}"
+
+def validate_decimal_units(value: str) -> None:
+    """Validates the decimal units of the given value.
+
+    The given value is expected to satisfy a unit/value format that specifies a decimal resource requirement such as 500m,
+    2k, etc. Note that the units are optional and accepts values such as int and float values in string e.g. "0.5" and "1".
+
+    Parameters
+    ----------
+    value: str
+        The value to validate the decimal unit of.
+
+    Raises:
+    ------
+    ValueError
+        When the identified unit is not a supported one. The supported units are [m, k, M, G, T, P, E].
+    """
+    pattern = r"^\s*(\d+(?:\.\d+)?)([mkMGTPE]?)\s*$"
+    if not re.match(pattern, value):
+        raise ValueError(
+            f"Invalid decimal unit for input: {value}. Supported optional units are [m, k, M, G, T, P, E]."
+        )
