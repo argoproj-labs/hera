@@ -5,8 +5,9 @@ from hera.shared._pydantic import (
     BaseModel as _BaseModel,
     root_validator,
 )
+from hera.workflows.converters import convert_binary_units, convert_decimal_units
 from hera.workflows.models import ResourceRequirements as _ModelResourceRequirements
-from hera.workflows.validators import validate_storage_units
+from hera.workflows.validators import validate_binary_units, validate_decimal_units
 
 
 # TODO: Move function?
@@ -70,22 +71,38 @@ class Resources(_BaseModel):
         ephemeral_limit: Optional[str] = values.get("ephemeral_limit")
 
         if memory_request is not None:
-            validate_storage_units(memory_request)
+            validate_binary_units(memory_request)
         if memory_limit is not None:
-            validate_storage_units(memory_limit)
+            validate_binary_units(memory_limit)
+            if memory_request is not None:
+                assert convert_binary_units(memory_request) <= convert_binary_units(
+                    memory_limit
+                ), "Memory request must be smaller or equal to limit"
 
         if ephemeral_request is not None:
-            validate_storage_units(ephemeral_request)
-        if ephemeral_limit:
-            validate_storage_units(ephemeral_limit)
+            validate_binary_units(ephemeral_request)
+        if ephemeral_limit is not None:
+            validate_binary_units(ephemeral_limit)
+            if ephemeral_request is not None:
+                assert convert_binary_units(ephemeral_request) <= convert_binary_units(
+                    ephemeral_limit
+                ), "Ephemeral request must be smaller or equal to limit"
 
-        # TODO: add validation for CPU units if str
-        if cpu_limit is not None and isinstance(cpu_limit, int):
-            assert cpu_limit >= 0, "CPU limit must be positive"
-        if cpu_request is not None and isinstance(cpu_request, int):
+        if cpu_request is not None and isinstance(cpu_request, (int, float)):
             assert cpu_request >= 0, "CPU request must be positive"
-            if cpu_limit is not None and isinstance(cpu_limit, int):
+        if cpu_limit is not None and isinstance(cpu_limit, (int, float)):
+            assert cpu_limit >= 0, "CPU limit must be positive"
+            if cpu_request is not None and isinstance(cpu_request, (int, float)):
                 assert cpu_request <= cpu_limit, "CPU request must be smaller or equal to limit"
+
+        if cpu_request is not None and isinstance(cpu_request, str):
+            validate_decimal_units(cpu_request)
+        if cpu_limit is not None and isinstance(cpu_limit, str):
+            validate_decimal_units(cpu_limit)
+            if cpu_request is not None and isinstance(cpu_request, str):
+                assert convert_decimal_units(cpu_request) <= convert_decimal_units(
+                    cpu_limit
+                ), "CPU request must be smaller or equal to limit"
 
         return values
 
