@@ -47,17 +47,17 @@ def _validate_binary_units(value: str) -> None:
     """Validates the binary units of the given value.
 
     The given value is expected to satisfy a unit/value format that specifies a binary resource requirement such as 500Mi,
-    1Gi, etc. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']. Note that the units are case sensitive.
+    1Gi, etc.
 
     Parameters
     ----------
     value: str
-        The value to validate the binary unit of.
+        The value to validate the binary unit of. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']. Note that the units are case sensitive.
 
     Raises:
     ------
     ValueError
-        When the identified unit is not a supported one. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'].
+        When the identified unit is not a supported one.
     """
     pattern = r"^\s*(\d+(?:\.\d+)?)([KMGTPE]i)\s*$"
     if not re.match(pattern, value):
@@ -71,17 +71,16 @@ def _validate_decimal_units(value: str) -> None:
 
     The given value is expected to satisfy a unit/value format that specifies a decimal resource requirement such as 500m,
     2k, etc. Note that the units are optional and accepts values such as int and float values in string e.g. "0.5" and "1".
-    The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']. Note that the units are case sensitive.
 
     Parameters
     ----------
     value: str
-        The value to validate the decimal unit of.
+        The value to validate the decimal unit of. The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']. Note that the units are case sensitive.
 
     Raises:
     ------
     ValueError
-        When the identified unit is not a supported one. The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E'].
+        When the identified unit is not a supported one.
     """
     pattern = r"^\s*(\d+(?:\.\d+)?)([mkMGTPE]?)\s*$"
     if not re.match(pattern, value):

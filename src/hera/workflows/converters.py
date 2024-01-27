@@ -24,13 +24,12 @@ _binary_multipliers = {
 def _convert_decimal_units(value: str) -> float:
     """Converts the given decimal units to a float value. If no unit is given, the value is multiplied by 1.
 
-    The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E']. Note that the units are case sensitive.
-
     Args:
-        value (str): The value to convert the decimal units of.
+        value (str): The value to convert the decimal units of. The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E'].
+        Note that the units are case sensitive.
 
     Raises:
-        ValueError: When the identified unit is not a supported one. The supported units are ['m', 'k', 'M', 'G', 'T', 'P', 'E'].
+        ValueError: When the identified unit is not a supported one.
 
     Returns:
         float: Float value of the given decimal units.
@@ -50,13 +49,12 @@ def _convert_decimal_units(value: str) -> float:
 def _convert_binary_units(value: str) -> float:
     """Converts the given binary units to a float value. If no unit is given, the value is multiplied by 1.
 
-    The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei']. Note that the units are case sensitive.
-
     Args:
-        value (str): The value to convert the binary unit of.
+        value (str): The value to convert the binary unit of. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'].
+        Note that the units are case sensitive.
 
     Raises:
-        ValueError: When the identified unit is not a supported one. The supported units are ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'].
+        ValueError: When the identified unit is not a supported one.
 
     Returns:
         float: Float value of the given binary units.
