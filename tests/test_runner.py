@@ -18,6 +18,7 @@ import tests.helper as test_module
 from hera.shared import GlobalConfig
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
+from hera.workflows.io import RunnerOutput
 from hera.workflows.runner import _run, _runner
 from hera.workflows.script import RunnerScriptConstructor
 
@@ -616,3 +617,356 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
     # THEN
     mock_parse_args.assert_called_once()
     mock_runner.assert_called_once_with("my_entrypoint", [])
+
+
+@pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_output,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_input_parameters",
+            [
+                {"name": "my_required_int", "value": "4"},
+                {"name": "my_int", "value": "3"},
+                {"name": "another-int", "value": "2"},
+                {"name": "multiple-ints", "value": "[1, 2, 3]"},
+            ],
+            "42",
+            1,
+            id="test parameter only input variations",
+        ),
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_io_in_generic",
+            [
+                {"name": "my_inputs", "value": '[{"my_required_int": 2, "my_annotated_int": 3}]'},
+            ],
+            "1",
+            1,
+            id="test generic usage (reverts to regular pydantic class implementation)",
+        ),
+    ],
+)
+def test_runner_pydantic_inputs_params(
+    entrypoint,
+    kwargs_list: List[Dict[str, str]],
+    expected_output,
+    global_config_fixture: GlobalConfig,
+    pydantic_mode,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    outputs_directory = str(tmp_path / "tmp/hera/outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "entrypoint,kwargs_list,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_parameters",
+            [],
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            1,
+            id="pydantic output parameter variations",
+        ),
+    ],
+)
+def test_runner_pydantic_output_params(
+    entrypoint,
+    kwargs_list,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert isinstance(output, RunnerOutput)
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,input_files,expected_output,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_input_artifact",
+            {
+                "json": '{"a": 3, "b": "bar"}',
+                "path": "dummy",
+                "str-path": "dummy",
+                "file": "dummy",
+            },
+            '{"a": "3", "b": "bar"}',
+            1,
+            id="pydantic io artifact input variations",
+        ),
+    ],
+)
+def test_runner_pydantic_input_artifacts(
+    entrypoint,
+    input_files: Dict,
+    expected_output,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    for file, contents in input_files.items():
+        filepath = tmp_path / file
+        filepath.write_text(contents)
+
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera/outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+
+    # WHEN
+    output = _runner(entrypoint, [])
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "entrypoint,input_files,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_artifact",
+            {
+                "json": '{"a": 3, "b": "bar"}',
+                "path": "dummy",
+                "str-path": "dummy",
+                "file": "dummy",
+            },
+            [
+                {"subpath": "tmp/hera-outputs/artifacts/artifact-str-output", "value": "test"},
+            ],
+            1,
+            id="pydantic io artifact output variations",
+        ),
+    ],
+)
+def test_runner_pydantic_output_artifacts(
+    entrypoint,
+    input_files: Dict,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    for file, contents in input_files.items():
+        filepath = tmp_path / file
+        filepath.write_text(contents)
+
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN
+    output = _runner(entrypoint, [])
+
+    # THEN
+    assert isinstance(output, RunnerOutput)
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_using_exit_code",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            1,
+            id="pydantic output with exit code",
+        ),
+    ],
+)
+def test_runner_pydantic_output_with_exit_code(
+    entrypoint,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    output = _runner(entrypoint, [])
+
+    assert output.exit_code == 42
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_using_exit_code",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            1,
+            id="use _run to check actual system exit",
+        ),
+    ],
+)
+@patch("hera.workflows.runner._parse_args")
+def test_run_pydantic_output_with_exit_code(
+    mock_parse_args,
+    entrypoint,
+    expected_files,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    file_path = Path(tmp_path / "test_params")
+    file_path.write_text("")
+    args = MagicMock(entrypoint=entrypoint, args_path=file_path)
+    mock_parse_args.return_value = args
+
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    with pytest.raises(SystemExit) as e:
+        _run()
+
+    assert e.value.code == 42
+    mock_parse_args.assert_called_once()
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files,expected_result,pydantic_mode",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io:pydantic_output_using_result",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
+                {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+            ],
+            "42",
+            1,
+            id="pydantic output with result output",
+        ),
+    ],
+)
+def test_runner_pydantic_output_with_result(
+    entrypoint,
+    expected_files,
+    expected_result,
+    pydantic_mode,
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    monkeypatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    os.environ["hera__script_annotations"] = ""
+    os.environ["hera__script_pydantic_io"] = ""
+
+    import tests.script_runner.pydantic_io as module
+
+    importlib.reload(module)
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    output = _runner(entrypoint, [])
+
+    assert serialize(output.result) == serialize(expected_result)
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]

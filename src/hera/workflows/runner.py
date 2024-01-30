@@ -6,12 +6,13 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
+from hera.workflows.io import RunnerInput, RunnerOutput
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
@@ -32,7 +33,18 @@ def _ignore_unmatched_kwargs(f):
     def inner(**kwargs):
         # filter out kwargs that are not part of the function signature
         # and transform them to the correct type
-        filtered_kwargs = {key: _parse(value, key, f) for key, value in kwargs.items() if _is_kwarg_of(key, f)}
+        if os.environ.get("hera__script_pydantic_io", None) is None:
+            filtered_kwargs = {key: _parse(value, key, f) for key, value in kwargs.items() if _is_kwarg_of(key, f)}
+            return f(**filtered_kwargs)
+
+        # filter out kwargs that are not part of the function signature
+        # and transform them to the correct type. If any kwarg values are
+        # of RunnerType, pass them through without parsing.
+        filtered_kwargs = {}
+        for key, value in kwargs.items():
+            if _is_kwarg_of(key, f):
+                type_ = _get_type(key, f)
+                filtered_kwargs[key] = value if type_ and issubclass(type_, RunnerInput) else _parse(value, key, f)
         return f(**filtered_kwargs)
 
     return inner
@@ -162,6 +174,37 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
             elif artifact_annotation.loader is None:
                 mapped_kwargs[param_name] = artifact_annotation.path
 
+    T = TypeVar("T", bound=RunnerInput)
+
+    def map_runner_input(param_name: str, runner_input_class: T):
+        """Map argo input kwargs to the fields of the given RunnerInput.
+
+        If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
+        Otherwise, we look for the kwarg with the name of the field.
+        """
+        input_model_obj = {}
+
+        def map_field(field: str) -> Optional[str]:
+            annotation = runner_input_class.__annotations__[field]
+            if get_origin(annotation) is Annotated:
+                annotation = get_args(annotation)[1]
+                if isinstance(annotation, Parameter):
+                    map_annotated_param(field, annotation)
+                    mapped_kwargs[field] = json.loads(mapped_kwargs[field])
+                elif isinstance(annotation, Artifact):
+                    map_annotated_artifact(field, annotation)
+            else:
+                mapped_kwargs[field] = json.loads(kwargs[field])
+
+            return field
+
+        for field in runner_input_class.__fields__:
+            matched_field = map_field(field)
+            if matched_field:
+                input_model_obj[field] = mapped_kwargs[matched_field]
+
+        mapped_kwargs[param_name] = runner_input_class.parse_raw(json.dumps(input_model_obj))
+
     for param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:
             func_param_annotation = get_args(func_param.annotation)[1]
@@ -172,6 +215,8 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
                 map_annotated_artifact(param_name, func_param_annotation)
             else:
                 mapped_kwargs[param_name] = kwargs[param_name]
+        elif get_origin(func_param.annotation) is None and issubclass(func_param.annotation, RunnerInput):
+            map_runner_input(param_name, func_param.annotation)
         else:
             mapped_kwargs[param_name] = kwargs[param_name]
 
@@ -180,8 +225,8 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
 
 def _save_annotated_return_outputs(
     function_outputs: Union[Tuple[Any], Any],
-    output_destinations: List[Tuple[type, Union[Parameter, Artifact]]],
-) -> None:
+    output_annotations: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[RunnerOutput]]],
+) -> Optional[RunnerOutput]:
     """Save the outputs of the function to the specified output destinations.
 
     The output values are matched with the output annotations and saved using the schema:
@@ -192,29 +237,52 @@ def _save_annotated_return_outputs(
     """
     if not isinstance(function_outputs, tuple):
         function_outputs = [function_outputs]
-    if len(function_outputs) != len(output_destinations):
+    if len(function_outputs) != len(output_annotations):
         raise ValueError("The number of outputs does not match the annotation")
 
-    for output_value, dest in zip(function_outputs, output_destinations):
-        if get_origin(dest[0]) is None:
-            # Built-in types return None from get_origin, so we can check isinstance directly
-            if not isinstance(output_value, dest[0]):
-                raise ValueError(
-                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                )
+    if os.environ.get("hera__script_pydantic_io", None) is not None:
+        return_obj = None
+
+    for output_value, dest in zip(function_outputs, output_annotations):
+        if isinstance(output_value, RunnerOutput):
+            if os.environ.get("hera__script_pydantic_io", None) is None:
+                raise ValueError("hera__script_pydantic_io environment variable is not set")
+
+            return_obj = output_value
+
+            for field, value in output_value.dict().items():
+                if field in {"exit_code", "result"}:
+                    continue
+
+                matching_output = output_value._get_output(field)
+                path = _get_outputs_path(matching_output)
+                _write_to_path(path, value)
         else:
-            # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
-            origin_type = cast(type, get_origin(dest[0]))
-            if not isinstance(output_value, origin_type):
-                raise ValueError(
-                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                )
+            assert isinstance(dest, tuple)
+            if get_origin(dest[0]) is None:
+                # Built-in types return None from get_origin, so we can check isinstance directly
+                if not isinstance(output_value, dest[0]):
+                    raise ValueError(
+                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                    )
+            else:
+                # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
+                origin_type = cast(type, get_origin(dest[0]))
+                if not isinstance(output_value, origin_type):
+                    raise ValueError(
+                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                    )
 
-        if not dest[1].name:
-            raise ValueError("The name was not provided for one of the outputs.")
+            if not dest[1].name:
+                raise ValueError("The name was not provided for one of the outputs.")
 
-        path = _get_outputs_path(dest[1])
-        _write_to_path(path, output_value)
+            path = _get_outputs_path(dest[1])
+            _write_to_path(path, output_value)
+
+    if os.environ.get("hera__script_pydantic_io", None) is not None:
+        return return_obj
+
+    return None
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
@@ -278,7 +346,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     if _pydantic_mode == 2:
         from pydantic import validate_call  # type: ignore
 
-        function = validate_call(function)
+        function = validate_call(function)  # TODO: v2 function blocks pydantic IO
     else:
         if _PYDANTIC_VERSION == 1:
             from pydantic import validate_arguments
@@ -294,8 +362,8 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         if output_annotations:
             # This will save outputs returned from the function only. Any function parameters/artifacts marked as
             # outputs should be written to within the function itself.
-            _save_annotated_return_outputs(function(**kwargs), output_annotations)
-            return None
+            output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+            return output or None
 
     return function(**kwargs)
 
@@ -326,6 +394,11 @@ def _run():
     result = _runner(args.entrypoint, kwargs_list)
     if not result:
         return
+
+    if isinstance(result, RunnerOutput):
+        print(serialize(result.result))
+        exit(result.exit_code)
+
     print(serialize(result))
 
 

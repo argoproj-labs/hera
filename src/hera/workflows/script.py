@@ -41,6 +41,7 @@ from hera.workflows._unparse import roundtrip
 from hera.workflows.artifact import (
     Artifact,
 )
+from hera.workflows.io import RunnerInput, RunnerOutput
 from hera.workflows.models import (
     EnvVar,
     Inputs as ModelInputs,
@@ -358,11 +359,30 @@ def _get_outputs_from_return_annotation(
                 annotation.value_from = ValueFrom(path=outputs_directory + f"/parameters/{annotation.name}")
             parameters.append(annotation)
 
-    if get_origin(inspect.signature(source).return_annotation) is Annotated:
-        append_annotation(get_args(inspect.signature(source).return_annotation)[1])
-    elif get_origin(inspect.signature(source).return_annotation) is tuple:
-        for annotation in get_args(inspect.signature(source).return_annotation):
+    return_annotation = inspect.signature(source).return_annotation
+    if get_origin(return_annotation) is Annotated:
+        append_annotation(get_args(return_annotation)[1])
+    elif get_origin(return_annotation) is tuple:
+        for annotation in get_args(return_annotation):
+            if isinstance(annotation, type) and issubclass(annotation, RunnerOutput):
+                raise ValueError("RunnerOutput cannot be part of a tuple output")
+
             append_annotation(get_args(annotation)[1])
+    elif return_annotation and issubclass(return_annotation, RunnerOutput):
+        if not global_config.experimental_features["script_pydantic_io"]:
+            raise ValueError(
+                (
+                    "Unable to instantiate {} since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format(return_annotation, "script_pydantic_io")
+            )
+
+        output_class = return_annotation
+        for output in output_class._get_outputs():
+            append_annotation(output)
+
     return parameters, artifacts
 
 
@@ -408,12 +428,42 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     """Return all inputs from the function.
 
     This includes all basic Python function parameters, and all parameters with a Parameter or Artifact annotation.
+    For the Pydantic IO experimental feature, any input parameter which is a subclass of RunnerInput, the fields of the
+    class will be used as inputs, rather than the class itself.
+
+    Note, the given Parameter/Artifact names in annotations of different inputs could clash, which will raise a ValueError.
     """
     parameters = []
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if get_origin(func_param.annotation) is not Annotated or not isinstance(
+        if get_origin(func_param.annotation) is None and issubclass(func_param.annotation, RunnerInput):
+            if not global_config.experimental_features["script_pydantic_io"]:
+                raise ValueError(
+                    (
+                        "Unable to instantiate {} since it is an experimental feature."
+                        " Please turn on experimental features by setting "
+                        '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                        " Note that experimental features are unstable and subject to breaking changes."
+                    ).format(func_param.annotation, "script_pydantic_io")
+                )
+
+            if len(inspect.signature(source).parameters) != 1:
+                raise SyntaxError("Only one function parameter can be specified when using a RunnerInput.")
+
+            input_class = func_param.annotation
+            if (
+                func_param.default != inspect.Parameter.empty
+                and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+            ):
+                object_override = func_param.default
+                parameters.extend(input_class._get_parameters(object_override=object_override))
+            else:
+                parameters.extend(input_class._get_parameters())
+
+            artifacts.extend(input_class._get_artifacts())
+
+        elif get_origin(func_param.annotation) is not Annotated or not isinstance(
             get_args(func_param.annotation)[1], (Artifact, Parameter)
         ):
             if (
@@ -455,15 +505,18 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
 def _extract_return_annotation_output(source: Callable) -> List:
     """Extract the output annotations from the return annotation of the function signature."""
-    output = []
+    output: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[RunnerOutput]]] = []
 
-    origin_type = get_origin(inspect.signature(source).return_annotation)
-    annotation_args = get_args(inspect.signature(source).return_annotation)
+    return_annotation = inspect.signature(source).return_annotation
+    origin_type = get_origin(return_annotation)
+    annotation_args = get_args(return_annotation)
     if origin_type is Annotated:
         output.append(annotation_args)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
             output.append(get_args(annotated_type))
+    elif origin_type is None and isinstance(return_annotation, type) and issubclass(return_annotation, RunnerOutput):
+        output.append(return_annotation)
 
     return output
 
@@ -756,6 +809,8 @@ class RunnerScriptConstructor(ScriptConstructor):
                 script.env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
             if self.pydantic_mode:
                 script.env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
+            if global_config.experimental_features["script_pydantic_io"]:
+                script.env.append(EnvVar(name="hera__script_pydantic_io", value=""))
         return script
 
 
