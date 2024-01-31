@@ -31,7 +31,7 @@ except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import BaseModel, root_validator, validator
+from hera.shared._pydantic import BaseModel, get_fields, root_validator, validator
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows.artifact import Artifact
@@ -1211,9 +1211,10 @@ class ModelMapperMixin(BaseMixin):
             self.model_path = model_path.split(".")
             curr_class: Type[BaseModel] = self._get_model_class()
             for key in self.model_path:
-                if key not in curr_class.__fields__:
+                fields = get_fields(curr_class)
+                if key not in fields:
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
-                curr_class = curr_class.__fields__[key].outer_type_
+                curr_class = fields[key].outer_type_
 
         @classmethod
         def _get_model_class(cls) -> Type[BaseModel]:

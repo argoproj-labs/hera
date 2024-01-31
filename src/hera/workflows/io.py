@@ -2,7 +2,7 @@
 from collections import ChainMap
 from typing import Any, List, Optional, Union
 
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import BaseModel, get_fields
 from hera.shared.serialization import serialize
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
@@ -32,22 +32,28 @@ class RunnerInput(BaseModel):
         parameters = []
         annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
-        for field in cls.__fields__:
+        fields = get_fields(cls)
+        for field in fields:
             if get_origin(annotations[field]) is Annotated:
                 if isinstance(get_args(annotations[field])[1], Parameter):
                     param = get_args(annotations[field])[1]
                     if object_override:
                         param.default = serialize(getattr(object_override, field))
-                    elif cls.__fields__[field].default:
+                    elif fields[field].default:
                         # Serialize the value (usually done in Parameter's validator)
-                        param.default = serialize(cls.__fields__[field].default)
+                        param.default = serialize(fields[field].default)
                     parameters.append(param)
             else:
                 # Create a Parameter from basic type annotations
                 if object_override:
-                    parameters.append(Parameter(name=field, default=serialize(getattr(object_override, field))))
+                    parameters.append(
+                        Parameter(
+                            name=field,
+                            default=serialize(getattr(object_override, field)),
+                        )
+                    )
                 else:
-                    parameters.append(Parameter(name=field, default=cls.__fields__[field].default))
+                    parameters.append(Parameter(name=field, default=fields[field].default))
         return parameters
 
     @classmethod
@@ -55,7 +61,7 @@ class RunnerInput(BaseModel):
         artifacts = []
         annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
-        for field in cls.__fields__:
+        for field in get_fields(cls):
             if get_origin(annotations[field]) is Annotated:
                 if isinstance(get_args(annotations[field])[1], Artifact):
                     artifact = get_args(annotations[field])[1]
@@ -82,7 +88,8 @@ class RunnerOutput(BaseModel):
         outputs = []
         annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
-        for field in cls.__fields__:
+        fields = get_fields(cls)
+        for field in fields:
             if field in {"exit_code", "result"}:
                 continue
             if get_origin(annotations[field]) is Annotated:
@@ -90,7 +97,7 @@ class RunnerOutput(BaseModel):
                     outputs.append(get_args(annotations[field])[1])
             else:
                 # Create a Parameter from basic type annotations
-                outputs.append(Parameter(name=field, default=cls.__fields__[field].default))
+                outputs.append(Parameter(name=field, default=fields[field].default))
         return outputs
 
     @classmethod
@@ -102,4 +109,4 @@ class RunnerOutput(BaseModel):
                 return get_args(annotation)[1]
 
         # Create a Parameter from basic type annotations
-        return Parameter(name=field_name, default=cls.__fields__[field_name].default)
+        return Parameter(name=field_name, default=get_fields(cls)[field_name].default)

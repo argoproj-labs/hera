@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from hera.auth import TokenGenerator
-from hera.shared._pydantic import BaseModel, root_validator
+from hera.shared._pydantic import BaseModel, get_fields, root_validator
 
 TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]
@@ -119,7 +119,7 @@ class _GlobalConfig:
             cls: The class to set defaults for.
             kwargs: The default values to set.
         """
-        invalid_keys = set(kwargs) - set(cls.__fields__)
+        invalid_keys = set(kwargs) - set(get_fields(cls))
         if invalid_keys:
             raise ValueError(f"Invalid keys for class {cls}: {invalid_keys}")
         self._defaults[cls].update(kwargs)
@@ -143,7 +143,7 @@ class BaseMixin(BaseModel):
         this method. We also tried other ways including creating a metaclass that invokes hera_init after init,
         but that always broke auto-complete for IDEs like VSCode.
         """
-        super()._init_private_attributes()
+        super()._init_private_attributes()  # type: ignore
         self.__hera_init__()
 
     def __hera_init__(self):
