@@ -1,6 +1,6 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
 
-from typing import Literal
+from typing import TYPE_CHECKING, Any, Dict, Literal, Type
 
 _PYDANTIC_VERSION: Literal[1, 2] = 1
 # The pydantic v1 interface is used for both pydantic v1 and v2 in order to support
@@ -8,7 +8,6 @@ _PYDANTIC_VERSION: Literal[1, 2] = 1
 
 try:
     from pydantic.v1 import (  # type: ignore
-        BaseModel as PydanticBaseModel,
         Field,
         ValidationError,
         root_validator,
@@ -18,7 +17,6 @@ try:
     _PYDANTIC_VERSION = 2
 except (ImportError, ModuleNotFoundError):
     from pydantic import (  # type: ignore[assignment,no-redef]
-        BaseModel as PydanticBaseModel,
         Field,
         ValidationError,
         root_validator,
@@ -26,6 +24,26 @@ except (ImportError, ModuleNotFoundError):
     )
 
     _PYDANTIC_VERSION = 1
+
+
+# TYPE_CHECKING-guarding specifically the `BaseModel` import helps the type checkers
+# provide proper type checking to models. Without this, both mypy and pyright lose
+# native pydantic hinting for `__init__` arguments.
+if TYPE_CHECKING:
+    from pydantic import BaseModel as PydanticBaseModel
+else:
+    try:
+        from pydantic.v1 import BaseModel as PydanticBaseModel  # type: ignore
+    except (ImportError, ModuleNotFoundError):
+        from pydantic import BaseModel as PydanticBaseModel  # type: ignore[assignment,no-redef]
+
+
+def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, Any]:
+    """Centralize access to __fields__."""
+    try:
+        return cls.model_fields  # type: ignore
+    except AttributeError:
+        return cls.__fields__  # type: ignore
 
 
 __all__ = [
