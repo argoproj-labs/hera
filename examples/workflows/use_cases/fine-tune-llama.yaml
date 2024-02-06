@@ -79,32 +79,65 @@ spec:
   - name: create-ssd-storage-class
     resource:
       action: create
-      manifest: "\nkind: StorageClass\napiVersion: storage.k8s.io/v1\nmetadata:\n\
-        \  name: ssd\nprovisioner: kubernetes.io/gce-pd\nvolumeBindingMode: WaitForFirstConsumer\n\
-        parameters:\n  type: pd-ssd\n"
+      manifest: |2
+
+        kind: StorageClass
+        apiVersion: storage.k8s.io/v1
+        metadata:
+          name: ssd
+        provisioner: kubernetes.io/gce-pd
+        volumeBindingMode: WaitForFirstConsumer
+        parameters:
+          type: pd-ssd
   - name: create-etcd-stateful-set
     resource:
       action: create
-      manifest: "\napiVersion: apps/v1\nkind: StatefulSet\nmetadata:\n  name: etcd\n\
-        \  labels:\n    app: etcd\nspec:\n  serviceName: etcd\n  selector:\n    matchLabels:\n\
-        \      app: etcd\n  replicas: 3\n  template:\n    metadata:\n      name: etcd\n\
-        \      labels:\n        app: etcd\n    spec:\n      containers:\n        -\
-        \ name: etcd\n          image: quay.io/coreos/etcd:latest\n          ports:\n\
-        \            - containerPort: 2379\n              name: client\n         \
-        \   - containerPort: 2380\n              name: peer\n          volumeMounts:\n\
-        \            - name: data\n              mountPath: /var/run/etcd\n      \
-        \    command:\n            - /bin/sh\n            - -c\n            - |\n\
-        \              PEERS=\"etcd-0=http://etcd-0.etcd:2380,etcd-1=http://etcd-1.etcd:2380,etcd-2=http://etcd-2.etcd:2380\"\
-        \n              exec etcd --name ${HOSTNAME}                 --listen-peer-urls\
-        \ http://0.0.0.0:2380                 --listen-client-urls http://0.0.0.0:2379\
-        \                 --advertise-client-urls http://${HOSTNAME}.etcd:2379   \
-        \              --initial-advertise-peer-urls http://${HOSTNAME}:2380     \
-        \            --initial-cluster-token etcd-cluster-1                 --initial-cluster\
-        \ ${PEERS}                 --initial-cluster-state new                 --data-dir\
-        \ /var/run/etcd/default.etcd\n  volumeClaimTemplates:\n    - metadata:\n \
-        \       name: data\n      spec:\n        storageClassName: ssd\n        accessModes:\
-        \ [\"ReadWriteOnce\"]\n        resources:\n          requests:\n         \
-        \   storage: 1Gi"
+      manifest: |2-
+
+        apiVersion: apps/v1
+        kind: StatefulSet
+        metadata:
+          name: etcd
+          labels:
+            app: etcd
+        spec:
+          serviceName: etcd
+          selector:
+            matchLabels:
+              app: etcd
+          replicas: 3
+          template:
+            metadata:
+              name: etcd
+              labels:
+                app: etcd
+            spec:
+              containers:
+                - name: etcd
+                  image: quay.io/coreos/etcd:latest
+                  ports:
+                    - containerPort: 2379
+                      name: client
+                    - containerPort: 2380
+                      name: peer
+                  volumeMounts:
+                    - name: data
+                      mountPath: /var/run/etcd
+                  command:
+                    - /bin/sh
+                    - -c
+                    - |
+                      PEERS="etcd-0=http://etcd-0.etcd:2380,etcd-1=http://etcd-1.etcd:2380,etcd-2=http://etcd-2.etcd:2380"
+                      exec etcd --name ${HOSTNAME}                 --listen-peer-urls http://0.0.0.0:2380                 --listen-client-urls http://0.0.0.0:2379                 --advertise-client-urls http://${HOSTNAME}.etcd:2379                 --initial-advertise-peer-urls http://${HOSTNAME}:2380                 --initial-cluster-token etcd-cluster-1                 --initial-cluster ${PEERS}                 --initial-cluster-state new                 --data-dir /var/run/etcd/default.etcd
+          volumeClaimTemplates:
+            - metadata:
+                name: data
+              spec:
+                storageClassName: ssd
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
   - name: create-etcd-load-balancer
     outputs:
       parameters:
@@ -113,10 +146,21 @@ spec:
           jsonPath: metadata.name
     resource:
       action: create
-      manifest: "\napiVersion: v1\nkind: Service\nmetadata:\n  name: etcd-client\n\
-        spec:\n  type: LoadBalancer\n  ports:\n    - name: etcd-client\n      port:\
-        \ 2379\n      protocol: TCP\n      targetPort: 2379\n  selector:\n    app:\
-        \ etcd"
+      manifest: |2-
+
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: etcd-client
+        spec:
+          type: LoadBalancer
+          ports:
+            - name: etcd-client
+              port: 2379
+              protocol: TCP
+              targetPort: 2379
+          selector:
+            app: etcd
   - container:
       args:
       - etcd_ip=""; while [ -z $etcd_ip ]; do echo "Waiting for end point..."; etcd_ip=$(kubectl
