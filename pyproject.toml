@@ -39,7 +39,7 @@ yaml = ["PyYAML"]
 cli = ["cappa", "PyYAML"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "*"
+pytest = "<8.0.0"
 pytest-cov = "*"
 mypy = "*"
 build = "*"
@@ -128,13 +128,15 @@ source = [
 [tool.ruff]
 line-length = 119
 show-fixes = true
-select = ["E", "F", "D"]
-ignore = ["E501"]
 target-version = "py38"
-extend-select = ["I"]
 src = ["src"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+select = ["E", "F", "D"]
+ignore = ["E501"]
+extend-select = ["I"]
+
+[tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401", "D107"]
 "examples/**" = ["D"]
 "src/hera/events/models/**" = ["D"]
@@ -143,10 +145,10 @@ src = ["src"]
 "tests/**" = ["D"]
 "scripts/graphlib.py" = ["D"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 force-wrap-aliases = true
 combine-as-imports = true
 known-first-party = ["hera"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
