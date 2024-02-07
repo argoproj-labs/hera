@@ -622,9 +622,10 @@ class ArgumentsMixin(BaseMixin):
             if isinstance(arg, dict):
                 for k, v in arg.items():
                     if isinstance(v, Parameter):
-                        value = v.as_argument()
+                        value = v.with_name(k).as_argument()
                     elif isinstance(v, ModelParameter):
                         value = Parameter.from_model(v).as_argument()
+                        value.name = k
                     else:
                         value = Parameter(name=k, value=v).as_argument()
 
