@@ -149,8 +149,6 @@ class Workflow(
     mapped_model: ClassVar[Type[PydanticBaseModel]] = _ModelWorkflow
 
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    api_version: Annotated[Optional[str], ModelMapper("api_version")] = None
-    kind: Annotated[Optional[str], ModelMapper("kind")] = None
     status: Annotated[Optional[_ModelWorkflowStatus], ModelMapper("status")] = None
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
@@ -276,12 +274,6 @@ class Workflow(
     def _set_workflows_service(cls, v):
         if v is None:
             return WorkflowsService()
-        return v
-
-    @validator("kind", pre=True, always=True, allow_reuse=True)
-    def _set_kind(cls, v):
-        if v is None:
-            return cls.__name__  # type: ignore
         return v
 
     @validator("namespace", pre=True, always=True, allow_reuse=True)

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from collections import ChainMap
-from typing import Any, Callable, ClassVar, Dict, List, Optional, Type, Union
+from typing import Any, Callable, ClassVar, Dict, List, Optional, Type, TypeVar, Union
 
 try:
     from inspect import get_annotations  # type: ignore
@@ -22,7 +22,9 @@ except ImportError:
 
 from hera import _yaml
 from hera.shared import BaseMixin
-from hera.shared._pydantic import PydanticBaseModel, get_fields
+from hera.shared._pydantic import PydanticBaseModel, get_fields, validator
+
+T = TypeVar("T", bound=PydanticBaseModel)
 
 
 class ModelMapper:
@@ -48,10 +50,10 @@ class ModelMapper:
         cls,
         hera_class: Type[ResourceBase],
         hera_obj: ResourceBase,
-        model: PydanticBaseModel,
+        model: T,
         *,
         traverse_mro: bool = True,
-    ):
+    ) -> T:
         """Builds an instance of a `ResourceBase` into the destination model type."""
         assert isinstance(hera_obj, ResourceBase), type(hera_obj)
 
@@ -60,6 +62,7 @@ class ModelMapper:
             value = (
                 getattr(hera_obj, mapper.builder.__name__)() if mapper.builder is not None else getattr(hera_obj, attr)
             )
+
             if value is not None:
                 _set_model_attr(model, mapper.model_path, value)
 
@@ -75,9 +78,12 @@ class ResourceBase(BaseMixin):
     Note, this class will validate that the annotated attributes map to real fields on the `mapped_model`.
     """
 
+    api_version: Annotated[Optional[str], ModelMapper("api_version")] = None
+    kind: Annotated[Optional[str], ModelMapper("kind")] = None
+
     mapped_model: ClassVar[Type[PydanticBaseModel]]
 
-    def __init_subclass__(cls, *, traverse_mro=True, **kwargs):
+    def __init_subclass__(cls, *, traverse_mro: bool = True, **kwargs):
         """Validate that the annotated `ModelMapper` paths map to real destination fields."""
         for _, model_mapper, _ in cls._iter_model_mappers(traverse_mro=traverse_mro):
             try:
@@ -104,7 +110,7 @@ class ResourceBase(BaseMixin):
 
         # Due to child subclasses being able to override parent fields, ChainMap over the mro order
         # yields only leaf instances of each attribute.
-        annotations = ChainMap(*({k: (v, c) for k, v in get_annotations(c).items()} for c in mro))
+        annotations = ChainMap(*({k: (v, c) for k, v in get_annotations(c, eval_str=True).items()} for c in mro))
 
         for attr, (annotation, c) in annotations.items():
             if get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], ModelMapper):
@@ -115,9 +121,10 @@ class ResourceBase(BaseMixin):
 
                 yield attr, model_mapper, c
 
-    def build(self) -> PydanticBaseModel:
+    def build(self):
         """Builds the Workflow as an Argo schema Workflow object."""
-        raise NotImplementedError()
+        model_workflow = self.mapped_model()
+        return ModelMapper.build_model(self.__class__, self, model_workflow)
 
     def to_dict(self) -> dict:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
@@ -169,6 +176,12 @@ class ResourceBase(BaseMixin):
     def from_file(cls, yaml_file: Union[Path, str]) -> Self:
         """Parse from given yaml_file."""
         raise NotImplementedError
+
+    @validator("kind", pre=True, always=True, allow_reuse=True)
+    def _set_kind(cls, v):
+        if v is None:
+            return cls.__name__  # type: ignore
+        return v
 
 
 def _set_model_attr(model: PydanticBaseModel, attrs: List[str], value: Any):

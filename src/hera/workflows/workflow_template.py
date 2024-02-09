@@ -6,7 +6,7 @@ for more on WorkflowTemplates.
 from pathlib import Path
 from typing import ClassVar, Dict, Optional, Type, Union, cast
 
-from hera.shared._pydantic import BaseModel
+from hera.shared._pydantic import PydanticBaseModel
 
 try:
     from typing import Annotated  # type: ignore
@@ -36,7 +36,7 @@ class WorkflowTemplate(Workflow):
     them from your Workflows.
     """
 
-    mapped_model: ClassVar[Type[BaseModel]] = _ModelWorkflowTemplate
+    mapped_model: ClassVar[Type[PydanticBaseModel]] = _ModelWorkflowTemplate
 
     # Removes status mapping
     status: Annotated[Optional[_ModelWorkflowStatus], ModelMapper("")] = None

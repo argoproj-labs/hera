@@ -12,7 +12,7 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 from hera.exceptions import NotFound
-from hera.shared._pydantic import BaseModel, PydanticBaseModel
+from hera.shared._pydantic import PydanticBaseModel
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
@@ -36,8 +36,9 @@ class CronWorkflow(Workflow, traverse_mro=False):
         spec. See [CronWorkflowSpec](https://argoproj.github.io/argo-workflows/fields/#cronworkflow) for more details.
     """
 
-    mapped_model: ClassVar[Type[BaseModel]] = _ModelCronWorkflow
+    mapped_model: ClassVar[Type[PydanticBaseModel]] = _ModelCronWorkflow
 
+    # These need to be redefined due to `traverse_mro=False`
     api_version: Annotated[Optional[str], ModelMapper("api_version")] = None
     kind: Annotated[Optional[str], ModelMapper("kind")] = None
 
