@@ -1,6 +1,7 @@
 """Define the base classes used to produce k8s CRDs."""
 from __future__ import annotations
 
+from collections import ChainMap
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Type, Union
 
 try:
@@ -27,7 +28,7 @@ from hera.shared._pydantic import PydanticBaseModel, get_fields
 class ModelMapper:
     """Maps a model attribute to the attribute path of the produced resource.
 
-    For example `foo: MopdelMapper("metadata.name")` would map the annotated object's
+    For example `foo: ModelMapper("metadata.name")` would map the annotated object's
     `foo` attribute to the "metadata" -> "name" field on the final k8s resource.
     """
 
@@ -79,7 +80,13 @@ class ResourceBase(BaseMixin):
     def __init_subclass__(cls, *, traverse_mro=True, **kwargs):
         """Validate that the annotated `ModelMapper` paths map to real destination fields."""
         for _, model_mapper, _ in cls._iter_model_mappers(traverse_mro=traverse_mro):
-            curr_cls = cls.mapped_model
+            try:
+                curr_cls = cls.mapped_model
+            except AttributeError:
+                raise AttributeError(
+                    f"{cls.__qualname__} must define a `mapped_model` attribute, "
+                    "which specifies the Pydantic model to which this resource's attributes map."
+                )
 
             for key in model_mapper.model_path:
                 fields = get_fields(curr_cls)
@@ -95,22 +102,14 @@ class ResourceBase(BaseMixin):
         if not traverse_mro:
             mro = (cls,)
 
-        # Due to child subclasses being able to override parent fields, traversing the mro might
-        # yield the same attribute more than once, which wont make sense. Track seen fields, and only
-        # handle each one once.
-        handled_fields = set()
+        # Due to child subclasses being able to override parent fields, ChainMap over the mro order
+        # yields only leaf instances of each attribute.
+        annotations = ChainMap(*({k: (v, c) for k, v in get_annotations(c).items()} for c in mro))
 
-        annotations = ((attr, annotation, c) for c in mro for attr, annotation in get_annotations(c).items())
-        for attr, annotation, c in annotations:
+        for attr, (annotation, c) in annotations.items():
             if get_origin(annotation) is Annotated and isinstance(get_args(annotation)[1], ModelMapper):
                 model_mapper = get_args(annotation)[1]
 
-                if attr in handled_fields:
-                    continue
-                handled_fields.add(attr)
-
-                # This check must happen after dealing with handled_fields, since leaf classes might
-                # override fields to unset `model_path` to disable them.
                 if not model_mapper.model_path:
                     continue
 
