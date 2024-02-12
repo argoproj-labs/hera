@@ -85,7 +85,7 @@ def script_param_no_name(a_number) -> Annotated[int, Parameter()]:
 
 
 @script()
-def script_param_otuput_raises_index_error() -> Annotated[int, Parameter(name="param-output")]:
+def script_param_output_raises_index_error() -> Annotated[int, Parameter(name="param-output")]:
     """Raise an IndexError."""
     a_list = []
     return a_list[0]

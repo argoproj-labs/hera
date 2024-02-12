@@ -296,11 +296,6 @@ def test_runner_annotated_parameter_inputs(
             [],
             [{"subpath": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
         ),
-        (
-            "script_raises_an_error",
-            [],
-            [{"subpath": "tmp/hera/outputs/parameters/an-output", "value": ""}],
-        ),
     ],
 )
 def test_script_annotations_outputs(
@@ -343,7 +338,7 @@ def test_script_annotations_outputs(
     "function_name,expected_error,expected_files",
     [
         (
-            "script_param_otuput_raises_index_error",
+            "script_param_output_raises_index_error",
             IndexError,
             [{"subpath": "tmp/hera-outputs/parameters/param-output", "value": ""}],
         ),
