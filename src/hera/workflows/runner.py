@@ -326,6 +326,48 @@ def _save_annotated_return_outputs(
     return None
 
 
+def _save_dummy_outputs(
+    output_annotations: List[
+        Union[Tuple[type, Union[Parameter, Artifact]], Union[Type[RunnerOutputV1], Type[RunnerOutputV2]]]
+    ],
+) -> None:
+    """Save dummy values into the outputs specified.
+
+    This function is used at runtime by the Hera Runner to create files in the container so that Argo
+    does not log confusing error messages that obfuscate the real error, which look like:
+    ```
+    msg="cannot save parameter /tmp/hera-outputs/parameters/my-parameter"
+    argo=true
+    error="open /tmp/hera-outputs/parameters/my-parameter: no such file or directory"`
+    ```
+
+    The output annotations are used to write files using the schema:
+    <parent_directory>/artifacts/<name>
+    <parent_directory>/parameters/<name>
+    If the artifact path or parameter value_from.path is specified, that is used instead.
+    <parent_directory> can be provided by the user or is set to /tmp/hera-outputs by default
+    """
+    for dest in output_annotations:
+        if isinstance(dest, (RunnerOutputV1, RunnerOutputV2)):
+            if os.environ.get("hera__script_pydantic_io", None) is None:
+                raise ValueError("hera__script_pydantic_io environment variable is not set")
+
+            for field, _ in dest.__fields__:
+                if field in {"exit_code", "result"}:
+                    continue
+
+                annotation = dest._get_output(field)
+                path = _get_outputs_path(annotation)
+                _write_to_path(path, "")
+        else:
+            assert isinstance(dest, tuple)
+            if not dest[1].name:
+                raise ValueError("The name was not provided for one of the outputs.")
+
+            path = _get_outputs_path(dest[1])
+            _write_to_path(path, "")
+
+
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     """Get the path from the destination annotation using the defined outputs directory."""
     path = Path(os.environ.get("hera__outputs_directory", "/tmp/hera-outputs"))
@@ -403,7 +445,11 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         if output_annotations:
             # This will save outputs returned from the function only. Any function parameters/artifacts marked as
             # outputs should be written to within the function itself.
-            output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+            try:
+                output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+            except Exception as e:
+                _save_dummy_outputs(output_annotations)
+                raise e
             return output or None
 
     return function(**kwargs)

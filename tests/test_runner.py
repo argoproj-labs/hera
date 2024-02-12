@@ -335,6 +335,58 @@ def test_script_annotations_outputs(
 
 
 @pytest.mark.parametrize(
+    "function_name,expected_error,expected_files",
+    [
+        (
+            "script_param_output_raises_index_error",
+            IndexError,
+            [{"subpath": "tmp/hera-outputs/parameters/param-output", "value": ""}],
+        ),
+        (
+            "script_artifact_output_raises_index_error",
+            IndexError,
+            [{"subpath": "tmp/hera-outputs/artifacts/artifact-output", "value": ""}],
+        ),
+    ],
+)
+def test_script_raising_error_still_outputs(
+    function_name,
+    expected_error: type,
+    expected_files: List[Dict[str, str]],
+    global_config_fixture: GlobalConfig,
+    environ_annotations_fixture: None,
+    tmp_path: Path,
+    monkeypatch,
+):
+    """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
+    for file in expected_files:
+        assert not Path(tmp_path / file["subpath"]).is_file()
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    import tests.script_runner.annotated_outputs as output_tests_module
+
+    importlib.reload(output_tests_module)
+
+    # WHEN
+    with pytest.raises(expected_error):
+        _runner(f"{output_tests_module.__name__}:{function_name}", [])
+
+    # THEN
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
     "function_name,kwargs_list,exception",
     [
         (
@@ -671,11 +723,10 @@ def test_runner_pydantic_inputs_params(
 
 
 @pytest.mark.parametrize(
-    "entrypoint,kwargs_list,expected_files,pydantic_mode",
+    "entrypoint,expected_files,pydantic_mode",
     [
         pytest.param(
             "tests.script_runner.pydantic_io_v1:pydantic_output_parameters",
-            [],
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
@@ -687,7 +738,6 @@ def test_runner_pydantic_inputs_params(
 )
 def test_runner_pydantic_output_params(
     entrypoint,
-    kwargs_list,
     expected_files,
     pydantic_mode,
     global_config_fixture: GlobalConfig,
@@ -708,7 +758,7 @@ def test_runner_pydantic_output_params(
     os.environ["hera__outputs_directory"] = outputs_directory
 
     # WHEN
-    output = _runner(entrypoint, kwargs_list)
+    output = _runner(entrypoint, [])
 
     # THEN
     assert isinstance(output, RunnerOutput)
