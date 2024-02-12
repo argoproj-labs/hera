@@ -85,6 +85,20 @@ def script_param_no_name(a_number) -> Annotated[int, Parameter()]:
 
 
 @script()
+def script_param_otuput_raises_index_error() -> Annotated[int, Parameter(name="param-output")]:
+    """Raise an IndexError."""
+    a_list = []
+    return a_list[0]
+
+
+@script()
+def script_artifact_output_raises_index_error() -> Annotated[int, Artifact(name="artifact-output")]:
+    """Raise an IndexError."""
+    a_list = []
+    return a_list[0]
+
+
+@script()
 def script_outputs_in_function_signature(
     a_number: Annotated[int, Parameter(name="a_number")],
     successor: Annotated[Path, Parameter(name="successor", output=True)],
