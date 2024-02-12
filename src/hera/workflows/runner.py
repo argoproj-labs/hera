@@ -360,6 +360,7 @@ def _save_dummy_outputs(
                 path = _get_outputs_path(annotation)
                 _write_to_path(path, "")
         else:
+            assert isinstance(dest, tuple)
             if not dest[1].name:
                 raise ValueError("The name was not provided for one of the outputs.")
 
