@@ -434,9 +434,13 @@ global_config.experimental_features["script_pydantic_io"] = True
 
 ### Pydantic V1 or V2?
 
-You should import `RunnerInput` and `RunnerOutput` from the `hera.workflows.io.v1` or `hera.workflows.io.v2` module
-depending on which version of Pydantic you require. The V2 models will not be available if you have installed
-`pydantic<2`, but the V1 models are usable for either version, allowing you to migrate at your own pace.
+You can import `RunnerInput` and `RunnerOutput` from the `hera.workflows.io` submodule to import the version of Pydantic
+that matches your V1 or V2 installation.
+
+If you need to use V1 models when you have V2 installed, you should import
+`RunnerInput` and `RunnerOutput` from the `hera.workflows.io.v1` or `hera.workflows.io.v2` module explicitly. The V2
+models will not be available if you have installed `pydantic<2`, but the V1 models are usable for either version,
+allowing you to migrate at your own pace.
 
 ### Script inputs using `RunnerInput`
 
@@ -449,7 +453,7 @@ from typing import Annotated
 from pydantic import BaseModel
 
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
-from hera.workflows.io.v2 import RunnerInput
+from hera.workflows.io import RunnerInput
 
 
 class MyObject(BaseModel):
@@ -508,7 +512,7 @@ Aside from the `exit_code` and `result`, the `RunnerOutput` behaves exactly like
 from typing import Annotated
 
 from hera.workflows import Artifact, Parameter, script
-from hera.workflows.io.v2 import RunnerOutput
+from hera.workflows.io import RunnerOutput
 
 
 class MyOutput(RunnerOutput):
