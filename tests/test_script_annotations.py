@@ -10,6 +10,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
+from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.workflows import Workflow, script
 from hera.workflows.parameter import Parameter
 from hera.workflows.steps import Steps
@@ -180,6 +181,13 @@ def test_configmap(global_config_fixture):
 
 
 @pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        1,
+        _PYDANTIC_VERSION,
+    ],
+)
+@pytest.mark.parametrize(
     "function_name,expected_input,expected_output",
     [
         pytest.param(
@@ -269,15 +277,16 @@ def test_configmap(global_config_fixture):
         ),
     ],
 )
-def test_script_pydantic_io(function_name, expected_input, expected_output, global_config_fixture):
+def test_script_pydantic_io(pydantic_mode, function_name, expected_input, expected_output, global_config_fixture):
     """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
     # GIVEN
     global_config_fixture.experimental_features["script_annotations"] = True
     global_config_fixture.experimental_features["script_pydantic_io"] = True
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
-    import tests.script_annotations.pydantic_io as module
+    module_name = f"tests.script_annotations.pydantic_io_v{pydantic_mode}"
 
+    module = importlib.import_module(module_name)
     importlib.reload(module)
     workflow = importlib.import_module(module.__name__).w
 
@@ -337,7 +346,7 @@ def test_script_pydantic_without_experimental_flag(global_config_fixture):
     global_config_fixture.experimental_features["script_pydantic_io"] = False
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
-    import tests.script_annotations.pydantic_io as module
+    import tests.script_annotations.pydantic_io_v1 as module
 
     importlib.reload(module)
     workflow = importlib.import_module(module.__name__).w
@@ -347,6 +356,6 @@ def test_script_pydantic_without_experimental_flag(global_config_fixture):
         workflow.to_dict()
 
     assert (
-        "Unable to instantiate <class 'tests.script_annotations.pydantic_io.ParamOnlyInput'> since it is an experimental feature."
+        "Unable to instantiate <class 'tests.script_annotations.pydantic_io_v1.ParamOnlyInput'> since it is an experimental feature."
         in str(e.value)
     )

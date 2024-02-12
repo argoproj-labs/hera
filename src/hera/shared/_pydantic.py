@@ -64,7 +64,7 @@ class BaseModel(PydanticBaseModel):
         """
 
         allow_population_by_field_name = True
-        """support populating Hera object fields via keyed dictionaries"""
+        """support populating Hera object fields by their Field alias"""
 
         allow_mutation = True
         """supports mutating Hera objects post instantiation"""

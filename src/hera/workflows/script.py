@@ -41,7 +41,21 @@ from hera.workflows._unparse import roundtrip
 from hera.workflows.artifact import (
     Artifact,
 )
-from hera.workflows.io import RunnerInput, RunnerOutput
+from hera.workflows.io.v1 import (
+    RunnerInput as RunnerInputV1,
+    RunnerOutput as RunnerOutputV1,
+)
+
+try:
+    from hera.workflows.io.v2 import (  # type: ignore
+        RunnerInput as RunnerInputV2,
+        RunnerOutput as RunnerOutputV2,
+    )
+except ImportError:
+    from hera.workflows.io.v1 import (  # type: ignore
+        RunnerInput as RunnerInputV2,
+        RunnerOutput as RunnerOutputV2,
+    )
 from hera.workflows.models import (
     EnvVar,
     Inputs as ModelInputs,
@@ -364,11 +378,11 @@ def _get_outputs_from_return_annotation(
         append_annotation(get_args(return_annotation)[1])
     elif get_origin(return_annotation) is tuple:
         for annotation in get_args(return_annotation):
-            if isinstance(annotation, type) and issubclass(annotation, RunnerOutput):
+            if isinstance(annotation, type) and issubclass(annotation, (RunnerOutputV1, RunnerOutputV2)):
                 raise ValueError("RunnerOutput cannot be part of a tuple output")
 
             append_annotation(get_args(annotation)[1])
-    elif return_annotation and issubclass(return_annotation, RunnerOutput):
+    elif return_annotation and issubclass(return_annotation, (RunnerOutputV1, RunnerOutputV2)):
         if not global_config.experimental_features["script_pydantic_io"]:
             raise ValueError(
                 (
@@ -437,7 +451,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if get_origin(func_param.annotation) is None and issubclass(func_param.annotation, RunnerInput):
+        if get_origin(func_param.annotation) is None and issubclass(
+            func_param.annotation, (RunnerInputV1, RunnerInputV2)
+        ):
             if not global_config.experimental_features["script_pydantic_io"]:
                 raise ValueError(
                     (
@@ -505,7 +521,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
 def _extract_return_annotation_output(source: Callable) -> List:
     """Extract the output annotations from the return annotation of the function signature."""
-    output: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[RunnerOutput]]] = []
+    output: List[Union[Tuple[type, Union[Parameter, Artifact]], Type[Union[RunnerOutputV1, RunnerOutputV2]]]] = []
 
     return_annotation = inspect.signature(source).return_annotation
     origin_type = get_origin(return_annotation)
@@ -515,7 +531,11 @@ def _extract_return_annotation_output(source: Callable) -> List:
     elif origin_type is tuple:
         for annotated_type in annotation_args:
             output.append(get_args(annotated_type))
-    elif origin_type is None and isinstance(return_annotation, type) and issubclass(return_annotation, RunnerOutput):
+    elif (
+        origin_type is None
+        and isinstance(return_annotation, type)
+        and issubclass(return_annotation, (RunnerOutputV1, RunnerOutputV2))
+    ):
         output.append(return_annotation)
 
     return output
