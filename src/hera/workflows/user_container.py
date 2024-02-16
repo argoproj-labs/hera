@@ -26,7 +26,7 @@ class UserContainer(_ModelUserContainer):
     volumes: Optional[List[_BaseVolume]] = None
 
     def _build_image_pull_policy(self) -> Optional[str]:
-        """Processes the image pull policy field and returns a generated `ImagePullPolicy` enum."""
+        """Processes the image pull policy field and optionally returns a string value from `ImagePullPolicy` enum."""
         if self.image_pull_policy is None:
             return None
         elif isinstance(self.image_pull_policy, ImagePullPolicy):
@@ -37,10 +37,8 @@ class UserContainer(_ModelUserContainer):
             # the following 2 are "normal" entries
             **{ipp.name: ipp for ipp in ImagePullPolicy},
             **{ipp.value: ipp for ipp in ImagePullPolicy},
-            # some users might submit the policy without underscores
-            **{ipp.value.lower().replace("_", ""): ipp for ipp in ImagePullPolicy},
-            # some users might submit the policy in lowercase
-            **{ipp.name.lower(): ipp for ipp in ImagePullPolicy},
+            # some users might submit the policy in lowercase & without underscores
+            **{ipp.value.lower(): ipp for ipp in ImagePullPolicy},
         }
         try:
             return ImagePullPolicy[policy_mapper[self.image_pull_policy].name].value
