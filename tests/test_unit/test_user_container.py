@@ -1,3 +1,5 @@
+import pytest
+
 from hera.workflows.models import (
     ImagePullPolicy,
     UserContainer as ModelUserContainer,
@@ -9,11 +11,23 @@ from hera.workflows.volume import Volume
 
 class TestUserContainer:
     def test_build_image_pull_policy(self) -> None:
+        # Normal cases
+        assert (
+            UserContainer(name="test", image_pull_policy="if_not_present")._build_image_pull_policy() == "IfNotPresent"
+        )
+        assert (
+            UserContainer(name="test", image_pull_policy="ifnotpresent")._build_image_pull_policy() == "IfNotPresent"
+        )
+
         assert UserContainer(name="test", image_pull_policy="Always")._build_image_pull_policy() == "Always"
         assert (
             UserContainer(name="test", image_pull_policy=ImagePullPolicy.always)._build_image_pull_policy() == "Always"
         )
         assert UserContainer(name="test")._build_image_pull_policy() is None
+
+        # Error cases
+        with pytest.raises(KeyError):
+            UserContainer(name="test", image_pull_policy="maybe")._build_image_pull_policy()
 
     def test_builds_volume_mounts(self) -> None:
         uc: ModelUserContainer = UserContainer(
