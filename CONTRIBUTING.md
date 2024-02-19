@@ -6,7 +6,7 @@ Your time is the ultimate currency, and the community highly appreciates your wi
 for the benefit of everyone! Remember to star the repo on GitHub and share Hera with your colleagues to grow our community!
 
 [![Contributors](https://img.shields.io/github/contributors/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
-[![Stars](https://img.shields.io/github/stars/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
+[![Stars](https://img.shields.io/github/stars/argoproj-labs/hera)](https://github.com/argoproj-labs/hera/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
 
 ## Setting up
