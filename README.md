@@ -11,37 +11,27 @@ The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
 
-## Links
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/argoproj-labs/hera)
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
-
-[![CICD](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml)
-[![Docs](https://readthedocs.org/projects/hera/badge/?version=latest)](https://hera.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/argoproj-labs/hera/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+### PyPi stats
 
 [![Pypi](https://img.shields.io/pypi/v/hera.svg)](https://pypi.python.org/pypi/hera)
 [![Versions](https://img.shields.io/pypi/pyversions/hera.svg)](https://github.com/argoproj-labs/hera)
-
-[![CondaForge](https://anaconda.org/conda-forge/hera-workflows/badges/version.svg)](https://anaconda.org/conda-forge/hera-workflows)
-
-### PyPi stats for `hera`
 
 [![Downloads](https://static.pepy.tech/badge/hera)](https://pepy.tech/project/hera)
 [![Downloads/month](https://static.pepy.tech/badge/hera/month)](https://pepy.tech/project/hera)
 [![Downloads/week](https://static.pepy.tech/badge/hera/week)](https://pepy.tech/project/hera)
 
-### PyPi stats for `hera-workflows`
+### Repo information
 
-> **⚠ Note ⚠** The `hera-workflows` package is **deprecated** since the project
-> [renamed to Hera](https://github.com/argoproj-labs/hera/discussions/532) for V5. Please install from the `hera` PyPi
-> package.
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/license/apache-2-0/)
+[![CICD](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml/badge.svg)](https://github.com/argoproj-labs/hera/actions/workflows/cicd.yaml)
+[![Docs](https://readthedocs.org/projects/hera/badge/?version=latest)](https://hera.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/argoproj-labs/hera/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera)
 
-[![Downloads](https://static.pepy.tech/badge/hera-workflows)](https://pepy.tech/project/hera-workflows)
-[![Downloads/month](https://static.pepy.tech/badge/hera-workflows/month)](https://pepy.tech/project/hera-workflows)
-[![Downloads/week](https://static.pepy.tech/badge/hera-workflows/week)](https://pepy.tech/project/hera-workflows)
+#### Explore the code
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/argoproj-labs/hera)
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
 
 ## Hera at a glance
 
@@ -144,10 +134,15 @@ w.create()
 |----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | [PyPi](https://pypi.org/project/hera/)                   | `pip install hera`                                                                                   |
 | [PyPi](https://pypi.org/project/hera-workflows/)         | `pip install hera-workflows`                                                                         |
-| [Conda](https://anaconda.org/conda-forge/hera-workflows) | `conda install -c conda-forge hera-workflows`                                                        |
 | [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
 
 ### Optional dependencies
+
+#### yaml
+
+- Install via `hera[yaml]`
+- [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via
+  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
 
 #### cli
 
@@ -156,13 +151,7 @@ w.create()
 - The CLI aims to enable GitOps practices,
   easier debugging, and a more seamless experience with Argo Workflows.
 - **_The CLI is an experimental feature and subject to change!_** At the moment it only supports generating YAML files
-  from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information length
-
-#### yaml
-
-- Install via `hera[yaml]`
-- [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via
-  `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
+  from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information.
 
 ## Presentations
 
