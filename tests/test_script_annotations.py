@@ -196,6 +196,7 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_int", "default": "1"},
                     {"name": "another-int", "default": "42", "description": "my desc"},
+                    {"name": "no_default_param"},
                 ]
             },
             {
@@ -247,6 +248,7 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_int", "default": "2"},
                     {"name": "another-int", "default": "24", "description": "my desc"},
+                    {"name": "no_default_param", "default": "1"},
                 ],
             },
             {
@@ -263,7 +265,7 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {
                         "name": "my_inputs",
-                        "default": '[{"my_int": 1, "my_annotated_int": 42}, {"my_int": 2, "my_annotated_int": 42}]',
+                        "default": '[{"my_int": 1, "my_annotated_int": 42, "no_default_param": 1}, {"my_int": 2, "my_annotated_int": 42, "no_default_param": 2}]',
                     },
                 ],
             },

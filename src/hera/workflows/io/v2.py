@@ -5,7 +5,8 @@ RunnerInput/Output are only defined in this file if Pydantic v2 is installed.
 from collections import ChainMap
 from typing import Any, List, Optional, Union
 
-from hera.shared.serialization import serialize
+
+from hera.shared.serialization import MISSING, serialize
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
 
@@ -23,6 +24,7 @@ from importlib.util import find_spec
 
 if find_spec("pydantic.v1"):
     from pydantic import BaseModel
+    from pydantic_core import PydanticUndefined
 
     class RunnerInput(BaseModel):
         """Input model usable by the Hera Runner.
@@ -38,22 +40,24 @@ if find_spec("pydantic.v1"):
             parameters = []
             annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
-            for field in cls.model_fields:  # type: ignore
+            for field, field_info in cls.model_fields.items():
                 if get_origin(annotations[field]) is Annotated:
                     if isinstance(get_args(annotations[field])[1], Parameter):
                         param = get_args(annotations[field])[1]
                         if object_override:
                             param.default = serialize(getattr(object_override, field))
-                        elif cls.model_fields[field].default:  # type: ignore
+                        elif field_info.default:  # type: ignore
                             # Serialize the value (usually done in Parameter's validator)
-                            param.default = serialize(cls.model_fields[field].default)  # type: ignore
+                            param.default = serialize(field_info.default)  # type: ignore
                         parameters.append(param)
                 else:
                     # Create a Parameter from basic type annotations
-                    if object_override:
-                        parameters.append(Parameter(name=field, default=serialize(getattr(object_override, field))))
-                    else:
-                        parameters.append(Parameter(name=field, default=cls.model_fields[field].default))  # type: ignore
+                    default = getattr(object_override, field) if object_override else field_info.default
+                    if default == PydanticUndefined:
+                        default = MISSING
+
+                    parameters.append(Parameter(name=field, default=default or MISSING))
+
             return parameters
 
         @classmethod
