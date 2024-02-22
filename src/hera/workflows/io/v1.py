@@ -46,7 +46,9 @@ class RunnerInput(BaseModel):
             else:
                 # Create a Parameter from basic type annotations
                 default = getattr(object_override, field) if object_override else field_info.default
-                parameters.append(Parameter(name=field, default=default or MISSING))
+                if default is None:
+                    default = MISSING
+                parameters.append(Parameter(name=field, default=default))
 
         return parameters
 

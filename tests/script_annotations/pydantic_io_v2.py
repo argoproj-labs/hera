@@ -82,7 +82,10 @@ def pydantic_io_with_defaults(
 
 @script(constructor="runner")
 def pydantic_io_within_generic(
-    my_inputs: List[ParamOnlyInput] = [ParamOnlyInput(no_default_param=1), ParamOnlyInput(my_int=2,no_default_param=2)],
+    my_inputs: List[ParamOnlyInput] = [
+        ParamOnlyInput(no_default_param=1),
+        ParamOnlyInput(my_int=2, no_default_param=2),
+    ],
 ) -> ParamOnlyOutput:
     pass
 

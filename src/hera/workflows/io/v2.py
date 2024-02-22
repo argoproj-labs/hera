@@ -5,7 +5,6 @@ RunnerInput/Output are only defined in this file if Pydantic v2 is installed.
 from collections import ChainMap
 from typing import Any, List, Optional, Union
 
-
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
@@ -40,7 +39,7 @@ if find_spec("pydantic.v1"):
             parameters = []
             annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
-            for field, field_info in cls.model_fields.items():
+            for field, field_info in cls.model_fields.items():  # type: ignore
                 if get_origin(annotations[field]) is Annotated:
                     if isinstance(get_args(annotations[field])[1], Parameter):
                         param = get_args(annotations[field])[1]
@@ -56,7 +55,7 @@ if find_spec("pydantic.v1"):
                     if default == PydanticUndefined:
                         default = MISSING
 
-                    parameters.append(Parameter(name=field, default=default or MISSING))
+                    parameters.append(Parameter(name=field, default=default))
 
             return parameters
 
