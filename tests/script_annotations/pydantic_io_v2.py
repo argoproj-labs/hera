@@ -23,6 +23,7 @@ except ImportError:
 class ParamOnlyInput(RunnerInput):
     my_int: int = 1
     my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
+    no_default_param: int
 
 
 class ParamOnlyOutput(RunnerOutput):
@@ -74,14 +75,14 @@ def pydantic_io(
 
 @script(constructor="runner")
 def pydantic_io_with_defaults(
-    my_input: ParamOnlyInput = ParamOnlyInput(my_int=2, my_annotated_int=24),
+    my_input: ParamOnlyInput = ParamOnlyInput(my_int=2, my_annotated_int=24, no_default_param=1),
 ) -> ParamOnlyOutput:
     pass
 
 
 @script(constructor="runner")
 def pydantic_io_within_generic(
-    my_inputs: List[ParamOnlyInput] = [ParamOnlyInput(), ParamOnlyInput(my_int=2)],
+    my_inputs: List[ParamOnlyInput] = [ParamOnlyInput(no_default_param=1), ParamOnlyInput(my_int=2,no_default_param=2)],
 ) -> ParamOnlyOutput:
     pass
 
