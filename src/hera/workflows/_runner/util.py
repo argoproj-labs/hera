@@ -6,27 +6,20 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Callable, List, Optional, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
+from hera.workflows._runner.script_annotations_util import (
+    _map_argo_inputs_to_function,
+    _save_annotated_return_outputs,
+    _save_dummy_outputs,
+)
 from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.io.v1 import (
-    RunnerInput as RunnerInputV1,
     RunnerOutput as RunnerOutputV1,
 )
-
-try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        RunnerInput as RunnerInputV2,
-        RunnerOutput as RunnerOutputV2,
-    )
-except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        RunnerInput as RunnerInputV2,
-        RunnerOutput as RunnerOutputV2,
-    )
 from hera.workflows.script import _extract_return_annotation_output
 
 try:
@@ -34,11 +27,19 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-try:
+try:  # pydantic-v1/v2 related imports
     from pydantic.type_adapter import TypeAdapter  # type: ignore
     from pydantic.v1 import parse_obj_as  # type: ignore
+
+    from hera.workflows.io.v2 import (  # type: ignore
+        RunnerOutput as RunnerOutputV2,
+    )
 except ImportError:
     from pydantic import parse_obj_as
+
+    from hera.workflows.io.v1 import (  # type: ignore
+        RunnerOutput as RunnerOutputV2,
+    )
 
 
 def _ignore_unmatched_kwargs(f: Callable):
@@ -159,234 +160,6 @@ def _is_output_kwarg(key: str, f: Callable):
         and isinstance(get_args(param.annotation)[1], (Artifact, Parameter))
         and get_args(param.annotation)[1].output
     )
-
-
-def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
-    """Map kwargs from Argo to the function parameters using the function's parameter annotations.
-
-    For Parameter inputs:
-    * if the Parameter has a "name", replace it with the function parameter name
-    * otherwise use the function parameter name as-is
-    For Parameter outputs:
-    * update value to a Path object from the value_from.path value, or the default if not provided
-
-    For Artifact inputs:
-    * load the Artifact according to the given ArtifactLoader
-    For Artifact outputs:
-    * update value to a Path object
-    """
-    mapped_kwargs: Dict[str, Any] = {}
-
-    def map_annotated_param(param_name: str, param_annotation: Parameter) -> None:
-        if param_annotation.output:
-            if param_annotation.value_from and param_annotation.value_from.path:
-                mapped_kwargs[param_name] = Path(param_annotation.value_from.path)
-            else:
-                mapped_kwargs[param_name] = _get_outputs_path(param_annotation)
-            # Automatically create the parent directory (if required)
-            mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-        elif param_annotation.name:
-            mapped_kwargs[param_name] = kwargs[param_annotation.name]
-        else:
-            mapped_kwargs[param_name] = kwargs[param_name]
-
-    def map_annotated_artifact(param_name: str, artifact_annotation: Artifact) -> None:
-        if artifact_annotation.output:
-            if artifact_annotation.path:
-                mapped_kwargs[param_name] = Path(artifact_annotation.path)
-            else:
-                mapped_kwargs[param_name] = _get_outputs_path(artifact_annotation)
-            # Automatically create the parent directory (if required)
-            mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-        else:
-            if not artifact_annotation.path:
-                # Path was added to yaml automatically, we need to add it back in for the runner
-                artifact_annotation.path = artifact_annotation._get_default_inputs_path()
-
-            if artifact_annotation.loader == ArtifactLoader.json.value:
-                path = Path(artifact_annotation.path)
-                mapped_kwargs[param_name] = json.load(path.open())
-            elif artifact_annotation.loader == ArtifactLoader.file.value:
-                path = Path(artifact_annotation.path)
-                mapped_kwargs[param_name] = path.read_text()
-            elif artifact_annotation.loader is None:
-                mapped_kwargs[param_name] = artifact_annotation.path
-
-    T = TypeVar("T", bound=Union[RunnerInputV1, RunnerInputV2])
-
-    def map_runner_input(param_name: str, runner_input_class: T):
-        """Map argo input kwargs to the fields of the given RunnerInput.
-
-        If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
-        Otherwise, we look for the kwarg with the name of the field.
-        """
-        input_model_obj = {}
-
-        def map_field(field: str) -> Optional[str]:
-            annotation = runner_input_class.__annotations__[field]
-            if get_origin(annotation) is Annotated:
-                annotation = get_args(annotation)[1]
-                if isinstance(annotation, Parameter):
-                    map_annotated_param(field, annotation)
-                    mapped_kwargs[field] = json.loads(mapped_kwargs[field])
-                elif isinstance(annotation, Artifact):
-                    map_annotated_artifact(field, annotation)
-            else:
-                mapped_kwargs[field] = json.loads(kwargs[field])
-
-            return field
-
-        for field in runner_input_class.__fields__:
-            matched_field = map_field(field)
-            if matched_field:
-                input_model_obj[field] = mapped_kwargs[matched_field]
-
-        mapped_kwargs[param_name] = runner_input_class.parse_raw(json.dumps(input_model_obj))
-
-    for param_name, func_param in inspect.signature(function).parameters.items():
-        if get_origin(func_param.annotation) is Annotated:
-            func_param_annotation = get_args(func_param.annotation)[1]
-
-            if isinstance(func_param_annotation, Parameter):
-                map_annotated_param(param_name, func_param_annotation)
-            elif isinstance(func_param_annotation, Artifact):
-                map_annotated_artifact(param_name, func_param_annotation)
-            else:
-                mapped_kwargs[param_name] = kwargs[param_name]
-        elif get_origin(func_param.annotation) is None and issubclass(
-            func_param.annotation, (RunnerInputV1, RunnerInputV2)
-        ):
-            map_runner_input(param_name, func_param.annotation)
-        else:
-            mapped_kwargs[param_name] = kwargs[param_name]
-    return mapped_kwargs
-
-
-def _save_annotated_return_outputs(
-    function_outputs: Union[Tuple[Any], Any],
-    output_annotations: List[
-        Union[Tuple[type, Union[Parameter, Artifact]], Union[Type[RunnerOutputV1], Type[RunnerOutputV2]]]
-    ],
-) -> Optional[Union[RunnerOutputV1, RunnerOutputV2]]:
-    """Save the outputs of the function to the specified output destinations.
-
-    The output values are matched with the output annotations and saved using the schema:
-    <parent_directory>/artifacts/<name>
-    <parent_directory>/parameters/<name>
-    If the artifact path or parameter value_from.path is specified, that is used instead.
-    <parent_directory> can be provided by the user or is set to /tmp/hera-outputs by default
-    """
-    if not isinstance(function_outputs, tuple):
-        function_outputs = [function_outputs]
-    if len(function_outputs) != len(output_annotations):
-        raise ValueError("The number of outputs does not match the annotation")
-
-    if os.environ.get("hera__script_pydantic_io", None) is not None:
-        return_obj = None
-
-    for output_value, dest in zip(function_outputs, output_annotations):
-        if isinstance(output_value, (RunnerOutputV1, RunnerOutputV2)):
-            if os.environ.get("hera__script_pydantic_io", None) is None:
-                raise ValueError("hera__script_pydantic_io environment variable is not set")
-
-            return_obj = output_value
-
-            for field, value in output_value.dict().items():
-                if field in {"exit_code", "result"}:
-                    continue
-
-                matching_output = output_value._get_output(field)
-                path = _get_outputs_path(matching_output)
-                _write_to_path(path, value)
-        else:
-            assert isinstance(dest, tuple)
-            if get_origin(dest[0]) is None:
-                # Built-in types return None from get_origin, so we can check isinstance directly
-                if not isinstance(output_value, dest[0]):
-                    raise ValueError(
-                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                    )
-            else:
-                # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
-                origin_type = cast(type, get_origin(dest[0]))
-                if not isinstance(output_value, origin_type):
-                    raise ValueError(
-                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                    )
-
-            if not dest[1].name:
-                raise ValueError("The name was not provided for one of the outputs.")
-
-            path = _get_outputs_path(dest[1])
-            _write_to_path(path, output_value)
-
-    if os.environ.get("hera__script_pydantic_io", None) is not None:
-        return return_obj
-
-    return None
-
-
-def _save_dummy_outputs(
-    output_annotations: List[
-        Union[Tuple[type, Union[Parameter, Artifact]], Union[Type[RunnerOutputV1], Type[RunnerOutputV2]]]
-    ],
-) -> None:
-    """Save dummy values into the outputs specified.
-
-    This function is used at runtime by the Hera Runner to create files in the container so that Argo
-    does not log confusing error messages that obfuscate the real error, which look like:
-    ```
-    msg="cannot save parameter /tmp/hera-outputs/parameters/my-parameter"
-    argo=true
-    error="open /tmp/hera-outputs/parameters/my-parameter: no such file or directory"`
-    ```
-
-    The output annotations are used to write files using the schema:
-    <parent_directory>/artifacts/<name>
-    <parent_directory>/parameters/<name>
-    If the artifact path or parameter value_from.path is specified, that is used instead.
-    <parent_directory> can be provided by the user or is set to /tmp/hera-outputs by default
-    """
-    for dest in output_annotations:
-        if isinstance(dest, (RunnerOutputV1, RunnerOutputV2)):
-            if os.environ.get("hera__script_pydantic_io", None) is None:
-                raise ValueError("hera__script_pydantic_io environment variable is not set")
-
-            for field, _ in dest.__fields__:
-                if field in {"exit_code", "result"}:
-                    continue
-
-                annotation = dest._get_output(field)
-                path = _get_outputs_path(annotation)
-                _write_to_path(path, "")
-        else:
-            assert isinstance(dest, tuple)
-            if not dest[1].name:
-                raise ValueError("The name was not provided for one of the outputs.")
-
-            path = _get_outputs_path(dest[1])
-            _write_to_path(path, "")
-
-
-def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
-    """Get the path from the destination annotation using the defined outputs directory."""
-    path = Path(os.environ.get("hera__outputs_directory", "/tmp/hera-outputs"))
-    if isinstance(destination, Parameter) and destination.name:
-        path = path / f"parameters/{destination.name}"
-    elif isinstance(destination, Artifact):
-        if destination.path:
-            path = Path(destination.path)
-        elif destination.name:
-            path = path / f"artifacts/{destination.name}"
-    return path
-
-
-def _write_to_path(path: Path, output_value: Any) -> None:
-    """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
-    output_string = serialize(output_value)
-    if output_string is not None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(output_string)
 
 
 def _runner(entrypoint: str, kwargs_list: List) -> Any:
