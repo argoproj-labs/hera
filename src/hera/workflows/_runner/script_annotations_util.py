@@ -43,6 +43,31 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
+def get_annotated_param_value(
+    func_param_name: str,
+    param_annotation: Parameter,
+    kwargs: dict[str, Union[Path, str]],
+) -> Union[Path, str]:
+    if param_annotation.output:
+        if param_annotation.value_from and param_annotation.value_from.path:
+            path = Path(param_annotation.value_from.path)
+        else:
+            path = _get_outputs_path(param_annotation)
+        # Automatically create the parent directory (if required)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
+
+    if param_annotation.name in kwargs:
+        return kwargs[param_annotation.name]
+
+    if func_param_name in kwargs:
+        return kwargs[func_param_name]
+
+    raise RuntimeError(
+        f"Parameter {param_annotation.name if param_annotation.name else func_param_name} was not given a value"
+    )
+
+
 def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
     """Map kwargs from Argo to the function parameters using the function's parameter annotations.
 
@@ -58,19 +83,6 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
     * update value to a Path object
     """
     mapped_kwargs: Dict[str, Any] = {}
-
-    def map_annotated_param(param_name: str, param_annotation: Parameter) -> None:
-        if param_annotation.output:
-            if param_annotation.value_from and param_annotation.value_from.path:
-                mapped_kwargs[param_name] = Path(param_annotation.value_from.path)
-            else:
-                mapped_kwargs[param_name] = _get_outputs_path(param_annotation)
-            # Automatically create the parent directory (if required)
-            mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-        elif param_annotation.name:
-            mapped_kwargs[param_name] = kwargs[param_annotation.name]
-        else:
-            mapped_kwargs[param_name] = kwargs[param_name]
 
     def map_annotated_artifact(param_name: str, artifact_annotation: Artifact) -> None:
         if artifact_annotation.output:
@@ -109,8 +121,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
             if get_origin(annotation) is Annotated:
                 annotation = get_args(annotation)[1]
                 if isinstance(annotation, Parameter):
-                    map_annotated_param(field, annotation)
-                    mapped_kwargs[field] = json.loads(mapped_kwargs[field])
+                    mapped_kwargs[field] = json.loads(get_annotated_param_value(field, annotation, kwargs))
                 elif isinstance(annotation, Artifact):
                     map_annotated_artifact(field, annotation)
             else:
@@ -125,22 +136,24 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
 
         mapped_kwargs[param_name] = runner_input_class.parse_raw(json.dumps(input_model_obj))
 
-    for param_name, func_param in inspect.signature(function).parameters.items():
+    for func_param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:
             func_param_annotation = get_args(func_param.annotation)[1]
 
             if isinstance(func_param_annotation, Parameter):
-                map_annotated_param(param_name, func_param_annotation)
+                mapped_kwargs[func_param_name] = get_annotated_param_value(
+                    func_param_name, func_param_annotation, kwargs
+                )
             elif isinstance(func_param_annotation, Artifact):
-                map_annotated_artifact(param_name, func_param_annotation)
+                map_annotated_artifact(func_param_name, func_param_annotation)
             else:
-                mapped_kwargs[param_name] = kwargs[param_name]
+                mapped_kwargs[func_param_name] = kwargs[func_param_name]
         elif get_origin(func_param.annotation) is None and issubclass(
             func_param.annotation, (RunnerInputV1, RunnerInputV2)
         ):
-            map_runner_input(param_name, func_param.annotation)
+            map_runner_input(func_param_name, func_param.annotation)
         else:
-            mapped_kwargs[param_name] = kwargs[param_name]
+            mapped_kwargs[func_param_name] = kwargs[func_param_name]
     return mapped_kwargs
 
 

@@ -15,7 +15,7 @@ import pytest
 from pydantic import ValidationError
 
 import tests.helper as test_module
-from hera.shared import GlobalConfig
+from hera.shared._global_config import _GlobalConfig
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner
@@ -86,7 +86,7 @@ def test_parameter_loading(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
 ):
     # GIVEN
@@ -138,7 +138,7 @@ def test_runner_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
 ):
     # GIVEN
@@ -194,7 +194,7 @@ def test_runner_annotated_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     pydantic_mode,
     environ_annotations_fixture: None,
     monkeypatch,
@@ -302,7 +302,7 @@ def test_script_annotations_outputs(
     function_name,
     kwargs_list: List[Dict[str, str]],
     expected_files: List[Dict[str, str]],
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     tmp_path: Path,
     monkeypatch,
@@ -353,7 +353,7 @@ def test_script_raising_error_still_outputs(
     function_name,
     expected_error: type,
     expected_files: List[Dict[str, str]],
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     tmp_path: Path,
     monkeypatch,
@@ -415,7 +415,7 @@ def test_script_annotations_outputs_exceptions(
     function_name,
     kwargs_list: List[Dict[str, str]],
     exception,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
 ):
     """Test that the output annotations throw the expected exceptions."""
@@ -488,7 +488,7 @@ def test_script_annotations_artifact_inputs(
     expected_output,
     tmp_path: Path,
     monkeypatch,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
@@ -515,7 +515,7 @@ def test_script_annotations_artifact_inputs(
 
 
 def test_script_annotations_artifact_input_loader_error(
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
 ):
     """Test that the input artifact loaded with wrong type throws the expected exception."""
@@ -553,7 +553,7 @@ def test_script_annotations_artifacts_no_path(
     expected_output,
     tmp_path: Path,
     monkeypatch,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
@@ -575,7 +575,7 @@ def test_script_annotations_artifacts_no_path(
 
 
 def test_script_annotations_artifacts_wrong_loader(
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
 ):
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
@@ -592,7 +592,7 @@ def test_script_annotations_artifacts_wrong_loader(
     assert "value is not a valid enumeration member" in str(e.value)
 
 
-def test_script_annotations_unknown_type(global_config_fixture: GlobalConfig):
+def test_script_annotations_unknown_type(global_config_fixture: _GlobalConfig):
     # GIVEN
     expected_output = "a string"
     entrypoint = "tests.script_runner.unknown_annotation_types:unknown_annotations_ignored"
@@ -700,7 +700,7 @@ def test_runner_pydantic_inputs_params(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     pydantic_mode,
     environ_annotations_fixture: None,
     monkeypatch,
@@ -740,7 +740,7 @@ def test_runner_pydantic_output_params(
     entrypoint,
     expected_files,
     pydantic_mode,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     monkeypatch,
     tmp_path: Path,
@@ -789,7 +789,7 @@ def test_runner_pydantic_input_artifacts(
     input_files: Dict,
     expected_output,
     pydantic_mode,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     monkeypatch,
     tmp_path: Path,
@@ -843,7 +843,7 @@ def test_runner_pydantic_output_artifacts(
     input_files: Dict,
     expected_files,
     pydantic_mode,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     monkeypatch,
     tmp_path: Path,
@@ -894,7 +894,7 @@ def test_runner_pydantic_output_with_exit_code(
     entrypoint,
     expected_files,
     pydantic_mode,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     monkeypatch,
     tmp_path: Path,
@@ -941,7 +941,7 @@ def test_run_pydantic_output_with_exit_code(
     entrypoint,
     expected_files,
     pydantic_mode,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     monkeypatch,
     tmp_path: Path,
@@ -995,7 +995,7 @@ def test_runner_pydantic_output_with_result(
     expected_files,
     expected_result,
     pydantic_mode,
-    global_config_fixture: GlobalConfig,
+    global_config_fixture: _GlobalConfig,
     environ_annotations_fixture: None,
     monkeypatch,
     tmp_path: Path,
