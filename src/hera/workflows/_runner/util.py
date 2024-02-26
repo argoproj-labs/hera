@@ -6,7 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
@@ -180,7 +180,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     if hasattr(function, "wrapped_function"):
         function = function.wrapped_function
     # convert the kwargs list to a dict
-    kwargs = {}
+    kwargs: Dict[str, str] = {}
     for kwarg in kwargs_list:
         if "name" not in kwarg or "value" not in kwarg:
             continue

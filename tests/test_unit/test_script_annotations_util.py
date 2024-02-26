@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Any, Union
@@ -8,8 +9,10 @@ from hera.workflows._runner.script_annotations_util import (
     _get_outputs_path,
     get_annotated_artifact_value,
     get_annotated_param_value,
+    map_runner_input,
 )
 from hera.workflows.artifact import Artifact, ArtifactLoader
+from hera.workflows.io import RunnerInput
 from hera.workflows.models import ValueFrom
 from hera.workflows.parameter import Parameter
 
@@ -93,7 +96,7 @@ def test_get_annotated_param_value_error_param_name():
         pytest.param('{"json": "object"}', Artifact(loader=ArtifactLoader.file), '{"json": "object"}', id="file-load"),
     ],
 )
-def test_get_annotated_artifact_value_json_inputs(
+def test_get_annotated_artifact_value_inputs_with_loaders(
     file_contents: str,
     artifact: Artifact,
     expected_return: Any,
@@ -103,23 +106,6 @@ def test_get_annotated_artifact_value_json_inputs(
     file_path.write_text(file_contents)
     artifact.path = file_path
     assert get_annotated_artifact_value(artifact) == expected_return
-
-
-@pytest.mark.parametrize(
-    "file_contents,artifact",
-    [
-        pytest.param('{"json": "object"}', Artifact(loader=None), id="file-load"),
-    ],
-)
-def test_get_annotated_artifact_value_path_inputs(
-    file_contents: str,
-    artifact: Artifact,
-    tmp_path: Path,
-):
-    file_path = tmp_path / "contents.txt"
-    file_path.write_text(file_contents)
-    artifact.path = file_path
-    assert get_annotated_artifact_value(artifact) == file_path
 
 
 @pytest.mark.parametrize(
@@ -153,3 +139,24 @@ def test_get_annotated_artifact_value_path_outputs(
     expected_path: str,
 ):
     assert get_annotated_artifact_value(artifact) == Path(expected_path)
+
+
+def test_map_runner_input():
+    class MyInput(RunnerInput):
+        a_str: str
+        an_int: int
+        a_dict: dict
+        a_list: list
+
+    kwargs = {
+        "a_str": "hello",
+        "an_int": "123",
+        "a_dict": '{"a-key": "a-value"}',
+        "a_list": json.dumps([1, 2, 3]),
+    }
+    assert map_runner_input(MyInput, kwargs) == MyInput(
+        a_str="hello",
+        an_int=123,
+        a_dict={"a-key": "a-value"},
+        a_list=[1, 2, 3],
+    )

@@ -111,7 +111,50 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     raise RuntimeError(f"Artifact {artifact_annotation.name} was not given a value")
 
 
-def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
+T = TypeVar("T", bound=Union[RunnerInputV1, RunnerInputV2])
+
+
+def map_runner_input(
+    runner_input_class: T,
+    kwargs: dict[str, Union[Path, str]],
+) -> T:
+    """Map argo input kwargs to the fields of the given RunnerInput, return an instance of the class.
+
+    If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
+    Otherwise, we look for the kwarg with the name of the field.
+    """
+    input_model_obj = {}
+
+    def load_parameter_value(value: str) -> Any:
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+
+    def map_field(
+        field: str,
+        kwargs: dict[str, Union[Path, str]],
+    ) -> Any:
+        annotation = runner_input_class.__annotations__[field]
+        if get_origin(annotation) is Annotated:
+            annotation = get_args(annotation)[1]
+            if isinstance(annotation, Parameter):
+                assert not annotation.output
+                return load_parameter_value(get_annotated_param_value(field, annotation, kwargs))
+
+            if isinstance(annotation, Artifact):
+                return get_annotated_artifact_value(annotation)
+
+        # change to _parse to better deal with raw strings and json-serialised strings
+        return load_parameter_value(kwargs[field])
+
+    for field in runner_input_class.__fields__:
+        input_model_obj[field] = map_field(field, kwargs)
+
+    return runner_input_class.parse_raw(json.dumps(input_model_obj))
+
+
+def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> Dict:
     """Map kwargs from Argo to the function parameters using the function's parameter annotations.
 
     For Parameter inputs:
@@ -126,36 +169,6 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
     * update value to a Path object
     """
     mapped_kwargs: Dict[str, Any] = {}
-
-    T = TypeVar("T", bound=Union[RunnerInputV1, RunnerInputV2])
-
-    def map_runner_input(param_name: str, runner_input_class: T):
-        """Map argo input kwargs to the fields of the given RunnerInput.
-
-        If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
-        Otherwise, we look for the kwarg with the name of the field.
-        """
-        input_model_obj = {}
-
-        def map_field(field: str) -> Optional[str]:
-            annotation = runner_input_class.__annotations__[field]
-            if get_origin(annotation) is Annotated:
-                annotation = get_args(annotation)[1]
-                if isinstance(annotation, Parameter):
-                    mapped_kwargs[field] = json.loads(get_annotated_param_value(field, annotation, kwargs))
-                elif isinstance(annotation, Artifact):
-                    mapped_kwargs[field] = get_annotated_artifact_value(annotation)
-            else:
-                mapped_kwargs[field] = json.loads(kwargs[field])
-
-            return field
-
-        for field in runner_input_class.__fields__:
-            matched_field = map_field(field)
-            if matched_field:
-                input_model_obj[field] = mapped_kwargs[matched_field]
-
-        mapped_kwargs[param_name] = runner_input_class.parse_raw(json.dumps(input_model_obj))
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
         if get_origin(func_param.annotation) is Annotated:
@@ -172,7 +185,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
         elif get_origin(func_param.annotation) is None and issubclass(
             func_param.annotation, (RunnerInputV1, RunnerInputV2)
         ):
-            map_runner_input(func_param_name, func_param.annotation)
+            mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
         else:
             mapped_kwargs[func_param_name] = kwargs[func_param_name]
     return mapped_kwargs
