@@ -48,6 +48,12 @@ def get_annotated_param_value(
     param_annotation: Parameter,
     kwargs: dict[str, Union[Path, str]],
 ) -> Union[Path, str]:
+    """Get the value from a given function param and its annotation.
+
+    If the parameter is an output, return the path it will write to.
+    If the parameter is an input, return the string value from the kwargs dict,
+    which could be from the param_annotation.name if given, or func_param_name.
+    """
     if param_annotation.output:
         if param_annotation.value_from and param_annotation.value_from.path:
             path = Path(param_annotation.value_from.path)
@@ -68,6 +74,43 @@ def get_annotated_param_value(
     )
 
 
+def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
+    """Get the value of the given Artifact annotation.
+
+    If the artifact is an output, return the path it will write to.
+    If the artifact is an input, return the loaded value (json, path or string) using its ArtifactLoader.
+
+    As Artifacts are always Annotated in function parameters, we don't need to consider
+    the `kwargs` or the function parameter name.
+    """
+    if artifact_annotation.output:
+        if artifact_annotation.path:
+            path = Path(artifact_annotation.path)
+        else:
+            path = _get_outputs_path(artifact_annotation)
+        # Automatically create the parent directory (if required)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
+
+    if not artifact_annotation.path:
+        # Path is added to the spec automatically when built. As it isn't present in the annotation itself,
+        # we need to add it back in for the runner.
+        artifact_annotation.path = artifact_annotation._get_default_inputs_path()
+
+    if artifact_annotation.loader == ArtifactLoader.json.value:
+        path = Path(artifact_annotation.path)
+        return json.load(path.open())
+
+    if artifact_annotation.loader == ArtifactLoader.file.value:
+        path = Path(artifact_annotation.path)
+        return path.read_text()
+
+    if artifact_annotation.loader is None:
+        return artifact_annotation.path
+
+    raise RuntimeError(f"Artifact {artifact_annotation.name} was not given a value")
+
+
 def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
     """Map kwargs from Argo to the function parameters using the function's parameter annotations.
 
@@ -83,28 +126,6 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
     * update value to a Path object
     """
     mapped_kwargs: Dict[str, Any] = {}
-
-    def map_annotated_artifact(param_name: str, artifact_annotation: Artifact) -> None:
-        if artifact_annotation.output:
-            if artifact_annotation.path:
-                mapped_kwargs[param_name] = Path(artifact_annotation.path)
-            else:
-                mapped_kwargs[param_name] = _get_outputs_path(artifact_annotation)
-            # Automatically create the parent directory (if required)
-            mapped_kwargs[param_name].parent.mkdir(parents=True, exist_ok=True)
-        else:
-            if not artifact_annotation.path:
-                # Path was added to yaml automatically, we need to add it back in for the runner
-                artifact_annotation.path = artifact_annotation._get_default_inputs_path()
-
-            if artifact_annotation.loader == ArtifactLoader.json.value:
-                path = Path(artifact_annotation.path)
-                mapped_kwargs[param_name] = json.load(path.open())
-            elif artifact_annotation.loader == ArtifactLoader.file.value:
-                path = Path(artifact_annotation.path)
-                mapped_kwargs[param_name] = path.read_text()
-            elif artifact_annotation.loader is None:
-                mapped_kwargs[param_name] = artifact_annotation.path
 
     T = TypeVar("T", bound=Union[RunnerInputV1, RunnerInputV2])
 
@@ -123,7 +144,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
                 if isinstance(annotation, Parameter):
                     mapped_kwargs[field] = json.loads(get_annotated_param_value(field, annotation, kwargs))
                 elif isinstance(annotation, Artifact):
-                    map_annotated_artifact(field, annotation)
+                    mapped_kwargs[field] = get_annotated_artifact_value(annotation)
             else:
                 mapped_kwargs[field] = json.loads(kwargs[field])
 
@@ -145,7 +166,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict) -> Dict:
                     func_param_name, func_param_annotation, kwargs
                 )
             elif isinstance(func_param_annotation, Artifact):
-                map_annotated_artifact(func_param_name, func_param_annotation)
+                mapped_kwargs[func_param_name] = get_annotated_artifact_value(func_param_annotation)
             else:
                 mapped_kwargs[func_param_name] = kwargs[func_param_name]
         elif get_origin(func_param.annotation) is None and issubclass(
