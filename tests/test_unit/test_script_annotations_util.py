@@ -160,3 +160,17 @@ def test_map_runner_input():
         a_dict={"a-key": "a-value"},
         a_list=[1, 2, 3],
     )
+
+
+def test_map_runner_input_strings():
+    """Test the parsing logic when str type fields are passed json-serialized strings."""
+
+    class MyInput(RunnerInput):
+        a_dict_str: str
+        a_list_str: str
+
+    kwargs = {"a_dict_str": json.dumps({"key": "value"}), "a_list_str": json.dumps([1, 2, 3])}
+    assert map_runner_input(MyInput, kwargs) == MyInput(
+        a_dict_str=json.dumps({"key": "value"}),
+        a_list_str=json.dumps([1, 2, 3]),
+    )

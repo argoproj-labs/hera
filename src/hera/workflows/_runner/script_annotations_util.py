@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
+from hera.shared._pydantic import BaseModel, get_fields
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
@@ -118,7 +119,7 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     raise RuntimeError(f"Artifact {artifact_annotation.name} was not given a value")
 
 
-T = TypeVar("T", bound=Union[RunnerInputV1, RunnerInputV2])
+T = TypeVar("T", bound=Type[BaseModel])
 
 
 def map_runner_input(
@@ -130,9 +131,14 @@ def map_runner_input(
     If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
     Otherwise, we look for the kwarg with the name of the field.
     """
+    from hera.workflows._runner.util import _get_type
+
     input_model_obj = {}
 
-    def load_parameter_value(value: str) -> Any:
+    def load_parameter_value(value: str, value_type: type) -> Any:
+        if issubclass(_get_type(value_type), str):
+            return value
+
         try:
             return json.loads(value)
         except json.JSONDecodeError:
@@ -144,18 +150,20 @@ def map_runner_input(
     ) -> Any:
         annotation = runner_input_class.__annotations__[field]
         if get_origin(annotation) is Annotated:
-            annotation = get_args(annotation)[1]
-            if isinstance(annotation, Parameter):
-                assert not annotation.output
-                return load_parameter_value(_get_annotated_input_param_value(field, annotation, kwargs))
+            meta_annotation = get_args(annotation)[1]
+            if isinstance(meta_annotation, Parameter):
+                assert not meta_annotation.output
+                return load_parameter_value(
+                    _get_annotated_input_param_value(field, meta_annotation, kwargs),
+                    get_args(annotation)[0],
+                )
 
-            if isinstance(annotation, Artifact):
-                return get_annotated_artifact_value(annotation)
+            if isinstance(meta_annotation, Artifact):
+                return get_annotated_artifact_value(meta_annotation)
 
-        # change to _parse to better deal with raw strings and json-serialised strings
-        return load_parameter_value(kwargs[field])
+        return load_parameter_value(kwargs[field], annotation)
 
-    for field in runner_input_class.__fields__:
+    for field in get_fields(runner_input_class):
         input_model_obj[field] = map_field(field, kwargs)
 
     return cast(T, runner_input_class.parse_raw(json.dumps(input_model_obj)))
@@ -288,7 +296,7 @@ def _save_dummy_outputs(
             if os.environ.get("hera__script_pydantic_io", None) is None:
                 raise ValueError("hera__script_pydantic_io environment variable is not set")
 
-            for field, _ in dest.__fields__:
+            for field in get_fields(dest):
                 if field in {"exit_code", "result"}:
                     continue
 

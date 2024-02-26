@@ -42,7 +42,7 @@ except ImportError:
     )
 
 
-def _ignore_unmatched_kwargs(f: Callable):
+def _ignore_unmatched_kwargs(f: Callable) -> Callable:
     """Make function ignore unmatched kwargs.
 
     If the function already has the catch all **kwargs, do nothing.
@@ -73,7 +73,7 @@ def _is_kwarg_of(key: str, f: Callable) -> bool:
     )
 
 
-def _parse(value: str, key: str, f: Callable):
+def _parse(value: str, key: str, f: Callable) -> Any:
     """Parse a value to the correct type.
 
     Args:
@@ -106,10 +106,7 @@ def _parse(value: str, key: str, f: Callable):
         return value
 
 
-def _get_type(key: str, f: Callable) -> Optional[type]:
-    type_ = inspect.signature(f).parameters[key].annotation
-    if type_ is inspect.Parameter.empty:
-        return None
+def _get_type(type_: type) -> type:
     if get_origin(type_) is None:
         return type_
     origin_type = cast(type, get_origin(type_))
@@ -136,13 +133,15 @@ def _get_unannotated_type(key: str, f: Callable) -> Optional[type]:
 
 def _is_str_kwarg_of(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` has a type annotation of a subclass of str."""
-    type_ = _get_type(key, f)
-    if type_ is None:
+    func_param_annotation = inspect.signature(f).parameters[key].annotation
+    if func_param_annotation is inspect.Parameter.empty:
         return False
+
+    type_ = _get_type(func_param_annotation)
     return issubclass(type_, str)
 
 
-def _is_artifact_loaded(key: str, f: Callable):
+def _is_artifact_loaded(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is actually an Artifact that has already been loaded."""
     param = inspect.signature(f).parameters[key]
     return (
@@ -152,7 +151,7 @@ def _is_artifact_loaded(key: str, f: Callable):
     )
 
 
-def _is_output_kwarg(key: str, f: Callable):
+def _is_output_kwarg(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is an output Artifact/Parameter."""
     param = inspect.signature(f).parameters[key]
     return (
@@ -228,7 +227,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     return function(**kwargs)
 
 
-def _parse_args():
+def _parse_args() -> argparse.Namespace:
     """Creates an argparse for the runner function.
 
     The returned argparse takes a module and function name as flags and a path to a json file as an argument.
@@ -239,7 +238,7 @@ def _parse_args():
     return parser.parse_args()
 
 
-def _run():
+def _run() -> None:
     """Runs a function from a specific path using parsed arguments from Argo.
 
     Note that this prints the result of the function to stdout, which is the normal mode of operation for Argo. Any
