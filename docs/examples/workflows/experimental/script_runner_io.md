@@ -1,4 +1,4 @@
-# Script Pydantic Io
+# Script Runner Io
 
 
 
@@ -14,7 +14,8 @@
         from pydantic import BaseModel
 
     from hera.shared import global_config
-    from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
+    from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
+    from hera.workflows.archive import NoneArchiveStrategy
     from hera.workflows.io import RunnerInput, RunnerOutput
 
     try:
@@ -27,7 +28,7 @@
 
 
     class MyObject(BaseModel):
-        a_dict: dict = {}
+        a_dict: dict  # not giving a default makes the field a required input for the template
         a_str: str = "a default string"
 
 
@@ -44,7 +45,12 @@
         artifact_int: Annotated[int, Artifact(name="artifact-output")]
 
 
-    @script(constructor="runner")
+    @script(constructor="runner", image="python-image-built-with-my-package")
+    def writer() -> Annotated[int, Artifact(name="int-artifact", archive=NoneArchiveStrategy())]:
+        return 100
+
+
+    @script(constructor="runner", image="python-image-built-with-my-package")
     def pydantic_io(
         my_input: MyInput,
     ) -> MyOutput:
@@ -52,7 +58,17 @@
 
 
     with Workflow(generate_name="pydantic-io-") as w:
-        pydantic_io()
+        with Steps(name="use-pydantic-io"):
+            write_step = writer()
+            pydantic_io(
+                arguments=[
+                    write_step.get_artifact("int-artifact").with_name("artifact-input"),
+                    {
+                        "param_int": 101,
+                        "an_object": MyObject(a_dict={"my-new-key": "my-new-value"}),
+                    },
+                ]
+            )
     ```
 
 === "YAML"
@@ -64,6 +80,46 @@
       generateName: pydantic-io-
     spec:
       templates:
+      - name: use-pydantic-io
+        steps:
+        - - name: writer
+            template: writer
+        - - arguments:
+              artifacts:
+              - from: '{{steps.writer.outputs.artifacts.int-artifact}}'
+                name: artifact-input
+              parameters:
+              - name: param_int
+                value: '101'
+              - name: an_object
+                value: '{"a_dict": {"my-new-key": "my-new-value"}, "a_str": "a default
+                  string"}'
+            name: pydantic-io
+            template: pydantic-io
+      - name: writer
+        outputs:
+          artifacts:
+          - archive:
+              none: {}
+            name: int-artifact
+            path: /tmp/hera-outputs/artifacts/int-artifact
+        script:
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.experimental.script_runner_io:writer
+          command:
+          - python
+          env:
+          - name: hera__script_annotations
+            value: ''
+          - name: hera__outputs_directory
+            value: /tmp/hera-outputs
+          - name: hera__script_pydantic_io
+            value: ''
+          image: python-image-built-with-my-package
+          source: '{{inputs.parameters}}'
       - inputs:
           artifacts:
           - name: artifact-input
@@ -87,7 +143,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_pydantic_io:pydantic_io
+          - examples.workflows.experimental.script_runner_io:pydantic_io
           command:
           - python
           env:
@@ -97,7 +153,7 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.8
+          image: python-image-built-with-my-package
           source: '{{inputs.parameters}}'
     ```
 

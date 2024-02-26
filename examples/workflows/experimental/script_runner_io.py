@@ -4,7 +4,8 @@ except ImportError:
     from pydantic import BaseModel
 
 from hera.shared import global_config
-from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
+from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
+from hera.workflows.archive import NoneArchiveStrategy
 from hera.workflows.io import RunnerInput, RunnerOutput
 
 try:
@@ -17,7 +18,7 @@ global_config.experimental_features["script_pydantic_io"] = True
 
 
 class MyObject(BaseModel):
-    a_dict: dict = {}
+    a_dict: dict  # not giving a default makes the field a required input for the template
     a_str: str = "a default string"
 
 
@@ -34,7 +35,12 @@ class MyOutput(RunnerOutput):
     artifact_int: Annotated[int, Artifact(name="artifact-output")]
 
 
-@script(constructor="runner")
+@script(constructor="runner", image="python-image-built-with-my-package")
+def writer() -> Annotated[int, Artifact(name="int-artifact", archive=NoneArchiveStrategy())]:
+    return 100
+
+
+@script(constructor="runner", image="python-image-built-with-my-package")
 def pydantic_io(
     my_input: MyInput,
 ) -> MyOutput:
@@ -42,4 +48,14 @@ def pydantic_io(
 
 
 with Workflow(generate_name="pydantic-io-") as w:
-    pydantic_io()
+    with Steps(name="use-pydantic-io"):
+        write_step = writer()
+        pydantic_io(
+            arguments=[
+                write_step.get_artifact("int-artifact").with_name("artifact-input"),
+                {
+                    "param_int": 101,
+                    "an_object": MyObject(a_dict={"my-new-key": "my-new-value"}),
+                },
+            ]
+        )
