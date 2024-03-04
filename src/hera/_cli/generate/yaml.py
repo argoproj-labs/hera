@@ -11,6 +11,13 @@ from typing import Generator, Iterable, List
 from hera._cli.base import GenerateYaml
 from hera.workflows.workflow import Workflow
 
+DEFAULT_EXTENSION = ".yaml"
+YAML_EXTENSIONS = {".yml", ".yaml"}
+
+
+def _write_workflow_to_yaml(target_file: Path, content: str):
+    target_file.write_text(content)
+
 
 def generate_yaml(options: GenerateYaml):
     """Generate yaml from Python Workflow definitions.
@@ -34,18 +41,19 @@ def generate_yaml(options: GenerateYaml):
 
     # When `to` write file(s) to disk, otherwise output everything to stdout.
     if options.to:
-        dest_is_file = os.path.exists(options.to) and options.to.is_file()
+        dest_is_file = options.to.suffix.lower() in YAML_EXTENSIONS
 
         if dest_is_file:
+            os.makedirs(options.to.parent, exist_ok=True)
+
             output = join_workflows(o for _, o in path_to_output)
-            options.to.write_text(output)
+            _write_workflow_to_yaml(options.to, output)
 
         else:
             os.makedirs(options.to, exist_ok=True)
 
             for dest_path, content in path_to_output:
-                full_path = (options.to / dest_path).with_suffix(".yaml")
-                full_path.write_text(content)
+                _write_workflow_to_yaml((options.to / dest_path).with_suffix(DEFAULT_EXTENSION), content)
 
     else:
         output = join_workflows(o for _, o in path_to_output)
