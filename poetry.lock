@@ -122,16 +122,17 @@ virtualenv = ["virtualenv (>=20.0.35)"]
 
 [[package]]
 name = "cappa"
-version = "0.16.2"
+version = "0.17.0"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = ">=3.8,<4"
 files = [
-    {file = "cappa-0.16.2-py3-none-any.whl", hash = "sha256:57bd3e7b67cceda490fdb10635e2fe8cbe69fb8657974c8017b03f594bc10740"},
-    {file = "cappa-0.16.2.tar.gz", hash = "sha256:f5274af7aca86a7fe6a5d5904b2b686941a1e87c0744928c8465cf2d5795e1eb"},
+    {file = "cappa-0.17.0-py3-none-any.whl", hash = "sha256:3e620a9e947c784bc327d58cce9f6f8f824b51782ef3cfaccb06cef9d1f458a7"},
+    {file = "cappa-0.17.0.tar.gz", hash = "sha256:9a3c45255e2da19c397343dff0164dd0bbdaec9a1ca4721b692421b0c7b6cdd4"},
 ]
 
 [package.dependencies]
+eval_type_backport = {version = "*", markers = "python_version < \"3.10\""}
 rich = "*"
 typing-extensions = ">=4.7.1"
 typing-inspect = ">=0.9.0"
@@ -409,6 +410,20 @@ files = [
 [package.dependencies]
 dnspython = ">=2.0.0"
 idna = ">=2.0.0"
+
+[[package]]
+name = "eval-type-backport"
+version = "0.1.3"
+description = "Like `typing._eval_type`, but lets older Python versions use newer typing features."
+optional = true
+python-versions = ">=3.7"
+files = [
+    {file = "eval_type_backport-0.1.3-py3-none-any.whl", hash = "sha256:519d2a993b3da286df9f90e17f503f66435106ad870cf26620c5720e2158ddf2"},
+    {file = "eval_type_backport-0.1.3.tar.gz", hash = "sha256:d83ee225331dfa009493cec1f3608a71550b515ee4749abe78da14e3c5e314f5"},
+]
+
+[package.extras]
+tests = ["pytest"]
 
 [[package]]
 name = "exceptiongroup"
@@ -1303,4 +1318,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4"
-content-hash = "e024a0e1b29f41874315dbfb8efef34661ac03eeb5599004f628b4f0a5937cae"
+content-hash = "fc1d9123c59481cef184ce77a63fc46b30f43b5719e2027fb726f49e222f1051"
