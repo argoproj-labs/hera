@@ -107,8 +107,7 @@ Explore the examples through the side bar!
 | [template-defaults](https://github.com/argoproj/argo-workflows/blob/main/examples/template-defaults.yaml) |
 | [testvolume](https://github.com/argoproj/argo-workflows/blob/main/examples/testvolume.yaml) |
 | [timeouts-step](https://github.com/argoproj/argo-workflows/blob/main/examples/timeouts-step.yaml) |
-| [title-and-description-with-markdown](https://github.com/argoproj/argo-workflows/blob/main/examples/title-and-description-with-markdown.yaml) |
-| [withsequence-nested-result](https://github.com/argoproj/argo-workflows/blob/main/examples/withsequence-nested-result.yaml) |
+| [title-and-descriptin-with-markdown](https://github.com/argoproj/argo-workflows/blob/main/examples/title-and-descriptin-with-markdown.yaml) |
 | [work-avoidance](https://github.com/argoproj/argo-workflows/blob/main/examples/work-avoidance.yaml) |
 | [workflow-count-resourcequota](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-count-resourcequota.yaml) |
 | [workflow-event-binding/event-consumer-workfloweventbinding](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/event-consumer-workfloweventbinding.yaml) |
