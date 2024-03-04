@@ -1,0 +1,81 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pydantic-io-
+spec:
+  templates:
+  - name: use-pydantic-io
+    steps:
+    - - name: writer
+        template: writer
+    - - arguments:
+          artifacts:
+          - from: '{{steps.writer.outputs.artifacts.int-artifact}}'
+            name: artifact-input
+          parameters:
+          - name: param_int
+            value: '101'
+          - name: an_object
+            value: '{"a_dict": {"my-new-key": "my-new-value"}, "a_str": "a default
+              string"}'
+        name: pydantic-io
+        template: pydantic-io
+  - name: writer
+    outputs:
+      artifacts:
+      - archive:
+          none: {}
+        name: int-artifact
+        path: /tmp/hera-outputs/artifacts/int-artifact
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.script_runner_io:writer
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python-image-built-with-my-package
+      source: '{{inputs.parameters}}'
+  - inputs:
+      artifacts:
+      - name: artifact-input
+        path: /tmp/hera-inputs/artifacts/artifact-input
+      parameters:
+      - default: '42'
+        name: param-input
+      - default: '{"a_dict": {"my-key": "a-value"}, "a_str": "hello world!"}'
+        name: obj-input
+    name: pydantic-io
+    outputs:
+      artifacts:
+      - name: artifact-output
+        path: /tmp/hera-outputs/artifacts/artifact-output
+      parameters:
+      - name: param-output
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/param-output
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.script_runner_io:pydantic_io
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python-image-built-with-my-package
+      source: '{{inputs.parameters}}'

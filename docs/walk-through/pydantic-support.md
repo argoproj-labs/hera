@@ -14,3 +14,6 @@ validate the function call. Using Pydantic classes in your function parameters u
 de-serializing features of Pydantic when running on Argo. Your functions can return objects that are serialized, passed
 to another `Step` as a string argument, and then de-serialized in another function. This flow can be seen in
 [the callable scripts example](../examples/workflows/scripts/callable_script.md).
+
+The new experimental Runner IO feature provides a way to specify composite inputs using the class fields, which become the
+template's inputs. Read more in the [Script Runner IO guide](../user-guides/scripts-runner-io.md).

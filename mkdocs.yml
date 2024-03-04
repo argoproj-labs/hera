@@ -27,7 +27,10 @@ nav:
     - History of Hera: contributing/history.md
   - User Guides:
     - Core Concepts: user-guides/core-concepts.md
-    - Scripts: user-guides/scripts.md
+    - Scripts:
+      - Script Basics: user-guides/script-basics.md
+      - Script Annotations: user-guides/script-annotations.md
+      - Script Runner IO: user-guides/script-runner-io.md
     - Expr Transpiler: user-guides/expr.md
   - Examples:
     - About: examples/workflows-examples.md

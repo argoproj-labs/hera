@@ -67,8 +67,8 @@ def echo_twice(message: str):
 ```
 
 For an in-depth explanation of the mechanics of the script decorator, see the
-[script decorator section](../user-guides/scripts.md#script-decorator) in the scripts user guide, and read about
-building your own image in the [script constructors section](../user-guides/scripts.md#script-constructors).
+[script decorator section](../user-guides/script-basics.md#script-decorator) in the scripts user guide, and read about
+building your own image in the [script constructors section](../user-guides/script-basics.md#script-constructors).
 
 ## The Workflow Context Manager
 
