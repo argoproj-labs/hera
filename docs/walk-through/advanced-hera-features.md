@@ -117,7 +117,7 @@ This feature can be enabled by setting the `experimental_feature` flag `script_a
 global_config.experimental_features["script_annotations"] = True
 ```
 
-Read the full guide on script annotations in [the script user guide](../user-guides/scripts.md#script-annotations).
+Read the full guide on script annotations in [the script user guide](../user-guides/script-annotations.md).
 
 ### Script IO Models
 
@@ -133,7 +133,7 @@ To enable Hera input/output models, you must set the `experimental_feature` flag
 global_config.experimental_features["script_pydantic_io"] = True
 ```
 
-Read the full guide on script pydantic IO in [the script user guide](../user-guides/scripts.md#script-pydantic-io).
+Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
 
 
 ## Graduated features
@@ -150,4 +150,4 @@ Argo. The image used by the script should be built from the source code package 
 source code's functions, dependencies, and Hera itself are available to run. The `RunnerScriptConstructor` is also
 compatible with Pydantic so supports deserializing inputs to Python objects and serializing outputs to json strings.
 
-Read [the Script Guide](../user-guides/scripts.md#runnerscriptconstructor) to learn more!
+Read [the Script Guide](../user-guides/script-basics.md#runnerscriptconstructor) to learn more!
