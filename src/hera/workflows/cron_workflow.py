@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
+
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
@@ -73,13 +74,13 @@ class CronWorkflow(Workflow):
     """
 
     concurrency_policy: Annotated[Optional[str], _CronWorkflowModelMapper("spec.concurrency_policy")] = None
-    failed_jobs_history_limit: Annotated[
-        Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")
-    ] = None
+    failed_jobs_history_limit: Annotated[Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")] = (
+        None
+    )
     schedule: Annotated[str, _CronWorkflowModelMapper("spec.schedule")]
-    starting_deadline_seconds: Annotated[
-        Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")
-    ] = None
+    starting_deadline_seconds: Annotated[Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")] = (
+        None
+    )
     successful_jobs_history_limit: Annotated[
         Optional[int], _CronWorkflowModelMapper("spec.successful_jobs_history_limit")
     ] = None

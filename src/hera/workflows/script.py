@@ -667,8 +667,7 @@ def script(**script_kwargs):
             ...
 
         @overload
-        def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]:
-            ...
+        def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]: ...
 
         @wraps(func)
         def task_wrapper(*args, **kwargs):

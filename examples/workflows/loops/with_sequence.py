@@ -1,6 +1,7 @@
 """
 This example showcases how to generate and parallelize generated sequences
 """
+
 from hera.workflows import DAG, Workflow, script
 from hera.workflows.models import Sequence
 

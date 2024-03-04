@@ -1,4 +1,5 @@
 """A script that constructs Hera's main init files that supports importing all the Hera models."""
+
 import importlib
 import pkgutil
 from pathlib import Path

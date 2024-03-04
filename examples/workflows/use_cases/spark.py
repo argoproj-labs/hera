@@ -3,6 +3,7 @@
 This is not a comprehensive example that showcases how to spin up a Spark cluster, but rather a simple example that
 compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https://sparkbyexamples.com/pyspark-tutorial/
 """
+
 from hera.workflows import DAG, Resources, Workflow, script
 
 

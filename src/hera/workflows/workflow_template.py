@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
+
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 

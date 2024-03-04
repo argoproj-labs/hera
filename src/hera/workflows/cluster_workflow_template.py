@@ -1,4 +1,5 @@
 """Module that provides Hera objects for cluster workflow templates."""
+
 from hera.exceptions import NotFound
 from hera.shared._pydantic import validator
 from hera.workflows.models import (

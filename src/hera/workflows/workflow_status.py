@@ -1,4 +1,5 @@
 """Workflow status is a module that provides functionality for representing and interacting with workflow status."""
+
 from enum import Enum
 
 

@@ -2,6 +2,7 @@
 
 See https://argoproj.github.io/argo-workflows/walk-through/artifacts/ for a tutorial on Artifacts.
 """
+
 from __future__ import annotations
 
 import logging

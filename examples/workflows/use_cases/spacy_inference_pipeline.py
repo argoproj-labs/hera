@@ -1,7 +1,7 @@
 """
 This example showcases how to run multi-step ML pipeline to prepare data and run spacy Named Entity Recognition (NER) model inference within Hera / Argo Workflows!
 Step 1: Prepares dataset using Spacy example sentences library and saves dataset the volume path /mnt/data
-Step 2: Performs inference on the dataset in the volume path /mnt/data using Spacy Named Entity Recognition (NER) LLM model 
+Step 2: Performs inference on the dataset in the volume path /mnt/data using Spacy Named Entity Recognition (NER) LLM model
 """
 
 from hera.workflows import (

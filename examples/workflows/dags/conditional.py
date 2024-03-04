@@ -1,4 +1,5 @@
 """This example showcases conditional execution on success, failure, and error"""
+
 from hera.workflows import DAG, Workflow, script
 
 

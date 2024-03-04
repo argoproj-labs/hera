@@ -1,4 +1,5 @@
 """Global config module supports configuring Hera's behavior based on client requirements."""
+
 from __future__ import annotations
 
 import inspect

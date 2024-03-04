@@ -14,6 +14,7 @@ There are several implicit dependencies in this script:
    token for the talk purposes :) your own infrastructure might have more secure ways to provide this token, such as
    a secret vault that uses a specific service account for authentication/authorization to fetch the token
 """
+
 from hera.workflows import (
     DAG,
     Container,

@@ -1,4 +1,5 @@
 """This example showcases how to run Dask within a Hera submitted Argo workflow."""
+
 from hera.workflows import (
     Steps,
     Workflow,

@@ -4,6 +4,7 @@ This is useful when you write workflows in a business context that requires proc
 example, if you have a step that performs QC checks on some data, and only a subset of the data passes the checks, then
 you can compute the resources dynamically based on the amount of data you need to process in follow up steps.
 """
+
 import json
 
 from hera.workflows import DAG, Workflow, script

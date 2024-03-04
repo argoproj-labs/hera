@@ -1,4 +1,5 @@
 """The util module contains the functionality required for the script runner."""
+
 import argparse
 import functools
 import importlib

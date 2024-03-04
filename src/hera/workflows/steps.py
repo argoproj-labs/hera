@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/walk-through/steps/
 for more on Steps.
 """
+
 from typing import Any, List, Optional, Union
 
 from hera.workflows._mixins import (

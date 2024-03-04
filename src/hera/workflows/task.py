@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/walk-through/dag/
 for more on using Tasks within a DAG.
 """
+
 from __future__ import annotations
 
 from enum import Enum

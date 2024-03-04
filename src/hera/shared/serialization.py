@@ -1,4 +1,5 @@
 """A serialization module that contains utilities for serializing any values passed to the Argo server via Hera."""
+
 import json
 from json import JSONEncoder
 from typing import Any, Optional

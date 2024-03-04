@@ -6,6 +6,7 @@ See https://argoproj.github.io/argo-workflows/walk-through/suspending/ for more 
 
 See https://argoproj.github.io/argo-workflows/intermediate-inputs/ for more on intermediate parameters.
 """
+
 from typing import List, Optional, Union
 
 from hera.workflows._mixins import CallableTemplateMixin, TemplateMixin
