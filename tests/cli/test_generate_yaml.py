@@ -1,11 +1,14 @@
+import os
+from pathlib import Path
 import sys
 from textwrap import dedent
-from unittest.mock import mock_open, patch
+from unittest.mock import MagicMock, call, mock_open, patch
 
 import pytest
 from cappa.testing import CommandRunner
 
 from hera._cli.base import Hera
+from hera._cli.generate.yaml import _write_workflow_to_yaml
 
 
 def get_stdout(capsys):
@@ -131,85 +134,89 @@ def test_scan_folder(capsys):
 
 
 @pytest.mark.cli
-def test_source_file_output_file():
-    exists_patch = patch("os.path.exists", return_value=True)
-    write_text_patch = patch("pathlib.Path.write_text")
-
-    with exists_patch, write_text_patch as m:
-        runner.invoke("tests/cli/examples/single_workflow.py", "--to", "foo.yml")
-
-    assert m.call_count == 1
-
-    output = m.mock_calls[0][1][0]
-    assert output == single_workflow_output
+def test_write_workflow_to_yaml(tmp_path: Path):
+    string = "text for test"
+    filepath = tmp_path / "test.txt"
+    _write_workflow_to_yaml(filepath, string)
+    assert filepath.read_text() == string
 
 
 @pytest.mark.cli
-def test_source_folder_output_file():
-    exists_patch = patch("os.path.exists", return_value=True)
-    is_file_patch = patch("pathlib.Path.is_file", return_value=True)
-    write_text_patch = patch("pathlib.Path.write_text")
+@patch("hera._cli.generate.yaml._write_workflow_to_yaml")
+@patch("hera._cli.generate.yaml.os")
+def test_source_file_to_single_file(
+    mock_os: MagicMock,
+    mock_write_workflow_to_yaml: MagicMock,
+):
+    makedirs_mock = MagicMock()
+    mock_os.makedirs = makedirs_mock
 
-    with exists_patch, is_file_patch, write_text_patch as m:
-        runner.invoke("tests/cli/examples", "--to", "foo.yml")
+    runner.invoke("tests/cli/examples/single_workflow.py", "--to", "foo.yaml")
 
-    assert m.call_count == 1
-
-    output = m.mock_calls[0][1][0]
-    assert output == whole_folder_output
-
-
-@pytest.mark.cli
-def test_source_file_output_folder():
-    source_is_dir_patch = patch("pathlib.Path.is_dir", return_value=False)
-    dest_exists_patch = patch("os.path.exists", return_value=True)
-    dest_is_file_patch = patch("pathlib.Path.is_file", return_value=False)
-    makedirs_patch = patch("os.makedirs")
-
-    open_patch = patch_open()
-
-    with source_is_dir_patch, dest_exists_patch, dest_is_file_patch, makedirs_patch, open_patch:
-        runner.invoke("tests/cli/examples/single_workflow.py", "--to", "dir/")
-
-    filename = str(open_patch.new.mock_calls[0][1][0])
-    assert filename == "dir/single_workflow.yaml"
-
-    content = open_patch.new.return_value.write.mock_calls[0][1][0]
-    assert content == single_workflow_output
+    makedirs_mock.assert_called_once_with(Path("foo.yaml").parent, exist_ok=True)
+    mock_write_workflow_to_yaml.assert_called_once_with(Path("foo.yaml"), single_workflow_output)
 
 
 @pytest.mark.cli
-def test_source_folder_output_folder():
-    source_is_dir_patch = patch("pathlib.Path.is_dir", return_value=True)
-    dest_exists_patch = patch("os.path.exists", return_value=False)
-    makedirs_patch = patch("os.makedirs")
+@patch("hera._cli.generate.yaml._write_workflow_to_yaml")
+@patch("hera._cli.generate.yaml.os")
+def test_source_folder_to_single_file(
+    mock_os: MagicMock,
+    mock_write_workflow_to_yaml: MagicMock,
+):
+    mock_os.walk = os.walk
+    mock_os.path.join = os.path.join
 
-    open_patch = patch_open()
+    makedirs_mock = MagicMock()
+    mock_os.makedirs = makedirs_mock
 
-    with source_is_dir_patch, dest_exists_patch, makedirs_patch, open_patch:
-        runner.invoke("tests/cli/examples", "--to", "dir/")
+    runner.invoke("tests/cli/examples", "--to", "foo.yaml")
 
-    assert open_patch.new.call_count == 4
-    assert open_patch.new.return_value.write.call_count == 4
+    makedirs_mock.assert_called_once_with(Path("foo.yaml").parent, exist_ok=True)
+    mock_write_workflow_to_yaml.assert_called_once_with(Path("foo.yaml"), whole_folder_output)
 
-    filenames = [
-        str(open_patch.new.mock_calls[0][1][0]),
-        str(open_patch.new.mock_calls[4][1][0]),
-        str(open_patch.new.mock_calls[8][1][0]),
-        str(open_patch.new.mock_calls[12][1][0]),
-    ]
-    assert filenames == [
-        "dir/cluster_workflow_template.yaml",
-        "dir/multiple_workflow.yaml",
-        "dir/single_workflow.yaml",
-        "dir/workflow_template.yaml",
-    ]
 
-    content1 = open_patch.new.return_value.write.mock_calls[1][1][0]
-    assert content1 == multiple_workflow_output
+@pytest.mark.cli
+@patch("hera._cli.generate.yaml._write_workflow_to_yaml")
+@patch("hera._cli.generate.yaml.os")
+def test_source_file_to_output_folder(
+    mock_os: MagicMock,
+    mock_write_workflow_to_yaml: MagicMock,
+):
+    makedirs_mock = MagicMock()
+    mock_os.makedirs = makedirs_mock
 
-    content2 = open_patch.new.return_value.write.mock_calls[2][1][0]
-    assert content2 == single_workflow_output
+    runner.invoke("tests/cli/examples/single_workflow.py", "--to", "dir/")
+
+    makedirs_mock.assert_called_once_with(Path("dir/"), exist_ok=True)
+    mock_write_workflow_to_yaml.assert_called_once_with(Path("dir/single_workflow.yaml"), single_workflow_output)
+
+
+@pytest.mark.cli
+@patch("hera._cli.generate.yaml._write_workflow_to_yaml")
+@patch("hera._cli.generate.yaml.os")
+def test_source_folder_to_output_folder(
+    mock_os: MagicMock,
+    mock_write_workflow_to_yaml: MagicMock,
+):
+    mock_os.walk = os.walk
+    mock_os.path.join = os.path.join
+
+    makedirs_mock = MagicMock()
+    mock_os.makedirs = makedirs_mock
+
+    runner.invoke("tests/cli/examples", "--to", "dir/")
+
+    makedirs_mock.assert_called_once_with(Path("dir/"), exist_ok=True)
+    mock_write_workflow_to_yaml.assert_has_calls(
+        [
+            call(Path("dir/cluster_workflow_template.yaml"), cluster_workflow_template_output),
+            call(Path("dir/multiple_workflow.yaml"), multiple_workflow_output),
+            call(Path("dir/single_workflow.yaml"), single_workflow_output),
+            call(Path("dir/workflow_template.yaml"), workflow_template_output),
+        ],
+        any_order=True,
+    )
 
 
 @pytest.mark.cli
