@@ -3,7 +3,7 @@ from collections import ChainMap
 from typing import Any, List, Optional, Union
 
 from hera.shared._pydantic import BaseModel, get_fields
-from hera.shared.serialization import serialize
+from hera.shared.serialization import MISSING, serialize
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
 
@@ -33,27 +33,23 @@ class RunnerInput(BaseModel):
         annotations = {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
         fields = get_fields(cls)
-        for field in fields:
+        for field, field_info in fields.items():
             if get_origin(annotations[field]) is Annotated:
                 if isinstance(get_args(annotations[field])[1], Parameter):
                     param = get_args(annotations[field])[1]
                     if object_override:
                         param.default = serialize(getattr(object_override, field))
-                    elif fields[field].default:
+                    elif field_info.default:
                         # Serialize the value (usually done in Parameter's validator)
-                        param.default = serialize(fields[field].default)
+                        param.default = serialize(field_info.default)
                     parameters.append(param)
             else:
                 # Create a Parameter from basic type annotations
-                if object_override:
-                    parameters.append(
-                        Parameter(
-                            name=field,
-                            default=serialize(getattr(object_override, field)),
-                        )
-                    )
-                else:
-                    parameters.append(Parameter(name=field, default=fields[field].default))
+                default = getattr(object_override, field) if object_override else field_info.default
+                if default is None:
+                    default = MISSING
+                parameters.append(Parameter(name=field, default=default))
+
         return parameters
 
     @classmethod

@@ -196,6 +196,7 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_int", "default": "1"},
                     {"name": "another-int", "default": "42", "description": "my desc"},
+                    {"name": "no_default_param"},
                 ]
             },
             {
@@ -247,6 +248,7 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_int", "default": "2"},
                     {"name": "another-int", "default": "24", "description": "my desc"},
+                    {"name": "no_default_param", "default": "1"},
                 ],
             },
             {
@@ -263,7 +265,7 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {
                         "name": "my_inputs",
-                        "default": '[{"my_int": 1, "my_annotated_int": 42}, {"my_int": 2, "my_annotated_int": 42}]',
+                        "default": '[{"my_int": 1, "my_annotated_int": 42, "no_default_param": 1}, {"my_int": 2, "my_annotated_int": 42, "no_default_param": 2}]',
                     },
                 ],
             },
@@ -285,6 +287,59 @@ def test_script_pydantic_io(pydantic_mode, function_name, expected_input, expect
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version
     module_name = f"tests.script_annotations.pydantic_io_v{pydantic_mode}"
+
+    module = importlib.import_module(module_name)
+    importlib.reload(module)
+    workflow = importlib.import_module(module.__name__).w
+
+    # WHEN
+    workflow_dict = workflow.to_dict()
+    assert workflow == Workflow.from_dict(workflow_dict)
+    assert workflow == Workflow.from_yaml(workflow.to_yaml())
+
+    # THEN
+    template = next(filter(lambda t: t["name"] == function_name.replace("_", "-"), workflow_dict["spec"]["templates"]))
+    assert template["inputs"] == expected_input
+    assert template["outputs"] == expected_output
+
+
+@pytest.mark.parametrize(
+    "pydantic_mode",
+    [
+        1,
+        _PYDANTIC_VERSION,
+    ],
+)
+@pytest.mark.parametrize(
+    "function_name,expected_input,expected_output",
+    [
+        pytest.param(
+            "pydantic_io_params",
+            {
+                "parameters": [
+                    {"name": "my_str"},
+                    {"name": "my_empty_default_str", "default": ""},
+                    {"name": "alt-name", "default": "hello world!"},
+                ]
+            },
+            {
+                "parameters": [
+                    {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
+                    {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                ],
+            },
+            id="param-only-io",
+        ),
+    ],
+)
+def test_script_pydantic_io_strs(pydantic_mode, function_name, expected_input, expected_output, global_config_fixture):
+    """Test that output annotations work correctly by asserting correct inputs and outputs on the built workflow."""
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    module_name = f"tests.script_annotations.pydantic_io_v{pydantic_mode}_strs"
 
     module = importlib.import_module(module_name)
     importlib.reload(module)
