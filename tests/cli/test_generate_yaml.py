@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from textwrap import dedent
 from unittest.mock import MagicMock, call, mock_open, patch
 
