@@ -1,4 +1,5 @@
 """Hera IO models."""
+
 from importlib.util import find_spec
 
 if find_spec("pydantic.v1"):

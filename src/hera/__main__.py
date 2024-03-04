@@ -1,4 +1,5 @@
 """Entrypoint for running hera as a CLI."""
+
 import importlib
 import sys
 

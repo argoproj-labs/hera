@@ -1,4 +1,5 @@
 """Holds the resource specification."""
+
 from typing import Dict, Optional, Union
 
 from hera.shared._pydantic import (

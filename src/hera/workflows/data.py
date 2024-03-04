@@ -1,4 +1,5 @@
 """Data module provides Hera objects for Argo data functionality, such as sourcing data + applying transformations."""
+
 from typing import List, Union
 
 from hera.expr._node import Node

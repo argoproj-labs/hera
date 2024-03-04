@@ -1,6 +1,5 @@
 """This example will reuse the outputs volume across script steps."""
 
-
 from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.volume import Volume
 

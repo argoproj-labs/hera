@@ -4,6 +4,7 @@ The functions should behave in the same way on the Argo cluster, meaning annotat
 and import logic should be taken into account. The functions are not required to be a
 part of a Workflow when running locally.
 """
+
 import importlib
 import json
 import os

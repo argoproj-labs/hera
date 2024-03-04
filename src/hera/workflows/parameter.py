@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/walk-through/parameters/
 for a tutorial on Parameters.
 """
+
 from __future__ import annotations
 
 from typing import Any, Optional

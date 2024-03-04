@@ -1,6 +1,5 @@
 """This example will reuse the outputs volume across script steps."""
 
-
 try:
     from typing import Annotated  # type: ignore
 except ImportError:

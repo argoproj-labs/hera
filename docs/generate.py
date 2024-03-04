@@ -1,4 +1,5 @@
 """Module that holds the functionality that generates Hera's documentation."""
+
 import os
 import re
 import shutil

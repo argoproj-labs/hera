@@ -1,4 +1,5 @@
 """The metrics module implements independent and collections of Prometheus metrics that can be used in Argo."""
+
 from typing import List, Optional, Union
 
 from hera.shared import BaseMixin

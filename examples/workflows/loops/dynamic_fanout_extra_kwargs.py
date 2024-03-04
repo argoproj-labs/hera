@@ -4,6 +4,7 @@ parallel. This is useful for batch jobs and instances where clients do not know 
 they may need to process. In addition to the fanout, this example showcases how one can set up extra parameters for
 the job to dictate what the fanout should execute over.
 """
+
 from hera.workflows import DAG, Workflow, script
 
 

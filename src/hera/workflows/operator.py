@@ -1,4 +1,5 @@
 """The operator module holds implementations of objects such as the operator enum."""
+
 from enum import Enum
 
 

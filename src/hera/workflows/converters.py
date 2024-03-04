@@ -1,4 +1,5 @@
 """Utility functions for converting binary and decimal units to float values."""
+
 import re
 
 _decimal_multipliers = {

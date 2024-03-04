@@ -1,4 +1,5 @@
 """The archive module provides archival behavior strategies for artifacts."""
+
 from typing import Optional
 
 from hera.shared._pydantic import BaseModel

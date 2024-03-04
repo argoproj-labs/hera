@@ -2,6 +2,7 @@
 This example is a python replica of
 https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing-verbose-snippets.yaml
 """
+
 import base64
 import json
 

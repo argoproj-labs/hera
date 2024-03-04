@@ -20,6 +20,7 @@ spec:
       # fail with a 66% probability
       args: ["import random; import sys; exit_code = random.choice([0, 1, 1]); sys.exit(exit_code)"]
 """
+
 from hera.workflows import (
     Container,
     RetryStrategy,

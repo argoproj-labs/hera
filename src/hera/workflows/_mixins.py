@@ -1,4 +1,5 @@
 """Core collection of Hera mixins that isolate shareable functionality between Hera objects."""
+
 from __future__ import annotations
 
 import functools

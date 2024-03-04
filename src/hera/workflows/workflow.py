@@ -3,6 +3,7 @@
 See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
+
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
@@ -170,14 +171,14 @@ class Workflow(
     generate_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.generate_name")] = None
     generation: Annotated[Optional[int], _WorkflowModelMapper("metadata.generation")] = None
     labels: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.labels")] = None
-    managed_fields: Annotated[
-        Optional[List[ManagedFieldsEntry]], _WorkflowModelMapper("metadata.managed_fields")
-    ] = None
+    managed_fields: Annotated[Optional[List[ManagedFieldsEntry]], _WorkflowModelMapper("metadata.managed_fields")] = (
+        None
+    )
     name: Annotated[Optional[str], _WorkflowModelMapper("metadata.name")] = None
     namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace")] = None
-    owner_references: Annotated[
-        Optional[List[OwnerReference]], _WorkflowModelMapper("metadata.owner_references")
-    ] = None
+    owner_references: Annotated[Optional[List[OwnerReference]], _WorkflowModelMapper("metadata.owner_references")] = (
+        None
+    )
     resource_version: Annotated[Optional[str], _WorkflowModelMapper("metadata.resource_version")] = None
     self_link: Annotated[Optional[str], _WorkflowModelMapper("metadata.self_link")] = None
     uid: Annotated[Optional[str], _WorkflowModelMapper("metadata.uid")] = None

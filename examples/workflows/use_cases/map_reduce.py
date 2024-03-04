@@ -4,6 +4,7 @@ folder for workflows because the upstream example is not formatted according to 
 
 See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/main/examples/map-reduce.yaml).
 """
+
 from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Parameter, S3Artifact, Workflow, script
 
 

@@ -1,4 +1,5 @@
 """Holds a collection of validators that are shared in V1."""
+
 import re
 from typing import Optional
 

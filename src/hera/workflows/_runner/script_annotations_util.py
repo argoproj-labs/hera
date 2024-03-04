@@ -1,4 +1,5 @@
 """The script_annotations_util module contains functionality for the script annotations feature when used with the runner."""
+
 import inspect
 import json
 import os
