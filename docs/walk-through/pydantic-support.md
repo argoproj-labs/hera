@@ -16,4 +16,4 @@ to another `Step` as a string argument, and then de-serialized in another functi
 [the callable scripts example](../examples/workflows/scripts/callable_script.md).
 
 The new experimental Runner IO feature provides a way to specify composite inputs using the class fields, which become the
-template's inputs. Read more in the [Script Runner IO guide](../user-guides/scripts-runner-io.md).
+template's inputs. Read more in the [Script Runner IO guide](../user-guides/script-runner-io.md).

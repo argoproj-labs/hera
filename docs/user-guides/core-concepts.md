@@ -105,7 +105,7 @@ def hello(s: str):
     print("Hello, {s}!".format(s=s))
 ```
 
-Read more in the [Script decorator section](./scripts.md#script-decorator).
+Read more in the [Script decorator section](./script-basics.md#script-decorator).
 
 
 ### Resource
