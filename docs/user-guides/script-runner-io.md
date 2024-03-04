@@ -102,4 +102,4 @@ def pydantic_io() -> MyOutput:
 
 ```
 
-See the full Pydantic IO example [here](../examples/workflows/experimental/script_pydantic_io.md)!
+See the full Pydantic IO example [here](../examples/workflows/experimental/script_runner_io.md)!
