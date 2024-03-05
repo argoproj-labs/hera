@@ -218,8 +218,13 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         if output_annotations:
             # This will save outputs returned from the function only. Any function parameters/artifacts marked as
             # outputs should be written to within the function itself.
+            from hera.workflows.runner import RunnerException
+
             try:
                 output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+            except RunnerException as e:
+                _save_annotated_return_outputs(e.outputs, output_annotations)
+                raise e
             except Exception as e:
                 _save_dummy_outputs(output_annotations)
                 raise e

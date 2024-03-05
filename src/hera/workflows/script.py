@@ -830,6 +830,8 @@ class RunnerScriptConstructor(ScriptConstructor):
                 script.env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
             if global_config.experimental_features["script_pydantic_io"]:
                 script.env.append(EnvVar(name="hera__script_pydantic_io", value=""))
+            if global_config.experimental_features["script_runner_exception"]:
+                script.env.append(EnvVar(name="hera__script_runner_exception", value=""))
         return script
 
 

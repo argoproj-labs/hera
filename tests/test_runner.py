@@ -23,6 +23,7 @@ from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner
 from hera.workflows.io.v1 import RunnerOutput
+from hera.workflows.runner import RunnerException
 
 
 @pytest.mark.parametrize(
@@ -974,6 +975,39 @@ def test_runner_pydantic_output_with_result(
     output = _runner(entrypoint, [])
 
     assert serialize(output.result) == serialize(expected_result)
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files",
+    [
+        (
+            "tests.script_runner.runner_exception:script_param",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my-param", "value": "123"},
+            ],
+        ),
+    ],
+)
+def test_runner_exception_output_with_exit_code(
+    entrypoint,
+    expected_files,
+    global_config_fixture: _GlobalConfig,
+    environ_annotations_fixture: None,
+    tmp_path: Path,
+):
+    # GIVEN
+    os.environ["hera__script_runner_exception"] = ""
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    os.environ["hera__outputs_directory"] = outputs_directory
+
+    # WHEN / THEN
+    with pytest.raises(RunnerException):
+        _runner(entrypoint, [])
 
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
