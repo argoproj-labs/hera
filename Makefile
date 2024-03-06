@@ -1,4 +1,4 @@
-ARGO_WORKFLOWS_VERSION="3.4.4"
+ARGO_WORKFLOWS_VERSION="3.5.5"
 OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v$(ARGO_WORKFLOWS_VERSION)/api/openapi-spec/swagger.json"
 SPEC_PATH="$(shell pwd)/argo-workflows-$(ARGO_WORKFLOWS_VERSION).json"
 
