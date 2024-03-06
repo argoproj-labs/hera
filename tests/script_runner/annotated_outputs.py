@@ -22,7 +22,7 @@ def empty_str_param() -> Annotated[str, Parameter(name="empty-str")]:
 
 
 @script()
-def none_param() -> Annotated[type(None), Parameter(name="null-str")]:
+def none_param() -> Annotated[type(None), Parameter(name="null-str")]:  # type: ignore
     return None
 
 
