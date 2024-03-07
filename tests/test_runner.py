@@ -3,25 +3,26 @@
 The functions should behave in the same way on the Argo cluster, meaning annotations
 and import logic should be taken into account. The functions are not required to be a
 part of a Workflow when running locally.
+
+The tests will usually need to set the experimental feature environment variables which
+can be done through monkeypatch.setenv. This is because the runner code acts as if it
+is running on Argo, where the global_config will not contain the experimental features.
 """
 
 import importlib
 import json
-import os
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Literal
 from unittest.mock import MagicMock, patch
 
 import pytest
 from pydantic import ValidationError
 
 import tests.helper as test_module
-from hera.shared._global_config import _GlobalConfig
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner
 from hera.workflows.io.v1 import RunnerOutput
-from hera.workflows.script import RunnerScriptConstructor
 
 
 @pytest.mark.parametrize(
@@ -84,15 +85,13 @@ from hera.workflows.script import RunnerScriptConstructor
     ),
 )
 def test_parameter_loading(
-    entrypoint,
+    entrypoint: str,
     kwargs_list: List[Dict[str, str]],
-    expected_output,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
+    expected_output: Any,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
-    global_config_fixture.experimental_features["script_runner"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -139,11 +138,10 @@ def test_runner_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -192,16 +190,14 @@ def test_runner_parameter_inputs(
     ],
 )
 def test_runner_annotated_parameter_inputs(
-    entrypoint,
+    entrypoint: str,
     kwargs_list: List[Dict[str, str]],
-    expected_output,
-    global_config_fixture: _GlobalConfig,
-    pydantic_mode,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    expected_output: Any,
+    pydantic_mode: Literal[1, 2],
+    monkeypatch: pytest.MonkeyPatch,
 ):
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -215,22 +211,22 @@ def test_runner_annotated_parameter_inputs(
         (
             "empty_str_param",
             [],
-            [{"subpath": "tmp/hera/outputs/parameters/empty-str", "value": ""}],
+            [{"subpath": "tmp/hera-outputs/parameters/empty-str", "value": ""}],
         ),
         (
             "none_param",
             [],
-            [{"subpath": "tmp/hera/outputs/parameters/null-str", "value": "null"}],
+            [{"subpath": "tmp/hera-outputs/parameters/null-str", "value": "null"}],
         ),
         (
             "script_param",
             [{"name": "a_number", "value": "3"}],
-            [{"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"}],
+            [{"subpath": "tmp/hera-outputs/parameters/successor", "value": "4"}],
         ),
         (
             "script_artifact",
             [{"name": "a_number", "value": "3"}],
-            [{"subpath": "tmp/hera/outputs/artifacts/successor", "value": "4"}],
+            [{"subpath": "tmp/hera-outputs/artifacts/successor", "value": "4"}],
         ),
         (
             "script_artifact_path",
@@ -241,32 +237,32 @@ def test_runner_annotated_parameter_inputs(
             "script_artifact_and_param",
             [{"name": "a_number", "value": "3"}],
             [
-                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"subpath": "tmp/hera/outputs/artifacts/successor", "value": "5"},
+                {"subpath": "tmp/hera-outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera-outputs/artifacts/successor", "value": "5"},
             ],
         ),
         (
             "script_two_params",
             [{"name": "a_number", "value": "3"}],
             [
-                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"subpath": "tmp/hera/outputs/parameters/successor2", "value": "5"},
+                {"subpath": "tmp/hera-outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera-outputs/parameters/successor2", "value": "5"},
             ],
         ),
         (
             "script_two_artifacts",
             [{"name": "a_number", "value": "3"}],
             [
-                {"subpath": "tmp/hera/outputs/artifacts/successor", "value": "4"},
-                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera-outputs/artifacts/successor", "value": "4"},
+                {"subpath": "tmp/hera-outputs/artifacts/successor2", "value": "5"},
             ],
         ),
         (
             "script_outputs_in_function_signature",
             [{"name": "a_number", "value": "3"}],
             [
-                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera-outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera-outputs/artifacts/successor2", "value": "5"},
             ],
         ),
         (
@@ -281,21 +277,21 @@ def test_runner_annotated_parameter_inputs(
             "script_param_artifact_in_function_signature_and_return_type",
             [{"name": "a_number", "value": "3"}],
             [
-                {"subpath": "tmp/hera/outputs/parameters/successor", "value": "4"},
-                {"subpath": "tmp/hera/outputs/artifacts/successor2", "value": "5"},
-                {"subpath": "tmp/hera/outputs/parameters/successor3", "value": "6"},
-                {"subpath": "tmp/hera/outputs/artifacts/successor4", "value": "7"},
+                {"subpath": "tmp/hera-outputs/parameters/successor", "value": "4"},
+                {"subpath": "tmp/hera-outputs/artifacts/successor2", "value": "5"},
+                {"subpath": "tmp/hera-outputs/parameters/successor3", "value": "6"},
+                {"subpath": "tmp/hera-outputs/artifacts/successor4", "value": "7"},
             ],
         ),
         (
             "return_list_str",
             [],
-            [{"subpath": "tmp/hera/outputs/parameters/list-of-str", "value": '["my", "list"]'}],
+            [{"subpath": "tmp/hera-outputs/parameters/list-of-str", "value": '["my", "list"]'}],
         ),
         (
             "return_dict",
             [],
-            [{"subpath": "tmp/hera/outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
+            [{"subpath": "tmp/hera-outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
         ),
     ],
 )
@@ -303,25 +299,20 @@ def test_script_annotations_outputs(
     function_name,
     kwargs_list: List[Dict[str, str]],
     expected_files: List[Dict[str, str]],
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
     tmp_path: Path,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
-    for file in expected_files:
-        assert not Path(tmp_path / file["subpath"]).is_file()
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
 
-    outputs_directory = str(tmp_path / "tmp/hera/outputs")
-    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
+    # may fetch a cached version which will not have the correct ARTIFACT_PATH
     import tests.script_runner.annotated_outputs as output_tests_module
 
     importlib.reload(output_tests_module)
@@ -354,25 +345,20 @@ def test_script_raising_error_still_outputs(
     function_name,
     expected_error: type,
     expected_files: List[Dict[str, str]],
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
     tmp_path: Path,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
-    for file in expected_files:
-        assert not Path(tmp_path / file["subpath"]).is_file()
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
+    # may fetch a cached version which will not have the correct ARTIFACT_PATH
     import tests.script_runner.annotated_outputs as output_tests_module
 
     importlib.reload(output_tests_module)
@@ -416,16 +402,16 @@ def test_script_annotations_outputs_exceptions(
     function_name,
     kwargs_list: List[Dict[str, str]],
     exception,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the output annotations throw the expected exceptions."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     with pytest.raises(ValueError) as e:
         _ = _runner(f"tests.script_runner.annotated_outputs:{function_name}", kwargs_list)
+
     # THEN
     assert exception in str(e.value)
 
@@ -488,8 +474,7 @@ def test_script_annotations_artifact_inputs(
     file_contents,
     expected_output,
     tmp_path: Path,
-    monkeypatch,
-    global_config_fixture: _GlobalConfig,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
@@ -499,14 +484,13 @@ def test_script_annotations_artifact_inputs(
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(filepath))
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
+    # may fetch a cached version which will not have the correct ARTIFACT_PATH
     import tests.script_runner.artifact_loaders as module
 
     importlib.reload(module)
 
     kwargs_list = []
-    global_config_fixture.experimental_features["script_annotations"] = True
-    os.environ["hera__script_annotations"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(f"{module.__name__}:{function}", kwargs_list)
@@ -516,17 +500,16 @@ def test_script_annotations_artifact_inputs(
 
 
 def test_script_annotations_artifact_input_loader_error(
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the input artifact loaded with wrong type throws the expected exception."""
     # GIVEN
     function_name = "no_loader_invalid_type"
     kwargs_list = []
-    global_config_fixture.experimental_features["script_annotations"] = True
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version
+    # may fetch a cached version which will not have the correct ARTIFACT_PATH
     import tests.script_runner.artifact_loaders as module
 
     importlib.reload(module)
@@ -553,8 +536,7 @@ def test_script_annotations_artifacts_no_path(
     file_contents,
     expected_output,
     tmp_path: Path,
-    monkeypatch,
-    global_config_fixture: _GlobalConfig,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
     # GIVEN
@@ -565,8 +547,7 @@ def test_script_annotations_artifacts_no_path(
     monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
 
     kwargs_list = []
-    global_config_fixture.experimental_features["script_annotations"] = True
-    os.environ["hera__script_annotations"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -576,14 +557,13 @@ def test_script_annotations_artifacts_no_path(
 
 
 def test_script_annotations_artifacts_wrong_loader(
-    global_config_fixture: _GlobalConfig,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
     entrypoint = "tests.script_runner.artifact_with_invalid_loader:invalid_loader"
     kwargs_list = []
-    global_config_fixture.experimental_features["script_annotations"] = True
-    os.environ["hera__script_annotations"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     with pytest.raises(ValueError) as e:
@@ -593,13 +573,14 @@ def test_script_annotations_artifacts_wrong_loader(
     assert "value is not a valid enumeration member" in str(e.value)
 
 
-def test_script_annotations_unknown_type(global_config_fixture: _GlobalConfig):
+def test_script_annotations_unknown_type(
+    monkeypatch: pytest.MonkeyPatch,
+):
     # GIVEN
     expected_output = "a string"
     entrypoint = "tests.script_runner.unknown_annotation_types:unknown_annotations_ignored"
     kwargs_list = [{"name": "my_string", "value": expected_output}]
-    global_config_fixture.experimental_features["script_annotations"] = True
-    os.environ["hera__script_annotations"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -611,13 +592,13 @@ def test_script_annotations_unknown_type(global_config_fixture: _GlobalConfig):
 @pytest.mark.parametrize(
     "kwargs_list",
     [
-        [{"name": "a_string", "value": 123}],
-        [{"name": "a_number", "value": 123}],
+        [{"name": "a_string", "value": "123"}],
+        [{"name": "a_number", "value": "123"}],
     ],
 )
 @patch("hera.workflows._runner.util._runner")
 @patch("hera.workflows._runner.util._parse_args")
-def test_run(mock_parse_args, mock_runner, kwargs_list, tmp_path: Path):
+def test_run(mock_parse_args, mock_runner, kwargs_list: List[Dict[str, str]], tmp_path: Path):
     # GIVEN
     file_path = Path(tmp_path / "test_params")
     file_path.write_text(serialize(kwargs_list))
@@ -701,20 +682,15 @@ def test_runner_pydantic_inputs_params(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    global_config_fixture: _GlobalConfig,
     pydantic_mode,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
     entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
-
-    outputs_directory = str(tmp_path / "tmp/hera/outputs")
-    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -741,22 +717,20 @@ def test_runner_pydantic_output_params(
     entrypoint,
     expected_files,
     pydantic_mode,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # WHEN
     output = _runner(entrypoint, [])
@@ -790,9 +764,7 @@ def test_runner_pydantic_input_artifacts(
     input_files: Dict,
     expected_output,
     pydantic_mode,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
@@ -803,15 +775,12 @@ def test_runner_pydantic_input_artifacts(
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
-
-    outputs_directory = str(tmp_path / "tmp/hera/outputs")
-    global_config_fixture.set_class_defaults(RunnerScriptConstructor, outputs_directory=outputs_directory)
 
     # WHEN
     output = _runner(entrypoint, [])
@@ -844,9 +813,7 @@ def test_runner_pydantic_output_artifacts(
     input_files: Dict,
     expected_files,
     pydantic_mode,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
@@ -857,15 +824,15 @@ def test_runner_pydantic_output_artifacts(
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # WHEN
     output = _runner(entrypoint, [])
@@ -895,22 +862,20 @@ def test_runner_pydantic_output_with_exit_code(
     entrypoint,
     expected_files,
     pydantic_mode,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # WHEN / THEN
     output = _runner(entrypoint, [])
@@ -942,9 +907,7 @@ def test_run_pydantic_output_with_exit_code(
     entrypoint,
     expected_files,
     pydantic_mode,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
@@ -954,15 +917,15 @@ def test_run_pydantic_output_with_exit_code(
     mock_parse_args.return_value = args
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
 
     importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # WHEN / THEN
     with pytest.raises(SystemExit) as e:
@@ -996,22 +959,16 @@ def test_runner_pydantic_output_with_result(
     expected_files,
     expected_result,
     pydantic_mode,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    os.environ["hera__script_annotations"] = ""
-    os.environ["hera__script_pydantic_io"] = ""
-
-    import tests.script_runner.pydantic_io_v1 as module
-
-    importlib.reload(module)
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # WHEN / THEN
     output = _runner(entrypoint, [])
