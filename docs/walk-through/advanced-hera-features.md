@@ -135,6 +135,38 @@ global_config.experimental_features["script_pydantic_io"] = True
 
 Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
 
+### Script Runner Exception
+
+The `hera.workflows.runner.RunnerException` class allows you to raise an error from your function, while still
+outputting values from your Argo template, along with an optional exit code. If the exit code is set, the container will
+exit with the given exit code, otherwise, the Exception will be raised up which will allow you to see the full stack
+trace from the container logs.
+
+To enable the `RunnerException` class, you must set the `experimental_feature` flag `script_runner_exception`.
+
+```py
+global_config.experimental_features["script_runner_exception"] = True
+```
+
+We encourage you to play around with the `RunnerException` class to try different things! It's very much an experimental
+feature that we want feedback on - please leave feedback in
+[GitHub discussions](https://github.com/argoproj-labs/hera/discussions) or the
+[CNCF Slack](https://cloud-native.slack.com/archives/C03NRMD9KPY)!
+
+An initial suggestion might be to use an all-exception `try`/`except` in your function to be able to convert the
+exception into a `RunnerException`, meaning you still get outputs from the container, along with the stack trace in the
+logs:
+
+```py
+@script(constructor="runner")
+def use_flakey_function() -> Annotated[int, Parameter(name="my-int")]:
+    try:
+        my_int = flakey_function()
+    except Exception as e:
+        raise RunnerException(-1) from e
+
+    return my_int
+```
 
 ## Graduated features
 
