@@ -992,22 +992,57 @@ def test_runner_pydantic_output_with_result(
         ),
     ],
 )
-def test_runner_exception_output_with_exit_code(
+def test_runner_exception_output(
     entrypoint,
     expected_files,
-    global_config_fixture: _GlobalConfig,
-    environ_annotations_fixture: None,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ):
     # GIVEN
-    os.environ["hera__script_runner_exception"] = ""
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_runner_exception", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
-    os.environ["hera__outputs_directory"] = outputs_directory
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
 
     # WHEN / THEN
     with pytest.raises(RunnerException):
         _runner(entrypoint, [])
+
+    for file in expected_files:
+        assert Path(tmp_path / file["subpath"]).is_file()
+        assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint,expected_files",
+    [
+        (
+            "tests.script_runner.runner_exception:script_param_with_exit_code",
+            [
+                {"subpath": "tmp/hera-outputs/parameters/my-param", "value": "123"},
+            ],
+        ),
+    ],
+)
+def test_runner_exception_output_with_exit_code(
+    entrypoint,
+    expected_files,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_runner_exception", "")
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
+
+    # WHEN / THEN
+    with pytest.raises(SystemExit) as e:
+        _runner(entrypoint, [])
+
+    assert e.value.code == 1
 
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()

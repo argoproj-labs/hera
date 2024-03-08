@@ -224,6 +224,9 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
                 output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
             except RunnerException as e:
                 _save_annotated_return_outputs(e.outputs, output_annotations)
+                if e.exit_code is not None:
+                    exit(e.exit_code)
+
                 raise e
             except Exception as e:
                 _save_dummy_outputs(output_annotations)

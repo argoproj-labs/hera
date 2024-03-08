@@ -1,7 +1,7 @@
 """The entrypoint for the Hera Runner when running on Argo."""
 
 import os
-from typing import Any, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 
 from hera.workflows._runner.util import _run
 
@@ -12,7 +12,7 @@ class RunnerException(Exception):
     Note: Must be enabled via hera.shared.global_config.experimental_features.
     """
 
-    def __init__(self, outputs: Union[Tuple[Any], Any]) -> None:
+    def __init__(self, outputs: Union[Tuple[Any], Any], exit_code: Optional[int] = None) -> None:
         """Initialise the RunnerException with outputs to be written that match the function output annotations."""
         if os.environ.get("hera__script_runner_exception", None) is None:
             raise ValueError(
@@ -24,6 +24,7 @@ class RunnerException(Exception):
                 ).format(RunnerException, "script_runner_exception")
             )
         self.outputs = outputs
+        self.exit_code = exit_code
 
 
 if __name__ == "__main__":

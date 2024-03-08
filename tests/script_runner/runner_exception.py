@@ -15,3 +15,8 @@ global_config.experimental_features["script_annotations"] = True
 @script()
 def script_param() -> Annotated[int, Parameter(name="my-param")]:
     raise RunnerException(123)
+
+
+@script()
+def script_param_with_exit_code() -> Annotated[int, Parameter(name="my-param")]:
+    raise RunnerException(123, exit_code=1)
