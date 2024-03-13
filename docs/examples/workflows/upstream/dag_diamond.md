@@ -13,10 +13,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ```python linenums="1"
     from hera.workflows import DAG, Container, Parameter, Workflow
 
-    with Workflow(
-        generate_name="dag-diamond-",
-        entrypoint="diamond",
-    ) as w:
+    with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         echo = Container(
             name="echo",
             image="alpine:3.7",

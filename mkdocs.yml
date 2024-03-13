@@ -8,6 +8,7 @@ nav:
   - Walk Through:
     - walk-through/quick-start.md
     - walk-through/about-hera.md
+    - walk-through/hera-tour.md
     - walk-through/hello-world.md
     - walk-through/parameters.md
     - walk-through/steps.md
