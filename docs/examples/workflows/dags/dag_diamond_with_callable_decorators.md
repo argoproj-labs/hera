@@ -8,14 +8,10 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import (
-        DAG,
-        Workflow,
-        script,
-    )
+    from hera.workflows import DAG, Workflow, script
 
 
-    @script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+    @script(image="python:3.12")
     def echo(message):
         print(message)
 
@@ -76,8 +72,11 @@
         script:
           command:
           - python
-          image: python:alpine3.6
+          image: python:3.12
           source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
             import json
             try: message = json.loads(r'''{{inputs.parameters.message}}''')
             except: message = r'''{{inputs.parameters.message}}'''

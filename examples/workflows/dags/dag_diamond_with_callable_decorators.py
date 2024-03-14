@@ -1,11 +1,7 @@
-from hera.workflows import (
-    DAG,
-    Workflow,
-    script,
-)
+from hera.workflows import DAG, Workflow, script
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+@script(image="python:3.12")
 def echo(message):
     print(message)
 
