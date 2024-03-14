@@ -3,7 +3,7 @@
 ## Building the DAG diamond from scratch
 
 > This tutorial is a written, in-depth version of the ArgoCon EU 2024 talk - "Orchestrating Python Functions Natively
-> with Hera", watch it [here](TODO)!
+> with Hera", link coming soon!
 
 Let's go through some features of Hera by building a Workflow that will initially implement the DAG diamond example.
 
