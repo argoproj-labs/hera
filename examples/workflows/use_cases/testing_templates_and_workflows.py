@@ -53,4 +53,4 @@ def test_create_workflow():
             model_workflow.status.nodes.values(),
         )
     )
-    assert echo_node.outputs.result == "Hello world!"
+    assert echo_node.outputs.parameters[0].value == "my value"

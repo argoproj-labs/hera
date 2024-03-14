@@ -1,11 +1,16 @@
 import pytest
 
-from hera.workflows import Steps, Workflow, WorkflowsService, script
+from hera.workflows import Parameter, Steps, Workflow, WorkflowsService, script
+from hera.workflows.models import (
+    NodeStatus,
+    Parameter as ModelParameter,
+)
 
 
-@script()
-def echo(message: str):
-    print(message)
+@script(outputs=Parameter(name="message-out", value_from={"path": "/tmp/message-out"}))
+def echo_to_param(message: str):
+    with open("/tmp/message-out", "w") as f:
+        f.write(message)
 
 
 def get_workflow() -> Workflow:
@@ -20,7 +25,7 @@ def get_workflow() -> Workflow:
         ),
     ) as w:
         with Steps(name="steps"):
-            echo(arguments={"message": "Hello world!"})
+            echo_to_param(arguments={"message": "Hello world!"})
     return w
 
 
@@ -29,5 +34,8 @@ def test_create_hello_world():
     model_workflow = get_workflow().create(wait=True)
     assert model_workflow.status and model_workflow.status.phase == "Succeeded"
 
-    echo_node = next(filter(lambda n: n.display_name == "echo", model_workflow.status.nodes.values()))
-    assert echo_node.outputs.result == "Hello world!"
+    echo_node: NodeStatus = next(
+        filter(lambda n: n.display_name == "echo-to-param", model_workflow.status.nodes.values())
+    )
+    message_out: ModelParameter = next(filter(lambda n: n.name == "message-out", echo_node.outputs.parameters))
+    assert message_out.value == "Hello world!"

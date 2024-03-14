@@ -297,10 +297,15 @@ contains the `phase` which can be "Succeeded", "Failed" etc, along with the `nod
 Taking an example workflow definition that we can retrieve from a function such as:
 
 ```py
+@script(outputs=Parameter(name="message-out", value_from={"path": "/tmp/message-out"}))
+def echo_to_param(message: str):
+    with open("/tmp/message-out", "w") as f:
+        f.write(message)
+
 def get_workflow_definition() -> Workflow:
     with Workflow(generate_name="hello-world-", entrypoint="steps") as w:
         with Steps(name="steps"):
-            echo(arguments={"message": "Hello world!"})
+            echo_to_param(arguments={"message": "Hello world!"})
     return w
 ```
 
@@ -314,12 +319,13 @@ def test_create_workflow():
 
     echo_node = next(
         filter(
-            lambda n: n.display_name == "echo",  # use display_name to get the human-readable name of the nodes
+            lambda n: n.display_name == "echo-to-param",  # use display_name to get the human-readable name of the nodes
             model_workflow.status.nodes.values(),
         )
     )
 
-    assert echo_node.outputs.result == "Hello world!"
+    message_out = next(filter(lambda n: n.name == "message-out", echo_node.outputs.parameters))
+    assert message_out.value == "Hello world!"
 ```
 
 Good luck, and happy Hera-ing!

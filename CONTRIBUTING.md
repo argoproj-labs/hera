@@ -45,7 +45,7 @@ respected. To solve this, add the following as a config in your `.vscode/launch.
 ```json
 {
    "name": "Debug Tests",
-   "type": "python",
+   "type": "debugpy", // "python" is now deprecated
    "request": "launch",
    "purpose": ["debug-test"],
    "console": "integratedTerminal",
@@ -69,7 +69,7 @@ Please keep in mind the following guidelines and practices when contributing to 
 1. Add unit tests for any new code you write.
 1. Add an example, or extend an existing example, with any new features you may add. Use `make examples` to ensure that the documentation and examples are in sync.
 
-## Adding new Workflow tests
+## Adding new Workflow YAML generation tests
 
 Hera has an automated-test harness that is coupled with our documentation. In order to add new tests, please follow these steps -
 
@@ -88,7 +88,10 @@ In order to add a new workflow test to test Hera functionality, do the following
 
 ### Upstream Hera examples
 
-Tests that correspond to any [upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/main/examples) should live in `examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and also to catch any regressions that might happen.
+Tests that correspond to any
+[upstream Argo Workflow examples](https://github.com/argoproj/argo-workflows/tree/main/examples) should live in
+`examples/workflows/upstream/*.py`. These tests exist to ensure that Hera has complete parity with Argo Workflows and
+also to catch any regressions that might happen.
 
 In order to add a new workflow test to test Hera functionality, do the following -
 
@@ -103,6 +106,52 @@ In order to add a new workflow test to test Hera functionality, do the following
   `archive-location.upstream.yaml`
 * If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
 * The golden copies must be checked in to ensure that regressions may be caught in the future
+
+## Adding new Workflow on-cluster tests
+
+Hera's CICD spins up Argo Workflows on a local Kubernetes cluster, which runs tests decorated with
+`@pytest.mark.on_cluster`. If you want to add more on-cluster tests, the easiest way is through a GitHub Codespace. You
+can then run the same `make` commands that run in CICD:
+
+```
+make install-k3d
+```
+
+This will install the k3d CLI.
+
+```
+make run-argo
+```
+
+This will create a cluster using k3d called `test-cluster`, then create a namespace called `argo` on it, applying the
+argo configuration, and patching the deployment to use `server` as the `auth-mode`, meaning the connection to submit the
+workflow doesn't require an authentication mechanism.
+
+You can then run existing on-cluster tests to ensure everything is set up correctly. This command also ports-forward the
+server's port.
+
+```
+make test-on-cluster
+```
+
+### Viewing the Argo UI from a Codespace
+
+> Before doing this, note that **anyone** will be able to connect using the Argo UI URL!
+
+Ensure Argo Workflows is running using the `make` command:
+
+```
+make run-argo
+```
+
+Forward the Server's port using kubectl:
+
+```
+kubectl -n argo port-forward deployment/argo-server 2746:2746
+```
+
+Then, go to the `PORTS` panel in VSCode, and add the `2746` port. You should see a green circle to the left of the port.
+Then right click on the `2746` row and set `Port Visibility` to `public`. You can then open the URL in your browser to view the Argo UI.
 
 ## Code of Conduct
 
