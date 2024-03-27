@@ -88,6 +88,7 @@ class WorkflowsService:
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
         name_prefix: Optional[str] = None,
+        namespace: Optional[str] = None,
     ) -> WorkflowList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -104,6 +105,7 @@ class WorkflowsService:
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
                 "namePrefix": name_prefix,
+                "namespace": namespace,
             },
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -115,12 +117,12 @@ class WorkflowsService:
 
         raise exception_from_server_response(resp)
 
-    def list_archived_workflow_label_keys(self) -> LabelKeys:
+    def list_archived_workflow_label_keys(self, namespace: Optional[str] = None) -> LabelKeys:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/archived-workflows-label-keys"),
-            params=None,
+            params={"namespace": namespace},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
@@ -142,6 +144,7 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        namespace: Optional[str] = None,
     ) -> LabelValues:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -157,6 +160,7 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "namespace": namespace,
             },
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
@@ -168,12 +172,12 @@ class WorkflowsService:
 
         raise exception_from_server_response(resp)
 
-    def get_archived_workflow(self, uid: str) -> Workflow:
+    def get_archived_workflow(self, uid: str, namespace: Optional[str] = None, name: Optional[str] = None) -> Workflow:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.get(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
-            params=None,
+            params={"namespace": namespace, "name": name},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
@@ -184,12 +188,12 @@ class WorkflowsService:
 
         raise exception_from_server_response(resp)
 
-    def delete_archived_workflow(self, uid: str) -> ArchivedWorkflowDeletedResponse:
+    def delete_archived_workflow(self, uid: str, namespace: Optional[str] = None) -> ArchivedWorkflowDeletedResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
         resp = requests.delete(
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}").format(uid=uid),
-            params=None,
+            params={"namespace": namespace},
             headers={"Authorization": f"Bearer {self.token}"},
             data=None,
             verify=self.verify_ssl,
@@ -631,6 +635,7 @@ class WorkflowsService:
     def list_workflow_templates(
         self,
         namespace: Optional[str] = None,
+        name_pattern: Optional[str] = None,
         label_selector: Optional[str] = None,
         field_selector: Optional[str] = None,
         watch: Optional[bool] = None,
@@ -648,6 +653,7 @@ class WorkflowsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params={
+                "namePattern": name_pattern,
                 "listOptions.labelSelector": label_selector,
                 "listOptions.fieldSelector": field_selector,
                 "listOptions.watch": watch,
