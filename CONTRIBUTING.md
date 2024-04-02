@@ -9,7 +9,26 @@ for the benefit of everyone! Remember to star the repo on GitHub and share Hera 
 [![Stars](https://img.shields.io/github/stars/argoproj-labs/hera)](https://github.com/argoproj-labs/hera/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/argoproj-labs/hera)](https://github.com/argoproj-labs/hera)
 
-## Setting up
+## New Contributor Guide
+
+We welcome code contributions for new features and bug fixes that address
+issues labeled with ["good-first-issue"](https://github.com/argoproj-labs/hera/issues?q=is%3Aopen+is%3Aissue+label%3Anote%3Agood-first-issue)
+or
+["ideal-for-contribution"](https://github.com/argoproj-labs/hera/issues?q=is%3Aopen+is%3Aissue+label%3Anote%3Aideal-for-contribution).
+
+We also encourage contributions in the form of:
+* Adding your organization as a [user of Hera](https://github.com/argoproj-labs/hera/blob/main/USERS.md)!
+* Answering questions on [GitHub Discussions](https://github.com/argoproj-labs/hera/discussions) and
+  [Slack](https://cloud-native.slack.com/archives/C03NRMD9KPY)
+* Blog Posts / Social Media featuring Hera
+* Attending the Hera [working group meeting](https://bloomberg.zoom.us/j/98693513976?pwd=QXVDRkFCZ1FybkIwdkdsWWdFa3NWUT09) (bi-weekly on Fridays, 3pm GMT / 3pm BST)
+  * Add notes to our [community agenda doc](https://docs.google.com/document/d/1IpHkxsxWdE0lhgpDj_pXYGotsa3s38koCzawlHyH860/edit) for the meeting
+
+If you have an idea for a large feature, please reach out to us on the Slack channel or attend the working group
+meetings first, and then we can help you propose the feature using
+[the CNCF design proposal template](https://github.com/cncf/project-template/blob/main/DESIGN-PROPOSALS.md?plain=1).
+
+### Setting up
 
 If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry`:
 
@@ -37,7 +56,7 @@ workflows-models               Generate the Workflows models portion of Argo Wor
 workflows-service              Generate the Workflows service option of Hera
 ```
 
-### Working in VSCode
+#### Working in VSCode
 
 If your preferred IDE is VSCode, you may have an issue using the integrated Testing extension where breakpoints are not
 respected. To solve this, add the following as a config in your `.vscode/launch.json` file:
@@ -58,16 +77,15 @@ respected. To solve this, add the following as a config in your `.vscode/launch.
 
 Please keep in mind the following guidelines and practices when contributing to Hera:
 
-1. Your commit must be signed. Hera uses [an application](https://github.com/apps/dco) that enforces the Developer
-   Certificate of Origin (DCO). Currently, a Contributor License Agreement
-   ([CLA](https://github.com/cla-assistant/cla-assistant)) check also appears on submitted pull requests. This can be
-   safely ignored and is **not** a requirement for contributions to hera. This is an artifact as the Argo Project is slowly migrating projects from CLA to DCO.
-1. Use `make format` to format the repository code. `make format` maps to a usage of [ruff](https://docs.astral.sh/ruff/formatter/), acting as a replacement for
-   [black](https://github.com/psf/black), and the repository adheres to whatever `ruff`/`black` uses as its strict pep8 format.
-   No questions asked!
+1. Your commit must be signed (`git commit --signoff`). Hera uses the [DCO application](https://github.com/apps/dco)
+   that enforces the Developer Certificate of Origin (DCO) on commits.
+1. Use `make format` to format the repository code. `make format` maps to a usage of
+   [ruff](https://docs.astral.sh/ruff/formatter/), and the repository adheres to whatever `ruff` uses as its strict pep8
+   format. No questions asked!
 1. Use `make lint test` to lint, run tests, and typecheck on the project.
 1. Add unit tests for any new code you write.
-1. Add an example, or extend an existing example, with any new features you may add. Use `make examples` to ensure that the documentation and examples are in sync.
+1. Add an example, or extend an existing example, with any new features you may add. Use `make examples` to ensure that
+   the documentation and examples are in sync.
 
 ## Adding new Workflow YAML generation tests
 

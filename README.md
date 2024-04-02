@@ -134,7 +134,7 @@ w.create()
 |----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | [PyPi](https://pypi.org/project/hera/)                   | `pip install hera`                                                                                   |
 | [PyPi](https://pypi.org/project/hera-workflows/)         | `pip install hera-workflows`                                                                         |
-| [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed`/`pip install .` |
+| [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed; pip install .`  |
 
 ### Optional dependencies
 
