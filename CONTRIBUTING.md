@@ -21,8 +21,8 @@ We also encourage contributions in the form of:
 * Answering questions on [GitHub Discussions](https://github.com/argoproj-labs/hera/discussions) and
   [Slack](https://cloud-native.slack.com/archives/C03NRMD9KPY)
 * Blog Posts / Social Media featuring Hera
-* Attending the [Hera working group meeting](TODO) (bi-weekly on Fridays, 3pm GMT)
-  * Add notes to our [community agenda doc](TODO) for the meeting
+* Attending the Hera [working group meeting](https://bloomberg.zoom.us/j/98693513976?pwd=QXVDRkFCZ1FybkIwdkdsWWdFa3NWUT09) (bi-weekly on Fridays, 3pm GMT / 3pm BST)
+  * Add notes to our [community agenda doc](https://docs.google.com/document/d/1IpHkxsxWdE0lhgpDj_pXYGotsa3s38koCzawlHyH860/edit) for the meeting
 
 If you have an idea for a large feature, please reach out to us on the Slack channel or attend the working group
 meetings first, and then we can help you propose the feature using
