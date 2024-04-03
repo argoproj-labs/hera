@@ -20,7 +20,6 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    overload,
 )
 
 from typing_extensions import ParamSpec, get_args, get_origin
@@ -575,41 +574,37 @@ def _output_annotations_used(source: Callable) -> bool:
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
-ScriptIns = ParamSpec("ScriptIns")  # For attribute types of Script
+
+ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
+StepIns = ParamSpec("StepIns")  # # For input attributes of Step class
+TaskIns = ParamSpec("TaskIns")  # # For input attributes of Task class
 
 
-def _take_annotation_from(
-    _: Callable[
-        ScriptIns,
-        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
-    ],
+# Pass actual classes of Script, Step and Task to bind inputs to the ParamSpecs above
+def _add_type_hints(
+    _script: Callable[ScriptIns, Script],
+    _step: Callable[StepIns, Step],
+    _task: Callable[TaskIns, Task],
 ) -> Callable[
-    [Callable],
+    ...,
     Callable[
-        ScriptIns,
-        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
+        ScriptIns,  # this adds Script type hints to the underlying function kwargs, i.e. `script`
+        Callable[  # we will return a function that is a decorator
+            [Callable[FuncIns, FuncR]],  # taking underlying function's inputs
+            Union[  # able to return FuncR | Step | Task | None
+                Callable[FuncIns, FuncR],
+                Callable[StepIns, Optional[Step]],
+                Callable[TaskIns, Optional[Task]],
+            ],
+        ],
     ],
 ]:
-    def decorator(
-        real_function: Callable,
-    ) -> Callable[
-        ScriptIns,
-        Callable[[Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]],
-    ]:
-        def new_function(
-            *args: ScriptIns.args, **kwargs: ScriptIns.kwargs
-        ) -> Callable[
-            [Callable[FuncIns, FuncR]], Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]
-        ]:
-            return real_function(*args, **kwargs)
-
-        return new_function
-
-    return decorator
+    """Adds type hints to the decorated function."""
+    return lambda func: func
 
 
-@_take_annotation_from(Script)  # type: ignore
-def script(**script_kwargs):
+@_add_type_hints(Script, Step, Task)  # type: ignore
+def script(**script_kwargs) -> Callable:
     """A decorator that wraps a function into a Script object.
 
     Using this decorator users can define a function that will be executed as a script in a container. Once the
@@ -628,10 +623,8 @@ def script(**script_kwargs):
         Function that wraps a given function into a `Script`.
     """
 
-    def script_wrapper(
-        func: Callable[FuncIns, FuncR],
-    ) -> Union[Callable[FuncIns, FuncR], Callable[ScriptIns, Union[Task, Step]]]:
-        """Wraps the given callable into a `Script` object that can be invoked.
+    def script_wrapper(func: Callable[FuncIns, FuncR]) -> Callable:
+        """Wraps the given callable so it can be invoked as a Step or Task.
 
         Parameters
         ----------
@@ -641,8 +634,8 @@ def script(**script_kwargs):
         Returns:
         -------
         Callable
-            Another callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
-            otherwise return the callable function unchanged.
+            Callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
+            otherwise returns the callable function unchanged.
         """
         # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
         # function for remote submission since it does not depend on any class or instance attributes, so it is
@@ -662,16 +655,9 @@ def script(**script_kwargs):
 
         s = Script(name=name, source=source, **script_kwargs)
 
-        @overload
-        def task_wrapper(*args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncR:  # type: ignore
-            ...
-
-        @overload
-        def task_wrapper(*args: ScriptIns.args, **kwargs: ScriptIns.kwargs) -> Union[Step, Task]: ...
-
         @wraps(func)
-        def task_wrapper(*args, **kwargs):
-            """Invokes a `Script` object's `__call__` method using the given `task_params`."""
+        def task_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
+            """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
             if _context.active:
                 return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
