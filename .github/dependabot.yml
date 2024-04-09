@@ -17,6 +17,10 @@ updates:
         - "python"
         - "semver:patch"
         - "type:dependency-upgrade"
+    groups:
+      patches:  # groups all patches into 1 PR
+        update-types:
+          - "patch"
   - package-ecosystem: github-actions
     directory: /
     schedule:
