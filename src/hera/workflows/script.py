@@ -588,9 +588,9 @@ def _add_type_hints(
 ) -> Callable[
     ...,
     Callable[
-        ScriptIns,  # this adds Script type hints to the underlying function kwargs, i.e. `script`
+        ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
         Callable[  # we will return a function that is a decorator
-            [Callable[FuncIns, FuncR]],  # taking underlying function's inputs
+            [Callable[FuncIns, FuncR]],  # taking underlying *user* function
             Union[  # able to return FuncR | Step | Task | None
                 Callable[FuncIns, FuncR],
                 Callable[StepIns, Optional[Step]],
