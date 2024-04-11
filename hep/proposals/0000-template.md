@@ -84,7 +84,7 @@ Why should we **not** do this?
 
 # Prior Art
 
-Discuss prior art, both the good and bad.
+Discuss [prior art](https://en.wikipedia.org/wiki/Prior_art), both the good and bad.
 
 # Unresolved Questions (OPTIONAL)
 
