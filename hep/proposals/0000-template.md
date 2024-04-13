@@ -2,7 +2,7 @@
 [meta]: #meta
 - Name: (fill in the feature name: My Feature)
 - Start Date: (fill in today's date: YYYY-MM-DD)
-- Update data (optional): (fill in today's date: YYYY-MM-DD)
+- Update date (optional): (fill in today's date: YYYY-MM-DD)
 - Author(s): (Github usernames)
 - Supersedes: (put "N/A" unless this replaces an existing HEP, then link to that HEP)
 
