@@ -35,11 +35,11 @@ This HEP introduces a new and powerful decorator based syntax for defining all k
 # Motivation
 [motivation]: #motivation
 
-The current context manager based syntax is good but it doesn't map well to template types that contain inputs/outputs. With the `@script` decorator, we have made hera feel extremely Pythonic and it has the added benefit of being runnable locally. We wish to extend this syntax to other template types which will allow for better readability and local testing and it will also standardize the template interface for Argo Workflows.
+The current context manager based syntax is good (especially for bridging the gap from Python to Argo's YAML) but it doesn't map well to template types that contain inputs/outputs. With the `@script` decorator, we made Hera feel extremely Pythonic and it has the added benefit of being runnable locally. We wish to extend this syntax to other template types, namely DAGs, Steps and Containers, which will allow for better readability and local testing. In this HEP, we also show how we will be able to generate stubs for WorkflowTemplates and improvements for referencing TemplateRefs under the new decorator syntax.
 
 # Proposal
 
-This HEP proposes that every template be mapped into a decorated function with HeraIO classes as the inputs and outputs.
+This HEP proposes that Argo's DAG, Steps and Container templates be mapped into Hera as decorated functions with HeraIO classes as the inputs and outputs.
 
 # Code Examples
 
@@ -47,24 +47,25 @@ This HEP proposes that every template be mapped into a decorated function with H
 
 ```python
 from hera.workflows import WorkflowTemplate
-from hera import io as hio
+import hera.workflows.io as hio
 
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
-# This defines the a template input
+# Users must subclass `hio.Input` to define the template's inputs
 class MyInput(hio.Input):
     user: str
 
-@wt.entrypoint  # Sets hello_world as the default entrypoint for the workflow template
+@wt.entrypoint  # Sets hello_world as the default entrypoint for the workflow template, it is an error to set entrypoint on multiple functions
 @wt.script  # Adds a new script template to the workflow template called hello_world
-def hello_world(my_input: MyInput) -> hio.Output:
+def hello_world(my_input: MyInput) -> hio.Output:  # A subclass of hio.Output must be used for the output of the function
     output = hio.Output()
     output.result = f"Hello Hera User: {my_input.user}!"
     return output
 
-# Allows users to instantiate a workflow template into a workflow
+# `run` is a new function for users to instantiate a workflow template as a workflow
 workflow = wt.run(MyInput(name="happy-hera-user"), wait=True)
+
 # Returned workflow is a normal hera Workflow class and can be accessed as normal
 assert workflow.status.phase == "Succeeded"
 assert workflow.status.outputs.result == "Hello Hera User: happy-hera-user!"
@@ -74,8 +75,7 @@ assert workflow.status.outputs.result == "Hello Hera User: happy-hera-user!"
 
 ```python
 from hera.workflows import WorkflowTemplate
-from hera import io as hio
-from hera.expr import spring
+import hera.workflows.io as hio
 
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
@@ -100,12 +100,12 @@ class WorkerOutput(hio.Output):
     value: str
 
 
-# The great outcome of this new syntax is that the template definition
-# vs the template call becomes very explicit.
+# The great outcome of this new syntax is is the separation of concerns so that
+# the template definition vs the template call becomes very explicit.
 # When a template is defined, it is defined via the decorator which registers it
 # When a template is invoked, it is invoked either via the callable syntax or via
 # wt.run() if it is the entrypoint
-# Another great side-effect is that all the templates can also be "run" locally as functions
+# Another great side-effect is that all the templates can run locally as functions
 @wt.entrypoint
 @wt.dag
 def worker(worker_input: WorkerInput) -> WorkerOutput:
@@ -130,12 +130,12 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
 
 ```python
 from hera.workflows import WorkflowTemplate
-from hera import io as hio
+import hera.workflows.io as hio
 
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
-# This defines the a template input
+# This defines the template's inputs
 class CalculatorInput(hio.Input):
     x: int
     y: int
@@ -148,7 +148,7 @@ def calculator(calc_input: CalculatorInput) -> hio.Output:
     return hio.Output(calc_input.x - calc_input.y)
     
 
-# This defines the another template input
+# This defines another template's inputs
 class FiboInput(hio.Input):
     num: int
 
@@ -173,20 +173,26 @@ def fibonacci(fibo: FiboInput) -> FiboOutput:
 
 ```python
 from hera.workflows import WorkflowTemplate, Container
-from hera import io as hio
+import hera.workflows.io as hio
 
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
-# This defines the a template input
+# This defines the template's inputs
 class MyInput(hio.Input):
     user: str = "Hera"
 
 class MyOutput(hio.Output):
-    container_greeting: Annotated[str, Parameter(name="container-greeting")]
+    container_greeting: Annotated[
+        str,
+        Parameter(
+            name="container-greeting",
+            value_from={"path": "/tmp/hello_world.txt"},
+        ),
+    ]
 
 @wt.entrypoint
-@wt.container(command=["sh", "-c"], args=["echo {{input.parameters.user}}"])
+@wt.container(command=["sh", "-c"], args=["echo {{input.parameters.user}} | tee /tmp/hello_world.txt"])
 def basic_hello_world(my_input: MyInput) -> hio.Output:
     ...
 
@@ -194,29 +200,33 @@ def basic_hello_world(my_input: MyInput) -> hio.Output:
 @wt.entrypoint
 @wt.container(command=["sh", "-c"])
 def advanced_hello_world(my_input: MyInput, template: Container) -> MyOutput:
-    # hio.output serves two functions. One, it allows users to create the output class
-    # which allows output path variables to be referenced.
-    # Second, it can be used to "mock" a container template when running locally and allow us to
+    # A 'MyOutput' object can be used to "mock" the output when running locally and allow us to
     # inject outputs based on inputs.
-    output: MyOutput = hio.output(my_input)
+    output: MyOutput = MyOutput(my_input)
+
     # template is a special variable that allows you to reference the template itself and modify
-    # its attributes. This is especially useful when trying to reference input params in args
+    # its attributes. This is especially useful when trying to reference input params in args.
+    # The hio.name and hio.path functions will be able to inspect the annotation of the given variable
+    # to return the correct Argo template syntax substitution.
     template.args = [f"echo {hio.name(my_input.user)} > {hio.path(output.container_greeting)}"]
     return output
 ```
 
-## Workflow Template Ref
+## Template Refs
 
 ```python
-from hera.workflows import WorkflowTemplate
-from hera import io as hio
-from hera.expr import spring
+from hera.workflows import WorkflowTemplate, ClusterWorkflowTemplate
+import hera.workflows.io as hio
 
 # We start by defining our Workflow Template
 wt = WorkflowTemplate(name="my-template")
 
-ewt = WorkflowTemplate(name="externally-workflow-template")
+# We will be referring to "another-workflow-template", to demonstrate two WorkflowTemplates can be written in the same package
 awt = WorkflowTemplate(name="another-workflow-template")
+
+# We assume we can generate Python code for this (Cluster) Workflow Template from e.g `hera generate stubs external-workflow-template`.
+# Ultimately, awt and ewt will behave the same way when their templates are invoked in dag/steps functions.
+ewt = ClusterWorkflowTemplate(name="external-workflow-template")
 
 @awt.script  # Adds a new script template to a workflow template called "another-workflow-template"
 def setup() -> hio.Output:
@@ -226,18 +236,22 @@ class ConcatInput(hio.Input):
     word_a: str
     word_b: str
 
-
 class ConcatOutput(hio.Output):
     value: str
 
-# Adds a new template ref from an external template
-# This can be auto-generated or typed by the user
-@ewt.template_ref
+# We assume we can autogenerate stubs such as these for templates in "external-workflow-template"
+@ewt.script
 def concat(concat_input: ConcatInput) -> ConcatOutput:
     ...
-    # Note: we can optionally use hio.output(concat_input)
-    # again here to run "local" mock versions of this workflow template ref
+    # Note: we can optionally return hio.output(concat_input)
+    # again here to run "local" mock versions of this template ref
     # this will be useful in local testing
+
+# In the case of kebab-case template names or other details, we can pass the extra info to the decorator:
+@ewt.script(name="my-concat-function")
+def my_concat_function(concat_input: ConcatInput) -> ConcatOutput:
+    ...
+
 
 class WorkerInput(hio.Input):
     value_a: str
@@ -250,11 +264,11 @@ class WorkerOutput(hio.Output):
 @wt.entrypoint
 @wt.dag
 def worker(worker_input: WorkerInput) -> WorkerOutput:
-    # Note that here setup will be referenced as a workflow template ref
-    # since it belongs in a different workflow template even though it is defined
-    # inside this file
+    # Here, the call to `setup` will create a template ref task since it belongs
+    # in a different workflow template even though it is defined inside this file
     setup_task = setup()
-    # concat is a workflow template ref and just serves as a stub
+
+    # concat serves as a stub, and will also become a template ref task
     task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
     task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
     final_task = concat(ConcatInput(word_a=task_a.value, word_b=task_b.value))
