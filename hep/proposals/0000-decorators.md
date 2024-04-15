@@ -143,7 +143,7 @@ class CalculatorInput(hio.Input):
 
 @wt.script  # Adds a new script template to the workflow template called calculator
 def calculator(calc_input: CalculatorInput) -> hio.Output:
-    if calc_input.operation == "add"
+    if calc_input.operation == "add":
         return hio.Output(calc_input.x + calc_input.y)
     return hio.Output(calc_input.x - calc_input.y)
     
