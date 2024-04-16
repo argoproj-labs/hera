@@ -304,7 +304,165 @@ Why should we **not** do this?
 
 # Prior Art
 
-Discuss prior art, both the good and bad.
+Comparisons to Prefect, Airflow and Metaflow, in particular in the context of parameter-passing between tasks.
+
+## Prefect
+
+As Prefect is in control of its own platform, it offers decorators for "flows" (equivalent to Argo's Workflows) and "tasks" (equivalent to DAGTasks) that do more of the behind the scenes magic for you, letting you use native Python code. Comparing to Hera, which must be able to compile the WorkflowTemplate definitions into YAML, we cannot lift _all_ of the backend implementation details into decorators in the same way.
+
+```py
+from prefect import flow, task
+
+@task
+def my_task():
+    return 1
+
+@flow
+def my_flow():
+    task_result = my_task()
+    return task_result + 1
+
+result = my_flow()
+assert result == 2
+```
+
+Prefect exposes the concept of serializing - https://docs.prefect.io/latest/concepts/results/#result-serializer-types - and “types” of results https://docs.prefect.io/latest/concepts/results/#result-types - of which the “LiteralType” must be JSON serializable (similar to Hera’s Pydantic integration).
+
+https://docs.prefect.io/latest/concepts/results/#retrieving-results
+
+## Airflow
+
+Airflow 1.0 used the concept of XCOMs to communicate between the isolated Task instances.
+
+The new Airflow 2.0 library uses TaskFlows, similar to Prefect, letting you use native Python code.
+
+```py
+import json
+
+import pendulum
+
+from airflow.decorators import dag, task
+@dag(
+    schedule=None,
+    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
+    catchup=False,
+    tags=["example"],
+)
+def tutorial_taskflow_api():
+    """
+    ### TaskFlow API Tutorial Documentation
+    This is a simple data pipeline example which demonstrates the use of
+    the TaskFlow API using three simple tasks for Extract, Transform, and Load.
+    Documentation that goes along with the Airflow TaskFlow API tutorial is
+    located
+    [here](https://airflow.apache.org/docs/apache-airflow/stable/tutorial_taskflow_api.html)
+    """
+    @task()
+    def extract():
+        """
+        #### Extract task
+        A simple Extract task to get data ready for the rest of the data
+        pipeline. In this case, getting data is simulated by reading from a
+        hardcoded JSON string.
+        """
+        data_string = '{"1001": 301.27, "1002": 433.21, "1003": 502.22}'
+
+        order_data_dict = json.loads(data_string)
+        return order_data_dict
+
+    @task(multiple_outputs=True)
+    def transform(order_data_dict: dict):
+        """
+        #### Transform task
+        A simple Transform task which takes in the collection of order data and
+        computes the total order value.
+        """
+        total_order_value = 0
+
+        for value in order_data_dict.values():
+            total_order_value += value
+
+        return {"total_order_value": total_order_value}
+    @task()
+    def load(total_order_value: float):
+        """
+        #### Load task
+        A simple Load task which takes in the result of the Transform task and
+        instead of saving it to end user review, just prints it out.
+        """
+
+        print(f"Total order value is: {total_order_value:.2f}")
+
+    order_data = extract()
+    order_summary = transform(order_data)
+    load(order_summary["total_order_value"])
+
+tutorial_taskflow_api()
+```
+
+Note that Airflow has abstracted away the construction of the DAG by using the outputs passed between tasks to derive the dependencies. This is new in Airflow 2.0. Previously, the `>>` syntax would be used.
+
+These libraries don’t seem to have a concept of multiple outputs (despite the naming of `multiple_outputs` seen above - it simply means it's a dict), therefore it’s hard to compare that aspect. But for results, Hera already implements the `.result` property, which can be used in an equivalent way, even with the script runner, however, use of the script runner encourages explicit parameter outputs, to avoid using stdout to pass values.
+
+## Metaflow
+
+Metaflow is more of an experimentation/development platform, rather than being explicitly a Workflow Orchestrator with all the scaling, retry capabilities etc of something like Argo Workflows. "Steps" act as "checkpoints" for your code. The other main value-add of Metaflow is how it acts as the plumbing between different platforms, and allows local and remote execution of the same code, meaning it is suitable for the initial experimentation phase of the Model Development Lifecycle (MDLC). It appears to be less suitable to the later maintenance phase of the MDLC, as the rough code used for experimentation is less likely to be well-tested, compared to Hera, which lends itself to a full test suite of your code and Workflows through the use of the Script functions.
+
+Something like a "[linear flow](https://docs.metaflow.org/metaflow/basics#linear)" in Metaflow is immediately understandable:
+```py
+from metaflow import FlowSpec, step
+
+class LinearFlow(FlowSpec):
+
+    @step
+    def start(self):
+        self.my_var = 'hello world'
+        self.next(self.a)
+
+    @step
+    def a(self):
+        print('the data artifact is: %s' % self.my_var)
+        self.next(self.end)
+
+    @step
+    def end(self):
+        print('the data artifact is still: %s' % self.my_var)
+
+if __name__ == '__main__':
+    LinearFlow()
+```
+
+Metaflow also has the problem of fan-out syntax being less native using "[foreach](https://docs.metaflow.org/metaflow/basics#foreach)":
+
+```py
+from metaflow import FlowSpec, step
+
+class ForeachFlow(FlowSpec):
+
+    @step
+    def start(self):
+        self.titles = ['Stranger Things',
+                       'House of Cards',
+                       'Narcos']
+        self.next(self.a, foreach='titles')
+
+    @step
+    def a(self):
+        self.title = '%s processed' % self.input
+        self.next(self.join)
+
+    @step
+    def join(self, inputs):
+        self.results = [input.title for input in inputs]
+        self.next(self.end)
+
+    @step
+    def end(self):
+        print('\n'.join(self.results))
+
+if __name__ == '__main__':
+    ForeachFlow()
+```
 
 # Unresolved Questions (OPTIONAL)
 
