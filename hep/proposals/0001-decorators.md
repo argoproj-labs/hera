@@ -252,7 +252,7 @@ class MyOutput(hio.Output):
     ]
 
 @wt.entrypoint
-@wt.container(command=["sh", "-c"], args=["echo {{input.parameters.user}} | tee /tmp/hello_world.txt"])
+@wt.container(command=["sh", "-c"], args=["echo {{inputs.parameters.user}} | tee /tmp/hello_world.txt"])
 def basic_hello_world(my_input: MyInput) -> hio.Output:
     ...
 
@@ -344,25 +344,101 @@ If applicable, describe the differences between teaching this to existing users 
 
 # Implementation
 
-TODO:
-* Add note about use of Hera IO classes
-* Add links about https://github.com/alexmojaki/sorcery#select_from, https://github.com/alexmojaki/executing#libraries-that-use-this and https://github.com/pwwang/python-varname
+The decorators for DAG, Steps and Containers, and the new Script decorator will be implemented as functions under the `hera.workflows.workflow.Workflow` class, in a similar fashion to the existing `script` decorator:
 
-## Link to the Implementation PR
+```py
+class Workflow(
+    ArgumentsMixin,
+    ContextMixin,
+    HookMixin,
+    VolumeMixin,
+    MetricsMixin,
+    ModelMapperMixin,
+):
+    # ...
 
-# Migration (OPTIONAL)
+    def container(**container_kwargs) -> Callable:
+        ...
 
-This section should document breaks to public API and breaks in compatibility due to this HEP's proposed changes. In addition, it should document the proposed steps that one would need to take to work through these changes.
+    def dag(**dag_kwargs) -> Callable:
+        ...
+
+    def steps(**steps_kwargs) -> Callable:
+        ...
+
+    def script(**script_kwargs) -> Callable:
+        ...
+```
+
+We will enforce the single input and output of the function within the decorator to be the `hera.workflows.io.Input` and `hera.workflows.io.Output` classes. We will repurpose the RunnerInput/RunnerOutput classes and deprecate the `script_pydantic_io` experimental feature, as we will stop development on the old `script` decorator to instead promote the new decorators as "the golden path" for development with Hera.
+
+We require the use of special classes for the input/output of the function to allow a mechanism to switch between "build" code for when building a Workflow, versus local "running" code. Using a custom class means we can implement dunder methods like `__getattribute__` to intercept the call so that for a statement within a DAG/Steps function like from the DAG example:
+
+```py
+    task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
+```
+
+For the `worker_input.value_a` access, we can dynamically get the actual value when running locally, or create an argument `word_a` with the value `inputs.parameters.value_a` when building the workflow, i.e. for this `DAGTask` we will get the following YAML:
+
+```yaml
+- name: task_a
+  template: concat
+  arguments:
+    parameters:
+    - name: word_a
+      value: {{inputs.parameters.value_a}}
+    - name: word_b
+      value: {{tasks.setup_task.outputs.result}}
+```
+
+Without the IO classes the building of the workflow would be more complicated as we would need to go through positional args to match them, but we then have the problem of wanting to allow `TemplateInvocatorSubNodeMixin` (Task/Step) kwargs without them clashing. By limiting functions to a single input and output, we can encapsulate the runtime/build time behaviour difference, as well as allowing Task/Step kwargs to be set as kwarg-only parameters to the function call.
+
+Deeper in the backend, to be able to extract the names of tasks from statements like
+
+```py
+    task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
+```
+
+we need to make use of libraries that can perform AST inspection. `sorcery` introduces the ability to get the name of the variable itself through the `assigned_names` [function](https://github.com/alexmojaki/sorcery?tab=readme-ov-file#assigned_names). A library that builds off this is [python-varname](https://github.com/pwwang/python-varname), which is able to retrieve the name of the variable being assigned to by a function, from _inside_ the function:
+
+```py
+from varname import varname
+def function():
+    return varname()
+
+func = function()  # func == 'func'
+```
+
+Therefore, in the new `script` decorator function, when building the workflow, we will need to use `varname` to get the Task or Step's name, which might look something like:
+
+```py
+class Workflow(...):
+
+    def script(self, *args, **kwargs):
+        def wrapper(f):
+            signature = inspect.signature(f)
+            outputs = signature.return_annotation
+            inputs = signature.parameters['in_'].annotation
+            s = Script(name=f.__name__)
+            self._templates.append(s)
+            def wrapped(*args, **kwargs):
+                if building:
+                    # name of the task/step, which may be in the kwargs or inferred from the variable name:
+                    name = kwargs.pop("name", varname())
+                    # ... implementation ...
+```
 
 # Drawbacks
 
-Why should we **not** do this?
+* The existing syntax using context managers does a good job of mirroring the underlying YAML syntax of Argo Workflows, but can be confusing to regular Python users.
+* By adding this feature, we are introducing another way of writing templates - we will need to ensure documentation is clear, and examples are updated to show which method they are using.
+* We are unlikely to continue feature development on the current method of writing script templates.
+  * We will be deprecating and removing the `script_pydantic_io` experimental feature, in favour of this HEP
+  * We may also want to consider whether to graduate or deprecate the `script_annotations` experimental feature. It is a convenient way to write script templates with named Parameters using the current script decorator, but can harm readability, and the `tuple` type for outputs especially poses a problem for readability, so may be better to remove the `tuple` output and otherwise graduate that feature.
 
 # Alternatives
 
-- What other designs have been considered?
-- Why is this proposal the best?
-- What is the impact of not doing this?
+We could keep only the current context manager syntax, however, users still struggle with passing parameters and have to resort to Argo's underlying esoteric YAML syntax, and DAG and Steps templates are not locally executable. Within the existing codebase/design of Hera, alternative such as new classes doesn't make the most sense compared to decorators, as we already have a precedent with the current `script` decorator.
 
 # Prior Art
 
