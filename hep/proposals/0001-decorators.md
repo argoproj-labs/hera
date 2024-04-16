@@ -39,7 +39,7 @@ The current context manager based syntax is good (especially for bridging the ga
 
 # Proposal
 
-This HEP proposes that Argo's DAG, Steps and Container templates be mapped into Hera as decorated functions with HeraIO classes as the inputs and outputs.
+This HEP proposes that Argo's DAG, Steps and Container templates be mapped into Hera as decorated functions with HeraIO classes as the inputs and outputs. We will also introduce a new script decorator under the `hera.workflows.workflow.Workflow` class which will enforce use of the script runner along with the HeraIO classes.
 
 # Code Examples
 
@@ -57,7 +57,7 @@ class MyInput(hio.Input):
     user: str
 
 @wt.entrypoint  # Sets hello_world as the default entrypoint for the workflow template, it is an error to set entrypoint on multiple functions
-@wt.script  # Adds a new script template to the workflow template called hello_world
+@wt.script  # Adds a new script template to the workflow template called hello_world. This will enforce use of the script runner.
 def hello_world(my_input: MyInput) -> hio.Output:  # A subclass of hio.Output must be used for the output of the function
     output = hio.Output()
     output.result = f"Hello Hera User: {my_input.user}!"
@@ -112,19 +112,35 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
     # We will need to use something like python-varname
     # to automatically create a task called "setup_task" here.
     setup_task = setup()
+    # setup_task will be a `Task` when building the workflow, vs an `hio.Output` object
+    # when running locally.
+
+
     # Note how easy it is to reference variables from the DAG template input
     # or previous tasks.
     task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
     task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
     final_task = concat(ConcatInput(word_a=task_a.result, word_b=task_b.result))
-    # Note, we will automatically construct the dependency graph
-    # based on the input/output relationship between tasks.
+
+    # Note, we will automatically construct the dependency graph based on the
+    # input/output relationship between tasks, so Hera will infer the DAG as:
+    # setup_task >> [task_a, task_b] >> final_task
+
     # Users will still be able to explicitly add dependencies between tasks
     # using the rshift operator if they wish to define dependencies amongst
     # tasks that don't share variables directly
+
+    # Easily "forward" task output parameters to the DAG's output parameters
+    # which replaces the existing syntax, which requires a "forward declaration"
+    # of the intended output parameter:
+    # with DAG(
+    #     ...,
+    #     outputs=Parameter(
+    #         name="my-dag-output",
+    #         value_from={"parameter": "{{task-name.outputs.parameters.param-name}}"},
+    #     ),
     return WorkerOutput(value=final_task.result)
 ```
-
 
 ## Steps Template
 
@@ -167,7 +183,51 @@ def fibonacci(fibo: FiboInput) -> FiboOutput:
     return FiboOutput(num=valid_number.check(current.num, 1))
 ```
 
+### Parallel steps
 
+Converting the DAG code:
+
+```py
+from hera.workflows import WorkflowTemplate, parallel
+import hera.workflows.io as hio
+
+# We start by defining our Workflow Template
+wt = WorkflowTemplate(name="my-template")
+
+@wt.script  # Adds a new script template to the workflow template
+def setup() -> hio.Output:
+    return hio.Output(result="success")
+
+class ConcatInput(hio.Input):
+    word_a: str
+    word_b: str
+
+@wt.script  # Adds a new script template to the workflow template
+def concat(concat_input: ConcatInput) -> hio.Output:
+    return hio.Output(result=f"{concat_input.word_a} {concat_input.word_b}")
+
+class WorkerInput(hio.Input):
+    value_a: str
+    value_b: str
+
+class WorkerOutput(hio.Output):
+    value: str
+
+
+@wt.entrypoint
+@wt.steps
+def worker(worker_input: WorkerInput) -> WorkerOutput:
+    setup_step = setup()
+
+    # We can potentially add parameters such as `when` to `parallel` to add
+    # the `when` clause to all sub-steps
+    with parallel():
+        step_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_step.result))
+        step_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_step.result))
+
+    final_step = concat(ConcatInput(word_a=step_a.result, word_b=step_b.result))
+    return WorkerOutput(value=final_step.result)
+```
 
 ## Container Template
 
@@ -282,9 +342,11 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
 If applicable, describe the differences between teaching this to existing users and new users.
 
 
-# Implementation (OPTIONAL)
+# Implementation
 
-TODO: Add links about https://github.com/alexmojaki/sorcery#select_from, https://github.com/alexmojaki/executing#libraries-that-use-this and https://github.com/pwwang/python-varname
+TODO:
+* Add note about use of Hera IO classes
+* Add links about https://github.com/alexmojaki/sorcery#select_from, https://github.com/alexmojaki/executing#libraries-that-use-this and https://github.com/pwwang/python-varname
 
 ## Link to the Implementation PR
 
