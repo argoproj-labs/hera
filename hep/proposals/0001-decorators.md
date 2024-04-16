@@ -337,10 +337,9 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
 
 
 
-## How to teach (OPTIONAL)
+## How to teach
 
-If applicable, describe the differences between teaching this to existing users and new users.
-
+Given the existing `script` decorator is used throughout the walk through and examples, we will need to be clear if and when we replace it with the workflow-specific `script` decorator, as the feature will need to go through the `experimental_features` route. We should then consider re-writing the walkthrough and key examples to use the new decorators. We may want to consider a migration guide or tool to convert from the old `script` to the new to make this easier for ourselves and our users.
 
 # Implementation
 
