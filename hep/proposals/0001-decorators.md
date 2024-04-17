@@ -41,6 +41,9 @@ The current context manager based syntax is good (especially for bridging the ga
 
 This HEP proposes that Argo's DAG, Steps and Container templates be mapped into Hera as decorated functions with HeraIO classes as the inputs and outputs. We will also introduce a new script decorator under the `hera.workflows.workflow.Workflow` class which will enforce use of the script runner along with the HeraIO classes.
 
+> ⚠️ The existing context manager syntax, and the script decorator, will continue to be supported, but they are unlikely
+> to receive any active development of new features.
+
 # Code Examples
 
 ## Basic Workflow
