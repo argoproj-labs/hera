@@ -440,7 +440,7 @@ class Workflow(...):
 
 # Alternatives
 
-We could keep only the current context manager syntax, however, users still struggle with passing parameters and have to resort to Argo's underlying esoteric YAML syntax, and DAG and Steps templates are not locally executable. Within the existing codebase/design of Hera, alternative such as new classes doesn't make the most sense compared to decorators, as we already have a precedent with the current `script` decorator.
+We could keep only the current context manager syntax, however, users still struggle with passing parameters and have to resort to Argo's underlying esoteric YAML syntax, and DAG and Steps templates are not locally executable. Within the existing codebase/design of Hera, alternatives such as new classes don't make the most sense compared to decorators, as we have already set a precedent with the current `script` decorator.
 
 # Prior Art
 
