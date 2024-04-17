@@ -6,9 +6,9 @@ for more on Workflows.
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin
+from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 
 try:
     from typing import Annotated, get_args  # type: ignore
@@ -83,6 +83,7 @@ class Workflow(
     VolumeMixin,
     MetricsMixin,
     ModelMapperMixin,
+    TemplateDecoratorFuncsMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -475,6 +476,17 @@ class Workflow(
         assert self.workflows_service is not None, "Cannot fetch a workflow link without a service"
         assert self.name is not None, "Cannot fetch a workflow link without a workflow name"
         return self.workflows_service.get_workflow_link(self.name)
+
+    def set_entrypoint(self) -> Callable:
+        """Decorator function to set entrypoint."""
+
+        def decorator(func: Callable) -> Callable:
+            # TODO: check if template has an alternative name
+            # self.entrypoint = f.__template_name
+            self.entrypoint = func.__name__.replace("_", "-")
+            return func
+
+        return decorator
 
 
 __all__ = ["Workflow"]

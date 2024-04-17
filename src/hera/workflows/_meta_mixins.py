@@ -9,6 +9,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
+from typing_extensions import ParamSpec
+
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
 from hera.workflows._context import _context
@@ -404,3 +406,105 @@ class CallableTemplateMixin(BaseMixin):
                 if p.name not in parameter_names:
                     new_params.append(p)
         return new_params
+
+
+FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
+FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+
+ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
+StepIns = ParamSpec("StepIns")  # # For input attributes of Step class
+TaskIns = ParamSpec("TaskIns")  # # For input attributes of Task class
+
+
+class TemplateDecoratorFuncsMixin(BaseMixin):
+    from hera.workflows.script import RunnerScriptConstructor, Script
+
+    def _add_type_hints(
+        _script: Callable[ScriptIns, Script],
+    ) -> Callable[
+        ...,
+        Callable[
+            ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
+            Callable[  # we will return a function that is a decorator
+                [Callable[FuncIns, FuncR]],  # taking underlying *user* function
+                Callable[FuncIns, FuncR],  # and returning it
+            ],
+        ],
+    ]:
+        """Adds type hints to the decorated function."""
+        return lambda func: func
+
+    @_add_type_hints(Script)  # type: ignore
+    def script(self, **script_kwargs) -> Callable:
+        """A decorator that wraps a function into a Script object.
+
+        Using this decorator users can define a function that will be executed as a script in a container. Once the
+        `Script` is returned users can use it as they generally use a `Script` e.g. as a callable inside a DAG or Steps.
+        Note that invoking the function will result in the template associated with the script to be added to the
+        workflow context, so users do not have to worry about that.
+
+        Parameters
+        ----------
+        **script_kwargs
+            Keyword arguments to be passed to the Script object.
+
+        Returns:
+        -------
+        Callable
+            Function that wraps a given function into a `Script`.
+        """
+
+        def script_wrapper(func: Callable[FuncIns, FuncR]) -> Callable:
+            """Wraps the given callable so it can be invoked as a Step or Task.
+
+            Parameters
+            ----------
+            func: Callable
+                Function to wrap.
+
+            Returns:
+            -------
+            Callable
+                Callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
+                otherwise returns the callable function unchanged.
+            """
+            # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
+            # function for remote submission since it does not depend on any class or instance attributes, so it is
+            # submittable
+            if isinstance(func, staticmethod):
+                source: Callable = func.__func__
+            else:
+                source = func
+
+            if "name" in script_kwargs:
+                # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
+                # kwargs called `name`
+                name = script_kwargs.pop("name")
+            else:
+                # otherwise populate the `name` from the function name
+                name = source.__name__.replace("_", "-")
+
+            from hera.workflows.script import RunnerScriptConstructor, Script
+
+            if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
+                script_kwargs["constructor"] = RunnerScriptConstructor()
+
+            # Open Workflow context to add `Script` object automatically
+            with self:
+                s = Script(name=name, source=source, **script_kwargs)
+
+            if not isinstance(s.constructor, RunnerScriptConstructor):
+                raise ValueError(f"Script '{name}' must use RunnerScriptConstructor")
+
+            @functools.wraps(func)
+            def task_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
+                """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
+                if _context.active:
+                    return s.__call__(*args, **kwargs)
+                return func(*args, **kwargs)
+
+            # Set the wrapped function to the original function so that we can use it later
+            task_wrapper.wrapped_function = func  # type: ignore
+            return task_wrapper
+
+        return script_wrapper
