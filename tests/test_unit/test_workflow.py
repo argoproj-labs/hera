@@ -52,7 +52,7 @@ def test_workflow_create():
 
 def test_workflow_to_file(tmp_path: Path):
     # GIVEN
-    workflow = importlib.import_module("examples.workflows.hello_world").w
+    workflow = importlib.import_module("examples.workflows.misc.hello_world").w
 
     # WHEN
     yaml_path = workflow.to_file(tmp_path)
@@ -64,7 +64,7 @@ def test_workflow_to_file(tmp_path: Path):
 
 def test_workflow_from_yaml():
     # GIVEN
-    workflow = importlib.import_module("examples.workflows.hello_world").w
+    workflow = importlib.import_module("examples.workflows.misc.hello_world").w
 
     # THEN
     assert workflow == Workflow.from_yaml(workflow.to_yaml())
