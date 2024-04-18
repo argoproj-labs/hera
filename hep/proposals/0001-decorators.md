@@ -17,32 +17,61 @@
   - [DAG Template](#dag-template)
   - [Steps Template](#steps-template)
   - [Container Template](#container-template)
-  - [Workflow Template Ref](#workflow-template-ref)
-  - [How to teach (OPTIONAL)](#how-to-teach-optional)
-- [Implementation (OPTIONAL)](#implementation-optional)
-  - [Link to the Implementation PR](#link-to-the-implementation-pr)
-- [Migration (OPTIONAL)](#migration-optional)
+  - [Template Refs](#template-refs)
+  - [Template Sets](#template-sets)
+  - [How to teach](#how-to-teach)
+- [Implementation](#implementation)
+<!-- - [Migration (OPTIONAL)](#migration-optional) -->
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
 - [Prior Art](#prior-art)
-- [Unresolved Questions (OPTIONAL)](#unresolved-questions-optional)
+- [Unresolved Questions](#unresolved-questions)
 
 # Overview
 [overview]: #overview
 
-This HEP introduces a new and powerful decorator based syntax for defining all kinds of Workflows and Templates.
+This HEP introduces new and powerful decorator based syntax elements for defining Workflows and Templates.
 
 # Motivation
 [motivation]: #motivation
 
-The current context manager based syntax is good (especially for bridging the gap from Python to Argo's YAML) but it doesn't map well to template types that contain inputs/outputs. With the `@script` decorator, we made Hera feel extremely Pythonic and it has the added benefit of being runnable locally. We wish to extend this syntax to other template types, namely DAGs, Steps and Containers, which will allow for better readability and local testing. In this HEP, we also show how we will be able to generate stubs for WorkflowTemplates and improvements for referencing TemplateRefs under the new decorator syntax.
+The current context manager based syntax is good (especially for bridging the gap from Python to Argo's YAML) but it doesn't map well to non-script template types that contain inputs/outputs like DAGs and Steps. It is also difficult for users to pass Parameters and Artifacts between Tasks and Steps.
+
+With the `@script` decorator, we made Hera feel extremely Pythonic and it has the added benefit of being runnable locally. We wish to extend this syntax to other template types, namely DAGs, Steps and Containers, (and eventually other template types) which will allow for better readability and local testing. In this HEP, we also show how we will be able to generate stubs for WorkflowTemplates and improvements for referencing TemplateRefs under the new decorator syntax.
+
+To outline the benefits of this proposal:
+* DAGs and Steps made up of local script-decorated functions will be entirely locally runnable
+  * We intend to follow up this HEP with a "locally-runnable expressions" HEP, to allow full conditional logic control in DAGs and Steps
+* Parameter passing within DAGs and Steps will be simplified and read as Python-native code
+* All templates will be mockable with user-defined snippets of Python code to allow you to locally test DAGs and Steps, so users will have the ability to specify the mocked outputs of a template
+* You will be able to more easily arrange code for multiple WorkflowTemplates in one package as templates are tied to their respective WorkflowTemplates through the decorator
+  * Tying templates to their respective WorkflowTemplates means we know that, when used in a DAG/Steps function, the function call to another WorkflowTemplate's template to create a Task/Step should be a `TemplateRef`
+* You will be able to stub out templates from WorkflowTemplates, allowing you to use them in DAGs/Steps with full type information
+  * We intend to follow up this HEP with a "stub generation" enhancement to the CLI, where these stubs will be generated via `hera generate stubs`
 
 # Proposal
 
 This HEP proposes that Argo's DAG, Steps and Container templates be mapped into Hera as decorated functions with HeraIO classes as the inputs and outputs. We will also introduce a new script decorator under the `hera.workflows.workflow.Workflow` class which will enforce use of the script runner along with the HeraIO classes.
 
-> ⚠️ The existing context manager syntax, and the script decorator, will continue to be supported, but they are unlikely
-> to receive any active development of new features.
+> ⚠️ The existing context manager syntax, and the current script decorator, will continue to be supported, but they are
+> unlikely to receive any active development of new features.
+
+To allow Workflow definitions to span multiple files, we will also introduce a `TemplateSet` class offering the same decorators. This can then be used to collect templates (DAGs, scripts etc) in files `A.py` and `B.py`, while the `Workflow` object is defined in file `C.py`, which will import the `TemplateSet` from `A` and `B`, and will add all of those templates to the Workflow via a `w.add_template_set` function. This is analogous to [FastAPI's `include_router` mechanism](https://fastapi.tiangolo.com/reference/apirouter/?h=include_router#fastapi.APIRouter.include_router):
+
+```py
+from fastapi import APIRouter, FastAPI
+
+app = FastAPI()
+internal_router = APIRouter()
+users_router = APIRouter()
+
+@users_router.get("/users/")
+def read_users():
+    return [{"name": "Rick"}, {"name": "Morty"}]
+
+internal_router.include_router(users_router)
+app.include_router(internal_router)
+```
 
 # Code Examples
 
@@ -255,7 +284,7 @@ class MyOutput(hio.Output):
     ]
 
 @wt.entrypoint
-@wt.container(command=["sh", "-c"], args=["echo {{inputs.parameters.user}} | tee /tmp/hello_world.txt"])
+@wt.container(command=["sh", "-c"], args=["echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"])
 def basic_hello_world(my_input: MyInput) -> hio.Output:
     ...
 
@@ -265,13 +294,13 @@ def basic_hello_world(my_input: MyInput) -> hio.Output:
 def advanced_hello_world(my_input: MyInput, template: Container) -> MyOutput:
     # A 'MyOutput' object can be used to "mock" the output when running locally and allow us to
     # inject outputs based on inputs.
-    output: MyOutput = MyOutput(my_input)
+    output: MyOutput = MyOutput(container_greeting=f"Hello {my_input.user}")
 
     # template is a special variable that allows you to reference the template itself and modify
     # its attributes. This is especially useful when trying to reference input params in args.
     # The hio.name and hio.path functions will be able to inspect the annotation of the given variable
     # to return the correct Argo template syntax substitution.
-    template.args = [f"echo {hio.name(my_input.user)} > {hio.path(output.container_greeting)}"]
+    template.args = [f"echo Hello {hio.name(my_input.user)} > {hio.path(output.container_greeting)}"]
     return output
 ```
 
@@ -338,7 +367,20 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
     return WorkerOutput(value=final_task.value)
 ```
 
+## Template Sets
 
+```py
+from hera.workflows import TemplateSet, WorkflowTemplate
+
+wt = WorkflowTemplate(name="my-template")
+templates = TemplateSet()
+
+@templates.script
+def setup() -> hio.Output:
+    return hio.Output(result="Setting things up")
+
+wt.add_template_set(templates)
+```
 
 ## How to teach
 
@@ -604,8 +646,11 @@ if __name__ == '__main__':
     ForeachFlow()
 ```
 
-# Unresolved Questions (OPTIONAL)
+# Unresolved Questions
 
-- What parts of the design do you expect to be resolved before this gets merged?
-- What parts of the design do you expect to be resolved through implementation of the feature?
-- What related issues do you consider out of scope for this HEP that could be addressed in the future independently of the solution that comes out of this HEP?
+This feature is independent of any current proposals, so once approved, this HEP can be implemented as written in the current code base.
+
+Future features that are out of scope but will build off this HEP include
+* the generation of stubs, which we have suggested will be through `hera generate stub`
+* local expr evaluation, which has not been investigated in this HEP, but can be seen in example code proposed as `valid_number = hio.expr(fibo.num > 1)`
+* the remaining template types like HTTP, resource etc which have not been investigated in this HEP
