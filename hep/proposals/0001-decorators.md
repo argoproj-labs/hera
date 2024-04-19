@@ -19,6 +19,7 @@
   - [Container Template](#container-template)
   - [Template Refs](#template-refs)
   - [Template Sets](#template-sets)
+  - [Fan-outs](#fan-outs)
   - [How to teach](#how-to-teach)
 - [Implementation](#implementation)
 <!-- - [Migration (OPTIONAL)](#migration-optional) -->
@@ -194,7 +195,6 @@ def calculator(calc_input: CalculatorInput) -> hio.Output:
     if calc_input.operation == "add":
         return hio.Output(calc_input.x + calc_input.y)
     return hio.Output(calc_input.x - calc_input.y)
-    
 
 # This defines another template's inputs
 class FiboInput(hio.Input):
@@ -344,27 +344,25 @@ def concat(concat_input: ConcatInput) -> ConcatOutput:
 def my_concat_function(concat_input: ConcatInput) -> ConcatOutput:
     ...
 
-
-class WorkerInput(hio.Input):
+class MyDagInput(hio.Input):
     value_a: str
     value_b: str
 
-class WorkerOutput(hio.Output):
+class MyDagOutput(hio.Output):
     value: str
-
 
 @wt.entrypoint
 @wt.dag
-def worker(worker_input: WorkerInput) -> WorkerOutput:
+def my_dag(my_dag_input: MyDagInput) -> MyDagOutput:
     # Here, the call to `setup` will create a template ref task since it belongs
     # in a different workflow template even though it is defined inside this file
     setup_task = setup()
 
     # concat serves as a stub, and will also become a template ref task
-    task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
-    task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
+    task_a = concat(ConcatInput(word_a=my_dag_input.value_a, word_b=setup_task.result))
+    task_b = concat(ConcatInput(word_a=my_dag_input.value_b, word_b=setup_task.result))
     final_task = concat(ConcatInput(word_a=task_a.value, word_b=task_b.value))
-    return WorkerOutput(value=final_task.value)
+    return MyDagOutput(value=final_task.value)
 ```
 
 ## Template Sets
@@ -380,6 +378,200 @@ def setup() -> hio.Output:
     return hio.Output(result="Setting things up")
 
 wt.add_template_set(templates)
+```
+
+## Fan-outs
+
+### Static (items)
+
+#### Basic `with_items`
+
+```python
+from hera.workflows import WorkflowTemplate
+import hera.workflows.io as hio
+
+wt = WorkflowTemplate(name="my-template")
+
+class WorkerInput(hio.Input):
+    value: str
+
+class StorageInput(hio.Input):
+    data: str
+
+@wt.script
+def process_data(worker_input: WorkerInput) -> hio.Output:
+    new_data = worker_input.value * 5  # "a" becomes "aaaaa"
+    return hio.Output(result=new_data)
+
+@wt.script
+def store_data(storage_input: Storage_input) -> None:
+    ...
+
+@wt.entrypoint
+@wt.dag
+def fanout_dag():
+    # Create a task which will fan-out to process the data
+    process_data_task = process_data(WorkerInput(value=hio.Item), with_items=["a", "b", "c", "d", "e"])
+
+    # Task to collect data (fan-in)
+    store_data = store_data(StorageInput(data=process_data_task.result))
+```
+
+#### Dictionary `with_items`
+
+```python
+from hera.workflows import WorkflowTemplate
+import hera.workflows.io as hio
+
+wt = WorkflowTemplate(name="my-template")
+
+class WorkerInput(hio.Input):
+    param_1: str
+    param_2: str
+    param_3: str
+
+class StorageInput(hio.Input):
+    data: str
+
+@wt.script
+def process_data(worker_input: WorkerInput) -> hio.Output:
+    new_data = f"{worker_input.param_1}{worker_input.param_2}{worker_input.param_3}"
+    return hio.Output(result=new_data)
+
+@wt.script
+def store_data(storage_input: Storage_input) -> None:
+    ...
+
+@wt.entrypoint
+@wt.dag
+def fanout_dag():
+    # Use a list of dictionaries for this example, to demonstrate how we can access the keys of the dictionary item
+    my_items = [
+        {
+            "param_1": "A",
+            "param_2": "B",
+            "param_3": "C",
+        },
+        {
+            "param_1": "X",
+            "param_2": "Y",
+            "param_3": "Z",
+        },
+    ]
+    # Create a task which will fan-out to process the data
+    process_data_task = process_data(
+        WorkerInput(
+            param_1=hio.Item["param_1"],  # Access the item's keys via dictionary key syntax on the special `Item` class
+            param_2=hio.Item["param_2"],
+            param_3=hio.Item["param_3"],
+        ),
+        with_items=my_items,
+    )
+
+    # Task to collect data (fan-in)
+    store_data(StorageInput(data=process_data_task.result))
+```
+
+### Dynamic (params)
+
+#### Basic `with_param`
+
+```python
+from hera.workflows import WorkflowTemplate
+import hera.workflows.io as hio
+
+wt = WorkflowTemplate(name="my-template")
+
+class WorkerInput(hio.Input):
+    value: str
+
+class StorageInput(hio.Input):
+    data: str
+
+@wt.script
+def get_data() -> hio.Output:
+    data = random.sample("abcdef", 5)  # e.g. data=['e', 'b', 'a', 'c', 'd']
+    return hio.Output(result=data)
+
+@wt.script
+def process_data(worker_input: WorkerInput) -> hio.Output:
+    new_data = worker_input.value * 5  # "a" becomes "aaaaa"
+    return hio.Output(result=new_data)
+
+@wt.script
+def store_data(storage_input: Storage_input) -> None:
+    ...
+
+@wt.entrypoint
+@wt.dag
+def fanout_dag():
+    # Get data which will be stored in `result`
+    data = get_data()
+
+    # Create a task which will fan-out to process the data
+    process_data_task = process_data(WorkerInput(value=hio.Param), with_param=data.result)
+
+    # Task to collect data (fan-in)
+    store_data(StorageInput(data=process_data_task.result))
+```
+
+#### Dictionary `with_param`
+
+```python
+from hera.workflows import WorkflowTemplate
+import hera.workflows.io as hio
+import random
+
+wt = WorkflowTemplate(name="my-template")
+
+class WorkerInput(hio.Input):
+    value: str
+
+class StorageInput(hio.Input):
+    data: str
+
+@wt.script
+def get_data() -> hio.Output:
+    string = "abcdef"
+    data = {
+        "param_1": random.choice(string)
+        "param_2": random.choice(string)
+        "param_3": random.choice(string)
+    }
+    return hio.Output(result=data)
+
+@wt.script
+def get_data() -> hio.Output:
+    data = random.sample("abcdef", 5)  # e.g. data=['e', 'b', 'a', 'c', 'd']
+    return hio.Output(result=data)
+
+@wt.script
+def process_data(worker_input: WorkerInput) -> hio.Output:
+    new_data = worker_input.value * 5  # "a" becomes "aaaaa"
+    return hio.Output(result=new_data)
+
+@wt.script
+def store_data(storage_input: Storage_input) -> None:
+    ...
+
+@wt.entrypoint
+@wt.dag
+def fanout_dag():
+    # Get data which will be stored in `result`
+    data = get_data()
+
+    # Create a task which will fan-out to process the dynamically-generated data
+    process_data_task = process_data(
+        WorkerInput(
+            param_1=hio.Param["param_1"],  # Access the item's keys via dictionary key syntax on the special `Param` class
+            param_2=hio.Param["param_2"],
+            param_3=hio.Param["param_3"],
+        ),
+        with_items=my_items,
+    )
+
+    # Task to collect data (fan-in)
+    store_data(StorageInput(data=process_data_task.result))
 ```
 
 ## How to teach
