@@ -35,7 +35,7 @@ This HEP introduces new and powerful decorator based syntax elements for definin
 # Motivation
 [motivation]: #motivation
 
-The current context manager based syntax is good (especially for bridging the gap from Python to Argo's YAML) but it doesn't map well to non-script template types that contain inputs/outputs like DAGs and Steps. It is also difficult for users to pass Parameters and Artifacts between Tasks and Steps.
+The current context manager based syntax is good (especially for bridging the gap from Python to Argo's YAML) but it doesn't map well to non-script template types like DAGs and Steps that can also have inputs and outputs. It is also difficult for users to pass Parameters and Artifacts between Tasks and Steps.
 
 With the `@script` decorator, we made Hera feel extremely Pythonic and it has the added benefit of being runnable locally. We wish to extend this syntax to other template types, namely DAGs, Steps and Containers, (and eventually other template types) which will allow for better readability and local testing. In this HEP, we also show how we will be able to generate stubs for WorkflowTemplates and improvements for referencing TemplateRefs under the new decorator syntax.
 
@@ -132,14 +132,14 @@ class WorkerOutput(hio.Output):
     value: str
 
 
-# The great outcome of this new syntax is is the separation of concerns so that
+# The great outcome of this new syntax is the separation of concerns so that
 # the template definition vs the template call becomes very explicit.
 # When a template is defined, it is defined via the decorator which registers it
 # When a template is invoked, it is invoked either via the callable syntax or via
 # wt.run() if it is the entrypoint
 # Another great side-effect is that all the templates can run locally as functions
 @wt.entrypoint
-@wt.dag
+@wt.dag  # Adds a new DAG template to the workflow template
 def worker(worker_input: WorkerInput) -> WorkerOutput:
     # We will need to use something like python-varname
     # to automatically create a task called "setup_task" here.
@@ -204,7 +204,7 @@ class FiboOutput(hio.Output):
     num: int
 
 @wt.entrypoint
-@wt.steps  # Adds a new script template to the workflow template called fibonacci
+@wt.steps  # Adds a new steps template to the workflow template called fibonacci
 def fibonacci(fibo: FiboInput) -> FiboOutput:
     # we will need to validate that users can only run/define certain kinds of expressions here
     # and throw warnings if they are using syntax that is invalid
@@ -416,13 +416,13 @@ class Workflow(
 
 We will enforce the single input and output of the function within the decorator to be the `hera.workflows.io.Input` and `hera.workflows.io.Output` classes. We will repurpose the RunnerInput/RunnerOutput classes and deprecate the `script_pydantic_io` experimental feature, as we will stop development on the old `script` decorator to instead promote the new decorators as "the golden path" for development with Hera.
 
-We require the use of special classes for the input/output of the function to allow a mechanism to switch between "build" code for when building a Workflow, versus local "running" code. Using a custom class means we can implement dunder methods like `__getattribute__` to intercept the call so that for a statement within a DAG/Steps function like from the DAG example:
+We require the use of special classes for the input/output of the function to allow a mechanism to switch between "build" code for when building a Workflow, versus local "running" code. Using a custom class means we can implement dunder methods like `__getattribute__` to intercept the call for Pydantic attributes. For a function call in a DAG/Steps context such as:
 
 ```py
     task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.result))
 ```
 
-For the `worker_input.value_a` access, we can dynamically get the actual value when running locally, or create an argument `word_a` with the value `inputs.parameters.value_a` when building the workflow, i.e. for this `DAGTask` we will get the following YAML:
+For the access to `worker_input.value_a`, we can dynamically get the actual value when running locally, or create an argument `word_a` with the value `inputs.parameters.value_a` when building the workflow, i.e. for this `DAGTask` we will get the following YAML:
 
 ```yaml
 - name: task_a
