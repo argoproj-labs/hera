@@ -48,3 +48,5 @@ functionality in Hera. Read more in the [user guides](../user-guides/core-concep
 A natural extension of a Python DSL for Argo is tighter integration with Python scripts. This is where Hera improves the
 developer experience through its tailored classes and syntactic sugar to enable developers to easily orchestrate Python
 functions. Check out [Hello World](hello-world.md) to get started!
+
+If you want an introductory tour of Hera, check out the [Hera Tour](hera-tour.md)!

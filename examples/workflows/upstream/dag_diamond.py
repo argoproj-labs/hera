@@ -1,9 +1,6 @@
 from hera.workflows import DAG, Container, Parameter, Workflow
 
-with Workflow(
-    generate_name="dag-diamond-",
-    entrypoint="diamond",
-) as w:
+with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
     echo = Container(
         name="echo",
         image="alpine:3.7",

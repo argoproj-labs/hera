@@ -13,10 +13,14 @@ updates:
       day: "monday"
       time: "10:00"
       timezone: "America/New_York"
-      labels:
-        - "python"
-        - "semver:patch"
-        - "type:dependency-upgrade"
+    labels:
+      - "python"
+      - "semver:patch"
+      - "type:dependency-upgrade"
+    groups:
+      patches:  # groups all patches into 1 PR
+        update-types:
+          - "patch"
   - package-ecosystem: github-actions
     directory: /
     schedule:

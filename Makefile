@@ -155,6 +155,7 @@ run-argo: ## Start the argo server
 	kubectl get namespace argo || kubectl create namespace argo
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
+	kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=argo:default --namespace=argo
 	kubectl rollout status -n argo deployment/argo-server --timeout=120s --watch=true
 
 .PHONY: stop-argo
