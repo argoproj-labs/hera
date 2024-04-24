@@ -4,6 +4,7 @@ See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
 
+import logging
 import time
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -481,9 +482,9 @@ class Workflow(
         """Decorator function to set entrypoint."""
 
         def decorator(func: Callable) -> Callable:
-            # TODO: check if template has an alternative name
-            # self.entrypoint = f.__template_name
-            self.entrypoint = func.__name__.replace("_", "-")
+            if not hasattr(func, "template_name"):
+                logging.warning("Ensure `set_entrypoint` decorator is above template decorator")
+            self.entrypoint = func.template_name
             return func
 
         return decorator

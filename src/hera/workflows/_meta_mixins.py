@@ -451,11 +451,12 @@ class TemplateDecoratorFuncsMixin(BaseMixin):
         Returns:
         -------
         Callable
-            Function that wraps a given function into a `Script`.
+            Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if
+            in a Steps or DAG context.
         """
 
-        def script_wrapper(func: Callable[FuncIns, FuncR]) -> Callable:
-            """Wraps the given callable so it can be invoked as a Step or Task.
+        def script_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
+            """The internal decorator function.
 
             Parameters
             ----------
@@ -465,8 +466,8 @@ class TemplateDecoratorFuncsMixin(BaseMixin):
             Returns:
             -------
             Callable
-                Callable that represents the `Script` object `__call__` method when in a Steps or DAG context,
-                otherwise returns the callable function unchanged.
+                Callable that calls the `Script` object `__call__` method when in a Steps or DAG context,
+                otherwise calls function itself.
             """
             # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
             # function for remote submission since it does not depend on any class or instance attributes, so it is
@@ -497,14 +498,17 @@ class TemplateDecoratorFuncsMixin(BaseMixin):
                 raise ValueError(f"Script '{name}' must use RunnerScriptConstructor")
 
             @functools.wraps(func)
-            def task_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
+            def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.active:
                     return s.__call__(*args, **kwargs)
                 return func(*args, **kwargs)
 
             # Set the wrapped function to the original function so that we can use it later
-            task_wrapper.wrapped_function = func  # type: ignore
-            return task_wrapper
+            script_call_wrapper.wrapped_function = func  # type: ignore
+            # Set the template name to the inferred name
+            script_call_wrapper.template_name = name
 
-        return script_wrapper
+            return script_call_wrapper
+
+        return script_decorator
