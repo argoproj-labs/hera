@@ -2,7 +2,7 @@
 [meta]: #meta
 - Name: Hera Decorator Syntax
 - Start Date: 2024-04-13
-- Author(s): [@samj1912](https://github.com/elliotgunton), [@elliotgunton](https://github.com/elliotgunton)
+- Author(s): [@samj1912](https://github.com/samj1912), [@elliotgunton](https://github.com/elliotgunton)
 - Supersedes: N/A
 
 # Table of Contents
