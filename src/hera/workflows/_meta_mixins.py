@@ -1,3 +1,5 @@
+"""Build- and meta-related mixins that isolate shareable functionality between Hera objects."""
+
 from __future__ import annotations
 
 import functools
@@ -88,6 +90,8 @@ def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
 
 
 class ModelMapperMixin(BaseMixin):
+    """`ModelMapperMixin` allows Hera classes to be mapped to auto-generated Argo classes."""
+
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
             self.model_path = None
