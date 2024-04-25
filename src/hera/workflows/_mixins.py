@@ -614,7 +614,7 @@ class ArgumentsMixin(BaseMixin):
         return result
 
 
-class CallableTemplateMixin(ArgumentsMixin):
+class CallableTemplateMixin(BaseMixin):
     """`CallableTemplateMixin` provides the ability to 'call' the template like a regular Python function.
 
     The callable template implements the `__call__` method for the inheritor. The `__call__` method supports invoking
@@ -691,7 +691,7 @@ class CallableTemplateMixin(ArgumentsMixin):
         # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
         kwargs_arguments = kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]  # type: ignore
-        arguments = self.arguments if self.arguments else [] + kwargs_arguments
+        arguments = self.arguments if hasattr(self, "arguments") and self.arguments else [] + kwargs_arguments
         return list(filter(lambda x: x is not None, arguments))
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:

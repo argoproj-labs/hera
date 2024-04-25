@@ -106,6 +106,7 @@ class Parallel(
 
 
 class Steps(
+    ArgumentsMixin,
     IOMixin,
     TemplateMixin,
     CallableTemplateMixin,

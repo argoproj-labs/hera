@@ -2,7 +2,7 @@
 
 from typing import List, Optional, Union
 
-from hera.workflows._mixins import CallableTemplateMixin, IOMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, CallableTemplateMixin, IOMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import (
     ManifestFrom,
@@ -13,7 +13,7 @@ from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 
 
-class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
+class Resource(ArgumentsMixin, CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     """`Resource` is a representation of a K8s resource that can be created by Argo.
 
     The resource is a callable step that can be invoked in a DAG/Workflow. The resource can create any K8s resource,
