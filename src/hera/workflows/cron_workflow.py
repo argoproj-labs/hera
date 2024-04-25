@@ -161,7 +161,7 @@ class CronWorkflow(Workflow):
     def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
         """Parse from given model to cls's type."""
         assert isinstance(model, _ModelCronWorkflow)
-        hera_cron_workflow = CronWorkflow(schedule="")
+        hera_cron_workflow = cls(schedule="")
 
         for attr, annotation in cls._get_all_annotations().items():
             if get_origin(annotation) is Annotated and isinstance(
