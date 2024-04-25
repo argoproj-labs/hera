@@ -4,7 +4,8 @@ from typing import List, Union
 
 from hera.expr._node import Node
 from hera.workflows import models as m
-from hera.workflows._mixins import ArgumentsMixin, CallableTemplateMixin, IOMixin, TemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, IOMixin, TemplateMixin
 from hera.workflows.artifact import Artifact
 
 

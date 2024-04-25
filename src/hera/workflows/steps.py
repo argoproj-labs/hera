@@ -6,9 +6,9 @@ for more on Steps.
 
 from typing import Any, List, Optional, Union
 
+from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
-    CallableTemplateMixin,
     ContextMixin,
     IOMixin,
     ItemMixin,

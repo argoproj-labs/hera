@@ -2,7 +2,8 @@
 
 from typing import List, Optional, Union
 
-from hera.workflows._mixins import ArgumentsMixin, CallableTemplateMixin, IOMixin, SubNodeMixin, TemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, IOMixin, SubNodeMixin, TemplateMixin
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import (
     ManifestFrom,

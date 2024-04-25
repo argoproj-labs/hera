@@ -2,7 +2,8 @@
 
 from typing import List, Optional
 
-from hera.workflows._mixins import ArgumentsMixin, CallableTemplateMixin, IOMixin, TemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, IOMixin, TemplateMixin
 from hera.workflows.models import (
     HTTP as _ModelHTTP,
     HTTPBodySource,

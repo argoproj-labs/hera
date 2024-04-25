@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import List, Optional
 
+from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
-    CallableTemplateMixin,
     ContainerMixin,
     EnvIOMixin,
     ResourceMixin,

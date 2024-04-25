@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import functools
-import inspect
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     List,
     Optional,
     Sequence as SequenceType,
-    Set,
     Type,
     TypeVar,
     Union,
@@ -23,11 +19,10 @@ from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import root_validator, validator
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
-from hera.workflows._meta_mixins import HookMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin, HookMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
-from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.metrics import Metrics, _BaseMetric
 from hera.workflows.models import (
     HTTP,
@@ -74,10 +69,6 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
-
-if TYPE_CHECKING:
-    from hera.workflows.steps import Step
-    from hera.workflows.task import Task
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
@@ -614,160 +605,6 @@ class ArgumentsMixin(BaseMixin):
         return result
 
 
-class CallableTemplateMixin(BaseMixin):
-    """`CallableTemplateMixin` provides the ability to 'call' the template like a regular Python function.
-
-    The callable template implements the `__call__` method for the inheritor. The `__call__` method supports invoking
-    the template as a regular Python function. The call must be executed within an active context, which is a
-    `Workflow`, `DAG` or `Steps` context since the call optionally returns a `Step` or a `Task` depending on the active
-    context (`None` for `Workflow`, `Step` for `Steps` and `Task` for `DAG`). Note that `Steps` also supports calling
-    templates in a parallel steps context via using `Steps(...).parallel()`. When the call is executed and the template
-    does not exist on the active context, i.e. the workflow, it is automatically added for the user. Note that invoking
-    the same template multiple times does *not* result in the creation/addition of the same template to the active
-    context/workflow. Rather, a union is performed, so space is saved for users on the templates field and templates are
-    not duplicated.
-    """
-
-    def __call__(self, *args, **kwargs) -> Union[None, Step, Task]:
-        if "name" not in kwargs:
-            kwargs["name"] = self.name  # type: ignore
-
-        arguments = self._get_arguments(**kwargs)
-        parameter_names = self._get_parameter_names(arguments)
-        artifact_names = self._get_artifact_names(arguments)
-
-        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
-        # set it here in order for the following logic to capture it
-        if "source" not in kwargs and hasattr(self, "source"):
-            kwargs["source"] = self.source  # type: ignore
-
-        if "source" in kwargs and "with_param" in kwargs:
-            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
-        elif "source" in kwargs and "with_items" in kwargs:
-            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
-
-        # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
-        # additional parameters are inferred and have to be added to the `kwargs['arguments']`, otherwise
-        # the step/task will miss adding them when building the final arguments
-        kwargs["arguments"] = arguments
-
-        from hera.workflows.dag import DAG
-        from hera.workflows.script import Script
-        from hera.workflows.steps import Parallel, Step, Steps
-        from hera.workflows.task import Task
-        from hera.workflows.workflow import Workflow
-
-        if _context.pieces:
-            if isinstance(_context.pieces[-1], Workflow):
-                # Notes on callable templates under a Workflow:
-                # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
-                #   template to the workflow and return None.
-                # * Containers, ContainerSets and Data objects (i.e. subclasses of CallableTemplateMixin) are already
-                #   added when initialized under the Workflow context so a callable doesn't make sense in that context,
-                #   so we raise an InvalidTemplateCall exception.
-                # * We do not currently validate the added templates to stop a user adding the same template multiple
-                #   times, which can happen if "calling" the same script multiple times to add it to the workflow,
-                #   or initializing a second `Container` exactly like the first.
-                if isinstance(self, Script):
-                    _context.add_sub_node(self)
-                    return None
-
-                raise InvalidTemplateCall(
-                    f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
-                )
-            if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                return Step(*args, template=self, **kwargs)
-
-            if isinstance(_context.pieces[-1], DAG):
-                return Task(*args, template=self, **kwargs)
-
-        raise InvalidTemplateCall(
-            f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
-        )
-
-    def _get_arguments(self, **kwargs) -> List:
-        """Returns a list of arguments from the kwargs given to the template call."""
-        # these are the already set parameters. If a user has already set a parameter argument, then Hera
-        # uses the user-provided value rather than the inferred value
-        kwargs_arguments = kwargs.get("arguments", [])
-        kwargs_arguments = kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]  # type: ignore
-        arguments = self.arguments if hasattr(self, "arguments") and self.arguments else [] + kwargs_arguments
-        return list(filter(lambda x: x is not None, arguments))
-
-    def _get_parameter_names(self, arguments: List) -> Set[str]:
-        """Returns the union of parameter names from the given arguments' parameter objects and dictionary keys."""
-        parameters = [arg for arg in arguments if isinstance(arg, (ModelParameter, Parameter))]
-        keys = [arg for arg in arguments if isinstance(arg, dict)]
-        return {p.name for p in parameters}.union(
-            set(functools.reduce(lambda x, y: cast(List[str], x) + list(y.keys()), keys, []))
-        )
-
-    def _get_artifact_names(self, arguments: List) -> Set[str]:
-        """Returns the set of artifact names that are currently set on the mixin inheritor."""
-        artifacts = [arg for arg in arguments if isinstance(arg, (ModelArtifact, Artifact))]
-        return {a if isinstance(a, str) else a.name for a in artifacts if a.name}
-
-    def _get_deduped_params_from_source(
-        self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
-    ) -> List[Parameter]:
-        """Infer arguments from the given source and deduplicates based on the given params and artifacts.
-
-        Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
-        `arguments` are used to indicate exactly what _values_ are assigned to the set inputs. Here,
-        we infer the arguments when `with_param` is used. If a source is passed along with `with_param`, we
-        infer the arguments to set from the given source. It is assumed that `with_param` will return the
-        expected result for Argo to fan out the task on.
-
-        Parameters
-        ----------
-        parameter_names: Set[str]
-            Set of already constructed parameter names.
-        artifact_names: Set[str]
-            Set of already constructed artifact names.
-        source: Callable
-            The source function to infer the arguments from.
-
-        Returns:
-        -------
-        List[Parameter]
-            The list of inferred arguments to set.
-        """
-        new_arguments = []
-        new_parameters = _get_param_items_from_source(source)
-        for p in new_parameters:
-            if p.name not in parameter_names and p.name not in artifact_names:
-                new_arguments.append(p)
-        return new_arguments
-
-    def _get_deduped_params_from_items(self, parameter_names: Set[str], items: List[Any]) -> List[Parameter]:
-        """Infer arguments from the given items.
-
-        The main difference between `with_items` and `with_param` is that param is a serialized version of
-        `with_items`. Hence, `with_items` comes in the form of a list of objects, whereas `with_param` comes
-        in as a single serialized object. Here, we can infer the parameters to create based on the content
-        of `with_items`.
-
-        Parameters
-        ----------
-        parameter_names: Set[str]
-            Set of already constructed parameter names.
-        items: List[Any]
-            The items to infer the arguments from.
-
-        Returns:
-        -------
-        List[Parameter]
-            The list of inferred arguments to set.
-        """
-        item_params = _get_params_from_items(items)
-        new_params = []
-        if item_params is not None:
-            for p in item_params:
-                if p.name not in parameter_names:
-                    new_params.append(p)
-        return new_params
-
-
 class ParameterMixin(BaseMixin):
     """`ParameterMixin` supports the usage of `with_param` on inheritors."""
 
@@ -1094,48 +931,3 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def get_parameter(self, name: str) -> Parameter:
         """Gets a parameter from the outputs of this subnode."""
         return self._get_parameter(name=name, subtype=self._subtype)
-
-
-def _get_param_items_from_source(source: Callable) -> List[Parameter]:
-    """Returns a list (possibly empty) of `Parameter` from the specified `source`.
-
-    This infers that each non-keyword, positional, argument of the given source is a parameter that stems from a
-    fanout. Therefore, each parameter value takes the form of `{{item}}` when there's a single argument or
-    `{{item.<argument name>}}` when there are other arguments.
-
-    Returns:
-    -------
-    List[Parameter]
-        A list of identified parameters (possibly empty).
-    """
-    source_signature: List[str] = []
-    for p in inspect.signature(source).parameters.values():
-        if p.default == inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            # only add positional or keyword arguments that are not set to a default value
-            # as the default value ones are captured by the automatically generated `Parameter` fields for positional
-            # kwargs. Otherwise, we assume that the user sets the value of the parameter via the `with_param` field
-            source_signature.append(p.name)
-
-    if len(source_signature) == 1:
-        return [Parameter(name=n, value="{{item}}") for n in source_signature]
-    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in source_signature]
-
-
-def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
-    """Returns an optional list of `Parameter` from the specified list of `with_items`.
-
-    The assembled list of `Parameter` contains all the unique parameters identified from the `with_items` list. For
-    example, if the `with_items` list contains 3 serializable elements such as
-    `[{'a': 1, 'b': 2}, {'a': 3, 'b': 4}, {'a': 5, 'b': 6}]`, then only 2 `Parameter`s are returned. Namely, only
-     `Parameter(name='a')` and `Parameter(name='b')` is returned, with values `{{item.a}}` and `{{item.b}}`,
-     respectively. This helps with the parallel/serial processing of the supplied items.
-    """
-    if len(with_items) == 0:
-        return None
-    elif len(with_items) == 1:
-        el = with_items[0]
-        if len(el.keys()) == 1:
-            return [Parameter(name=n, value="{{item}}") for n in el.keys()]
-        else:
-            return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
-    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]

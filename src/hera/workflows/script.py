@@ -29,9 +29,9 @@ from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.workflows._context import _context
+from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
-    CallableTemplateMixin,
     ContainerMixin,
     EnvIOMixin,
     ResourceMixin,
