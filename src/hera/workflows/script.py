@@ -15,6 +15,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -328,10 +329,12 @@ class Script(
         """Add given volume to the script template for the automatic saving of the hera outputs."""
         assert isinstance(self.constructor, RunnerScriptConstructor)
 
-        if not isinstance(self.volumes, list) and self.volumes is not None:
-            self.volumes = [self.volumes]
-        elif self.volumes is None:
+        if self.volumes is None:
             self.volumes = []
+        elif isinstance(self.volumes, Sequence):
+            self.volumes = list(self.volumes)
+        elif not isinstance(self.volumes, list):
+            self.volumes = [self.volumes]
 
         if volume not in self.volumes:
             self.volumes.append(volume)
