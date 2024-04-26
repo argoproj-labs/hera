@@ -480,7 +480,7 @@ class Workflow(
 
         def decorator(func: Callable) -> Callable:
             if not hasattr(func, "template_name"):
-                raise SyntaxError("Ensure `set_entrypoint` decorator is above template decorator")
+                raise SyntaxError("`set_entrypoint` decorator must be above template decorator")
 
             self.entrypoint = func.template_name  # type: ignore
             return func
