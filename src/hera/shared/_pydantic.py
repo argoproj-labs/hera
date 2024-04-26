@@ -1,6 +1,6 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
 
-from typing import TYPE_CHECKING, Any, Dict, Literal, Type
+from typing import TYPE_CHECKING, Any, Dict, Type
 
 from pydantic import VERSION
 
