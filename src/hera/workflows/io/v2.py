@@ -6,6 +6,7 @@ RunnerInput/Output are only defined in this file if Pydantic v2 is installed.
 from collections import ChainMap
 from typing import Any, List, Optional, Union
 
+from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
@@ -20,9 +21,8 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-from importlib.util import find_spec
 
-if find_spec("pydantic.v1"):
+if _PYDANTIC_VERSION == 2:
     from pydantic import BaseModel
     from pydantic_core import PydanticUndefined
 

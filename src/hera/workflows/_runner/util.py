@@ -28,14 +28,14 @@ try:
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
-try:  # pydantic-v1/v2 related imports
+if _PYDANTIC_VERSION == 2:
     from pydantic.type_adapter import TypeAdapter  # type: ignore
     from pydantic.v1 import parse_obj_as  # type: ignore
 
     from hera.workflows.io.v2 import (  # type: ignore
         RunnerOutput as RunnerOutputV2,
     )
-except ImportError:
+else:
     from pydantic import parse_obj_as
 
     from hera.workflows.io.v1 import (  # type: ignore

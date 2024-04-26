@@ -1,21 +1,21 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
 
-from typing import TYPE_CHECKING, Any, Dict, Literal, Type
+from typing import TYPE_CHECKING, Any, Dict, Type
 
-_PYDANTIC_VERSION: Literal[1, 2] = 1
+from pydantic import VERSION
+
+_PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 # The pydantic v1 interface is used for both pydantic v1 and v2 in order to support
 # users across both versions.
 
-try:
+if _PYDANTIC_VERSION == 2:
     from pydantic.v1 import (  # type: ignore
         Field,
         ValidationError,
         root_validator,
         validator,
     )
-
-    _PYDANTIC_VERSION = 2
-except (ImportError, ModuleNotFoundError):
+else:
     from pydantic import (  # type: ignore[assignment,no-redef]
         Field,
         ValidationError,
@@ -23,18 +23,15 @@ except (ImportError, ModuleNotFoundError):
         validator,
     )
 
-    _PYDANTIC_VERSION = 1
-
-
 # TYPE_CHECKING-guarding specifically the `BaseModel` import helps the type checkers
 # provide proper type checking to models. Without this, both mypy and pyright lose
 # native pydantic hinting for `__init__` arguments.
 if TYPE_CHECKING:
     from pydantic import BaseModel as PydanticBaseModel
 else:
-    try:
+    if _PYDANTIC_VERSION == 2:
         from pydantic.v1 import BaseModel as PydanticBaseModel  # type: ignore
-    except (ImportError, ModuleNotFoundError):
+    else:
         from pydantic import BaseModel as PydanticBaseModel  # type: ignore[assignment,no-redef]
 
 

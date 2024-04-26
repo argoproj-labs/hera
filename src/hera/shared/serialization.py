@@ -10,9 +10,9 @@ from pydantic import BaseModel
 # for hera internal models, we still need to support v1 base models.
 from hera.shared._pydantic import _PYDANTIC_VERSION
 
-try:
+if _PYDANTIC_VERSION == 2:
     from pydantic.v1 import BaseModel as V1BaseModel  # type: ignore
-except (ImportError, ModuleNotFoundError):
+else:
     V1BaseModel = None  # type: ignore
 
 MISSING = object()
