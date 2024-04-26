@@ -8,6 +8,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
+from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin
+
 try:
     from typing import Annotated, get_args  # type: ignore
 except ImportError:
@@ -20,10 +22,8 @@ from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,
     ContextMixin,
-    HookMixin,
     MetricsMixin,
     MetricsT,
-    ModelMapperMixin,
     VolumeMixin,
     VolumesT,
 )
@@ -68,13 +68,6 @@ from hera.workflows.workflow_status import WorkflowStatus
 ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
 NAME_LIMIT = 63
-
-# The length of the random suffix used for generate_name
-# length (5) from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L45
-_SUFFIX_LEN = 5
-# The max name length comes from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L44
-# We want to truncate according to SUFFIX_LEN
-_TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
 
 
 class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):

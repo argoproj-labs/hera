@@ -2,7 +2,8 @@
 
 from typing import List, Optional
 
-from hera.workflows._mixins import CallableTemplateMixin, IOMixin, TemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin
+from hera.workflows._mixins import ArgumentsMixin, IOMixin, TemplateMixin
 from hera.workflows.models import (
     HTTP as _ModelHTTP,
     HTTPBodySource,
@@ -11,7 +12,7 @@ from hera.workflows.models import (
 )
 
 
-class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
+class HTTP(ArgumentsMixin, TemplateMixin, IOMixin, CallableTemplateMixin):
     """`HTTP` is an implementation of the HTTP template that supports executing HTTP actions in a step/task."""
 
     url: str

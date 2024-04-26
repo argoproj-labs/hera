@@ -15,6 +15,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -28,8 +29,9 @@ from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.workflows._context import _context
+from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
-    CallableTemplateMixin,
+    ArgumentsMixin,
     ContainerMixin,
     EnvIOMixin,
     ResourceMixin,
@@ -106,6 +108,7 @@ class ScriptConstructor(BaseMixin):
 
 
 class Script(
+    ArgumentsMixin,
     EnvIOMixin,
     CallableTemplateMixin,
     ContainerMixin,
@@ -328,10 +331,12 @@ class Script(
         """Add given volume to the script template for the automatic saving of the hera outputs."""
         assert isinstance(self.constructor, RunnerScriptConstructor)
 
-        if not isinstance(self.volumes, list) and self.volumes is not None:
-            self.volumes = [self.volumes]
-        elif self.volumes is None:
+        if self.volumes is None:
             self.volumes = []
+        elif isinstance(self.volumes, Sequence):
+            self.volumes = list(self.volumes)
+        elif not isinstance(self.volumes, list):
+            self.volumes = [self.volumes]
 
         if volume not in self.volumes:
             self.volumes.append(volume)

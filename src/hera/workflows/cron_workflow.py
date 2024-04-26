@@ -7,6 +7,8 @@ for more on CronWorkflows.
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
+from hera.workflows._meta_mixins import ModelMapperMixin, _set_model_attr
+
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
@@ -14,10 +16,8 @@ except ImportError:
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel
-from hera.workflows._mixins import (
-    ModelMapperMixin,
+from hera.workflows._meta_mixins import (
     _get_model_attr,
-    _set_model_attr,
 )
 from hera.workflows.models import (
     CreateCronWorkflowRequest,

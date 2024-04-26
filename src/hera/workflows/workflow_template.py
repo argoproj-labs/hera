@@ -14,7 +14,7 @@ except ImportError:
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel, validator
-from hera.workflows._mixins import ModelMapperMixin
+from hera.workflows._meta_mixins import ModelMapperMixin
 from hera.workflows.models import (
     ObjectMeta,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -25,7 +25,15 @@ from hera.workflows.models import (
     WorkflowTemplateUpdateRequest,
 )
 from hera.workflows.protocol import TWorkflow
-from hera.workflows.workflow import _TRUNCATE_LENGTH, Workflow, _WorkflowModelMapper
+from hera.workflows.workflow import NAME_LIMIT, Workflow, _WorkflowModelMapper
+
+# The length of the random suffix used for generate_name
+# length (5) from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L45
+_SUFFIX_LEN = 5
+
+# The max name length comes from https://github.com/kubernetes/kubernetes/blob/6195f96e/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L44
+# We want to truncate according to SUFFIX_LEN
+_TRUNCATE_LENGTH = NAME_LIMIT - _SUFFIX_LEN
 
 
 class _WorkflowTemplateModelMapper(_WorkflowModelMapper):
