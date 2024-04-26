@@ -82,7 +82,7 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install -E cli
-          poetry run pip install "pydantic<1.10.15"
+          poetry run pip install "pydantic<2"
 
       - name: run ci checks
         run: make ci
