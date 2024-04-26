@@ -19,10 +19,10 @@ Hook = Callable[[TBase], TBase]
 This can be a Workflow, a Script, a Container, etc - any Hera object. 
 """
 
-_HookMap = Dict[Type[TBase], List[Hook]]
+_HookMap = Dict[TypeTBase, List[Hook]]
 """mapping of Hera object type to the list of mutating hooks to apply to the object"""
 
-_Defaults = Dict[TBase, Dict]
+_Defaults = Dict[TypeTBase, Dict]
 """mapping of Hera object type to a dictionary of default field/value combinations"""
 
 
@@ -113,7 +113,7 @@ class _GlobalConfig:
         self._pre_build_hooks = self._pre_build_hooks or {}
         return self._pre_build_hooks.get(type(instance)) or []
 
-    def set_class_defaults(self, cls: Type[TBase], **kwargs: Any) -> None:
+    def set_class_defaults(self, cls: TypeTBase, **kwargs: Any) -> None:
         """Sets default values for a class.
 
         Args:
@@ -125,7 +125,7 @@ class _GlobalConfig:
             raise ValueError(f"Invalid keys for class {cls}: {invalid_keys}")
         self._defaults[cls].update(kwargs)
 
-    def _get_class_defaults(self, cls: BaseMixin) -> Any:
+    def _get_class_defaults(self, cls: TypeTBase) -> Any:
         """Gets a default value for a class.
 
         Args:
@@ -154,7 +154,9 @@ class BaseMixin(BaseModel):
     @root_validator(pre=True)
     def _set_defaults(cls, values):
         """Sets the user-provided defaults of Hera objects."""
-        defaults = global_config._get_class_defaults(cls)
+        # In a Pydantic validator function, the first parameter (cls) is the class itself, not an instance of it
+        # but mypy/linting sees it as an instance
+        defaults = global_config._get_class_defaults(cls)  # type: ignore
         for key, value in defaults.items():
             if values.get(key) is None:
                 values[key] = value

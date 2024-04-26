@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Union
 
-from hera.workflows._meta_mixins import CallableTemplateMixin
-from hera.workflows._mixins import ArgumentsMixin, ContextMixin, IOMixin, TemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
+from hera.workflows._mixins import ArgumentsMixin, IOMixin, TemplateMixin
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     DAGTask,

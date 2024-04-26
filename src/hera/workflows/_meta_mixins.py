@@ -48,6 +48,31 @@ except ImportError:
 THookable = TypeVar("THookable", bound="HookMixin")
 """`THookable` is the type associated with mixins that provide the ability to apply hooks from the global config"""
 
+TContext = TypeVar("TContext", bound="ContextMixin")
+"""`TContext` is the bounded context controlled by the context mixin that enable context management in workflow/dag"""
+
+
+class ContextMixin(BaseMixin):
+    """`ContextMixin` provides the ability to implement context management.
+
+    The mixin implements the `__enter__` and `__exit__` functionality that enables the core `with` clause. The mixin
+    expects that inheritors implement the `_add_sub` functionality, which adds a node defined within the context to the
+    main object context such as `Workflow`, `DAG`, or `ContainerSet`.
+    """
+
+    def __enter__(self: TContext) -> TContext:
+        """Enter the context of the inheritor."""
+        _context.enter(self)
+        return self
+
+    def __exit__(self, *_) -> None:
+        """Leave the context of the inheritor."""
+        _context.exit()
+
+    def _add_sub(self, node: Any) -> Any:
+        """Adds the supplied node to the context of the inheritor."""
+        raise NotImplementedError()
+
 
 class ExperimentalMixin(BaseMixin):
     _experimental_warning_message: str = (
@@ -59,7 +84,7 @@ class ExperimentalMixin(BaseMixin):
 
     _flag: str
 
-    @root_validator
+    @root_validator(allow_reuse=True)
     def _check_enabled(cls, values):
         if not global_config.experimental_features[cls._flag]:
             raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
@@ -412,27 +437,31 @@ FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decora
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
 
 ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
-StepIns = ParamSpec("StepIns")  # # For input attributes of Step class
-TaskIns = ParamSpec("TaskIns")  # # For input attributes of Task class
+StepIns = ParamSpec("StepIns")  # For input attributes of Step class
+TaskIns = ParamSpec("TaskIns")  # For input attributes of Task class
+
+if TYPE_CHECKING:
+    from hera.workflows.script import Script
 
 
-class TemplateDecoratorFuncsMixin(BaseMixin):
-    from hera.workflows.script import RunnerScriptConstructor, Script
-
-    def _add_type_hints(
-        _script: Callable[ScriptIns, Script],
-    ) -> Callable[
-        ...,
-        Callable[
-            ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
-            Callable[  # we will return a function that is a decorator
-                [Callable[FuncIns, FuncR]],  # taking underlying *user* function
-                Callable[FuncIns, FuncR],  # and returning it
-            ],
+def _add_type_hints(
+    _script: Callable[ScriptIns, Script],
+) -> Callable[
+    ...,
+    Callable[
+        ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
+        Callable[  # we will return a function that is a decorator
+            [Callable[FuncIns, FuncR]],  # taking underlying *user* function
+            Callable[FuncIns, FuncR],  # and returning it
         ],
-    ]:
-        """Adds type hints to the decorated function."""
-        return lambda func: func
+    ],
+]:
+    """Adds type hints to the decorated function."""
+    return lambda func: func
+
+
+class TemplateDecoratorFuncsMixin(ContextMixin):
+    from hera.workflows.script import Script
 
     @_add_type_hints(Script)  # type: ignore
     def script(self, **script_kwargs) -> Callable:
@@ -490,7 +519,7 @@ class TemplateDecoratorFuncsMixin(BaseMixin):
             if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
                 script_kwargs["constructor"] = RunnerScriptConstructor()
 
-            # Open Workflow context to add `Script` object automatically
+            # Open context to add `Script` object automatically
             with self:
                 s = Script(name=name, source=source, **script_kwargs)
 
@@ -507,7 +536,7 @@ class TemplateDecoratorFuncsMixin(BaseMixin):
             # Set the wrapped function to the original function so that we can use it later
             script_call_wrapper.wrapped_function = func  # type: ignore
             # Set the template name to the inferred name
-            script_call_wrapper.template_name = name
+            script_call_wrapper.template_name = name  # type: ignore
 
             return script_call_wrapper
 

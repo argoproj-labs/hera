@@ -22,7 +22,6 @@ from hera.shared._pydantic import BaseModel, validator
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,
-    ContextMixin,
     MetricsMixin,
     MetricsT,
     VolumeMixin,
@@ -79,7 +78,6 @@ class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
 
 class Workflow(
     ArgumentsMixin,
-    ContextMixin,
     HookMixin,
     VolumeMixin,
     MetricsMixin,
@@ -484,7 +482,7 @@ class Workflow(
         def decorator(func: Callable) -> Callable:
             if not hasattr(func, "template_name"):
                 logging.warning("Ensure `set_entrypoint` decorator is above template decorator")
-            self.entrypoint = func.template_name
+            self.entrypoint = func.template_name  # type: ignore
             return func
 
         return decorator
