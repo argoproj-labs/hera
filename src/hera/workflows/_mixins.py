@@ -18,7 +18,7 @@ from typing import (
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import root_validator, validator
 from hera.shared.serialization import serialize
-from hera.workflows._context import SubNodeMixin, _context
+from hera.workflows._context import SubNodeMixin
 from hera.workflows._meta_mixins import CallableTemplateMixin, HookMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
@@ -169,31 +169,6 @@ VolumesT = Optional[OneOrMany[Union[ModelVolume, _BaseVolume]]]
 This volume type is used to specify the configuration of volumes to be automatically created by Argo/K8s and mounted
 by Hera at specific mount paths in containers.
 """
-
-TContext = TypeVar("TContext", bound="ContextMixin")
-"""`TContext` is the bounded context controlled by the context mixin that enable context management in workflow/dag"""
-
-
-class ContextMixin(BaseMixin):
-    """`ContextMixin` provides the ability to implement context management.
-
-    The mixin implements the `__enter__` and `__exit__` functionality that enables the core `with` clause. The mixin
-    expects that inheritors implement the `_add_sub` functionality, which adds a node defined within the context to the
-    main object context such as `Workflow`, `DAG`, or `ContainerSet`.
-    """
-
-    def __enter__(self: TContext) -> TContext:
-        """Enter the context of the inheritor."""
-        _context.enter(self)
-        return self
-
-    def __exit__(self, *_) -> None:
-        """Leave the context of the inheritor."""
-        _context.exit()
-
-    def _add_sub(self, node: Any) -> Any:
-        """Adds the supplied node to the context of the inheritor."""
-        raise NotImplementedError()
 
 
 class ContainerMixin(BaseMixin):

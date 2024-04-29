@@ -9,6 +9,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
+from typing_extensions import ParamSpec
+
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
 from hera.workflows._context import _context
@@ -46,6 +48,31 @@ except ImportError:
 THookable = TypeVar("THookable", bound="HookMixin")
 """`THookable` is the type associated with mixins that provide the ability to apply hooks from the global config"""
 
+TContext = TypeVar("TContext", bound="ContextMixin")
+"""`TContext` is the bounded context controlled by the context mixin that enable context management in workflow/dag"""
+
+
+class ContextMixin(BaseMixin):
+    """`ContextMixin` provides the ability to implement context management.
+
+    The mixin implements the `__enter__` and `__exit__` functionality that enables the core `with` clause. The mixin
+    expects that inheritors implement the `_add_sub` functionality, which adds a node defined within the context to the
+    main object context such as `Workflow`, `DAG`, or `ContainerSet`.
+    """
+
+    def __enter__(self: TContext) -> TContext:
+        """Enter the context of the inheritor."""
+        _context.enter(self)
+        return self
+
+    def __exit__(self, *_) -> None:
+        """Leave the context of the inheritor."""
+        _context.exit()
+
+    def _add_sub(self, node: Any) -> Any:
+        """Adds the supplied node to the context of the inheritor."""
+        raise NotImplementedError()
+
 
 class ExperimentalMixin(BaseMixin):
     _experimental_warning_message: str = (
@@ -57,7 +84,7 @@ class ExperimentalMixin(BaseMixin):
 
     _flag: str
 
-    @root_validator
+    @root_validator(allow_reuse=True)
     def _check_enabled(cls, values):
         if not global_config.experimental_features[cls._flag]:
             raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
@@ -404,3 +431,113 @@ class CallableTemplateMixin(BaseMixin):
                 if p.name not in parameter_names:
                     new_params.append(p)
         return new_params
+
+
+FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
+FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+
+ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
+StepIns = ParamSpec("StepIns")  # For input attributes of Step class
+TaskIns = ParamSpec("TaskIns")  # For input attributes of Task class
+
+if TYPE_CHECKING:
+    from hera.workflows.script import Script
+
+
+def _add_type_hints(
+    _script: Callable[ScriptIns, Script],
+) -> Callable[
+    ...,
+    Callable[
+        ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
+        Callable[  # we will return a function that is a decorator
+            [Callable[FuncIns, FuncR]],  # taking underlying *user* function
+            Callable[FuncIns, FuncR],  # and returning it
+        ],
+    ],
+]:
+    """Adds type hints to the decorated function."""
+    return lambda func: func
+
+
+class TemplateDecoratorFuncsMixin(ContextMixin):
+    from hera.workflows.script import Script
+
+    @_add_type_hints(Script)  # type: ignore
+    def script(self, **script_kwargs) -> Callable:
+        """A decorator that wraps a function into a Script object.
+
+        Using this decorator users can define a function that will be executed as a script in a container. Once the
+        `Script` is returned users can use it as they generally use a `Script` e.g. as a callable inside a DAG or Steps.
+        Note that invoking the function will result in the template associated with the script to be added to the
+        workflow context, so users do not have to worry about that.
+
+        Parameters
+        ----------
+        **script_kwargs
+            Keyword arguments to be passed to the Script object.
+
+        Returns:
+        -------
+        Callable
+            Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if
+            in a Steps or DAG context.
+        """
+
+        def script_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
+            """The internal decorator function.
+
+            Parameters
+            ----------
+            func: Callable
+                Function to wrap.
+
+            Returns:
+            -------
+            Callable
+                Callable that calls the `Script` object `__call__` method when in a Steps or DAG context,
+                otherwise calls function itself.
+            """
+            # instance methods are wrapped in `staticmethod`. Hera can capture that type and extract the underlying
+            # function for remote submission since it does not depend on any class or instance attributes, so it is
+            # submittable
+            if isinstance(func, staticmethod):
+                source: Callable = func.__func__
+            else:
+                source = func
+
+            if "name" in script_kwargs:
+                # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
+                # kwargs called `name`
+                name = script_kwargs.pop("name")
+            else:
+                # otherwise populate the `name` from the function name
+                name = source.__name__.replace("_", "-")
+
+            from hera.workflows.script import RunnerScriptConstructor, Script
+
+            if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
+                script_kwargs["constructor"] = RunnerScriptConstructor()
+
+            # Open context to add `Script` object automatically
+            with self:
+                s = Script(name=name, source=source, **script_kwargs)
+
+            if not isinstance(s.constructor, RunnerScriptConstructor):
+                raise ValueError(f"Script '{name}' must use RunnerScriptConstructor")
+
+            @functools.wraps(func)
+            def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
+                """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
+                if _context.active:
+                    return s.__call__(*args, **kwargs)
+                return func(*args, **kwargs)
+
+            # Set the wrapped function to the original function so that we can use it later
+            script_call_wrapper.wrapped_function = func  # type: ignore
+            # Set the template name to the inferred name
+            script_call_wrapper.template_name = name  # type: ignore
+
+            return script_call_wrapper
+
+        return script_decorator

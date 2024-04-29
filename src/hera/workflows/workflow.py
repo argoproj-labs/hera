@@ -4,11 +4,14 @@ See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
 
+import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
-from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin
+from typing_extensions import ParamSpec
+
+from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 
 try:
     from typing import Annotated, get_args  # type: ignore
@@ -21,7 +24,6 @@ from hera.shared._pydantic import BaseModel, validator
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,
-    ContextMixin,
     MetricsMixin,
     MetricsT,
     VolumeMixin,
@@ -69,6 +71,9 @@ ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReferen
 
 NAME_LIMIT = 63
 
+T = TypeVar("T")
+P = ParamSpec("P")
+
 
 class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
     @classmethod
@@ -78,11 +83,11 @@ class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
 
 class Workflow(
     ArgumentsMixin,
-    ContextMixin,
     HookMixin,
     VolumeMixin,
     MetricsMixin,
     ModelMapperMixin,
+    TemplateDecoratorFuncsMixin,
 ):
     """The base Workflow class for Hera.
 
@@ -475,6 +480,20 @@ class Workflow(
         assert self.workflows_service is not None, "Cannot fetch a workflow link without a service"
         assert self.name is not None, "Cannot fetch a workflow link without a workflow name"
         return self.workflows_service.get_workflow_link(self.name)
+
+    def set_entrypoint(self, func: Callable[P, T]) -> Callable[P, T]:
+        """Decorator function to set entrypoint."""
+        if not hasattr(func, "template_name"):
+            raise SyntaxError("`set_entrypoint` decorator must be above template decorator")
+
+        if self.entrypoint is not None:
+            if self.entrypoint == func.template_name:
+                return func
+
+            logging.warning(f"entrypoint is being reassigned from {self.entrypoint} to {func.template_name}")
+
+        self.entrypoint = func.template_name  # type: ignore
+        return func
 
 
 __all__ = ["Workflow"]

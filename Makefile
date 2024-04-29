@@ -120,6 +120,11 @@ init-files:
 examples:  ## Generate documentation files for examples
 	@(cd docs && poetry run python generate.py)
 
+.PHONY: regenerate-example
+regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
+regenerate-example: install-3.8
+	@HERA_REGENERATE=1 poetry run python -m pytest -k $(EXAMPLE_FILENAME)
+
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests, report missing examples
 regenerate-test-data: install-3.8
