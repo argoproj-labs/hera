@@ -6,14 +6,14 @@ for more on Workflows.
 
 import time
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 
 try:
-    from typing import Annotated, get_args  # type: ignore
+    from typing import Annotated, ParamSpec, get_args  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated, get_args  # type: ignore
+    from typing_extensions import Annotated, ParamSpec, get_args  # type: ignore
 
 from hera import _yaml
 from hera.shared import global_config
@@ -67,6 +67,9 @@ from hera.workflows.workflow_status import WorkflowStatus
 ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]
 
 NAME_LIMIT = 63
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
 class _WorkflowModelMapper(ModelMapperMixin.ModelMapper):
@@ -475,17 +478,13 @@ class Workflow(
         assert self.name is not None, "Cannot fetch a workflow link without a workflow name"
         return self.workflows_service.get_workflow_link(self.name)
 
-    def set_entrypoint(self) -> Callable:
+    def set_entrypoint(self, func: Callable[P, T]) -> Callable[P, T]:
         """Decorator function to set entrypoint."""
+        if not hasattr(func, "template_name"):
+            raise SyntaxError("`set_entrypoint` decorator must be above template decorator")
 
-        def decorator(func: Callable) -> Callable:
-            if not hasattr(func, "template_name"):
-                raise SyntaxError("`set_entrypoint` decorator must be above template decorator")
-
-            self.entrypoint = func.template_name  # type: ignore
-            return func
-
-        return decorator
+        self.entrypoint = func.template_name  # type: ignore
+        return func
 
 
 __all__ = ["Workflow"]

@@ -29,7 +29,7 @@
 
 
     # Pass script kwargs (including an alternative public template name) in the decorator
-    @w.set_entrypoint()
+    @w.set_entrypoint
     @w.script(name="goodbye-world", labels={"my-label": "my-value"})
     def goodbye(my_input: MyInput) -> RunnerOutput:
         output = RunnerOutput()
