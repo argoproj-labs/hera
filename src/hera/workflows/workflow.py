@@ -4,16 +4,19 @@ See https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow
 for more on Workflows.
 """
 
+import logging
 import time
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
+from typing_extensions import ParamSpec
+
 from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 
 try:
-    from typing import Annotated, ParamSpec, get_args  # type: ignore
+    from typing import Annotated, get_args  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated, ParamSpec, get_args  # type: ignore
+    from typing_extensions import Annotated, get_args  # type: ignore
 
 from hera import _yaml
 from hera.shared import global_config
@@ -482,6 +485,12 @@ class Workflow(
         """Decorator function to set entrypoint."""
         if not hasattr(func, "template_name"):
             raise SyntaxError("`set_entrypoint` decorator must be above template decorator")
+
+        if self.entrypoint is not None:
+            if self.entrypoint == func.template_name:
+                return func
+
+            logging.warning(f"entrypoint is being reassigned from {self.entrypoint} to {func.template_name}")
 
         self.entrypoint = func.template_name  # type: ignore
         return func
