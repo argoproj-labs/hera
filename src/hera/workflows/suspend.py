@@ -10,7 +10,7 @@ See https://argoproj.github.io/argo-workflows/intermediate-inputs/ for more on i
 from typing import List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
-from hera.workflows._mixins import ArgumentsMixin, TemplateMixin
+from hera.workflows._mixins import TemplateMixin
 from hera.workflows.models import (
     Inputs,
     Outputs,
@@ -21,7 +21,6 @@ from hera.workflows.parameter import Parameter
 
 
 class Suspend(
-    ArgumentsMixin,
     TemplateMixin,
     CallableTemplateMixin,
 ):

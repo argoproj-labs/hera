@@ -10,7 +10,6 @@ from typing import List, Optional
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
-    ArgumentsMixin,
     ContainerMixin,
     EnvIOMixin,
     ResourceMixin,
@@ -26,7 +25,6 @@ from hera.workflows.models import (
 
 
 class Container(
-    ArgumentsMixin,
     EnvIOMixin,
     ContainerMixin,
     TemplateMixin,

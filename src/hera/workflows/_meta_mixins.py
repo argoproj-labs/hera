@@ -352,12 +352,9 @@ class CallableTemplateMixin(BaseMixin):
 
     def _get_arguments(self, **kwargs) -> List:
         """Returns a list of arguments from the kwargs given to the template call."""
-        # these are the already set parameters. If a user has already set a parameter argument, then Hera
-        # uses the user-provided value rather than the inferred value
         kwargs_arguments = kwargs.get("arguments", [])
         kwargs_arguments = kwargs_arguments if isinstance(kwargs_arguments, List) else [kwargs_arguments]  # type: ignore
-        arguments = self.arguments if hasattr(self, "arguments") and self.arguments else [] + kwargs_arguments
-        return list(filter(lambda x: x is not None, arguments))
+        return kwargs_arguments
 
     def _get_parameter_names(self, arguments: List) -> Set[str]:
         """Returns the union of parameter names from the given arguments' parameter objects and dictionary keys."""
