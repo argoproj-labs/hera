@@ -5,11 +5,11 @@ from typing import List, Union
 from hera.expr._node import Node
 from hera.workflows import models as m
 from hera.workflows._meta_mixins import CallableTemplateMixin
-from hera.workflows._mixins import ArgumentsMixin, IOMixin, TemplateMixin
+from hera.workflows._mixins import IOMixin, TemplateMixin
 from hera.workflows.artifact import Artifact
 
 
-class Data(ArgumentsMixin, TemplateMixin, IOMixin, CallableTemplateMixin):
+class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
     """`Data` implements the Argo data template representation.
 
     Data can be used to indicate that some data, identified by a `source`, should be processed via the specified

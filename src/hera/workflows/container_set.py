@@ -6,7 +6,6 @@ from typing import Any, List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import (
-    ArgumentsMixin,
     ContainerMixin,
     EnvIOMixin,
     EnvMixin,
@@ -26,7 +25,7 @@ from hera.workflows.models import (
 )
 
 
-class ContainerNode(ArgumentsMixin, ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, SubNodeMixin):
+class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, SubNodeMixin):
     """A regular container that can be used as part of a `hera.workflows.ContainerSet`.
 
     See Also:

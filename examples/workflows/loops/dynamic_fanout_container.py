@@ -16,7 +16,6 @@ generate = Container(
 fanout = Container(
     name="fanout",
     inputs=[Parameter(name="value")],
-    arguments=[Parameter(name="value", value="{{item.value}}")],
     image="alpine:latest",
     command=["echo", "{{inputs.parameters.value}}"],
 )
@@ -27,5 +26,7 @@ with Workflow(generate_name="dynamic-fanout-container-", entrypoint="d") as w:
         # this can be anything! e.g. fetch from some API, then in parallel process all entities; chunk database records
         # and process them in parallel, etc.
         g = generate()
-        f = fanout(with_param=g.result)  # this make the task fan out over the `with_param`
+        f = fanout(
+            arguments={"value": "{{item.value}}"}, with_param=g.result
+        )  # this make the task fan out over the `with_param`
         g >> f

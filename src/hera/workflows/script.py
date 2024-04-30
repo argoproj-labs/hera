@@ -31,7 +31,6 @@ from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
-    ArgumentsMixin,
     ContainerMixin,
     EnvIOMixin,
     ResourceMixin,
@@ -108,7 +107,6 @@ class ScriptConstructor(BaseMixin):
 
 
 class Script(
-    ArgumentsMixin,
     EnvIOMixin,
     CallableTemplateMixin,
     ContainerMixin,

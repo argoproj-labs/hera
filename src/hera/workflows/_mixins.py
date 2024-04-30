@@ -533,7 +533,7 @@ class VolumeMountMixin(VolumeMixin):
 
 
 class ArgumentsMixin(BaseMixin):
-    """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object."""
+    """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object (only Tasks, Steps and Workflows use arguments)."""
 
     arguments: ArgumentsT = None
     _normalize_arguments = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
