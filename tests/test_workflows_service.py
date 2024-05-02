@@ -4,10 +4,10 @@ from hera.workflows.service import WorkflowsService
 class TestWorkflowsService:
     def test_token_is_none_when_not_specified(self):
         service = WorkflowsService()
-        assert service.token == None
+        assert service.token is None
 
         service = WorkflowsService(token=None)
-        assert service.token == None
+        assert service.token is None
 
     def test_adds_bearer_suffix_to_token(self, global_config_fixture):
         global_config_fixture.token = "token"

@@ -85,10 +85,10 @@ class WorkflowsService:
         elif token and not token.lower().startswith("bearer"):
             self.token = "Bearer " + token
         elif global_config_token and global_config_token.lower().startswith("bearer"):
-            print('HELLO 1')
+            print("HELLO 1")
             self.token = global_config_token
         elif global_config_token and not global_config_token.lower().startswith("bearer"):
-            print('HELLO 2')
+            print("HELLO 2")
             self.token = "Bearer " + global_config_token
         else:
             self.token = token
