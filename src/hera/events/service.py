@@ -50,6 +50,24 @@ class EventsService:
         """Events service constructor."""
         self.host = cast(str, host or global_config.host)
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
+
+        # some users reported in https://github.com/argoproj-labs/hera/issues/1016 that it can be a bit awkward for
+        # Hera to assume a `Bearer` prefix on behalf of users. Some might pass it and some might not. Therefore, Hera
+        # only prefixes the token with `Bearer ` if it's not already specified and lets the uses specify it otherwise.
+        # Note that the `Bearer` token can be specified through the global configuration as well. In order to deliver
+        # a fix on Hera V5 without introducing breaking changes, we have to support both
+        global_config_token = global_config.token  # call only once because it can be a user specified function!
+        if token and token.lower().startswith("bearer"):
+            self.token = token
+        elif token and not token.lower().startswith("bearer"):
+            self.token = "Bearer " + token
+        elif global_config_token and global_config_token.lower().startswith("bearer"):
+            self.token = global_config_token
+        elif global_config_token and not global_config_token.lower().startswith("bearer"):
+            self.token = "Bearer " + global_config_token
+        else:
+            self.token = token
+
         self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace
 
@@ -83,7 +101,7 @@ class EventsService:
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -101,7 +119,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"{self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -121,7 +139,7 @@ class EventsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -141,7 +159,7 @@ class EventsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"{self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -178,7 +196,7 @@ class EventsService:
                 "deleteOptions.propagationPolicy": propagation_policy,
                 "deleteOptions.dryRun": dry_run,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -196,7 +214,7 @@ class EventsService:
                 discriminator=discriminator, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"{self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -214,7 +232,7 @@ class EventsService:
         resp = requests.get(
             url=urljoin(self.host, "api/v1/info"),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -254,7 +272,7 @@ class EventsService:
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -272,7 +290,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"{self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -292,7 +310,7 @@ class EventsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params={"getOptions.resourceVersion": resource_version},
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -310,7 +328,7 @@ class EventsService:
                 name=name, namespace=namespace if namespace is not None else self.namespace
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"{self.token}", "Content-Type": "application/json"},
             data=req.json(
                 exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
             ),
@@ -347,7 +365,7 @@ class EventsService:
                 "deleteOptions.propagationPolicy": propagation_policy,
                 "deleteOptions.dryRun": dry_run,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -387,7 +405,7 @@ class EventsService:
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -437,7 +455,7 @@ class EventsService:
                 "podLogOptions.limitBytes": limit_bytes,
                 "podLogOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -477,7 +495,7 @@ class EventsService:
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -517,7 +535,7 @@ class EventsService:
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -565,7 +583,7 @@ class EventsService:
                 "podLogOptions.limitBytes": limit_bytes,
                 "podLogOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
             },
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -581,7 +599,7 @@ class EventsService:
         resp = requests.get(
             url=urljoin(self.host, "api/v1/userinfo"),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -597,7 +615,7 @@ class EventsService:
         resp = requests.get(
             url=urljoin(self.host, "api/v1/version"),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -631,7 +649,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -649,7 +667,7 @@ class EventsService:
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -670,7 +688,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -688,7 +706,7 @@ class EventsService:
                 uid=uid, nodeId=node_id, artifactName=artifact_name
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
@@ -709,7 +727,7 @@ class EventsService:
                 namespace=namespace if namespace is not None else self.namespace,
             ),
             params=None,
-            headers={"Authorization": f"Bearer {self.token}"},
+            headers={"Authorization": f"{self.token}"},
             data=None,
             verify=self.verify_ssl,
         )
