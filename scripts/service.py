@@ -442,7 +442,6 @@ class {models_type}Service:
         else:
             self.token = token
 
-        self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace
 """
 
