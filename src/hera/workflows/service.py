@@ -91,6 +91,7 @@ class WorkflowsService:
         else:
             self.token = token
 
+        self.token = token or global_config.token
         self.namespace = namespace or global_config.namespace
 
     def list_archived_workflows(

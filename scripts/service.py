@@ -432,7 +432,7 @@ class {models_type}Service:
         # a fix on Hera V5 without introducing breaking changes, we have to support both
         global_config_token = global_config.token  # call only once because it can be a user specified function!
         if token and token.lower().startswith("bearer"):
-            self.token = token
+            self.token: Optional[str] = token
         elif token and not token.lower().startswith("bearer"):
             self.token = "Bearer " + token
         elif global_config_token and global_config_token.lower().startswith("bearer"):
