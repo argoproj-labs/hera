@@ -57,16 +57,19 @@ class EventsService:
         # Note that the `Bearer` token can be specified through the global configuration as well. In order to deliver
         # a fix on Hera V5 without introducing breaking changes, we have to support both
         global_config_token = global_config.token  # call only once because it can be a user specified function!
-        if token and token.lower().startswith("bearer"):
-            self.token: Optional[str] = token
-        elif token and not token.lower().startswith("bearer"):
-            self.token = "Bearer " + token
-        elif global_config_token and global_config_token.lower().startswith("bearer"):
-            self.token = global_config_token
-        elif global_config_token and not global_config_token.lower().startswith("bearer"):
-            self.token = "Bearer " + global_config_token
+
+        def format_token(t):
+            parts = t.split()
+            if len(parts) == 1:
+                return "Bearer " + t
+            return t
+
+        if token:
+            self.token: Optional[str] = format_token(token)
+        elif global_config_token:
+            self.token = format_token(global_config_token)
         else:
-            self.token = token
+            self.token = None
 
         self.namespace = namespace or global_config.namespace
 

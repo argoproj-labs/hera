@@ -28,3 +28,7 @@ class TestWorkflowsService:
 
         service = WorkflowsService(token="Bearer token")
         assert service.token == "Bearer token"
+
+    def test_adds_custom_token(self):
+        service = WorkflowsService(token="something token")
+        assert service.token == "something token"
