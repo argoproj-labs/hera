@@ -6,6 +6,7 @@ for more on Steps.
 
 from typing import Any, List, Optional, Union
 
+from hera.shared._pydantic import PrivateAttr
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -16,7 +17,7 @@ from hera.workflows._mixins import (
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
-from hera.workflows.exceptions import InvalidType
+from hera.workflows.exceptions import InvalidType, NodeNameConflict
 from hera.workflows.models import (
     ParallelSteps,
     Template as _ModelTemplate,
@@ -87,9 +88,14 @@ class Parallel(
 
     sub_steps: List[Union[Step, _ModelWorkflowStep]] = []
 
+    _node_names = PrivateAttr(default_factory=set)
+
     def _add_sub(self, node: Any):
         if not isinstance(node, Step):
             raise InvalidType(type(node))
+        if node.name in self._node_names:
+            raise NodeNameConflict(f"Found multiple Steps named: {node.name}")
+        self._node_names.add(node.name)
         self.sub_steps.append(node)
 
     def _build_step(self) -> List[_ModelWorkflowStep]:
@@ -120,6 +126,8 @@ class Steps(
     in the order they are initialised.
     * All Step objects initialised within a Parallel context will run in parallel.
     """
+
+    _node_names = PrivateAttr(default_factory=set)
 
     sub_steps: List[
         Union[
@@ -156,7 +164,12 @@ class Steps(
     def _add_sub(self, node: Any):
         if not isinstance(node, (Step, Parallel)):
             raise InvalidType(type(node))
-
+        if isinstance(node, Step):
+            if node.name in self._node_names:
+                raise NodeNameConflict(f"Found multiple Step nodes with name: {node.name}")
+            self._node_names.add(node.name)
+        if isinstance(node, Parallel):
+            node._node_names = self._node_names
         self.sub_steps.append(node)
 
     def parallel(self) -> Parallel:

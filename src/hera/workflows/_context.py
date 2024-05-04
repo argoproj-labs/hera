@@ -8,7 +8,7 @@ from contextvars import ContextVar
 from typing import List, Optional, TypeVar, Union
 
 from hera.shared import BaseMixin
-from hera.workflows.exceptions import InvalidType
+from hera.workflows.exceptions import InvalidType, TemplateNameConflict
 from hera.workflows.protocol import Subbable, TTemplate
 
 TNode = TypeVar("TNode", bound="SubNodeMixin")
@@ -76,6 +76,21 @@ class _HeraContext:
         if not pieces:
             return
 
+        # for particular types, the user invoked a decorated function e.g. `@script`
+        # inside a proper context. Here, we add the object to the overall workflow context, directly as a template,
+        # in case it is not found (based on the name). This helps users save on the number of templates that are
+        # added when using an object that is a `Script`
+        if hasattr(node, "template") and node.template is not None and not isinstance(node.template, str):
+            found = False
+            for t in pieces[0].templates:  # type: ignore
+                if t.name == node.template.name:
+                    if t != node.template:
+                        raise TemplateNameConflict(f"Found multiple templates with the same name: {t.name}")
+                    found = True
+                    break
+            if not found:
+                pieces[0]._add_sub(node.template)
+
         try:
             # here, we are trying to add a node to the last piece of context in the hopes that it is a subbable
             pieces[-1]._add_sub(node)
@@ -84,19 +99,6 @@ class _HeraContext:
             # the object needs to be added as a template to the piece of context at [-1]. This will be the case for
             # DAGs and Steps
             pieces[-1]._add_sub(node.template)  # type: ignore
-
-        # when the above does not raise an exception, it means the user invoked a decorated function e.g. `@script`
-        # inside a proper context. Here, we add the object to the overall workflow context, directly as a template,
-        # in case it is not found (based on the name). This helps users save on the number of templates that are
-        # added when using an object that is a `Script`
-        if hasattr(node, "template") and node.template is not None and not isinstance(node.template, str):
-            found = False
-            for t in pieces[0].templates:  # type: ignore
-                if t.name == node.template.name:
-                    found = True
-                    break
-            if not found:
-                pieces[0]._add_sub(node.template)
 
 
 _context = _HeraContext()

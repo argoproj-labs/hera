@@ -11,6 +11,7 @@ _PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 if _PYDANTIC_VERSION == 2:
     from pydantic.v1 import (  # type: ignore
         Field,
+        PrivateAttr,
         ValidationError,
         root_validator,
         validator,
@@ -18,6 +19,7 @@ if _PYDANTIC_VERSION == 2:
 else:
     from pydantic import (  # type: ignore[assignment,no-redef]
         Field,
+        PrivateAttr,
         ValidationError,
         root_validator,
         validator,
@@ -46,6 +48,7 @@ def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, Any]:
 __all__ = [
     "BaseModel",
     "Field",
+    "PrivateAttr",
     "PydanticBaseModel",  # Export for serialization.py to cover user-defined models
     "ValidationError",
     "root_validator",

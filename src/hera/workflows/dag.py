@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Union
 
+from hera.shared._pydantic import PrivateAttr
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import IOMixin, TemplateMixin
-from hera.workflows.exceptions import InvalidType
+from hera.workflows.exceptions import InvalidType, NodeNameConflict
 from hera.workflows.models import (
     DAGTask,
     DAGTemplate as _ModelDAGTemplate,
@@ -43,9 +44,14 @@ class DAG(
     target: Optional[str] = None
     tasks: List[Union[Task, DAGTask]] = []
 
+    _node_names = PrivateAttr(default_factory=set)
+
     def _add_sub(self, node: Any):
         if not isinstance(node, Task):
             raise InvalidType(type(node))
+        if node.name in self._node_names:
+            raise NodeNameConflict(f"Found multiple Task nodes with name: {node.name}")
+        self._node_names.add(node.name)
         self.tasks.append(node)
 
     def _build_template(self) -> _ModelTemplate:
