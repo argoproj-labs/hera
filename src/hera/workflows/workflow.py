@@ -360,7 +360,7 @@ class Workflow(
             If false then the workflow is created asynchronously and the function returns immediately.
             If true then the workflow is created and the function blocks until the workflow is done executing.
         poll_interval: int = 5
-            The interval in seconds to poll the workflow status if wait is true. Ignored when wait is true.
+            The interval in seconds to poll the workflow status if wait is true. Ignored when wait is false.
         """
         assert self.workflows_service, "workflow service not initialized"
         assert self.namespace, "workflow namespace not defined"
