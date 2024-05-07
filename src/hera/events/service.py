@@ -59,7 +59,7 @@ class EventsService:
         global_config_token = global_config.token  # call only once because it can be a user specified function!
 
         def format_token(t):
-            parts = t.split()
+            parts = t.strip().split()
             if len(parts) == 1:
                 return "Bearer " + t
             return t
