@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
 from hera.shared.serialization import MISSING, serialize
+from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.models import (
     Arguments as ModelArguments,
@@ -37,6 +38,29 @@ else:
 
 
 class InputMixin(BaseModel):
+    def __new__(cls, **kwargs):
+        from hera.workflows.dag import DAG
+        from hera.workflows.steps import Steps
+
+        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+            # Intercept the declaration to avoid validation on the templated strings
+            _context.pieces[-1]._declaring = False
+            instance = cls.construct(**kwargs)
+            _context.pieces[-1]._declaring = True
+            return instance
+        else:
+            return super(InputMixin, cls).__new__(cls)
+
+    def __init__(self, /, **kwargs):
+        from hera.workflows.dag import DAG
+        from hera.workflows.steps import Steps
+
+        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+            # Return in order to skip validation of `construct`ed instance
+            return
+
+        return super().__init__(**kwargs)
+
     @classmethod
     def _get_parameters(cls, object_override: Optional[Self] = None) -> List[Parameter]:
         parameters = []
@@ -129,6 +153,29 @@ class InputMixin(BaseModel):
 
 
 class OutputMixin(BaseModel):
+    def __new__(cls, **kwargs):
+        from hera.workflows.dag import DAG
+        from hera.workflows.steps import Steps
+
+        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+            # Intercept the declaration to avoid validation on the templated strings
+            _context.pieces[-1]._declaring = False
+            instance = cls.construct(**kwargs)
+            _context.pieces[-1]._declaring = True
+            return instance
+        else:
+            return super(OutputMixin, cls).__new__(cls)
+
+    def __init__(self, /, **kwargs):
+        from hera.workflows.dag import DAG
+        from hera.workflows.steps import Steps
+
+        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+            # Return in order to skip validation of `construct`ed instance
+            return
+
+        return super().__init__(**kwargs)
+
     @classmethod
     def _get_outputs(cls) -> List[Union[Artifact, Parameter]]:
         outputs = []

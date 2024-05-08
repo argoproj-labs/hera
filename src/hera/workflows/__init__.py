@@ -151,8 +151,6 @@ __all__ = [
     "Resources",
     "RetryPolicy",
     "RetryStrategy",
-    "RunnerInput",
-    "RunnerOutput",
     "RunnerScriptConstructor",
     "S3Artifact",
     "ScaleIOVolume",

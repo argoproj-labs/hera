@@ -16,10 +16,10 @@ from typing import (
 )
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import root_validator, validator
+from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
 from hera.shared.serialization import serialize
-from hera.workflows._context import SubNodeMixin
-from hera.workflows._meta_mixins import CallableTemplateMixin, HookMixin
+from hera.workflows._context import SubNodeMixin, _context
+from hera.workflows._meta_mixins import CallableTemplateMixin, HeraBuildObj, HookMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
@@ -69,6 +69,12 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
+
+try:
+    from typing import Annotated, get_args, get_origin  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
+
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
@@ -704,6 +710,48 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
+    _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
+
+    def _get_template_str_reference(self, name: str) -> str:
+        assert self._build_obj  # Assertions to fix type checking
+
+        fields = get_fields(self._build_obj.output_class)
+        annotations = get_field_annotations(self._build_obj.output_class)
+        assert name in fields
+
+        from hera.workflows.dag import DAG
+
+        # We don't need to keep track of dependencies for Steps
+        if _context.pieces and isinstance(_context.pieces[-1], DAG):
+            _context.pieces[-1]._current_task_depends.add(self.name)
+
+        if get_origin(annotations[name]) is Annotated:
+            annotation = get_args(annotations[name])[1]
+            assert isinstance(annotation, (Parameter, Artifact))
+            if isinstance(annotation, Parameter):
+                return f"{{{{{self._subtype}.{self.name}.outputs.parameters.{annotation.name}}}}}"
+            elif isinstance(annotation, Artifact):
+                return f"{{{{{self._subtype}.{self.name}.outputs.artifacts.{annotation.name}}}}}"
+        else:
+            return f"{{{{{self._subtype}.{self.name}.outputs.parameters.{name}}}}}"
+
+    def __getattribute__(self, name: str) -> Any:
+        from hera.workflows.dag import DAG
+        from hera.workflows.steps import Steps
+
+        if (
+            _context.pieces
+            and isinstance(_context.pieces[-1], (DAG, Steps))
+            and _context.pieces[-1]._declaring
+            and name != "result"
+        ):
+            _context.pieces[-1]._declaring = False
+            value = self._get_template_str_reference(name)
+            _context.pieces[-1]._declaring = True
+            return value
+
+        return super().__getattribute__(name)
+
     def _build_on_exit(self) -> Optional[str]:
         """Builds the `on_exit` field `str` representation from the set `Templatable` or the specified `str`."""
         if isinstance(self.on_exit, Templatable):
@@ -748,7 +796,16 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     @property
     def result(self) -> str:
         """Result holds the result (stdout) of a script template."""
-        return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
+        from hera.workflows.dag import DAG
+
+        if _context.pieces and isinstance(_context.pieces[-1], DAG) and _context.pieces[-1]._declaring:
+            _context.pieces[-1]._declaring = False
+            _context.pieces[-1]._current_task_depends.add(self.name)
+            result_templated_str = f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
+            _context.pieces[-1]._declaring = True
+            return result_templated_str
+        else:
+            return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
 
     def get_result_as(self, name: str) -> Parameter:
         """Returns a `Parameter` specification with the given name containing the `results` of `self`."""

@@ -6,6 +6,7 @@ for more on Steps.
 
 from typing import Any, List, Optional, Union
 
+from hera.shared._pydantic import PrivateAttr
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -120,6 +121,9 @@ class Steps(
     in the order they are initialised.
     * All Step objects initialised within a Parallel context will run in parallel.
     """
+
+    # Boolean to set when we are running DAG/Steps declaration code, i.e. when we are running decorator manipulation code
+    _declaring: bool = PrivateAttr(False)
 
     sub_steps: List[
         Union[
