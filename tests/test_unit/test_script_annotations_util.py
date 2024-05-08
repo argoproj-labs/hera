@@ -12,7 +12,7 @@ from hera.workflows._runner.script_annotations_util import (
     map_runner_input,
 )
 from hera.workflows.artifact import Artifact, ArtifactLoader
-from hera.workflows.io import RunnerInput
+from hera.workflows.io import Input
 from hera.workflows.models import ValueFrom
 from hera.workflows.parameter import Parameter
 
@@ -142,7 +142,7 @@ def test_get_annotated_artifact_value_path_outputs(
 
 
 def test_map_runner_input():
-    class MyInput(RunnerInput):
+    class MyInput(Input):
         a_str: str
         an_int: int
         a_dict: dict
@@ -165,7 +165,7 @@ def test_map_runner_input():
 def test_map_runner_input_strings():
     """Test the parsing logic when str type fields are passed json-serialized strings."""
 
-    class MyInput(RunnerInput):
+    class MyInput(Input):
         a_dict_str: str
         a_list_str: str
 

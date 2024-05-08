@@ -1,6 +1,6 @@
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Workflow, script
-from hera.workflows.io.v1 import RunnerInput
+from hera.workflows.io.v1 import Input
 
 try:
     from typing import Annotated  # type: ignore
@@ -11,7 +11,7 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class ArtifactOnlyInput(RunnerInput):
+class ArtifactOnlyInput(Input):
     str_path_artifact: Annotated[str, Artifact(name="str-path-artifact", loader=None)]
     file_artifact: Annotated[str, Artifact(name="file-artifact", loader=ArtifactLoader.file)]
 

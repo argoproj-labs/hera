@@ -11,19 +11,19 @@ from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.io.v1 import (
-    RunnerInput as RunnerInputV1,
-    RunnerOutput as RunnerOutputV1,
+    Input as InputV1,
+    Output as OutputV1,
 )
 
 try:
     from hera.workflows.io.v2 import (  # type: ignore
-        RunnerInput as RunnerInputV2,
-        RunnerOutput as RunnerOutputV2,
+        Input as InputV2,
+        Output as OutputV2,
     )
 except ImportError:
     from hera.workflows.io.v1 import (  # type: ignore
-        RunnerInput as RunnerInputV2,
-        RunnerOutput as RunnerOutputV2,
+        Input as InputV2,
+        Output as OutputV2,
     )
 
 try:
@@ -127,7 +127,7 @@ def map_runner_input(
     runner_input_class: T,
     kwargs: Dict[str, str],
 ) -> T:
-    """Map argo input kwargs to the fields of the given RunnerInput, return an instance of the class.
+    """Map argo input kwargs to the fields of the given Input, return an instance of the class.
 
     If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
     Otherwise, we look for the kwarg with the name of the field.
@@ -198,9 +198,7 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
                 mapped_kwargs[func_param_name] = get_annotated_artifact_value(func_param_annotation)
             else:
                 mapped_kwargs[func_param_name] = kwargs[func_param_name]
-        elif get_origin(func_param.annotation) is None and issubclass(
-            func_param.annotation, (RunnerInputV1, RunnerInputV2)
-        ):
+        elif get_origin(func_param.annotation) is None and issubclass(func_param.annotation, (InputV1, InputV2)):
             mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
         else:
             mapped_kwargs[func_param_name] = kwargs[func_param_name]
@@ -209,10 +207,8 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
 
 def _save_annotated_return_outputs(
     function_outputs: Union[Tuple[Any], Any],
-    output_annotations: List[
-        Union[Tuple[type, Union[Parameter, Artifact]], Union[Type[RunnerOutputV1], Type[RunnerOutputV2]]]
-    ],
-) -> Optional[Union[RunnerOutputV1, RunnerOutputV2]]:
+    output_annotations: List[Union[Tuple[type, Union[Parameter, Artifact]], Union[Type[OutputV1], Type[OutputV2]]]],
+) -> Optional[Union[OutputV1, OutputV2]]:
     """Save the outputs of the function to the specified output destinations.
 
     The output values are matched with the output annotations and saved using the schema:
@@ -230,7 +226,7 @@ def _save_annotated_return_outputs(
         return_obj = None
 
     for output_value, dest in zip(function_outputs, output_annotations):
-        if isinstance(output_value, (RunnerOutputV1, RunnerOutputV2)):
+        if isinstance(output_value, (OutputV1, OutputV2)):
             if os.environ.get("hera__script_pydantic_io", None) is None:
                 raise ValueError("hera__script_pydantic_io environment variable is not set")
 
@@ -273,7 +269,10 @@ def _save_annotated_return_outputs(
 
 def _save_dummy_outputs(
     output_annotations: List[
-        Union[Tuple[type, Union[Parameter, Artifact]], Union[Type[RunnerOutputV1], Type[RunnerOutputV2]]]
+        Union[
+            Tuple[type, Union[Parameter, Artifact]],
+            Union[Type[OutputV1], Type[OutputV2]],
+        ]
     ],
 ) -> None:
     """Save dummy values into the outputs specified.
@@ -293,7 +292,7 @@ def _save_dummy_outputs(
     <parent_directory> can be provided by the user or is set to /tmp/hera-outputs by default
     """
     for dest in output_annotations:
-        if isinstance(dest, (RunnerOutputV1, RunnerOutputV2)):
+        if isinstance(dest, (OutputV1, OutputV2)):
             if os.environ.get("hera__script_pydantic_io", None) is None:
                 raise ValueError("hera__script_pydantic_io environment variable is not set")
 

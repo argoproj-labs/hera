@@ -1,6 +1,6 @@
 from hera.shared import global_config
 from hera.workflows import Parameter, Workflow, script
-from hera.workflows.io.v1 import RunnerInput
+from hera.workflows.io.v1 import Input
 
 try:
     from typing import Annotated  # type: ignore
@@ -11,7 +11,7 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class ParamOnlyInput(RunnerInput):
+class ParamOnlyInput(Input):
     my_int: int = 1
     my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
 

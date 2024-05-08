@@ -22,7 +22,7 @@ import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner
-from hera.workflows.io.v1 import RunnerOutput
+from hera.workflows.io.v1 import Output
 
 
 @pytest.mark.parametrize(
@@ -736,7 +736,7 @@ def test_runner_pydantic_output_params(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert isinstance(output, RunnerOutput)
+    assert isinstance(output, Output)
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
@@ -838,7 +838,7 @@ def test_runner_pydantic_output_artifacts(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert isinstance(output, RunnerOutput)
+    assert isinstance(output, Output)
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]

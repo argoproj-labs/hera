@@ -1,7 +1,17 @@
 from pathlib import Path
 
 from hera.workflows import Parameter, Workflow, script
-from hera.workflows.io.v1 import RunnerInput, RunnerOutput
+
+try:
+    from hera.workflows.io.v2 import (  # type: ignore
+        Input,
+        Output,
+    )
+except ImportError:
+    from hera.workflows.io.v1 import (  # type: ignore
+        Input,
+        Output,
+    )
 
 try:
     from typing import Annotated  # type: ignore
@@ -9,13 +19,13 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 
-class ParamOnlyInput(RunnerInput):
+class ParamOnlyInput(Input):
     my_str: str
     my_empty_default_str: str = ""
     my_annotated_str: Annotated[str, Parameter(name="alt-name")] = "hello world!"
 
 
-class ParamOnlyOutput(RunnerOutput):
+class ParamOnlyOutput(Output):
     my_output_str: str = "my-default-str"
     another_output: Annotated[Path, Parameter(name="second-output")]
 

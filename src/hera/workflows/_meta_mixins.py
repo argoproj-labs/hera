@@ -35,7 +35,7 @@ except ImportError:
 try:
     from inspect import get_annotations  # type: ignore
 except ImportError:
-    from hera.workflows._inspect import get_annotations  # type: ignore
+    from hera.shared._inspect import get_annotations  # type: ignore
 
 _yaml: Optional[ModuleType] = None
 try:
@@ -134,7 +134,7 @@ class ModelMapperMixin(BaseMixin):
                 fields = get_fields(curr_class)
                 if key not in fields:
                     raise ValueError(f"Model key '{key}' does not exist in class {curr_class}")
-                curr_class = fields[key].outer_type_
+                curr_class = fields[key].outer_type_  # type: ignore
 
         @classmethod
         def _get_model_class(cls) -> Type[BaseModel]:
