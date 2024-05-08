@@ -1,8 +1,15 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
 
+from collections import ChainMap
 from typing import TYPE_CHECKING, Any, Dict, Type
 
 from pydantic import VERSION
+
+try:
+    from inspect import get_annotations  # type: ignore
+except ImportError:
+    from hera.shared._inspect import get_annotations  # type: ignore
+
 
 _PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 # The pydantic v1 interface is used for both pydantic v1 and v2 in order to support
@@ -28,14 +35,17 @@ else:
 # native pydantic hinting for `__init__` arguments.
 if TYPE_CHECKING:
     from pydantic import BaseModel as PydanticBaseModel
+    from pydantic.fields import FieldInfo
 else:
     if _PYDANTIC_VERSION == 2:
         from pydantic.v1 import BaseModel as PydanticBaseModel  # type: ignore
+        from pydantic.v1.fields import FieldInfo
     else:
         from pydantic import BaseModel as PydanticBaseModel  # type: ignore[assignment,no-redef]
+        from pydantic.fields import FieldInfo
 
 
-def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, Any]:
+def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, FieldInfo]:
     """Centralize access to __fields__."""
     try:
         return cls.model_fields  # type: ignore
@@ -43,14 +53,8 @@ def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, Any]:
         return cls.__fields__  # type: ignore
 
 
-__all__ = [
-    "BaseModel",
-    "Field",
-    "PydanticBaseModel",  # Export for serialization.py to cover user-defined models
-    "ValidationError",
-    "root_validator",
-    "validator",
-]
+def get_field_annotations(cls: Type[PydanticBaseModel]) -> Dict[str, Any]:
+    return {k: v for k, v in ChainMap(*(get_annotations(c) for c in cls.__mro__)).items()}
 
 
 class BaseModel(PydanticBaseModel):
@@ -74,3 +78,14 @@ class BaseModel(PydanticBaseModel):
 
         smart_union = True
         """uses smart union for matching a field's specified value to the underlying type that's part of a union"""
+
+
+__all__ = [
+    "BaseModel",
+    "Field",
+    "FieldInfo",
+    "PydanticBaseModel",  # Export for serialization.py to cover user-defined models
+    "ValidationError",
+    "root_validator",
+    "validator",
+]

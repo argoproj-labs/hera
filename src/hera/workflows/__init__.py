@@ -30,7 +30,7 @@ from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretE
 from hera.workflows.env_from import ConfigMapEnvFrom, SecretEnvFrom
 from hera.workflows.exceptions import InvalidDispatchType, InvalidTemplateCall, InvalidType
 from hera.workflows.http_template import HTTP
-from hera.workflows.io import RunnerInput, RunnerOutput
+from hera.workflows.io import Input, Output, RunnerInput, RunnerOutput
 from hera.workflows.metrics import Counter, Gauge, Histogram, Label, Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
@@ -126,6 +126,7 @@ __all__ = [
     "HostPathVolume",
     "ISCSIVolume",
     "InlineScriptConstructor",
+    "Input",
     "InvalidDispatchType",
     "InvalidTemplateCall",
     "InvalidType",
@@ -136,6 +137,7 @@ __all__ = [
     "NoneArchiveStrategy",
     "OSSArtifact",
     "Operator",
+    "Output",
     "Parallel",
     "Parameter",
     "PhotonPersistentDiskVolume",

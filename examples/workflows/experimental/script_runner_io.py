@@ -6,7 +6,7 @@ except ImportError:
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
 from hera.workflows.archive import NoneArchiveStrategy
-from hera.workflows.io import RunnerInput, RunnerOutput
+from hera.workflows.io import Input, Output
 
 try:
     from typing import Annotated  # type: ignore
@@ -22,7 +22,7 @@ class MyObject(BaseModel):
     a_str: str = "a default string"
 
 
-class MyInput(RunnerInput):
+class MyInput(Input):
     param_int: Annotated[int, Parameter(name="param-input")] = 42
     an_object: Annotated[MyObject, Parameter(name="obj-input")] = MyObject(
         a_dict={"my-key": "a-value"}, a_str="hello world!"
@@ -30,7 +30,7 @@ class MyInput(RunnerInput):
     artifact_int: Annotated[int, Artifact(name="artifact-input", loader=ArtifactLoader.json)]
 
 
-class MyOutput(RunnerOutput):
+class MyOutput(Output):
     param_int: Annotated[int, Parameter(name="param-output")]
     artifact_int: Annotated[int, Artifact(name="artifact-output")]
 

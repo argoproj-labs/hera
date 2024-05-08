@@ -3,7 +3,7 @@ from typing import Tuple
 
 from hera.shared import global_config
 from hera.workflows import Parameter, Workflow, script
-from hera.workflows.io.v1 import RunnerOutput
+from hera.workflows.io.v1 import Output
 
 try:
     from typing import Annotated  # type: ignore
@@ -14,7 +14,7 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class ParamOnlyOutput(RunnerOutput):
+class ParamOnlyOutput(Output):
     my_output_str: str = "my-default-str"
     another_output: Annotated[Path, Parameter(name="second-output")]
 

@@ -5,7 +5,7 @@ from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
-from hera.workflows.io.v1 import RunnerInput, RunnerOutput
+from hera.workflows.io.v1 import Input, Output
 
 try:
     from pydantic.v1 import BaseModel
@@ -21,14 +21,14 @@ global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class ParamOnlyInput(RunnerInput):
+class ParamOnlyInput(Input):
     my_required_int: int
     my_int: int = 1
     my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
     my_ints: Annotated[List[int], Parameter(name="multiple-ints")] = []
 
 
-class ParamOnlyOutput(RunnerOutput):
+class ParamOnlyOutput(Output):
     my_output_str: str = "my-default-str"
     annotated_str: Annotated[str, Parameter(name="second-output")]
 
@@ -79,7 +79,7 @@ class MyArtifact(BaseModel):
     b: str = "b"
 
 
-class ArtifactOnlyInput(RunnerInput):
+class ArtifactOnlyInput(Input):
     json_artifact: Annotated[
         MyArtifact, Artifact(name="json-artifact", path=ARTIFACT_PATH + "/json", loader=ArtifactLoader.json)
     ]
@@ -92,7 +92,7 @@ class ArtifactOnlyInput(RunnerInput):
     ]
 
 
-class ArtifactOnlyOutput(RunnerOutput):
+class ArtifactOnlyOutput(Output):
     an_artifact: Annotated[str, Artifact(name="artifact-str-output")]
 
 
