@@ -52,7 +52,6 @@ class InputMixin(BaseModel):
 
     def __init__(self, /, **kwargs):
         if _context.declaring:
-            # object.__setattr__(self, "_build_data", kwargs)
             # Return in order to skip validation of `construct`ed instance
             return
 

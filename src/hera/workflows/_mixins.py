@@ -711,7 +711,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     with_sequence: Optional[Sequence] = None
 
     _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
-    
+
     def __init__(self, **kwargs) -> None:
         if _context.declaring:
             object.__setattr__(self, "_build_data", kwargs)

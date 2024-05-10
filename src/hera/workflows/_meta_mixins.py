@@ -570,6 +570,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                     subnode: Union[Step, Task]
 
+                    assert _context.pieces
                     _context.declaring = False
                     if isinstance(_context.pieces[-1], (Steps, Parallel)):
                         subnode = Step(
@@ -652,4 +653,5 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                             dag.outputs = dag_func_return._get_as_output()
 
             return dag_call_wrapper
+
         return dag_decorator

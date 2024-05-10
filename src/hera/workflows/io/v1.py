@@ -6,7 +6,7 @@ from hera.shared._pydantic import BaseModel
 from hera.workflows.io._io_mixins import InputMixin, OutputMixin
 
 
-class Input(BaseModel, InputMixin):
+class Input(InputMixin, BaseModel):
     """Input model usable by the Hera Runner.
 
     Input is a Pydantic model which users can create a subclass of. When a subclass
@@ -16,7 +16,7 @@ class Input(BaseModel, InputMixin):
     """
 
 
-class Output(BaseModel, OutputMixin):
+class Output(OutputMixin, BaseModel):
     """Output model usable by the Hera Runner.
 
     Output is a Pydantic model which users can create a subclass of. When a subclass
