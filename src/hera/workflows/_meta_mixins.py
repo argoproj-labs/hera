@@ -49,6 +49,8 @@ except ImportError:
 
 
 if TYPE_CHECKING:
+    from hera.workflows._mixins import TemplateMixin
+    from hera.workflows.models import Template
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
@@ -478,6 +480,50 @@ class HeraBuildObj:
         self.output_class = output_class
 
 
+def create_subnode(
+    subnode_name: str,
+    func: Callable,
+    template: Union[str, Template, TemplateMixin, CallableTemplateMixin],
+    *args,
+    **kwargs,
+) -> Union[Step, Task]:
+    from hera.workflows.dag import DAG
+    from hera.workflows.steps import Parallel, Step, Steps
+    from hera.workflows.task import Task
+
+    subnode_args = None
+    if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+        subnode_args = args[0]._get_as_arguments()
+
+    signature = inspect.signature(func)
+    output_class = signature.return_annotation
+
+    subnode: Union[Step, Task]
+
+    assert _context.pieces
+    _context.declaring = False
+    if isinstance(_context.pieces[-1], (Steps, Parallel)):
+        subnode = Step(
+            name=subnode_name,
+            template=template,
+            arguments=subnode_args,
+            **kwargs,
+        )
+    elif isinstance(_context.pieces[-1], DAG):
+        subnode = Task(
+            name=subnode_name,
+            template=template,
+            arguments=subnode_args,
+            depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
+            **kwargs,
+        )
+        _context.pieces[-1]._current_task_depends.clear()
+
+    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
+    _context.declaring = True
+    return subnode
+
+
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.dag import DAG
     from hera.workflows.script import Script
@@ -544,9 +590,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             @functools.wraps(func)
             def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
-                from hera.workflows.dag import DAG
-                from hera.workflows.steps import Steps
-
                 if _context.declaring:
                     from hera.workflows.dag import DAG
                     from hera.workflows.steps import Parallel, Step, Steps
@@ -632,6 +675,19 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
             @functools.wraps(func)
             def dag_call_wrapper(*args, **kwargs):
+                if _context.declaring:
+                    # A sub-dag as a Step or Task is being created
+                    try:
+                        subnode_name = varname()
+                    except ImproperUseError:
+                        # Template is being used without variable assignment (so use function name or provided name)
+                        subnode_name = name
+
+                    subnode_name = kwargs.pop("name", subnode_name)
+                    assert isinstance(subnode_name, str)
+
+                    return create_subnode(subnode_name, func, dag, args, kwargs)
+
                 return func(*args, **kwargs)
 
             dag_call_wrapper.template_name = name  # type: ignore

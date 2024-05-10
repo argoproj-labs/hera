@@ -179,6 +179,25 @@ def test_dag_task_auto_depends():
     assert final_task.depends == "task_a && task_b"
 
 
+def test_dag_with_inner_dag():
+    w: Workflow = importlib.import_module("tests.workflow_decorators.inner_dag").w
+
+    assert len(w.templates) == 4
+
+    outer_dag_template: DAG = next(iter([t for t in w.templates if t.name == "outer-dag"]), None)
+
+    assert len(outer_dag_template.tasks) == 3
+
+    dag_a = next(iter([t for t in outer_dag_template.tasks if t.name == "sub_dag_a"]), None)
+    assert dag_a
+
+    dag_b = next(iter([t for t in outer_dag_template.tasks if t.name == "sub_dag_b"]), None)
+    assert dag_b
+
+    dag_c = next(iter([t for t in outer_dag_template.tasks if t.name == "sub_dag_c"]), None)
+    assert dag_c
+
+
 def test_dag_is_runnable():
     """The dag function should be runnable as Python code."""
     from tests.workflow_decorators.dag import WorkerInput, WorkerOutput, worker
