@@ -711,44 +711,49 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     with_sequence: Optional[Sequence] = None
 
     _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
-
-    def _get_template_str_reference(self, name: str) -> str:
-        assert self._build_obj  # Assertions to fix type checking
-
-        fields = get_fields(self._build_obj.output_class)
-        annotations = get_field_annotations(self._build_obj.output_class)
-        assert name in fields
-
-        from hera.workflows.dag import DAG
-
-        # We don't need to keep track of dependencies for Steps
-        if _context.pieces and isinstance(_context.pieces[-1], DAG):
-            _context.pieces[-1]._current_task_depends.add(self.name)
-
-        if get_origin(annotations[name]) is Annotated:
-            annotation = get_args(annotations[name])[1]
-            assert isinstance(annotation, (Parameter, Artifact))
-            if isinstance(annotation, Parameter):
-                return f"{{{{{self._subtype}.{self.name}.outputs.parameters.{annotation.name}}}}}"
-            elif isinstance(annotation, Artifact):
-                return f"{{{{{self._subtype}.{self.name}.outputs.artifacts.{annotation.name}}}}}"
+    
+    def __init__(self, **kwargs) -> None:
+        if _context.declaring:
+            object.__setattr__(self, "_build_data", kwargs)
         else:
-            return f"{{{{{self._subtype}.{self.name}.outputs.parameters.{name}}}}}"
+            super().__init__(**kwargs)
 
     def __getattribute__(self, name: str) -> Any:
-        from hera.workflows.dag import DAG
-        from hera.workflows.steps import Steps
+        if _context.declaring:
+            # Use object's __getattribute__ to avoid infinite recursion
+            build_obj = object.__getattribute__(self, "_build_obj")
+            assert build_obj  # Assertions to fix type checking
 
-        if (
-            _context.pieces
-            and isinstance(_context.pieces[-1], (DAG, Steps))
-            and _context.pieces[-1]._declaring
-            and name != "result"
-        ):
-            _context.pieces[-1]._declaring = False
-            value = self._get_template_str_reference(name)
-            _context.pieces[-1]._declaring = True
-            return value
+            fields = get_fields(build_obj.output_class)
+            annotations = get_field_annotations(build_obj.output_class)
+            if name in fields:
+                # If the attribute name is in the build_obj's output class fields, then
+                # as we are in a declaring context, the access is for a Task/Step output
+                subnode_name = object.__getattribute__(self, "name")
+                subnode_type = object.__getattribute__(self, "_subtype")
+
+                from hera.workflows.dag import DAG
+
+                # We don't need to keep track of dependencies for Steps
+                if _context.pieces and isinstance(_context.pieces[-1], DAG):
+                    _context.pieces[-1]._current_task_depends.add(subnode_name)
+
+                if name == "result":
+                    result_templated_str = f"{{{{{subnode_type}.{subnode_name}.outputs.result}}}}"
+                    return result_templated_str
+
+                if get_origin(annotations[name]) is Annotated:
+                    annotation = get_args(annotations[name])[1]
+
+                    if not isinstance(annotation, (Parameter, Artifact)):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
+
+                    if isinstance(annotation, Parameter):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{annotation.name}}}}}"
+                    elif isinstance(annotation, Artifact):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.artifacts.{annotation.name}}}}}"
+                else:
+                    return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
 
         return super().__getattribute__(name)
 
@@ -796,16 +801,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     @property
     def result(self) -> str:
         """Result holds the result (stdout) of a script template."""
-        from hera.workflows.dag import DAG
-
-        if _context.pieces and isinstance(_context.pieces[-1], DAG) and _context.pieces[-1]._declaring:
-            _context.pieces[-1]._declaring = False
-            _context.pieces[-1]._current_task_depends.add(self.name)
-            result_templated_str = f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
-            _context.pieces[-1]._declaring = True
-            return result_templated_str
-        else:
-            return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
+        return f"{{{{{self._subtype}.{self.name}.outputs.result}}}}"
 
     def get_result_as(self, name: str) -> Parameter:
         """Returns a `Parameter` specification with the given name containing the `results` of `self`."""

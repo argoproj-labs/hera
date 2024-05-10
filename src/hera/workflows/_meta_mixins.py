@@ -547,11 +547,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 from hera.workflows.dag import DAG
                 from hera.workflows.steps import Steps
 
-                if (
-                    _context.pieces
-                    and isinstance(_context.pieces[-1], (DAG, Steps))
-                    and _context.pieces[-1]._declaring
-                ):
+                if _context.declaring:
                     from hera.workflows.dag import DAG
                     from hera.workflows.steps import Parallel, Step, Steps
                     from hera.workflows.task import Task
@@ -574,7 +570,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                     subnode: Union[Step, Task]
 
-                    _context.pieces[-1]._declaring = False
+                    _context.declaring = False
                     if isinstance(_context.pieces[-1], (Steps, Parallel)):
                         subnode = Step(
                             name=subnode_name,
@@ -593,10 +589,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                         _context.pieces[-1]._current_task_depends.clear()
 
                     subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
-
-                    if isinstance(_context.pieces[-1], (DAG, Steps)):
-                        _context.pieces[-1]._declaring = True
-
+                    _context.declaring = True
                     return subnode
 
                 if _context.pieces:
@@ -651,12 +644,12 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     if issubclass(arg_class, (InputV1, InputV2)):
                         input_obj = arg_class._get_as_templated_arguments()
                         # "run" the dag/steps function to collect the tasks
-                        dag._declaring = True
+                        _context.declaring = True
                         dag_func_return = func(input_obj)
+                        _context.declaring = False
+
                         if func_return and isinstance(dag_func_return, (OutputV1, OutputV2)):
                             dag.outputs = dag_func_return._get_as_output()
 
-            dag._declaring = False
             return dag_call_wrapper
-
         return dag_decorator

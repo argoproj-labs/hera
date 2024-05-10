@@ -44,8 +44,6 @@ class DAG(
     target: Optional[str] = None
     tasks: List[Union[Task, DAGTask]] = []
 
-    # Boolean to set when we are running DAG/Steps declaration code, i.e. when we are running decorator manipulation code
-    _declaring: bool = PrivateAttr(False)
     _current_task_depends: Set[str] = PrivateAttr(set())
 
     def _add_sub(self, node: Any):

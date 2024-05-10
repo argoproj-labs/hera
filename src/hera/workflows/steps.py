@@ -122,9 +122,6 @@ class Steps(
     * All Step objects initialised within a Parallel context will run in parallel.
     """
 
-    # Boolean to set when we are running DAG/Steps declaration code, i.e. when we are running decorator manipulation code
-    _declaring: bool = PrivateAttr(False)
-
     sub_steps: List[
         Union[
             Step,

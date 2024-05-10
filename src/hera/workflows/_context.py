@@ -14,6 +14,7 @@ from hera.workflows.protocol import Subbable, TTemplate
 TNode = TypeVar("TNode", bound="SubNodeMixin")
 
 _pieces = ContextVar("_pieces", default=None)
+_declaring = ContextVar("_declaring", default=False)
 
 
 class SubNodeMixin(BaseMixin):
@@ -64,6 +65,14 @@ class _HeraContext:
     def pieces(self, value) -> None:
         """Sets the given values as the pieces of the context."""
         _pieces.set(value)
+
+    @property
+    def declaring(self) -> bool:
+        return _declaring.get()
+
+    @declaring.setter
+    def declaring(self, value: bool) -> None:
+        _declaring.set(value)
 
     @property
     def active(self) -> bool:

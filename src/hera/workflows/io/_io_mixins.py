@@ -39,23 +39,20 @@ else:
 
 class InputMixin(BaseModel):
     def __new__(cls, **kwargs):
-        from hera.workflows.dag import DAG
-        from hera.workflows.steps import Steps
-
-        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+        if _context.declaring:
             # Intercept the declaration to avoid validation on the templated strings
-            _context.pieces[-1]._declaring = False
+            # We must then turn off declaring mode to be able to "construct" an instance
+            # of the InputMixin subclass.
+            _context.declaring = False
             instance = cls.construct(**kwargs)
-            _context.pieces[-1]._declaring = True
+            _context.declaring = True
             return instance
         else:
             return super(InputMixin, cls).__new__(cls)
 
     def __init__(self, /, **kwargs):
-        from hera.workflows.dag import DAG
-        from hera.workflows.steps import Steps
-
-        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+        if _context.declaring:
+            # object.__setattr__(self, "_build_data", kwargs)
             # Return in order to skip validation of `construct`ed instance
             return
 
@@ -154,23 +151,17 @@ class InputMixin(BaseModel):
 
 class OutputMixin(BaseModel):
     def __new__(cls, **kwargs):
-        from hera.workflows.dag import DAG
-        from hera.workflows.steps import Steps
-
-        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+        if _context.declaring:
             # Intercept the declaration to avoid validation on the templated strings
-            _context.pieces[-1]._declaring = False
+            _context.declaring = False
             instance = cls.construct(**kwargs)
-            _context.pieces[-1]._declaring = True
+            _context.declaring = True
             return instance
         else:
             return super(OutputMixin, cls).__new__(cls)
 
     def __init__(self, /, **kwargs):
-        from hera.workflows.dag import DAG
-        from hera.workflows.steps import Steps
-
-        if _context.pieces and isinstance(_context.pieces[-1], (DAG, Steps)) and _context.pieces[-1]._declaring:
+        if _context.declaring:
             # Return in order to skip validation of `construct`ed instance
             return
 
