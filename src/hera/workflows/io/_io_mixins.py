@@ -202,7 +202,10 @@ class OutputMixin(BaseModel):
         return Parameter(name=field_name, default=default)  # type: ignore
 
     def _get_as_output(self) -> List[Union[Artifact, Parameter]]:
-        """Get the Output with values of ..."""
+        """Get the Output model as the output of a dag/steps template.
+
+        This lets dags and steps hoist task/step outputs into its own outputs.
+        """
         outputs: List[Union[Artifact, Parameter]] = []
         annotations = get_field_annotations(type(self))
 
