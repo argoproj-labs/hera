@@ -539,6 +539,7 @@ _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.dag import DAG
     from hera.workflows.script import Script
+    from hera.workflows.steps import Steps
 
     @_add_type_hints(Script)  # type: ignore
     def script(self, **script_kwargs) -> Callable:
@@ -675,25 +676,12 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
         return script_decorator
 
-    @_add_type_hints(DAG)  # type: ignore
-    def dag(self, **dag_kwargs) -> Callable:
-        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
-            raise ValueError(
-                str(
-                    "Unable to use {} decorator since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format("dag", _DECORATOR_SYNTAX_FLAG)
-            )
-        if not _varname_imported:
-            raise ImportError(
-                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
-            )
-
-        from hera.workflows.dag import DAG
-
-        def dag_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
+    def _construct_invocator_decorator(
+        self,
+        invocator_type: Type[Union[Steps, DAG]],
+        **template_kwargs,
+    ):
+        def decorator(func: Callable[FuncIns, FuncR]) -> Callable:
             """The decorating function that runs at "definition" time.
 
             This function will do 3 things:
@@ -721,7 +709,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             validation. We take this output object and convert it to a list of Artifacts/Parameters, setting
             the outputs of the template.
             """
-            name = dag_kwargs.pop("name", func.__name__.replace("_", "-"))
+            name = template_kwargs.pop("name", func.__name__.replace("_", "-"))
 
             signature = inspect.signature(func)
             func_inputs = signature.parameters
@@ -736,12 +724,17 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if func_return and issubclass(func_return, (OutputV1, OutputV2)):
                 outputs = func_return._get_outputs()
 
-            # Add dag to workflow
+            # Add dag/steps to workflow
             with self:
-                dag = DAG(name=name, inputs=inputs, outputs=outputs, **dag_kwargs)
+                template = invocator_type(
+                    name=name,
+                    inputs=inputs,
+                    outputs=outputs,
+                    **template_kwargs,
+                )
 
             @functools.wraps(func)
-            def dag_call_wrapper(*args, **kwargs):
+            def call_wrapper(*args, **kwargs):
                 if _context.declaring:
                     # A sub-dag as a Step or Task is being created
                     try:
@@ -753,26 +746,62 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     subnode_name = kwargs.pop("name", subnode_name)
                     assert isinstance(subnode_name, str)
 
-                    return create_subnode(subnode_name, func, dag, *args, **kwargs)
+                    return create_subnode(subnode_name, func, template, *args, **kwargs)
 
                 return func(*args, **kwargs)
 
-            dag_call_wrapper.template_name = name  # type: ignore
+            call_wrapper.template_name = name  # type: ignore
 
             # Open workflow context to cross-check task template names
-            with self, dag:
+            with self, template:
                 if len(func_inputs) == 1:
                     arg_class = list(func_inputs.values())[0].annotation
                     if issubclass(arg_class, (InputV1, InputV2)):
                         input_obj = arg_class._get_as_templated_arguments()
-                        # "run" the dag/steps function to collect the tasks
+                        # "run" the dag/steps function to collect the tasks/steps
                         _context.declaring = True
-                        dag_func_return = func(input_obj)
+                        func_return = func(input_obj)
                         _context.declaring = False
 
-                        if func_return and isinstance(dag_func_return, (OutputV1, OutputV2)):
-                            dag.outputs = dag_func_return._get_as_output()
+                        if func_return and isinstance(func_return, (OutputV1, OutputV2)):
+                            template.outputs = func_return._get_as_output()
 
-            return dag_call_wrapper
+            return call_wrapper
+        return decorator
 
-        return dag_decorator
+    @_add_type_hints(DAG)  # type: ignore
+    def dag(self, **dag_kwargs) -> Callable:
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("dag", _DECORATOR_SYNTAX_FLAG)
+            )
+        if not _varname:
+            raise ImportError("`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency")
+
+        from hera.workflows.dag import DAG
+
+        return self._construct_invocator_decorator(DAG, **dag_kwargs)
+    
+    @_add_type_hints(Steps)  # type: ignore
+    def steps(self, **steps_kwargs) -> Callable:
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("steps", _DECORATOR_SYNTAX_FLAG)
+            )
+        if not _varname:
+            raise ImportError("`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency")
+
+        from hera.workflows.steps import Steps
+
+        return self._construct_invocator_decorator(Steps, **steps_kwargs)
+    
