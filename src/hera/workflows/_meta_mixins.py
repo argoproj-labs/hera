@@ -537,6 +537,7 @@ _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
 
 
 class TemplateDecoratorFuncsMixin(ContextMixin):
+    from hera.workflows.container import Container
     from hera.workflows.dag import DAG
     from hera.workflows.script import Script
     from hera.workflows.steps import Steps
@@ -616,52 +617,19 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
             @functools.wraps(func)
             def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
-                """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
+                """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    from hera.workflows.dag import DAG
-                    from hera.workflows.steps import Parallel, Step, Steps
-                    from hera.workflows.task import Task
-
-                    subnode_args = None
-                    if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
-                        subnode_args = args[0]._get_as_arguments()
-
-                    signature = inspect.signature(func)
-                    output_class = signature.return_annotation
-
                     try:
+                        # ignore decorator function assignment
                         subnode_name = varname()
                     except ImproperUseError:
                         # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = name
+                        subnode_name = script_template.name
 
                     subnode_name = kwargs.pop("name", subnode_name)
                     assert isinstance(subnode_name, str)
 
-                    subnode: Union[Step, Task]
-
-                    assert _context.pieces
-                    _context.declaring = False
-                    if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                        subnode = Step(
-                            name=subnode_name,
-                            template=script_template,
-                            arguments=subnode_args,
-                            **kwargs,
-                        )
-                    elif isinstance(_context.pieces[-1], DAG):
-                        subnode = Task(
-                            name=subnode_name,
-                            template=script_template,
-                            arguments=subnode_args,
-                            depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
-                            **kwargs,
-                        )
-                        _context.pieces[-1]._current_task_depends.clear()
-
-                    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
-                    _context.declaring = True
-                    return subnode
+                    return create_subnode(subnode_name, func, script_template, *args, **kwargs)
 
                 if _context.pieces:
                     return script_template.__call__(*args, **kwargs)
@@ -809,3 +777,85 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.steps import Steps
 
         return self._construct_invocator_decorator(Steps, **steps_kwargs)
+
+    @_add_type_hints(Container)  # type: ignore
+    def container(self, **container_kwargs) -> Callable:
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("container", _DECORATOR_SYNTAX_FLAG)
+            )
+        from hera.workflows.container import Container
+
+        def container_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
+            name = container_kwargs.pop("name", func.__name__.replace("_", "-"))
+
+            signature = inspect.signature(func)
+            func_inputs = signature.parameters
+            inputs = []
+            if len(func_inputs) >= 1:
+                arg_class = list(func_inputs.values())[0].annotation
+                if issubclass(arg_class, (InputV1, InputV2)):
+                    inputs = arg_class._get_inputs()
+
+            func_return = signature.return_annotation
+            outputs = []
+            if func_return and issubclass(func_return, (OutputV1, OutputV2)):
+                outputs = func_return._get_outputs()
+
+            # Open context to add `Container` object automatically
+            with self:
+                container_template = Container(
+                    name=name,
+                    source=func,
+                    inputs=inputs,
+                    outputs=outputs,
+                    **container_kwargs,
+                )
+
+            @functools.wraps(func)
+            def container_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
+                """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
+                if _context.declaring:
+                    from hera.workflows.dag import DAG
+                    from hera.workflows.steps import Parallel, Step, Steps
+                    from hera.workflows.task import Task
+
+                    try:
+                        # ignore decorator function assignment
+                        subnode_name = varname()
+                    except ImproperUseError:
+                        # Template is being used without variable assignment (so use function name or provided name)
+                        subnode_name = container_template.name
+
+                    subnode_name = kwargs.pop("name", subnode_name)
+                    assert isinstance(subnode_name, str)
+
+                    return create_subnode(subnode_name, func, container_template, *args, **kwargs)
+
+                if _context.pieces:
+                    return container_template.__call__(*args, **kwargs)
+                return func(*args, **kwargs)
+
+            # Set the template name to the inferred name
+            container_call_wrapper.template_name = name  # type: ignore
+
+            # If the function has two inputs then the user wants to set template
+            # attributes within the function itself (advanced use case)
+            if len(func_inputs) == 2:
+                arg_class = list(func_inputs.values())[0].annotation
+                if issubclass(arg_class, (InputV1, InputV2)):
+                    input_obj = arg_class._get_as_templated_arguments()
+                    # "run" the container function to update the template
+                    func(input_obj, container_template)
+
+                    if func_return and isinstance(func_return, (OutputV1, OutputV2)):
+                        container_template.outputs = func_return._get_as_output()
+
+            return container_call_wrapper
+
+        return container_decorator
