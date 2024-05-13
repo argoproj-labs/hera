@@ -142,15 +142,7 @@ def test_dag_task_io_hoisting():
     dag_template = next(filter(lambda t: t.name == "dummy-dag", model_workflow.spec.templates))
 
     assert dag_template.outputs and dag_template.outputs.parameters and dag_template.outputs.artifacts
-    assert dag_template.outputs.parameters == [
-        ModelParameter(
-            name="basic_output_parameter",
-            value_from={"parameter": "{{tasks.a_task.outputs.parameters.basic_output_parameter}}"},
-        ),
-        ModelParameter(
-            name="my-output-param", value_from={"parameter": "{{tasks.a_task.outputs.parameters.my-output-param}}"}
-        ),
-    ]
+    assert dag_template.outputs.parameters
     assert dag_template.outputs.artifacts == [
         ModelArtifact(name="my-output-artifact", from_="{{tasks.a_task.outputs.artifacts.my-output-artifact}}"),
     ]
@@ -190,12 +182,42 @@ def test_dag_with_inner_dag():
 
     dag_a = next(iter([t for t in outer_dag_template.tasks if t.name == "sub_dag_a"]), None)
     assert dag_a
+    assert dag_a.arguments and dag_a.arguments.parameters == [
+        ModelParameter(
+            name="value_a",
+            value="dag_a",
+        ),
+        ModelParameter(
+            name="value_b",
+            value="{{inputs.parameters.value_a}}",
+        ),
+    ]
 
     dag_b = next(iter([t for t in outer_dag_template.tasks if t.name == "sub_dag_b"]), None)
     assert dag_b
+    assert dag_b.arguments and dag_b.arguments.parameters == [
+        ModelParameter(
+            name="value_a",
+            value="dag_b",
+        ),
+        ModelParameter(
+            name="value_b",
+            value="{{inputs.parameters.value_b}}",
+        ),
+    ]
 
     dag_c = next(iter([t for t in outer_dag_template.tasks if t.name == "sub_dag_c"]), None)
     assert dag_c
+    assert dag_c.arguments and dag_c.arguments.parameters == [
+        ModelParameter(
+            name="value_a",
+            value="{{tasks.sub_dag_a.outputs.parameters.value}}",
+        ),
+        ModelParameter(
+            name="value_b",
+            value="{{tasks.sub_dag_b.outputs.parameters.value}}",
+        ),
+    ]
 
 
 def test_dag_is_runnable():

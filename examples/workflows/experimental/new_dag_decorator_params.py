@@ -17,7 +17,7 @@ class SetupOutput(Output):
 
 @w.script()
 def setup() -> SetupOutput:
-    return SetupOutput(environment_parameter="linux", result="Setting things up")
+    return SetupOutput(environment_parameter="linux", an_annotated_parameter=42, result="Setting things up")
 
 
 class ConcatInput(Input):

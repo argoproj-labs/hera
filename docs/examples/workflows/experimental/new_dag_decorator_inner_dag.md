@@ -55,6 +55,7 @@
 
         return WorkerOutput(value=final_task.result)
 
+
     @w.set_entrypoint
     @w.dag()
     def outer_dag(worker_input: WorkerInput) -> WorkerOutput:
@@ -164,95 +165,31 @@
               parameter: '{{tasks.final_task.outputs.result}}'
       - dag:
           tasks:
-          - name: setup_task
-            template: setup
           - arguments:
               parameters:
-              - name: word_a
+              - name: value_a
                 value: dag_a
-              - name: word_b
-                value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}'
-            depends: setup_task
-            name: task_a
-            template: concat
-          - arguments:
-              parameters:
-              - name: word_a
+              - name: value_b
                 value: '{{inputs.parameters.value_a}}'
-              - name: word_b
-                value: '{{tasks.setup_task.outputs.result}}'
-            depends: setup_task
-            name: task_b
-            template: concat
+            name: sub_dag_a
+            template: worker
           - arguments:
               parameters:
-              - name: word_a
-                value: '{{tasks.task_a.outputs.result}}'
-              - name: word_b
-                value: '{{tasks.task_b.outputs.result}}'
-            depends: task_a && task_b
-            name: final_task
-            template: concat
-          - depends: final_task
-            name: setup_task
-            template: setup
-          - arguments:
-              parameters:
-              - name: word_a
+              - name: value_a
                 value: dag_b
-              - name: word_b
-                value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}'
-            depends: setup_task
-            name: task_a
-            template: concat
-          - arguments:
-              parameters:
-              - name: word_a
+              - name: value_b
                 value: '{{inputs.parameters.value_b}}'
-              - name: word_b
-                value: '{{tasks.setup_task.outputs.result}}'
-            depends: setup_task
-            name: task_b
-            template: concat
+            name: sub_dag_b
+            template: worker
           - arguments:
               parameters:
-              - name: word_a
-                value: '{{tasks.task_a.outputs.result}}'
-              - name: word_b
-                value: '{{tasks.task_b.outputs.result}}'
-            depends: task_a && task_b
-            name: final_task
-            template: concat
-          - depends: final_task
-            name: setup_task
-            template: setup
-          - arguments:
-              parameters:
-              - name: word_a
-                value: '{{tasks.final_task.outputs.result}}'
-              - name: word_b
-                value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}'
-            depends: setup_task
-            name: task_a
-            template: concat
-          - arguments:
-              parameters:
-              - name: word_a
-                value: '{{tasks.final_task.outputs.result}}'
-              - name: word_b
-                value: '{{tasks.setup_task.outputs.result}}'
-            depends: setup_task
-            name: task_b
-            template: concat
-          - arguments:
-              parameters:
-              - name: word_a
-                value: '{{tasks.task_a.outputs.result}}'
-              - name: word_b
-                value: '{{tasks.task_b.outputs.result}}'
-            depends: task_a && task_b
-            name: final_task
-            template: concat
+              - name: value_a
+                value: '{{tasks.sub_dag_a.outputs.parameters.value}}'
+              - name: value_b
+                value: '{{tasks.sub_dag_b.outputs.parameters.value}}'
+            depends: sub_dag_a && sub_dag_b
+            name: sub_dag_c
+            template: worker
         inputs:
           parameters:
           - name: value_a
@@ -262,6 +199,6 @@
           parameters:
           - name: value
             valueFrom:
-              parameter: '{{tasks.final_task.outputs.result}}'
+              parameter: '{{tasks.sub_dag_c.outputs.parameters.value}}'
     ```
 

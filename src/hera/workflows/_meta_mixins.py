@@ -686,13 +686,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     subnode_name = kwargs.pop("name", subnode_name)
                     assert isinstance(subnode_name, str)
 
-                    return create_subnode(subnode_name, func, dag, args, kwargs)
+                    return create_subnode(subnode_name, func, dag, *args, **kwargs)
 
                 return func(*args, **kwargs)
 
             dag_call_wrapper.template_name = name  # type: ignore
-            dag_call_wrapper.template_type = "dag"  # type: ignore
-            dag_call_wrapper.context = dag  # type: ignore
 
             # Open workflow context to cross-check task template names
             with self, dag:

@@ -93,11 +93,29 @@ spec:
           parameter: '{{tasks.final_task.outputs.result}}'
   - dag:
       tasks:
-      - name: sub_dag_a
+      - arguments:
+          parameters:
+          - name: value_a
+            value: dag_a
+          - name: value_b
+            value: '{{inputs.parameters.value_a}}'
+        name: sub_dag_a
         template: worker
-      - name: sub_dag_b
+      - arguments:
+          parameters:
+          - name: value_a
+            value: dag_b
+          - name: value_b
+            value: '{{inputs.parameters.value_b}}'
+        name: sub_dag_b
         template: worker
-      - depends: sub_dag_a && sub_dag_b
+      - arguments:
+          parameters:
+          - name: value_a
+            value: '{{tasks.sub_dag_a.outputs.parameters.value}}'
+          - name: value_b
+            value: '{{tasks.sub_dag_b.outputs.parameters.value}}'
+        depends: sub_dag_a && sub_dag_b
         name: sub_dag_c
         template: worker
     inputs:

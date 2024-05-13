@@ -55,7 +55,7 @@ class InputMixin(BaseModel):
             # Return in order to skip validation of `construct`ed instance
             return
 
-        return super().__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def _get_parameters(cls, object_override: Optional[Self] = None) -> List[Parameter]:
@@ -164,7 +164,7 @@ class OutputMixin(BaseModel):
             # Return in order to skip validation of `construct`ed instance
             return
 
-        return super().__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def _get_outputs(cls) -> List[Union[Artifact, Parameter]]:
