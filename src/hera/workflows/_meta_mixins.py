@@ -767,6 +767,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                             template.outputs = func_return._get_as_output()
 
             return call_wrapper
+
         return decorator
 
     @_add_type_hints(DAG)  # type: ignore
@@ -786,7 +787,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.dag import DAG
 
         return self._construct_invocator_decorator(DAG, **dag_kwargs)
-    
+
     @_add_type_hints(Steps)  # type: ignore
     def steps(self, **steps_kwargs) -> Callable:
         if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
@@ -804,4 +805,3 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.steps import Steps
 
         return self._construct_invocator_decorator(Steps, **steps_kwargs)
-    

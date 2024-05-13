@@ -39,7 +39,7 @@ from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryPolicy, RetryStrategy
 from hera.workflows.script import InlineScriptConstructor, RunnerScriptConstructor, Script, ScriptConstructor, script
 from hera.workflows.service import WorkflowsService
-from hera.workflows.steps import Parallel, Step, Steps
+from hera.workflows.steps import Parallel, Step, Steps, parallel
 from hera.workflows.suspend import Suspend
 from hera.workflows.task import Task, TaskResult
 from hera.workflows.user_container import UserContainer
@@ -176,5 +176,6 @@ __all__ = [
     "WorkflowTemplate",
     "WorkflowsService",
     "ZipArchiveStrategy",
+    "parallel",
     "script",
 ]
