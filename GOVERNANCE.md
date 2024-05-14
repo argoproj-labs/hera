@@ -65,7 +65,7 @@ For a new maintainer to be appointed they must -
 #### Privileges
 
 Maintainers will have the following permissions:
-- Ability to update permissions on the Hera Github repository
+- ["Maintain" permissions](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/repository-roles-for-an-organization#permissions-for-each-role) on the Hera Github repository
 - Ability to merge PRs to protected branches
 - Cutting releases (PyPI publish will still require approval from a TOC member)
 
