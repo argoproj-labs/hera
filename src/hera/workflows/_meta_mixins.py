@@ -654,6 +654,33 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.dag import DAG
 
         def dag_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
+            """The decorating function that runs at "definition" time.
+
+            This function will do 3 things:
+            1. Inspect the function signature to get inputs/outputs
+            2. Create the DAG/Steps template and add it to the workflow
+            3. Run `func` in "declaring" mode to gather the tasks/steps and inputs/outputs between them, explained below.
+
+            To run the function in declaring mode, we first need to create an input object which will
+            carry templated string arguments in its attributes, rather than the correct types (like ints,
+            other BaseModels, etc). This will let the templated strings propagate to the task arguments. We
+            must skip Pydantic's validation of the input object, which is why InputMixin override __new__,
+            to `construct` an instance; __init__ then returns early to skip validation.
+
+            Then, passing in the object, we call the underlying function. This is where other templates
+            are called, such as scripts, containers or other DAGs, and results in `Task` (or `Step`) objects being
+            created. These tasks may have attribute access on them when passing values between tasks, as the
+            code author sees Inputs/Outputs, while we are seeing Tasks in declaring mode. Therefore,
+            TemplateInvocatorSubNodeMixin override __getattribute__, which, when in declaring mode, will
+            retrieve a templated string for the given attribute, e.g. `my_task.an_output_param` will get
+            the string "{{tasks.my_task.outputs.parameters.an_output_param}}". This also works for artifacts
+            and the special `result` output.
+
+            Finally, for the return from the function, a user may specify a subclass of Output. OutputMixin
+            therefore also overrides __new__ and __init__ to allow an instance to be constructed without
+            validation. We take this output object and convert it to a list of Artifacts/Parameters, setting
+            the outputs of the template.
+            """
             name = dag_kwargs.pop("name", func.__name__.replace("_", "-"))
 
             signature = inspect.signature(func)

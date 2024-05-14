@@ -14,6 +14,9 @@ spec:
       - name: dummy-param
         valueFrom:
           path: /tmp/hera-outputs/parameters/dummy-param
+      - name: setup-config
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/setup-config
     script:
       args:
       - -m

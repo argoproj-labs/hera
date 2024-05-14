@@ -8,6 +8,7 @@
 === "Hera"
 
     ```python linenums="1"
+    from pydantic import BaseModel
     from typing_extensions import Annotated
 
     from hera.shared import global_config
@@ -20,14 +21,24 @@
     w = Workflow(generate_name="my-workflow-")
 
 
+    class SetupConfig(BaseModel):
+        a_param: str
+
+
     class SetupOutput(Output):
         environment_parameter: str
-        an_annotated_parameter: Annotated[int, Parameter(name="dummy-param")]
+        an_annotated_parameter: Annotated[int, Parameter(name="dummy-param")]  # use an annotated non-str
+        setup_config: Annotated[SetupConfig, Parameter(name="setup-config")]  # use a pydantic BaseModel
 
 
     @w.script()
     def setup() -> SetupOutput:
-        return SetupOutput(environment_parameter="linux", an_annotated_parameter=42, result="Setting things up")
+        return SetupOutput(
+            environment_parameter="linux",
+            an_annotated_parameter=42,
+            setup_config=SetupConfig(a_param="test"),
+            result="Setting things up",
+        )
 
 
     class ConcatInput(Input):
@@ -85,6 +96,9 @@
           - name: dummy-param
             valueFrom:
               path: /tmp/hera-outputs/parameters/dummy-param
+          - name: setup-config
+            valueFrom:
+              path: /tmp/hera-outputs/parameters/setup-config
         script:
           args:
           - -m
