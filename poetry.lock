@@ -445,7 +445,7 @@ test = ["pytest (>=6)"]
 name = "executing"
 version = "2.0.1"
 description = "Get the currently executing AST node of a frame, and other information"
-optional = false
+optional = true
 python-versions = ">=3.5"
 files = [
     {file = "executing-2.0.1-py2.py3-none-any.whl", hash = "sha256:eac49ca94516ccc753f9fb5ce82603156e590b27525a8bc32cce8ae302eb61bc"},
@@ -1317,7 +1317,7 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "varname"
 version = "0.13.1"
 description = "Dark magics about variable names in python."
-optional = false
+optional = true
 python-versions = "<4.0,>=3.8"
 files = [
     {file = "varname-0.13.1-py3-none-any.whl", hash = "sha256:f70f58e2b85584daa4fe6d4f90c5fdd4bf314e5a60b0bd5865bc79da0f404729"},
@@ -1347,9 +1347,10 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [extras]
 cli = ["cappa", "pyyaml"]
+experimental = ["varname"]
 yaml = ["pyyaml"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4"
-content-hash = "dba5d494f5ef1afe83f595a3c34aefc7a4fc510b5a5659f13a91cac1e14648ef"
+content-hash = "cabe27fcec24c46ae592ec530acaa61ca5820d940f6a5a09189f93cca915828e"
