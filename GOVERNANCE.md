@@ -1,6 +1,6 @@
 # Hera Governance
 
-This document outlines the governance for the overall Hera Project.
+This document outlines the governance for the Hera Project.
 
 Any changes to Hera's governance and this document require a unanimous vote by all TOC members.
 
@@ -10,14 +10,14 @@ All votes mentioned in this document follow a [lazy-consensus process](https://m
 
 The current members are defined in [MEMBERS.md](MEMBERS.md)
 
-### TOC
+### Technical Oversight Committee (TOC)
 
 Hera TOC members are maintainers who have made substantial contributions to the project. The Hera TOC is modeled on the CNCF TOC as a technical governing body. It oversees all aspects of the project and has a mandate to drive consensus for:
 
 - Defining and maintaining the technical vision for the project
 - Fostering a healthy and welcoming community, including by defining and enforcing our Code of Conduct
 - Defining the governance structure of the project
-- Appointing maintainers and lead
+- Appointing maintainers and leads
 - Defining the [HEP](proposals/README.md) process through which cross-cutting changes are proposed and approved
 - Defining the annual roadmap
 - Responsible for handling security reports and incidents
@@ -56,7 +56,7 @@ Maintainers are in charge of the day to day maintenance of the project including
 
 For a new maintainer to be appointed they must -
 
-- Be a committer to Hera for at-least 2 months
+- Be an approver to Hera for at least 2 months
 - Reviewer for or author of at least 10 substantial PRs to the codebase, with the definition of substantial subject to the TOC's discretion (e.g. refactors, enhancements rather than grammar correction or one-line pulls).
 - Exhibiting sound technical judgment through PR contributions
 - Exhibiting sound technical judgment through PR reviews
@@ -65,7 +65,7 @@ For a new maintainer to be appointed they must -
 #### Privileges
 
 Maintainers will have the following permissions:
-- Maintain permissions on the Hera Github repository
+- Ability to update permissions on the Hera Github repository
 - Ability to merge PRs to protected branches
 - Cutting releases (PyPI publish will still require approval from a TOC member)
 
@@ -74,7 +74,7 @@ Maintainers will have the following permissions:
 Approvers are seasoned contributors who are responsible for:
 
 - Ensuring contributions align with project goals and meet the project's quality standards
-- Reviewing and approving PRs
+- Reviewing and approving PRs (but not merging to protected branches)
 - Supporting contributors
 
 #### Nomination Process
