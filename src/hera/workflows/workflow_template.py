@@ -153,6 +153,7 @@ class WorkflowTemplate(Workflow):
     def _get_as_workflow(self, generate_name: Optional[str]) -> Workflow:
         workflow = cast(Workflow, Workflow.from_dict(self.to_dict()))
         workflow.kind = "Workflow"
+        workflow.workflows_service = self.workflows_service  # bind this workflow to the same service
 
         if generate_name is not None:
             workflow.generate_name = generate_name
