@@ -16,6 +16,7 @@
 
     global_config.experimental_features["script_annotations"] = True
     global_config.experimental_features["script_pydantic_io"] = True
+    global_config.experimental_features["decorator_syntax"] = True
 
 
     w = Workflow(generate_name="my-workflow-")
@@ -135,6 +136,8 @@
           - default: ''
             name: word_a
           - name: word_b
+          - default: '{"reverse": false}'
+            name: concat_config
         name: concat
         script:
           args:
@@ -163,6 +166,8 @@
                 value: '{{inputs.parameters.value_a}}'
               - name: word_b
                 value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}{{tasks.setup_task.outputs.parameters.dummy-param}}'
+              - name: concat_config
+                value: '{"reverse": false}'
             depends: setup_task
             name: task_a
             template: concat
@@ -172,6 +177,8 @@
                 value: '{{inputs.parameters.value_b}}'
               - name: word_b
                 value: '{{tasks.setup_task.outputs.result}}'
+              - name: concat_config
+                value: '{"reverse": false}'
             depends: setup_task
             name: task_b
             template: concat
@@ -181,6 +188,8 @@
                 value: '{{tasks.task_a.outputs.result}}'
               - name: word_b
                 value: '{{tasks.task_b.outputs.result}}'
+              - name: concat_config
+                value: '{"reverse": false}'
             depends: task_a && task_b
             name: final_task
             template: concat
@@ -191,6 +200,8 @@
           - name: value_b
           - default: '42'
             name: an_int_value
+          - default: '{"param_1": "Hello", "param_2": "world"}'
+            name: a_basemodel
         name: worker
         outputs:
           parameters:

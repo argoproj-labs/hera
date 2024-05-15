@@ -524,6 +524,9 @@ def create_subnode(
     return subnode
 
 
+_DECORATOR_SYNTAX_FLAG = "decorator_syntax"
+
+
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.dag import DAG
     from hera.workflows.script import Script
@@ -548,6 +551,15 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if
             in a Steps or DAG context.
         """
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("script", _DECORATOR_SYNTAX_FLAG)
+            )
         from hera.workflows.script import RunnerScriptConstructor, Script
 
         def script_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
@@ -651,6 +663,16 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
     @_add_type_hints(DAG)  # type: ignore
     def dag(self, **dag_kwargs) -> Callable:
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("dag", _DECORATOR_SYNTAX_FLAG)
+            )
+
         from hera.workflows.dag import DAG
 
         def dag_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
