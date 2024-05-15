@@ -664,14 +664,14 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             To run the function in declaring mode, we first need to create an input object which will
             carry templated string arguments in its attributes, rather than the correct types (like ints,
             other BaseModels, etc). This will let the templated strings propagate to the task arguments. We
-            must skip Pydantic's validation of the input object, which is why InputMixin override __new__,
+            must skip Pydantic's validation of the input object, which is why InputMixin overrides __new__,
             to `construct` an instance; __init__ then returns early to skip validation.
 
             Then, passing in the object, we call the underlying function. This is where other templates
             are called, such as scripts, containers or other DAGs, and results in `Task` (or `Step`) objects being
             created. These tasks may have attribute access on them when passing values between tasks, as the
             code author sees Inputs/Outputs, while we are seeing Tasks in declaring mode. Therefore,
-            TemplateInvocatorSubNodeMixin override __getattribute__, which, when in declaring mode, will
+            TemplateInvocatorSubNodeMixin overrides __getattribute__, which, when in declaring mode, will
             retrieve a templated string for the given attribute, e.g. `my_task.an_output_param` will get
             the string "{{tasks.my_task.outputs.parameters.an_output_param}}". This also works for artifacts
             and the special `result` output.

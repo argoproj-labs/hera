@@ -41,20 +41,34 @@
         )
 
 
+    class ConcatConfig(BaseModel):
+        reverse: bool
+
+
     class ConcatInput(Input):
         word_a: Annotated[str, Parameter(name="word_a", default="")]
         word_b: str
+        concat_config: ConcatConfig = ConcatConfig(reverse=False)
 
 
     @w.script()
     def concat(concat_input: ConcatInput) -> Output:
-        return Output(result=f"{concat_input.word_a} {concat_input.word_b}")
+        res = f"{concat_input.word_a} {concat_input.word_b}"
+        if concat_input.reverse:
+            res = res[::-1]
+        return Output(result=res)
+
+
+    class WorkerConfig(BaseModel):
+        param_1: str
+        param_2: str
 
 
     class WorkerInput(Input):
         value_a: str = "my default"
         value_b: str
         an_int_value: int = 42
+        a_basemodel: WorkerConfig = WorkerConfig(param_1="Hello", param_2="world")
 
 
     class WorkerOutput(Output):

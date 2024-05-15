@@ -122,7 +122,7 @@ examples:  ## Generate documentation files for examples
 
 .PHONY: regenerate-example
 regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
-regenerate-example: install-3.8
+regenerate-example: install
 	@HERA_REGENERATE=1 poetry run python -m pytest -k $(EXAMPLE_FILENAME)
 
 .PHONY: regenerate-test-data

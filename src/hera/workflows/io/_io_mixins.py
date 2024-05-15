@@ -134,7 +134,9 @@ class InputMixin(BaseModel):
             self_dict = self.model_dump()
 
         for field in get_fields(type(self)):
-            templated_value = self_dict[field]
+            # The value may be a static value (of any time) if it has a default value, so we need to serialize it
+            # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
+            templated_value = serialize(self_dict[field])
 
             if get_origin(annotations[field]) is Annotated:
                 annotation = get_args(annotations[field])[1]
