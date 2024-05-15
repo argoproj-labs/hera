@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
 from hera.shared.serialization import MISSING, serialize
+from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.models import (
     Arguments as ModelArguments,
@@ -37,6 +38,25 @@ else:
 
 
 class InputMixin(BaseModel):
+    def __new__(cls, **kwargs):
+        if _context.declaring:
+            # Intercept the declaration to avoid validation on the templated strings
+            # We must then turn off declaring mode to be able to "construct" an instance
+            # of the InputMixin subclass.
+            _context.declaring = False
+            instance = cls.construct(**kwargs)
+            _context.declaring = True
+            return instance
+        else:
+            return super(InputMixin, cls).__new__(cls)
+
+    def __init__(self, /, **kwargs):
+        if _context.declaring:
+            # Return in order to skip validation of `construct`ed instance
+            return
+
+        super().__init__(**kwargs)
+
     @classmethod
     def _get_parameters(cls, object_override: Optional[Self] = None) -> List[Parameter]:
         parameters = []
@@ -114,7 +134,9 @@ class InputMixin(BaseModel):
             self_dict = self.model_dump()
 
         for field in get_fields(type(self)):
-            templated_value = self_dict[field]
+            # The value may be a static value (of any time) if it has a default value, so we need to serialize it
+            # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
+            templated_value = serialize(self_dict[field])
 
             if get_origin(annotations[field]) is Annotated:
                 annotation = get_args(annotations[field])[1]
@@ -129,6 +151,23 @@ class InputMixin(BaseModel):
 
 
 class OutputMixin(BaseModel):
+    def __new__(cls, **kwargs):
+        if _context.declaring:
+            # Intercept the declaration to avoid validation on the templated strings
+            _context.declaring = False
+            instance = cls.construct(**kwargs)
+            _context.declaring = True
+            return instance
+        else:
+            return super(OutputMixin, cls).__new__(cls)
+
+    def __init__(self, /, **kwargs):
+        if _context.declaring:
+            # Return in order to skip validation of `construct`ed instance
+            return
+
+        super().__init__(**kwargs)
+
     @classmethod
     def _get_outputs(cls) -> List[Union[Artifact, Parameter]]:
         outputs = []
@@ -165,7 +204,10 @@ class OutputMixin(BaseModel):
         return Parameter(name=field_name, default=default)  # type: ignore
 
     def _get_as_output(self) -> List[Union[Artifact, Parameter]]:
-        """Get the Output with values of ..."""
+        """Get the Output model as the output of a dag/steps template.
+
+        This lets dags and steps hoist task/step outputs into its own outputs.
+        """
         outputs: List[Union[Artifact, Parameter]] = []
         annotations = get_field_annotations(type(self))
 

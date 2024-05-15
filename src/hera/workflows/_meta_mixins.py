@@ -14,8 +14,11 @@ from typing_extensions import ParamSpec
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
 from hera.workflows._context import _context
-from hera.workflows.artifact import Artifact
 from hera.workflows.exceptions import InvalidTemplateCall
+from hera.workflows.io.v1 import (
+    Input as InputV1,
+    Output as OutputV1,
+)
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
@@ -23,10 +26,16 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import TWorkflow
 
-if TYPE_CHECKING:
-    from hera.workflows.steps import Step
-    from hera.workflows.task import Task
-
+try:
+    from hera.workflows.io.v2 import (  # type: ignore
+        Input as InputV2,
+        Output as OutputV2,
+    )
+except ImportError:
+    from hera.workflows.io.v1 import (  # type: ignore
+        Input as InputV2,
+        Output as OutputV2,
+    )
 try:
     from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
@@ -37,6 +46,13 @@ try:
 except ImportError:
     from hera.shared._inspect import get_annotations  # type: ignore
 
+
+if TYPE_CHECKING:
+    from hera.workflows._mixins import TemplateMixin
+    from hera.workflows.models import Template
+    from hera.workflows.steps import Step
+    from hera.workflows.task import Task
+
 _yaml: Optional[ModuleType] = None
 try:
     import yaml
@@ -44,6 +60,16 @@ try:
     _yaml = yaml
 except ImportError:
     _yaml = None
+
+
+_varname_imported: bool = False
+try:
+    # user must install `hera[experimental]`
+    from varname import ImproperUseError, varname
+
+    _varname_imported = True
+except ImportError:
+    pass
 
 THookable = TypeVar("THookable", bound="HookMixin")
 """`THookable` is the type associated with mixins that provide the ability to apply hooks from the global config"""
@@ -341,10 +367,10 @@ class CallableTemplateMixin(BaseMixin):
                     f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
                 )
             if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                return Step(*args, template=self, **kwargs)
+                return Step(template=self, **kwargs)
 
             if isinstance(_context.pieces[-1], DAG):
-                return Task(*args, template=self, **kwargs)
+                return Task(template=self, **kwargs)
 
         raise InvalidTemplateCall(
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
@@ -366,6 +392,8 @@ class CallableTemplateMixin(BaseMixin):
 
     def _get_artifact_names(self, arguments: List) -> Set[str]:
         """Returns the set of artifact names that are currently set on the mixin inheritor."""
+        from hera.workflows.artifact import Artifact
+
         artifacts = [arg for arg in arguments if isinstance(arg, (ModelArtifact, Artifact))]
         return {a if isinstance(a, str) else a.name for a in artifacts if a.name}
 
@@ -433,20 +461,18 @@ class CallableTemplateMixin(BaseMixin):
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
 
-ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
+PydanticKwargs = ParamSpec("PydanticKwargs")  # For input attributes of a Pydantic class
+PydanticCls = TypeVar("PydanticCls")
 StepIns = ParamSpec("StepIns")  # For input attributes of Step class
 TaskIns = ParamSpec("TaskIns")  # For input attributes of Task class
 
-if TYPE_CHECKING:
-    from hera.workflows.script import Script
-
 
 def _add_type_hints(
-    _script: Callable[ScriptIns, Script],
+    _pydantic_obj: Callable[PydanticKwargs, PydanticCls],
 ) -> Callable[
     ...,
     Callable[
-        ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
+        PydanticKwargs,  # this adds type hints to the underlying *library* function kwargs
         Callable[  # we will return a function that is a decorator
             [Callable[FuncIns, FuncR]],  # taking underlying *user* function
             Callable[FuncIns, FuncR],  # and returning it
@@ -457,7 +483,61 @@ def _add_type_hints(
     return lambda func: func
 
 
+class HeraBuildObj:
+    def __init__(self, subnode_type: str, output_class: Type[Union[OutputV1, OutputV2]]) -> None:
+        self.subnode_type = subnode_type
+        self.output_class = output_class
+
+
+def create_subnode(
+    subnode_name: str,
+    func: Callable,
+    template: Union[str, Template, TemplateMixin, CallableTemplateMixin],
+    *args,
+    **kwargs,
+) -> Union[Step, Task]:
+    from hera.workflows.dag import DAG
+    from hera.workflows.steps import Parallel, Step, Steps
+    from hera.workflows.task import Task
+
+    subnode_args = None
+    if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+        subnode_args = args[0]._get_as_arguments()
+
+    signature = inspect.signature(func)
+    output_class = signature.return_annotation
+
+    subnode: Union[Step, Task]
+
+    assert _context.pieces
+    _context.declaring = False
+    if isinstance(_context.pieces[-1], (Steps, Parallel)):
+        subnode = Step(
+            name=subnode_name,
+            template=template,
+            arguments=subnode_args,
+            **kwargs,
+        )
+    elif isinstance(_context.pieces[-1], DAG):
+        subnode = Task(
+            name=subnode_name,
+            template=template,
+            arguments=subnode_args,
+            depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
+            **kwargs,
+        )
+        _context.pieces[-1]._current_task_depends.clear()
+
+    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
+    _context.declaring = True
+    return subnode
+
+
+_DECORATOR_SYNTAX_FLAG = "decorator_syntax"
+
+
 class TemplateDecoratorFuncsMixin(ContextMixin):
+    from hera.workflows.dag import DAG
     from hera.workflows.script import Script
 
     @_add_type_hints(Script)  # type: ignore
@@ -480,6 +560,21 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if
             in a Steps or DAG context.
         """
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("script", _DECORATOR_SYNTAX_FLAG)
+            )
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
+
+        from hera.workflows.script import RunnerScriptConstructor, Script
 
         def script_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
             """The internal decorator function.
@@ -503,31 +598,72 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             else:
                 source = func
 
-            if "name" in script_kwargs:
-                # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
-                # kwargs called `name`
-                name = script_kwargs.pop("name")
-            else:
-                # otherwise populate the `name` from the function name
-                name = source.__name__.replace("_", "-")
-
-            from hera.workflows.script import RunnerScriptConstructor, Script
+            # take the client-provided `name` if it is submitted, pop the name for otherwise there will be two
+            # kwargs called `name`
+            # otherwise populate the `name` from the function name
+            name = script_kwargs.pop("name", source.__name__.replace("_", "-"))
 
             if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
                 script_kwargs["constructor"] = RunnerScriptConstructor()
 
             # Open context to add `Script` object automatically
             with self:
-                s = Script(name=name, source=source, **script_kwargs)
+                script_template = Script(name=name, source=source, **script_kwargs)
 
-            if not isinstance(s.constructor, RunnerScriptConstructor):
+            if not isinstance(script_template.constructor, RunnerScriptConstructor):
                 raise ValueError(f"Script '{name}' must use RunnerScriptConstructor")
 
             @functools.wraps(func)
             def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
-                if _context.active:
-                    return s.__call__(*args, **kwargs)
+                if _context.declaring:
+                    from hera.workflows.dag import DAG
+                    from hera.workflows.steps import Parallel, Step, Steps
+                    from hera.workflows.task import Task
+
+                    subnode_args = None
+                    if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+                        subnode_args = args[0]._get_as_arguments()
+
+                    signature = inspect.signature(func)
+                    output_class = signature.return_annotation
+
+                    try:
+                        subnode_name = varname()
+                    except ImproperUseError:
+                        # Template is being used without variable assignment (so use function name or provided name)
+                        subnode_name = name
+
+                    subnode_name = kwargs.pop("name", subnode_name)
+                    assert isinstance(subnode_name, str)
+
+                    subnode: Union[Step, Task]
+
+                    assert _context.pieces
+                    _context.declaring = False
+                    if isinstance(_context.pieces[-1], (Steps, Parallel)):
+                        subnode = Step(
+                            name=subnode_name,
+                            template=script_template,
+                            arguments=subnode_args,
+                            **kwargs,
+                        )
+                    elif isinstance(_context.pieces[-1], DAG):
+                        subnode = Task(
+                            name=subnode_name,
+                            template=script_template,
+                            arguments=subnode_args,
+                            depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
+                            **kwargs,
+                        )
+                        _context.pieces[-1]._current_task_depends.clear()
+
+                    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
+                    _context.declaring = True
+                    return subnode
+
+                if _context.pieces:
+                    return script_template.__call__(*args, **kwargs)
                 return func(*args, **kwargs)
 
             # Set the wrapped function to the original function so that we can use it later
@@ -538,3 +674,105 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             return script_call_wrapper
 
         return script_decorator
+
+    @_add_type_hints(DAG)  # type: ignore
+    def dag(self, **dag_kwargs) -> Callable:
+        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format("dag", _DECORATOR_SYNTAX_FLAG)
+            )
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
+
+        from hera.workflows.dag import DAG
+
+        def dag_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
+            """The decorating function that runs at "definition" time.
+
+            This function will do 3 things:
+            1. Inspect the function signature to get inputs/outputs
+            2. Create the DAG/Steps template and add it to the workflow
+            3. Run `func` in "declaring" mode to gather the tasks/steps and inputs/outputs between them, explained below.
+
+            To run the function in declaring mode, we first need to create an input object which will
+            carry templated string arguments in its attributes, rather than the correct types (like ints,
+            other BaseModels, etc). This will let the templated strings propagate to the task arguments. We
+            must skip Pydantic's validation of the input object, which is why InputMixin overrides __new__,
+            to `construct` an instance; __init__ then returns early to skip validation.
+
+            Then, passing in the object, we call the underlying function. This is where other templates
+            are called, such as scripts, containers or other DAGs, and results in `Task` (or `Step`) objects being
+            created. These tasks may have attribute access on them when passing values between tasks, as the
+            code author sees Inputs/Outputs, while we are seeing Tasks in declaring mode. Therefore,
+            TemplateInvocatorSubNodeMixin overrides __getattribute__, which, when in declaring mode, will
+            retrieve a templated string for the given attribute, e.g. `my_task.an_output_param` will get
+            the string "{{tasks.my_task.outputs.parameters.an_output_param}}". This also works for artifacts
+            and the special `result` output.
+
+            Finally, for the return from the function, a user may specify a subclass of Output. OutputMixin
+            therefore also overrides __new__ and __init__ to allow an instance to be constructed without
+            validation. We take this output object and convert it to a list of Artifacts/Parameters, setting
+            the outputs of the template.
+            """
+            name = dag_kwargs.pop("name", func.__name__.replace("_", "-"))
+
+            signature = inspect.signature(func)
+            func_inputs = signature.parameters
+            inputs = []
+            if len(func_inputs) == 1:
+                arg_class = list(func_inputs.values())[0].annotation
+                if issubclass(arg_class, (InputV1, InputV2)):
+                    inputs = arg_class._get_inputs()
+
+            func_return = signature.return_annotation
+            outputs = []
+            if func_return and issubclass(func_return, (OutputV1, OutputV2)):
+                outputs = func_return._get_outputs()
+
+            # Add dag to workflow
+            with self:
+                dag = DAG(name=name, inputs=inputs, outputs=outputs, **dag_kwargs)
+
+            @functools.wraps(func)
+            def dag_call_wrapper(*args, **kwargs):
+                if _context.declaring:
+                    # A sub-dag as a Step or Task is being created
+                    try:
+                        subnode_name = varname()
+                    except ImproperUseError:
+                        # Template is being used without variable assignment (so use function name or provided name)
+                        subnode_name = name
+
+                    subnode_name = kwargs.pop("name", subnode_name)
+                    assert isinstance(subnode_name, str)
+
+                    return create_subnode(subnode_name, func, dag, *args, **kwargs)
+
+                return func(*args, **kwargs)
+
+            dag_call_wrapper.template_name = name  # type: ignore
+
+            # Open workflow context to cross-check task template names
+            with self, dag:
+                if len(func_inputs) == 1:
+                    arg_class = list(func_inputs.values())[0].annotation
+                    if issubclass(arg_class, (InputV1, InputV2)):
+                        input_obj = arg_class._get_as_templated_arguments()
+                        # "run" the dag/steps function to collect the tasks
+                        _context.declaring = True
+                        dag_func_return = func(input_obj)
+                        _context.declaring = False
+
+                        if func_return and isinstance(dag_func_return, (OutputV1, OutputV2)):
+                            dag.outputs = dag_func_return._get_as_output()
+
+            return dag_call_wrapper
+
+        return dag_decorator

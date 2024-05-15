@@ -29,7 +29,7 @@ codegen: models services examples init-files
 check-codegen: ## Check if the code is up to date
 check-codegen:
 	@$(MAKE) codegen
-	git diff --exit-code || "Code is not up-to-date. Please run 'make codegen'"
+	@git diff --exit-code || echo "Code is not up-to-date. Please run 'make codegen'"
 
 .PHONY: format
 format: ## Format and sort imports for source, tests, examples, etc.
@@ -122,7 +122,7 @@ examples:  ## Generate documentation files for examples
 
 .PHONY: regenerate-example
 regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
-regenerate-example: install-3.8
+regenerate-example: install
 	@HERA_REGENERATE=1 poetry run python -m pytest -k $(EXAMPLE_FILENAME)
 
 .PHONY: regenerate-test-data

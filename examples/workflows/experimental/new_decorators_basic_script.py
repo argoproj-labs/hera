@@ -3,6 +3,7 @@ from hera.workflows import Input, Output, WorkflowTemplate
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
+global_config.experimental_features["decorator_syntax"] = True
 
 w = WorkflowTemplate(name="my-template")
 

@@ -33,7 +33,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install -E cli
+        run: poetry install --all-extras
 
       - name: run ci checks
         run: make ci
@@ -81,7 +81,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install -E cli
+          poetry install --all-extras
           poetry run pip install "pydantic<2"
 
       - name: run ci checks
@@ -95,8 +95,6 @@ jobs:
   workflow-tests:
     name: run workflow tests
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
 
     runs-on: ubuntu-latest
 
@@ -114,7 +112,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install -E cli
+        run: poetry install --all-extras
 
       - name: setup k3d cluster
         run: make install-k3d
