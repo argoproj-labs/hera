@@ -227,3 +227,12 @@ def test_dag_is_runnable():
     assert worker(WorkerInput(value_a="hello", value_b="world")) == WorkerOutput(
         value="hello linux world Setting things up"
     )
+
+
+def test_steps_with_parallel_steps_is_runnable():
+    """The steps function, even with a parallel context, should be runnable as Python code."""
+    from tests.workflow_decorators.steps import WorkerInput, WorkerOutput, worker
+
+    assert worker(WorkerInput(value_a="hello", value_b="world")) == WorkerOutput(
+        value="hello linux42 world Setting things up"
+    )
