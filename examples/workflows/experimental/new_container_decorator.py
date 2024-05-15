@@ -1,3 +1,5 @@
+from typing import Optional
+
 from typing_extensions import Annotated
 
 from hera.shared import global_config
@@ -33,7 +35,7 @@ def basic_hello_world(my_input: MyInput) -> MyOutput: ...
 
 
 @w.container(command=["sh", "-c"])
-def advanced_hello_world(my_input: MyInput, template: Container) -> MyOutput:
+def advanced_hello_world(my_input: MyInput, template: Optional[Container] = None) -> MyOutput:
     # A 'MyOutput' object can be used to "mock" the output when running locally and allow us to
     # inject outputs based on inputs.
     output: MyOutput = MyOutput(container_greeting=f"Hello {my_input.user}")
