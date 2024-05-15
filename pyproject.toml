@@ -38,7 +38,7 @@ cli = ["cappa", "PyYAML"]
 experimental = ["varname"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "<8.0.0"
+pytest = "<9.0.0"
 pytest-cov = "*"
 mypy = "*"
 build = "*"
