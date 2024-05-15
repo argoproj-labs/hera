@@ -781,8 +781,10 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     " Note that experimental features are unstable and subject to breaking changes."
                 ).format("dag", _DECORATOR_SYNTAX_FLAG)
             )
-        if not _varname:
-            raise ImportError("`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency")
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
 
         from hera.workflows.dag import DAG
 
@@ -799,8 +801,10 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     " Note that experimental features are unstable and subject to breaking changes."
                 ).format("steps", _DECORATOR_SYNTAX_FLAG)
             )
-        if not _varname:
-            raise ImportError("`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency")
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
 
         from hera.workflows.steps import Steps
 
