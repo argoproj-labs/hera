@@ -54,7 +54,7 @@ Maintainers are in charge of the day to day maintenance of the project including
 
 #### Nomination Process
 
-For a new maintainer to be appointed they must -
+For a new maintainer to be appointed they must:
 
 - Be an approver to Hera for at least 2 months
 - Reviewer for or author of at least 10 substantial PRs to the codebase, with the definition of substantial subject to the TOC's discretion (e.g. refactors, enhancements rather than grammar correction or one-line pulls).
