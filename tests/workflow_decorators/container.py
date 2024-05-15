@@ -31,7 +31,7 @@ class MyOutput(Output):
 
 @w.set_entrypoint
 @w.container(command=["sh", "-c"], args=["echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"])
-def basic_hello_world(my_input: MyInput) -> Output: ...
+def basic_hello_world(my_input: MyInput) -> MyOutput: ...
 
 
 @w.container(command=["sh", "-c"])
@@ -42,9 +42,8 @@ def advanced_hello_world(my_input: MyInput, template: Optional[Container] = None
 
     # template is a special variable that allows you to reference the template itself and modify
     # its attributes. This is especially useful when trying to reference input params in args.
-    # The hio.path function will be able to inspect the annotation of the given variable
-    # to return the correct Argo template syntax substitution.
+    # The path function (from the Output Hera class) will be able to inspect the annotation of
+    # the given variable to return the correct Argo template syntax substitution.
     if template:
-        template.args = [f"echo Hello {my_input.user} > tee /tmp/hello_world.txt"]
-    # template.args = [f"echo Hello {my_input.user} > {hio.path(output.container_greeting)}"]
+        template.args = [f"echo Hello {my_input.user} | tee {output.path(output.container_greeting)}"]
     return output

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
 from hera.shared.serialization import MISSING, serialize
@@ -35,6 +35,15 @@ if TYPE_CHECKING:
 else:
     # Subclassing `object` when using the real code (i.e. not type-checking) is basically a no-op
     BaseModel = object  # type: ignore
+
+
+_varname_imported: bool = False
+try:
+    from varname import argname
+
+    _varname_imported = True
+except ImportError:
+    pass
 
 
 class InputMixin(BaseModel):
@@ -156,6 +165,11 @@ class InputMixin(BaseModel):
         return ModelArguments(parameters=params or None, artifacts=artifacts or None)
 
 
+class PathGetter:
+    def __init__(self, path: str):
+        self.path = path
+
+
 class OutputMixin(BaseModel):
     def __new__(cls, **kwargs):
         if _context.declaring:
@@ -173,6 +187,32 @@ class OutputMixin(BaseModel):
             return
 
         super().__init__(**kwargs)
+
+    @classmethod
+    def path(cls, attribute: Any) -> str:
+        """Gets the path of the given attribute, given it is annotated as a Parameter or Artifact."""
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
+
+        attribute_name = argname("attribute")
+        annotations = get_field_annotations(cls)
+
+        if get_origin(annotations[attribute_name]) is not Annotated:
+            raise SyntaxError("Cannot get path of non-Annotated attribute")
+
+        annotation = get_args(annotations[attribute_name])[1]
+        if not isinstance(annotation, (Parameter, Artifact)):
+            raise SyntaxError("Cannot get path of non-Parameter or Artifact annotation")
+
+        if isinstance(annotation, Parameter):
+            return annotation.value_from.path
+
+        if isinstance(annotation, Artifact):
+            return annotation.path
+
+        raise NotImplementedError("Unreachable code")
 
     @classmethod
     def _get_outputs(cls) -> List[Union[Artifact, Parameter]]:
