@@ -79,7 +79,7 @@ Approvers are seasoned contributors who are responsible for:
 
 #### Nomination Process
 
-For a new approver to be appointed they must -
+For a new approver to be appointed they must:
 
 - Be an author or reviewer of multiple feature or bug-fix PRs
 - Exhibiting sound technical judgment through PR contributions
@@ -99,7 +99,7 @@ Project members are contributors to the project.
 
 #### Nomination Process
 
-For a new member to be appointed they must -
+For a new member to be appointed they must:
 
 - Be a Hera user
 - Exhibit interest and time to help out the project
