@@ -24,7 +24,7 @@ spec:
           path: /tmp/hello_world.txt
   - container:
       args:
-      - echo Hello {{inputs.parameters.user}} > tee /tmp/hello_world.txt
+      - echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt
       command:
       - sh
       - -c

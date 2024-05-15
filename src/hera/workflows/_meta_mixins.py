@@ -732,7 +732,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 input_obj = input_arg._get_as_templated_arguments()
                 # "run" the container function to update the template
                 func(input_obj, container_template)  # type: ignore
-
+                # _context.declaring = False
                 if func_return and isinstance(func_return, (OutputV1, OutputV2)):
                     container_template.outputs = func_return._get_as_output()
 
