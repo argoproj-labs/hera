@@ -25,7 +25,7 @@ Hera TOC members are maintainers who have made substantial contributions to the 
 
 #### Nomination Process
 
-For a new TOC member to be appointed they must -
+For a new TOC member to be appointed they must:
 
 - Be a seasoned maintainer of Hera
 - Have driven multiple HEPs to implementation
