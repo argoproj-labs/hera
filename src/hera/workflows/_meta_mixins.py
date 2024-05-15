@@ -10,7 +10,6 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 from typing_extensions import ParamSpec
-from varname import ImproperUseError, varname
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
@@ -61,6 +60,16 @@ try:
     _yaml = yaml
 except ImportError:
     _yaml = None
+
+
+_varname_imported: bool = False
+try:
+    # user must install `hera[experimental]`
+    from varname import ImproperUseError, varname
+
+    _varname_imported = True
+except ImportError:
+    pass
 
 THookable = TypeVar("THookable", bound="HookMixin")
 """`THookable` is the type associated with mixins that provide the ability to apply hooks from the global config"""
@@ -560,6 +569,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     " Note that experimental features are unstable and subject to breaking changes."
                 ).format("script", _DECORATOR_SYNTAX_FLAG)
             )
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
+
         from hera.workflows.script import RunnerScriptConstructor, Script
 
         def script_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
@@ -671,6 +685,10 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     '`hera.shared.global_config.experimental_features["{}"] = True`.'
                     " Note that experimental features are unstable and subject to breaking changes."
                 ).format("dag", _DECORATOR_SYNTAX_FLAG)
+            )
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
             )
 
         from hera.workflows.dag import DAG
