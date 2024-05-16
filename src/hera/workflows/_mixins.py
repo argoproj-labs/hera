@@ -712,12 +712,6 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
     _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
 
-    def __init__(self, **kwargs) -> None:
-        if _context.declaring:
-            object.__setattr__(self, "_build_data", kwargs)
-        else:
-            super().__init__(**kwargs)
-
     def __getattribute__(self, name: str) -> Any:
         if _context.declaring:
             # Use object's __getattribute__ to avoid infinite recursion
