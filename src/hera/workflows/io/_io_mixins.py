@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
@@ -159,9 +160,25 @@ class InputMixin(BaseModel):
         return ModelArguments(parameters=params or None, artifacts=artifacts or None)
 
 
-class PathGetter:
-    def __init__(self, path: str):
-        self.path = path
+def _get_output_path(annotation: Union[Parameter, Artifact]) -> Path:
+    """Get the path from the OutputMixin attribute's annotation.
+
+    Use the default path with the annotation's name if no path present on the object.
+    """
+    default_path = Path("/tmp/hera-outputs")
+    if isinstance(annotation, Parameter):
+        if annotation.value_from and annotation.value_from.path:
+            return Path(annotation.value_from.path)
+
+        assert annotation.name
+        return default_path / f"parameters/{annotation.name}"
+
+    if isinstance(annotation, Artifact):
+        if annotation.path:
+            return Path(annotation.path)
+
+        assert annotation.name
+        return default_path / f"artifacts/{annotation.name}"
 
 
 class OutputMixin(BaseModel):
@@ -183,7 +200,7 @@ class OutputMixin(BaseModel):
         super().__init__(**kwargs)
 
     @classmethod
-    def path(cls, attribute: Any) -> str:
+    def path(cls, attribute: Any) -> Path:
         """Gets the path of the given attribute, given it is annotated as a Parameter or Artifact."""
         if not _varname_imported:
             raise ImportError(
@@ -191,6 +208,10 @@ class OutputMixin(BaseModel):
             )
 
         attribute_name = argname("attribute")
+        if not isinstance(attribute_name, str):
+            # should not generally be reachable
+            raise SyntaxError("Invalid usage of `path()`")
+
         annotations = get_field_annotations(cls)
 
         if get_origin(annotations[attribute_name]) is not Annotated:
@@ -200,16 +221,10 @@ class OutputMixin(BaseModel):
         if not isinstance(annotation, (Parameter, Artifact)):
             raise SyntaxError("Cannot get path of non-Parameter or Artifact annotation")
 
-        if isinstance(annotation, Parameter):
-            return annotation.value_from.path
-
-        if isinstance(annotation, Artifact):
-            return annotation.path
-
-        raise NotImplementedError("Unreachable code")
+        return _get_output_path(annotation)
 
     @classmethod
-    def _get_outputs(cls) -> List[Union[Artifact, Parameter]]:
+    def _get_outputs(cls, add_missing_path: bool = False) -> List[Union[Artifact, Parameter]]:
         outputs = []
         annotations = get_field_annotations(cls)
 
@@ -219,14 +234,25 @@ class OutputMixin(BaseModel):
             if field in {"exit_code", "result"}:
                 continue
             if get_origin(annotations[field]) is Annotated:
-                if isinstance(get_args(annotations[field])[1], (Parameter, Artifact)):
-                    outputs.append(get_args(annotations[field])[1])
+                annotation = get_args(annotations[field])[1]
+                if isinstance(annotation, Parameter):
+                    if add_missing_path and (annotation.value_from is None or annotation.value_from.path is None):
+                        annotation.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{annotation.name}")
+                elif isinstance(annotation, Artifact):
+                    if add_missing_path and annotation.path is None:
+                        annotation.path = f"/tmp/hera-outputs/artifacts/{annotation.name}"
+                outputs.append(annotation)
             else:
                 # Create a Parameter from basic type annotations
                 default = model_fields[field].default
                 if default is None or default == PydanticUndefined:
                     default = MISSING
-                outputs.append(Parameter(name=field, default=default))
+
+                value_from = None
+                if add_missing_path:
+                    value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{field}")
+
+                outputs.append(Parameter(name=field, default=default, value_from=value_from))
         return outputs
 
     @classmethod
@@ -243,7 +269,7 @@ class OutputMixin(BaseModel):
             default = MISSING
         return Parameter(name=field_name, default=default)  # type: ignore
 
-    def _get_as_output(self) -> List[Union[Artifact, Parameter]]:
+    def _get_as_invocator_output(self) -> List[Union[Artifact, Parameter]]:
         """Get the Output model as the output of a dag/steps template.
 
         This lets dags and steps hoist task/step outputs into its own outputs.
