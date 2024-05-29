@@ -6,7 +6,7 @@ import functools
 import inspect
 from collections import ChainMap
 from pathlib import Path
-from types import ModuleType, NoneType
+from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 from typing_extensions import ParamSpec
@@ -46,6 +46,11 @@ try:
     from inspect import get_annotations  # type: ignore
 except ImportError:
     from hera.shared._inspect import get_annotations  # type: ignore
+
+try:
+    from types import NoneType  # type: ignore
+except ImportError:
+    NoneType = type(None)  # type: ignore
 
 
 if TYPE_CHECKING:
@@ -679,7 +684,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             func_return = signature.return_annotation
             outputs = []
             if func_return and issubclass(func_return, (OutputV1, OutputV2)):
-                outputs = func_return._get_outputs()
+                outputs = func_return._get_outputs(add_missing_path=True)
 
             # Open context to add `Container` object automatically
             with self:
@@ -726,9 +731,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 input_obj = input_arg._get_as_templated_arguments()
                 # "run" the container function to update the template
                 func(input_obj, container_template)  # type: ignore
-                # _context.declaring = False
-                if func_return and isinstance(func_return, (OutputV1, OutputV2)):
-                    container_template.outputs = func_return._get_as_output()
 
             return container_call_wrapper
 
@@ -822,7 +824,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                         _context.declaring = False
 
                         if func_return and isinstance(func_return, (OutputV1, OutputV2)):
-                            template.outputs = func_return._get_as_output()
+                            template.outputs = func_return._get_as_invocator_output()
 
             return call_wrapper
 
