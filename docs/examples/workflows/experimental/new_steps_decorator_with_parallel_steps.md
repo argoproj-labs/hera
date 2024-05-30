@@ -13,8 +13,6 @@
     from hera.shared import global_config
     from hera.workflows import Input, Output, Parameter, Workflow, parallel
 
-    global_config.experimental_features["script_annotations"] = True
-    global_config.experimental_features["script_pydantic_io"] = True
     global_config.experimental_features["decorator_syntax"] = True
 
 

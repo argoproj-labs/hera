@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 from typing_extensions import ParamSpec
 
 from hera.shared import BaseMixin, global_config
+from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
@@ -552,9 +553,6 @@ def _get_underlying_type(annotation: Type):
     return real_type
 
 
-_DECORATOR_SYNTAX_FLAG = "decorator_syntax"
-
-
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.container import Container
     from hera.workflows.dag import DAG
@@ -563,7 +561,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
     @staticmethod
     def _check_if_enabled(decorator_name: str):
-        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
+        if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):
             raise ValueError(
                 str(
                     "Unable to use {} decorator since it is an experimental feature."
