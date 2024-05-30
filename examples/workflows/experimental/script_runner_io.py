@@ -13,7 +13,6 @@ try:
 except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
-global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True
 
 
