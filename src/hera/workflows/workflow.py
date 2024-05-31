@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 from typing_extensions import ParamSpec
 
 from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
+from hera.workflows.template_set import TemplateSet
 
 try:
     from typing import Annotated, get_args  # type: ignore
@@ -494,6 +495,11 @@ class Workflow(
 
         self.entrypoint = func.template_name  # type: ignore
         return func
+
+    def add_template_set(self, template_set: TemplateSet) -> None:
+        """Add the templates stored in the template_set to this Workflow."""
+        for template in template_set.templates:
+            self._add_sub(template)
 
 
 __all__ = ["Workflow"]
