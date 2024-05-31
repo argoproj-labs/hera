@@ -78,9 +78,19 @@ class _HeraContext:
 
         # When the user invokes a decorated function e.g. `@script inside a sub-context (dag/steps),
         # we also add the step/task's template to the overall workflow context, if it is not already added.
-        if hasattr(node, "template") and node.template is not None and not isinstance(node.template, str):
+        from hera.workflows._mixins import TemplateInvocatorSubNodeMixin
+
+        if (
+            isinstance(node, TemplateInvocatorSubNodeMixin)
+            and node.template is not None
+            and not isinstance(node.template, str)
+        ):
+            from hera.workflows.workflow import Workflow
+
+            assert isinstance(pieces[0], Workflow)
+
             found = False
-            for t in pieces[0].templates:  # type: ignore
+            for t in pieces[0].templates:
                 if t.name == node.template.name:
                     if t != node.template:
                         raise TemplateNameConflict(f"Found multiple templates with the same name: {t.name}")
