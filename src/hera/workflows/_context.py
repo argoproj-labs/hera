@@ -76,10 +76,8 @@ class _HeraContext:
         if not pieces:
             return
 
-        # for particular types, the user invoked a decorated function e.g. `@script`
-        # inside a proper context. Here, we add the object to the overall workflow context, directly as a template,
-        # in case it is not found (based on the name). This helps users save on the number of templates that are
-        # added when using an object that is a `Script`
+        # When the user invokes a decorated function e.g. `@script inside a sub-context (dag/steps),
+        # we also add the step/task's template to the overall workflow context, if it is not already added.
         if hasattr(node, "template") and node.template is not None and not isinstance(node.template, str):
             found = False
             for t in pieces[0].templates:  # type: ignore
@@ -91,14 +89,7 @@ class _HeraContext:
             if not found:
                 pieces[0]._add_sub(node.template)
 
-        try:
-            # here, we are trying to add a node to the last piece of context in the hopes that it is a subbable
-            pieces[-1]._add_sub(node)
-        except InvalidType:
-            # if the above fails, it means the user invoked a decorated function e.g. `@script`. Hence,
-            # the object needs to be added as a template to the piece of context at [-1]. This will be the case for
-            # DAGs and Steps
-            pieces[-1]._add_sub(node.template)  # type: ignore
+        pieces[-1]._add_sub(node)
 
 
 _context = _HeraContext()
