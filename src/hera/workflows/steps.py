@@ -7,6 +7,7 @@ for more on Steps.
 from typing import Any, List, Optional, Union
 
 from hera.shared._pydantic import PrivateAttr
+from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -24,6 +25,25 @@ from hera.workflows.models import (
     WorkflowStep as _ModelWorkflowStep,
 )
 from hera.workflows.protocol import Steppable, Templatable
+
+
+class DummyContext:
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *_):
+        pass
+
+
+def parallel():
+    """Open a parallel context within a steps-decorator function.
+
+    When running locally, the context will be a no-op.
+    """
+    if _context.declaring:
+        return Parallel()
+
+    return DummyContext()
 
 
 class Step(
@@ -111,7 +131,6 @@ class Parallel(
 
 
 class Steps(
-    ArgumentsMixin,
     IOMixin,
     TemplateMixin,
     CallableTemplateMixin,
@@ -219,4 +238,9 @@ class Steps(
         )
 
 
-__all__ = ["Steps", "Step", "Parallel"]
+__all__ = [
+    "Steps",
+    "Step",
+    "Parallel",
+    "parallel",
+]

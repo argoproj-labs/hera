@@ -373,7 +373,7 @@ def test_script_pydantic_invalid_outputs(global_config_fixture):
     with pytest.raises(ValueError) as e:
         workflow.to_dict()
 
-    assert "RunnerOutput cannot be part of a tuple output" in str(e.value)
+    assert "Output cannot be part of a tuple output" in str(e.value)
 
 
 def test_script_pydantic_multiple_inputs(global_config_fixture):
@@ -392,7 +392,7 @@ def test_script_pydantic_multiple_inputs(global_config_fixture):
     with pytest.raises(SyntaxError) as e:
         workflow.to_dict()
 
-    assert "Only one function parameter can be specified when using a RunnerInput" in str(e.value)
+    assert "Only one function parameter can be specified when using an Input" in str(e.value)
 
 
 def test_script_pydantic_without_experimental_flag(global_config_fixture):

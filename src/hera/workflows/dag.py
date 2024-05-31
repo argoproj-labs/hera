@@ -6,7 +6,7 @@ for more on DAGs (Directed Acyclic Graphs).
 
 from __future__ import annotations
 
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Set, Union
 
 from hera.shared._pydantic import PrivateAttr
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
@@ -45,6 +45,7 @@ class DAG(
     tasks: List[Union[Task, DAGTask]] = []
 
     _node_names = PrivateAttr(default_factory=set)
+    _current_task_depends: Set[str] = PrivateAttr(set())
 
     def _add_sub(self, node: Any):
         if not isinstance(node, Task):

@@ -19,7 +19,7 @@ from hera.workflows._runner.script_annotations_util import (
 )
 from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.io.v1 import (
-    RunnerOutput as RunnerOutputV1,
+    Output as OutputV1,
 )
 from hera.workflows.script import _extract_return_annotation_output
 
@@ -33,13 +33,13 @@ if _PYDANTIC_VERSION == 2:
     from pydantic.v1 import parse_obj_as  # type: ignore
 
     from hera.workflows.io.v2 import (  # type: ignore
-        RunnerOutput as RunnerOutputV2,
+        Output as OutputV2,
     )
 else:
     from pydantic import parse_obj_as
 
     from hera.workflows.io.v1 import (  # type: ignore
-        RunnerOutput as RunnerOutputV2,
+        Output as OutputV2,
     )
 
 
@@ -255,7 +255,7 @@ def _run() -> None:
     if not result:
         return
 
-    if isinstance(result, (RunnerOutputV1, RunnerOutputV2)):
+    if isinstance(result, (OutputV1, OutputV2)):
         print(serialize(result.result))
         exit(result.exit_code)
 

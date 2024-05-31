@@ -5,13 +5,13 @@ from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
 
 try:
     from hera.workflows.io.v2 import (  # type: ignore
-        RunnerInput,
-        RunnerOutput,
+        Input,
+        Output,
     )
 except ImportError:
     from hera.workflows.io.v1 import (  # type: ignore
-        RunnerInput,
-        RunnerOutput,
+        Input,
+        Output,
     )
 
 try:
@@ -20,13 +20,13 @@ except ImportError:
     from typing_extensions import Annotated  # type: ignore
 
 
-class ParamOnlyInput(RunnerInput):
+class ParamOnlyInput(Input):
     my_int: int = 1
     my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
     no_default_param: int
 
 
-class ParamOnlyOutput(RunnerOutput):
+class ParamOnlyOutput(Output):
     my_output_str: str = "my-default-str"
     another_output: Annotated[Path, Parameter(name="second-output")]
 
@@ -38,14 +38,14 @@ def pydantic_io_params(
     pass
 
 
-class ArtifactOnlyInput(RunnerInput):
+class ArtifactOnlyInput(Input):
     my_file_artifact: Annotated[Path, Artifact(name="file-artifact")]
     my_int_artifact: Annotated[
         int, Artifact(name="an-int-artifact", description="my desc", loader=ArtifactLoader.json)
     ]
 
 
-class ArtifactOnlyOutput(RunnerOutput):
+class ArtifactOnlyOutput(Output):
     an_artifact: Annotated[str, Artifact(name="artifact-output")]
 
 
@@ -56,12 +56,12 @@ def pydantic_io_artifacts(
     pass
 
 
-class BothInput(RunnerInput):
+class BothInput(Input):
     param_int: Annotated[int, Parameter(name="param-int")] = 42
     artifact_int: Annotated[int, Artifact(name="artifact-int", loader=ArtifactLoader.json)]
 
 
-class BothOutput(RunnerOutput):
+class BothOutput(Output):
     param_int: Annotated[int, Parameter(name="param-int")]
     artifact_int: Annotated[int, Artifact(name="artifact-int")]
 

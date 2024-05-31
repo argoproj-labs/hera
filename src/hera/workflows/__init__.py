@@ -36,7 +36,7 @@ from hera.workflows.exceptions import (
     TemplateNameConflict,
 )
 from hera.workflows.http_template import HTTP
-from hera.workflows.io import RunnerInput, RunnerOutput
+from hera.workflows.io import Input, Output, RunnerInput, RunnerOutput
 from hera.workflows.metrics import Counter, Gauge, Histogram, Label, Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
@@ -45,7 +45,7 @@ from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryPolicy, RetryStrategy
 from hera.workflows.script import InlineScriptConstructor, RunnerScriptConstructor, Script, ScriptConstructor, script
 from hera.workflows.service import WorkflowsService
-from hera.workflows.steps import Parallel, Step, Steps
+from hera.workflows.steps import Parallel, Step, Steps, parallel
 from hera.workflows.suspend import Suspend
 from hera.workflows.task import Task, TaskResult
 from hera.workflows.user_container import UserContainer
@@ -132,6 +132,7 @@ __all__ = [
     "HostPathVolume",
     "ISCSIVolume",
     "InlineScriptConstructor",
+    "Input",
     "InvalidDispatchType",
     "InvalidTemplateCall",
     "InvalidType",
@@ -143,6 +144,7 @@ __all__ = [
     "NoneArchiveStrategy",
     "OSSArtifact",
     "Operator",
+    "Output",
     "Parallel",
     "Parameter",
     "PhotonPersistentDiskVolume",
@@ -182,5 +184,6 @@ __all__ = [
     "WorkflowTemplate",
     "WorkflowsService",
     "ZipArchiveStrategy",
+    "parallel",
     "script",
 ]

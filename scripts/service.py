@@ -142,7 +142,7 @@ class ServiceEndpoint:
             params = "None"
 
         # headers
-        headers = "{'Authorization': f'Bearer {self.token}'"
+        headers = "{'Authorization': self.token"
         if self.method.lower() == "post" or self.method.lower() == "put":
             headers += f", 'Content-Type': '{self.consumes}'"
         headers += "}"
@@ -424,7 +424,27 @@ class {models_type}Service:
         \"\"\"{models_type} service constructor.\"\"\"
         self.host = cast(str, host or global_config.host)
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
-        self.token = token or global_config.token
+
+        # some users reported in https://github.com/argoproj-labs/hera/issues/1016 that it can be a bit awkward for 
+        # Hera to assume a `Bearer` prefix on behalf of users. Some might pass it and some might not. Therefore, Hera
+        # only prefixes the token with `Bearer ` if it's not already specified and lets the uses specify it otherwise.
+        # Note that the `Bearer` token can be specified through the global configuration as well. In order to deliver 
+        # a fix on Hera V5 without introducing breaking changes, we have to support both
+        global_config_token = global_config.token  # call only once because it can be a user specified function!
+        
+        def format_token(t):
+            parts = t.strip().split()
+            if len(parts) == 1:
+                return "Bearer " + t
+            return t
+
+        if token:
+            self.token: Optional[str] = format_token(token)
+        elif global_config_token:
+            self.token = format_token(global_config_token)
+        else:
+            self.token = None
+
         self.namespace = namespace or global_config.namespace
 """
 

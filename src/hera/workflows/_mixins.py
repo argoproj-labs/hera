@@ -16,10 +16,10 @@ from typing import (
 )
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import root_validator, validator
+from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
 from hera.shared.serialization import serialize
-from hera.workflows._context import SubNodeMixin
-from hera.workflows._meta_mixins import CallableTemplateMixin, HookMixin
+from hera.workflows._context import SubNodeMixin, _context
+from hera.workflows._meta_mixins import CallableTemplateMixin, HeraBuildObj, HookMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
@@ -69,6 +69,12 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
+
+try:
+    from typing import Annotated, get_args, get_origin  # type: ignore
+except ImportError:
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
+
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
@@ -703,6 +709,53 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     inline: Optional[Union[Template, TemplateMixin]] = None
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
+
+    _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
+
+    def __init__(self, **kwargs) -> None:
+        if _context.declaring:
+            object.__setattr__(self, "_build_data", kwargs)
+        else:
+            super().__init__(**kwargs)
+
+    def __getattribute__(self, name: str) -> Any:
+        if _context.declaring:
+            # Use object's __getattribute__ to avoid infinite recursion
+            build_obj = object.__getattribute__(self, "_build_obj")
+            assert build_obj  # Assertions to fix type checking
+
+            fields = get_fields(build_obj.output_class)
+            annotations = get_field_annotations(build_obj.output_class)
+            if name in fields:
+                # If the attribute name is in the build_obj's output class fields, then
+                # as we are in a declaring context, the access is for a Task/Step output
+                subnode_name = object.__getattribute__(self, "name")
+                subnode_type = object.__getattribute__(self, "_subtype")
+
+                from hera.workflows.dag import DAG
+
+                # We don't need to keep track of dependencies for Steps
+                if _context.pieces and isinstance(_context.pieces[-1], DAG):
+                    _context.pieces[-1]._current_task_depends.add(subnode_name)
+
+                if name == "result":
+                    result_templated_str = f"{{{{{subnode_type}.{subnode_name}.outputs.result}}}}"
+                    return result_templated_str
+
+                if get_origin(annotations[name]) is Annotated:
+                    annotation = get_args(annotations[name])[1]
+
+                    if not isinstance(annotation, (Parameter, Artifact)):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
+
+                    if isinstance(annotation, Parameter):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{annotation.name}}}}}"
+                    elif isinstance(annotation, Artifact):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.artifacts.{annotation.name}}}}}"
+                else:
+                    return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
+
+        return super().__getattribute__(name)
 
     def _build_on_exit(self) -> Optional[str]:
         """Builds the `on_exit` field `str` representation from the set `Templatable` or the specified `str`."""

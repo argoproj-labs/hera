@@ -16,8 +16,8 @@ To get a significant feature into Hera, first, a HEP needs to be approved and me
 
 When a HEP enters the FCP the following will happen:
 
-1. A maintainer will apply the "Final Comment Period" label.
-2. The FCP will last 7 days. If there's unanimous agreement amongst the maintainers the FCP can close early.
-3. For voting, the binding votes are comprised of the maintainers. Acceptance requires ALL binding votes in favor. The absence of a vote from a party with a binding vote in the process is considered to be a vote in the affirmative. Non-binding votes are of course welcome. 
-4. Each maintainer gets a veto on the proposal. If there is a veto, the HEP will go back to the development phase until consensus is met.
+1. A TOC member will apply the "Final Comment Period" label.
+2. The FCP will last 7 days. If there's unanimous agreement amongst the TOC the FCP can close early.
+3. For voting, the binding votes are comprised of the TOC members. Acceptance requires ALL binding votes in favor. The absence of a vote from a party with a binding vote in the process is considered to be a vote in the affirmative. Non-binding votes are of course welcome. 
+4. Each TOC member gets a veto on the proposal. If there is a veto, the HEP will go back to the development phase until consensus is met.
 5. If no substantial new arguments or ideas are raised, the FCP will follow the outcome decided.

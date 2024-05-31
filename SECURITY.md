@@ -7,7 +7,7 @@ time to react, analyze and develop a fix to mitigate the found security vulnerab
 
 Please report vulnerabilities by e-mail to the following address:
 
-* flaviu.vadan@dynotx.com
+* hera-security-reports@googlegroups.com
 
 All vulnerabilities and associated information will be treated with full confidentiality.
 
