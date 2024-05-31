@@ -28,7 +28,13 @@ from hera.workflows.dag import DAG
 from hera.workflows.data import Data
 from hera.workflows.env import ConfigMapEnv, Env, FieldEnv, ResourceEnv, SecretEnv
 from hera.workflows.env_from import ConfigMapEnvFrom, SecretEnvFrom
-from hera.workflows.exceptions import InvalidDispatchType, InvalidTemplateCall, InvalidType
+from hera.workflows.exceptions import (
+    InvalidDispatchType,
+    InvalidTemplateCall,
+    InvalidType,
+    NodeNameConflict,
+    TemplateNameConflict,
+)
 from hera.workflows.http_template import HTTP
 from hera.workflows.io import Input, Output, RunnerInput, RunnerOutput
 from hera.workflows.metrics import Counter, Gauge, Histogram, Label, Metric, Metrics
@@ -134,6 +140,7 @@ __all__ = [
     "Metric",
     "Metrics",
     "NFSVolume",
+    "NodeNameConflict",
     "NoneArchiveStrategy",
     "OSSArtifact",
     "Operator",
@@ -168,6 +175,7 @@ __all__ = [
     "TarArchiveStrategy",
     "Task",
     "TaskResult",
+    "TemplateNameConflict",
     "UserContainer",
     "Volume",
     "VsphereVirtualDiskVolume",
