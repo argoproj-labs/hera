@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 from typing_extensions import ParamSpec
 
 from hera.shared import BaseMixin, global_config
+from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
@@ -533,13 +534,26 @@ def create_subnode(
     return subnode
 
 
-_DECORATOR_SYNTAX_FLAG = "decorator_syntax"
-
-
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.dag import DAG
     from hera.workflows.script import Script
     from hera.workflows.steps import Steps
+
+    @staticmethod
+    def _check_if_enabled(decorator_name: str):
+        if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):
+            raise ValueError(
+                str(
+                    "Unable to use {} decorator since it is an experimental feature."
+                    " Please turn on experimental features by setting "
+                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                    " Note that experimental features are unstable and subject to breaking changes."
+                ).format(decorator_name, _DECORATOR_SYNTAX_FLAG)
+            )
+        if not _varname_imported:
+            raise ImportError(
+                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
+            )
 
     @_add_type_hints(Script)  # type: ignore
     def script(self, **script_kwargs) -> Callable:
@@ -561,19 +575,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if
             in a Steps or DAG context.
         """
-        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
-            raise ValueError(
-                str(
-                    "Unable to use {} decorator since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format("script", _DECORATOR_SYNTAX_FLAG)
-            )
-        if not _varname_imported:
-            raise ImportError(
-                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
-            )
+        self._check_if_enabled("script")
 
         from hera.workflows.script import RunnerScriptConstructor, Script
 
@@ -772,19 +774,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
     @_add_type_hints(DAG)  # type: ignore
     def dag(self, **dag_kwargs) -> Callable:
-        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
-            raise ValueError(
-                str(
-                    "Unable to use {} decorator since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format("dag", _DECORATOR_SYNTAX_FLAG)
-            )
-        if not _varname_imported:
-            raise ImportError(
-                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
-            )
+        self._check_if_enabled("dag")
 
         from hera.workflows.dag import DAG
 
@@ -792,19 +782,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
     @_add_type_hints(Steps)  # type: ignore
     def steps(self, **steps_kwargs) -> Callable:
-        if not global_config.experimental_features[_DECORATOR_SYNTAX_FLAG]:
-            raise ValueError(
-                str(
-                    "Unable to use {} decorator since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format("steps", _DECORATOR_SYNTAX_FLAG)
-            )
-        if not _varname_imported:
-            raise ImportError(
-                "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
-            )
+        self._check_if_enabled("steps")
 
         from hera.workflows.steps import Steps
 
