@@ -48,6 +48,7 @@ from hera.workflows.service import WorkflowsService
 from hera.workflows.steps import Parallel, Step, Steps, parallel
 from hera.workflows.suspend import Suspend
 from hera.workflows.task import Task, TaskResult
+from hera.workflows.template_set import TemplateSet
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import (
     AccessMode,
@@ -176,6 +177,7 @@ __all__ = [
     "Task",
     "TaskResult",
     "TemplateNameConflict",
+    "TemplateSet",
     "UserContainer",
     "Volume",
     "VsphereVirtualDiskVolume",
