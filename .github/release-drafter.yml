@@ -2,6 +2,9 @@ template: $CHANGES
 name-template: v$RESOLVED_VERSION
 tag-template: $RESOLVED_VERSION
 categories:
+  - title: ℹ️ Information
+    labels:
+      - type:informational
   - title: ⭐️ Enhancements
     labels:
       - type:enhancement
