@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pytest import raises
 
 from hera.workflows.service import WorkflowsService
@@ -36,11 +38,14 @@ class TestWorkflowsService:
         assert service.token == "something token"
 
     def test_workflow_client_cert_is_present(self, global_config_fixture):
+        random_path = Path("random_path")
+        global_certs_path = Path("global_certs")
+
         service = WorkflowsService()
         assert service.client_certs is None
 
-        service = WorkflowsService(client_certs=("random_path", "random_path"))
-        assert service.client_certs == ("random_path", "random_path")
+        service = WorkflowsService(client_certs=(random_path, random_path))
+        assert service.client_certs == (random_path, random_path)
 
         assert global_config_fixture.client_certs is None
 
@@ -49,15 +54,15 @@ class TestWorkflowsService:
         with raises(ValueError):
             global_config_fixture.client_certs = (None, None)
         with raises(ValueError):
-            global_config_fixture.client_certs = (None, "path")
+            global_config_fixture.client_certs = (None, random_path)
         with raises(ValueError):
-            global_config_fixture.client_certs = ("path", None)
+            global_config_fixture.client_certs = (random_path, None)
 
-        global_config_fixture.client_certs = ("global_certs", "global_certs")
-        assert global_config_fixture.client_certs == ("global_certs", "global_certs")
+        global_config_fixture.client_certs = (global_certs_path, global_certs_path)
+        assert global_config_fixture.client_certs == (global_certs_path, global_certs_path)
 
         service = WorkflowsService()
-        assert service.client_certs == ("global_certs", "global_certs")
+        assert service.client_certs == (global_certs_path, global_certs_path)
 
-        service = WorkflowsService(client_certs=("random_path", "random_path"))
-        assert service.client_certs == ("random_path", "random_path")
+        service = WorkflowsService(client_certs=(random_path, random_path))
+        assert service.client_certs == (random_path, random_path)
