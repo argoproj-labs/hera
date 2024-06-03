@@ -38,6 +38,11 @@ so that we can decorate it. We use Hera's `script` decorator to turn the `echo` 
 `Script` class. As we're defining the Workflow in Python, Hera is able to infer multiple field values that the developer
 would otherwise have to define when using YAML.
 
+> **Note:** Using Hera's defaults for the script decorator is only suitable for very small/basic functions as it will
+> not allow you to use functions or modules defined outside of the function. For the best experience you will need to
+> build your own image and set up your config to use the `RunnerScriptConstructor`.
+> [See the Script Basics guide for details](../user-guides/script-basics.md).
+
 ### The `script` Decorator
 
 The `script` decorator can take kwargs that a `Script` can take. Importantly, you can specify the `image` of Python
