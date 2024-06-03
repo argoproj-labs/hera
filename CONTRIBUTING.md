@@ -17,6 +17,7 @@ or
 ["ideal-for-contribution"](https://github.com/argoproj-labs/hera/issues?q=is%3Aopen+is%3Aissue+label%3Anote%3Aideal-for-contribution).
 
 We also encourage contributions in the form of:
+
 * Adding your organization as a [user of Hera](https://github.com/argoproj-labs/hera/blob/main/USERS.md)!
 * Answering questions on [GitHub Discussions](https://github.com/argoproj-labs/hera/discussions) and
   [Slack](https://cloud-native.slack.com/archives/C03NRMD9KPY)
@@ -30,7 +31,9 @@ meetings first, and then we can help you propose the feature using
 
 ### Setting up
 
-If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry`:
+If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry` (which
+must first be installed with `pipx` or the Poetry installer - see the
+[Poetry Installation guide](https://python-poetry.org/docs/#installation)):
 
 ```shell
 poetry install

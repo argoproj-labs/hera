@@ -23,9 +23,6 @@ nav:
       - walk-through/advanced-template-features.md
       - walk-through/advanced-hera-features.md
       - walk-through/pydantic-support.md
-  - Contributing:
-    - Contributing Guide: CONTRIBUTING.md
-    - History of Hera: contributing/history.md
   - User Guides:
     - Core Concepts: user-guides/core-concepts.md
     - Scripts:
@@ -56,6 +53,9 @@ nav:
     - Upstream Examples:
       - About: examples/about-upstream.md
       - ... | flat | examples/workflows/upstream/*.md
+  - Contributing:
+    - Contributing Guide: CONTRIBUTING.md
+    - History of Hera: contributing/history.md
   - API Reference:
     - Shared: api/shared.md
     - Workflows:

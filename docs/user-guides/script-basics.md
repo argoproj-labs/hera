@@ -12,12 +12,6 @@ treated as the intended sub-object, which would be a `template` when under a `Wo
 `Steps`. The function will still behave as normal outside of any Hera contexts, meaning you can write unit tests on the
 given function.
 
-> **For advanced users**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the
-> decorator, so that when your function is invoked under a Hera context, the call is redirected to the `Script.__call__`
-> function. This takes the kwargs of a `Step` or `Task` depending on whether the context manager is a `Steps` or a
-> `DAG`. Under a Workflow itself, your function is not expected to take arguments, so the call will add the function as
-> a template.
-
 When decorating a function, you should pass `Script` parameters to the `script` decorator. This includes values such as
 the `image` to use, and `resources` to request.
 
@@ -42,6 +36,12 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         D = echo(name="D", arguments={"message": "D"})
         A >> [B, C] >> D
 ```
+
+> **For advanced users**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the
+> decorator, so that when your function is invoked under a Hera context, the call is redirected to the `Script.__call__`
+> function. This takes the kwargs of a `Step` or `Task` depending on whether the context manager is a `Steps` or a
+> `DAG`. Under a Workflow itself, your function is not expected to take arguments, so the call will add the function as
+> a template.
 
 Alternatively, you can specify your DAG using `Task` directly:
 
@@ -117,7 +117,7 @@ spec:
 ```
 
 This method of running the function is handled by the `InlineScriptConstructor`, called such because it constructs the
-`Script` template to run the function "inline" in the YAML.
+`Script` template with the function appearing "inline" in the YAML in the `source` value.
 
 #### Importing modules
 
