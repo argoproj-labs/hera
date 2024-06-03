@@ -13,7 +13,7 @@ def hello(name: str):
     print(f"Hello {name}")
 
 
-async def abuild_workflow_wait(event):
+async def abuild_workflow_wait(event: asyncio.Event):
     with Workflow(
         generate_name="waiter-",
         entrypoint="steps",
@@ -24,7 +24,7 @@ async def abuild_workflow_wait(event):
     return w
 
 
-async def abuild_workflow_set(event):
+async def abuild_workflow_set(event: asyncio.Event):
     with Workflow(
         generate_name="setter-",
         entrypoint="steps",
