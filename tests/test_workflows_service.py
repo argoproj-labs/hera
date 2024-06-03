@@ -1,3 +1,5 @@
+from pytest import raises
+
 from hera.workflows.service import WorkflowsService
 
 
@@ -32,3 +34,30 @@ class TestWorkflowsService:
     def test_adds_custom_token(self):
         service = WorkflowsService(token="something token")
         assert service.token == "something token"
+
+    def test_workflow_client_cert_is_present(self, global_config_fixture):
+        service = WorkflowsService()
+        assert service.client_certs is None
+
+        service = WorkflowsService(client_certs=("random_path", "random_path"))
+        assert service.client_certs == ("random_path", "random_path")
+
+        assert global_config_fixture.client_certs is None
+
+        with raises(ValueError):
+            global_config_fixture.client_certs = "path"
+        with raises(ValueError):
+            global_config_fixture.client_certs = (None, None)
+        with raises(ValueError):
+            global_config_fixture.client_certs = (None, "path")
+        with raises(ValueError):
+            global_config_fixture.client_certs = ("path", None)
+
+        global_config_fixture.client_certs = ("global_certs", "global_certs")
+        assert global_config_fixture.client_certs == ("global_certs", "global_certs")
+
+        service = WorkflowsService()
+        assert service.client_certs == ("global_certs", "global_certs")
+
+        service = WorkflowsService(client_certs=("random_path", "random_path"))
+        assert service.client_certs == ("random_path", "random_path")

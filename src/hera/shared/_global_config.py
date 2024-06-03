@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from hera.auth import TokenGenerator
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
@@ -40,7 +40,7 @@ class _GlobalConfig:
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
     _token: Optional[Union[str, TokenGenerator, Callable[[], Optional[str]]]] = None
     """an optional authentication token used by Hera in communicating with the Argo server"""
-
+    _client_certs: Optional[Tuple[str, str]] = None
     _image: Union[str, Callable[[], str]] = "python:3.8"
     """an optional Docker image specification"""
 
@@ -98,6 +98,16 @@ class _GlobalConfig:
     def token(self, t: Union[Optional[str], TokenGenerator, Callable[[], Optional[str]]]) -> None:
         """Sets the Argo Workflows token at a global level so services can use it."""
         self._token = t
+
+    @property
+    def client_certs(self) -> Optional[Tuple[str, str]]:
+        return self._client_certs
+
+    @client_certs.setter
+    def client_certs(self, certs: Tuple[str, str]) -> None:
+        if not all(certs) or not isinstance(certs, tuple):
+            raise ValueError("Please specify client cert and key pair")
+        self._client_certs = certs
 
     def register_pre_build_hook(self, hook: Hook) -> Hook:
         """Registers a hook to be called before building a model."""
