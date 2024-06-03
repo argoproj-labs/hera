@@ -104,7 +104,7 @@ class _GlobalConfig:
         return self._client_certs
 
     @client_certs.setter
-    def client_certs(self, certs: Tuple[str, str]) -> None:
+    def client_certs(self, certs: Tuple[str, str] | Callable(None, Tuple[str, str])) -> None:
         if not all(certs) or not isinstance(certs, tuple):
             raise ValueError("Please specify client cert and key pair")
         self._client_certs = certs
