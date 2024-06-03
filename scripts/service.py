@@ -181,7 +181,8 @@ class ServiceEndpoint:
             params={params},
             headers={headers},
             data={body},
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.client_certs,
         )
 
         if resp.ok:
@@ -403,10 +404,11 @@ def get_service_def() -> str:
 from urllib.parse import urljoin
 import requests
 import os
+from pathlib import Path
 from hera.{module}.models import {imports}
 from hera.shared import global_config
 from hera.exceptions import exception_from_server_response
-from typing import Optional, cast
+from typing import Optional, Tuple, cast
 
 def valid_host_scheme(host: str) -> bool:
     \"\"\"Validates the the given `host` starts with either `http` or `https`.\"\"\"
@@ -419,11 +421,13 @@ class {models_type}Service:
         host: Optional[str] = None,
         verify_ssl: Optional[bool] = None,
         token: Optional[str] = None,
+        client_certs: Optional[Tuple[Path, Path]] = None,
         namespace: Optional[str] = None,
     ) -> None:
         \"\"\"{models_type} service constructor.\"\"\"
         self.host = cast(str, host or global_config.host)
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
+        self.client_certs = client_certs if client_certs is not None else global_config.client_certs
 
         # some users reported in https://github.com/argoproj-labs/hera/issues/1016 that it can be a bit awkward for 
         # Hera to assume a `Bearer` prefix on behalf of users. Some might pass it and some might not. Therefore, Hera
