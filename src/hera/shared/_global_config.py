@@ -41,7 +41,9 @@ class _GlobalConfig:
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
     _token: Optional[Union[str, TokenGenerator, Callable[[], Optional[str]]]] = None
     """an optional authentication token used by Hera in communicating with the Argo server"""
-    _client_certs: Optional[Tuple[Path, Path]] = None
+    _client_certs: Optional[
+        Union[Tuple[Path, Path], Tuple[str, str], Callable[[], Optional[Union[Tuple[Path, Path], Tuple[str, str]]]]]
+    ] = None
     _image: Union[str, Callable[[], str]] = "python:3.8"
     """an optional Docker image specification"""
 
@@ -101,13 +103,22 @@ class _GlobalConfig:
         self._token = t
 
     @property
-    def client_certs(self) -> Optional[Tuple[Path, Path]]:
-        return self._client_certs
+    def client_certs(self) -> Optional[Union[Tuple[Path, Path], Tuple[str, str]]]:
+        """Returns an global client certificate and key."""
+        if self._client_certs is None or isinstance(self._client_certs, tuple):
+            return self._client_certs
+        return self._client_certs()
 
     @client_certs.setter
-    def client_certs(self, certs: Tuple[Path, Path] | Callable[[], Tuple[Path, Path]]) -> None:
-        if not all(certs) or not isinstance(certs, tuple):
-            raise ValueError("Please specify client cert and key pair")
+    def client_certs(
+        self,
+        certs: Union[
+            Optional[Tuple[Path, Path]],
+            Optional[Tuple[str, str]],
+            Callable[[], Optional[Union[Tuple[Path, Path], Tuple[str, str]]]],
+        ],
+    ) -> None:
+        """Sets the client certificate and key at a global level so services can use it."""
         self._client_certs = certs
 
     def register_pre_build_hook(self, hook: Hook) -> Hook:
