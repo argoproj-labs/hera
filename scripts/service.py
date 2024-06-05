@@ -404,7 +404,6 @@ def get_service_def() -> str:
 from urllib.parse import urljoin
 import requests
 import os
-from pathlib import Path
 from hera.{module}.models import {imports}
 from hera.shared import global_config
 from hera.exceptions import exception_from_server_response
