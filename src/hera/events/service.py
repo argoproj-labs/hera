@@ -51,20 +51,7 @@ class EventsService:
         """Events service constructor."""
         self.host = cast(str, host or global_config.host)
         self.verify_ssl = verify_ssl if verify_ssl is not None else global_config.verify_ssl
-
-        # In the global certs the user can either specify a Path or str object.
-        # If its the former lets unpack this tuple and convert the cert to str since the requests library
-        # expects the certs to be a (str, str)
-        def format_global_cert(c):
-            if c is not None:
-                (gclient_cert, gclient_key) = c
-                return None if gclient_cert is None or gclient_key is None else (str(gclient_cert), str(gclient_key))
-
-            return None
-
-        self.client_certs: Tuple[str, str] = (
-            client_certs if client_certs is not None else format_global_cert(global_config.client_certs)
-        )
+        self.client_certs = client_certs if client_certs is not None else global_config.client_certs
 
         # some users reported in https://github.com/argoproj-labs/hera/issues/1016 that it can be a bit awkward for
         # Hera to assume a `Bearer` prefix on behalf of users. Some might pass it and some might not. Therefore, Hera

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from hera.workflows.service import WorkflowsService
 
 
@@ -47,8 +45,8 @@ class TestWorkflowsService:
 
         assert global_config_fixture.client_certs is None
 
-        global_config_fixture.client_certs = (Path(global_certs_path), Path(global_certs_path))
-        assert global_config_fixture.client_certs == (Path(global_certs_path), Path(global_certs_path))
+        global_config_fixture.client_certs = (global_certs_path, global_certs_path)
+        assert global_config_fixture.client_certs == (global_certs_path, global_certs_path)
 
         service = WorkflowsService()
         assert service.client_certs == (global_certs_path, global_certs_path)
