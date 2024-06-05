@@ -40,7 +40,10 @@ class _GlobalConfig:
     # are processed upon accessing. The rest, which use primitive types, such as `str`, can remain public
     _token: Optional[Union[str, TokenGenerator, Callable[[], Optional[str]]]] = None
     """an optional authentication token used by Hera in communicating with the Argo server"""
+
     _client_certs: Optional[Union[Tuple[str, str], Callable[[], Optional[Tuple[str, str]]]]] = None
+    """an optional client certificate and key that is used to authenticate with reverse proxies"""
+
     _image: Union[str, Callable[[], str]] = "python:3.8"
     """an optional Docker image specification"""
 
