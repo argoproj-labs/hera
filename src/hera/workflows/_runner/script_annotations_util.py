@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
-from hera.shared._pydantic import BaseModel, get_fields
+from hera.shared._pydantic import BaseModel, FieldInfo, get_fields
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
@@ -147,25 +147,31 @@ def map_runner_input(
 
     def map_field(
         field: str,
+        field_info: FieldInfo,
         kwargs: Dict[str, str],
     ) -> Any:
-        annotation = runner_input_class.__annotations__[field]
-        if get_origin(annotation) is Annotated:
-            meta_annotation = get_args(annotation)[1]
+        if field_info.annotation is None:
+            # I don't think pydantic allows this to happen ...
+            raise ValueError("RunnerInput fields must be type-annotated")
+        meta_annotations = [md for md in field_info.metadata if isinstance(md, (Parameter, Artifact))]
+        if len(meta_annotations) > 1:
+            raise ValueError("RunnerInput fields may only have one Parameter or Artifact annotation.")
+        elif len(meta_annotations) == 1:
+            meta_annotation = meta_annotations[0]
             if isinstance(meta_annotation, Parameter):
                 assert not meta_annotation.output
                 return load_parameter_value(
                     _get_annotated_input_param_value(field, meta_annotation, kwargs),
-                    get_args(annotation)[0],
+                    field_info.annotation,
                 )
 
             if isinstance(meta_annotation, Artifact):
                 return get_annotated_artifact_value(meta_annotation)
+        else:
+            return load_parameter_value(kwargs[field], field_info.annotation)
 
-        return load_parameter_value(kwargs[field], annotation)
-
-    for field in get_fields(runner_input_class):
-        input_model_obj[field] = map_field(field, kwargs)
+    for field, field_info in get_fields(runner_input_class).items():
+        input_model_obj[field] = map_field(field, field_info, kwargs)
 
     return cast(T, runner_input_class.parse_raw(json.dumps(input_model_obj)))
 
