@@ -19,7 +19,7 @@ from hera.workflows.parameter import Parameter
 try:
     from typing import Annotated
 except ImportError:
-    from typing_extension import Annotated
+    from typing_extensions import Annotated
 
 
 @pytest.mark.parametrize(

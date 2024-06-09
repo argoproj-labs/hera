@@ -58,7 +58,6 @@ def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, FieldInfo]:
 __all__ = [
     "BaseModel",
     "Field",
-    "FieldInfo",
     "PrivateAttr",
     "PydanticBaseModel",  # Export for serialization.py to cover user-defined models
     "ValidationError",
