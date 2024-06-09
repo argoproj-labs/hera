@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from hera.workflows.service import WorkflowsService
 
 
@@ -32,3 +34,24 @@ class TestWorkflowsService:
     def test_adds_custom_token(self):
         service = WorkflowsService(token="something token")
         assert service.token == "something token"
+
+    def test_workflow_client_cert_is_present(self, global_config_fixture):
+        random_path = "random_path"
+        global_certs_path = "global_certs"
+
+        service = WorkflowsService()
+        assert service.client_certs is None
+
+        service = WorkflowsService(client_certs=(random_path, random_path))
+        assert service.client_certs == (random_path, random_path)
+
+        assert global_config_fixture.client_certs is None
+
+        global_config_fixture.client_certs = (Path(global_certs_path), Path(global_certs_path))
+        assert global_config_fixture.client_certs == (global_certs_path, global_certs_path)
+
+        service = WorkflowsService()
+        assert service.client_certs == (global_certs_path, global_certs_path)
+
+        service = WorkflowsService(client_certs=(random_path, random_path))
+        assert service.client_certs == (random_path, random_path)
