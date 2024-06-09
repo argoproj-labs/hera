@@ -1,6 +1,8 @@
 # Authentication
 
-The way you authenticate generally depends on your unique organization setup. If you submit workflows through Hera
+The way you authenticate generally depends on your unique organization setup. You could either directly authenticate against the Argo server, or you handle authentication directly through the reverse proxy, or even both. 
+
+If you submit workflows through Hera
 directly you have multiple ways to authenticate with the Argo server.
 
 Note that the follow examples combine a global config with a workflow submission for illustration purposes. You can
@@ -148,6 +150,83 @@ global_config.token = K8sTokenGenerator("my-service-account")
 
 # the workflow automatically creates a workflow service, which uses the global config
 # host and token generator for authentication
+with Workflow(
+    generate_name="test-",
+    entrypoint="c",
+) as w:
+    Container(name="c", image="alpine:3.13", command=["sh", "-c", "echo hello world"])
+
+w.create()
+```
+
+## Client Certificates
+
+There are cases where your org might have client certificate authentication enabled which means that you'd have to present a client cert + key everytime you wish to access a UI or API. 
+In those cases you could either pass the certs on the global config or directly into the `WorkflowService`
+
+### Workflow Service
+
+```python
+from hera.workflows import WorkflowsService, Workflow, Container
+
+with Workflow(
+    generate_name="test-",
+    workflows_service=WorkflowsService(
+        host="https://my-argo-server.com",
+        token="Bearer abc123",
+    ),
+    client_certs=("/path-to-client-cert","/path-to-client-key")
+    entrypoint="c",
+) as w:
+    Container(name="c", image="alpine:3.13", command=["sh", "-c", "echo hello world"])
+
+w.create()
+```
+
+## Global configuration
+
+You can set a global configuration for Hera to inject the client certificates into the automatically created `WorkflowsService` object.
+The global config token can take multiple types such as a `(str, str)` or `(Path, Path)` tuple or a function generating a `(str, str) or (Path, Path)`.
+
+#### Simple `(str,str)`
+
+```python
+from hera.shared import global_config
+from hera.workflows import Workflow, Container
+
+global_config.host = "https://my-argo-server.com"
+global_config.token = "abc-123"  # this will be injected to all workflows' services for auth purposes!
+global_config.client_certs = ("/path-to-client-cert","/path-to-client-key")
+with Workflow(
+    generate_name="test-",
+    entrypoint="c",
+) as w:
+    Container(name="c", image="alpine:3.13", command=["sh", "-c", "echo hello world"])
+
+w.create()
+```
+
+#### A function that returns a `(str, str) or (Path, Path)` (`Callable[[], Union[Optional[Tuple[Path, Path]], Optional[Tuple[str, str]]]]`)
+
+```python
+from typing import Optional,Tuple
+from pathlib import Path
+from hera.shared import global_config
+from hera.workflows import Workflow, Container
+
+
+def get_certs() -> Optional[Tuple[str,str]]:
+    """Generate or grab client certs for Hera. 
+    This process can do anything and generate a token however you need it to"""
+    return ("/path-to-client-cert","/path-to-client-key")
+
+def get_cert_paths() -> Optional[Tuple[Path, Path]]:
+    return (Path("/path-to-client-cert"), Path("/path-to-client-key"))
+
+
+global_config.host = "https://my-argo-server.com"
+global_config.token = get_certs # or get_cert_paths
+
 with Workflow(
     generate_name="test-",
     entrypoint="c",
