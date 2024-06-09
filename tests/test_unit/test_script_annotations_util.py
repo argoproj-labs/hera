@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Annotated, Any, Union
+from typing import Any, Union
 
 import pytest
 
@@ -15,6 +15,11 @@ from hera.workflows.artifact import Artifact, ArtifactLoader
 from hera.workflows.io import Input
 from hera.workflows.models import ValueFrom
 from hera.workflows.parameter import Parameter
+
+try:
+    from typing import Annotated
+except ImportError:
+    from typing_extension import Annotated
 
 
 @pytest.mark.parametrize(
