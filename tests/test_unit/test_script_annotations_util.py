@@ -249,3 +249,16 @@ def test_map_runner_input_annotated_inheritance():
 
     kwargs = {"foo": "hello", "bar": "there"}
     assert map_runner_input(FooBar, kwargs) == FooBar(**kwargs)
+
+
+def test_map_runner_input_annotated_inheritance_override():
+    """Test model inheritance with Annotated fields."""
+
+    class Foo(Input):
+        foo: Annotated[str, Parameter(name="foo")]
+
+    class FooBar(Foo):
+        foo: Annotated[str, Parameter(name="bar")]
+
+    kwargs = {"bar": "hello"}
+    assert map_runner_input(FooBar, kwargs) == FooBar(foo="hello")

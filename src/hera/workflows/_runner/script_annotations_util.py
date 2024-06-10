@@ -3,11 +3,10 @@
 import inspect
 import json
 import os
-from collections import ChainMap
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
-from hera.shared._pydantic import BaseModel, get_fields
+from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
@@ -146,7 +145,7 @@ def map_runner_input(
         except json.JSONDecodeError:
             return value
 
-    runner_input_annotations = ChainMap(*(getattr(cls, "__annotations__", {}) for cls in runner_input_class.__mro__))
+    runner_input_annotations = get_field_annotations(runner_input_class)
 
     def map_field(
         field: str,
