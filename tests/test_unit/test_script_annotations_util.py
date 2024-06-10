@@ -262,3 +262,13 @@ def test_map_runner_input_annotated_inheritance_override():
 
     kwargs = {"bar": "hello"}
     assert map_runner_input(FooBar, kwargs) == FooBar(foo="hello")
+
+
+def test_map_runner_input_annotated_parameter_noname():
+    """Test Annotated Parameter with no name."""
+
+    class Foo(Input):
+        foo: Annotated[str, Parameter(description="a parameter")]
+
+    kwargs = {"foo": "hello"}
+    assert map_runner_input(Foo, kwargs) == Foo(foo="hello")
