@@ -146,14 +146,14 @@ def map_runner_input(
         except json.JSONDecodeError:
             return value
 
-    runner_input_annotations = ChainMap(*(inspect.get_annotations(cls) for cls in runner_input_class.__mro__))
+    runner_input_annotations = ChainMap(*(getattr(cls, "__annotations__", {}) for cls in runner_input_class.__mro__))
 
     def map_field(
         field: str,
         kwargs: Dict[str, str],
     ) -> Any:
         annotation = runner_input_annotations.get(field)
-        if annotation is None:
+        if annotation is None:  # pragma: no cover
             # I don't think pydantic allows this to happen ...
             raise ValueError("RunnerInput fields must be type-annotated")
         if get_origin(annotation) is Annotated:
