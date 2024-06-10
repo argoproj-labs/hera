@@ -153,9 +153,7 @@ def map_runner_input(
         kwargs: Dict[str, str],
     ) -> Any:
         annotation = runner_input_annotations.get(field)
-        if annotation is None:  # pragma: no cover
-            # I don't think pydantic allows this to happen ...
-            raise ValueError("RunnerInput fields must be type-annotated")
+        assert annotation is not None, "RunnerInput fields must be type-annotated"
         if get_origin(annotation) is Annotated:
             # my_field: Annotated[int, ...]
             ann_type = get_args(annotation)[0]
@@ -166,7 +164,7 @@ def map_runner_input(
             meta_annotations = []
 
         if len(meta_annotations) > 1:
-            raise ValueError("RunnerInput fields may only have one Parameter or Artifact annotation.")
+            raise ValueError("hera.workflows.io.Input fields may only have one Parameter or Artifact annotation.")
         elif len(meta_annotations) == 1:
             meta_annotation = meta_annotations[0]
             if isinstance(meta_annotation, Parameter):
