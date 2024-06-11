@@ -154,27 +154,22 @@ def map_runner_input(
         annotation = runner_input_annotations.get(field)
         assert annotation is not None, "RunnerInput fields must be type-annotated"
         if get_origin(annotation) is Annotated:
-            # my_field: Annotated[int, ...]
+            # my_field: Annotated[int, Parameter(...)]
             ann_type = get_args(annotation)[0]
-            meta_annotations = [md for md in get_args(annotation)[1:] if isinstance(md, (Parameter, Artifact))]
+            param_or_artifact = get_args(annotation)[1]
         else:
             # my_field: int
             ann_type = annotation
-            meta_annotations = []
+            param_or_artifact = None
 
-        if len(meta_annotations) > 1:
-            raise ValueError("hera.workflows.io.Input fields may only have one Parameter or Artifact annotation.")
-        elif len(meta_annotations) == 1:
-            meta_annotation = meta_annotations[0]
-            if isinstance(meta_annotation, Parameter):
-                assert not meta_annotation.output
-                return load_parameter_value(
-                    _get_annotated_input_param_value(field, meta_annotation, kwargs),
-                    ann_type,
-                )
-
-            if isinstance(meta_annotation, Artifact):
-                return get_annotated_artifact_value(meta_annotation)
+        if isinstance(param_or_artifact, Parameter):
+            assert not param_or_artifact.output
+            return load_parameter_value(
+                _get_annotated_input_param_value(field, param_or_artifact, kwargs),
+                ann_type,
+            )
+        elif isinstance(param_or_artifact, Artifact):
+            return get_annotated_artifact_value(param_or_artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
 

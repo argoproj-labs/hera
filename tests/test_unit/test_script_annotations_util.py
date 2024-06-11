@@ -193,17 +193,6 @@ def test_map_runner_input_annotated_parameter():
     assert map_runner_input(Foo, kwargs) == Foo(foo="there")
 
 
-def test_map_runner_input_parameter_last_annotation():
-    """Test annotated Parameter in third position."""
-
-    class Foo(Input):
-        # None standing in for something like pydantic.BeforeValidator
-        foo: Annotated[str, None, Parameter(name="foo")]
-
-    kwargs = {"foo": "hello"}
-    map_runner_input(Foo, kwargs)
-
-
 def test_map_runner_input_output_parameter_disallowed():
     """Test annotated output Parameter is not allowed."""
 
@@ -211,17 +200,6 @@ def test_map_runner_input_output_parameter_disallowed():
         foo: Annotated[str, Parameter(name="bar", output=True)]
 
     with pytest.raises(AssertionError):
-        kwargs = {"foo": "hello"}
-        map_runner_input(Foo, kwargs)
-
-
-def test_map_runner_input_multi_parameter_disallowed():
-    """Test annotated multiple Parameters is not allowed."""
-
-    class Foo(Input):
-        foo: Annotated[str, Parameter(name="bar", output=True), Parameter(name="baz", output=True)]
-
-    with pytest.raises(ValueError):
         kwargs = {"foo": "hello"}
         map_runner_input(Foo, kwargs)
 
