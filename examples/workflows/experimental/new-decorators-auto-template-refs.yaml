@@ -7,6 +7,11 @@ spec:
   templates:
   - dag:
       tasks:
+      - name: run-setup-dag
+        templateRef:
+          clusterScope: true
+          name: my-cluster-workflow-template
+          template: run-setup-dag
       - name: setup_task
         templateRef:
           clusterScope: true
