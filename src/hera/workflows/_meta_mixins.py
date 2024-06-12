@@ -56,7 +56,6 @@ except ImportError:
 
 if TYPE_CHECKING:
     from hera.workflows._mixins import TemplateMixin
-    from hera.workflows.models import Template
     from hera.workflows.steps import Step
     from hera.workflows.task import Task
 
@@ -536,7 +535,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         self,
         subnode_name: str,
         func: Callable,
-        template: Union[str, Template, TemplateMixin, CallableTemplateMixin],
+        template: TemplateMixin,
         *args,
         **kwargs,
     ) -> Union[Step, Task]:
@@ -558,6 +557,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         assert _context.pieces
 
         template_ref = None
+        _context.declaring = False
         if _context.pieces[0] != self and isinstance(self, WorkflowTemplate):
             # Using None for cluster_scope means it won't appear in the YAML spec (saving some bytes),
             # as cluster_scope=False is the default value
@@ -567,9 +567,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 cluster_scope=True if isinstance(self, ClusterWorkflowTemplate) else None,
             )
             # Set template to None as it cannot be set alongside template_ref
-            template = None
+            template = None  # type: ignore
 
-        _context.declaring = False
         if isinstance(_context.pieces[-1], (Steps, Parallel)):
             subnode = Step(
                 name=subnode_name,
