@@ -6,10 +6,12 @@ from hera.workflows import ClusterWorkflowTemplate, Input, Output, Parameter, Wo
 
 global_config.experimental_features["decorator_syntax"] = True
 
+
+# Here we are going to define a Workflow that uses templates from external WorkflowTemplates
+w = Workflow(generate_name="my-workflow-")
+
 wt = WorkflowTemplate(name="my-workflow-template")
 cwt = ClusterWorkflowTemplate(name="my-cluster-workflow-template")
-
-w = Workflow(generate_name="my-workflow-")
 
 
 class SetupConfig(BaseModel):
@@ -22,6 +24,7 @@ class SetupOutput(Output):
     setup_config: Annotated[SetupConfig, Parameter(name="setup-config")]  # use a pydantic BaseModel
 
 
+# External templates can have the actual implementation
 @cwt.script()
 def setup() -> SetupOutput:
     return SetupOutput(
@@ -30,6 +33,11 @@ def setup() -> SetupOutput:
         setup_config=SetupConfig(a_param="test"),
         result="Setting things up",
     )
+
+
+# Or be stubbed out
+@cwt.dag()
+def run_setup_dag() -> Output: ...
 
 
 class ConcatConfig(BaseModel):
@@ -43,11 +51,7 @@ class ConcatInput(Input):
 
 
 @wt.script()
-def concat(concat_input: ConcatInput) -> Output:
-    res = f"{concat_input.word_a} {concat_input.word_b}"
-    if concat_input.reverse:
-        res = res[::-1]
-    return Output(result=res)
+def concat(concat_input: ConcatInput) -> Output: ...
 
 
 class WorkerConfig(BaseModel):
@@ -69,8 +73,11 @@ class WorkerOutput(Output):
 @w.set_entrypoint
 @w.dag()
 def worker(worker_input: WorkerInput) -> WorkerOutput:
-    setup_task = setup()
-    task_a = concat(
+    # We can call functions belonging to other WorkflowTemplates in this Workflow's DAG.
+    # Hera will resolve the reference into a TemplateRef used in the Task.
+    run_setup_dag()  # Comes from the ClusterWorkflowTemplate and is stubbed
+    setup_task = setup()  # Comes from the ClusterWorkflowTemplate with implementation details (but are not used)
+    task_a = concat(  # Comes from the WorkflowTemplate and is stubbed
         ConcatInput(
             word_a=worker_input.value_a,
             word_b=setup_task.environment_parameter + str(setup_task.an_annotated_parameter),
