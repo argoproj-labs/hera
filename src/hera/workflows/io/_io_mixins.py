@@ -64,8 +64,11 @@ class InputMixin(BaseModel):
 
         for field, field_info in get_fields(cls).items():
             if get_origin(annotations[field]) is Annotated:
-                param = get_args(annotations[field])[1]
+                # Copy so as to not modify the Input fields themselves
+                param = get_args(annotations[field])[1].copy()
                 if isinstance(param, Parameter):
+                    if param.name is None:
+                        param.name = field
                     if object_override:
                         param.default = serialize(getattr(object_override, field))
                     elif field_info.default is not None and field_info.default != PydanticUndefined:  # type: ignore
@@ -91,8 +94,11 @@ class InputMixin(BaseModel):
 
         for field in get_fields(cls):
             if get_origin(annotations[field]) is Annotated:
-                artifact = get_args(annotations[field])[1]
+                # Copy so as to not modify the Input fields themselves
+                artifact = get_args(annotations[field])[1].copy()
                 if isinstance(artifact, Artifact):
+                    if artifact.name is None:
+                        artifact.name = field
                     if artifact.path is None:
                         artifact.path = artifact._get_default_inputs_path()
                     artifacts.append(artifact)
