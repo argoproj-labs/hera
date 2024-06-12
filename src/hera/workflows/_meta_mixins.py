@@ -23,6 +23,7 @@ from hera.workflows.io.v1 import (
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
+    TemplateRef,
 )
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import TWorkflow
@@ -495,50 +496,6 @@ class HeraBuildObj:
         self.output_class = output_class
 
 
-def create_subnode(
-    subnode_name: str,
-    func: Callable,
-    template: Union[str, Template, TemplateMixin, CallableTemplateMixin],
-    *args,
-    **kwargs,
-) -> Union[Step, Task]:
-    from hera.workflows.dag import DAG
-    from hera.workflows.steps import Parallel, Step, Steps
-    from hera.workflows.task import Task
-
-    subnode_args = None
-    if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
-        subnode_args = args[0]._get_as_arguments()
-
-    signature = inspect.signature(func)
-    output_class = signature.return_annotation
-
-    subnode: Union[Step, Task]
-
-    assert _context.pieces
-    _context.declaring = False
-    if isinstance(_context.pieces[-1], (Steps, Parallel)):
-        subnode = Step(
-            name=subnode_name,
-            template=template,
-            arguments=subnode_args,
-            **kwargs,
-        )
-    elif isinstance(_context.pieces[-1], DAG):
-        subnode = Task(
-            name=subnode_name,
-            template=template,
-            arguments=subnode_args,
-            depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
-            **kwargs,
-        )
-        _context.pieces[-1]._current_task_depends.clear()
-
-    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
-    _context.declaring = True
-    return subnode
-
-
 def _get_underlying_type(annotation: Type):
     real_type = annotation
     if get_origin(annotation) is Annotated:
@@ -574,6 +531,67 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             raise ImportError(
                 "`varname` is not installed. Install `hera[experimental]` to bring in the extra dependency"
             )
+
+    def _create_subnode(
+        self,
+        subnode_name: str,
+        func: Callable,
+        template: Union[str, Template, TemplateMixin, CallableTemplateMixin],
+        *args,
+        **kwargs,
+    ) -> Union[Step, Task]:
+        from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
+        from hera.workflows.dag import DAG
+        from hera.workflows.steps import Parallel, Step, Steps
+        from hera.workflows.task import Task
+        from hera.workflows.workflow_template import WorkflowTemplate
+
+        subnode_args = None
+        if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+            subnode_args = args[0]._get_as_arguments()
+
+        signature = inspect.signature(func)
+        output_class = signature.return_annotation
+
+        subnode: Union[Step, Task]
+
+        assert _context.pieces
+
+        template_ref = None
+        if _context.pieces[0] != self and isinstance(self, WorkflowTemplate):
+            # Using None for cluster_scope means it won't appear in the YAML spec (saving some bytes),
+            # as cluster_scope=False is the default value
+            template_ref = TemplateRef(
+                name=self.name,
+                template=template.name,
+                cluster_scope=True if isinstance(self, ClusterWorkflowTemplate) else None,
+            )
+            # Set template to None as it cannot be set alongside template_ref
+            template = None
+
+        _context.declaring = False
+        if isinstance(_context.pieces[-1], (Steps, Parallel)):
+            subnode = Step(
+                name=subnode_name,
+                template=template,
+                template_ref=template_ref,
+                arguments=subnode_args,
+                **kwargs,
+            )
+        elif isinstance(_context.pieces[-1], DAG):
+            subnode = Task(
+                name=subnode_name,
+                template=template,
+                template_ref=template_ref,
+                arguments=subnode_args,
+                depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
+                **kwargs,
+            )
+            _context.pieces[-1]._current_task_depends.clear()
+
+        subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
+        _context.declaring = True
+        return subnode
 
     @_add_type_hints(Script)  # type: ignore
     def script(self, **script_kwargs) -> Callable:
@@ -629,7 +647,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
                 script_kwargs["constructor"] = RunnerScriptConstructor()
 
-            # Open context to add `Script` object automatically
+            # Open (Workflow) context to add `Script` object automatically
             with self:
                 script_template = Script(name=name, source=source, **script_kwargs)
 
@@ -650,7 +668,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     subnode_name = kwargs.pop("name", subnode_name)
                     assert isinstance(subnode_name, str)
 
-                    return create_subnode(subnode_name, func, script_template, *args, **kwargs)
+                    return self._create_subnode(subnode_name, func, script_template, *args, **kwargs)
 
                 if _context.pieces:
                     return script_template.__call__(*args, **kwargs)
@@ -709,7 +727,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     subnode_name = kwargs.pop("name", subnode_name)
                     assert isinstance(subnode_name, str)
 
-                    return create_subnode(subnode_name, func, container_template, *args, **kwargs)
+                    return self._create_subnode(subnode_name, func, container_template, *args, **kwargs)
 
                 if _context.pieces:
                     return container_template.__call__(*args, **kwargs)
@@ -792,7 +810,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     subnode_name = kwargs.pop("name", subnode_name)
                     assert isinstance(subnode_name, str)
 
-                    return create_subnode(subnode_name, func, template, *args, **kwargs)
+                    return self._create_subnode(subnode_name, func, template, *args, **kwargs)
 
                 return func(*args, **kwargs)
 
