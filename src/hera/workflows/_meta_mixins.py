@@ -718,20 +718,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             # Set the template name to the inferred name
             container_call_wrapper.template_name = name  # type: ignore
 
-            # If the function has two inputs then the user wants to set template
-            # attributes within the function itself (advanced use case)
-            if len(func_inputs) == 2:
-                input_arg = list(func_inputs.values())[0].annotation
-                template_arg = _get_underlying_type(list(func_inputs.values())[1].annotation)
-                if not issubclass(input_arg, (InputV1, InputV2)):
-                    raise SyntaxError(f"First argument of function must be subclass of Input, got {input_arg}")
-                if not issubclass(template_arg, Container):
-                    raise SyntaxError(f"Second argument of function must be a Container, got {template_arg}")
-
-                input_obj = input_arg._get_as_templated_arguments()
-                # "run" the container function to update the template
-                func(input_obj, container_template)  # type: ignore
-
             return container_call_wrapper
 
         return container_decorator

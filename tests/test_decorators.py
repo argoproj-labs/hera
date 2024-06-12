@@ -236,10 +236,3 @@ def test_steps_with_parallel_steps_is_runnable():
     assert worker(WorkerInput(value_a="hello", value_b="world")) == WorkerOutput(
         value="hello linux42 world Setting things up"
     )
-
-
-def test_container_is_runnable():
-    """The container function should be runnable as Python code."""
-    from tests.workflow_decorators.container import MyInput, MyOutput, advanced_hello_world
-
-    assert advanced_hello_world(MyInput(user="test")) == MyOutput(container_greeting="Hello test")

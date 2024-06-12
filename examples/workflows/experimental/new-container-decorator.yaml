@@ -22,20 +22,3 @@ spec:
       - name: container-greeting
         valueFrom:
           path: /tmp/hello_world.txt
-  - container:
-      args:
-      - echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt
-      command:
-      - sh
-      - -c
-      image: python:3.8
-    inputs:
-      parameters:
-      - default: Hera
-        name: user
-    name: advanced-hello-world
-    outputs:
-      parameters:
-      - name: container-greeting
-        valueFrom:
-          path: /tmp/hello_world.txt
