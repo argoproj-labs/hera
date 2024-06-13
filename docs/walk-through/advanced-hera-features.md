@@ -135,6 +135,17 @@ global_config.experimental_features["script_pydantic_io"] = True
 
 Read the full guide on script pydantic IO in [the script user guide](../user-guides/script-runner-io.md).
 
+### Decorators for main template types
+
+Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
+
+To enable the decorators, you must set the `experimental_feature` flag `decorator_syntax`
+
+```py
+global_config.experimental_features["decorator_syntax"] = True
+```
+
+Read the full guide on decorators in [the decorator user guide](../user-guides/decorators.md).
 
 ## Graduated features
 

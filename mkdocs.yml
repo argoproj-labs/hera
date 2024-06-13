@@ -29,6 +29,7 @@ nav:
       - Script Basics: user-guides/script-basics.md
       - Script Annotations: user-guides/script-annotations.md
       - Script Runner IO: user-guides/script-runner-io.md
+    - Decorators: user-guides/decorators.md
     - Expr Transpiler: user-guides/expr.md
   - Examples:
     - About: examples/workflows-examples.md
