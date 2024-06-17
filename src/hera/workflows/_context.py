@@ -96,7 +96,8 @@ class _HeraContext:
         ):
             from hera.workflows.workflow import Workflow
 
-            assert isinstance(pieces[0], Workflow)
+            if not isinstance(pieces[0], Workflow):
+                raise SyntaxError("Not under a Workflow context")
 
             found = False
             for t in pieces[0].templates:
