@@ -26,5 +26,5 @@ jobs:
       - uses: mheap/github-action-required-labels@v5
         with:
           count: 1
-          labels: type:bug, type:dependency-upgrade, type:documentation, type:enhancement, type:question, type:task, type:skip-changelog
+          labels: type:bug, type:dependency-upgrade, type:documentation, type:enhancement, type:question, type:task, type:informational, type:skip-changelog
           mode: exactly
