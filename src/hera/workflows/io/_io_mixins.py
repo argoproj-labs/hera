@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
@@ -70,6 +71,11 @@ class InputMixin(BaseModel):
                 if isinstance(param, Parameter):
                     if param.name is None:
                         param.name = field
+                    if param.default is not None:
+                        warnings.warn(
+                            "Using the default field for Parameters in Annotations is deprecated"
+                            "and will be removed in v5.17, use a Python default value instead"
+                        )
                     if object_override:
                         param.default = serialize(getattr(object_override, field))
                     elif field_info.default is not None and field_info.default != PydanticUndefined:  # type: ignore
