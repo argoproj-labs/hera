@@ -115,3 +115,13 @@ class TestContextNameConflicts:
                     hello(name=name)
                 with s.parallel():
                     world(name=name)
+
+
+def test_error_outside_of_workflow_context():
+    @script()
+    def hello():
+        print("hello")
+
+    with pytest.raises(SyntaxError, match="Not under a Workflow context"):
+        with Steps(name="test"):
+            hello()
