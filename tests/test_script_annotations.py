@@ -17,7 +17,7 @@ from hera.workflows.parameter import Parameter
 from hera.workflows.steps import Steps
 
 
-@pytest.mark.parametrize("module_name", ["combined", "default", "description", "enum"])
+@pytest.mark.parametrize("module_name", ["combined", "description", "enum"])
 def test_script_annotations_parameter_regression(module_name, global_config_fixture):
     """Regression tests for the input parameter annotations.
 
@@ -85,6 +85,26 @@ def test_double_default_throws_a_value_error(global_config_fixture):
         w.to_dict()
 
     assert "default cannot be set via both the function parameter default and the Parameter's default" in str(e.value)
+
+
+@pytest.mark.skip(reason="Code change required in next Hera version")
+def test_parameter_default_throws_a_value_error(global_config_fixture):
+    """Test asserting that it is not possible to define default in the annotation."""
+
+    # GIVEN
+    @script()
+    def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
+        print(an_int)
+
+    global_config_fixture.experimental_features["script_annotations"] = True
+    with pytest.raises(ValueError) as e:
+        with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
+            with Steps(name="my-steps"):
+                echo_int()
+
+        w.to_dict()
+
+    assert "default cannot be set via the Parameter's default, use a Python default value instead" in str(e.value)
 
 
 @pytest.mark.parametrize(

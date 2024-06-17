@@ -7,6 +7,7 @@ for more on scripts.
 import copy
 import inspect
 import textwrap
+import warnings
 from abc import abstractmethod
 from functools import wraps
 from typing import (
@@ -33,6 +34,7 @@ from hera.shared._global_config import (
     _flag_enabled,
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
+from hera.shared.serialization import serialize
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
@@ -513,12 +515,22 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
                 artifacts.append(new_object)
             elif isinstance(new_object, Parameter):
+                if new_object.default is not None:
+                    warnings.warn(
+                        "Using the default field for Parameters in Annotations is deprecated"
+                        "and will be removed in v5.17, use a Python default value instead"
+                    )
+                    # TODO: Uncomment for 5.17:
+                    # raise ValueError(
+                    #     "default cannot be set via the Parameter's default, use a Python default value instead"
+                    # )
                 if func_param.default != inspect.Parameter.empty:
+                    # TODO: remove this check for 5.17:
                     if new_object.default is not None:
                         raise ValueError(
                             "default cannot be set via both the function parameter default and the Parameter's default"
                         )
-                    new_object.default = str(func_param.default)
+                    new_object.default = serialize(func_param.default)
                 parameters.append(new_object)
 
     return parameters, artifacts
