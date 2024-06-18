@@ -10,12 +10,14 @@ See https://argoproj.github.io/argo-workflows/intermediate-inputs/ for more on i
 from typing import List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
-from hera.workflows._mixins import TemplateMixin
+from hera.workflows._mixins import IOMixin, TemplateMixin
 from hera.workflows.models import (
     Inputs,
     Outputs,
+    SuppliedValueFrom,
     SuspendTemplate as _ModelSuspendTemplate,
     Template as _ModelTemplate,
+    ValueFrom,
 )
 from hera.workflows.parameter import Parameter
 
@@ -23,6 +25,7 @@ from hera.workflows.parameter import Parameter
 class Suspend(
     TemplateMixin,
     CallableTemplateMixin,
+    IOMixin,
 ):
     """The Suspend template allows the user to pause a workflow for a specified length of time.
 
@@ -41,22 +44,38 @@ class Suspend(
         )
 
     def _build_outputs(self) -> Optional[Outputs]:
-        outputs = []
+        intermediate_param_outputs = []
         for param in self.intermediate_parameters:
-            outputs.append(
+            intermediate_param_outputs.append(
                 Parameter(
                     name=param.name,
-                    value_from={"supplied": {}},  # type: ignore
+                    value_from=ValueFrom(supplied=SuppliedValueFrom()),
                     description=param.description,
                 ).as_output()
             )
-        return Outputs(parameters=outputs) if outputs else None
+
+        all_outputs = super()._build_outputs()
+        if all_outputs is not None:
+            if all_outputs.parameters is None:
+                all_outputs.parameters = []
+            all_outputs.parameters.extend(intermediate_param_outputs)
+            return all_outputs
+        else:
+            return Outputs(parameters=intermediate_param_outputs) if intermediate_param_outputs else None
 
     def _build_inputs(self) -> Optional[Inputs]:
-        inputs = []
+        intermediate_param_inputs = []
         for param in self.intermediate_parameters:
-            inputs.append(param.as_input())
-        return Inputs(parameters=inputs) if inputs else None
+            intermediate_param_inputs.append(param.as_input())
+
+        all_inputs = super()._build_inputs()
+        if all_inputs is not None:
+            if all_inputs.parameters is None:
+                all_inputs.parameters = []
+            all_inputs.parameters.extend(intermediate_param_inputs)
+            return all_inputs
+        else:
+            return Inputs(parameters=intermediate_param_inputs) if intermediate_param_inputs else None
 
     def _build_template(self) -> _ModelTemplate:
         return _ModelTemplate(

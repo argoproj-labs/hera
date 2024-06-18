@@ -1,5 +1,5 @@
 from hera.workflows import Step, Steps, Suspend, Workflow
-from hera.workflows.models import Inputs, Parameter, SuspendTemplate, Template
+from hera.workflows.models import Parameter
 
 with Workflow(
     generate_name="suspend-input-duration-",
@@ -10,17 +10,17 @@ with Workflow(
         intermediate_parameters=[Parameter(name="duration")],
     )
 
-    configurable_suspend_template = Template(
+    configurable_suspend_template = Suspend(
         name="input-duration-suspend",
-        suspend=SuspendTemplate(duration="{{inputs.parameters.duration}}"),
-        inputs=Inputs(parameters=[Parameter(name="duration", default="10")]),
+        inputs=[Parameter(name="duration", default="10")],
+        duration="{{inputs.parameters.duration}}",
     )
 
     with Steps(name="suspend"):
-        intermediate_params(name="get-value-step")
+        get_value_step = intermediate_params(name="get-value-step")
 
         Step(
             name="custom-delay-step",
             template=configurable_suspend_template,
-            arguments={"duration": "{{steps.get-value-step.outputs.parameters.duration}}"},
+            arguments={"duration": get_value_step.get_parameter("duration")},
         )
