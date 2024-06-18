@@ -517,15 +517,16 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             elif isinstance(new_object, Parameter):
                 if new_object.default is not None:
                     warnings.warn(
-                        "Using the default field for Parameters in Annotations is deprecated"
-                        "and will be removed in v5.17, use a Python default value instead"
+                        "Using the default field for Parameters in Annotations is deprecated since v5.16"
+                        "and will be removed in a future minor version, use a Python default value instead"
                     )
-                    # TODO: Uncomment for 5.17:
-                    # raise ValueError(
-                    #     "default cannot be set via the Parameter's default, use a Python default value instead"
-                    # )
+                    # TODO: raise error if override flag not enabled in 5.17:
+                    # if not global_config.experimental_features["..."]:
+                    #     raise ValueError(
+                    #         "default cannot be set via the Parameter's default, use a Python default value instead"
+                    #     )
                 if func_param.default != inspect.Parameter.empty:
-                    # TODO: remove this check for 5.17:
+                    # TODO: remove this check in 5.18:
                     if new_object.default is not None:
                         raise ValueError(
                             "default cannot be set via both the function parameter default and the Parameter's default"

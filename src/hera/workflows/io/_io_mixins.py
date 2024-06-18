@@ -73,8 +73,8 @@ class InputMixin(BaseModel):
                         param.name = field
                     if param.default is not None:
                         warnings.warn(
-                            "Using the default field for Parameters in Annotations is deprecated"
-                            "and will be removed in v5.17, use a Python default value instead"
+                            "Using the default field for Parameters in Annotations is deprecated since v5.16"
+                            "and will be removed in a future minor version, use a Python default value instead"
                         )
                     if object_override:
                         param.default = serialize(getattr(object_override, field))
