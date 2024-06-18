@@ -30,13 +30,13 @@
 
     @script(constructor="runner")
     def echo_all(
-        an_int: Annotated[int, Parameter(description="an_int parameter", default=1)],
-        a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True)],
-        a_string: Annotated[str, Parameter(description="a_string parameter", default="a")],
         # note that this artifact is loaded from /tmp/file into an_artifact as a string
         an_artifact: Annotated[str, Artifact(name="my-artifact", path="/tmp/file", loader=ArtifactLoader.file)],
         # note that this automatically uses the path /tmp/hera/inputs/artifacts/my-artifact-no-path
         an_artifact_no_path: Annotated[str, Artifact(name="my-artifact-no-path", loader=ArtifactLoader.file)],
+        an_int: Annotated[int, Parameter(description="an_int parameter")] = 1,
+        a_bool: Annotated[bool, Parameter(description="a_bool parameter")] = True,
+        a_string: Annotated[str, Parameter(description="a_string parameter")] = "a",
     ):
         print(an_int)
         print(a_bool)

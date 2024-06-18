@@ -52,6 +52,7 @@ Explore the examples through the side bar!
 | [exit-handler-with-param](https://github.com/argoproj/argo-workflows/blob/main/examples/exit-handler-with-param.yaml) |
 | [exit-handlers](https://github.com/argoproj/argo-workflows/blob/main/examples/exit-handlers.yaml) |
 | [expression-destructure-json](https://github.com/argoproj/argo-workflows/blob/main/examples/expression-destructure-json.yaml) |
+| [expression-destructure-json-complex](https://github.com/argoproj/argo-workflows/blob/main/examples/expression-destructure-json-complex.yaml) |
 | [expression-reusing-verbose-snippets](https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing-verbose-snippets.yaml) |
 | [expression-tag-template-workflow](https://github.com/argoproj/argo-workflows/blob/main/examples/expression-tag-template-workflow.yaml) |
 | [fibonacci-seq-conditional-param](https://github.com/argoproj/argo-workflows/blob/main/examples/fibonacci-seq-conditional-param.yaml) |

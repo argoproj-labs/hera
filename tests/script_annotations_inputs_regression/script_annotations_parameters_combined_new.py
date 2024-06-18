@@ -15,9 +15,9 @@ global_config.experimental_features["script_annotations"] = True
 
 @script()
 def echo_all(
-    an_int: Annotated[int, Parameter(description="an_int parameter", default=1, enum=[1, 2, 3])],
-    a_bool: Annotated[bool, Parameter(description="a_bool parameter", default=True, enum=[True, False])],
-    a_string: Annotated[str, Parameter(description="a_string parameter", default="a", enum=["a", "b", "c"])],
+    an_int: Annotated[int, Parameter(description="an_int parameter", enum=[1, 2, 3])] = 1,
+    a_bool: Annotated[bool, Parameter(description="a_bool parameter", enum=[True, False])] = True,
+    a_string: Annotated[str, Parameter(description="a_string parameter", enum=["a", "b", "c"])] = "a",
 ):
     print(an_int)
     print(a_bool)
