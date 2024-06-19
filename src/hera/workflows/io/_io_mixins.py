@@ -65,6 +65,10 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field, field_info in get_fields(cls).items():
+            if issubclass(cls, OutputMixin) and field in {"exit_code", "result"}:
+                # Skip OutputMixin's fields so users can subclass from both Input and Output
+                # to create a "passthrough" IO object
+                continue
             if get_origin(annotations[field]) is Annotated:
                 # Copy so as to not modify the Input fields themselves
                 param = get_args(annotations[field])[1].copy()
@@ -147,7 +151,11 @@ class InputMixin(BaseModel):
             self_dict = self.model_dump()
 
         for field in get_fields(type(self)):
-            # The value may be a static value (of any time) if it has a default value, so we need to serialize it
+            if issubclass(type(self), OutputMixin) and field in {"exit_code", "result"}:
+                # Skip OutputMixin's fields so users can subclass from both Input and Output
+                # to create a "passthrough" IO object
+                continue
+            # The dict value may be of any type if it was a default value, so we need to serialize it.
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
             templated_value = serialize(self_dict[field])
 
@@ -213,7 +221,9 @@ class OutputMixin(BaseModel):
             if field in {"exit_code", "result"}:
                 continue
             if get_origin(annotations[field]) is Annotated:
-                annotation = get_args(annotations[field])[1]
+                # Copy annotation to avoid modifying it, as it may be used in a "passthrough" field
+                # (where it is both an output and an input)
+                annotation = get_args(annotations[field])[1].copy()
                 if isinstance(annotation, Parameter):
                     if add_missing_path and (annotation.value_from is None or annotation.value_from.path is None):
                         annotation.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{annotation.name}")

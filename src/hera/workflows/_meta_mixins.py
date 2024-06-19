@@ -21,6 +21,7 @@ from hera.workflows.io.v1 import (
     Output as OutputV1,
 )
 from hera.workflows.models import (
+    Arguments as ModelArguments,
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
     TemplateRef,
@@ -509,6 +510,46 @@ def _get_underlying_type(annotation: Type):
     return real_type
 
 
+def _derive_passthrough_io(
+    previous_subnode: Union[Step, Task],
+    input_class: Union[InputV1, InputV2],
+) -> ModelArguments:
+    """Returns a ModelArguments object derived from the previous_subnode and current node's input_class.
+
+    This function is used where (we assume) a user wants to pass all outputs of previous step/task
+    as arguments to the current step/task. This is only supported if the previous node uses a script-decorated
+    function, as it's the only way to go from the Step/Task object to the `source` to get the function signature.
+    Therefore we explicitly give helpful error messages if any pre-conditions are broken (compared to the
+    rest of the codebase).
+
+    We would need to store metadata in the Step/Task object to support other template types.
+    """
+    from hera.workflows.script import Script
+
+    if not isinstance(previous_subnode.template, Script):
+        raise ValueError("Only Script template passthrough IO is supported")
+
+    if not previous_subnode.template.source or not isinstance(previous_subnode.template.source, Callable):  # type: ignore
+        # See https://github.com/python/mypy/issues/3060 for isinstance issue requiring "type: ignore"
+        raise ValueError("Only Script template passthrough IO is supported")
+
+    prev_node_return_class = inspect.signature(previous_subnode.template.source).return_annotation  # type: ignore
+    if not issubclass(prev_node_return_class, (OutputV1, OutputV2)):
+        raise ValueError("Previous Step or Task must output a hera.workflows.io.Output type")
+
+    if prev_node_return_class != input_class:
+        raise ValueError(
+            f"Previous Step/Task output type {prev_node_return_class} does not match"
+            f"current Step/Task input type {input_class} - the same type must be used"
+        )
+
+    object_dict = {}
+    for field in get_fields(prev_node_return_class):
+        if field not in {"exit_code", "result"}:
+            object_dict[field] = getattr(previous_subnode, field)
+    return input_class.construct(**object_dict)._get_as_arguments()
+
+
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.container import Container
     from hera.workflows.dag import DAG
@@ -545,12 +586,17 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.task import Task
         from hera.workflows.workflow_template import WorkflowTemplate
 
-        subnode_args = None
-        if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
-            subnode_args = args[0]._get_as_arguments()
-
         signature = inspect.signature(func)
+        function_inputs = list(signature.parameters.values())
+        input_class = function_inputs[0].annotation if len(function_inputs) == 1 else None
         output_class = signature.return_annotation
+
+        subnode_args = None
+        if len(args) == 1:
+            if isinstance(args[0], (InputV1, InputV2)):
+                subnode_args = args[0]._get_as_arguments()
+            elif isinstance(args[0], (Step, Task)) and issubclass(input_class, (InputV1, InputV2)):
+                subnode_args = _derive_passthrough_io(args[0], input_class)
 
         subnode: Union[Step, Task]
 
@@ -819,15 +865,24 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             with self, template:
                 if len(func_inputs) == 1:
                     arg_class = list(func_inputs.values())[0].annotation
-                    if issubclass(arg_class, (InputV1, InputV2)):
-                        input_obj = arg_class._get_as_templated_arguments()
-                        # "run" the dag/steps function to collect the tasks/steps
-                        _context.declaring = True
-                        func_return = func(input_obj)
-                        _context.declaring = False
+                    if not issubclass(arg_class, (InputV1, InputV2)):
+                        raise ValueError(
+                            "Function must take no arguments or a single argument that is a subclass of hera.workflows.io.Input"
+                        )
+                    input_obj = arg_class._get_as_templated_arguments()
+                    # "run" the dag/steps function to collect the tasks/steps
+                    _context.declaring = True
+                    func_return = func(input_obj)
+                    _context.declaring = False
 
-                        if func_return and isinstance(func_return, (OutputV1, OutputV2)):
-                            template.outputs = func_return._get_as_invocator_output()
+                elif len(func_inputs) == 0:
+                    # "run" the dag/steps function to collect the tasks/steps
+                    _context.declaring = True
+                    func_return = func()
+                    _context.declaring = False
+
+                if func_return and isinstance(func_return, (OutputV1, OutputV2)):
+                    template.outputs = func_return._get_as_invocator_output()
 
             return call_wrapper
 
