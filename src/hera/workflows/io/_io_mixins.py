@@ -156,7 +156,7 @@ class InputMixin(BaseModel):
                 # to create a "passthrough" IO object
                 continue
             # The dict value may be of any type if it was a default value, so we need to serialize it.
-            # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
+            # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")`
             templated_value = serialize(self_dict[field])
 
             if get_origin(annotations[field]) is Annotated:
