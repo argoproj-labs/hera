@@ -29,7 +29,7 @@ codegen: models services examples init-files
 check-codegen: ## Check if the code is up to date
 check-codegen:
 	@$(MAKE) codegen
-	@git diff --exit-code || echo "Code is not up-to-date. Please run 'make codegen'"
+	@git diff --exit-code || (echo "Code is not up-to-date. Please run 'make codegen'" && exit 1)
 
 .PHONY: format
 format: ## Format and sort imports for source, tests, examples, etc.
