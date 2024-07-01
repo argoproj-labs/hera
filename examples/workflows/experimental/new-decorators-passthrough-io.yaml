@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: my-template
+spec:
+  templates:
+  - name: give-output
+    outputs:
+      artifacts:
+      - name: my-artifact
+        path: /tmp/hera-outputs/artifacts/my-artifact
+      parameters:
+      - name: my_str
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/my_str
+      - name: my_int
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/my_int
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.new_decorators_passthrough_io:give_output
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+  - inputs:
+      artifacts:
+      - name: my-artifact
+        path: /tmp/hera-inputs/artifacts/my-artifact
+      parameters:
+      - name: my_str
+      - name: my_int
+    name: take-input
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.new_decorators_passthrough_io:take_input
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python:3.8
+      source: '{{inputs.parameters}}'
+  - dag:
+      tasks:
+      - name: output_task
+        template: give-output
+      - arguments:
+          artifacts:
+          - from: '{{tasks.output_task.outputs.artifacts.my-artifact}}'
+            name: my-artifact
+          parameters:
+          - name: my_str
+            value: '{{tasks.output_task.outputs.parameters.my_str}}'
+          - name: my_int
+            value: '{{tasks.output_task.outputs.parameters.my_int}}'
+        depends: output_task
+        name: take-input
+        template: take-input
+    name: my-dag
