@@ -133,6 +133,11 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
         for imp in sorted(imports):
             f.write(f"{imp}\n")
 
+        models = [imp.split(" ")[-1] for imp in imports]
+        models_strs = sorted([f'"{m}"' for m in models])
+        models_str = ", ".join(models_strs)
+        f.write(f"\n__all__ = [{models_str}]\n")
+
 
 def ensure_init():
     """Ensure that an init file is present in every folder.
