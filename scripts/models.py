@@ -4,11 +4,34 @@
 # we can parse out the JSON using the old code and filter on Workflow objects
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import List, Optional
 
 import requests
 
 model_types = {"workflows", "events"}
+
+
+@dataclass(frozen=True, order=True)
+class ImportReference:
+    path: str
+    name: str
+    alias: Optional[str] = None
+
+    @property
+    def rendered_import(self) -> str:
+        name = self.name
+        if self.alias:
+            name = f"{self.name} as {self.alias}"
+
+        return f"from {self.path} import {name}\n"
+
+    @property
+    def aliased_name(self) -> str:
+        if self.alias:
+            return self.alias
+        return self.name
 
 
 def get_openapi_spec_url() -> str:
@@ -76,7 +99,7 @@ def assemble_root_path_from_models_type(m_type: str) -> str:
     return f"hera.{m_type}.models"
 
 
-def get_import_paths_from_refs(refs: list, root_path: str) -> list:
+def get_import_paths_from_refs(refs: list, root_path: str) -> List[ImportReference]:
     """Assembles the Hera import paths from the given list of references."""
     result = []
     for ref in refs:
@@ -84,16 +107,16 @@ def get_import_paths_from_refs(refs: list, root_path: str) -> list:
         path, obj = ".".join(split[:-1]), split[-1]
         # these are duplicate objects and cause collisions, so we use extra flags from the import path to denote
         # the differences between them, which helps users avoid import errors
+        alias = None
         if obj in ["HTTPHeader", "LogEntry"]:
-            alias = f"{split[-2]}{obj}"
-            upper_alias = alias[0].upper() + alias[1:]
-            obj = f"{obj} as {upper_alias}"
+            raw_alias = f"{split[-2]}{obj}"
+            alias = raw_alias[0].upper() + raw_alias[1:]
 
-        result.append(f"from {root_path}.{path} import {obj}")
+        result.append(ImportReference(f"{root_path}.{path}", obj, alias=alias))
     return result
 
 
-def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> None:
+def write_imports(references: List[ImportReference], models_type: str, openapi_spec_url: str) -> None:
     """Writes the given imports to the `root_path` models."""
     path = Path(__name__).parent.parent / "src" / "hera" / models_type / "models" / "__init__.py"
     with open(str(path), "w+") as f:
@@ -105,16 +128,18 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
         )
 
         if models_type == "events":
-            imports.extend(
-                [
-                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import Item",
-                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import Event",
-                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import EventResponse",
-                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import GetUserInfoResponse",
-                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import InfoResponse",
-                    "from hera.events.models.io.argoproj.workflow.v1alpha1 import Version",
-                ]
-            )
+            events = [
+                "Item",
+                "Event",
+                "EventResponse",
+                "GetUserInfoResponse",
+                "InfoResponse",
+                "Version",
+            ]
+
+            for event in events:
+                references.append(ImportReference("hera.events.models.io.argoproj.workflow.v1alpha1", event))
+
         enums = [
             "ImagePullPolicy",
             "TerminationMessagePolicy",
@@ -128,10 +153,14 @@ def write_imports(imports: list, models_type: str, openapi_spec_url: str) -> Non
             "OperatorModel",
         ]
         for enum in enums:
-            imports.append(f"from hera.{models_type}.models.io.k8s.api.core.v1 import {enum}")
+            references.append(ImportReference(f"hera.{models_type}.models.io.k8s.api.core.v1", enum))
 
-        for imp in sorted(imports):
-            f.write(f"{imp}\n")
+        for ref in sorted(references):
+            f.write(ref.rendered_import)
+
+        models_strs = sorted([f'"{ref.aliased_name}"' for ref in references])
+        models_str = ", ".join(models_strs)
+        f.write(f"\n__all__ = [{models_str}]\n")
 
 
 def ensure_init():

@@ -143,6 +143,7 @@ extend-select = ["I"]
 "src/hera/workflows/models/**" = ["D"]
 "tests/**" = ["D"]
 "scripts/graphlib.py" = ["D"]
+"scripts/models.py" = ["D"]
 
 [tool.ruff.lint.isort]
 force-wrap-aliases = true
