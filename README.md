@@ -1,5 +1,7 @@
 # Hera
 
+<img src =docs/assets/hera-logo.svg width="30%">
+
 Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
 ecosystem accessible by simplifying workflow construction and submission.
 
