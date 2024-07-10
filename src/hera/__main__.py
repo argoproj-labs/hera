@@ -3,6 +3,8 @@
 import importlib
 import sys
 
+from hera._version import version
+
 
 def main(argv=None):
     """Entrypoint for running hera as a CLI."""
@@ -23,7 +25,7 @@ def main(argv=None):
         file=sys.stderr,
     )
 
-    cappa.invoke(Hera, argv=argv)
+    cappa.invoke(Hera, argv=argv, version=version)
 
 
 if __name__ == "__main__":  # pragma: no cover
