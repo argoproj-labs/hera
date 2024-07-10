@@ -70,6 +70,7 @@ theme:
     text: Roboto
     code: Roboto Mono
   name: material
+  logo: assets/hera-logo.svg
   icon:
     repo: fontawesome/brands/github
   palette:
