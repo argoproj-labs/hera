@@ -58,6 +58,13 @@
             valueFrom:
               supplied: {}
         suspend: {}
+      - inputs:
+          parameters:
+          - default: '10'
+            name: duration
+        name: input-duration-suspend
+        suspend:
+          duration: '{{inputs.parameters.duration}}'
       - name: suspend
         steps:
         - - name: get-value-step
@@ -68,12 +75,5 @@
                 value: '{{steps.get-value-step.outputs.parameters.duration}}'
             name: custom-delay-step
             template: input-duration-suspend
-      - inputs:
-          parameters:
-          - default: '10'
-            name: duration
-        name: input-duration-suspend
-        suspend:
-          duration: '{{inputs.parameters.duration}}'
     ```
 

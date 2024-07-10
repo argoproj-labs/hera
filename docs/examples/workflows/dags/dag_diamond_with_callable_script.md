@@ -8,40 +8,20 @@
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import (
-        DAG,
-        Parameter,
-        Script,
-        Workflow,
-    )
+    from hera.workflows import DAG, Workflow, script
 
 
-    def my_print_script(message):
+    @script(image="python:3.12")
+    def echo(message):
         print(message)
 
 
-    def get_script(callable):
-        # note that we have the _option_ to set `inputs=Parameter(name="message")`, but Hera infers the `Parameter`s
-        # that are necessary based on the passed in callable!
-        return Script(
-            name=callable.__name__.replace("_", "-"),
-            source=callable,
-            add_cwd_to_sys_path=False,
-            image="python:alpine3.6",
-        )
-
-
-    with Workflow(
-        generate_name="dag-diamond-",
-        entrypoint="diamond",
-    ) as w:
-        echo = get_script(my_print_script)
-
+    with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         with DAG(name="diamond"):
-            A = echo(name="A", arguments=[Parameter(name="message", value="A")])
-            B = echo(name="B", arguments=[Parameter(name="message", value="B")])
-            C = echo(name="C", arguments=[Parameter(name="message", value="C")])
-            D = echo(name="D", arguments=[Parameter(name="message", value="D")])
+            A = echo(name="A", arguments={"message": "A"})
+            B = echo(name="B", arguments={"message": "B"})
+            C = echo(name="C", arguments={"message": "C"})
+            D = echo(name="D", arguments={"message": "D"})
             A >> [B, C] >> D
     ```
 
@@ -55,20 +35,6 @@
     spec:
       entrypoint: diamond
       templates:
-      - inputs:
-          parameters:
-          - name: message
-        name: my-print-script
-        script:
-          command:
-          - python
-          image: python:alpine3.6
-          source: |-
-            import json
-            try: message = json.loads(r'''{{inputs.parameters.message}}''')
-            except: message = r'''{{inputs.parameters.message}}'''
-
-            print(message)
       - dag:
           tasks:
           - arguments:
@@ -76,28 +42,45 @@
               - name: message
                 value: A
             name: A
-            template: my-print-script
+            template: echo
           - arguments:
               parameters:
               - name: message
                 value: B
             depends: A
             name: B
-            template: my-print-script
+            template: echo
           - arguments:
               parameters:
               - name: message
                 value: C
             depends: A
             name: C
-            template: my-print-script
+            template: echo
           - arguments:
               parameters:
               - name: message
                 value: D
             depends: B && C
             name: D
-            template: my-print-script
+            template: echo
         name: diamond
+      - inputs:
+          parameters:
+          - name: message
+        name: echo
+        script:
+          command:
+          - python
+          image: python:3.12
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
+
+            print(message)
     ```
 
