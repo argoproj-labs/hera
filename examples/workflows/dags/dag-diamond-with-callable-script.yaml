@@ -5,20 +5,6 @@ metadata:
 spec:
   entrypoint: diamond
   templates:
-  - inputs:
-      parameters:
-      - name: message
-    name: my-print-script
-    script:
-      command:
-      - python
-      image: python:alpine3.6
-      source: |-
-        import json
-        try: message = json.loads(r'''{{inputs.parameters.message}}''')
-        except: message = r'''{{inputs.parameters.message}}'''
-
-        print(message)
   - dag:
       tasks:
       - arguments:
@@ -26,26 +12,43 @@ spec:
           - name: message
             value: A
         name: A
-        template: my-print-script
+        template: echo
       - arguments:
           parameters:
           - name: message
             value: B
         depends: A
         name: B
-        template: my-print-script
+        template: echo
       - arguments:
           parameters:
           - name: message
             value: C
         depends: A
         name: C
-        template: my-print-script
+        template: echo
       - arguments:
           parameters:
           - name: message
             value: D
         depends: B && C
         name: D
-        template: my-print-script
+        template: echo
     name: diamond
+  - inputs:
+      parameters:
+      - name: message
+    name: echo
+    script:
+      command:
+      - python
+      image: python:3.12
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: message = json.loads(r'''{{inputs.parameters.message}}''')
+        except: message = r'''{{inputs.parameters.message}}'''
+
+        print(message)
