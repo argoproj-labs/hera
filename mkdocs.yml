@@ -71,6 +71,7 @@ theme:
     code: Roboto Mono
   name: material
   logo: assets/hera-logo.svg
+  favicon: assets/favicon.ico
   icon:
     repo: fontawesome/brands/github
   palette:
