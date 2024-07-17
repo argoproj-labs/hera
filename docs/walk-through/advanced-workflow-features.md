@@ -13,7 +13,7 @@ or when the workflow has a `Running` status.
 ## Exit Handlers (deprecated)
 
 Exit handlers are templates that always execute (regardless of success or failure) at the end of a workflow. They were
-replaced by workflow-level ([above](#workflow-level-lifecycle-hooks)) and [template-level hooks](./advanced-template-features.md#lifecycle-hooks).
+replaced by workflow-level ([above](#workflow-level-lifecycle-hooks)) and [template-level hooks](./advanced-template-features.md#template-level-lifecycle-hooks).
 
 Some use cases listed from [Argo Workflows](https://argoproj.github.io/argo-workflows/walk-through/exit-handlers/)
 include:
