@@ -16,4 +16,4 @@
 
 ## Members
 
-...
+- Alice Purcell <alicederyn@gmail.com>
