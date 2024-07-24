@@ -140,13 +140,13 @@ w.create()
 
 ### Optional dependencies
 
-#### yaml
+#### `yaml`
 
 - Install via `hera[yaml]`
 - [PyYAML](https://pypi.org/project/PyYAML/) is required for the `yaml` output format, which is accessible via
   `hera.workflows.Workflow.to_yaml(*args, **kwargs)`. This enables GitOps practices and easier debugging.
 
-#### cli
+#### `cli`
 
 - Install via `hera[cli]`. The `[cli]` option installs the extra dependency [Cappa](https://github.com/DanCardin/cappa)
   required for the CLI
@@ -154,6 +154,9 @@ w.create()
   easier debugging, and a more seamless experience with Argo Workflows.
 - **_The CLI is an experimental feature and subject to change!_** At the moment it only supports generating YAML files
   from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information.
+
+#### `experimental`
+ - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features that have not yet graduated into stable features.
 
 ## Presentations
 
