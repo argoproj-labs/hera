@@ -18,6 +18,12 @@ If you want to declare inputs and outputs in your templates, you must use the sp
 classes from `hera.workflows` so that Hera can deduce the inputs and outputs of your templates from the fields declared
 in the classes.
 
+You must also install the optional extras under `experimental` to enable the full feature set for decorators
+
+```bash
+pip install hera[experimental]
+```
+
 ## `dag` and `steps`
 
 The `dag` and `steps` decorator bring brand-new functionality to Hera, as they allow you to run and test your dag and

@@ -139,7 +139,13 @@ Read the full guide on script pydantic IO in [the script user guide](../user-gui
 
 Decorators for dags, steps and containers are provided alongside a new script decorator, letting your declare Workflows via Python functions alone.
 
-To enable the decorators, you must set the `experimental_feature` flag `decorator_syntax`
+To enable the decorators, you must install the optional extras under `experimental`
+
+```bash
+pip install hera[experimental]
+```
+
+You can then set the `experimental_feature` flag `decorator_syntax` in your code
 
 ```py
 global_config.experimental_features["decorator_syntax"] = True
