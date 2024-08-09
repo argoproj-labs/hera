@@ -7,7 +7,7 @@ import inspect
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
@@ -86,7 +86,7 @@ def _parse(value: str, key: str, f: Callable) -> Any:
         The parsed value.
 
     """
-    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
+    if _can_be_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
         return value
     try:
         if os.environ.get("hera__script_annotations", None) is None:
@@ -132,13 +132,21 @@ def _get_unannotated_type(key: str, f: Callable) -> Optional[type]:
     return type_
 
 
-def _is_str_kwarg_of(key: str, f: Callable) -> bool:
-    """Check if param `key` of function `f` has a type annotation of a subclass of str."""
+def _can_be_str_kwarg_of(key: str, f: Callable) -> bool:
+    """Check if param `key` of function `f` has a type annotation that can be interpreted as a subclass of str."""
     func_param_annotation = inspect.signature(f).parameters[key].annotation
     if func_param_annotation is inspect.Parameter.empty:
         return False
 
     type_ = _get_type(func_param_annotation)
+    if type_ is Union:
+        # Checking only Union[X, None] or Union[None, X] for given X which is subclass of str.
+        # Note that Optional[X] is alias of Union[X, None], so Optional is also handled in here.
+        args = get_args(func_param_annotation)
+        return len(args) == 2 and (
+            (args[0] is type(None) and issubclass(args[1], str))
+            or (issubclass(args[0], str) and args[1] is type(None))
+        )
     return issubclass(type_, str)
 
 
