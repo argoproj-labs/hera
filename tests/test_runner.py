@@ -978,3 +978,98 @@ def test_runner_pydantic_output_with_result(
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
+
+
+@pytest.mark.parametrize(
+    "entrypoint",
+    [
+        "tests.script_runner.optional_parameter:optional_str_parameter",
+        "tests.script_runner.optional_parameter:optional_str_parameter_using_union",
+        "tests.script_runner.optional_parameter:optional_str_parameter_using_or",
+    ],
+)
+@pytest.mark.parametrize(
+    "kwargs_list,expected_output",
+    [
+        pytest.param(
+            [{"name": "my_string", "value": "a string"}],
+            "a string",
+        ),
+        pytest.param(
+            [{"name": "my_string", "value": None}],
+            "null",
+        ),
+    ],
+)
+def test_script_optional_parameter(
+    monkeypatch: pytest.MonkeyPatch,
+    entrypoint,
+    kwargs_list,
+    expected_output,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__script_annotations", "")
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "kwargs_list,expected_output",
+    [
+        pytest.param(
+            [{"name": "my_int", "value": 123}],
+            "123",  # serialized one.
+        ),
+        pytest.param(
+            [{"name": "my_int", "value": None}],
+            "null",
+        ),
+    ],
+)
+def test_script_other_optional_parameter(
+    monkeypatch: pytest.MonkeyPatch,
+    kwargs_list,
+    expected_output,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__script_annotations", "")
+    entrypoint = "tests.script_runner.optional_parameter:optional_int_parameter"
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "kwargs_list,expected_output",
+    [
+        pytest.param(
+            [{"name": "my_param", "value": "a string"}],
+            "a string",
+        ),
+        pytest.param(
+            [{"name": "my_param", "value": 123}],
+            "123",
+        ),
+    ],
+)
+def test_script_union_parameter(
+    monkeypatch: pytest.MonkeyPatch,
+    kwargs_list,
+    expected_output,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__script_annotations", "")
+    entrypoint = "tests.script_runner.union_parameter:union_parameter"
+
+    # WHEN
+    output = _runner(entrypoint, kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
