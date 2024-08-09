@@ -1,3 +1,5 @@
+import sys
+
 try:
     from typing import Optional, Union  # type: ignore
 except ImportError:
@@ -20,9 +22,11 @@ def optional_str_parameter_using_union(my_string: Union[None, str]) -> Union[Non
     return my_string
 
 
-@script(constructor="runner")
-def optional_str_parameter_using_or(my_string: str | None) -> str | None:
-    return my_string
+if sys.version_info[0] >= 3 and sys.version_info[1] >= 10:
+    # Union types using OR operator are allowed since python 3.10.
+    @script(constructor="runner")
+    def optional_str_parameter_using_or(my_string: str | None) -> str | None:
+        return my_string
 
 
 @script(constructor="runner")
