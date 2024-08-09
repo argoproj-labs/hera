@@ -11,6 +11,7 @@ is running on Argo, where the global_config will not contain the experimental fe
 
 import importlib
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Literal
 from unittest.mock import MagicMock, patch
@@ -985,8 +986,13 @@ def test_runner_pydantic_output_with_result(
     [
         "tests.script_runner.optional_parameter:optional_str_parameter",
         "tests.script_runner.optional_parameter:optional_str_parameter_using_union",
-        "tests.script_runner.optional_parameter:optional_str_parameter_using_or",
-    ],
+    ]
+    + (
+        # Union types using OR operator are allowed since python 3.10.
+        ["tests.script_runner.optional_parameter:optional_str_parameter_using_or"]
+        if sys.version_info[0] >= 3 and sys.version_info[1] >= 10
+        else []
+    ),
 )
 @pytest.mark.parametrize(
     "kwargs_list,expected_output",
