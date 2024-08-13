@@ -1,10 +1,5 @@
 import sys
-
-try:
-    from typing import Optional, Union  # type: ignore
-except ImportError:
-    from typing_extensions import Optional, Union  # type: ignore
-
+from typing import Optional, Union
 
 from hera.shared import global_config
 from hera.workflows import script
@@ -32,3 +27,8 @@ if sys.version_info[0] >= 3 and sys.version_info[1] >= 10:
 @script(constructor="runner")
 def optional_int_parameter(my_int: Optional[int]) -> Optional[int]:
     return my_int
+
+
+@script(constructor="runner")
+def union_parameter(my_param: Union[str, int]) -> Union[str, int]:
+    return my_param

@@ -984,12 +984,12 @@ def test_runner_pydantic_output_with_result(
 @pytest.mark.parametrize(
     "entrypoint",
     [
-        "tests.script_runner.optional_parameter:optional_str_parameter",
-        "tests.script_runner.optional_parameter:optional_str_parameter_using_union",
+        "tests.script_runner.parameter_with_complex_types:optional_str_parameter",
+        "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_union",
     ]
     + (
         # Union types using OR operator are allowed since python 3.10.
-        ["tests.script_runner.optional_parameter:optional_str_parameter_using_or"]
+        ["tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_or"]
         if sys.version_info[0] >= 3 and sys.version_info[1] >= 10
         else []
     ),
@@ -1024,55 +1024,38 @@ def test_script_optional_parameter(
 
 
 @pytest.mark.parametrize(
-    "kwargs_list,expected_output",
+    "entrypoint,kwargs_list,expected_output",
     [
-        pytest.param(
+        [
+            "tests.script_runner.parameter_with_complex_types:optional_int_parameter",
             [{"name": "my_int", "value": 123}],
-            "123",  # serialized one.
-        ),
-        pytest.param(
+            "123",
+        ],
+        [
+            "tests.script_runner.parameter_with_complex_types:optional_int_parameter",
             [{"name": "my_int", "value": None}],
             "null",
-        ),
-    ],
-)
-def test_script_other_optional_parameter(
-    monkeypatch: pytest.MonkeyPatch,
-    kwargs_list,
-    expected_output,
-):
-    # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
-    entrypoint = "tests.script_runner.optional_parameter:optional_int_parameter"
-
-    # WHEN
-    output = _runner(entrypoint, kwargs_list)
-
-    # THEN
-    assert serialize(output) == expected_output
-
-
-@pytest.mark.parametrize(
-    "kwargs_list,expected_output",
-    [
-        pytest.param(
+        ],
+        [
+            "tests.script_runner.parameter_with_complex_types:union_parameter",
             [{"name": "my_param", "value": "a string"}],
             "a string",
-        ),
-        pytest.param(
+        ],
+        [
+            "tests.script_runner.parameter_with_complex_types:union_parameter",
             [{"name": "my_param", "value": 123}],
             "123",
-        ),
+        ],
     ],
 )
-def test_script_union_parameter(
+def test_script_with_complex_types(
     monkeypatch: pytest.MonkeyPatch,
+    entrypoint,
     kwargs_list,
     expected_output,
 ):
     # GIVEN
     monkeypatch.setenv("hera__script_annotations", "")
-    entrypoint = "tests.script_runner.union_parameter:union_parameter"
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
