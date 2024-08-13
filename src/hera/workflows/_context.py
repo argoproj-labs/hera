@@ -8,7 +8,7 @@ from contextvars import ContextVar
 from typing import List, Optional, TypeVar, Union
 
 from hera.shared import BaseMixin
-from hera.workflows.exceptions import InvalidType, TemplateNameConflict
+from hera.workflows.exceptions import InvalidType
 from hera.workflows.protocol import Subbable, TTemplate
 
 TNode = TypeVar("TNode", bound="SubNodeMixin")
@@ -102,8 +102,6 @@ class _HeraContext:
             found = False
             for t in pieces[0].templates:
                 if t.name == node.template.name:
-                    if t != node.template:
-                        raise TemplateNameConflict(f"Found multiple templates with the same name: {t.name}")
                     found = True
                     break
             if not found:

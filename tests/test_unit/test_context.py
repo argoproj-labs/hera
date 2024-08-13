@@ -1,7 +1,7 @@
 import pytest
 
-from hera.workflows import DAG, Steps, WorkflowTemplate, script
-from hera.workflows.exceptions import NodeNameConflict, TemplateNameConflict
+from hera.workflows import DAG, Step, Steps, WorkflowTemplate, script
+from hera.workflows.exceptions import NodeNameConflict
 
 
 class TestContextNameConflicts:
@@ -10,24 +10,30 @@ class TestContextNameConflicts:
     and that no two Task/Step nodes have the same name.
     """
 
-    def test_conflict_on_templates_with_same_name(self):
-        """Multiple templates can't have the same name."""
-        name = "name-of-dag-and-script"
+    def test_allows_recursive_steps(self):
+        """Recursive steps should not cause an error.
 
-        @script(name=name)
-        def example():
-            print("hello")
+        See https://github.com/argoproj-labs/hera/issues/1151
+        """
 
-        with pytest.raises(TemplateNameConflict):
-            with WorkflowTemplate(name="my-workflow", entrypoint=name), DAG(name=name):
-                example()
+        @script(constructor="inline")
+        def random_roll():
+            import random
 
-        with pytest.raises(TemplateNameConflict):
-            with WorkflowTemplate(
-                name="my-workflow",
-                entrypoint=name,
-            ), Steps(name=name):
-                example()
+            return random.randint(0, 2)
+
+        with WorkflowTemplate(name="my-workflow", entrypoint="steps"):
+            with Steps(name="sub-steps") as st:
+                random_number = random_roll()
+                Step(
+                    name="recurse",
+                    arguments={"input-num": random_number.result},
+                    template=st,
+                    when=f"{random_number.result} != 0",
+                )
+
+            with Steps(name="steps"):
+                st()
 
     def test_no_conflict_on_tasks_with_different_names_using_same_template(self):
         """Task nodes can have different names for the same script template."""

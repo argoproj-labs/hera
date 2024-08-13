@@ -26,7 +26,7 @@ class InvalidDispatchType(WorkflowsException):
 
 
 class TemplateNameConflict(WorkflowsException):
-    """Exception raised when multiple Templates are found with the same name.."""
+    """Currently unused."""
 
     ...
 
