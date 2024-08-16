@@ -433,6 +433,13 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
             return v
         return IntOrString(__root__=v)
 
+    def _build_init_containers(self) -> Optional[List[ModelUserContainer]]:
+        """Builds the `init_containers` field and optionally returns a list of `UserContainer`."""
+        if self.init_containers is None:
+            return None
+
+        return [i.build() if isinstance(i, UserContainer) else i for i in self.init_containers]
+
     def _build_sidecars(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `sidecars` field and optionally returns a list of `UserContainer`."""
         if self.sidecars is None:
