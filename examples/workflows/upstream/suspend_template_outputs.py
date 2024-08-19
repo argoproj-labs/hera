@@ -5,10 +5,10 @@ with Workflow(
     name="suspend-outputs",
     entrypoint="suspend",
 ) as w:
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay",
-        command=["cowsay"],
+    print_message = Container(
+        name="print-message",
+        image="busybox",
+        command=["echo"],
         inputs=[Parameter(name="message")],
         args=["{{inputs.parameters.message}}"],
     )
@@ -29,4 +29,4 @@ with Workflow(
                 ),
             ),
         )
-        whalesay(name="release", arguments={"message": "{{steps.approve.outputs.parameters.message}}"})
+        print_message(name="release", arguments={"message": "{{steps.approve.outputs.parameters.message}}"})

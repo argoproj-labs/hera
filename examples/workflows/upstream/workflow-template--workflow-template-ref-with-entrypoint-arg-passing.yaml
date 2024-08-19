@@ -7,6 +7,6 @@ spec:
     parameters:
     - name: message
       value: hello world
-  entrypoint: whalesay-template
+  entrypoint: print-message
   workflowTemplateRef:
-    name: workflow-template-whalesay-template
+    name: workflow-template-print-message

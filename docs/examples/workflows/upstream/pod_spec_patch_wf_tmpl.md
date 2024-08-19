@@ -21,14 +21,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     """
     with Workflow(
         generate_name="pod-spec-patch-",
-        entrypoint="whalesay",
+        entrypoint="hello-world",
         pod_spec_patch=pod_spec_patch,
         arguments=[Parameter(name="cpu-limit", value="100m"), Parameter(name="mem-limit", value="100Mi")],
     ) as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+        print_message = Container(
+            name="hello-world",
+            image="busybox",
+            command=["echo"],
             args=["hello world"],
             pod_spec_patch='{"containers":[{"name":"main", "resources":{"limits":{"cpu": '
             '"{{workflow.parameters.cpu-limit}}" }}}]}',
@@ -49,7 +49,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           value: 100m
         - name: mem-limit
           value: 100Mi
-      entrypoint: whalesay
+      entrypoint: hello-world
       podSpecPatch: |
         containers:
           - name: main
@@ -61,9 +61,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - hello world
           command:
-          - cowsay
-          image: docker/whalesay:latest
-        name: whalesay
+          - echo
+          image: busybox
+        name: hello-world
         podSpecPatch: '{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}"
           }}}]}'
     ```

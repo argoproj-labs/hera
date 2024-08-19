@@ -5,12 +5,12 @@ from hera.workflows import (
 
 with Workflow(
     generate_name="archive-location-",
-    entrypoint="whalesay",
+    entrypoint="hello-world",
 ) as w:
     Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["cowsay"],
+        name="hello-world",
+        image="busybox",
+        command=["echo"],
         args=["hello world"],
         archive_location={"archive_logs": True},
     )

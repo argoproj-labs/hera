@@ -6,9 +6,9 @@ from hera.workflows import (
 
 w = Workflow(
     generate_name="workflow-template-hello-world-",
-    entrypoint="whalesay-template",
+    entrypoint="print-message",
     workflow_template_ref=m.WorkflowTemplateRef(
-        name="workflow-template-whalesay-template",
+        name="workflow-template-print-message",
     ),
     arguments=Parameter(name="message", value="hello world"),
 )

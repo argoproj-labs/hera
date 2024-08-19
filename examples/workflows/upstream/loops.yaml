@@ -9,20 +9,20 @@ spec:
       args:
       - '{{inputs.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay:latest
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
-    name: whalesay
+    name: print-message
   - name: loop-example
     steps:
     - - arguments:
           parameters:
           - name: message
             value: '{{item}}'
-        name: print-message
-        template: whalesay
+        name: print-message-loop
+        template: print-message
         withItems:
         - hello world
         - goodbye world

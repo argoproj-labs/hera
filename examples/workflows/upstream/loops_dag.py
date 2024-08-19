@@ -5,9 +5,9 @@ with Workflow(
     entrypoint="loops-dag",
 ) as w:
     echo = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["cowsay"],
+        name="print-message",
+        image="busybox",
+        command=["echo"],
         args=["{{inputs.parameters.message}}"],
         inputs=[Parameter(name="message")],
     )

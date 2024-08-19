@@ -6,7 +6,7 @@ manifest = """- op: add
 """
 
 with Workflow(
-    generate_name="k8s-patch-workflow-",
+    generate_name="k8s-patch-json-workflow-",
     entrypoint="main",
 ) as w:
     Resource(

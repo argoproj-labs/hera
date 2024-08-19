@@ -7,15 +7,15 @@ spec:
   templates:
   - container:
       args:
-      - echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt
+      - echo generating message in volume; echo hello world | tee /mnt/vol/hello_world.txt
       command:
       - sh
       - -c
-      image: docker/whalesay:latest
+      image: busybox
       volumeMounts:
       - mountPath: /mnt/vol
         name: workdir
-    name: whalesay
+    name: hello-world-to-file
   - container:
       args:
       - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
@@ -26,13 +26,13 @@ spec:
       volumeMounts:
       - mountPath: /mnt/vol
         name: workdir
-    name: print-message
+    name: print-message-from-file
   - name: volumes-pvc-example
     steps:
     - - name: generate
-        template: whalesay
+        template: hello-world-to-file
     - - name: print
-        template: print-message
+        template: print-message-from-file
   volumeClaimTemplates:
   - metadata:
       name: workdir

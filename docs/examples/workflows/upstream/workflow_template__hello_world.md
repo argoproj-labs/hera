@@ -16,16 +16,16 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(
         generate_name="workflow-template-hello-world-",
-        entrypoint="whalesay",
+        entrypoint="hello-world-from-templateRef",
     ) as w:
-        whalesay_template_ref = TemplateRef(
-            name="workflow-template-whalesay-template",
-            template="whalesay-template",
+        print_message_template_ref = TemplateRef(
+            name="workflow-template-print-message",
+            template="print-message",
         )
-        with Steps(name="whalesay"):
+        with Steps(name="hello-world-from-templateRef"):
             Step(
-                name="call-whalesay-template",
-                template_ref=whalesay_template_ref,
+                name="call-print-message",
+                template_ref=print_message_template_ref,
                 arguments={"message": "hello world"},
             )
     ```
@@ -38,17 +38,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: workflow-template-hello-world-
     spec:
-      entrypoint: whalesay
+      entrypoint: hello-world-from-templateRef
       templates:
-      - name: whalesay
+      - name: hello-world-from-templateRef
         steps:
         - - arguments:
               parameters:
               - name: message
                 value: hello world
-            name: call-whalesay-template
+            name: call-print-message
             templateRef:
-              name: workflow-template-whalesay-template
-              template: whalesay-template
+              name: workflow-template-print-message
+              template: print-message
     ```
 

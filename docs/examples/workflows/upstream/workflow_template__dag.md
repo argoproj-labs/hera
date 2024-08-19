@@ -18,7 +18,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         generate_name="workflow-template-dag-diamond-",
         entrypoint="diamond",
     ) as w:
-        whalesay_template_ref = TemplateRef(name="workflow-template-whalesay-template", template="whalesay-template")
+        whalesay_template_ref = TemplateRef(name="workflow-template-print-message", template="print-message")
         inner_template_ref = TemplateRef(name="workflow-template-inner-dag", template="inner-diamond")
         with DAG(name="diamond"):
             A = Task(name="A", template_ref=whalesay_template_ref, arguments={"message": "A"})
@@ -47,8 +47,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 value: A
             name: A
             templateRef:
-              name: workflow-template-whalesay-template
-              template: whalesay-template
+              name: workflow-template-print-message
+              template: print-message
           - arguments:
               parameters:
               - name: message
@@ -56,8 +56,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             depends: A
             name: B
             templateRef:
-              name: workflow-template-whalesay-template
-              template: whalesay-template
+              name: workflow-template-print-message
+              template: print-message
           - depends: A
             name: C
             templateRef:
@@ -70,8 +70,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             depends: B && C
             name: D
             templateRef:
-              name: workflow-template-whalesay-template
-              template: whalesay-template
+              name: workflow-template-print-message
+              template: print-message
         name: diamond
     ```
 

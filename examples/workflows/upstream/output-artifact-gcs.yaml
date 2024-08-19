@@ -3,16 +3,16 @@ kind: Workflow
 metadata:
   generateName: output-artifact-gcs-
 spec:
-  entrypoint: whalesay
+  entrypoint: hello-world-to-file
   templates:
   - container:
       args:
-      - cowsay hello world | tee /tmp/hello_world.txt
+      - echo hello world | tee /tmp/hello_world.txt
       command:
       - sh
       - -c
-      image: docker/whalesay:latest
-    name: whalesay
+      image: busybox
+    name: hello-world-to-file
     outputs:
       artifacts:
       - gcs:

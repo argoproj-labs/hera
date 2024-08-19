@@ -23,10 +23,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         entrypoint="workflow-ignore",
         parallelism=1,
     ) as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+        hello_world = Container(
+            name="hello-world",
+            image="busybox",
+            command=["echo"],
             args=["hello world"],
         )
         intentional_fail = Container(
@@ -36,11 +36,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             args=["echo intentional failure; exit 1"],
         )
         with Steps(name="workflow-ignore") as steps:
-            whalesay(name="A")
+            hello_world(name="A")
             with steps.parallel():
-                whalesay(name="B")
+                hello_world(name="B")
                 intentional_fail(name="C", continue_on=m.ContinueOn(failed=True))
-            whalesay(name="D")
+            hello_world(name="D")
     ```
 
 === "YAML"
@@ -58,9 +58,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - hello world
           command:
-          - cowsay
-          image: docker/whalesay:latest
-        name: whalesay
+          - echo
+          image: busybox
+        name: hello-world
       - container:
           args:
           - echo intentional failure; exit 1
@@ -72,14 +72,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - name: workflow-ignore
         steps:
         - - name: A
-            template: whalesay
+            template: hello-world
         - - name: B
-            template: whalesay
+            template: hello-world
           - continueOn:
               failed: true
             name: C
             template: intentional-fail
         - - name: D
-            template: whalesay
+            template: hello-world
     ```
 

@@ -9,11 +9,11 @@ from hera.workflows import (
 )
 
 with Workflow(generate_name="artifactory-artifact-", entrypoint="artifact-example") as w:
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
+    hello_world_to_file = Container(
+        name="hello-world-to-file",
+        image="busybox",
         command=["sh", "-c"],
-        args=["cowsay hello world | tee /tmp/hello_world.txt"],
+        args=["echo hello world | tee /tmp/hello_world.txt"],
         outputs=[
             ArtifactoryArtifact(
                 name="hello-art",
@@ -24,8 +24,8 @@ with Workflow(generate_name="artifactory-artifact-", entrypoint="artifact-exampl
             )
         ],
     )
-    print_message = Container(
-        name="print-message",
+    print_message_from_file = Container(
+        name="print-message-from-file",
         image="alpine:latest",
         command=["sh", "-c"],
         args=["cat /tmp/message"],
@@ -41,9 +41,9 @@ with Workflow(generate_name="artifactory-artifact-", entrypoint="artifact-exampl
     )
 
     with Steps(name="artifact-example") as s:
-        Step(name="generate-artifact", template=whalesay)
+        Step(name="generate-artifact", template=hello_world_to_file)
         Step(
             name="consume-artifact",
-            template=print_message,
+            template=print_message_from_file,
             arguments=[Artifact(name="message", from_="{{steps.generate-artifact.outputs.artifacts.hello-art}}")],
         )

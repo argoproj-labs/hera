@@ -9,12 +9,12 @@ spec:
       args:
       - '{{inputs.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
-    name: whalesay
+    name: print-message
   - name: suspend
     steps:
     - - name: approve
@@ -24,7 +24,7 @@ spec:
           - name: message
             value: '{{steps.approve.outputs.parameters.message}}'
         name: release
-        template: whalesay
+        template: print-message
   - name: approve
     outputs:
       parameters:

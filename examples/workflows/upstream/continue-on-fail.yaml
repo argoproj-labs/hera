@@ -10,9 +10,9 @@ spec:
       args:
       - hello world
       command:
-      - cowsay
-      image: docker/whalesay:latest
-    name: whalesay
+      - echo
+      image: busybox
+    name: hello-world
   - container:
       args:
       - echo intentional failure; exit 1
@@ -24,12 +24,12 @@ spec:
   - name: workflow-ignore
     steps:
     - - name: A
-        template: whalesay
+        template: hello-world
     - - name: B
-        template: whalesay
+        template: hello-world
       - continueOn:
           failed: true
         name: C
         template: intentional-fail
     - - name: D
-        template: whalesay
+        template: hello-world

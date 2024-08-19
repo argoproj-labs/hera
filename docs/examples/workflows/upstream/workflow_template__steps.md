@@ -27,8 +27,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             Step(
                 name="hello1",
                 template_ref=m.TemplateRef(
-                    name="workflow-template-whalesay-template",
-                    template="whalesay-template",
+                    name="workflow-template-print-message",
+                    template="print-message",
                 ),
                 arguments=Parameter(name="message", value="hello1"),
             )
@@ -44,8 +44,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 Step(
                     name="hello2b",
                     template_ref=m.TemplateRef(
-                        name="workflow-template-whalesay-template",
-                        template="whalesay-template",
+                        name="workflow-template-print-message",
+                        template="print-message",
                     ),
                     arguments=Parameter(name="message", value="hello2b"),
                 )
@@ -69,8 +69,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 value: hello1
             name: hello1
             templateRef:
-              name: workflow-template-whalesay-template
-              template: whalesay-template
+              name: workflow-template-print-message
+              template: print-message
         - - arguments:
               parameters:
               - name: message
@@ -85,7 +85,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 value: hello2b
             name: hello2b
             templateRef:
-              name: workflow-template-whalesay-template
-              template: whalesay-template
+              name: workflow-template-print-message
+              template: print-message
     ```
 

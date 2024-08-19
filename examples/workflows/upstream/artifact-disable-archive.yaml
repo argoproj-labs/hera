@@ -7,13 +7,13 @@ spec:
   templates:
   - container:
       args:
-      - cowsay hello world | tee /tmp/hello_world.txt | tee /tmp/hello_world_nc.txt
+      - echo hello world | tee /tmp/hello_world.txt | tee /tmp/hello_world_nc.txt
         ; sleep 1
       command:
       - sh
       - -c
-      image: docker/whalesay:latest
-    name: whalesay
+      image: busybox
+    name: hello-world-to-file
     outputs:
       artifacts:
       - archive:
@@ -44,11 +44,11 @@ spec:
         path: /tmp/hello.txt
       - name: hello-txt-nc
         path: /tmp/hello_nc.txt
-    name: print-message
+    name: print-message-from-files
   - name: artifact-disable-archive
     steps:
     - - name: generate-artifact
-        template: whalesay
+        template: hello-world-to-file
     - - arguments:
           artifacts:
           - from: '{{steps.generate-artifact.outputs.artifacts.etc}}'
@@ -58,4 +58,4 @@ spec:
           - from: '{{steps.generate-artifact.outputs.artifacts.hello-txt-nc}}'
             name: hello-txt-nc
         name: consume-artifact
-        template: print-message
+        template: print-message-from-files

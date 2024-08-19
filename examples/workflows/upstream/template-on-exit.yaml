@@ -9,21 +9,21 @@ spec:
       args:
       - goodbye world
       command:
-      - cowsay
-      image: docker/whalesay
+      - echo
+      image: busybox
     name: exitContainer
   - container:
       args:
       - hello world
       command:
-      - cowsay
-      image: docker/whalesay
-    name: whalesay
+      - echo
+      image: busybox
+    name: hello-world
   - name: step-template
     steps:
     - - name: stepA
         onExit: exitContainer
-        template: whalesay
+        template: hello-world
     - - name: stepB
         onExit: exitContainer
-        template: whalesay
+        template: hello-world

@@ -1,15 +1,15 @@
 from hera.workflows import Artifact, Container, Step, Steps, Workflow
 
 with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
+    hello_world_to_file = Container(
+        name="hello-world-to-file",
+        image="busybox",
         command=["sh", "-c"],
-        args=["sleep 1; cowsay hello world | tee /tmp/hello_world.txt"],
+        args=["sleep 1; echo hello world | tee /tmp/hello_world.txt"],
         outputs=[Artifact(name="hello-art", path="/tmp/hello_world.txt")],
     )
-    print_message = Container(
-        name="print-message",
+    print_message_from_file = Container(
+        name="print-message-from-file",
         image="alpine:latest",
         command=["sh", "-c"],
         args=["cat /tmp/message"],
@@ -17,9 +17,9 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
     )
 
     with Steps(name="artifact-example") as s:
-        gen_step = Step(name="generate-artifact", template=whalesay)
+        gen_step = Step(name="generate-artifact", template=hello_world_to_file)
         Step(
             name="consume-artifact",
-            template=print_message,
+            template=print_message_from_file,
             arguments=gen_step.get_artifact("hello-art").with_name("message"),
         )
