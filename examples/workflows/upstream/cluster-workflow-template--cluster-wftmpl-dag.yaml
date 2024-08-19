@@ -14,8 +14,8 @@ spec:
         name: A
         templateRef:
           clusterScope: true
-          name: cluster-workflow-template-whalesay-template
-          template: whalesay-template
+          name: cluster-workflow-template-print-message
+          template: print-message
       - arguments:
           parameters:
           - name: message
@@ -24,8 +24,8 @@ spec:
         name: B
         templateRef:
           clusterScope: true
-          name: cluster-workflow-template-whalesay-template
-          template: whalesay-template
+          name: cluster-workflow-template-print-message
+          template: print-message
       - depends: A
         name: C
         templateRef:
@@ -40,6 +40,6 @@ spec:
         name: D
         templateRef:
           clusterScope: true
-          name: cluster-workflow-template-whalesay-template
-          template: whalesay-template
+          name: cluster-workflow-template-print-message
+          template: print-message
     name: diamond

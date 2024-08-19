@@ -19,30 +19,30 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ) as w:
         exit_ = Container(
             name="exit",
-            image="docker/whalesay",
-            command=["cowsay"],
+            image="busybox",
+            command=["echo"],
             args=["step cleanup"],
         )
-        whalesay = Container(
-            name="whalesay",
+        print_message = Container(
+            name="print-message",
             inputs=[Parameter(name="message")],
-            image="docker/whalesay",
-            command=["cowsay"],
+            image="busybox",
+            command=["echo"],
             args=["{{inputs.parameters.message}}"],
         )
         with Steps(name="main") as s:
-            whalesay(
+            print_message(
                 name="hello1",
                 arguments=[Parameter(name="message", value="hello1")],
                 on_exit=exit_,
             )
             with s.parallel():
-                whalesay(
+                print_message(
                     name="hello2a",
                     arguments=[Parameter(name="message", value="hello2a")],
                     on_exit=exit_,
                 )
-                whalesay(
+                print_message(
                     name="hello2b",
                     arguments=[Parameter(name="message", value="hello2b")],
                     on_exit=exit_,
@@ -63,19 +63,19 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - step cleanup
           command:
-          - cowsay
-          image: docker/whalesay
+          - echo
+          image: busybox
         name: exit
       - container:
           args:
           - '{{inputs.parameters.message}}'
           command:
-          - cowsay
-          image: docker/whalesay
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
-        name: whalesay
+        name: print-message
       - name: main
         steps:
         - - arguments:
@@ -84,20 +84,20 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 value: hello1
             name: hello1
             onExit: exit
-            template: whalesay
+            template: print-message
         - - arguments:
               parameters:
               - name: message
                 value: hello2a
             name: hello2a
             onExit: exit
-            template: whalesay
+            template: print-message
           - arguments:
               parameters:
               - name: message
                 value: hello2b
             name: hello2b
             onExit: exit
-            template: whalesay
+            template: print-message
     ```
 

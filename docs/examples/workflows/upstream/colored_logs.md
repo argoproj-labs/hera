@@ -15,7 +15,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
 
     @script(image="python:3.7", add_cwd_to_sys_path=False, env=[Env(name="PYTHONUNBUFFERED", value="1")])
-    def whalesay():
+    def print_colors():
         import time  # noqa: I001
         import random
 
@@ -34,8 +34,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             time.sleep(1)
 
 
-    with Workflow(generate_name="colored-logs-", entrypoint="whalesay") as w:
-        whalesay(name="whalesay")
+    with Workflow(generate_name="colored-logs-", entrypoint="print-colors") as w:
+        print_colors(name="print-colors")
     ```
 
 === "YAML"
@@ -46,9 +46,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: colored-logs-
     spec:
-      entrypoint: whalesay
+      entrypoint: print-colors
       templates:
-      - name: whalesay
+      - name: print-colors
         script:
           command:
           - python

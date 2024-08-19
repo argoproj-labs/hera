@@ -19,9 +19,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     w = Workflow(
         generate_name="workflow-template-hello-world-",
-        entrypoint="whalesay-template",
+        entrypoint="print-message",
         workflow_template_ref=m.WorkflowTemplateRef(
-            name="workflow-template-whalesay-template",
+            name="workflow-template-print-message",
         ),
         arguments=Parameter(name="message", value="hello world"),
     )
@@ -39,8 +39,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         parameters:
         - name: message
           value: hello world
-      entrypoint: whalesay-template
+      entrypoint: print-message
       workflowTemplateRef:
-        name: workflow-template-whalesay-template
+        name: workflow-template-print-message
     ```
 

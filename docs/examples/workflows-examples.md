@@ -71,8 +71,9 @@ Explore the examples through the side bar!
 | [k8s-jobs](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-jobs.yaml) |
 | [k8s-orchestration](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-orchestration.yaml) |
 | [k8s-owner-reference](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-owner-reference.yaml) |
-| [k8s-patch](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-patch.yaml) |
-| [k8s-patch-basic](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-patch-basic.yaml) |
+| [k8s-patch-json-pod](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-patch-json-pod.yaml) |
+| [k8s-patch-merge-pod](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-patch-merge-pod.yaml) |
+| [k8s-patch-pod](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-patch-pod.yaml) |
 | [k8s-wait-wf](https://github.com/argoproj/argo-workflows/blob/main/examples/k8s-wait-wf.yaml) |
 | [label-value-from-workflow](https://github.com/argoproj/argo-workflows/blob/main/examples/label-value-from-workflow.yaml) |
 | [loops-param-argument](https://github.com/argoproj/argo-workflows/blob/main/examples/loops-param-argument.yaml) |

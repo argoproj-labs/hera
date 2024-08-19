@@ -7,12 +7,12 @@ spec:
   templates:
   - container:
       args:
-      - cowsay hello world | tee /tmp/hello_world.txt
+      - echo hello world | tee /tmp/hello_world.txt
       command:
       - sh
       - -c
-      image: docker/whalesay:latest
-    name: whalesay
+      image: busybox
+    name: hello-world-to-file
     outputs:
       artifacts:
       - artifactory:
@@ -44,14 +44,14 @@ spec:
             name: my-artifactory-credentials
         name: message
         path: /tmp/message
-    name: print-message
+    name: print-message-from-file
   - name: artifact-example
     steps:
     - - name: generate-artifact
-        template: whalesay
+        template: hello-world-to-file
     - - arguments:
           artifacts:
           - from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
             name: message
         name: consume-artifact
-        template: print-message
+        template: print-message-from-file

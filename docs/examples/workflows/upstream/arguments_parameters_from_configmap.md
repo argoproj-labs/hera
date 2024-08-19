@@ -20,13 +20,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(
         generate_name="arguments-parameters-from-configmap-",
-        entrypoint="whalesay",
+        entrypoint="print-message-from-configmap",
         service_account_name="argo",
     ) as w:
         Container(
-            name="whalesay",
-            image="argoproj/argosay:v2",
-            args=["echo", "{{inputs.parameters.message}}"],
+            name="print-message-from-configmap",
+            image="busybox",
+            command=["echo"],
+            args=["{{inputs.parameters.message}}"],
             inputs=Parameter(
                 name="message",
                 value_from=m.ValueFrom(
@@ -47,14 +48,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: arguments-parameters-from-configmap-
     spec:
-      entrypoint: whalesay
+      entrypoint: print-message-from-configmap
       serviceAccountName: argo
       templates:
       - container:
           args:
-          - echo
           - '{{inputs.parameters.message}}'
-          image: argoproj/argosay:v2
+          command:
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
@@ -62,6 +64,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               configMapKeyRef:
                 key: msg
                 name: simple-parameters
-        name: whalesay
+        name: print-message-from-configmap
     ```
 

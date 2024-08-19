@@ -11,12 +11,12 @@ spec:
   suspend: false
   timezone: America/Los_Angeles
   workflowSpec:
-    entrypoint: whalesay
+    entrypoint: hello-world-with-time
     templates:
     - container:
         args:
         - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
         command:
-        - cowsay
-        image: docker/whalesay:latest
-      name: whalesay
+        - echo
+        image: busybox
+      name: hello-world-with-time

@@ -4,29 +4,29 @@ with Workflow(
     generate_name="steps-",
     entrypoint="hello-hello-hello",
 ) as w:
-    whalesay = Container(
-        name="whalesay",
+    print_message = Container(
+        name="print-message",
         inputs=[Parameter(name="message")],
-        image="docker/whalesay",
-        command=["cowsay"],
+        image="busybox",
+        command=["echo"],
         args=["{{inputs.parameters.message}}"],
     )
 
     with Steps(name="hello-hello-hello") as s:
         Step(
             name="hello1",
-            template="whalesay",
+            template=print_message,
             arguments=[Parameter(name="message", value="hello1")],
         )
 
         with s.parallel():
             Step(
                 name="hello2a",
-                template="whalesay",
+                template=print_message,
                 arguments=[Parameter(name="message", value="hello2a")],
             )
             Step(
                 name="hello2b",
-                template="whalesay",
+                template=print_message,
                 arguments=[Parameter(name="message", value="hello2b")],
             )

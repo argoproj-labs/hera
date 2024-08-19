@@ -9,7 +9,7 @@ spec:
       value: 100m
     - name: mem-limit
       value: 100Mi
-  entrypoint: whalesay
+  entrypoint: hello-world
   podSpecPatch: |
     containers:
       - name: main
@@ -21,8 +21,8 @@ spec:
       args:
       - hello world
       command:
-      - cowsay
-      image: docker/whalesay:latest
-    name: whalesay
+      - echo
+      image: busybox
+    name: hello-world
     podSpecPatch: '{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}"
       }}}]}'

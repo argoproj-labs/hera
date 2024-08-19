@@ -15,23 +15,23 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(generate_name="volumes-pvc-", entrypoint="volumes-pvc-example") as w:
         v = Volume(name="workdir", size="1Gi", mount_path="/mnt/vol")
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
+        hello_world_to_file = Container(
+            name="hello-world-to-file",
+            image="busybox",
             command=["sh", "-c"],
-            args=["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
+            args=["echo generating message in volume; echo hello world | tee /mnt/vol/hello_world.txt"],
             volumes=v,
         )
-        print_message = Container(
-            name="print-message",
+        print_message_from_file = Container(
+            name="print-message-from-file",
             image="alpine:latest",
             command=["sh", "-c"],
             args=["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"],
             volumes=v,
         )
         with Steps(name="volumes-pvc-example") as s:
-            whalesay(name="generate")
-            print_message(name="print")
+            hello_world_to_file(name="generate")
+            print_message_from_file(name="print")
     ```
 
 === "YAML"
@@ -46,15 +46,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - container:
           args:
-          - echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt
+          - echo generating message in volume; echo hello world | tee /mnt/vol/hello_world.txt
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
+          image: busybox
           volumeMounts:
           - mountPath: /mnt/vol
             name: workdir
-        name: whalesay
+        name: hello-world-to-file
       - container:
           args:
           - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
@@ -65,13 +65,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           volumeMounts:
           - mountPath: /mnt/vol
             name: workdir
-        name: print-message
+        name: print-message-from-file
       - name: volumes-pvc-example
         steps:
         - - name: generate
-            template: whalesay
+            template: hello-world-to-file
         - - name: print
-            template: print-message
+            template: print-message-from-file
       volumeClaimTemplates:
       - metadata:
           name: workdir

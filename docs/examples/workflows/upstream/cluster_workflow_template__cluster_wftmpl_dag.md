@@ -24,14 +24,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             A = Task(
                 name="A",
                 template_ref=m.TemplateRef(
-                    name="cluster-workflow-template-whalesay-template", template="whalesay-template", cluster_scope=True
+                    name="cluster-workflow-template-print-message", template="print-message", cluster_scope=True
                 ),
                 arguments=Parameter(name="message", value="A"),
             )
             B = Task(
                 name="B",
                 template_ref=m.TemplateRef(
-                    name="cluster-workflow-template-whalesay-template", template="whalesay-template", cluster_scope=True
+                    name="cluster-workflow-template-print-message", template="print-message", cluster_scope=True
                 ),
                 arguments=Parameter(name="message", value="B"),
             )
@@ -44,7 +44,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             D = Task(
                 name="D",
                 template_ref=m.TemplateRef(
-                    name="cluster-workflow-template-whalesay-template", template="whalesay-template", cluster_scope=True
+                    name="cluster-workflow-template-print-message", template="print-message", cluster_scope=True
                 ),
                 arguments=Parameter(name="message", value="D"),
             )
@@ -70,8 +70,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name: A
             templateRef:
               clusterScope: true
-              name: cluster-workflow-template-whalesay-template
-              template: whalesay-template
+              name: cluster-workflow-template-print-message
+              template: print-message
           - arguments:
               parameters:
               - name: message
@@ -80,8 +80,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name: B
             templateRef:
               clusterScope: true
-              name: cluster-workflow-template-whalesay-template
-              template: whalesay-template
+              name: cluster-workflow-template-print-message
+              template: print-message
           - depends: A
             name: C
             templateRef:
@@ -96,8 +96,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name: D
             templateRef:
               clusterScope: true
-              name: cluster-workflow-template-whalesay-template
-              template: whalesay-template
+              name: cluster-workflow-template-print-message
+              template: print-message
         name: diamond
     ```
 

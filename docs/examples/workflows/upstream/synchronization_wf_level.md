@@ -19,7 +19,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(
         generate_name="synchronization-wf-level-",
-        entrypoint="whalesay",
+        entrypoint="hello-world",
         synchronization=m.Synchronization(
             semaphore=m.SemaphoreRef(
                 config_map_key_ref=m.ConfigMapKeySelector(
@@ -29,10 +29,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             )
         ),
     ) as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+        hello_world = Container(
+            name="hello-world",
+            image="busybox",
+            command=["echo"],
             args=["hello world"],
         )
     ```
@@ -45,7 +45,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: synchronization-wf-level-
     spec:
-      entrypoint: whalesay
+      entrypoint: hello-world
       synchronization:
         semaphore:
           configMapKeyRef:
@@ -56,8 +56,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - hello world
           command:
-          - cowsay
-          image: docker/whalesay:latest
-        name: whalesay
+          - echo
+          image: busybox
+        name: hello-world
     ```
 

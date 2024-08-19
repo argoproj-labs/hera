@@ -9,9 +9,9 @@ spec:
       args:
       - hello world
       command:
-      - cowsay
-      image: docker/whalesay
-    name: whalesay
+      - echo
+      image: busybox
+    name: hello-world
   - name: approve
     suspend: {}
   - name: delay
@@ -20,10 +20,10 @@ spec:
   - name: suspend
     steps:
     - - name: build
-        template: whalesay
+        template: hello-world
     - - name: approve
         template: approve
     - - name: delay
         template: delay
     - - name: release
-        template: whalesay
+        template: hello-world

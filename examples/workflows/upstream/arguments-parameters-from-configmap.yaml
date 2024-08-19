@@ -3,14 +3,15 @@ kind: Workflow
 metadata:
   generateName: arguments-parameters-from-configmap-
 spec:
-  entrypoint: whalesay
+  entrypoint: print-message-from-configmap
   serviceAccountName: argo
   templates:
   - container:
       args:
-      - echo
       - '{{inputs.parameters.message}}'
-      image: argoproj/argosay:v2
+      command:
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
@@ -18,4 +19,4 @@ spec:
           configMapKeyRef:
             key: msg
             name: simple-parameters
-    name: whalesay
+    name: print-message-from-configmap

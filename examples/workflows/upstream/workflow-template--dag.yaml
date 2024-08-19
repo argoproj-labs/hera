@@ -13,8 +13,8 @@ spec:
             value: A
         name: A
         templateRef:
-          name: workflow-template-whalesay-template
-          template: whalesay-template
+          name: workflow-template-print-message
+          template: print-message
       - arguments:
           parameters:
           - name: message
@@ -22,8 +22,8 @@ spec:
         depends: A
         name: B
         templateRef:
-          name: workflow-template-whalesay-template
-          template: whalesay-template
+          name: workflow-template-print-message
+          template: print-message
       - depends: A
         name: C
         templateRef:
@@ -36,6 +36,6 @@ spec:
         depends: B && C
         name: D
         templateRef:
-          name: workflow-template-whalesay-template
-          template: whalesay-template
+          name: workflow-template-print-message
+          template: print-message
     name: diamond

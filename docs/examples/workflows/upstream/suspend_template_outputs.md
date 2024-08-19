@@ -18,10 +18,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         name="suspend-outputs",
         entrypoint="suspend",
     ) as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay",
-            command=["cowsay"],
+        print_message = Container(
+            name="print-message",
+            image="busybox",
+            command=["echo"],
             inputs=[Parameter(name="message")],
             args=["{{inputs.parameters.message}}"],
         )
@@ -42,7 +42,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     ),
                 ),
             )
-            whalesay(name="release", arguments={"message": "{{steps.approve.outputs.parameters.message}}"})
+            print_message(name="release", arguments={"message": "{{steps.approve.outputs.parameters.message}}"})
     ```
 
 === "YAML"
@@ -59,12 +59,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - '{{inputs.parameters.message}}'
           command:
-          - cowsay
-          image: docker/whalesay
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
-        name: whalesay
+        name: print-message
       - name: suspend
         steps:
         - - name: approve
@@ -74,7 +74,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               - name: message
                 value: '{{steps.approve.outputs.parameters.message}}'
             name: release
-            template: whalesay
+            template: print-message
       - name: approve
         outputs:
           parameters:

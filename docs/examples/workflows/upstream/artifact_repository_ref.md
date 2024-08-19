@@ -25,9 +25,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ) as w:
         Container(
             name="main",
-            image="docker/whalesay:latest",
+            image="busybox",
             command=["sh", "-c"],
-            args=["cowsay hello world | tee /tmp/hello_world.txt"],
+            args=["echo hello world | tee /tmp/hello_world.txt"],
             outputs=[Artifact(name="hello_world", path="/tmp/hello_world.txt")],
         )
     ```
@@ -46,11 +46,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - container:
           args:
-          - cowsay hello world | tee /tmp/hello_world.txt
+          - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
+          image: busybox
         name: main
         outputs:
           artifacts:

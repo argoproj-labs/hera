@@ -7,7 +7,7 @@ spec:
     parameters:
     - name: message
       value: hello world
-  entrypoint: whalesay-template
+  entrypoint: print-message
   workflowTemplateRef:
     clusterScope: true
-    name: cluster-workflow-template-whalesay-template
+    name: cluster-workflow-template-print-message

@@ -12,8 +12,8 @@ with Workflow(
 ) as w:
     Container(
         name="main",
-        image="docker/whalesay:latest",
+        image="busybox",
         command=["sh", "-c"],
-        args=["cowsay hello world | tee /tmp/hello_world.txt"],
+        args=["echo hello world | tee /tmp/hello_world.txt"],
         outputs=[Artifact(name="hello_world", path="/tmp/hello_world.txt")],
     )

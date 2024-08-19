@@ -17,16 +17,16 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         generate_name="suspend-template-",
         entrypoint="suspend",
     ) as w:
-        whalesay = Container(name="whalesay", image="docker/whalesay", command=["cowsay"], args=["hello world"])
+        hello_world = Container(name="hello-world", image="busybox", command=["echo"], args=["hello world"])
 
         approve = Suspend(name="approve")
         delay = Suspend(name="delay", duration=20)
 
         with Steps(name="suspend"):
-            whalesay(name="build")
+            hello_world(name="build")
             approve()
             delay()
-            whalesay(name="release")
+            hello_world(name="release")
     ```
 
 === "YAML"
@@ -43,9 +43,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - hello world
           command:
-          - cowsay
-          image: docker/whalesay
-        name: whalesay
+          - echo
+          image: busybox
+        name: hello-world
       - name: approve
         suspend: {}
       - name: delay
@@ -54,12 +54,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - name: suspend
         steps:
         - - name: build
-            template: whalesay
+            template: hello-world
         - - name: approve
             template: approve
         - - name: delay
             template: delay
         - - name: release
-            template: whalesay
+            template: hello-world
     ```
 

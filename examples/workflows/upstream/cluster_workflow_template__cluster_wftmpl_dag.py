@@ -11,14 +11,14 @@ with Workflow(generate_name="workflow-template-dag-diamond-", entrypoint="diamon
         A = Task(
             name="A",
             template_ref=m.TemplateRef(
-                name="cluster-workflow-template-whalesay-template", template="whalesay-template", cluster_scope=True
+                name="cluster-workflow-template-print-message", template="print-message", cluster_scope=True
             ),
             arguments=Parameter(name="message", value="A"),
         )
         B = Task(
             name="B",
             template_ref=m.TemplateRef(
-                name="cluster-workflow-template-whalesay-template", template="whalesay-template", cluster_scope=True
+                name="cluster-workflow-template-print-message", template="print-message", cluster_scope=True
             ),
             arguments=Parameter(name="message", value="B"),
         )
@@ -31,7 +31,7 @@ with Workflow(generate_name="workflow-template-dag-diamond-", entrypoint="diamon
         D = Task(
             name="D",
             template_ref=m.TemplateRef(
-                name="cluster-workflow-template-whalesay-template", template="whalesay-template", cluster_scope=True
+                name="cluster-workflow-template-print-message", template="print-message", cluster_scope=True
             ),
             arguments=Parameter(name="message", value="D"),
         )

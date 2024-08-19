@@ -15,13 +15,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(
         generate_name="arguments-parameters-",
-        entrypoint="whalesay",
+        entrypoint="print-message",
         arguments=Parameter(name="message", value="hello world"),
     ) as w:
         Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+            name="print-message",
+            image="busybox",
+            command=["echo"],
             args=["{{inputs.parameters.message}}"],
             inputs=Parameter(name="message"),
         )
@@ -39,17 +39,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         parameters:
         - name: message
           value: hello world
-      entrypoint: whalesay
+      entrypoint: print-message
       templates:
       - container:
           args:
           - '{{inputs.parameters.message}}'
           command:
-          - cowsay
-          image: docker/whalesay:latest
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
-        name: whalesay
+        name: print-message
     ```
 
