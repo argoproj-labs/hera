@@ -177,7 +177,7 @@ class ContainerSet(
             executor=self.executor,
             fail_fast=self.fail_fast,
             host_aliases=self.host_aliases,
-            init_containers=self.init_containers,
+            init_containers=self._build_init_containers(),
             inputs=self._build_inputs(),
             memoize=self.memoize,
             metadata=self._build_metadata(),

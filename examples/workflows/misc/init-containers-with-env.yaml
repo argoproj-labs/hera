@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: container-
+spec:
+  entrypoint: cowsay
+  templates:
+  - container:
+      command:
+      - cowsay
+      - foo
+      image: docker/whalesay
+    name: cowsay
+    initContainers:
+    - name: init
+      image: busybox
+      command: [ "sh", "-c", "echo Hello from the init container ($FOO, $SECRET)" ]
+      env:
+      - name: FOO
+        value: "bar"
+      - name: SECRET
+        valueFrom:
+          secretKeyRef:
+            name: my-secret
+            key: password
