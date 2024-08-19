@@ -9,12 +9,12 @@ spec:
       args:
       - '{{inputs.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
-    name: whalesay
+    name: print-message
   - name: hello-hello-hello
     steps:
     - - arguments:
@@ -22,16 +22,16 @@ spec:
           - name: message
             value: hello1
         name: hello1
-        template: whalesay
+        template: print-message
     - - arguments:
           parameters:
           - name: message
             value: hello2a
         name: hello2a
-        template: whalesay
+        template: print-message
       - arguments:
           parameters:
           - name: message
             value: hello2b
         name: hello2b
-        template: whalesay
+        template: print-message

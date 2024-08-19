@@ -5,12 +5,12 @@ from hera.workflows import (
     models as m,
 )
 
-with Workflow(generate_name="output-artifact-gcs-", entrypoint="whalesay") as w:
+with Workflow(generate_name="output-artifact-gcs-", entrypoint="hello-world-to-file") as w:
     Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
+        name="hello-world-to-file",
+        image="busybox",
         command=["sh", "-c"],
-        args=["cowsay hello world | tee /tmp/hello_world.txt"],
+        args=["echo hello world | tee /tmp/hello_world.txt"],
         outputs=[
             GCSArtifact(
                 name="message",

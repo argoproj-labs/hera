@@ -1,17 +1,17 @@
 from hera.workflows import Container, Parameter, Steps, Workflow
 
 with Workflow(generate_name="loops-", entrypoint="loop-example") as w:
-    whalesay = Container(
-        name="whalesay",
+    print_message = Container(
+        name="print-message",
         inputs=Parameter(name="message"),
-        image="docker/whalesay:latest",
-        command=["cowsay"],
+        image="busybox",
+        command=["echo"],
         args=["{{inputs.parameters.message}}"],
     )
 
     with Steps(name="loop-example"):
-        whalesay(
-            name="print-message",
+        print_message(
+            name="print-message-loop",
             arguments={"message": "{{item}}"},
             with_items=["hello world", "goodbye world"],
         )

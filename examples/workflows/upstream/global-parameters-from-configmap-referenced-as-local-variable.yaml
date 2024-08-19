@@ -10,15 +10,16 @@ spec:
         configMapKeyRef:
           key: msg
           name: simple-parameters
-  entrypoint: whalesay
+  entrypoint: print-message
   serviceAccountName: argo
   templates:
   - container:
       args:
-      - echo
       - '{{inputs.parameters.message}}'
-      image: argoproj/argosay:v2
+      command:
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
-    name: whalesay
+    name: print-message

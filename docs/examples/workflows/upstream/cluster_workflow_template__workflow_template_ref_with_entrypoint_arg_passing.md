@@ -19,10 +19,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     w = Workflow(
         generate_name="cluster-workflow-template-hello-world-",
-        entrypoint="whalesay-template",
+        entrypoint="print-message",
         arguments=Parameter(name="message", value="hello world"),
         workflow_template_ref=m.WorkflowTemplateRef(
-            name="cluster-workflow-template-whalesay-template",
+            name="cluster-workflow-template-print-message",
             cluster_scope=True,
         ),
     )
@@ -40,9 +40,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         parameters:
         - name: message
           value: hello world
-      entrypoint: whalesay-template
+      entrypoint: print-message
       workflowTemplateRef:
         clusterScope: true
-        name: cluster-workflow-template-whalesay-template
+        name: cluster-workflow-template-print-message
     ```
 

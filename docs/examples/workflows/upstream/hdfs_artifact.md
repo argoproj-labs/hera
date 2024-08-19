@@ -21,11 +21,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     )
 
     with Workflow(generate_name="hdfs-artifact-", entrypoint="artifact-example") as w:
-        whalesay = Container(
-            name="whalesay",
+        hello_world_to_file = Container(
+            name="hello-world-to-file",
             command=["sh", "-c"],
-            args=["cowsay hello world | tee /tmp/hello_world.txt"],
-            image="docker/whalesay:latest",
+            args=["echo hello world | tee /tmp/hello_world.txt"],
+            image="busybox",
             outputs=[
                 HDFSArtifact(
                     name="hello-art",
@@ -40,8 +40,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 )
             ],
         )
-        print_message = Container(
-            name="print-message",
+        print_message_from_hdfs = Container(
+            name="print-message-from-hdfs",
             image="alpine:latest",
             command=["sh", "-c"],
             args=["cat /tmp/message"],
@@ -61,10 +61,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         )
 
         with Steps(name="artifact-example") as s:
-            Step(name="generate-artifact", template=whalesay)
+            Step(name="generate-artifact", template=hello_world_to_file)
             Step(
                 name="consume-artifact",
-                template=print_message,
+                template=print_message_from_hdfs,
                 arguments=[Artifact(name="message", from_="{{steps.generate-artifact.outputs.artifacts.hello-art}}")],
             )
     ```
@@ -81,12 +81,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - container:
           args:
-          - cowsay hello world | tee /tmp/hello_world.txt
+          - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
-        name: whalesay
+          image: busybox
+        name: hello-world-to-file
         outputs:
           artifacts:
           - hdfs:
@@ -116,16 +116,16 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               path: /tmp/argo/foo
             name: message
             path: /tmp/message
-        name: print-message
+        name: print-message-from-hdfs
       - name: artifact-example
         steps:
         - - name: generate-artifact
-            template: whalesay
+            template: hello-world-to-file
         - - arguments:
               artifacts:
               - from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
                 name: message
             name: consume-artifact
-            template: print-message
+            template: print-message-from-hdfs
     ```
 

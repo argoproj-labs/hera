@@ -7,13 +7,14 @@ from hera.workflows import (
 
 with Workflow(
     generate_name="arguments-parameters-from-configmap-",
-    entrypoint="whalesay",
+    entrypoint="print-message-from-configmap",
     service_account_name="argo",
 ) as w:
     Container(
-        name="whalesay",
-        image="argoproj/argosay:v2",
-        args=["echo", "{{inputs.parameters.message}}"],
+        name="print-message-from-configmap",
+        image="busybox",
+        command=["echo"],
+        args=["{{inputs.parameters.message}}"],
         inputs=Parameter(
             name="message",
             value_from=m.ValueFrom(

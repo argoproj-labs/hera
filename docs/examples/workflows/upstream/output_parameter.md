@@ -20,9 +20,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     )
 
     with Workflow(generate_name="output-parameter-", entrypoint="output-parameter") as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
+        hello_world_to_file = Container(
+            name="hello-world-to-file",
+            image="busybox",
             command=["sh", "-c"],
             args=["sleep 1; echo -n hello world > /tmp/hello_world.txt"],
             outputs=Parameter(
@@ -35,13 +35,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         )
         print_message = Container(
             name="print-message",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+            image="busybox",
+            command=["echo"],
             args=["{{inputs.parameters.message}}"],
             inputs=Parameter(name="message"),
         )
         with Steps(name="output-parameter"):
-            g = whalesay(name="generate-parameter")
+            g = hello_world_to_file(name="generate-parameter")
             print_message(
                 name="consume-parameter",
                 arguments={"message": "{{steps.generate-parameter.outputs.parameters.hello-param}}"},
@@ -64,8 +64,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
-        name: whalesay
+          image: busybox
+        name: hello-world-to-file
         outputs:
           parameters:
           - name: hello-param
@@ -76,8 +76,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - '{{inputs.parameters.message}}'
           command:
-          - cowsay
-          image: docker/whalesay:latest
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
@@ -85,7 +85,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - name: output-parameter
         steps:
         - - name: generate-parameter
-            template: whalesay
+            template: hello-world-to-file
         - - arguments:
               parameters:
               - name: message

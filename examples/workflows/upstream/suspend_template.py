@@ -4,13 +4,13 @@ with Workflow(
     generate_name="suspend-template-",
     entrypoint="suspend",
 ) as w:
-    whalesay = Container(name="whalesay", image="docker/whalesay", command=["cowsay"], args=["hello world"])
+    hello_world = Container(name="hello-world", image="busybox", command=["echo"], args=["hello world"])
 
     approve = Suspend(name="approve")
     delay = Suspend(name="delay", duration=20)
 
     with Steps(name="suspend"):
-        whalesay(name="build")
+        hello_world(name="build")
         approve()
         delay()
-        whalesay(name="release")
+        hello_world(name="release")

@@ -18,12 +18,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         models as m,
     )
 
-    with Workflow(generate_name="output-artifact-s3-", entrypoint="whalesay") as w:
+    with Workflow(generate_name="output-artifact-s3-", entrypoint="hello-world-to-file") as w:
         Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
+            name="hello-world-to-file",
+            image="busybox",
             command=["sh", "-c"],
-            args=["cowsay hello world | tee /tmp/hello_world.txt"],
+            args=["echo hello world | tee /tmp/hello_world.txt"],
             outputs=[
                 AzureArtifact(
                     name="message",
@@ -45,16 +45,16 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: output-artifact-s3-
     spec:
-      entrypoint: whalesay
+      entrypoint: hello-world-to-file
       templates:
       - container:
           args:
-          - cowsay hello world | tee /tmp/hello_world.txt
+          - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
-        name: whalesay
+          image: busybox
+        name: hello-world-to-file
         outputs:
           artifacts:
           - azure:

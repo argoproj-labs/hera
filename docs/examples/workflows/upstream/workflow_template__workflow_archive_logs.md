@@ -15,13 +15,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(
         generate_name="archive-location-",
-        entrypoint="whalesay",
+        entrypoint="hello-world",
         archive_logs=True,
     ) as w:
         Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+            name="hello-world",
+            image="busybox",
+            command=["echo"],
             args=["hello world"],
         )
     ```
@@ -35,14 +35,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       generateName: archive-location-
     spec:
       archiveLogs: true
-      entrypoint: whalesay
+      entrypoint: hello-world
       templates:
       - container:
           args:
           - hello world
           command:
-          - cowsay
-          image: docker/whalesay:latest
-        name: whalesay
+          - echo
+          image: busybox
+        name: hello-world
     ```
 

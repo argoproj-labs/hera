@@ -7,15 +7,15 @@ spec:
     parameters:
     - name: message
       value: hello world
-  entrypoint: whalesay
+  entrypoint: print-message
   templates:
   - container:
       args:
       - '{{inputs.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay:latest
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
-    name: whalesay
+    name: print-message

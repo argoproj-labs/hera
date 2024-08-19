@@ -21,11 +21,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     )
 
     with Workflow(generate_name="artifact-passing-subpath-", entrypoint="artifact-example") as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
+        hello_world_to_file = Container(
+            name="hello-world-to-file",
+            image="busybox",
             command=["sh", "-c"],
-            args=["sleep 1; cowsay hello world | tee /tmp/hello_world.txt"],
+            args=["sleep 1; echo hello world | tee /tmp/hello_world.txt"],
             outputs=[Artifact(name="hello-art", path="/tmp/", archive=NoneArchiveStrategy())],
         )
         print_message_dir = Container(
@@ -35,15 +35,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             args=["ls /tmp/message"],
             inputs=[Artifact(name="message", path="/tmp/message")],
         )
-        print_message = Container(
-            name="print-message",
+        print_message_from_file = Container(
+            name="print-message-from-file",
             image="alpine:latest",
             command=["sh", "-c"],
             args=["cat /tmp/message"],
             inputs=[Artifact(name="message", path="/tmp/message")],
         )
         with Steps(name="artifact-example") as s:
-            Step(name="generate-artifact", template=whalesay)
+            Step(name="generate-artifact", template=hello_world_to_file)
             Step(
                 name="list-artifact",
                 template=print_message_dir,
@@ -51,7 +51,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             )
             Step(
                 name="consume-artifact",
-                template=print_message,
+                template=print_message_from_file,
                 arguments=[
                     Artifact(
                         name="message",
@@ -74,12 +74,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - container:
           args:
-          - sleep 1; cowsay hello world | tee /tmp/hello_world.txt
+          - sleep 1; echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
-        name: whalesay
+          image: busybox
+        name: hello-world-to-file
         outputs:
           artifacts:
           - archive:
@@ -109,11 +109,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           artifacts:
           - name: message
             path: /tmp/message
-        name: print-message
+        name: print-message-from-file
       - name: artifact-example
         steps:
         - - name: generate-artifact
-            template: whalesay
+            template: hello-world-to-file
         - - arguments:
               artifacts:
               - from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
@@ -126,6 +126,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 name: message
                 subPath: hello_world.txt
             name: consume-artifact
-            template: print-message
+            template: print-message-from-file
     ```
 

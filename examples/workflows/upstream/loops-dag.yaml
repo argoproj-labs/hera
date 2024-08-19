@@ -9,12 +9,12 @@ spec:
       args:
       - '{{inputs.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay:latest
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
-    name: whalesay
+    name: print-message
   - dag:
       tasks:
       - arguments:
@@ -22,14 +22,14 @@ spec:
           - name: message
             value: A
         name: A
-        template: whalesay
+        template: print-message
       - arguments:
           parameters:
           - name: message
             value: '{{item}}'
         depends: A
         name: B
-        template: whalesay
+        template: print-message
         withItems:
         - foo
         - bar
@@ -40,5 +40,5 @@ spec:
             value: C
         depends: B
         name: C
-        template: whalesay
+        template: print-message
     name: loops-dag

@@ -8,14 +8,14 @@ pod_spec_patch = """containers:
 """
 with Workflow(
     generate_name="pod-spec-patch-",
-    entrypoint="whalesay",
+    entrypoint="hello-world",
     pod_spec_patch=pod_spec_patch,
     arguments=[Parameter(name="cpu-limit", value="100m"), Parameter(name="mem-limit", value="100Mi")],
 ) as w:
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["cowsay"],
+    print_message = Container(
+        name="hello-world",
+        image="busybox",
+        command=["echo"],
         args=["hello world"],
         pod_spec_patch='{"containers":[{"name":"main", "resources":{"limits":{"cpu": '
         '"{{workflow.parameters.cpu-limit}}" }}}]}',

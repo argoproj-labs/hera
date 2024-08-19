@@ -13,8 +13,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ```python linenums="1"
     from hera.workflows import Container, Workflow
 
-    with Workflow(generate_name="hello-world-", image_pull_secrets="docker-registry-secret", entrypoint="whalesay") as w:
-        Container(name="whalesay", image="docker/whalesay:latest", command=["cowsay"], args=["hello world"])
+    with Workflow(
+        generate_name="hello-world-",
+        image_pull_secrets="docker-registry-secret",
+        entrypoint="hello-world",
+    ) as w:
+        Container(
+            name="hello-world",
+            image="busybox",
+            command=["echo"],
+            args=["hello world"],
+        )
     ```
 
 === "YAML"
@@ -25,7 +34,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: hello-world-
     spec:
-      entrypoint: whalesay
+      entrypoint: hello-world
       imagePullSecrets:
       - name: docker-registry-secret
       templates:
@@ -33,8 +42,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - hello world
           command:
-          - cowsay
-          image: docker/whalesay:latest
-        name: whalesay
+          - echo
+          image: busybox
+        name: hello-world
     ```
 

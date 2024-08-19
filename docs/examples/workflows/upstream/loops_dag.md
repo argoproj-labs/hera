@@ -18,9 +18,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         entrypoint="loops-dag",
     ) as w:
         echo = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+            name="print-message",
+            image="busybox",
+            command=["echo"],
             args=["{{inputs.parameters.message}}"],
             inputs=[Parameter(name="message")],
         )
@@ -45,12 +45,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - '{{inputs.parameters.message}}'
           command:
-          - cowsay
-          image: docker/whalesay:latest
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
-        name: whalesay
+        name: print-message
       - dag:
           tasks:
           - arguments:
@@ -58,14 +58,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               - name: message
                 value: A
             name: A
-            template: whalesay
+            template: print-message
           - arguments:
               parameters:
               - name: message
                 value: '{{item}}'
             depends: A
             name: B
-            template: whalesay
+            template: print-message
             withItems:
             - foo
             - bar
@@ -76,7 +76,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 value: C
             depends: B
             name: C
-            template: whalesay
+            template: print-message
         name: loops-dag
     ```
 

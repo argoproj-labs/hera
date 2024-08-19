@@ -19,7 +19,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     ) as w:
         Container(
             name="main",
-            image="docker/whalesay:latest",
+            image="busybox",
             command=["sh", "-c", "for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done"],
         )
     ```
@@ -39,7 +39,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - sh
           - -c
           - for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done
-          image: docker/whalesay:latest
+          image: busybox
         name: main
     ```
 

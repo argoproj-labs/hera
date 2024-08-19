@@ -11,8 +11,8 @@ with Workflow(generate_name="workflow-template-steps-", entrypoint="hello-hello-
         Step(
             name="hello1",
             template_ref=m.TemplateRef(
-                name="workflow-template-whalesay-template",
-                template="whalesay-template",
+                name="workflow-template-print-message",
+                template="print-message",
             ),
             arguments=Parameter(name="message", value="hello1"),
         )
@@ -29,8 +29,8 @@ with Workflow(generate_name="workflow-template-steps-", entrypoint="hello-hello-
             Step(
                 name="hello2b",
                 template_ref=m.TemplateRef(
-                    name="workflow-template-whalesay-template",
-                    template="whalesay-template",
+                    name="workflow-template-print-message",
+                    template="print-message",
                 ),
                 arguments=Parameter(name="message", value="hello2b"),
             )

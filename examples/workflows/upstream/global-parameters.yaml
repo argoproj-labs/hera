@@ -7,12 +7,12 @@ spec:
     parameters:
     - name: message
       value: hello world
-  entrypoint: whalesay1
+  entrypoint: print-message
   templates:
   - container:
       args:
       - '{{workflow.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay:latest
-    name: whalesay1
+      - echo
+      image: busybox
+    name: print-message

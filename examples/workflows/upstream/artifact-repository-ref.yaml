@@ -9,11 +9,11 @@ spec:
   templates:
   - container:
       args:
-      - cowsay hello world | tee /tmp/hello_world.txt
+      - echo hello world | tee /tmp/hello_world.txt
       command:
       - sh
       - -c
-      image: docker/whalesay:latest
+      image: busybox
     name: main
     outputs:
       artifacts:

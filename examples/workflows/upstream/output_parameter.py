@@ -7,9 +7,9 @@ from hera.workflows import (
 )
 
 with Workflow(generate_name="output-parameter-", entrypoint="output-parameter") as w:
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
+    hello_world_to_file = Container(
+        name="hello-world-to-file",
+        image="busybox",
         command=["sh", "-c"],
         args=["sleep 1; echo -n hello world > /tmp/hello_world.txt"],
         outputs=Parameter(
@@ -22,13 +22,13 @@ with Workflow(generate_name="output-parameter-", entrypoint="output-parameter") 
     )
     print_message = Container(
         name="print-message",
-        image="docker/whalesay:latest",
-        command=["cowsay"],
+        image="busybox",
+        command=["echo"],
         args=["{{inputs.parameters.message}}"],
         inputs=Parameter(name="message"),
     )
     with Steps(name="output-parameter"):
-        g = whalesay(name="generate-parameter")
+        g = hello_world_to_file(name="generate-parameter")
         print_message(
             name="consume-parameter",
             arguments={"message": "{{steps.generate-parameter.outputs.parameters.hello-param}}"},

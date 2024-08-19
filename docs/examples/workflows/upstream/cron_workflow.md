@@ -15,7 +15,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with CronWorkflow(
         name="hello-world",
-        entrypoint="whalesay",
+        entrypoint="hello-world-with-time",
         schedule="* * * * *",
         timezone="America/Los_Angeles",
         starting_deadline_seconds=0,
@@ -24,10 +24,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         failed_jobs_history_limit=4,
         cron_suspend=False,
     ) as w:
-        whalesay = Container(
-            name="whalesay",
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+        print_message = Container(
+            name="hello-world-with-time",
+            image="busybox",
+            command=["echo"],
             args=["🕓 hello world. Scheduled on: {{workflow.scheduledTime}}"],
         )
     ```
@@ -48,14 +48,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       suspend: false
       timezone: America/Los_Angeles
       workflowSpec:
-        entrypoint: whalesay
+        entrypoint: hello-world-with-time
         templates:
         - container:
             args:
             - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
             command:
-            - cowsay
-            image: docker/whalesay:latest
-          name: whalesay
+            - echo
+            image: busybox
+          name: hello-world-with-time
     ```
 

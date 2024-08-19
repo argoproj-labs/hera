@@ -20,7 +20,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     with Workflow(
         generate_name="global-parameter-from-configmap-referenced-as-local-variable-",
-        entrypoint="whalesay",
+        entrypoint="print-message",
         arguments=Parameter(
             name="message",
             value_from=m.ValueFrom(config_map_key_ref=m.ConfigMapKeySelector(name="simple-parameters", key="msg")),
@@ -28,9 +28,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         service_account_name="argo",
     ) as w:
         Container(
-            name="whalesay",
-            image="argoproj/argosay:v2",
-            args=["echo", "{{inputs.parameters.message}}"],
+            name="print-message",
+            image="busybox",
+            command=["echo"],
+            args=["{{inputs.parameters.message}}"],
             inputs=Parameter(name="message"),
         )
     ```
@@ -50,17 +51,18 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             configMapKeyRef:
               key: msg
               name: simple-parameters
-      entrypoint: whalesay
+      entrypoint: print-message
       serviceAccountName: argo
       templates:
       - container:
           args:
-          - echo
           - '{{inputs.parameters.message}}'
-          image: argoproj/argosay:v2
+          command:
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
-        name: whalesay
+        name: print-message
     ```
 

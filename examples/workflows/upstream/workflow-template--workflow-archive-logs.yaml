@@ -4,12 +4,12 @@ metadata:
   generateName: archive-location-
 spec:
   archiveLogs: true
-  entrypoint: whalesay
+  entrypoint: hello-world
   templates:
   - container:
       args:
       - hello world
       command:
-      - cowsay
-      image: docker/whalesay:latest
-    name: whalesay
+      - echo
+      image: busybox
+    name: hello-world

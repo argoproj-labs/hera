@@ -11,8 +11,8 @@ spec:
       command:
       - sh
       - -c
-      image: docker/whalesay:latest
-    name: whalesay
+      image: busybox
+    name: hello-world-to-file
     outputs:
       parameters:
       - name: hello-param
@@ -23,8 +23,8 @@ spec:
       args:
       - '{{inputs.parameters.message}}'
       command:
-      - cowsay
-      image: docker/whalesay:latest
+      - echo
+      image: busybox
     inputs:
       parameters:
       - name: message
@@ -32,7 +32,7 @@ spec:
   - name: output-parameter
     steps:
     - - name: generate-parameter
-        template: whalesay
+        template: hello-world-to-file
     - - arguments:
           parameters:
           - name: message

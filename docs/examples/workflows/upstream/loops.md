@@ -14,17 +14,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     from hera.workflows import Container, Parameter, Steps, Workflow
 
     with Workflow(generate_name="loops-", entrypoint="loop-example") as w:
-        whalesay = Container(
-            name="whalesay",
+        print_message = Container(
+            name="print-message",
             inputs=Parameter(name="message"),
-            image="docker/whalesay:latest",
-            command=["cowsay"],
+            image="busybox",
+            command=["echo"],
             args=["{{inputs.parameters.message}}"],
         )
 
         with Steps(name="loop-example"):
-            whalesay(
-                name="print-message",
+            print_message(
+                name="print-message-loop",
                 arguments={"message": "{{item}}"},
                 with_items=["hello world", "goodbye world"],
             )
@@ -44,20 +44,20 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           args:
           - '{{inputs.parameters.message}}'
           command:
-          - cowsay
-          image: docker/whalesay:latest
+          - echo
+          image: busybox
         inputs:
           parameters:
           - name: message
-        name: whalesay
+        name: print-message
       - name: loop-example
         steps:
         - - arguments:
               parameters:
               - name: message
                 value: '{{item}}'
-            name: print-message
-            template: whalesay
+            name: print-message-loop
+            template: print-message
             withItems:
             - hello world
             - goodbye world

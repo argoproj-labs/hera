@@ -10,10 +10,10 @@ with Workflow(
     entrypoint="workflow-ignore",
     parallelism=1,
 ) as w:
-    whalesay = Container(
-        name="whalesay",
-        image="docker/whalesay:latest",
-        command=["cowsay"],
+    hello_world = Container(
+        name="hello-world",
+        image="busybox",
+        command=["echo"],
         args=["hello world"],
     )
     intentional_fail = Container(
@@ -23,8 +23,8 @@ with Workflow(
         args=["echo intentional failure; exit 1"],
     )
     with Steps(name="workflow-ignore") as steps:
-        whalesay(name="A")
+        hello_world(name="A")
         with steps.parallel():
-            whalesay(name="B")
+            hello_world(name="B")
             intentional_fail(name="C", continue_on=m.ContinueOn(failed=True))
-        whalesay(name="D")
+        hello_world(name="D")

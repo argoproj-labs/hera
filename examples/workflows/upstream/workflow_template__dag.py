@@ -5,7 +5,7 @@ with Workflow(
     generate_name="workflow-template-dag-diamond-",
     entrypoint="diamond",
 ) as w:
-    whalesay_template_ref = TemplateRef(name="workflow-template-whalesay-template", template="whalesay-template")
+    whalesay_template_ref = TemplateRef(name="workflow-template-print-message", template="print-message")
     inner_template_ref = TemplateRef(name="workflow-template-inner-dag", template="inner-diamond")
     with DAG(name="diamond"):
         A = Task(name="A", template_ref=whalesay_template_ref, arguments={"message": "A"})
