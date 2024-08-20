@@ -147,7 +147,7 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value():
     def unknown_annotations_ignored(my_optional_string: Optional[str]) -> str:
         return "Got: {}".format(my_optional_string)
 
-    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' doesn't have default value."):
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
         _get_inputs_from_callable(unknown_annotations_ignored)
 
 
@@ -156,7 +156,7 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value_2():
     def unknown_annotations_ignored(my_optional_string: Annotated[Optional[str], "123"]) -> str:
         return "Got: {}".format(my_optional_string)
 
-    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' doesn't have default value."):
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
         _get_inputs_from_callable(unknown_annotations_ignored)
 
 
@@ -165,7 +165,7 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value_3():
     def unknown_annotations_ignored(my_optional_string: Union[str, None]) -> str:
         return "Got: {}".format(my_optional_string)
 
-    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' doesn't have default value."):
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
         _get_inputs_from_callable(unknown_annotations_ignored)
 
 
@@ -174,7 +174,7 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value_4():
     def unknown_annotations_ignored(my_optional_string: Union[None, str]) -> str:
         return "Got: {}".format(my_optional_string)
 
-    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' doesn't have default value."):
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
         _get_inputs_from_callable(unknown_annotations_ignored)
 
 
@@ -183,5 +183,5 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value_5():
     def unknown_annotations_ignored(my_optional_string: Optional[str] = "123") -> str:
         return "Got: {}".format(my_optional_string)
 
-    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' doesn't have default value."):
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
         _get_inputs_from_callable(unknown_annotations_ignored)
