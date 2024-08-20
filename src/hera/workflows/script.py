@@ -506,7 +506,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             if (type_ is Union and len(args) == 2 and type(None) in args) and (
                 default is MISSING or default is not None
             ):
-                raise ValueError(f"Optional parameter '{func_param.name}' doesn't have default value.")
+                raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
 
             parameters.append(Parameter(name=func_param.name, default=default))
         else:
