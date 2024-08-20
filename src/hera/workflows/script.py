@@ -497,6 +497,13 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             else:
                 default = MISSING
 
+            if (
+                get_origin(func_param.annotation) is Union
+                and len(get_args(func_param.annotation)) == 2
+                and get_args(func_param.annotation)[1] is type(None)
+            ) and default is MISSING:
+                raise ValueError(f"Optional parameter '{func_param.name}' doesn't have default value.")
+
             parameters.append(Parameter(name=func_param.name, default=default))
         else:
             annotation = get_args(func_param.annotation)[1]
