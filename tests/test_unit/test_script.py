@@ -1,3 +1,7 @@
+from typing import Optional, Union
+
+import pytest
+
 try:
     from typing import Annotated  # type: ignore
 except ImportError:
@@ -117,3 +121,67 @@ def test_script_ignores_unknown_annotations():
 
     assert parameter.name == "my_string"
     assert parameter.default is None
+
+
+def test_script_optional_parameter():
+    # GIVEN
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Optional[str] = None) -> str:
+        return "Got: {}".format(my_optional_string)
+
+    # WHEN
+    params, artifacts = _get_inputs_from_callable(unknown_annotations_ignored)
+
+    # THEN
+    assert artifacts == []
+    assert isinstance(params, list)
+    assert len(params) == 1
+    parameter = params[0]
+
+    assert parameter.name == "my_optional_string"
+    assert parameter.default == "null"
+
+
+def test_invalid_script_when_optional_parameter_does_not_have_default_value():
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Optional[str]) -> str:
+        return "Got: {}".format(my_optional_string)
+
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
+        _get_inputs_from_callable(unknown_annotations_ignored)
+
+
+def test_invalid_script_when_optional_parameter_does_not_have_default_value_2():
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Annotated[Optional[str], "123"]) -> str:
+        return "Got: {}".format(my_optional_string)
+
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
+        _get_inputs_from_callable(unknown_annotations_ignored)
+
+
+def test_invalid_script_when_optional_parameter_does_not_have_default_value_3():
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Union[str, None]) -> str:
+        return "Got: {}".format(my_optional_string)
+
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
+        _get_inputs_from_callable(unknown_annotations_ignored)
+
+
+def test_invalid_script_when_optional_parameter_does_not_have_default_value_4():
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Union[None, str]) -> str:
+        return "Got: {}".format(my_optional_string)
+
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
+        _get_inputs_from_callable(unknown_annotations_ignored)
+
+
+def test_invalid_script_when_optional_parameter_does_not_have_default_value_5():
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Optional[str] = "123") -> str:
+        return "Got: {}".format(my_optional_string)
+
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
+        _get_inputs_from_callable(unknown_annotations_ignored)
