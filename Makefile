@@ -170,4 +170,4 @@ stop-argo:  ## Stop the argo server
 .PHONY: test-on-cluster
 test-on-cluster: ## Run workflow tests (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
-	@poetry run python -m pytest tests/test_submission.py -m on_cluster
+	@poetry run python -m pytest tests/submissions -m on_cluster
