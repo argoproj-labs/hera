@@ -86,7 +86,7 @@ def _parse(value: str, key: str, f: Callable) -> Any:
         The parsed value.
 
     """
-    if _can_be_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
+    if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
         return value
     try:
         if os.environ.get("hera__script_annotations", None) is None:
@@ -132,7 +132,7 @@ def _get_unannotated_type(key: str, f: Callable) -> Optional[type]:
     return type_
 
 
-def _can_be_str_kwarg_of(key: str, f: Callable) -> bool:
+def _is_str_kwarg_of(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` has a type annotation that can be interpreted as a subclass of str."""
     func_param_annotation = inspect.signature(f).parameters[key].annotation
     if func_param_annotation is inspect.Parameter.empty:
