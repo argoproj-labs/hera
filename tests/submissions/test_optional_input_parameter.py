@@ -12,7 +12,7 @@ from hera.workflows.models import (
 @script(outputs=Parameter(name="message-out", value_from={"path": "/tmp/message-out"}))
 def print_msg(message: Optional[str] = None):
     with open("/tmp/message-out", "w") as f:
-        f.write(f"Got: {message}")
+        f.write("Got: {}".format(message))
 
 
 def get_workflow() -> Workflow:
