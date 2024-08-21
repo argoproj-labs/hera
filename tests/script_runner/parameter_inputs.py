@@ -46,6 +46,13 @@ def annotated_basic_types(
 
 
 @script()
+def annotated_basic_types_with_other_metadata(
+    a_but_kebab: Annotated[int, "Should skip this one", Parameter(name="a-but-kebab")] = 2,
+    b_but_kebab: Annotated[str, "should", "skip", Parameter(name="b-but-kebab"), "this", "one"] = "foo",
+) -> Output:
+    return Output(output=[Input(a=a_but_kebab, b=b_but_kebab)])
+
+@script()
 def annotated_object(annotated_input_value: Annotated[Input, Parameter(name="input-value")]) -> Output:
     return Output(output=[annotated_input_value])
 

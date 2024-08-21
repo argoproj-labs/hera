@@ -168,6 +168,13 @@ def test_runner_parameter_inputs(
             id="str-param-given-int",
         ),
         pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_basic_types_with_other_metadata",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
+            '{"output": [{"a": 3, "b": "1"}]}',
+            _PYDANTIC_VERSION,
+            id="str-param-given-int",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
