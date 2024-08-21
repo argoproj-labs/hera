@@ -3,6 +3,11 @@
 from typing import Any, Iterable, Optional, Type, TypeAlias, TypeVar, Union, cast
 
 try:
+    from types import UnionType
+except ImportError:
+    UnionType = Union
+
+try:
     from typing import Annotated, get_args, get_origin
 except ImportError:
     from typing_extensions import Annotated, get_args, get_origin
@@ -64,7 +69,7 @@ def can_consume_primitive(annotation: type, target: type) -> bool:
     if is_annotated(annotation):
         annotation = consume_annotated_type(annotation)
     casted = may_cast_subscripted_type(annotation)
-    if casted is Union:
+    if casted is Union or casted is UnionType:
         return any(can_consume_primitive(arg, target) for arg in get_args(annotation))
     return issubclass(casted, target)
 
