@@ -1,16 +1,18 @@
 """Module that handles types and annotations."""
 
-from typing import Any, Iterable, Optional, Type, TypeAlias, TypeVar, Union, cast
+from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
+
+from typing_extensions import TypeAlias
 
 try:
-    from types import UnionType
+    from types import UnionType  # type: ignore
 except ImportError:
-    UnionType = Union
+    UnionType = Union  # type: ignore
 
 try:
-    from typing import Annotated, get_args, get_origin
+    from typing import Annotated, get_args, get_origin  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin
+    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
 def is_annotated(annotation: Any):
@@ -18,7 +20,7 @@ def is_annotated(annotation: Any):
     return get_origin(annotation) is Annotated
 
 
-_Types: TypeAlias = Union[type, tuple["_Types", ...]]
+_Types: TypeAlias = Union[type, Tuple["_Types", ...]]
 
 
 def has_annotated_metadata(annotation: Any, type_: _Types) -> bool:
@@ -38,9 +40,21 @@ def consume_annotated_type(annotation: Any) -> type:
 
 
 T = TypeVar("T")
+V = TypeVar("V")
 
 
-def consume_annotated_metadata(annotation: Any, type_: Union[Type[T], tuple[Type[T], ...]]) -> Optional[T]:
+@overload
+def consume_annotated_metadata(_: Any, __: Type[T]) -> Optional[T]: ...
+
+
+@overload
+def consume_annotated_metadata(_: Any, __: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
+
+
+# FIXME: Currently, mypy cannot guess following type hint properly: https://github.com/python/mypy/issues/17700
+#        def consume_annotated_metadata(_: Any, __: Union[Type[T], Tuple[Type[T], ...]]) -> Optional[T]: ...
+#        Once fixed, remove overloads and add simpler type hints.
+def consume_annotated_metadata(annotation, type_):
     """If given annotation has metadata typed type_, return the metadata."""
     args = get_args(annotation)
     for arg in args[1:]:

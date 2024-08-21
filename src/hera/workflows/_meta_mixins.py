@@ -184,7 +184,7 @@ class ModelMapperMixin(BaseMixin):
                         if mapper.builder is not None
                         else getattr(hera_obj, attr)
                     )
-                    if value is not None:
+                    if value is not None and mapper.model_path:
                         _set_model_attr(model, mapper.model_path, value)
 
             return model

@@ -211,13 +211,13 @@ class OutputMixin(BaseModel):
         for field in model_fields:
             if field in {"exit_code", "result"}:
                 continue
-            if type_util.is_annotated(annotations[field]) and type_util.has_annotated_metadata(
-                annotations[field], (Parameter, Artifact)
+            if type_util.is_annotated(annotations[field]) and (
+                output := type_util.consume_annotated_metadata(annotations[field], (Parameter, Artifact))
             ):
-                if output := type_util.consume_annotated_metadata(annotations[field], Parameter):
+                if isinstance(output, Parameter):
                     if add_missing_path and (output.value_from is None or output.value_from.path is None):
                         output.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{output.name}")
-                elif output := type_util.consume_annotated_metadata(annotations[field], Artifact):
+                elif isinstance(output, Artifact):
                     if add_missing_path and output.path is None:
                         output.path = f"/tmp/hera-outputs/artifacts/{output.name}"
                 outputs.append(output)

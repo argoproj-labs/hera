@@ -368,7 +368,7 @@ def _get_outputs_from_return_annotation(
     parameters = []
     artifacts = []
 
-    def append_annotation(annotation: Union[Artifact, Parameter]):
+    def append_annotation(annotation: Union[Artifact, Parameter, None]):
         if isinstance(annotation, Artifact):
             if annotation.path is None and outputs_directory is not None:
                 annotation.path = outputs_directory + f"/artifacts/{annotation.name}"

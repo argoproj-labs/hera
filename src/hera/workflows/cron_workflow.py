@@ -48,7 +48,11 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
             if type_util.is_annotated(annotation) and (
                 mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
             ):
-                if not isinstance(mapper, _CronWorkflowModelMapper) and mapper.model_path[0] == "spec":
+                if (
+                    not isinstance(mapper, _CronWorkflowModelMapper)
+                    and mapper.model_path
+                    and mapper.model_path[0] == "spec"
+                ):
                     # Skip attributes mapped to spec by parent _WorkflowModelMapper
                     continue
 
@@ -58,7 +62,7 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
                     if mapper.builder is not None
                     else getattr(hera_obj, attr)
                 )
-                if value is not None:
+                if value is not None and mapper.model_path:
                     _set_model_attr(model, mapper.model_path, value)
 
         return model

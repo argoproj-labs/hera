@@ -78,7 +78,7 @@ def test_may_cast_subscripted_type(annotation, expected):
 @pytest.mark.parametrize(
     "annotation, target, expected",
     [
-        [list[str], str, False],
+        [List[str], str, False],
         [Optional[str], str, True],
         [str, str, True],
         [Union[int, str], int, True],
