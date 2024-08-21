@@ -2,6 +2,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
+from hera._utils import type_util
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
@@ -26,9 +27,9 @@ else:
 
 
 try:
-    from typing import Annotated, Self, get_args, get_origin  # type: ignore
+    from typing import Self  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated, Self, get_args, get_origin  # type: ignore
+    from typing_extensions import Self  # type: ignore
 
 if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it
@@ -65,10 +66,10 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field, field_info in get_fields(cls).items():
-            if get_origin(annotations[field]) is Annotated:
-                # Copy so as to not modify the Input fields themselves
-                param = get_args(annotations[field])[1].copy()
-                if isinstance(param, Parameter):
+            if type_util.is_annotated(annotations[field]):
+                if param := type_util.consume_annotated_metadata(annotations[field], Parameter):
+                    # Copy so as to not modify the Input fields themselves
+                    param = param.copy()
                     if param.name is None:
                         param.name = field
                     if param.default is not None:
@@ -100,10 +101,10 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field in get_fields(cls):
-            if get_origin(annotations[field]) is Annotated:
-                # Copy so as to not modify the Input fields themselves
-                artifact = get_args(annotations[field])[1].copy()
-                if isinstance(artifact, Artifact):
+            if type_util.is_annotated(annotations[field]):
+                if artifact := type_util.consume_annotated_metadata(annotations[field], Artifact):
+                    # Copy so as to not modify the Input fields themselves
+                    artifact = artifact.copy()
                     if artifact.name is None:
                         artifact.name = field
                     if artifact.path is None:
@@ -123,14 +124,11 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field in cls_fields:
-            if get_origin(annotations[field]) is Annotated:
-                annotation = get_args(annotations[field])[1]
-                if isinstance(annotation, (Artifact, Parameter)):
-                    name = annotation.name
-                    if isinstance(annotation, Parameter):
-                        object_dict[field] = "{{inputs.parameters." + f"{name}" + "}}"
-                    elif isinstance(annotation, Artifact):
-                        object_dict[field] = "{{inputs.artifacts." + f"{name}" + "}}"
+            if type_util.is_annotated(annotations[field]):
+                if param := type_util.consume_annotated_metadata(annotations[field], Parameter):
+                    object_dict[field] = "{{inputs.parameters." + f"{param.name}" + "}}"
+                elif artifact := type_util.consume_annotated_metadata(annotations[field], Artifact):
+                    object_dict[field] = "{{inputs.artifacts." + f"{artifact.name}" + "}}"
             else:
                 object_dict[field] = "{{inputs.parameters." + f"{field}" + "}}"
 
@@ -151,12 +149,13 @@ class InputMixin(BaseModel):
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
             templated_value = serialize(self_dict[field])
 
-            if get_origin(annotations[field]) is Annotated:
-                annotation = get_args(annotations[field])[1]
-                if isinstance(annotation, Parameter) and annotation.name:
-                    params.append(ModelParameter(name=annotation.name, value=templated_value))
-                elif isinstance(annotation, Artifact) and annotation.name:
-                    artifacts.append(ModelArtifact(name=annotation.name, from_=templated_value))
+            if type_util.is_annotated(annotations[field]):
+                if (param := type_util.consume_annotated_metadata(annotations[field], Parameter)) and param.name:
+                    params.append(ModelParameter(name=param.name, value=templated_value))
+                elif (
+                    artifact := type_util.consume_annotated_metadata(annotations[field], Artifact)
+                ) and artifact.name:
+                    artifacts.append(ModelArtifact(name=artifact.name, from_=templated_value))
             else:
                 params.append(ModelParameter(name=field, value=templated_value))
 
@@ -212,15 +211,16 @@ class OutputMixin(BaseModel):
         for field in model_fields:
             if field in {"exit_code", "result"}:
                 continue
-            if get_origin(annotations[field]) is Annotated:
-                annotation = get_args(annotations[field])[1]
-                if isinstance(annotation, Parameter):
-                    if add_missing_path and (annotation.value_from is None or annotation.value_from.path is None):
-                        annotation.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{annotation.name}")
-                elif isinstance(annotation, Artifact):
-                    if add_missing_path and annotation.path is None:
-                        annotation.path = f"/tmp/hera-outputs/artifacts/{annotation.name}"
-                outputs.append(annotation)
+            if type_util.is_annotated(annotations[field]) and type_util.has_annotated_metadata(
+                annotations[field], (Parameter, Artifact)
+            ):
+                if output := type_util.consume_annotated_metadata(annotations[field], Parameter):
+                    if add_missing_path and (output.value_from is None or output.value_from.path is None):
+                        output.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{output.name}")
+                elif output := type_util.consume_annotated_metadata(annotations[field], Artifact):
+                    if add_missing_path and output.path is None:
+                        output.path = f"/tmp/hera-outputs/artifacts/{output.name}"
+                outputs.append(output)
             else:
                 # Create a Parameter from basic type annotations
                 default = model_fields[field].default
@@ -238,9 +238,9 @@ class OutputMixin(BaseModel):
     def _get_output(cls, field_name: str) -> Union[Artifact, Parameter]:
         annotations = get_field_annotations(cls)
         annotation = annotations[field_name]
-        if get_origin(annotation) is Annotated:
-            if isinstance(get_args(annotation)[1], (Parameter, Artifact)):
-                return get_args(annotation)[1]
+        if type_util.is_annotated(annotation):
+            if output := type_util.consume_annotated_metadata(annotation, (Parameter, Artifact)):
+                return output
 
         # Create a Parameter from basic type annotations
         default = get_fields(cls)[field_name].default
@@ -267,12 +267,13 @@ class OutputMixin(BaseModel):
 
             templated_value = self_dict[field]  # a string such as `"{{tasks.task_a.outputs.parameter.my_param}}"`
 
-            if get_origin(annotations[field]) is Annotated:
-                annotation = get_args(annotations[field])[1]
-                if isinstance(annotation, Parameter) and annotation.name:
-                    outputs.append(Parameter(name=annotation.name, value_from=ValueFrom(parameter=templated_value)))
-                elif isinstance(annotation, Artifact) and annotation.name:
-                    outputs.append(Artifact(name=annotation.name, from_=templated_value))
+            if type_util.is_annotated(annotations[field]):
+                if (param := type_util.consume_annotated_metadata(annotations[field], Parameter)) and param.name:
+                    outputs.append(Parameter(name=param.name, value_from=ValueFrom(parameter=templated_value)))
+                elif (
+                    artifact := type_util.consume_annotated_metadata(annotations[field], Artifact)
+                ) and artifact.name:
+                    outputs.append(Artifact(name=artifact.name, from_=templated_value))
             else:
                 outputs.append(Parameter(name=field, value_from=ValueFrom(parameter=templated_value)))
 

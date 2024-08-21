@@ -7,12 +7,13 @@ for more on CronWorkflows.
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
+from hera._utils import type_util
 from hera.workflows._meta_mixins import ModelMapperMixin, _set_model_attr
 
 try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
+    from typing import Annotated  # type: ignore
 except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
+    from typing_extensions import Annotated  # type: ignore
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel
@@ -44,10 +45,9 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
         assert isinstance(hera_obj, ModelMapperMixin)
 
         for attr, annotation in hera_class._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ModelMapperMixin.ModelMapper
+            if type_util.is_annotated(annotation) and (
+                mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
             ):
-                mapper = get_args(annotation)[1]
                 if not isinstance(mapper, _CronWorkflowModelMapper) and mapper.model_path[0] == "spec":
                     # Skip attributes mapped to spec by parent _WorkflowModelMapper
                     continue
@@ -164,10 +164,9 @@ class CronWorkflow(Workflow):
         hera_cron_workflow = cls(schedule="")
 
         for attr, annotation in cls._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ModelMapperMixin.ModelMapper
+            if type_util.is_annotated(annotation) and (
+                mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
             ):
-                mapper = get_args(annotation)[1]
                 if mapper.model_path:
                     value = None
 

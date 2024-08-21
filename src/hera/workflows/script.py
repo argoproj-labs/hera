@@ -26,6 +26,7 @@ from typing import (
 
 from typing_extensions import ParamSpec, get_args, get_origin
 
+from hera._utils import type_util
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
@@ -77,11 +78,6 @@ from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 
 class ScriptConstructor(BaseMixin):
@@ -383,14 +379,14 @@ def _get_outputs_from_return_annotation(
             parameters.append(annotation)
 
     return_annotation = inspect.signature(source).return_annotation
-    if get_origin(return_annotation) is Annotated:
-        append_annotation(get_args(return_annotation)[1])
+    if param_or_artifact := type_util.consume_annotated_metadata(return_annotation, (Artifact, Parameter)):
+        append_annotation(param_or_artifact)
     elif get_origin(return_annotation) is tuple:
         for annotation in get_args(return_annotation):
             if isinstance(annotation, type) and issubclass(annotation, (OutputV1, OutputV2)):
                 raise ValueError("Output cannot be part of a tuple output")
 
-            append_annotation(get_args(annotation)[1])
+            append_annotation(type_util.consume_annotated_metadata(annotation, (Artifact, Parameter)))
     elif return_annotation and issubclass(return_annotation, (OutputV1, OutputV2)):
         if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
             raise ValueError(
@@ -418,14 +414,11 @@ def _get_outputs_from_parameter_annotations(
     artifacts: List[Artifact] = []
 
     for name, p in inspect.signature(source).parameters.items():
-        if get_origin(p.annotation) is not Annotated:
+        if not type_util.is_annotated(p.annotation):
             continue
-        annotation = get_args(p.annotation)[1]
 
-        if not isinstance(annotation, (Artifact, Parameter)):
-            raise ValueError(f"The output {type(annotation)} cannot be used as an annotation.")
-
-        if not annotation.output:
+        annotation = type_util.consume_annotated_metadata(p.annotation, (Artifact, Parameter))
+        if not annotation or not annotation.output:
             continue
 
         new_object = annotation.copy()
@@ -460,7 +453,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if get_origin(func_param.annotation) is None and issubclass(func_param.annotation, (InputV1, InputV2)):
+        if not type_util.is_subscripted(func_param.annotation) and issubclass(
+            func_param.annotation, (InputV1, InputV2)
+        ):
             if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
                 raise ValueError(
                     (
@@ -486,37 +481,12 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
             artifacts.extend(input_class._get_artifacts())
 
-        elif get_origin(func_param.annotation) is not Annotated or not isinstance(
-            get_args(func_param.annotation)[1], (Artifact, Parameter)
-        ):
-            if (
-                func_param.default != inspect.Parameter.empty
-                and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
-            ):
-                default = func_param.default
-            else:
-                default = MISSING
-
-            type_ = get_origin(func_param.annotation)
-            args = get_args(func_param.annotation)
-            if type_ is Annotated:
-                type_ = get_origin(args[0])
-                args = get_args(args[0])
-
-            if (type_ is Union and len(args) == 2 and type(None) in args) and (
-                default is MISSING or default is not None
-            ):
-                raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
-
-            parameters.append(Parameter(name=func_param.name, default=default))
-        else:
-            annotation = get_args(func_param.annotation)[1]
-
-            if annotation.output:
+        elif param_or_artifact := type_util.consume_annotated_metadata(func_param.annotation, (Artifact, Parameter)):
+            if param_or_artifact.output:
                 continue
 
             # Create a new object so we don't modify the Workflow itself
-            new_object = annotation.copy()
+            new_object = param_or_artifact.copy()
             if not new_object.name:
                 new_object.name = func_param.name
 
@@ -544,6 +514,21 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                         )
                     new_object.default = serialize(func_param.default)
                 parameters.append(new_object)
+        else:
+            if (
+                func_param.default != inspect.Parameter.empty
+                and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+            ):
+                default = func_param.default
+            else:
+                default = MISSING
+
+            if type_util.can_consume_primitive(func_param.annotation, type(None)) and (
+                default is MISSING or default is not None
+            ):
+                raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
+
+            parameters.append(Parameter(name=func_param.name, default=default))
 
     return parameters, artifacts
 
@@ -555,7 +540,7 @@ def _extract_return_annotation_output(source: Callable) -> List:
     return_annotation = inspect.signature(source).return_annotation
     origin_type = get_origin(return_annotation)
     annotation_args = get_args(return_annotation)
-    if origin_type is Annotated:
+    if type_util.is_annotated(return_annotation):
         output.append(annotation_args)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
@@ -578,11 +563,10 @@ def _extract_all_output_annotations(source: Callable) -> List:
     output = []
 
     for _, func_param in inspect.signature(source).parameters.items():
-        if get_origin(func_param.annotation) is Annotated:
-            annotation_args = get_args(func_param.annotation)
-            annotated_type = annotation_args[1]
-            if isinstance(annotated_type, (Artifact, Parameter)) and annotated_type.output:
-                output.append(annotation_args)
+        if (
+            annotated := type_util.consume_annotated_metadata(func_param.annotation, (Artifact, Parameter))
+        ) and annotated.output:
+            output.append(get_args(func_param.annotation))
 
     output.extend(_extract_return_annotation_output(source))
 

@@ -15,6 +15,7 @@ from typing import (
     cast,
 )
 
+from hera._utils import type_util
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
 from hera.shared.serialization import serialize
@@ -69,12 +70,6 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
-
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
-
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
@@ -743,18 +738,14 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
                     result_templated_str = f"{{{{{subnode_type}.{subnode_name}.outputs.result}}}}"
                     return result_templated_str
 
-                if get_origin(annotations[name]) is Annotated:
-                    annotation = get_args(annotations[name])[1]
-
-                    if not isinstance(annotation, (Parameter, Artifact)):
-                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
-
-                    if isinstance(annotation, Parameter):
-                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{annotation.name}}}}}"
-                    elif isinstance(annotation, Artifact):
-                        return f"{{{{{subnode_type}.{subnode_name}.outputs.artifacts.{annotation.name}}}}}"
-                else:
-                    return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
+                if type_util.is_annotated(annotations[name]) and (
+                    param_or_artifact := type_util.consume_annotated_metadata(annotations[name], (Parameter, Artifact))
+                ):
+                    if isinstance(param_or_artifact, Parameter):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{param_or_artifact.name}}}}}"
+                    if isinstance(param_or_artifact, Artifact):
+                        return f"{{{{{subnode_type}.{subnode_name}.outputs.artifacts.{param_or_artifact.name}}}}}"
+                return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
 
         return super().__getattribute__(name)
 

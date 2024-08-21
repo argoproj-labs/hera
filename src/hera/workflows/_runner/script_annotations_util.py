@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
+from hera._utils import type_util
 from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
@@ -25,11 +26,6 @@ except ImportError:
         Input as InputV2,
         Output as OutputV2,
     )
-
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
@@ -132,12 +128,11 @@ def map_runner_input(
     If the field is annotated, we look for the kwarg with the name from the annotation (Parameter or Artifact).
     Otherwise, we look for the kwarg with the name of the field.
     """
-    from hera.workflows._runner.util import _get_type
-
     input_model_obj = {}
 
     def load_parameter_value(value: str, value_type: type) -> Any:
-        if issubclass(_get_type(value_type), str):
+        raw_type = type_util.consume_annotated_type(value_type)
+        if type_util.can_consume_primitive(raw_type, str):
             return value
 
         try:
@@ -153,23 +148,16 @@ def map_runner_input(
     ) -> Any:
         annotation = runner_input_annotations.get(field)
         assert annotation is not None, "RunnerInput fields must be type-annotated"
-        if get_origin(annotation) is Annotated:
-            # my_field: Annotated[int, Parameter(...)]
-            ann_type = get_args(annotation)[0]
-            param_or_artifact = get_args(annotation)[1]
-        else:
-            # my_field: int
-            ann_type = annotation
-            param_or_artifact = None
+        ann_type = type_util.consume_annotated_type(annotation)
 
-        if isinstance(param_or_artifact, Parameter):
-            assert not param_or_artifact.output
+        if param := type_util.consume_annotated_metadata(annotation, Parameter):
+            assert not param.output
             return load_parameter_value(
-                _get_annotated_input_param_value(field, param_or_artifact, kwargs),
+                _get_annotated_input_param_value(field, param, kwargs),
                 ann_type,
             )
-        elif isinstance(param_or_artifact, Artifact):
-            return get_annotated_artifact_value(param_or_artifact)
+        elif artifact := type_util.consume_annotated_metadata(annotation, Artifact):
+            return get_annotated_artifact_value(artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
 
@@ -196,18 +184,16 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
     mapped_kwargs: Dict[str, Any] = {}
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
-        if get_origin(func_param.annotation) is Annotated:
-            func_param_annotation = get_args(func_param.annotation)[1]
-
-            if isinstance(func_param_annotation, Parameter):
-                mapped_kwargs[func_param_name] = get_annotated_param_value(
-                    func_param_name, func_param_annotation, kwargs
-                )
-            elif isinstance(func_param_annotation, Artifact):
-                mapped_kwargs[func_param_name] = get_annotated_artifact_value(func_param_annotation)
+        if type_util.is_annotated(func_param.annotation):
+            if param := type_util.consume_annotated_metadata(func_param.annotation, Parameter):
+                mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
+            elif artifact := type_util.consume_annotated_metadata(func_param.annotation, Artifact):
+                mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
             else:
                 mapped_kwargs[func_param_name] = kwargs[func_param_name]
-        elif get_origin(func_param.annotation) is None and issubclass(func_param.annotation, (InputV1, InputV2)):
+        elif not type_util.is_subscripted(func_param.annotation) and issubclass(
+            func_param.annotation, (InputV1, InputV2)
+        ):
             mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
         else:
             mapped_kwargs[func_param_name] = kwargs[func_param_name]
@@ -250,19 +236,12 @@ def _save_annotated_return_outputs(
                 _write_to_path(path, value)
         else:
             assert isinstance(dest, tuple)
-            if get_origin(dest[0]) is None:
-                # Built-in types return None from get_origin, so we can check isinstance directly
-                if not isinstance(output_value, dest[0]):
-                    raise ValueError(
-                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                    )
-            else:
-                # Here, we know get_origin is not None, but its return type is found to be `Optional[Any]`
-                origin_type = cast(type, get_origin(dest[0]))
-                if not isinstance(output_value, origin_type):
-                    raise ValueError(
-                        f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
-                    )
+
+            type_ = type_util.may_cast_subscripted_type(dest[0])
+            if not isinstance(output_value, type_):
+                raise ValueError(
+                    f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
+                )
 
             if not dest[1].name:
                 raise ValueError("The name was not provided for one of the outputs.")

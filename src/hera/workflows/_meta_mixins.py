@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 
 from typing_extensions import ParamSpec
 
+from hera._utils import type_util
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
@@ -38,11 +39,6 @@ except ImportError:
         Input as InputV2,
         Output as OutputV2,
     )
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
-
 try:
     from inspect import get_annotations  # type: ignore
 except ImportError:
@@ -179,10 +175,9 @@ class ModelMapperMixin(BaseMixin):
             assert isinstance(hera_obj, ModelMapperMixin)
 
             for attr, annotation in hera_class._get_all_annotations().items():
-                if get_origin(annotation) is Annotated and isinstance(
-                    get_args(annotation)[1], ModelMapperMixin.ModelMapper
+                if type_util.is_annotated(annotation) and (
+                    mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
                 ):
-                    mapper = get_args(annotation)[1]
                     # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
                     value = (
                         getattr(hera_obj, mapper.builder.__name__)()
@@ -205,10 +200,9 @@ class ModelMapperMixin(BaseMixin):
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ModelMapperMixin.ModelMapper
+            if type_util.is_annotated(annotation) and (
+                mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
             ):
-                mapper = get_args(annotation)[1]
                 if mapper.model_path:
                     value = _get_model_attr(model, mapper.model_path)
                     if value is not None:
@@ -493,20 +487,6 @@ class HeraBuildObj:
     def __init__(self, subnode_type: str, output_class: Type[Union[OutputV1, OutputV2]]) -> None:
         self.subnode_type = subnode_type
         self.output_class = output_class
-
-
-def _get_underlying_type(annotation: Type):
-    real_type = annotation
-    if get_origin(annotation) is Annotated:
-        real_type = get_args(annotation)[0]
-
-    if get_origin(real_type) is Union:
-        args = get_args(real_type)
-        if len(args) == 2 and any([arg is NoneType for arg in args]):
-            # This was an "Optional" type, get the real type
-            real_type = next(iter([arg for arg in args if arg is not NoneType]))
-
-    return real_type
 
 
 class TemplateDecoratorFuncsMixin(ContextMixin):
