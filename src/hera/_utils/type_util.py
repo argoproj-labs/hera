@@ -55,9 +55,9 @@ def get_annotated_metadata(annotation, type_):
 
 
 def may_cast_subscripted_type(t: type) -> type:
-    """If the given type is subscripted, cast and return it.
+    """Get the unsubscripted version of t or the type of t itself if it's a built it, and cast it as a Python `type`.
 
-    This can be helpful if you want to use t with isinstance, issubclass, or etc.,
+    This can be helpful if you want to use t with isinstance, issubclass, etc.,
     """
     if origin_type := get_origin(t):
         return cast(type, origin_type)
