@@ -24,8 +24,8 @@ def test_is_annotated(annotation, expected):
         [str, str],
     ],
 )
-def test_consume_annotated_type(annotation, expected):
-    assert type_util.consume_annotated_type(annotation) == expected
+def test_unwrap_annotation(annotation, expected):
+    assert type_util.unwrap_annotation(annotation) == expected
 
 
 @pytest.mark.parametrize(

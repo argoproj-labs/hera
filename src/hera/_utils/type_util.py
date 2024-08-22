@@ -18,7 +18,7 @@ def is_annotated(annotation: type):
     return get_origin(annotation) is Annotated
 
 
-def consume_annotated_type(annotation: type) -> type:
+def unwrap_annotation(annotation: type) -> type:
     """If the given type is annotated, return unsubscripted version. If not return itself."""
     if is_annotated(annotation):
         return get_args(annotation)[0]
@@ -67,7 +67,7 @@ def may_cast_subscripted_type(t: type) -> type:
 def can_consume_primitive(annotation: type, target: type) -> bool:
     """If annotation can be considered as target type or subclass of it, return True."""
     if is_annotated(annotation):
-        annotation = consume_annotated_type(annotation)
+        annotation = unwrap_annotation(annotation)
     casted = may_cast_subscripted_type(annotation)
     if casted is Union or casted is UnionType:
         return any(can_consume_primitive(arg, target) for arg in get_args(annotation))

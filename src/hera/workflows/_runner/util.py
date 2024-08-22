@@ -115,13 +115,13 @@ def _get_unannotated_type(key: str, f: Callable) -> Optional[type]:
     type_ = _inspect_callable_param_annotation(key, f)
     if type_ is None:
         return None
-    return type_util.consume_annotated_type(type_)
+    return type_util.unwrap_annotation(type_)
 
 
 def _is_str_kwarg_of(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` has a type annotation that can be interpreted as a subclass of str."""
     if func_param_annotation := _inspect_callable_param_annotation(key, f):
-        type_ = type_util.consume_annotated_type(func_param_annotation)
+        type_ = type_util.unwrap_annotation(func_param_annotation)
         return type_util.can_consume_primitive(type_, str)
     return False
 

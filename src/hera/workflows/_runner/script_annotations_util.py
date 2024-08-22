@@ -131,7 +131,7 @@ def map_runner_input(
     input_model_obj = {}
 
     def load_parameter_value(value: str, value_type: type) -> Any:
-        raw_type = type_util.consume_annotated_type(value_type)
+        raw_type = type_util.unwrap_annotation(value_type)
         if type_util.can_consume_primitive(raw_type, str):
             return value
 
@@ -148,7 +148,7 @@ def map_runner_input(
     ) -> Any:
         annotation = runner_input_annotations.get(field)
         assert annotation is not None, "RunnerInput fields must be type-annotated"
-        ann_type = type_util.consume_annotated_type(annotation)
+        ann_type = type_util.unwrap_annotation(annotation)
 
         if param := type_util.get_annotated_metadata(annotation, Parameter):
             assert not param.output
