@@ -19,7 +19,7 @@ def is_annotated(annotation: type):
 
 
 def unwrap_annotation(annotation: type) -> type:
-    """If the given type is annotated, return unsubscripted version. If not return itself."""
+    """If the given annotation is of type Annotated, return the underlying type, otherwise return the annotation."""
     if is_annotated(annotation):
         return get_args(annotation)[0]
     return annotation
