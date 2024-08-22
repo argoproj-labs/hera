@@ -1,6 +1,6 @@
 """Module that handles types and annotations."""
 
-from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
+from typing import Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
 
 try:
     from types import UnionType  # type: ignore
@@ -13,12 +13,12 @@ except ImportError:
     from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
-def is_annotated(annotation: Any):
+def is_annotated(annotation: type):
     """Check annotation has Annotated type or not."""
     return get_origin(annotation) is Annotated
 
 
-def consume_annotated_type(annotation: Any) -> type:
+def consume_annotated_type(annotation: type) -> type:
     """If the given type is annotated, return unsubscripted version. If not return itself."""
     if is_annotated(annotation):
         return get_args(annotation)[0]
@@ -30,11 +30,11 @@ V = TypeVar("V")
 
 
 @overload
-def consume_annotated_metadata(_: Any, __: Type[T]) -> Optional[T]: ...
+def consume_annotated_metadata(_: type, __: Type[T]) -> Optional[T]: ...
 
 
 @overload
-def consume_annotated_metadata(_: Any, __: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
+def consume_annotated_metadata(_: type, __: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
 
 
 # FIXME: Currently, mypy cannot guess following type hint properly: https://github.com/python/mypy/issues/17700
