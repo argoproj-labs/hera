@@ -2,8 +2,6 @@
 
 from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
 
-from typing_extensions import TypeAlias
-
 try:
     from types import UnionType  # type: ignore
 except ImportError:
@@ -18,18 +16,6 @@ except ImportError:
 def is_annotated(annotation: Any):
     """Check annotation has Annotated type or not."""
     return get_origin(annotation) is Annotated
-
-
-_Types: TypeAlias = Union[type, Tuple["_Types", ...]]
-
-
-def has_annotated_metadata(annotation: Any, type_: _Types) -> bool:
-    """If given annotation has metadata typed type_, return True."""
-    args = get_args(annotation)
-    for arg in args[1:]:
-        if isinstance(arg, type_):
-            return True
-    return False
 
 
 def consume_annotated_type(annotation: Any) -> type:

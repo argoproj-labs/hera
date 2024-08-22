@@ -17,21 +17,6 @@ def test_is_annotated(annotation, expected):
 
 
 @pytest.mark.parametrize(
-    "annotation, t, expected",
-    [
-        [Annotated[str, Parameter(name="a_str")], Parameter, True],
-        [Annotated[str, "some metadata"], Parameter, False],
-        # Must support variadic annotated
-        [Annotated[str, "some metadata", Parameter(name="a_str")], Parameter, True],
-        # Must support tuple of types
-        [Annotated[str, "some metadata", Parameter(name="a_str")], (Parameter, Artifact), True],
-    ],
-)
-def test_has_annotated_metadata(annotation, t, expected):
-    assert type_util.has_annotated_metadata(annotation, t) == expected
-
-
-@pytest.mark.parametrize(
     "annotation, expected",
     [
         [Annotated[str, Parameter(name="a_str")], str],
