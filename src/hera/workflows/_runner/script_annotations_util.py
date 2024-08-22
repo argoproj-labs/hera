@@ -184,13 +184,10 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
     mapped_kwargs: Dict[str, Any] = {}
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
-        if type_util.is_annotated(func_param.annotation):
-            if param := type_util.consume_annotated_metadata(func_param.annotation, Parameter):
-                mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
-            elif artifact := type_util.consume_annotated_metadata(func_param.annotation, Artifact):
-                mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
-            else:
-                mapped_kwargs[func_param_name] = kwargs[func_param_name]
+        if param := type_util.consume_annotated_metadata(func_param.annotation, Parameter):
+            mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
+        elif artifact := type_util.consume_annotated_metadata(func_param.annotation, Artifact):
+            mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
         elif not type_util.is_subscripted(func_param.annotation) and issubclass(
             func_param.annotation, (InputV1, InputV2)
         ):

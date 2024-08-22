@@ -65,24 +65,23 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field, field_info in get_fields(cls).items():
-            if type_util.is_annotated(annotations[field]):
-                if param := type_util.consume_annotated_metadata(annotations[field], Parameter):
-                    # Copy so as to not modify the Input fields themselves
-                    param = param.copy()
-                    if param.name is None:
-                        param.name = field
-                    if param.default is not None:
-                        warnings.warn(
-                            "Using the default field for Parameters in Annotations is deprecated since v5.16"
-                            "and will be removed in a future minor version, use a Python default value instead"
-                        )
-                    if object_override:
-                        param.default = serialize(getattr(object_override, field))
-                    elif field_info.default is not None and field_info.default != PydanticUndefined:  # type: ignore
-                        # Serialize the value (usually done in Parameter's validator)
-                        param.default = serialize(field_info.default)  # type: ignore
-                    parameters.append(param)
-            else:
+            if param := type_util.consume_annotated_metadata(annotations[field], Parameter):
+                # Copy so as to not modify the Input fields themselves
+                param = param.copy()
+                if param.name is None:
+                    param.name = field
+                if param.default is not None:
+                    warnings.warn(
+                        "Using the default field for Parameters in Annotations is deprecated since v5.16"
+                        "and will be removed in a future minor version, use a Python default value instead"
+                    )
+                if object_override:
+                    param.default = serialize(getattr(object_override, field))
+                elif field_info.default is not None and field_info.default != PydanticUndefined:  # type: ignore
+                    # Serialize the value (usually done in Parameter's validator)
+                    param.default = serialize(field_info.default)  # type: ignore
+                parameters.append(param)
+            elif not type_util.is_annotated(annotations[field]):
                 # Create a Parameter from basic type annotations
                 default = getattr(object_override, field) if object_override else field_info.default
 
@@ -100,15 +99,14 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field in get_fields(cls):
-            if type_util.is_annotated(annotations[field]):
-                if artifact := type_util.consume_annotated_metadata(annotations[field], Artifact):
-                    # Copy so as to not modify the Input fields themselves
-                    artifact = artifact.copy()
-                    if artifact.name is None:
-                        artifact.name = field
-                    if artifact.path is None:
-                        artifact.path = artifact._get_default_inputs_path()
-                    artifacts.append(artifact)
+            if artifact := type_util.consume_annotated_metadata(annotations[field], Artifact):
+                # Copy so as to not modify the Input fields themselves
+                artifact = artifact.copy()
+                if artifact.name is None:
+                    artifact.name = field
+                if artifact.path is None:
+                    artifact.path = artifact._get_default_inputs_path()
+                artifacts.append(artifact)
         return artifacts
 
     @classmethod
@@ -177,7 +175,7 @@ class OutputMixin(BaseModel):
 
     @classmethod
     def _get_outputs(cls, add_missing_path: bool = False) -> List[Union[Artifact, Parameter]]:
-        outputs = []
+        outputs: List[Union[Artifact, Parameter]] = []
         annotations = get_field_annotations(cls)
 
         model_fields = get_fields(cls)
@@ -185,14 +183,14 @@ class OutputMixin(BaseModel):
         for field in model_fields:
             if field in {"exit_code", "result"}:
                 continue
-            if output := type_util.consume_annotated_metadata(annotations[field], (Parameter, Artifact)):
-                if isinstance(output, Parameter):
-                    if add_missing_path and (output.value_from is None or output.value_from.path is None):
-                        output.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{output.name}")
-                elif isinstance(output, Artifact):
-                    if add_missing_path and output.path is None:
-                        output.path = f"/tmp/hera-outputs/artifacts/{output.name}"
-                outputs.append(output)
+            if param := type_util.consume_annotated_metadata(annotations[field], Parameter):
+                if add_missing_path and (param.value_from is None or param.value_from.path is None):
+                    param.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{param.name}")
+                outputs.append(param)
+            elif artifact := type_util.consume_annotated_metadata(annotations[field], Artifact):
+                if add_missing_path and artifact.path is None:
+                    artifact.path = f"/tmp/hera-outputs/artifacts/{artifact.name}"
+                outputs.append(artifact)
             else:
                 # Create a Parameter from basic type annotations
                 default = model_fields[field].default
