@@ -46,6 +46,8 @@ def test_consume_annotated_type(annotation, expected):
 @pytest.mark.parametrize(
     "annotation, t, expected",
     [
+        # Not annotated one.
+        [str, Parameter, None],
         [Annotated[str, Parameter(name="a_str")], Parameter, Parameter(name="a_str")],
         [Annotated[str, "some metadata"], Parameter, None],
         # Must support variadic annotated

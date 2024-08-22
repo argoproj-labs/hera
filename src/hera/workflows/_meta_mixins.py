@@ -175,9 +175,7 @@ class ModelMapperMixin(BaseMixin):
             assert isinstance(hera_obj, ModelMapperMixin)
 
             for attr, annotation in hera_class._get_all_annotations().items():
-                if type_util.is_annotated(annotation) and (
-                    mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
-                ):
+                if mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                     # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
                     value = (
                         getattr(hera_obj, mapper.builder.__name__)()
@@ -200,9 +198,7 @@ class ModelMapperMixin(BaseMixin):
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
-            if type_util.is_annotated(annotation) and (
-                mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper)
-            ):
+            if mapper := type_util.consume_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                 if mapper.model_path:
                     value = _get_model_attr(model, mapper.model_path)
                     if value is not None:
