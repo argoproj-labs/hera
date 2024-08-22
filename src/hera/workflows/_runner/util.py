@@ -129,7 +129,7 @@ def _is_str_kwarg_of(key: str, f: Callable) -> bool:
 def _is_artifact_loaded(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is actually an Artifact that has already been loaded."""
     if param_annotation := _inspect_callable_param_annotation(key, f):
-        if artifact := type_util.consume_annotated_metadata(param_annotation, Artifact):
+        if artifact := type_util.get_annotated_metadata(param_annotation, Artifact):
             return artifact.loader == ArtifactLoader.json.value
     return False
 
@@ -137,7 +137,7 @@ def _is_artifact_loaded(key: str, f: Callable) -> bool:
 def _is_output_kwarg(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is an output Artifact/Parameter."""
     if param_annotation := _inspect_callable_param_annotation(key, f):
-        if param_or_artifact := type_util.consume_annotated_metadata(param_annotation, (Artifact, Parameter)):
+        if param_or_artifact := type_util.get_annotated_metadata(param_annotation, (Artifact, Parameter)):
             return bool(param_or_artifact.output)
     return False
 

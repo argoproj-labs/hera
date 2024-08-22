@@ -30,17 +30,17 @@ V = TypeVar("V")
 
 
 @overload
-def consume_annotated_metadata(_: type, __: Type[T]) -> Optional[T]: ...
+def get_annotated_metadata(_: type, __: Type[T]) -> Optional[T]: ...
 
 
 @overload
-def consume_annotated_metadata(_: type, __: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
+def get_annotated_metadata(_: type, __: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
 
 
 # FIXME: Currently, mypy cannot guess following type hint properly: https://github.com/python/mypy/issues/17700
-#        def consume_annotated_metadata(_: Any, __: Union[Type[T], Tuple[Type[T], ...]]) -> Optional[T]: ...
+#        def get_annotated_metadata(_: Any, __: Union[Type[T], Tuple[Type[T], ...]]) -> Optional[T]: ...
 #        Once fixed, remove overloads and add simpler type hints.
-def consume_annotated_metadata(annotation, type_):
+def get_annotated_metadata(annotation, type_):
     """If given annotation has metadata typed type_, return the metadata."""
     args = get_args(annotation)
     for arg in args[1:]:

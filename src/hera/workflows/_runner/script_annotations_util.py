@@ -150,13 +150,13 @@ def map_runner_input(
         assert annotation is not None, "RunnerInput fields must be type-annotated"
         ann_type = type_util.consume_annotated_type(annotation)
 
-        if param := type_util.consume_annotated_metadata(annotation, Parameter):
+        if param := type_util.get_annotated_metadata(annotation, Parameter):
             assert not param.output
             return load_parameter_value(
                 _get_annotated_input_param_value(field, param, kwargs),
                 ann_type,
             )
-        elif artifact := type_util.consume_annotated_metadata(annotation, Artifact):
+        elif artifact := type_util.get_annotated_metadata(annotation, Artifact):
             return get_annotated_artifact_value(artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
@@ -184,9 +184,9 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
     mapped_kwargs: Dict[str, Any] = {}
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
-        if param := type_util.consume_annotated_metadata(func_param.annotation, Parameter):
+        if param := type_util.get_annotated_metadata(func_param.annotation, Parameter):
             mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
-        elif artifact := type_util.consume_annotated_metadata(func_param.annotation, Artifact):
+        elif artifact := type_util.get_annotated_metadata(func_param.annotation, Artifact):
             mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
         elif not type_util.is_subscripted(func_param.annotation) and issubclass(
             func_param.annotation, (InputV1, InputV2)

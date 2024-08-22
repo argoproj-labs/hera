@@ -379,14 +379,14 @@ def _get_outputs_from_return_annotation(
             parameters.append(annotation)
 
     return_annotation = inspect.signature(source).return_annotation
-    if param_or_artifact := type_util.consume_annotated_metadata(return_annotation, (Artifact, Parameter)):
+    if param_or_artifact := type_util.get_annotated_metadata(return_annotation, (Artifact, Parameter)):
         append_annotation(param_or_artifact)
     elif get_origin(return_annotation) is tuple:
         for annotation in get_args(return_annotation):
             if isinstance(annotation, type) and issubclass(annotation, (OutputV1, OutputV2)):
                 raise ValueError("Output cannot be part of a tuple output")
 
-            append_annotation(type_util.consume_annotated_metadata(annotation, (Artifact, Parameter)))
+            append_annotation(type_util.get_annotated_metadata(annotation, (Artifact, Parameter)))
     elif return_annotation and issubclass(return_annotation, (OutputV1, OutputV2)):
         if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
             raise ValueError(
@@ -417,7 +417,7 @@ def _get_outputs_from_parameter_annotations(
         if not type_util.is_annotated(p.annotation):
             continue
 
-        annotation = type_util.consume_annotated_metadata(p.annotation, (Artifact, Parameter))
+        annotation = type_util.get_annotated_metadata(p.annotation, (Artifact, Parameter))
         if not annotation or not annotation.output:
             continue
 
@@ -481,7 +481,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
             artifacts.extend(input_class._get_artifacts())
 
-        elif param_or_artifact := type_util.consume_annotated_metadata(func_param.annotation, (Artifact, Parameter)):
+        elif param_or_artifact := type_util.get_annotated_metadata(func_param.annotation, (Artifact, Parameter)):
             if param_or_artifact.output:
                 continue
 
@@ -564,7 +564,7 @@ def _extract_all_output_annotations(source: Callable) -> List:
 
     for _, func_param in inspect.signature(source).parameters.items():
         if (
-            annotated := type_util.consume_annotated_metadata(func_param.annotation, (Artifact, Parameter))
+            annotated := type_util.get_annotated_metadata(func_param.annotation, (Artifact, Parameter))
         ) and annotated.output:
             output.append(get_args(func_param.annotation))
 

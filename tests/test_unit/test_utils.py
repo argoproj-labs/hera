@@ -47,8 +47,8 @@ def test_consume_annotated_type(annotation, expected):
         ],
     ],
 )
-def test_consume_annotated_metadata(annotation, t, expected):
-    assert type_util.consume_annotated_metadata(annotation, t) == expected
+def test_get_annotated_metadata(annotation, t, expected):
+    assert type_util.get_annotated_metadata(annotation, t) == expected
 
 
 @pytest.mark.parametrize(
