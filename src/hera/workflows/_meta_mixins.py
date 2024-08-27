@@ -44,11 +44,6 @@ try:
 except ImportError:
     from hera.shared._inspect import get_annotations  # type: ignore
 
-try:
-    from types import NoneType  # type: ignore
-except ImportError:
-    NoneType = type(None)  # type: ignore
-
 
 if TYPE_CHECKING:
     from hera.workflows._mixins import TemplateMixin
