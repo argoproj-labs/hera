@@ -131,8 +131,7 @@ def map_runner_input(
     input_model_obj = {}
 
     def load_parameter_value(value: str, value_type: type) -> Any:
-        raw_type = type_util.unwrap_annotation(value_type)
-        if type_util.can_consume_primitive(raw_type, str):
+        if type_util.can_consume_primitive(value_type, str):
             return value
 
         try:
