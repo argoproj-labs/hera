@@ -7,7 +7,7 @@ for more on CronWorkflows.
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
-from hera._utils import type_util
+from hera.shared import _type_util
 from hera.workflows._meta_mixins import ModelMapperMixin, _set_model_attr
 
 try:
@@ -45,7 +45,7 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
         assert isinstance(hera_obj, ModelMapperMixin)
 
         for attr, annotation in hera_class._get_all_annotations().items():
-            if mapper := type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+            if mapper := _type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                 if (
                     not isinstance(mapper, _CronWorkflowModelMapper)
                     and mapper.model_path
@@ -166,7 +166,7 @@ class CronWorkflow(Workflow):
         hera_cron_workflow = cls(schedule="")
 
         for attr, annotation in cls._get_all_annotations().items():
-            if mapper := type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+            if mapper := _type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                 if mapper.model_path:
                     value = None
 

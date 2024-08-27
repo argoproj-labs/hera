@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 import pytest
 
-from hera._utils import type_util
+from hera.shared import _type_util
 from hera.workflows import Artifact, Parameter
 
 try:
@@ -13,7 +13,7 @@ except ImportError:
 
 @pytest.mark.parametrize("annotation, expected", [[Annotated[str, "some metadata"], True], [str, False]])
 def test_is_annotated(annotation, expected):
-    assert type_util.is_annotated(annotation) == expected
+    assert _type_util.is_annotated(annotation) == expected
 
 
 @pytest.mark.parametrize(
@@ -25,7 +25,7 @@ def test_is_annotated(annotation, expected):
     ],
 )
 def test_unwrap_annotation(annotation, expected):
-    assert type_util.unwrap_annotation(annotation) == expected
+    assert _type_util.unwrap_annotation(annotation) == expected
 
 
 @pytest.mark.parametrize(
@@ -48,7 +48,7 @@ def test_unwrap_annotation(annotation, expected):
     ],
 )
 def test_get_annotated_metadata(annotation, t, expected):
-    assert type_util.get_annotated_metadata(annotation, t) == expected
+    assert _type_util.get_annotated_metadata(annotation, t) == expected
 
 
 @pytest.mark.parametrize(
@@ -59,7 +59,7 @@ def test_get_annotated_metadata(annotation, t, expected):
     ],
 )
 def test_get_origin_or_builtin(annotation, expected):
-    assert type_util.get_origin_or_builtin(annotation) is expected
+    assert _type_util.get_origin_or_builtin(annotation) is expected
 
 
 @pytest.mark.parametrize(
@@ -72,4 +72,4 @@ def test_get_origin_or_builtin(annotation, expected):
     ],
 )
 def test_origin_type_issubclass(annotation, target, expected):
-    assert type_util.origin_type_issubclass(annotation, target) is expected
+    assert _type_util.origin_type_issubclass(annotation, target) is expected

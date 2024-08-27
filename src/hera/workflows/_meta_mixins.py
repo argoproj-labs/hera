@@ -11,8 +11,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 
 from typing_extensions import ParamSpec
 
-from hera._utils import type_util
-from hera.shared import BaseMixin, global_config
+from hera.shared import BaseMixin, _type_util, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
 from hera.workflows._context import _context
@@ -170,7 +169,7 @@ class ModelMapperMixin(BaseMixin):
             assert isinstance(hera_obj, ModelMapperMixin)
 
             for attr, annotation in hera_class._get_all_annotations().items():
-                if mapper := type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                if mapper := _type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                     # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
                     value = (
                         getattr(hera_obj, mapper.builder.__name__)()
@@ -193,7 +192,7 @@ class ModelMapperMixin(BaseMixin):
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
-            if mapper := type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+            if mapper := _type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                 if mapper.model_path:
                     value = _get_model_attr(model, mapper.model_path)
                     if value is not None:

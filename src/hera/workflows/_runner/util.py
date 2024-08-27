@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, cast
 
-from hera._utils import type_util
+from hera.shared import _type_util
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
@@ -115,20 +115,20 @@ def _get_unannotated_type(key: str, f: Callable) -> Optional[type]:
     type_ = _inspect_callable_param_annotation(key, f)
     if type_ is None:
         return None
-    return type_util.unwrap_annotation(type_)
+    return _type_util.unwrap_annotation(type_)
 
 
 def _is_str_kwarg_of(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` has a type annotation that can be interpreted as a subclass of str."""
     if func_param_annotation := _inspect_callable_param_annotation(key, f):
-        return type_util.origin_type_issubclass(func_param_annotation, str)
+        return _type_util.origin_type_issubclass(func_param_annotation, str)
     return False
 
 
 def _is_artifact_loaded(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is actually an Artifact that has already been loaded."""
     if param_annotation := _inspect_callable_param_annotation(key, f):
-        if artifact := type_util.get_annotated_metadata(param_annotation, Artifact):
+        if artifact := _type_util.get_annotated_metadata(param_annotation, Artifact):
             return artifact.loader == ArtifactLoader.json.value
     return False
 
@@ -136,7 +136,7 @@ def _is_artifact_loaded(key: str, f: Callable) -> bool:
 def _is_output_kwarg(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is an output Artifact/Parameter."""
     if param_annotation := _inspect_callable_param_annotation(key, f):
-        if param_or_artifact := type_util.get_annotated_metadata(param_annotation, (Artifact, Parameter)):
+        if param_or_artifact := _type_util.get_annotated_metadata(param_annotation, (Artifact, Parameter)):
             return bool(param_or_artifact.output)
     return False
 
