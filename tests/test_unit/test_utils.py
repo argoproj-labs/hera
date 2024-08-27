@@ -71,5 +71,5 @@ def test_get_origin_or_builtin(annotation, expected):
         [Union[int, str], int, True],
     ],
 )
-def test_can_consume_primitive(annotation, target, expected):
-    assert type_util.can_consume_primitive(annotation, target) is expected
+def test_origin_type_issubclass(annotation, target, expected):
+    assert type_util.origin_type_issubclass(annotation, target) is expected

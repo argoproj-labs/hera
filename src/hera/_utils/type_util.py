@@ -64,14 +64,13 @@ def get_origin_or_builtin(t: type) -> type:
     return t
 
 
-def can_consume_primitive(annotation: type, target: type) -> bool:
-    """If annotation can be considered as target type or subclass of it, return True."""
-    if is_annotated(annotation):
-        annotation = unwrap_annotation(annotation)
-    casted = get_origin_or_builtin(annotation)
-    if casted is Union or casted is UnionType:
-        return any(can_consume_primitive(arg, target) for arg in get_args(annotation))
-    return issubclass(casted, target)
+def origin_type_issubclass(cls: type, type_: type) -> bool:
+    """Return True if cls can be considered as a subclass of type_."""
+    unwrapped_type = unwrap_annotation(cls)
+    origin_type = get_origin_or_builtin(unwrapped_type)
+    if origin_type is Union or origin_type is UnionType:
+        return any(origin_type_issubclass(arg, type_) for arg in get_args(cls))
+    return issubclass(origin_type, type_)
 
 
 def is_subscripted(t: type) -> bool:

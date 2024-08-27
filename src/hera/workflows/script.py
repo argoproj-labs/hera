@@ -528,7 +528,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             else:
                 default = MISSING
 
-            if type_util.can_consume_primitive(func_param.annotation, NoneType) and (
+            if type_util.origin_type_issubclass(func_param.annotation, NoneType) and (
                 default is MISSING or default is not None
             ):
                 raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
