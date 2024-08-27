@@ -58,8 +58,8 @@ def test_get_annotated_metadata(annotation, t, expected):
         [Optional[str], Union],
     ],
 )
-def test_may_cast_subscripted_type(annotation, expected):
-    assert type_util.may_cast_subscripted_type(annotation) is expected
+def test_get_origin_or_builtin(annotation, expected):
+    assert type_util.get_origin_or_builtin(annotation) is expected
 
 
 @pytest.mark.parametrize(

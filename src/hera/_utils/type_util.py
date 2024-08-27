@@ -54,7 +54,7 @@ def get_annotated_metadata(annotation, type_):
     return None
 
 
-def may_cast_subscripted_type(t: type) -> type:
+def get_origin_or_builtin(t: type) -> type:
     """Get the unsubscripted version of t or the type of t itself if it's a built it, and cast it as a Python `type`.
 
     This can be helpful if you want to use t with isinstance, issubclass, etc.,
@@ -68,7 +68,7 @@ def can_consume_primitive(annotation: type, target: type) -> bool:
     """If annotation can be considered as target type or subclass of it, return True."""
     if is_annotated(annotation):
         annotation = unwrap_annotation(annotation)
-    casted = may_cast_subscripted_type(annotation)
+    casted = get_origin_or_builtin(annotation)
     if casted is Union or casted is UnionType:
         return any(can_consume_primitive(arg, target) for arg in get_args(annotation))
     return issubclass(casted, target)

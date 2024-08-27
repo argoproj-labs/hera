@@ -234,7 +234,7 @@ def _save_annotated_return_outputs(
         else:
             assert isinstance(dest, tuple)
 
-            type_ = type_util.may_cast_subscripted_type(dest[0])
+            type_ = type_util.get_origin_or_builtin(dest[0])
             if not isinstance(output_value, type_):
                 raise ValueError(
                     f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
