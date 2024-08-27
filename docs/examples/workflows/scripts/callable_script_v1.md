@@ -8,21 +8,21 @@
 === "Hera"
 
     ```python linenums="1"
+    import sys
     from typing import List, Union
 
-    from hera.shared.serialization import serialize
+    if sys.version_info >= (3, 9):
+        from typing import Annotated
+    else:
+        from typing_extensions import Annotated
 
-    try:
-        from typing import Annotated  # type: ignore
-    except ImportError:
-        from typing_extensions import Annotated  # type: ignore
     try:
         from pydantic.v1 import BaseModel
     except (ImportError, ModuleNotFoundError):
         from pydantic import BaseModel
 
-
     from hera.shared import global_config
+    from hera.shared.serialization import serialize
     from hera.workflows import Parameter, RunnerScriptConstructor, Script, Steps, Workflow, script
 
     # Note, setting constructor to runner is only possible if the source code is available

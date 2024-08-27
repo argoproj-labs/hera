@@ -1,5 +1,11 @@
+import sys
 from pathlib import Path
 from typing import List
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from pydantic import BaseModel
 from tests.helper import ARTIFACT_PATH
@@ -11,11 +17,6 @@ try:
     from hera.workflows.io.v2 import Input, Output
 except ImportError:
     from hera.workflows.io.v1 import Input, Output
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True

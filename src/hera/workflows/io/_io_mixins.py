@@ -1,6 +1,26 @@
+import sys
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
+if sys.version_info >= (3, 10):
+    from typing import get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware. Python 3.9's versions don't support ParamSpecArgs and
+    # ParamSpecKwargs.
+    from typing_extensions import get_args, get_origin
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
 from hera.shared.serialization import MISSING, serialize
@@ -24,11 +44,6 @@ else:
     V2BaseModel = V1BaseModel  # type: ignore
     PydanticUndefined = None  # type: ignore[assignment]
 
-
-try:
-    from typing import Annotated, Self, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, Self, get_args, get_origin  # type: ignore
 
 if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it

@@ -1,13 +1,13 @@
+import sys
+from pathlib import Path
 from typing import Optional, Union
 
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 import pytest
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
-
-from pathlib import Path
 
 from hera.workflows import Workflow, script
 from hera.workflows.artifact import Artifact

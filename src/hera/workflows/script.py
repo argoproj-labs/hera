@@ -6,6 +6,7 @@ for more on scripts.
 
 import copy
 import inspect
+import sys
 import textwrap
 import warnings
 from abc import abstractmethod
@@ -23,6 +24,12 @@ from typing import (
     Union,
     cast,
 )
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 
 from typing_extensions import ParamSpec, get_args, get_origin
 
@@ -77,11 +84,6 @@ from hera.workflows.parameter import MISSING, Parameter
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 
 class ScriptConstructor(BaseMixin):

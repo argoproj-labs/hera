@@ -4,10 +4,27 @@ from __future__ import annotations
 
 import functools
 import inspect
+import sys
 from collections import ChainMap
 from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware.
+    from typing_extensions import Annotated, get_args, get_origin
+
+if sys.version_info >= (3, 10):
+    from inspect import get_annotations
+    from types import NoneType
+else:
+    from hera.shared._inspect import get_annotations
+
+    NoneType = type(None)
+
 
 from typing_extensions import ParamSpec
 
@@ -38,21 +55,6 @@ except ImportError:
         Input as InputV2,
         Output as OutputV2,
     )
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
-
-try:
-    from inspect import get_annotations  # type: ignore
-except ImportError:
-    from hera.shared._inspect import get_annotations  # type: ignore
-
-try:
-    from types import NoneType  # type: ignore
-except ImportError:
-    NoneType = type(None)  # type: ignore
-
 
 if TYPE_CHECKING:
     from hera.workflows._mixins import TemplateMixin

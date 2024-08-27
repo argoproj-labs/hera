@@ -5,23 +5,24 @@ for more on Workflows.
 """
 
 import logging
+import sys
 import time
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args
+else:
+    # Python 3.8 has get_args() but the implementation isn't Annotated-aware.
+    from typing_extensions import Annotated, get_args
+
+
 from typing_extensions import ParamSpec
-
-from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
-from hera.workflows.template_set import TemplateSet
-
-try:
-    from typing import Annotated, get_args  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args  # type: ignore
 
 from hera import _yaml
 from hera.shared import global_config
 from hera.shared._pydantic import BaseModel, validator
+from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
     ArgumentsT,
@@ -66,6 +67,7 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
 from hera.workflows.service import WorkflowsService
+from hera.workflows.template_set import TemplateSet
 from hera.workflows.workflow_status import WorkflowStatus
 
 ImagePullSecretsT = Optional[Union[LocalObjectReference, List[LocalObjectReference], str, List[str]]]

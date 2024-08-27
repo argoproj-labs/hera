@@ -4,20 +4,23 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 
+import sys
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
-from hera.workflows._meta_mixins import ModelMapperMixin, _set_model_attr
-
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware.
+    from typing_extensions import Annotated, get_args, get_origin
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel
 from hera.workflows._meta_mixins import (
+    ModelMapperMixin,
     _get_model_attr,
+    _set_model_attr,
 )
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
