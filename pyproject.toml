@@ -132,7 +132,10 @@ src = ["src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "D"]
-ignore = ["E501"]
+ignore = [
+  "D418",  # Bans docstrings on overloads. Pylance supports these and they are useful.
+  "E501",  # Line too long.
+]
 extend-select = ["I"]
 
 [tool.ruff.lint.per-file-ignores]
