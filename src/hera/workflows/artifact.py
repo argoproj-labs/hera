@@ -39,7 +39,10 @@ class ArtifactLoader(Enum):
     """Enum for artifact loader options."""
 
     json = "json"
+    """Deserialize the JSON-string Artifact file to a Python object (the target variable can be any JSON-compatible type)."""
+
     file = "file"
+    """Read the contents of the Artifact file directly as a string (the target variable must be a `str` type)."""
 
 
 class Artifact(BaseModel):
