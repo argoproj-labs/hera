@@ -11,7 +11,7 @@ spec:
       command:
       - sh
       - -c
-      image: python:3.8
+      image: busybox
     inputs:
       parameters:
       - default: Hera
