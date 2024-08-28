@@ -48,18 +48,21 @@ This example showcases how to run a init_containers with env
           - cowsay
           - foo
           image: docker/whalesay
-        name: cowsay
         initContainers:
-        - name: init
-          image: busybox
-          command: [ "sh", "-c", "echo Hello from the init container ($FOO, $SECRET)" ]
+        - command:
+          - sh
+          - -c
+          - echo Hello from the init container ($FOO, $SECRET)
           env:
           - name: FOO
-            value: "bar"
+            value: bar
           - name: SECRET
             valueFrom:
               secretKeyRef:
-                name: my-secret
                 key: password
+                name: my-secret
+          image: busybox
+          name: init
+        name: cowsay
     ```
 
