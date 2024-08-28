@@ -15,7 +15,10 @@ assignees: ''
 
 _If yes, it is more likely to be an Argo bug unrelated to Hera. Please double check before submitting an issue to Hera._
 
-**2. This bug occurs in Hera when...**
+**2. I have searched for [existing issues](https://github.com/argoproj-labs/hera/issues)**
+- [ ] Yes
+
+**3. This bug occurs in Hera when...**
 - [ ] exporting to YAML
 - [ ] submitting to Argo
 - [ ] running on Argo with the Hera runner
