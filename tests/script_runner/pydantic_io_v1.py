@@ -1,5 +1,11 @@
+import sys
 from pathlib import Path
 from typing import List
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from tests.helper import ARTIFACT_PATH
 
@@ -11,11 +17,6 @@ try:
     from pydantic.v1 import BaseModel
 except ImportError:
     from pydantic import BaseModel
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True

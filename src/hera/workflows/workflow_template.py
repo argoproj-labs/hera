@@ -4,13 +4,14 @@ See https://argoproj.github.io/argo-workflows/workflow-templates/
 for more on WorkflowTemplates.
 """
 
+import sys
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel, validator

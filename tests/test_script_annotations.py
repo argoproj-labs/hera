@@ -1,20 +1,21 @@
 """Test script annotations are built correctly within workflows."""
 
 import importlib
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 import pytest
-
-from .test_examples import _compare_workflows
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.workflows import Workflow, script
 from hera.workflows.parameter import Parameter
 from hera.workflows.steps import Steps
+
+from .test_examples import _compare_workflows
 
 
 @pytest.mark.parametrize("module_name", ["combined", "description", "enum"])

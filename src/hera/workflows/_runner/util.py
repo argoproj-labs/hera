@@ -6,8 +6,16 @@ import importlib
 import inspect
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union, cast
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware.
+    from typing_extensions import Annotated, get_args, get_origin
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
@@ -22,11 +30,6 @@ from hera.workflows.io.v1 import (
     Output as OutputV1,
 )
 from hera.workflows.script import _extract_return_annotation_output
-
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 if _PYDANTIC_VERSION == 2:
     from pydantic.type_adapter import TypeAdapter  # type: ignore

@@ -8,14 +8,12 @@ This example will reuse the outputs volume across script steps.
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows.artifact import ArtifactLoader
-    from hera.workflows.volume import Volume
+    import sys
 
-    try:
-        from typing import Annotated  # type: ignore
-    except ImportError:
-        from typing_extensions import Annotated  # type: ignore
-
+    if sys.version_info >= (3, 9):
+        from typing import Annotated
+    else:
+        from typing_extensions import Annotated
 
     from hera.shared import global_config
     from hera.workflows import (
@@ -28,6 +26,8 @@ This example will reuse the outputs volume across script steps.
         models as m,
         script,
     )
+    from hera.workflows.artifact import ArtifactLoader
+    from hera.workflows.volume import Volume
 
     global_config.experimental_features["script_annotations"] = True
 

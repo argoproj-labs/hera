@@ -3,8 +3,16 @@
 import inspect
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware.
+    from typing_extensions import Annotated, get_args, get_origin
 
 from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared.serialization import serialize
@@ -25,11 +33,6 @@ except ImportError:
         Input as InputV2,
         Output as OutputV2,
     )
-
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import (
     Any,
     Callable,
@@ -14,6 +15,13 @@ from typing import (
     Union,
     cast,
 )
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware.
+    from typing_extensions import Annotated, get_args, get_origin
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
@@ -69,12 +77,6 @@ from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
-
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
-
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
