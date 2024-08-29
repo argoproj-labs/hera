@@ -1,9 +1,10 @@
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
-
+import sys
 from pathlib import Path
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from pydantic import BaseModel
 from tests.helper import ARTIFACT_PATH

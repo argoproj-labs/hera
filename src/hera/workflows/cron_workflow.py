@@ -4,21 +4,21 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 
+import sys
 from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
-from hera.shared import _type_util
-from hera.workflows._meta_mixins import ModelMapperMixin, _set_model_attr
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
-
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 from hera.exceptions import NotFound
+from hera.shared import _type_util
 from hera.shared._pydantic import BaseModel
 from hera.workflows._meta_mixins import (
+    ModelMapperMixin,
     _get_model_attr,
+    _set_model_attr,
 )
 from hera.workflows.models import (
     CreateCronWorkflowRequest,

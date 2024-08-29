@@ -1,3 +1,10 @@
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 try:
     from pydantic.v1 import BaseModel
 except ImportError:
@@ -7,11 +14,6 @@ from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
 from hera.workflows.archive import NoneArchiveStrategy
 from hera.workflows.io import Input, Output
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 global_config.experimental_features["script_pydantic_io"] = True
 

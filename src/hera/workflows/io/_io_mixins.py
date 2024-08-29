@@ -1,5 +1,11 @@
+import sys
 import warnings
 from typing import TYPE_CHECKING, List, Optional, Union
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from hera.shared import _type_util
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
@@ -23,12 +29,6 @@ else:
 
     V2BaseModel = V1BaseModel  # type: ignore
     PydanticUndefined = None  # type: ignore[assignment]
-
-
-try:
-    from typing import Self  # type: ignore
-except ImportError:
-    from typing_extensions import Self  # type: ignore
 
 if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it

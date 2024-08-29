@@ -1,12 +1,13 @@
 """Test the correctness of the Output annotations. The test uses the runner to check the outputs and if they save correctly to files."""
 
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
-
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from tests.helper import ARTIFACT_PATH
 

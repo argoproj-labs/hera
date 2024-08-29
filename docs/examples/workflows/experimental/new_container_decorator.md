@@ -36,7 +36,11 @@
 
 
     @w.set_entrypoint
-    @w.container(command=["sh", "-c"], args=["echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"])
+    @w.container(
+        image="busybox",
+        command=["sh", "-c"],
+        args=["echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"],
+    )
     def basic_hello_world(my_input: MyInput) -> MyOutput: ...
     ```
 
@@ -56,7 +60,7 @@
           command:
           - sh
           - -c
-          image: python:3.8
+          image: busybox
         inputs:
           parameters:
           - default: Hera

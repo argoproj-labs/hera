@@ -1,16 +1,18 @@
 """Regression test: compare the new Annotated style inputs declaration with the old version."""
 
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 from hera.workflows import (
     Parameter,
     Workflow,
     models as m,
     script,
 )
-
-try:
-    from typing import Annotated  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore
 
 
 @script()
