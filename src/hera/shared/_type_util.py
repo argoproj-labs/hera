@@ -1,19 +1,22 @@
 """Module that handles types and annotations."""
 
-from typing import Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
+import sys
+from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
 
-try:
-    from types import UnionType  # type: ignore
-except ImportError:
-    UnionType = Union  # type: ignore
+if sys.version_info >= (3, 9):
+    from typing import Annotated, get_args, get_origin
+else:
+    # Python 3.8 has get_origin() and get_args() but those implementations aren't
+    # Annotated-aware.
+    from typing_extensions import Annotated, get_args, get_origin
 
-try:
-    from typing import Annotated, get_args, get_origin  # type: ignore
-except ImportError:
-    from typing_extensions import Annotated, get_args, get_origin  # type: ignore
+if sys.version_info >= (3, 10):
+    from types import UnionType
+else:
+    UnionType = Union
 
 
-def is_annotated(annotation: type):
+def is_annotated(annotation: Any):
     """Check annotation has Annotated type or not."""
     return get_origin(annotation) is Annotated
 
@@ -30,11 +33,11 @@ V = TypeVar("V")
 
 
 @overload
-def get_annotated_metadata(_: type, __: Type[T]) -> Optional[T]: ...
+def get_annotated_metadata(annotation: Any, type_: Type[T]) -> Optional[T]: ...
 
 
 @overload
-def get_annotated_metadata(_: type, __: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
+def get_annotated_metadata(annotation: Any, type_: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
 
 
 # FIXME: Currently, mypy cannot guess following type hint properly: https://github.com/python/mypy/issues/17700
@@ -42,6 +45,8 @@ def get_annotated_metadata(_: type, __: Tuple[Type[T], Type[V]]) -> Optional[Uni
 #        Once fixed, remove overloads and add simpler type hints.
 def get_annotated_metadata(annotation, type_):
     """If given annotation has metadata typed type_, return the metadata."""
+    if not is_annotated(annotation):
+        return None
     args = get_args(annotation)
     for arg in args[1:]:
         if isinstance(type_, Iterable):
@@ -75,7 +80,7 @@ def origin_type_issubclass(cls: type, type_: type) -> bool:
 
 def is_subscripted(t: type) -> bool:
     """Check if given type is subscripted, i.e. a typing object of the form X[Y, Z, ...].
-    
+
     >>> is_subscripted(list[str])
     True
     >>> is_subscripted(str)

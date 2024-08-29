@@ -403,7 +403,8 @@ def _get_outputs_from_return_annotation(
             if isinstance(annotation, type) and issubclass(annotation, (OutputV1, OutputV2)):
                 raise ValueError("Output cannot be part of a tuple output")
 
-            append_annotation(_type_util.get_annotated_metadata(annotation, (Artifact, Parameter)))
+            if param_or_artifact := _type_util.get_annotated_metadata(annotation, (Artifact, Parameter)):
+                append_annotation(param_or_artifact)
     elif return_annotation and issubclass(return_annotation, (OutputV1, OutputV2)):
         if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
             raise ValueError(
@@ -557,8 +558,8 @@ def _extract_return_annotation_output(source: Callable) -> List:
     return_annotation = inspect.signature(source).return_annotation
     origin_type = get_origin(return_annotation)
     annotation_args = get_args(return_annotation)
-    if param_or_artifact := get_annotated_metadata(return_annotation, (Artifact, Parameter)):
-        output.append(param_or_artifact)
+    if _type_util.get_annotated_metadata(return_annotation, (Artifact, Parameter)):
+        output.append(annotation_args)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
             output.append(get_args(annotated_type))
