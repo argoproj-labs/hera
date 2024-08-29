@@ -625,8 +625,6 @@ ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
 class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
     """Type assigned to functions decorated with @script."""
 
-    # Note: name is required for Step + Task, but is automatically inferred from
-    #       the name of the decorated function for @script.
     # Note: For more details about overload-overlap, see https://github.com/python/typeshed/issues/12178
 
     @overload
@@ -651,6 +649,8 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         May return a Step or a Task, depending on the context. Use `assert isinstance(result, Step)`
         or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
         """
+        # Note: signature must match the Step constructor, except that while name is required for Step,
+        # it is automatically inferred from the name of the decorated function for @script.
 
     @overload
     def __call__(  # type: ignore [overload-overlap]
@@ -672,6 +672,8 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         depends: Optional[str] = ...,
     ) -> Task:
         """@script-decorated function invoked within a task context."""
+        # Note: signature must match the Task constructor, except that while name is required for Task,
+        # it is automatically inferred from the name of the decorated function for @script.
 
     @overload
     def __call__(self, *args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncRCov:

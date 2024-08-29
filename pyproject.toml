@@ -133,7 +133,7 @@ src = ["src"]
 [tool.ruff.lint]
 select = ["E", "F", "D"]
 ignore = [
-  "D418",  # Bans docstrings on overloads. Pylance supports these and they are useful.
+  "D418",  # Bans docstrings on overloads, but VS Code displays these to users in tooltips.
   "E501",  # Line too long.
 ]
 extend-select = ["I"]
