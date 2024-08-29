@@ -629,6 +629,14 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
 
     @overload
     def __call__(  # type: ignore [overload-overlap]
+        self, *args: FuncIns.args, **kwargs: FuncIns.kwargs
+    ) -> FuncRCov:
+        # Note: this overload is for calling the decorated function.
+        # No docstring is provided, so VS Code will use the docstring of the decorated function.
+        ...
+
+    @overload
+    def __call__(  # type: ignore [overload-overlap, misc]
         self,
     ) -> Optional[Union[Step, Task]]:
         """@script-decorated function invoked within a workflow, step or task context.
@@ -684,12 +692,6 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         """@script-decorated function invoked within a task context."""
         # Note: signature must match the Task constructor, except that while name is required for Task,
         # it is automatically inferred from the name of the decorated function for @script.
-
-    @overload
-    def __call__(self, *args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncRCov:
-        # Note: this overload is for calling the decorated function.
-        # No docstring is provided, so VS Code will use the docstring of the decorated function.
-        ...
 
 
 # Pass actual class of Script to bind inputs to the ParamSpec above
