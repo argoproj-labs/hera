@@ -687,10 +687,9 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
 
     @overload
     def __call__(self, *args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncRCov:
-        """@script-decorated function invoked outside of a step or task context.
-
-        Will call the decorated function.
-        """
+        # Note: this overload is for calling the decorated function.
+        # No docstring is provided, so VS Code will use the docstring of the decorated function.
+        ...
 
 
 # Pass actual class of Script to bind inputs to the ParamSpec above
