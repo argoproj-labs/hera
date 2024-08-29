@@ -74,5 +74,11 @@ def origin_type_issubclass(cls: type, type_: type) -> bool:
 
 
 def is_subscripted(t: type) -> bool:
-    """Check if given type is subscripted."""
+    """Check if given type is subscripted, i.e. a typing object of the form X[Y, Z, ...].
+    
+    >>> is_subscripted(list[str])
+    True
+    >>> is_subscripted(str)
+    False
+    """
     return get_origin(t) is not None

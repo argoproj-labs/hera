@@ -385,7 +385,7 @@ def _get_outputs_from_return_annotation(
     parameters = []
     artifacts = []
 
-    def append_annotation(annotation: Union[Artifact, Parameter, None]):
+    def append_annotation(annotation: Union[Artifact, Parameter]):
         if isinstance(annotation, Artifact):
             if annotation.path is None and outputs_directory is not None:
                 annotation.path = outputs_directory + f"/artifacts/{annotation.name}"
@@ -557,8 +557,8 @@ def _extract_return_annotation_output(source: Callable) -> List:
     return_annotation = inspect.signature(source).return_annotation
     origin_type = get_origin(return_annotation)
     annotation_args = get_args(return_annotation)
-    if _type_util.is_annotated(return_annotation):
-        output.append(annotation_args)
+    if param_or_artifact := get_annotated_metadata(return_annotation, (Artifact, Parameter)):
+        output.append(param_or_artifact)
     elif origin_type is tuple:
         for annotated_type in annotation_args:
             output.append(get_args(annotated_type))

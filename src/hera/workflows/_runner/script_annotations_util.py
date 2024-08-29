@@ -185,12 +185,15 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
         if param := _type_util.get_annotated_metadata(func_param.annotation, Parameter):
             mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
+
         elif artifact := _type_util.get_annotated_metadata(func_param.annotation, Artifact):
             mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
+
         elif not _type_util.is_subscripted(func_param.annotation) and issubclass(
             func_param.annotation, (InputV1, InputV2)
         ):
             mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
+
         else:
             mapped_kwargs[func_param_name] = kwargs[func_param_name]
     return mapped_kwargs

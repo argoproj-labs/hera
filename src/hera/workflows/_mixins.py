@@ -738,10 +738,12 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
                     return result_templated_str
 
                 if param := _type_util.get_annotated_metadata(annotations[name], Parameter):
-                    return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{param.name}}}}}"
+                    return "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{param.name}" + "}}"
+
                 if artifact := _type_util.get_annotated_metadata(annotations[name], Artifact):
-                    return f"{{{{{subnode_type}.{subnode_name}.outputs.artifacts.{artifact.name}}}}}"
-                return f"{{{{{subnode_type}.{subnode_name}.outputs.parameters.{name}}}}}"
+                    return "{{" + f"{subnode_type}.{subnode_name}.outputs.artifacts.{artifact.name}" + "}}"
+
+                return "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{name}" + "}}"
 
         return super().__getattribute__(name)
 
