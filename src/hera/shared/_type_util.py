@@ -1,7 +1,7 @@
 """Module that handles types and annotations."""
 
 import sys
-from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, cast, overload
+from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, overload
 
 if sys.version_info >= (3, 9):
     from typing import Annotated, get_args, get_origin
@@ -21,7 +21,7 @@ def is_annotated(annotation: Any):
     return get_origin(annotation) is Annotated
 
 
-def unwrap_annotation(annotation: type) -> type:
+def unwrap_annotation(annotation: Any) -> Any:
     """If the given annotation is of type Annotated, return the underlying type, otherwise return the annotation."""
     if is_annotated(annotation):
         return get_args(annotation)[0]
@@ -59,17 +59,17 @@ def get_annotated_metadata(annotation, type_):
     return None
 
 
-def get_unsubscripted_type(t: type) -> type:
+def get_unsubscripted_type(t: Any) -> Any:
     """Return the origin of t, if subscripted, or t itself.
 
     This can be helpful if you want to use t with isinstance, issubclass, etc.,
     """
     if origin_type := get_origin(t):
-        return cast(type, origin_type)
+        return origin_type
     return t
 
 
-def origin_type_issubclass(cls: type, type_: type) -> bool:
+def origin_type_issubclass(cls: Any, type_: type) -> bool:
     """Return True if cls can be considered as a subclass of type_."""
     unwrapped_type = unwrap_annotation(cls)
     origin_type = get_unsubscripted_type(unwrapped_type)
@@ -78,7 +78,7 @@ def origin_type_issubclass(cls: type, type_: type) -> bool:
     return issubclass(origin_type, type_)
 
 
-def is_subscripted(t: type) -> bool:
+def is_subscripted(t: Any) -> bool:
     """Check if given type is subscripted, i.e. a typing object of the form X[Y, Z, ...].
 
     >>> is_subscripted(list[str])
