@@ -639,11 +639,11 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
     def __call__(  # type: ignore [overload-overlap, misc]
         self,
     ) -> Optional[Union[Step, Task]]:
-        """Create a Step or Task or add to the workflow, depending on context.
+        """Create a Step or Task or add the script as a template to the workflow, depending on the context.
 
         * Under a DAG context, creates and returns a Task.
         * Under a Steps or Parallel context, creates and returns a Step.
-        * Under a Workflow context, adds the script to the context and returns None.
+        * Under a Workflow context, adds the script as a template to the Workflow and returns None.
 
         Use `assert isinstance(result, Step)` or `assert isinstance(result, Task)` to select
         the correct type if using a type-checker.
