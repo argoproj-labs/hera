@@ -639,10 +639,14 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
     def __call__(  # type: ignore [overload-overlap, misc]
         self,
     ) -> Optional[Union[Step, Task]]:
-        """@script-decorated function invoked within a workflow, step or task context.
+        """Create a Step or Task or add to the workflow, depending on context.
 
-        May return None, a Step, or a Task, depending on the context. Use `assert isinstance(result, Step)`
-        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        * Under a DAG context, creates and returns a Task.
+        * Under a Steps or Parallel context, creates and returns a Step.
+        * Under a Workflow context, adds the script to the context and returns None.
+
+        Use `assert isinstance(result, Step)` or `assert isinstance(result, Task)` to select
+        the correct type if using a type-checker.
         """
 
     @overload
@@ -662,10 +666,13 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         with_param: Optional[Any] = ...,
         with_items: Optional[OneOrMany[Any]] = ...,
     ) -> Union[Step, Task]:
-        """@script-decorated function invoked within a step or task context.
+        """Create a Step or Task, depending on context.
 
-        May return a Step or a Task, depending on the context. Use `assert isinstance(result, Step)`
-        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        * Under a DAG context, creates and returns a Task.
+        * Under a Steps or Parallel context, creates and returns a Step.
+
+        Use `assert isinstance(result, Step)` or `assert isinstance(result, Task)` to select
+        the correct type if using a type-checker.
         """
         # Note: signature must match the Step constructor, except that while name is required for Step,
         # it is automatically inferred from the name of the decorated function when invoked.
@@ -689,7 +696,10 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         dependencies: Optional[List[str]] = ...,
         depends: Optional[str] = ...,
     ) -> Task:
-        """@script-decorated function invoked within a task context."""
+        """Create and return a Task.
+
+        Must be invoked under a DAG context.
+        """
         # Note: signature must match the Task constructor, except that while name is required for Task,
         # it is automatically inferred from the name of the decorated function when invoked.
 
