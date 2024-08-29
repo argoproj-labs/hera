@@ -4,7 +4,7 @@ import pytest
 
 from hera.shared._type_util import (
     get_annotated_metadata,
-    get_origin_or_builtin,
+    get_unsubscripted_type,
     is_annotated,
     origin_type_issubclass,
     unwrap_annotation,
@@ -64,8 +64,8 @@ def test_get_annotated_metadata(annotation, t, expected):
         [Optional[str], Union],
     ],
 )
-def test_get_origin_or_builtin(annotation, expected):
-    assert get_origin_or_builtin(annotation) is expected
+def test_get_unsubscripted_type(annotation, expected):
+    assert get_unsubscripted_type(annotation) is expected
 
 
 @pytest.mark.parametrize(

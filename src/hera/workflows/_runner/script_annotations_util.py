@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Un
 from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared._type_util import (
     get_annotated_metadata,
-    get_origin_or_builtin,
+    get_unsubscripted_type,
     is_subscripted,
     origin_type_issubclass,
     unwrap_annotation,
@@ -240,7 +240,7 @@ def _save_annotated_return_outputs(
         else:
             assert isinstance(dest, tuple)
 
-            type_ = get_origin_or_builtin(dest[0])
+            type_ = get_unsubscripted_type(dest[0])
             if not isinstance(output_value, type_):
                 raise ValueError(
                     f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
