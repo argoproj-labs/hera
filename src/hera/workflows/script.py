@@ -14,15 +14,19 @@ from functools import wraps
 from typing import (
     Any,
     Callable,
+    Dict,
+    Generic,
     List,
     Literal,
     Optional,
+    Protocol,
     Sequence,
     Tuple,
     Type,
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 if sys.version_info >= (3, 9):
@@ -45,8 +49,10 @@ from hera.shared.serialization import serialize
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
+    ArgumentsT,
     ContainerMixin,
     EnvIOMixin,
+    OneOrMany,
     ResourceMixin,
     TemplateMixin,
     VolumeMountMixin,
@@ -71,16 +77,21 @@ except ImportError:
         Output as OutputV2,
     )
 from hera.workflows.models import (
+    ContinueOn,
     EnvVar,
     Inputs as ModelInputs,
     Lifecycle,
+    LifecycleHook,
     Outputs as ModelOutputs,
     ScriptTemplate as _ModelScriptTemplate,
     SecurityContext,
+    Sequence as _ModelSequence,
     Template as _ModelTemplate,
+    TemplateRef,
     ValueFrom,
 )
 from hera.workflows.parameter import MISSING, Parameter
+from hera.workflows.protocol import Templatable
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
 from hera.workflows.volume import _BaseVolume
@@ -606,27 +617,93 @@ def _output_annotations_used(source: Callable) -> bool:
 
 FuncIns = ParamSpec("FuncIns")  # For input types of given func to script decorator
 FuncR = TypeVar("FuncR")  # For return type of given func to script decorator
+FuncRCov = TypeVar("FuncRCov", covariant=True)
 
 ScriptIns = ParamSpec("ScriptIns")  # For input attributes of Script class
-StepIns = ParamSpec("StepIns")  # # For input attributes of Step class
-TaskIns = ParamSpec("TaskIns")  # # For input attributes of Task class
 
 
-# Pass actual classes of Script, Step and Task to bind inputs to the ParamSpecs above
+class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
+    """Type assigned to functions decorated with @script."""
+
+    # Note: For more details about overload-overlap, see https://github.com/python/typeshed/issues/12178
+
+    @overload
+    def __call__(  # type: ignore [overload-overlap]
+        self,
+    ) -> Optional[Union[Step, Task]]:
+        """@script-decorated function invoked within a workflow, step or task context.
+
+        May return None, a Step, or a Task, depending on the context. Use `assert isinstance(result, Step)`
+        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        """
+
+    @overload
+    def __call__(  # type: ignore [overload-overlap]
+        self,
+        *,
+        name: str = ...,
+        continue_on: Optional[ContinueOn] = ...,
+        hooks: Optional[Dict[str, LifecycleHook]] = ...,
+        on_exit: Optional[Union[str, Templatable]] = ...,
+        template: Optional[Union[str, _ModelTemplate, TemplateMixin, CallableTemplateMixin]] = ...,
+        template_ref: Optional[TemplateRef] = ...,
+        inline: Optional[Union[_ModelTemplate, TemplateMixin]] = ...,
+        when: Optional[str] = ...,
+        with_sequence: Optional[_ModelSequence] = ...,
+        arguments: ArgumentsT = ...,
+        with_param: Optional[Any] = ...,
+        with_items: Optional[OneOrMany[Any]] = ...,
+    ) -> Union[Step, Task]:
+        """@script-decorated function invoked within a step or task context.
+
+        May return a Step or a Task, depending on the context. Use `assert isinstance(result, Step)`
+        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        """
+        # Note: signature must match the Step constructor, except that while name is required for Step,
+        # it is automatically inferred from the name of the decorated function for @script.
+
+    @overload
+    def __call__(  # type: ignore [overload-overlap]
+        self,
+        *,
+        name: str = ...,
+        continue_on: Optional[ContinueOn] = ...,
+        hooks: Optional[Dict[str, LifecycleHook]] = ...,
+        on_exit: Optional[Union[str, Templatable]] = ...,
+        template: Optional[Union[str, _ModelTemplate, TemplateMixin, CallableTemplateMixin]] = ...,
+        template_ref: Optional[TemplateRef] = ...,
+        inline: Optional[Union[_ModelTemplate, TemplateMixin]] = ...,
+        when: Optional[str] = ...,
+        with_sequence: Optional[_ModelSequence] = ...,
+        arguments: ArgumentsT = ...,
+        with_param: Optional[Any] = ...,
+        with_items: Optional[OneOrMany[Any]] = ...,
+        dependencies: Optional[List[str]] = ...,
+        depends: Optional[str] = ...,
+    ) -> Task:
+        """@script-decorated function invoked within a task context."""
+        # Note: signature must match the Task constructor, except that while name is required for Task,
+        # it is automatically inferred from the name of the decorated function for @script.
+
+    @overload
+    def __call__(self, *args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncRCov:
+        """@script-decorated function invoked outside of a step or task context.
+
+        Will call the decorated function.
+        """
+
+
+# Pass actual class of Script to bind inputs to the ParamSpec above
 def _add_type_hints(
     _script: Callable[ScriptIns, Script],
-    _step: Callable[StepIns, Step],
-    _task: Callable[TaskIns, Task],
 ) -> Callable[
     ...,
     Callable[
         ScriptIns,  # this adds Script type hints to the underlying *library* function kwargs, i.e. `script`
         Callable[  # we will return a function that is a decorator
             [Callable[FuncIns, FuncR]],  # taking underlying *user* function
-            Union[  # able to return FuncR | Step | Task | None
-                Callable[FuncIns, FuncR],
-                Callable[StepIns, Optional[Step]],
-                Callable[TaskIns, Optional[Task]],
+            _ScriptDecoratedFunction[  # and returning an overloaded method that can additionally return Task or Step
+                FuncIns, FuncR
             ],
         ],
     ],
@@ -635,7 +712,7 @@ def _add_type_hints(
     return lambda func: func
 
 
-@_add_type_hints(Script, Step, Task)  # type: ignore
+@_add_type_hints(Script)
 def script(**script_kwargs) -> Callable:
     """A decorator that wraps a function into a Script object.
 
