@@ -60,7 +60,7 @@ def get_annotated_metadata(annotation, type_):
 
 
 def get_origin_or_builtin(t: type) -> type:
-    """Get the unsubscripted version of t or the type of t itself if it's a built it, and cast it as a Python `type`.
+    """Return the origin of t, if subscripted, or t itself.
 
     This can be helpful if you want to use t with isinstance, issubclass, etc.,
     """
