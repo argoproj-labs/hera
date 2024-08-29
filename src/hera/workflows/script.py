@@ -630,6 +630,16 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
     @overload
     def __call__(  # type: ignore [overload-overlap]
         self,
+    ) -> Optional[Union[Step, Task]]:
+        """@script-decorated function invoked within a workflow, step or task context.
+
+        May return None, a Step, or a Task, depending on the context. Use `assert isinstance(result, Step)`
+        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        """
+
+    @overload
+    def __call__(  # type: ignore [overload-overlap]
+        self,
         *,
         name: str = ...,
         continue_on: Optional[ContinueOn] = ...,
