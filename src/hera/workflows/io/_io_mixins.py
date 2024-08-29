@@ -8,10 +8,7 @@ else:
     from typing_extensions import Self
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
-from hera.shared._type_util import (
-    get_annotated_metadata,
-    is_annotated,
-)
+from hera.shared._type_util import get_annotated_metadata
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
@@ -84,7 +81,7 @@ class InputMixin(BaseModel):
                     # Serialize the value (usually done in Parameter's validator)
                     param.default = serialize(field_info.default)  # type: ignore
                 parameters.append(param)
-            elif not is_annotated(annotations[field]):
+            elif not get_annotated_metadata(annotations[field], Artifact):
                 # Create a Parameter from basic type annotations
                 default = getattr(object_override, field) if object_override else field_info.default
 
