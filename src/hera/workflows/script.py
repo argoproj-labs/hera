@@ -668,7 +668,7 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
         """
         # Note: signature must match the Step constructor, except that while name is required for Step,
-        # it is automatically inferred from the name of the decorated function for @script.
+        # it is automatically inferred from the name of the decorated function when invoked.
 
     @overload
     def __call__(  # type: ignore [overload-overlap]
@@ -691,7 +691,7 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
     ) -> Task:
         """@script-decorated function invoked within a task context."""
         # Note: signature must match the Task constructor, except that while name is required for Task,
-        # it is automatically inferred from the name of the decorated function for @script.
+        # it is automatically inferred from the name of the decorated function when invoked.
 
 
 # Pass actual class of Script to bind inputs to the ParamSpec above
