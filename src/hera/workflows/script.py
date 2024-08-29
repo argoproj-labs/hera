@@ -432,9 +432,6 @@ def _get_outputs_from_parameter_annotations(
     artifacts: List[Artifact] = []
 
     for name, p in inspect.signature(source).parameters.items():
-        if not _type_util.is_annotated(p.annotation):
-            continue
-
         annotation = _type_util.get_annotated_metadata(p.annotation, (Artifact, Parameter))
         if not annotation or not annotation.output:
             continue

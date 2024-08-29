@@ -12,9 +12,10 @@ if sys.version_info >= (3, 9):
     from typing import Annotated
 else:
     from typing_extensions import Annotated
+
 from hera.exceptions import NotFound
-from hera.shared import _type_util
 from hera.shared._pydantic import BaseModel
+from hera.shared._type_util import get_annotated_metadata
 from hera.workflows._meta_mixins import (
     ModelMapperMixin,
     _get_model_attr,
@@ -45,7 +46,7 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
         assert isinstance(hera_obj, ModelMapperMixin)
 
         for attr, annotation in hera_class._get_all_annotations().items():
-            if mapper := _type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+            if mapper := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                 if (
                     not isinstance(mapper, _CronWorkflowModelMapper)
                     and mapper.model_path
@@ -166,7 +167,7 @@ class CronWorkflow(Workflow):
         hera_cron_workflow = cls(schedule="")
 
         for attr, annotation in cls._get_all_annotations().items():
-            if mapper := _type_util.get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+            if mapper := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                 if mapper.model_path:
                     value = None
 

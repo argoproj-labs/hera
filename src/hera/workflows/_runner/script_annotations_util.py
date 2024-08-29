@@ -6,8 +6,14 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
-from hera.shared import _type_util
 from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
+from hera.shared._type_util import (
+    get_annotated_metadata,
+    get_origin_or_builtin,
+    is_subscripted,
+    origin_type_issubclass,
+    unwrap_annotation,
+)
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
@@ -131,7 +137,7 @@ def map_runner_input(
     input_model_obj = {}
 
     def load_parameter_value(value: str, value_type: type) -> Any:
-        if _type_util.origin_type_issubclass(value_type, str):
+        if origin_type_issubclass(value_type, str):
             return value
 
         try:
@@ -147,15 +153,15 @@ def map_runner_input(
     ) -> Any:
         annotation = runner_input_annotations.get(field)
         assert annotation is not None, "RunnerInput fields must be type-annotated"
-        ann_type = _type_util.unwrap_annotation(annotation)
+        ann_type = unwrap_annotation(annotation)
 
-        if param := _type_util.get_annotated_metadata(annotation, Parameter):
+        if param := get_annotated_metadata(annotation, Parameter):
             assert not param.output
             return load_parameter_value(
                 _get_annotated_input_param_value(field, param, kwargs),
                 ann_type,
             )
-        elif artifact := _type_util.get_annotated_metadata(annotation, Artifact):
+        elif artifact := get_annotated_metadata(annotation, Artifact):
             return get_annotated_artifact_value(artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
@@ -183,15 +189,13 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
     mapped_kwargs: Dict[str, Any] = {}
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
-        if param := _type_util.get_annotated_metadata(func_param.annotation, Parameter):
+        if param := get_annotated_metadata(func_param.annotation, Parameter):
             mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
 
-        elif artifact := _type_util.get_annotated_metadata(func_param.annotation, Artifact):
+        elif artifact := get_annotated_metadata(func_param.annotation, Artifact):
             mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
 
-        elif not _type_util.is_subscripted(func_param.annotation) and issubclass(
-            func_param.annotation, (InputV1, InputV2)
-        ):
+        elif not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
             mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
 
         else:
@@ -236,7 +240,7 @@ def _save_annotated_return_outputs(
         else:
             assert isinstance(dest, tuple)
 
-            type_ = _type_util.get_origin_or_builtin(dest[0])
+            type_ = get_origin_or_builtin(dest[0])
             if not isinstance(output_value, type_):
                 raise ValueError(
                     f"The type of output `{dest[1].name}`, `{type(output_value)}` does not match the annotated type `{dest[0]}`"
