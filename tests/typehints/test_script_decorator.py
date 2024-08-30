@@ -65,7 +65,7 @@ def test_invocation_with_no_arguments():
 
 
 def test_parameter_named_name():
-    """If a script has a 'name' argument, the Step/Task overload will take precedence."""
+    """If a script has a 'name' argument, the user function will take precedence over other overloads."""
     INVOCATION = """
         from hera.workflows import script
 
@@ -77,7 +77,7 @@ def test_parameter_named_name():
         reveal_type(result)
     """
     result = run_mypy(dedent(INVOCATION))
-    assert 'Revealed type is "Union[hera.workflows.steps.Step, hera.workflows.task.Task]"' in result
+    assert 'Revealed type is "builtins.int"' in result
 
 
 def step_and_task_parameters() -> Iterator[Tuple[str, str, str]]:
