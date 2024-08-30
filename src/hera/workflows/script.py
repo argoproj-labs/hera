@@ -629,12 +629,24 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
 
     @overload
     def __call__(  # type: ignore [overload-overlap]
+        self, *args: FuncIns.args, **kwargs: FuncIns.kwargs
+    ) -> FuncRCov:
+        # Note: this overload is for calling the decorated function.
+        # No docstring is provided, so VS Code will use the docstring of the decorated function.
+        ...
+
+    @overload
+    def __call__(  # type: ignore [overload-overlap, misc]
         self,
     ) -> Optional[Union[Step, Task]]:
-        """@script-decorated function invoked within a workflow, step or task context.
+        """Create a Step or Task or add the script as a template to the workflow, depending on the context.
 
-        May return None, a Step, or a Task, depending on the context. Use `assert isinstance(result, Step)`
-        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        * Under a DAG context, creates and returns a Task.
+        * Under a Steps or Parallel context, creates and returns a Step.
+        * Under a Workflow context, adds the script as a template to the Workflow and returns None.
+
+        Use `assert isinstance(result, Step)` or `assert isinstance(result, Task)` to select
+        the correct type if using a type-checker.
         """
 
     @overload
@@ -654,13 +666,16 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         with_param: Optional[Any] = ...,
         with_items: Optional[OneOrMany[Any]] = ...,
     ) -> Union[Step, Task]:
-        """@script-decorated function invoked within a step or task context.
+        """Create a Step or Task, depending on context.
 
-        May return a Step or a Task, depending on the context. Use `assert isinstance(result, Step)`
-        or `assert isinstance(result, Task)` to select the correct type if using a type-checker.
+        * Under a DAG context, creates and returns a Task.
+        * Under a Steps or Parallel context, creates and returns a Step.
+
+        Use `assert isinstance(result, Step)` or `assert isinstance(result, Task)` to select
+        the correct type if using a type-checker.
         """
         # Note: signature must match the Step constructor, except that while name is required for Step,
-        # it is automatically inferred from the name of the decorated function for @script.
+        # it is automatically inferred from the name of the decorated function when invoked.
 
     @overload
     def __call__(  # type: ignore [overload-overlap]
@@ -681,16 +696,12 @@ class _ScriptDecoratedFunction(Generic[FuncIns, FuncRCov], Protocol):
         dependencies: Optional[List[str]] = ...,
         depends: Optional[str] = ...,
     ) -> Task:
-        """@script-decorated function invoked within a task context."""
-        # Note: signature must match the Task constructor, except that while name is required for Task,
-        # it is automatically inferred from the name of the decorated function for @script.
+        """Create and return a Task.
 
-    @overload
-    def __call__(self, *args: FuncIns.args, **kwargs: FuncIns.kwargs) -> FuncRCov:
-        """@script-decorated function invoked outside of a step or task context.
-
-        Will call the decorated function.
+        Must be invoked under a DAG context.
         """
+        # Note: signature must match the Task constructor, except that while name is required for Task,
+        # it is automatically inferred from the name of the decorated function when invoked.
 
 
 # Pass actual class of Script to bind inputs to the ParamSpec above
