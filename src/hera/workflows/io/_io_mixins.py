@@ -81,7 +81,7 @@ class InputMixin(BaseModel):
                     # Serialize the value (usually done in Parameter's validator)
                     param.default = serialize(field_info.default)  # type: ignore
                 parameters.append(param)
-            elif not get_annotated_metadata(annotations[field], Artifact):
+            elif not is_annotated(annotations[field]):
                 # Create a Parameter from basic type annotations
                 default = getattr(object_override, field) if object_override else field_info.default
 
