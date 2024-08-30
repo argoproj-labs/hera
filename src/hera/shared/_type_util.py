@@ -40,9 +40,6 @@ def get_annotated_metadata(annotation: Any, type_: Type[T]) -> Optional[T]: ...
 def get_annotated_metadata(annotation: Any, type_: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
 
 
-# FIXME: Currently, mypy cannot guess following type hint properly: https://github.com/python/mypy/issues/17700
-#        def get_annotated_metadata(_: Any, __: Union[Type[T], Tuple[Type[T], ...]]) -> Optional[T]: ...
-#        Once fixed, remove overloads and add simpler type hints.
 def get_annotated_metadata(annotation, type_):
     """If given annotation has metadata typed type_, return the metadata."""
     if not is_annotated(annotation):
