@@ -8,7 +8,7 @@ else:
     from typing_extensions import Self
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
-from hera.shared._type_util import get_annotated_metadata
+from hera.shared._type_util import get_annotated_metadata, is_annotated
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
@@ -149,7 +149,7 @@ class InputMixin(BaseModel):
                 params.append(ModelParameter(name=param.name, value=templated_value))
             elif (artifact := get_annotated_metadata(annotations[field], Artifact)) and artifact.name:
                 artifacts.append(ModelArtifact(name=artifact.name, from_=templated_value))
-            else:
+            elif not is_annotated(annotations[field]):
                 params.append(ModelParameter(name=field, value=templated_value))
 
         return ModelArguments(parameters=params or None, artifacts=artifacts or None)
@@ -240,7 +240,7 @@ class OutputMixin(BaseModel):
                 outputs.append(Parameter(name=param.name, value_from=ValueFrom(parameter=templated_value)))
             elif (artifact := get_annotated_metadata(annotations[field], Artifact)) and artifact.name:
                 outputs.append(Artifact(name=artifact.name, from_=templated_value))
-            else:
+            elif not is_annotated(annotations[field]):
                 outputs.append(Parameter(name=field, value_from=ValueFrom(parameter=templated_value)))
 
         return outputs
