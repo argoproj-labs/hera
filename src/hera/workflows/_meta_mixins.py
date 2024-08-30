@@ -150,7 +150,7 @@ class ModelMapperMixin(BaseMixin):
 
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
-            self.model_path = None
+            self.model_path = []
             self.builder = hera_builder
 
             if not model_path:
@@ -183,7 +183,7 @@ class ModelMapperMixin(BaseMixin):
                         if mapper.builder is not None
                         else getattr(hera_obj, attr)
                     )
-                    if value is not None and mapper.model_path:
+                    if value is not None:
                         _set_model_attr(model, mapper.model_path, value)
 
             return model

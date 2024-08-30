@@ -61,7 +61,7 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
                     if mapper.builder is not None
                     else getattr(hera_obj, attr)
                 )
-                if value is not None and mapper.model_path:
+                if value is not None:
                     _set_model_attr(model, mapper.model_path, value)
 
         return model
