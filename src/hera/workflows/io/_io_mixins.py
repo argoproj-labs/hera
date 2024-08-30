@@ -125,7 +125,7 @@ class InputMixin(BaseModel):
                 object_dict[field] = "{{inputs.parameters." + f"{param.name}" + "}}"
             elif artifact := get_annotated_metadata(annotations[field], Artifact):
                 object_dict[field] = "{{inputs.artifacts." + f"{artifact.name}" + "}}"
-            else:
+            elif not is_annotated(annotations[field]):
                 object_dict[field] = "{{inputs.parameters." + f"{field}" + "}}"
 
         return cls.construct(None, **object_dict)
@@ -191,7 +191,7 @@ class OutputMixin(BaseModel):
                 if add_missing_path and artifact.path is None:
                     artifact.path = f"/tmp/hera-outputs/artifacts/{artifact.name}"
                 outputs.append(artifact)
-            else:
+            elif not is_annotated(annotations[field]):
                 # Create a Parameter from basic type annotations
                 default = model_fields[field].default
                 if default is None or default == PydanticUndefined:
