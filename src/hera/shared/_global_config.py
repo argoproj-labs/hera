@@ -62,6 +62,9 @@ class _GlobalConfig:
     verify_ssl: bool = True
     """whether to perform SSL verification on the path towards communicating with the Argo server"""
 
+    use_session: bool = False
+    """whether to use a session for communicating with the Argo server and reuse connections"""
+
     api_version: str = "argoproj.io/v1alpha1"
     """the Argo API verison to use on models"""
 
