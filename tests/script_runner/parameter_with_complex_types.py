@@ -1,5 +1,10 @@
 import sys
-from typing import Annotated, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from hera.shared import global_config
 from hera.workflows import Parameter, script
