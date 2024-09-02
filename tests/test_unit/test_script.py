@@ -12,7 +12,7 @@ import pytest
 from hera.workflows import Workflow, script
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
-from hera.workflows.script import _get_inputs_from_callable
+from hera.workflows.script import _get_inputs_from_callable, _get_outputs_from_return_annotation
 
 
 def test_get_inputs_from_callable_simple_params():
@@ -188,10 +188,19 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value_5():
         _get_inputs_from_callable(unknown_annotations_ignored)
 
 
-def test_invalid_script_when_multiple_workflow_annotations_are_given():
+def test_invalid_script_when_multiple_input_workflow_annotations_are_given():
     @script()
     def invalid_script(a_str: Annotated[str, Artifact(name="a_str"), Parameter(name="a_str")] = "123") -> str:
         return "Got: {}".format(a_str)
 
     with pytest.raises(ValueError, match="Annotation should have one or zero artifact and parameter annotation."):
         _get_inputs_from_callable(invalid_script)
+
+
+def test_invalid_script_when_multiple_output_workflow_annotations_are_given():
+    @script()
+    def invalid_script(a_str: str = "123") -> Annotated[str, Artifact(name="a_str"), Artifact(name="b_str")]:
+        return "Got: {}".format(a_str)
+
+    with pytest.raises(ValueError, match="Annotation should have one or zero artifact and parameter annotation."):
+        _get_outputs_from_return_annotation(invalid_script, None)
