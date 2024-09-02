@@ -988,7 +988,7 @@ def test_runner_pydantic_output_with_result(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
-@pytest.mark.parametrize("pydantic_mode", [1, 2])
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
     "entrypoint,error_type,error_match",
     [
