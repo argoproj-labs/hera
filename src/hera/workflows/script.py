@@ -576,7 +576,7 @@ def _extract_all_output_annotations(source: Callable) -> List:
 
     for _, func_param in inspect.signature(source).parameters.items():
         if (annotated := get_annotated_metadata(func_param.annotation, (Artifact, Parameter))) and annotated.output:
-            output.append(get_args(func_param.annotation))
+            output.append(annotated)
 
     output.extend(_extract_return_annotation_output(source))
 
