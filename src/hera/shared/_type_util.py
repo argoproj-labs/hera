@@ -46,7 +46,7 @@ def get_annotated_metadata(annotation: Any, type_: Tuple[Type[T], Type[V]]) -> L
 def get_annotated_metadata(annotation, type_):
     """If given annotation has metadata typed type_, return the metadata.
 
-    Prefer get_workflow_annotatede_metadata if you want to call this with Artifact or Parameter.
+    Prefer get_workflow_annotation if you want to call this with Artifact or Parameter.
     """
     if not is_annotated(annotation):
         return []
