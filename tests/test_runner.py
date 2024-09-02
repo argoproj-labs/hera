@@ -995,13 +995,13 @@ def test_runner_pydantic_output_with_result(
         pytest.param(
             "tests.script_runner.pydantic_io_v2_invalid:pydantic_input_invalid",
             ValueError,
-            "Annotation should have one or zero artifact and parameter annotation.",
+            "Annotation metadata cannot contain more than one Artifact/Parameter.",
             id="invalid input annotation",
         ),
         pytest.param(
             "tests.script_runner.pydantic_io_v2_invalid:pydantic_output_invalid",
             ValueError,
-            "Annotation should have one or zero artifact and parameter annotation.",
+            "Annotation metadata cannot contain more than one Artifact/Parameter.",
             id="invalid output annotation",
         ),
     ],

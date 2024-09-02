@@ -72,7 +72,7 @@ def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Paramet
     if not metadata:
         return None
     if len(metadata) > 1:
-        raise ValueError("Annotation should have one or zero artifact and parameter annotation.")
+        raise ValueError("Annotation metadata cannot contain more than one Artifact/Parameter.")
     return metadata[0]
 
 
