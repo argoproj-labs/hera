@@ -92,6 +92,8 @@ def origin_type_issubclass(cls: Any, type_: type) -> bool:
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:
         return any(origin_type_issubclass(arg, type_) for arg in get_args(cls))
+    if not isinstance(origin_type, type):
+        return False
     return issubclass(origin_type, type_)
 
 

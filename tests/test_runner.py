@@ -1095,6 +1095,11 @@ def test_script_optional_parameter(
             [{"name": "my_param", "value": 123}],
             "123",
         ],
+        [
+            "tests.script_runner.parameter_with_complex_types:fn_with_output_tuple",
+            [{"name": "my_string", "value": "123"}],
+            '["123", "123"]',
+        ],
     ],
 )
 def test_script_with_complex_types(
@@ -1111,3 +1116,14 @@ def test_script_with_complex_types(
 
     # THEN
     assert serialize(output) == expected_output
+
+
+def test_script_partially_annotated_tuple_should_raise_an_error(monkeypatch: pytest.MonkeyPatch):
+    # GIVEN
+    monkeypatch.setenv("hera__script_annotations", "")
+    entrypoint = "tests.script_runner.parameter_with_complex_types:fn_with_output_tuple_partially_annotated"
+    kwargs_list = [{"name": "my_string", "value": "123"}]
+
+    # WHEN/THEN
+    with pytest.raises(ValueError, match="All elements in the tuple should be annotated with Artifact/Parameter."):
+        _runner(entrypoint, kwargs_list)

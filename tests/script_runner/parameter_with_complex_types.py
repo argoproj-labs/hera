@@ -1,8 +1,8 @@
 import sys
-from typing import Optional, Union
+from typing import Annotated, Optional, Tuple, Union
 
 from hera.shared import global_config
-from hera.workflows import script
+from hera.workflows import Parameter, script
 
 global_config.experimental_features["script_annotations"] = True
 
@@ -36,3 +36,13 @@ def optional_int_parameter(my_int: Optional[int] = None) -> Optional[int]:
 @script(constructor="runner")
 def union_parameter(my_param: Union[str, int] = None) -> Union[str, int]:
     return my_param
+
+
+@script(constructor="runner")
+def fn_with_output_tuple(my_string: str) -> Tuple[str, str]:
+    return my_string, my_string
+
+
+@script(constructor="runner")
+def fn_with_output_tuple_partially_annotated(my_string: str) -> Tuple[str, Annotated[str, Parameter(name="sample")]]:
+    return my_string, my_string
