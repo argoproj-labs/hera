@@ -176,15 +176,18 @@ class ModelMapperMixin(BaseMixin):
             assert isinstance(hera_obj, ModelMapperMixin)
 
             for attr, annotation in hera_class._get_all_annotations().items():
-                if mapper := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                    if len(mappers) != 1:
+                        raise ValueError("Expected only one ModelMapper")
+
                     # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
                     value = (
-                        getattr(hera_obj, mapper.builder.__name__)()
-                        if mapper.builder is not None
+                        getattr(hera_obj, mappers[0].builder.__name__)()
+                        if mappers[0].builder is not None
                         else getattr(hera_obj, attr)
                     )
                     if value is not None:
-                        _set_model_attr(model, mapper.model_path, value)
+                        _set_model_attr(model, mappers[0].model_path, value)
 
             return model
 
@@ -199,9 +202,11 @@ class ModelMapperMixin(BaseMixin):
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
-            if mapper := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
-                if mapper.model_path:
-                    value = _get_model_attr(model, mapper.model_path)
+            if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                if len(mappers) != 1:
+                    raise ValueError("Expected only one model mapper")
+                if mappers[0].model_path:
+                    value = _get_model_attr(model, mappers[0].model_path)
                     if value is not None:
                         setattr(hera_obj, attr, value)
 

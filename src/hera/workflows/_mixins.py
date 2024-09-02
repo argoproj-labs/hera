@@ -17,7 +17,7 @@ from typing import (
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
-from hera.shared._type_util import get_annotated_metadata
+from hera.shared._type_util import get_workflow_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
 from hera.workflows._meta_mixins import CallableTemplateMixin, HeraBuildObj, HookMixin
@@ -738,11 +738,15 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
                     result_templated_str = f"{{{{{subnode_type}.{subnode_name}.outputs.result}}}}"
                     return result_templated_str
 
-                if param := get_annotated_metadata(annotations[name], Parameter):
-                    return "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{param.name}" + "}}"
-
-                if artifact := get_annotated_metadata(annotations[name], Artifact):
-                    return "{{" + f"{subnode_type}.{subnode_name}.outputs.artifacts.{artifact.name}" + "}}"
+                if param_or_artifact := get_workflow_annotation(annotations[name]):
+                    if isinstance(param_or_artifact, Parameter):
+                        return (
+                            "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{param_or_artifact.name}" + "}}"
+                        )
+                    else:
+                        return (
+                            "{{" + f"{subnode_type}.{subnode_name}.outputs.artifacts.{param_or_artifact.name}" + "}}"
+                        )
 
                 return "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{name}" + "}}"
 

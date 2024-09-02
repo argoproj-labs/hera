@@ -11,12 +11,12 @@ from typing import Any, Callable, Dict, List, Optional, cast
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (
-    get_annotated_metadata,
+    get_workflow_annotation,
     origin_type_issubclass,
     unwrap_annotation,
 )
 from hera.shared.serialization import serialize
-from hera.workflows import Artifact, Parameter
+from hera.workflows import Artifact
 from hera.workflows._runner.script_annotations_util import (
     _map_argo_inputs_to_function,
     _save_annotated_return_outputs,
@@ -132,7 +132,7 @@ def _is_str_kwarg_of(key: str, f: Callable) -> bool:
 def _is_artifact_loaded(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is actually an Artifact that has already been loaded."""
     if param_annotation := _get_function_param_annotation(key, f):
-        if artifact := get_annotated_metadata(param_annotation, Artifact):
+        if (artifact := get_workflow_annotation(param_annotation)) and isinstance(artifact, Artifact):
             return artifact.loader == ArtifactLoader.json.value
     return False
 
@@ -140,7 +140,7 @@ def _is_artifact_loaded(key: str, f: Callable) -> bool:
 def _is_output_kwarg(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is an output Artifact/Parameter."""
     if param_annotation := _get_function_param_annotation(key, f):
-        if param_or_artifact := get_annotated_metadata(param_annotation, (Artifact, Parameter)):
+        if param_or_artifact := get_workflow_annotation(param_annotation):
             return bool(param_or_artifact.output)
     return False
 

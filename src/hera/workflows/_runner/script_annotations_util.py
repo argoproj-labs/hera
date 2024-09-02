@@ -8,8 +8,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Un
 
 from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared._type_util import (
-    get_annotated_metadata,
     get_unsubscripted_type,
+    get_workflow_annotation,
     is_subscripted,
     origin_type_issubclass,
     unwrap_annotation,
@@ -155,14 +155,15 @@ def map_runner_input(
         assert annotation is not None, "RunnerInput fields must be type-annotated"
         ann_type = unwrap_annotation(annotation)
 
-        if param := get_annotated_metadata(annotation, Parameter):
-            assert not param.output
-            return load_parameter_value(
-                _get_annotated_input_param_value(field, param, kwargs),
-                ann_type,
-            )
-        elif artifact := get_annotated_metadata(annotation, Artifact):
-            return get_annotated_artifact_value(artifact)
+        if param_or_artifact := get_workflow_annotation(annotation):
+            if isinstance(param_or_artifact, Parameter):
+                assert not param_or_artifact.output
+                return load_parameter_value(
+                    _get_annotated_input_param_value(field, param_or_artifact, kwargs),
+                    ann_type,
+                )
+            else:
+                return get_annotated_artifact_value(param_or_artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
 
@@ -189,11 +190,11 @@ def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> 
     mapped_kwargs: Dict[str, Any] = {}
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
-        if param := get_annotated_metadata(func_param.annotation, Parameter):
-            mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param, kwargs)
-
-        elif artifact := get_annotated_metadata(func_param.annotation, Artifact):
-            mapped_kwargs[func_param_name] = get_annotated_artifact_value(artifact)
+        if param_or_artifact := get_workflow_annotation(func_param.annotation):
+            if isinstance(param_or_artifact, Parameter):
+                mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param_or_artifact, kwargs)
+            else:
+                mapped_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
 
         elif not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
             mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
@@ -283,7 +284,7 @@ def _save_dummy_outputs(
     <parent_directory> can be provided by the user or is set to /tmp/hera-outputs by default
     """
     for dest in output_annotations:
-        if isinstance(dest, (OutputV1, OutputV2)):
+        if isinstance(dest, type) and issubclass(dest, (OutputV1, OutputV2)):
             if os.environ.get("hera__script_pydantic_io", None) is None:
                 raise ValueError("hera__script_pydantic_io environment variable is not set")
 

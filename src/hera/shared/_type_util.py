@@ -1,7 +1,7 @@
 """Module that handles types and annotations."""
 
 import sys
-from typing import Any, Iterable, Optional, Tuple, Type, TypeVar, Union, overload
+from typing import Any, Iterable, List, Optional, Tuple, Type, TypeVar, Union, overload
 
 if sys.version_info >= (3, 9):
     from typing import Annotated, get_args, get_origin
@@ -14,6 +14,9 @@ if sys.version_info >= (3, 10):
     from types import UnionType
 else:
     UnionType = Union
+
+from hera.workflows.artifact import Artifact
+from hera.workflows.parameter import Parameter
 
 
 def is_annotated(annotation: Any):
@@ -33,27 +36,44 @@ V = TypeVar("V")
 
 
 @overload
-def get_annotated_metadata(annotation: Any, type_: Type[T]) -> Optional[T]: ...
+def get_annotated_metadata(annotation: Any, type_: Type[T]) -> List[T]: ...
 
 
 @overload
-def get_annotated_metadata(annotation: Any, type_: Tuple[Type[T], Type[V]]) -> Optional[Union[T, V]]: ...
+def get_annotated_metadata(annotation: Any, type_: Tuple[Type[T], Type[V]]) -> List[Union[T, V]]: ...
 
 
 def get_annotated_metadata(annotation, type_):
-    """If given annotation has metadata typed type_, return the metadata."""
+    """If given annotation has metadata typed type_, return the metadata.
+
+    Prefer get_workflow_annotatede_metadata if you want to call this with Artifact or Parameter.
+    """
     if not is_annotated(annotation):
-        return None
+        return []
+    found = []
     args = get_args(annotation)
     for arg in args[1:]:
         if isinstance(type_, Iterable):
             for t in type_:
                 if isinstance(arg, t):
-                    return arg
+                    found.append(arg)
         else:
             if isinstance(arg, type_):
-                return arg
-    return None
+                found.append(arg)
+    return found
+
+
+def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Parameter]]:
+    """If given annotation has Artifact or Parameter metadata, return it.
+
+    Note that this function will raise the error when multiple Artifact or Parameter metadata are given.
+    """
+    metadata = get_annotated_metadata(annotation, (Artifact, Parameter))
+    if not metadata:
+        return None
+    if len(metadata) > 1:
+        raise ValueError("Annotation should have one or zero artifact and parameter annotation.")
+    return metadata[0]
 
 
 def get_unsubscripted_type(t: Any) -> Any:

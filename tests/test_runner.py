@@ -988,6 +988,45 @@ def test_runner_pydantic_output_with_result(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, 2])
+@pytest.mark.parametrize(
+    "entrypoint,error_type,error_match",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io_v2_invalid:pydantic_input_invalid",
+            ValueError,
+            "Annotation should have one or zero artifact and parameter annotation.",
+            id="invalid input annotation",
+        ),
+        pytest.param(
+            "tests.script_runner.pydantic_io_v2_invalid:pydantic_output_invalid",
+            ValueError,
+            "Annotation should have one or zero artifact and parameter annotation.",
+            id="invalid output annotation",
+        ),
+    ],
+)
+def test_runner_pydantic_with_invalid_annotations(
+    entrypoint,
+    error_type,
+    error_match,
+    pydantic_mode,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
+
+    # WHEN / THEN
+    with pytest.raises(error_type, match=error_match):
+        _runner(entrypoint, [])
+
+
 @pytest.mark.parametrize(
     "entrypoint",
     [
