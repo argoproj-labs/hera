@@ -9,14 +9,13 @@ from pathlib import Path
 from typing import Dict, Optional, Type, Union, cast
 
 if sys.version_info >= (3, 9):
-    from typing import Annotated, get_args, get_origin
+    from typing import Annotated
 else:
-    # Python 3.8 has get_origin() and get_args() but those implementations aren't
-    # Annotated-aware.
-    from typing_extensions import Annotated, get_args, get_origin
+    from typing_extensions import Annotated
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel
+from hera.shared._type_util import get_annotated_metadata
 from hera.workflows._meta_mixins import (
     ModelMapperMixin,
     _get_model_attr,
@@ -47,22 +46,25 @@ class _CronWorkflowModelMapper(_WorkflowModelMapper):
         assert isinstance(hera_obj, ModelMapperMixin)
 
         for attr, annotation in hera_class._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ModelMapperMixin.ModelMapper
-            ):
-                mapper = get_args(annotation)[1]
-                if not isinstance(mapper, _CronWorkflowModelMapper) and mapper.model_path[0] == "spec":
+            if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                if len(mappers) != 1:
+                    raise ValueError("Expected only one ModelMapper")
+                if (
+                    not isinstance(mappers[0], _CronWorkflowModelMapper)
+                    and mappers[0].model_path
+                    and mappers[0].model_path[0] == "spec"
+                ):
                     # Skip attributes mapped to spec by parent _WorkflowModelMapper
                     continue
 
                 # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
                 value = (
-                    getattr(hera_obj, mapper.builder.__name__)()
-                    if mapper.builder is not None
+                    getattr(hera_obj, mappers[0].builder.__name__)()
+                    if mappers[0].builder is not None
                     else getattr(hera_obj, attr)
                 )
                 if value is not None:
-                    _set_model_attr(model, mapper.model_path, value)
+                    _set_model_attr(model, mappers[0].model_path, value)
 
         return model
 
@@ -167,23 +169,24 @@ class CronWorkflow(Workflow):
         hera_cron_workflow = cls(schedule="")
 
         for attr, annotation in cls._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ModelMapperMixin.ModelMapper
-            ):
-                mapper = get_args(annotation)[1]
-                if mapper.model_path:
+            if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                if len(mappers) != 1:
+                    raise ValueError("Expected only one ModelMapper")
+
+                if mappers[0].model_path:
                     value = None
 
                     if (
-                        isinstance(mapper, _CronWorkflowModelMapper)
-                        or isinstance(mapper, _WorkflowModelMapper)
-                        and mapper.model_path[0] == "metadata"
+                        isinstance(mappers[0], _CronWorkflowModelMapper)
+                        or isinstance(mappers[0], _WorkflowModelMapper)
+                        and mappers[0].model_path[0] == "metadata"
                     ):
-                        value = _get_model_attr(model, mapper.model_path)
-                    elif isinstance(mapper, _WorkflowModelMapper) and mapper.model_path[0] == "spec":
+                        value = _get_model_attr(model, mappers[0].model_path)
+
+                    elif isinstance(mappers[0], _WorkflowModelMapper) and mappers[0].model_path[0] == "spec":
                         # We map "spec.workflow_spec" from the model CronWorkflow to "spec" for Hera's Workflow (used
                         # as the parent class of Hera's CronWorkflow)
-                        value = _get_model_attr(model.spec.workflow_spec, mapper.model_path[1:])
+                        value = _get_model_attr(model.spec.workflow_spec, mappers[0].model_path[1:])
 
                     if value is not None:
                         setattr(hera_cron_workflow, attr, value)

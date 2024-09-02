@@ -10,13 +10,6 @@ from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated, get_args, get_origin
-else:
-    # Python 3.8 has get_origin() and get_args() but those implementations aren't
-    # Annotated-aware.
-    from typing_extensions import Annotated, get_args, get_origin
-
 if sys.version_info >= (3, 10):
     from inspect import get_annotations
     from types import NoneType
@@ -31,6 +24,7 @@ from typing_extensions import ParamSpec
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
+from hera.shared._type_util import get_annotated_metadata
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.io.v1 import (
@@ -55,6 +49,7 @@ except ImportError:
         Input as InputV2,
         Output as OutputV2,
     )
+
 
 if TYPE_CHECKING:
     from hera.workflows._mixins import TemplateMixin
@@ -155,7 +150,7 @@ class ModelMapperMixin(BaseMixin):
 
     class ModelMapper:
         def __init__(self, model_path: str, hera_builder: Optional[Callable] = None):
-            self.model_path = None
+            self.model_path = []
             self.builder = hera_builder
 
             if not model_path:
@@ -181,18 +176,18 @@ class ModelMapperMixin(BaseMixin):
             assert isinstance(hera_obj, ModelMapperMixin)
 
             for attr, annotation in hera_class._get_all_annotations().items():
-                if get_origin(annotation) is Annotated and isinstance(
-                    get_args(annotation)[1], ModelMapperMixin.ModelMapper
-                ):
-                    mapper = get_args(annotation)[1]
+                if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                    if len(mappers) != 1:
+                        raise ValueError("Expected only one ModelMapper")
+
                     # Value comes from builder function if it exists on hera_obj, otherwise directly from the attr
                     value = (
-                        getattr(hera_obj, mapper.builder.__name__)()
-                        if mapper.builder is not None
+                        getattr(hera_obj, mappers[0].builder.__name__)()
+                        if mappers[0].builder is not None
                         else getattr(hera_obj, attr)
                     )
                     if value is not None:
-                        _set_model_attr(model, mapper.model_path, value)
+                        _set_model_attr(model, mappers[0].model_path, value)
 
             return model
 
@@ -207,12 +202,11 @@ class ModelMapperMixin(BaseMixin):
         hera_obj = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
-            if get_origin(annotation) is Annotated and isinstance(
-                get_args(annotation)[1], ModelMapperMixin.ModelMapper
-            ):
-                mapper = get_args(annotation)[1]
-                if mapper.model_path:
-                    value = _get_model_attr(model, mapper.model_path)
+            if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+                if len(mappers) != 1:
+                    raise ValueError("Expected only one model mapper")
+                if mappers[0].model_path:
+                    value = _get_model_attr(model, mappers[0].model_path)
                     if value is not None:
                         setattr(hera_obj, attr, value)
 
@@ -495,20 +489,6 @@ class HeraBuildObj:
     def __init__(self, subnode_type: str, output_class: Type[Union[OutputV1, OutputV2]]) -> None:
         self.subnode_type = subnode_type
         self.output_class = output_class
-
-
-def _get_underlying_type(annotation: Type):
-    real_type = annotation
-    if get_origin(annotation) is Annotated:
-        real_type = get_args(annotation)[0]
-
-    if get_origin(real_type) is Union:
-        args = get_args(real_type)
-        if len(args) == 2 and any([arg is NoneType for arg in args]):
-            # This was an "Optional" type, get the real type
-            real_type = next(iter([arg for arg in args if arg is not NoneType]))
-
-    return real_type
 
 
 class TemplateDecoratorFuncsMixin(ContextMixin):

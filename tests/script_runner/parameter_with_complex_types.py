@@ -23,6 +23,10 @@ if sys.version_info[0] >= 3 and sys.version_info[1] >= 10:
     def optional_str_parameter_using_or(my_string: str | None = None) -> str | None:
         return my_string
 
+    @script(constructor="runner")
+    def optional_str_parameter_using_multiple_or(my_string: str | int | None = None) -> str:
+        return my_string
+
 
 @script(constructor="runner")
 def optional_int_parameter(my_int: Optional[int] = None) -> Optional[int]:

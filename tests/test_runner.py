@@ -168,6 +168,13 @@ def test_runner_parameter_inputs(
             id="str-param-given-int",
         ),
         pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_basic_types_with_other_metadata",
+            [{"name": "a-but-kebab", "value": "3"}, {"name": "b-but-kebab", "value": "1"}],
+            '{"output": [{"a": 3, "b": "1"}]}',
+            _PYDANTIC_VERSION,
+            id="str-param-given-int",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar"}'}],
             '{"output": [{"a": 3, "b": "bar"}]}',
@@ -981,6 +988,45 @@ def test_runner_pydantic_output_with_result(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+@pytest.mark.parametrize(
+    "entrypoint,error_type,error_match",
+    [
+        pytest.param(
+            "tests.script_runner.pydantic_io_v2_invalid:pydantic_input_invalid",
+            ValueError,
+            "Annotation metadata cannot contain more than one Artifact/Parameter.",
+            id="invalid input annotation",
+        ),
+        pytest.param(
+            "tests.script_runner.pydantic_io_v2_invalid:pydantic_output_invalid",
+            ValueError,
+            "Annotation metadata cannot contain more than one Artifact/Parameter.",
+            id="invalid output annotation",
+        ),
+    ],
+)
+def test_runner_pydantic_with_invalid_annotations(
+    entrypoint,
+    error_type,
+    error_match,
+    pydantic_mode,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+):
+    # GIVEN
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    monkeypatch.setenv("hera__script_annotations", "")
+    monkeypatch.setenv("hera__script_pydantic_io", "")
+
+    outputs_directory = str(tmp_path / "tmp/hera-outputs")
+    monkeypatch.setenv("hera__outputs_directory", outputs_directory)
+
+    # WHEN / THEN
+    with pytest.raises(error_type, match=error_match):
+        _runner(entrypoint, [])
+
+
 @pytest.mark.parametrize(
     "entrypoint",
     [
@@ -989,7 +1035,10 @@ def test_runner_pydantic_output_with_result(
     ]
     + (
         # Union types using OR operator are allowed since python 3.10.
-        ["tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_or"]
+        [
+            "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_or",
+            "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_multiple_or",
+        ]
         if sys.version_info[0] >= 3 and sys.version_info[1] >= 10
         else []
     ),
