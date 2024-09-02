@@ -50,13 +50,13 @@ def get_annotated_metadata(annotation, type_):
     """
     if not is_annotated(annotation):
         return []
+
     found = []
     args = get_args(annotation)
     for arg in args[1:]:
         if isinstance(type_, Iterable):
-            for t in type_:
-                if isinstance(arg, t):
-                    found.append(arg)
+            if any(isinstance(arg, t) for t in type_):
+                found.append(arg)
         else:
             if isinstance(arg, type_):
                 found.append(arg)
