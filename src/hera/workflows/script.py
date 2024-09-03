@@ -50,7 +50,7 @@ from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.shared._type_util import get_workflow_annotation, is_subscripted, origin_type_issubclass
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
-from hera.workflows._meta_mixins import CallableTemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin, HeraBuildObj
 from hera.workflows._mixins import (
     ArgumentsT,
     ContainerMixin,
@@ -769,6 +769,27 @@ def script(**script_kwargs) -> Callable:
         def task_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
             """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
             if _context.active:
+                if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+                    arguments = args[0]._get_as_arguments()
+                    arguments_list = [
+                        *(arguments.artifacts or []),
+                        *(arguments.parameters or []),
+                    ]
+
+                    subnode = s.__call__(arguments=arguments_list, **kwargs)
+                    if not subnode:
+                        raise SyntaxError("Cannot use Pydantic I/O outside of a DAG, Steps or Parallel context")
+
+                    output_class = inspect.signature(func).return_annotation
+                    if not output_class or output_class is NoneType:
+                        return None
+
+                    if not issubclass(output_class, (OutputV1, OutputV2)):
+                        raise SyntaxError("Cannot use Pydantic input type without a Pydantic output type")
+
+                    _assert_pydantic_io_enabled(output_class)
+                    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
+                    return subnode
                 return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
 

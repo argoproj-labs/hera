@@ -373,6 +373,12 @@ class CallableTemplateMixin(BaseMixin):
                 return Step(template=self, **kwargs)
 
             if isinstance(_context.pieces[-1], DAG):
+                # Add dependencies based on context if not explicitly provided
+                current_task_depends = _context.pieces[-1]._current_task_depends
+                if current_task_depends and "depends" not in kwargs:
+                    kwargs["depends"] = " && ".join(sorted(current_task_depends))
+                current_task_depends.clear()
+
                 return Task(template=self, **kwargs)
 
         raise InvalidTemplateCall(

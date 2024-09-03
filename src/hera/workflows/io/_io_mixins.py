@@ -1,5 +1,6 @@
 import sys
 import warnings
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union
 
 if sys.version_info >= (3, 11):
@@ -59,21 +60,29 @@ def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, Field
             yield field, field_info, Parameter(name=field)
 
 
+@contextmanager
+def no_active_context() -> Iterator[None]:
+    pieces = _context.pieces
+    _context.pieces = []
+    try:
+        yield
+    finally:
+        _context.pieces = pieces
+
+
 class InputMixin(BaseModel):
     def __new__(cls, **kwargs):
-        if _context.declaring:
+        if _context.active:
             # Intercept the declaration to avoid validation on the templated strings
-            # We must then turn off declaring mode to be able to "construct" an instance
+            # We must then disable the active context to be able to "construct" an instance
             # of the InputMixin subclass.
-            _context.declaring = False
-            instance = cls.construct(**kwargs)
-            _context.declaring = True
-            return instance
+            with no_active_context():
+                return cls.construct(**kwargs)
         else:
             return super(InputMixin, cls).__new__(cls)
 
     def __init__(self, /, **kwargs):
-        if _context.declaring:
+        if _context.active:
             # Return in order to skip validation of `construct`ed instance
             return
 
@@ -157,17 +166,15 @@ class InputMixin(BaseModel):
 
 class OutputMixin(BaseModel):
     def __new__(cls, **kwargs):
-        if _context.declaring:
+        if _context.active:
             # Intercept the declaration to avoid validation on the templated strings
-            _context.declaring = False
-            instance = cls.construct(**kwargs)
-            _context.declaring = True
-            return instance
+            with no_active_context():
+                return cls.construct(**kwargs)
         else:
             return super(OutputMixin, cls).__new__(cls)
 
     def __init__(self, /, **kwargs):
-        if _context.declaring:
+        if _context.active:
             # Return in order to skip validation of `construct`ed instance
             return
 
