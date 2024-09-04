@@ -548,8 +548,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         assert _context.pieces
 
         template_ref = None
-        _context.declaring = False
-        if _context.pieces[0] != self and isinstance(self, WorkflowTemplate):
+        if _context.pieces[0] is not self and isinstance(self, WorkflowTemplate):
             # Using None for cluster_scope means it won't appear in the YAML spec (saving some bytes),
             # as cluster_scope=False is the default value
             template_ref = TemplateRef(
@@ -580,7 +579,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             _context.pieces[-1]._current_task_depends.clear()
 
         subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
-        _context.declaring = True
         return subnode
 
     @_add_type_hints(Script)  # type: ignore
