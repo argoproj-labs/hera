@@ -379,6 +379,18 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     return parameters
 
 
+def _assert_pydantic_io_enabled(annotation: str) -> None:
+    if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
+        raise ValueError(
+            (
+                "Unable to instantiate {} since it is an experimental feature."
+                " Please turn on experimental features by setting "
+                '`hera.shared.global_config.experimental_features["{}"] = True`.'
+                " Note that experimental features are unstable and subject to breaking changes."
+            ).format(annotation, _SCRIPT_PYDANTIC_IO_FLAG)
+        )
+
+
 def _get_outputs_from_return_annotation(
     source: Callable,
     outputs_directory: Optional[str],
@@ -408,16 +420,7 @@ def _get_outputs_from_return_annotation(
             if param_or_artifact := get_workflow_annotation(annotation):
                 append_annotation(param_or_artifact)
     elif isinstance(return_annotation, type) and issubclass(return_annotation, (OutputV1, OutputV2)):
-        if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-            raise ValueError(
-                (
-                    "Unable to instantiate {} since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format(return_annotation, _SCRIPT_PYDANTIC_IO_FLAG)
-            )
-
+        _assert_pydantic_io_enabled(return_annotation)
         output_class = return_annotation
         for output in output_class._get_outputs():
             append_annotation(output)
@@ -471,15 +474,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
     for func_param in inspect.signature(source).parameters.values():
         if not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
-            if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-                raise ValueError(
-                    (
-                        "Unable to instantiate {} since it is an experimental feature."
-                        " Please turn on experimental features by setting "
-                        '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                        " Note that experimental features are unstable and subject to breaking changes."
-                    ).format(func_param.annotation, _SCRIPT_PYDANTIC_IO_FLAG)
-                )
+            _assert_pydantic_io_enabled(func_param.annotation)
 
             if len(inspect.signature(source).parameters) != 1:
                 raise SyntaxError("Only one function parameter can be specified when using an Input.")
