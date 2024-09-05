@@ -41,6 +41,7 @@ from typing_extensions import ParamSpec, get_args, get_origin
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
+    _DECORATOR_SYNTAX_FLAG,
     _SCRIPT_ANNOTATIONS_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
     _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG,
@@ -379,15 +380,19 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     return parameters
 
 
+def please_enable_experimental_feature(flag: str) -> str:
+    return (
+        "Please turn on experimental features by setting "
+        f'`hera.shared.global_config.experimental_features["{flag}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+
 def _assert_pydantic_io_enabled(annotation: str) -> None:
     if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
         raise ValueError(
-            (
-                "Unable to instantiate {} since it is an experimental feature."
-                " Please turn on experimental features by setting "
-                '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                " Note that experimental features are unstable and subject to breaking changes."
-            ).format(annotation, _SCRIPT_PYDANTIC_IO_FLAG)
+            f"Unable to instantiate {annotation} since it is an experimental feature. "
+            + please_enable_experimental_feature(_SCRIPT_PYDANTIC_IO_FLAG)
         )
 
 
@@ -770,6 +775,11 @@ def script(**script_kwargs) -> Callable:
             """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
             if _context.active:
                 if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+                    if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):
+                        raise SyntaxError(
+                            "Cannot pass a Pydantic type inside a context. "
+                            + please_enable_experimental_feature(_DECORATOR_SYNTAX_FLAG)
+                        )
                     arguments = args[0]._get_as_arguments()
                     arguments_list = [
                         *(arguments.artifacts or []),

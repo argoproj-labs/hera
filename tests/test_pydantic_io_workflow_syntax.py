@@ -1,6 +1,6 @@
 import pytest
 
-from hera.shared._global_config import _SCRIPT_PYDANTIC_IO_FLAG
+from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG
 from hera.workflows import Input, Output, Steps, Workflow, script
 
 
@@ -14,7 +14,7 @@ class IntOutput(Output):
 
 @pytest.fixture(autouse=True)
 def enable_pydantic_io(global_config_fixture):
-    global_config_fixture.experimental_features[_SCRIPT_PYDANTIC_IO_FLAG] = True
+    global_config_fixture.experimental_features[_DECORATOR_SYNTAX_FLAG] = True
 
 
 def test_output_field_contains_argo_template(global_config_fixture):
