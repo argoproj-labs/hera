@@ -555,10 +555,10 @@ def _extract_return_annotation_output(source: Callable) -> List:
     if get_workflow_annotation(return_annotation):
         output.append(annotation_args)
     elif origin_type is tuple:
-        if all(get_workflow_annotation(annotated_type) for annotated_type in annotation_args):
-            for annotated_type in annotation_args:
-                output.append(get_args(annotated_type))
-        elif any(get_workflow_annotation(annotated_type) for annotated_type in annotation_args):
+        workflow_args = [get_args(annotated_type) for annotated_type in annotation_args if get_workflow_annotation(annotated_type)]
+        if len(workflow_args) == len(annotation_args):
+            output.extend(workflow_args)
+        elif workflow_args:
             raise ValueError("All elements in the tuple should be annotated with Artifact/Parameter.")
     elif (
         origin_type is None
