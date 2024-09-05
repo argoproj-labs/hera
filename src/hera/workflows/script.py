@@ -380,7 +380,7 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     return parameters
 
 
-def please_enable_experimental_feature(flag: str) -> str:
+def _enable_experimental_feature_msg(flag: str) -> str:
     return (
         "Please turn on experimental features by setting "
         f'`hera.shared.global_config.experimental_features["{flag}"] = True`.'
@@ -392,7 +392,7 @@ def _assert_pydantic_io_enabled(annotation: str) -> None:
     if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
         raise ValueError(
             f"Unable to instantiate {annotation} since it is an experimental feature. "
-            + please_enable_experimental_feature(_SCRIPT_PYDANTIC_IO_FLAG)
+            + _enable_experimental_feature_msg(_SCRIPT_PYDANTIC_IO_FLAG)
         )
 
 
@@ -778,7 +778,7 @@ def script(**script_kwargs) -> Callable:
                     if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):
                         raise SyntaxError(
                             "Cannot pass a Pydantic type inside a context. "
-                            + please_enable_experimental_feature(_DECORATOR_SYNTAX_FLAG)
+                            + _enable_experimental_feature_msg(_DECORATOR_SYNTAX_FLAG)
                         )
                     arguments = args[0]._get_as_arguments()
                     arguments_list = [
