@@ -73,6 +73,58 @@ def test_get_parameters_with_multiple_annotations():
     ]
 
 
+def test_get_artifacts_unannotated():
+    class Foo(Input):
+        foo: int
+        bar: str = "a default"
+
+    assert Foo._get_artifacts() == []
+
+
+def test_get_artifacts_with_pydantic_annotations():
+    class Foo(Input):
+        foo: Annotated[int, Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10)] = "a default"
+
+    assert Foo._get_artifacts() == []
+
+
+def test_get_artifacts_annotated_with_name():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(name="f_oo")]
+        bar: Annotated[str, Parameter(name="b_ar")] = "a default"
+        baz: Annotated[str, Artifact(name="b_az")]
+
+    assert Foo._get_artifacts() == [Artifact(name="b_az", path="/tmp/hera-inputs/artifacts/b_az")]
+
+
+def test_get_artifacts_annotated_with_description():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(description="param foo")]
+        bar: Annotated[str, Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Artifact(description="artifact baz")]
+
+    assert Foo._get_artifacts() == [
+        Artifact(name="baz", path="/tmp/hera-inputs/artifacts/baz", description="artifact baz")
+    ]
+
+
+def test_get_artifacts_annotated_with_path():
+    class Foo(Input):
+        baz: Annotated[str, Artifact(path="/tmp/hera-inputs/artifacts/bishbosh")]
+
+    assert Foo._get_artifacts() == [Artifact(name="baz", path="/tmp/hera-inputs/artifacts/bishbosh")]
+
+
+def test_get_artifacts_with_multiple_annotations():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Field(max_length=15), Artifact()]
+
+    assert Foo._get_artifacts() == [Artifact(name="baz", path="/tmp/hera-inputs/artifacts/baz")]
+
+
 def test_get_as_arguments_unannotated():
     class Foo(Input):
         foo: int
