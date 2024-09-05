@@ -555,8 +555,19 @@ def _extract_return_annotation_output(source: Callable) -> List:
     if get_workflow_annotation(return_annotation):
         output.append(annotation_args)
     elif origin_type is tuple:
-        for annotated_type in annotation_args:
-            output.append(get_args(annotated_type))
+        workflow_args = [
+            get_args(annotated_type) for annotated_type in annotation_args if get_workflow_annotation(annotated_type)
+        ]
+
+        # If all tuple elements are annotated as Parameter/Artifact
+        if len(workflow_args) == len(annotation_args):
+            output.extend(workflow_args)
+        # Only some tuple elements are annotated as Parameter/Artifact
+        elif workflow_args:
+            raise ValueError(
+                f"Function '{source.__name__}' output has partially annotated tuple return type. "
+                "Tuple elements must be all Annotated as Parameter/Artifact, or contain no Parameter/Artifact annotations for a raw tuple return type."
+            )
     elif (
         origin_type is None
         and isinstance(return_annotation, type)
