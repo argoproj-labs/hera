@@ -146,12 +146,13 @@ class InputMixin(BaseModel):
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
             templated_value = serialize(self_dict[field])
 
-            if (param_or_artifact := get_workflow_annotation(annotations[field])) and param_or_artifact.name:
+            if param_or_artifact := get_workflow_annotation(annotations[field]):
+                name = param_or_artifact.name or field
                 if isinstance(param_or_artifact, Parameter):
-                    params.append(ModelParameter(name=param_or_artifact.name, value=templated_value))
+                    params.append(ModelParameter(name=name, value=templated_value))
                 else:
-                    artifacts.append(ModelArtifact(name=param_or_artifact.name, from_=templated_value))
-            elif not is_annotated(annotations[field]):
+                    artifacts.append(ModelArtifact(name=name, from_=templated_value))
+            else:
                 params.append(ModelParameter(name=field, value=templated_value))
 
         return ModelArguments(parameters=params or None, artifacts=artifacts or None)
