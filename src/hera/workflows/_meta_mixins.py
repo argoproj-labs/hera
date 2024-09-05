@@ -564,7 +564,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             # Set template to None as it cannot be set alongside template_ref
             template = None  # type: ignore
 
-        if isinstance(_context.pieces[-1], (Steps, Parallel)):
+        current_context = _context.pieces[-1]
+        if isinstance(current_context, (Steps, Parallel)):
             subnode = Step(
                 name=subnode_name,
                 template=template,
@@ -572,13 +573,14 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 arguments=subnode_args,
                 **kwargs,
             )
-        elif isinstance(_context.pieces[-1], DAG):
+        elif isinstance(current_context, DAG):
+            if current_context._current_task_depends and "depends" not in kwargs:
+                kwargs["depends"] = " && ".join(sorted(current_context._current_task_depends))
             subnode = Task(
                 name=subnode_name,
                 template=template,
                 template_ref=template_ref,
                 arguments=subnode_args,
-                depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
                 **kwargs,
             )
 
