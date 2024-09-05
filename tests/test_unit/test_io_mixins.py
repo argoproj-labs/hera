@@ -7,11 +7,12 @@ else:
 
 from pydantic import Field
 
-from hera.workflows import Artifact, Input, Parameter
+from hera.workflows import Artifact, Input, Output, Parameter
 from hera.workflows.models import (
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
+    ValueFrom,
 )
 
 
@@ -286,3 +287,79 @@ def test_get_as_templated_arguments_with_multiple_annotations():
         bar="{{inputs.parameters.bar}}",
         baz="{{inputs.artifacts.baz}}",
     )
+
+
+def test_get_as_invocator_output_unannotated():
+    class Foo(Output):
+        foo: int
+        bar: str = "a default"
+
+    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}")
+    parameters = foo._get_as_invocator_output()
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
+    ]
+
+
+def test_get_as_invocator_output_with_pydantic_annotations():
+    class Foo(Output):
+        foo: Annotated[int, Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10)] = "a default"
+
+    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}")
+    parameters = foo._get_as_invocator_output()
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
+    ]
+
+
+def test_get_as_invocator_output_annotated_with_name():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(name="f_oo")]
+        bar: Annotated[str, Parameter(name="b_ar")] = "a default"
+        baz: Annotated[str, Artifact(name="b_az")]
+
+    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
+    parameters = foo._get_as_invocator_output()
+
+    assert parameters == [
+        Parameter(name="f_oo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="b_ar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Artifact(name="b_az", from_="{{...baz}}"),
+    ]
+
+
+def test_get_as_invocator_output_annotated_with_description():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(description="param foo")]
+        bar: Annotated[str, Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Artifact(description="artifact baz")]
+
+    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
+    parameters = foo._get_as_invocator_output()
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Artifact(name="baz", from_="{{...baz}}"),
+    ]
+
+
+def test_get_as_invocator_output_with_multiple_annotations():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Field(max_length=15), Artifact()]
+
+    foo = Foo.construct(foo="{{...foo}}", bar="{{...bar}}", baz="{{...baz}}")
+    parameters = foo._get_as_invocator_output()
+
+    assert parameters == [
+        Parameter(name="f_oo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Artifact(name="baz", from_="{{...baz}}"),
+    ]

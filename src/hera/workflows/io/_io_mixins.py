@@ -246,14 +246,13 @@ class OutputMixin(BaseModel):
 
             templated_value = self_dict[field]  # a string such as `"{{tasks.task_a.outputs.parameter.my_param}}"`
 
-            if (param_or_artifact := get_workflow_annotation(annotations[field])) and param_or_artifact.name:
+            if param_or_artifact := get_workflow_annotation(annotations[field]):
+                name = param_or_artifact.name or field
                 if isinstance(param_or_artifact, Parameter):
-                    outputs.append(
-                        Parameter(name=param_or_artifact.name, value_from=ValueFrom(parameter=templated_value))
-                    )
+                    outputs.append(Parameter(name=name, value_from=ValueFrom(parameter=templated_value)))
                 else:
-                    outputs.append(Artifact(name=param_or_artifact.name, from_=templated_value))
-            elif not is_annotated(annotations[field]):
+                    outputs.append(Artifact(name=name, from_=templated_value))
+            else:
                 outputs.append(Parameter(name=field, value_from=ValueFrom(parameter=templated_value)))
 
         return outputs
