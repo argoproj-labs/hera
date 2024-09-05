@@ -1128,8 +1128,8 @@ def test_script_partially_annotated_tuple_should_raise_an_error(monkeypatch: pyt
     with pytest.raises(
         ValueError,
         match=(
-            "Function 'fn_with_output_tuple_partially_annotated' output has partially annotated return type. "
-            "Hera allows tuple annotation to be fully annotated or not."
+            "Function 'fn_with_output_tuple_partially_annotated' output has partially annotated tuple return type. "
+            "Tuple elements must be all Annotated as Parameter/Artifact, or contain no Parameter/Artifact annotations for a raw tuple return type."
         ),
     ):
         _runner(entrypoint, kwargs_list)
