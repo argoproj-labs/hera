@@ -65,7 +65,8 @@ class InputMixin(BaseModel):
         annotations = get_field_annotations(cls)
 
         for field, field_info in get_fields(cls).items():
-            if (param := get_workflow_annotation(annotations[field])) and isinstance(param, Parameter):
+            param = get_workflow_annotation(annotations[field])
+            if isinstance(param, Parameter):
                 # Copy so as to not modify the Input fields themselves
                 param = param.copy()
                 if param.name is None:
@@ -81,7 +82,7 @@ class InputMixin(BaseModel):
                     # Serialize the value (usually done in Parameter's validator)
                     param.default = serialize(field_info.default)  # type: ignore
                 parameters.append(param)
-            elif not is_annotated(annotations[field]):
+            elif param is None:
                 # Create a Parameter from basic type annotations
                 default = getattr(object_override, field) if object_override else field_info.default
 

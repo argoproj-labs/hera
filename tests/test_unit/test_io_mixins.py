@@ -15,18 +15,62 @@ from hera.workflows.models import (
 )
 
 
-def test_input_mixin_get_parameters():
+def test_get_parameters_unannotated():
     class Foo(Input):
-        foo: Annotated[int, Parameter(name="foo")]
+        foo: int
+        bar: str = "a default"
 
-    assert Foo._get_parameters() == [Parameter(name="foo")]
+    assert Foo._get_parameters() == [
+        Parameter(name="foo"),
+        Parameter(name="bar", default="a default"),
+    ]
 
 
-def test_input_mixin_get_parameters_default_name():
+def test_get_parameters_with_pydantic_annotations():
     class Foo(Input):
-        foo: Annotated[int, Parameter(description="a foo")]
+        foo: Annotated[int, Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10)] = "a default"
 
-    assert Foo._get_parameters() == [Parameter(name="foo", description="a foo")]
+    assert Foo._get_parameters() == [
+        Parameter(name="foo"),
+        Parameter(name="bar", default="a default"),
+    ]
+
+
+def test_get_parameters_annotated_with_name():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(name="f_oo")]
+        bar: Annotated[str, Parameter(name="b_ar")] = "a default"
+        baz: Annotated[str, Artifact(name="b_az")]
+
+    assert Foo._get_parameters() == [
+        Parameter(name="f_oo"),
+        Parameter(name="b_ar", default="a default"),
+    ]
+
+
+def test_get_parameters_annotated_with_description():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(description="param foo")]
+        bar: Annotated[str, Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Artifact(description="artifact baz")]
+
+    assert Foo._get_parameters() == [
+        Parameter(name="foo", description="param foo"),
+        Parameter(name="bar", default="a default", description="param bar"),
+    ]
+
+
+def test_get_parameters_with_multiple_annotations():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Field(max_length=15), Artifact()]
+
+    assert Foo._get_parameters() == [
+        Parameter(name="f_oo"),
+        Parameter(name="bar", default="a default", description="param bar"),
+    ]
 
 
 def test_get_as_arguments_unannotated():
