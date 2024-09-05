@@ -377,7 +377,6 @@ class CallableTemplateMixin(BaseMixin):
                 current_task_depends = _context.pieces[-1]._current_task_depends
                 if current_task_depends and "depends" not in kwargs:
                     kwargs["depends"] = " && ".join(sorted(current_task_depends))
-                current_task_depends.clear()
 
                 return Task(template=self, **kwargs)
 
@@ -582,7 +581,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 depends=" && ".join(sorted(_context.pieces[-1]._current_task_depends)) or None,
                 **kwargs,
             )
-            _context.pieces[-1]._current_task_depends.clear()
 
         subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
         return subnode
