@@ -347,12 +347,12 @@ class CallableTemplateMixin(BaseMixin):
 
         from hera.workflows.dag import DAG
         from hera.workflows.script import Script
-        from hera.workflows.steps import Parallel, Step, Steps
-        from hera.workflows.task import Task
+        from hera.workflows.steps import Parallel, Steps
         from hera.workflows.workflow import Workflow
 
         if _context.pieces:
-            if isinstance(_context.pieces[-1], Workflow):
+            current_context = _context.pieces[-1]
+            if isinstance(current_context, Workflow):
                 # Notes on callable templates under a Workflow:
                 # * If the user calls a script directly under a Workflow (outside of a Steps/DAG) then we add the script
                 #   template to the workflow and return None.
@@ -369,16 +369,8 @@ class CallableTemplateMixin(BaseMixin):
                 raise InvalidTemplateCall(
                     f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
                 )
-            if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                return Step(template=self, **kwargs)
-
-            if isinstance(_context.pieces[-1], DAG):
-                # Add dependencies based on context if not explicitly provided
-                current_task_depends = _context.pieces[-1]._current_task_depends
-                if current_task_depends and "depends" not in kwargs:
-                    kwargs["depends"] = " && ".join(sorted(current_task_depends))
-
-                return Task(template=self, **kwargs)
+            if isinstance(current_context, (Steps, Parallel, DAG)):
+                return current_context._create_leaf_node(template=self, **kwargs)
 
         raise InvalidTemplateCall(
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
@@ -532,8 +524,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
     ) -> Union[Step, Task]:
         from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
         from hera.workflows.dag import DAG
-        from hera.workflows.steps import Parallel, Step, Steps
-        from hera.workflows.task import Task
+        from hera.workflows.steps import Parallel, Steps
         from hera.workflows.workflow_template import WorkflowTemplate
 
         subnode_args = None
@@ -547,8 +538,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
         signature = inspect.signature(func)
         output_class = signature.return_annotation
-
-        subnode: Union[Step, Task]
 
         assert _context.pieces
 
@@ -565,25 +554,16 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             template = None  # type: ignore
 
         current_context = _context.pieces[-1]
-        if isinstance(current_context, (Steps, Parallel)):
-            subnode = Step(
-                name=subnode_name,
-                template=template,
-                template_ref=template_ref,
-                arguments=subnode_args,
-                **kwargs,
-            )
-        elif isinstance(current_context, DAG):
-            if current_context._current_task_depends and "depends" not in kwargs:
-                kwargs["depends"] = " && ".join(sorted(current_context._current_task_depends))
-            subnode = Task(
-                name=subnode_name,
-                template=template,
-                template_ref=template_ref,
-                arguments=subnode_args,
-                **kwargs,
-            )
+        if not isinstance(current_context, (Steps, Parallel, DAG)):
+            raise InvalidTemplateCall("Not under a Steps, Parallel, or DAG context")
 
+        subnode = current_context._create_leaf_node(
+            name=subnode_name,
+            template=template,
+            template_ref=template_ref,
+            arguments=subnode_args,
+            **kwargs,
+        )
         subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
         return subnode
 

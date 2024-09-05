@@ -47,6 +47,11 @@ class DAG(
     _node_names = PrivateAttr(default_factory=set)
     _current_task_depends: Set[str] = PrivateAttr(set())
 
+    def _create_leaf_node(self, **kwargs) -> Task:
+        if self._current_task_depends and "depends" not in kwargs:
+            kwargs["depends"] = " && ".join(sorted(self._current_task_depends))
+        return Task(**kwargs)
+
     def _add_sub(self, node: Any):
         if not isinstance(node, Task):
             raise InvalidType(type(node))
