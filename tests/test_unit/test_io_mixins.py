@@ -119,3 +119,74 @@ def test_get_as_arguments_with_multiple_annotations():
             ModelParameter(name="bar", value="a default"),
         ],
     )
+
+
+def test_get_as_templated_arguments_unannotated():
+    class Foo(Input):
+        foo: int
+        bar: str = "a default"
+
+    templated_arguments = Foo._get_as_templated_arguments()
+
+    assert templated_arguments == Foo.construct(
+        foo="{{inputs.parameters.foo}}",
+        bar="{{inputs.parameters.bar}}",
+    )
+
+
+def test_get_as_templated_arguments_with_pydantic_annotations():
+    class Foo(Input):
+        foo: Annotated[int, Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10)] = "a default"
+
+    templated_arguments = Foo._get_as_templated_arguments()
+
+    assert templated_arguments == Foo.construct(
+        foo="{{inputs.parameters.foo}}",
+        bar="{{inputs.parameters.bar}}",
+    )
+
+
+def test_get_as_templated_arguments_annotated_with_name():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(name="f_oo")]
+        bar: Annotated[str, Parameter(name="b_ar")] = "a default"
+        baz: Annotated[str, Artifact(name="b_az")]
+
+    templated_arguments = Foo._get_as_templated_arguments()
+
+    assert templated_arguments == Foo.construct(
+        foo="{{inputs.parameters.f_oo}}",
+        bar="{{inputs.parameters.b_ar}}",
+        baz="{{inputs.artifacts.b_az}}",
+    )
+
+
+def test_get_as_templated_arguments_annotated_with_description():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(description="param foo")]
+        bar: Annotated[str, Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Artifact(description="artifact baz")]
+
+    templated_arguments = Foo._get_as_templated_arguments()
+
+    assert templated_arguments == Foo.construct(
+        foo="{{inputs.parameters.foo}}",
+        bar="{{inputs.parameters.bar}}",
+        baz="{{inputs.artifacts.baz}}",
+    )
+
+
+def test_get_as_templated_arguments_with_multiple_annotations():
+    class Foo(Input):
+        foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
+        bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Field(max_length=15), Artifact()]
+
+    templated_arguments = Foo._get_as_templated_arguments()
+
+    assert templated_arguments == Foo.construct(
+        foo="{{inputs.parameters.f_oo}}",
+        bar="{{inputs.parameters.bar}}",
+        baz="{{inputs.artifacts.baz}}",
+    )

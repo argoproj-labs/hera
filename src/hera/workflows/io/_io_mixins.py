@@ -122,11 +122,12 @@ class InputMixin(BaseModel):
 
         for field in cls_fields:
             if param_or_artifact := get_workflow_annotation(annotations[field]):
+                name = param_or_artifact.name or field
                 if isinstance(param_or_artifact, Parameter):
-                    object_dict[field] = "{{inputs.parameters." + f"{param_or_artifact.name}" + "}}"
+                    object_dict[field] = "{{inputs.parameters." + f"{name}" + "}}"
                 else:
-                    object_dict[field] = "{{inputs.artifacts." + f"{param_or_artifact.name}" + "}}"
-            elif not is_annotated(annotations[field]):
+                    object_dict[field] = "{{inputs.artifacts." + f"{name}" + "}}"
+            else:
                 object_dict[field] = "{{inputs.parameters." + f"{field}" + "}}"
 
         return cls.construct(None, **object_dict)
