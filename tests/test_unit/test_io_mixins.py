@@ -289,6 +289,217 @@ def test_get_as_templated_arguments_with_multiple_annotations():
     )
 
 
+def test_get_outputs_no_path_unannotated():
+    class Foo(Output):
+        foo: int
+        fum: int = 5
+        bar: str = "a default"
+
+    parameters = Foo._get_outputs()
+
+    assert parameters == [
+        Parameter(name="foo"),
+        Parameter(name="fum", default=5),
+        Parameter(name="bar", default="a default"),
+    ]
+
+
+def test_get_outputs_no_path_with_pydantic_annotations():
+    class Foo(Output):
+        foo: Annotated[int, Field(gt=0)]
+        fum: Annotated[int, Field(lt=1000)] = 5
+        bar: Annotated[str, Field(max_length=10)] = "a default"
+
+    parameters = Foo._get_outputs()
+
+    assert parameters == [
+        Parameter(name="foo"),
+        Parameter(name="fum", default=5),
+        Parameter(name="bar", default="a default"),
+    ]
+
+
+def test_get_outputs_no_path_annotated_with_name():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(name="f_oo")]
+        fum: Annotated[int, Parameter(name="f_um")] = 5
+        bar: Annotated[str, Parameter(name="b_ar")] = "a default"
+        baz: Annotated[str, Artifact(name="b_az")]
+
+    parameters = Foo._get_outputs()
+
+    assert parameters == [
+        Parameter(name="f_oo"),
+        Parameter(name="f_um", default=5),
+        Parameter(name="b_ar", default="a default"),
+        Artifact(name="b_az"),
+    ]
+
+
+def test_get_outputs_no_path_annotated_with_path():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(value_from=ValueFrom(path="/tmp/one"))]
+        fum: Annotated[int, Parameter(value_from=ValueFrom(path="/tmp/two"))] = 5
+        bar: Annotated[str, Parameter(value_from=ValueFrom(path="/tmp/three"))] = "a default"
+        baz: Annotated[str, Artifact(path="/tmp/four")]
+
+    parameters = Foo._get_outputs()
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(path="/tmp/one")),
+        Parameter(name="fum", default=5, value_from=ValueFrom(path="/tmp/two")),
+        Parameter(name="bar", default="a default", value_from=ValueFrom(path="/tmp/three")),
+        Artifact(name="baz", path="/tmp/four"),
+    ]
+
+
+def test_get_outputs_no_path_annotated_with_description():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(description="param foo")]
+        fum: Annotated[int, Parameter(description="param fum")] = 5
+        bar: Annotated[str, Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Artifact(description="artifact baz")]
+
+    parameters = Foo._get_outputs()
+
+    assert parameters == [
+        Parameter(name="foo", description="param foo"),
+        Parameter(name="fum", description="param fum", default=5),
+        Parameter(name="bar", default="a default", description="param bar"),
+        Artifact(name="baz", description="artifact baz"),
+    ]
+
+
+def test_get_outputs_no_path_with_multiple_annotations():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
+        fum: Annotated[int, Field(lt=10000), Parameter(name="f_um")] = 5
+        bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Field(max_length=15), Artifact()]
+
+    parameters = Foo._get_outputs()
+
+    assert parameters == [
+        Parameter(name="f_oo"),
+        Parameter(name="f_um", default=5),
+        Parameter(name="bar", default="a default", description="param bar"),
+        Artifact(name="baz"),
+    ]
+
+
+def test_get_outputs_add_path_unannotated():
+    class Foo(Output):
+        foo: int
+        fum: int = 5
+        bar: str = "a default"
+
+    parameters = Foo._get_outputs(add_missing_path=True)
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/foo")),
+        Parameter(name="fum", default=5, value_from=ValueFrom(path="/tmp/hera-outputs/parameters/fum")),
+        Parameter(name="bar", default="a default", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/bar")),
+    ]
+
+
+def test_get_outputs_add_path_with_pydantic_annotations():
+    class Foo(Output):
+        foo: Annotated[int, Field(gt=0)]
+        fum: Annotated[int, Field(lt=1000)] = 5
+        bar: Annotated[str, Field(max_length=10)] = "a default"
+
+    parameters = Foo._get_outputs(add_missing_path=True)
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/foo")),
+        Parameter(name="fum", default=5, value_from=ValueFrom(path="/tmp/hera-outputs/parameters/fum")),
+        Parameter(name="bar", default="a default", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/bar")),
+    ]
+
+
+def test_get_outputs_add_path_annotated_with_name():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(name="f_oo")]
+        fum: Annotated[int, Parameter(name="f_um")] = 5
+        bar: Annotated[str, Parameter(name="b_ar")] = "a default"
+        baz: Annotated[str, Artifact(name="b_az")]
+
+    parameters = Foo._get_outputs(add_missing_path=True)
+
+    assert parameters == [
+        Parameter(name="f_oo", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/f_oo")),
+        Parameter(name="f_um", default=5, value_from=ValueFrom(path="/tmp/hera-outputs/parameters/f_um")),
+        Parameter(name="b_ar", default="a default", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/b_ar")),
+        Artifact(name="b_az", path="/tmp/hera-outputs/artifacts/b_az"),
+    ]
+
+
+def test_get_outputs_add_path_annotated_with_path():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(value_from=ValueFrom(path="/tmp/one"))]
+        fum: Annotated[int, Parameter(value_from=ValueFrom(path="/tmp/two"))] = 5
+        bar: Annotated[str, Parameter(value_from=ValueFrom(path="/tmp/three"))] = "a default"
+        baz: Annotated[str, Artifact(path="/tmp/four")]
+
+    parameters = Foo._get_outputs(add_missing_path=True)
+
+    assert parameters == [
+        Parameter(name="foo", value_from=ValueFrom(path="/tmp/one")),
+        Parameter(name="fum", default=5, value_from=ValueFrom(path="/tmp/two")),
+        Parameter(name="bar", default="a default", value_from=ValueFrom(path="/tmp/three")),
+        Artifact(name="baz", path="/tmp/four"),
+    ]
+
+
+def test_get_outputs_add_path_annotated_with_description():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(description="param foo")]
+        fum: Annotated[int, Parameter(description="param fum")] = 5
+        bar: Annotated[str, Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Artifact(description="artifact baz")]
+
+    parameters = Foo._get_outputs(add_missing_path=True)
+
+    assert parameters == [
+        Parameter(name="foo", description="param foo", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/foo")),
+        Parameter(
+            name="fum",
+            description="param fum",
+            default=5,
+            value_from=ValueFrom(path="/tmp/hera-outputs/parameters/fum"),
+        ),
+        Parameter(
+            name="bar",
+            default="a default",
+            description="param bar",
+            value_from=ValueFrom(path="/tmp/hera-outputs/parameters/bar"),
+        ),
+        Artifact(name="baz", description="artifact baz", path="/tmp/hera-outputs/artifacts/baz"),
+    ]
+
+
+def test_get_outputs_add_path_with_multiple_annotations():
+    class Foo(Output):
+        foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
+        fum: Annotated[int, Field(lt=10000), Parameter(name="f_um")] = 5
+        bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
+        baz: Annotated[str, Field(max_length=15), Artifact()]
+
+    parameters = Foo._get_outputs(add_missing_path=True)
+
+    assert parameters == [
+        Parameter(name="f_oo", value_from=ValueFrom(path="/tmp/hera-outputs/parameters/f_oo")),
+        Parameter(name="f_um", default=5, value_from=ValueFrom(path="/tmp/hera-outputs/parameters/f_um")),
+        Parameter(
+            name="bar",
+            default="a default",
+            description="param bar",
+            value_from=ValueFrom(path="/tmp/hera-outputs/parameters/bar"),
+        ),
+        Artifact(name="baz", path="/tmp/hera-outputs/artifacts/baz"),
+    ]
+
+
 def test_get_as_invocator_output_unannotated():
     class Foo(Output):
         foo: int

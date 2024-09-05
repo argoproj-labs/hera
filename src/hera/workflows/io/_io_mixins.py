@@ -8,7 +8,7 @@ else:
     from typing_extensions import Self
 
 from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
-from hera.shared._type_util import get_workflow_annotation, is_annotated
+from hera.shared._type_util import get_workflow_annotation
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
@@ -189,7 +189,13 @@ class OutputMixin(BaseModel):
             if field in {"exit_code", "result"}:
                 continue
             if param_or_artifact := get_workflow_annotation(annotations[field]):
+                param_or_artifact = param_or_artifact.copy()
+                param_or_artifact.name = param_or_artifact.name or field
                 if isinstance(param_or_artifact, Parameter):
+                    if param_or_artifact.default is None:
+                        default = model_fields[field].default
+                        if default is not None and default != PydanticUndefined:
+                            param_or_artifact.default = serialize(default)
                     if add_missing_path and (
                         param_or_artifact.value_from is None or param_or_artifact.value_from.path is None
                     ):
@@ -201,7 +207,7 @@ class OutputMixin(BaseModel):
                     if add_missing_path and param_or_artifact.path is None:
                         param_or_artifact.path = f"/tmp/hera-outputs/artifacts/{param_or_artifact.name}"
                     outputs.append(param_or_artifact)
-            elif not is_annotated(annotations[field]):
+            else:
                 # Create a Parameter from basic type annotations
                 default = model_fields[field].default
                 if default is None or default == PydanticUndefined:
