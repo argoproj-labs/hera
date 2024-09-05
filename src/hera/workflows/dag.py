@@ -54,6 +54,7 @@ class DAG(
             raise NodeNameConflict(f"Found multiple Task nodes with name: {node.name}")
         self._node_names.add(node.name)
         self.tasks.append(node)
+        self._current_task_depends.clear()
 
     def _build_template(self) -> _ModelTemplate:
         """Builds the auto-generated `Template` representation of the `DAG`."""
