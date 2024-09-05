@@ -555,11 +555,15 @@ def _extract_return_annotation_output(source: Callable) -> List:
     if get_workflow_annotation(return_annotation):
         output.append(annotation_args)
     elif origin_type is tuple:
-        workflow_args = [get_args(annotated_type) for annotated_type in annotation_args if get_workflow_annotation(annotated_type)]
+        workflow_args = [
+            get_args(annotated_type) for annotated_type in annotation_args if get_workflow_annotation(annotated_type)
+        ]
         if len(workflow_args) == len(annotation_args):
             output.extend(workflow_args)
         elif workflow_args:
-            raise ValueError("All elements in the tuple should be annotated with Artifact/Parameter.")
+            raise ValueError(
+                f"Function '{source.__name__}' output has partially annotated return type. Hera allows tuple annotation to be fully annotated or not."
+            )
     elif (
         origin_type is None
         and isinstance(return_annotation, type)

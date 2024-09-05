@@ -1125,5 +1125,11 @@ def test_script_partially_annotated_tuple_should_raise_an_error(monkeypatch: pyt
     kwargs_list = [{"name": "my_string", "value": "123"}]
 
     # WHEN/THEN
-    with pytest.raises(ValueError, match="All elements in the tuple should be annotated with Artifact/Parameter."):
+    with pytest.raises(
+        ValueError,
+        match=(
+            "Function 'fn_with_output_tuple_partially_annotated' output has partially annotated return type. "
+            "Hera allows tuple annotation to be fully annotated or not."
+        ),
+    ):
         _runner(entrypoint, kwargs_list)
