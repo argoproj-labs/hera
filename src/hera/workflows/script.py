@@ -552,8 +552,8 @@ def _extract_return_annotation_output(source: Callable) -> List:
     return_annotation = inspect.signature(source).return_annotation
     origin_type = get_origin(return_annotation)
     annotation_args = get_args(return_annotation)
-    if param_or_artifact := get_workflow_annotation(return_annotation):
-        output.append(param_or_artifact)
+    if get_workflow_annotation(return_annotation):
+        output.append(annotation_args)
     elif origin_type is tuple:
         if all(get_workflow_annotation(annotated_type) for annotated_type in annotation_args):
             for annotated_type in annotation_args:
