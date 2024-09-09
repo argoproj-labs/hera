@@ -6,6 +6,12 @@ from requests import Session
 from hera.workflows.service import WorkflowsService
 
 
+class CustomSession(Session):
+    def __init__(self):
+        super().__init__()
+        self.headers.update({"X-Custom-Header": "FooBar"})
+
+
 class TestWorkflowsService:
     def test_token_is_none_when_not_specified(self):
         service = WorkflowsService()
@@ -59,33 +65,33 @@ class TestWorkflowsService:
         service = WorkflowsService(client_certs=(random_path, random_path))
         assert service.client_certs == (random_path, random_path)
 
-    def test_session_is_none_when_not_specified(self):
+    def test_session_is_used(self):
         service = WorkflowsService()
-        assert service.session is None
-
-        service = WorkflowsService(use_session=False)
-        assert service.session is None
-
-    def test_session_is_used_if_set(self):
-        service = WorkflowsService(use_session=True)
 
         assert service.session is not None
         assert isinstance(service.session, Session)
 
-    def test_service_request_no_session(self):
-        service = WorkflowsService(host="https://localhost:2746", use_session=False)
+    def test_session_is_used_if_custom(self):
+        session = CustomSession()
+        service = WorkflowsService(session=session)
 
-        with patch("requests.request") as mock_request, patch("requests.Session.request") as mock_session:
-            mock_request.return_value.ok = True
-            mock_request.return_value.json.return_value = {"items": [], "metadata": {"resourceVersion": "42"}}
-            service.list_workflows("argo")
+        assert service.session is not None
+        assert isinstance(service.session, CustomSession)
 
-        mock_request.assert_called_once()
-        # requests.request calls the Session request but since we mocked it, it shouldn't have been called
-        mock_session.assert_not_called()
+    def test_service_request_with_custom_session(self):
+        with patch("requests.request") as mock_request, patch(f"{__name__}.CustomSession.request") as mock_session:
+            mock_session.return_value.ok = True
+            mock_session.return_value.json.return_value = {"items": [], "metadata": {"resourceVersion": "42"}}
+
+            session = CustomSession()
+            with WorkflowsService(host="https://localhost:2746", session=session) as ws:
+                ws.list_workflows("argo")
+
+        mock_session.assert_called_once()
+        mock_request.assert_not_called()
 
     def test_service_request_with_session(self):
-        service = WorkflowsService(host="https://localhost:2746", use_session=True)
+        service = WorkflowsService(host="https://localhost:2746")
 
         with patch("requests.request") as mock_request, patch("requests.Session.request") as mock_session:
             mock_session.return_value.ok = True
@@ -94,3 +100,10 @@ class TestWorkflowsService:
 
         mock_session.assert_called_once()
         mock_request.assert_not_called()
+
+    def test_service_close_session(self):
+        with patch("requests.Session.close") as mock_close:
+            with WorkflowsService():
+                pass
+
+        mock_close.assert_called_once()
