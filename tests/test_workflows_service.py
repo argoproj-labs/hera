@@ -1,6 +1,15 @@
 from pathlib import Path
+from unittest.mock import patch
+
+from requests import Session
 
 from hera.workflows.service import WorkflowsService
+
+
+class CustomSession(Session):
+    def __init__(self):
+        super().__init__()
+        self.headers.update({"X-Custom-Header": "FooBar"})
 
 
 class TestWorkflowsService:
@@ -55,3 +64,46 @@ class TestWorkflowsService:
 
         service = WorkflowsService(client_certs=(random_path, random_path))
         assert service.client_certs == (random_path, random_path)
+
+    def test_session_is_used(self):
+        service = WorkflowsService()
+
+        assert service.session is not None
+        assert isinstance(service.session, Session)
+
+    def test_session_is_used_if_custom(self):
+        session = CustomSession()
+        service = WorkflowsService(session=session)
+
+        assert service.session is not None
+        assert isinstance(service.session, CustomSession)
+
+    def test_service_request_with_custom_session(self):
+        with patch("requests.request") as mock_request, patch(f"{__name__}.CustomSession.request") as mock_session:
+            mock_session.return_value.ok = True
+            mock_session.return_value.json.return_value = {"items": [], "metadata": {"resourceVersion": "42"}}
+
+            session = CustomSession()
+            with WorkflowsService(host="https://localhost:2746", session=session) as ws:
+                ws.list_workflows("argo")
+
+        mock_session.assert_called_once()
+        mock_request.assert_not_called()
+
+    def test_service_request_with_session(self):
+        service = WorkflowsService(host="https://localhost:2746")
+
+        with patch("requests.request") as mock_request, patch("requests.Session.request") as mock_session:
+            mock_session.return_value.ok = True
+            mock_session.return_value.json.return_value = {"items": [], "metadata": {"resourceVersion": "42"}}
+            service.list_workflows("argo")
+
+        mock_session.assert_called_once()
+        mock_request.assert_not_called()
+
+    def test_service_close_session(self):
+        with patch("requests.Session.close") as mock_close:
+            with WorkflowsService():
+                pass
+
+        mock_close.assert_called_once()
