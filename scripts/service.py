@@ -468,7 +468,7 @@ class {models_type}Service:
         
     def __exit__(self, *_):
         \"\"\"Close the service.\"\"\"
-        self.session.close()
+        self.close()
 """
 
 

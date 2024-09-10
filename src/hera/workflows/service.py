@@ -115,7 +115,7 @@ class WorkflowsService:
 
     def __exit__(self, *_):
         """Close the service."""
-        self.session.close()
+        self.close()
 
     def list_archived_workflows(
         self,
