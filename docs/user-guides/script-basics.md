@@ -37,27 +37,24 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
         A >> [B, C] >> D
 ```
 
-> **For advanced users**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the
-> decorator, so that when your function is invoked under a Hera context, the call is redirected to the `Script.__call__`
-> function. This takes the kwargs of a `Step` or `Task` depending on whether the context manager is a `Steps` or a
-> `DAG`. Under a Workflow itself, your function is not expected to take arguments, so the call will add the function as
-> a template.
+> **How it works**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the decorator,
+> so that when your function is invoked under a Hera context, the call is redirected to the `Script.__call__` function.
+> This takes the kwargs of a `Step` or `Task` depending on whether the context manager is a `Steps` or a `DAG`. Under a
+> Workflow itself, your function is not expected to take arguments, so the call will add the function as a template.
 
-Alternatively, you can specify your DAG using `Task` directly:
+This works as syntactic sugar for the alternative of using `Script` and `Task` directly to construct the Workflow and
+DAG:
 
 ```py
 with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
+   echo_template = Script(name="echo", source=echo, image="python:3.11", resources=Resources(memory_request="5Gi"))
     with DAG(name="diamond"):
-        A = Task(name="A", source=echo, arguments={"message": "A"})
-        B = Task(name="B", source=echo, arguments={"message": "B"}, when=f"{A.result == 'A'}")
-        C = Task(name="C", source=echo, arguments={"message": "C"}, when=f"{A.result != 'A'}")
-        D = Task(name="D", source=echo, arguments={"message": "D"})
+        A = Task(name="A", source=echo_template, arguments={"message": "A"})
+        B = Task(name="B", source=echo_template, arguments={"message": "B"}, when=f"{A.result == 'A'}")
+        C = Task(name="C", source=echo_template, arguments={"message": "C"}, when=f"{A.result != 'A'}")
+        D = Task(name="D", source=echo_template, arguments={"message": "D"})
         A >> [B, C] >> D
 ```
-
-> **Note** in the `DAG` above, `D` will still run, even though `C` will be skipped. This is because of the `depends` logic
-> resolving to `C.Succeeded || C.Skipped || C.Daemoned` due to Argo's default
-> [depends logic](https://argoproj.github.io/argo-workflows/enhanced-depends-logic/#depends).
 
 ## Script Constructors
 
