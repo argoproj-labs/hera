@@ -229,8 +229,9 @@ def test_dag_is_runnable():
     )
 
 
-def test_steps_with_parallel_steps_is_runnable():
+def test_steps_with_parallel_steps_is_runnable(global_config_fixture):
     """The steps function, even with a parallel context, should be runnable as Python code."""
+    global_config_fixture.experimental_features["suppress_parameter_default_error"] = True
     from tests.workflow_decorators.steps import WorkerInput, WorkerOutput, worker
 
     assert worker(WorkerInput(value_a="hello", value_b="world")) == WorkerOutput(
