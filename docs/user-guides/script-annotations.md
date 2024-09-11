@@ -44,7 +44,8 @@ def echo_all(
     print(a_string)
 ```
 
-The fields allowed in the `Parameter` annotations are: `name`, `enum`, and `description`.
+The fields allowed in the `Parameter` annotations are: `name`, `enum`, and `description`. A `default` must be set using
+standard Python syntax, i.e. `x: int = 42`.
 
 ## Artifacts
 
