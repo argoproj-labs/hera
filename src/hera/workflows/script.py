@@ -42,6 +42,7 @@ from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
     _SCRIPT_ANNOTATIONS_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
+    _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG,
     _flag_enabled,
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
@@ -511,15 +512,17 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                 artifacts.append(new_object)
             elif isinstance(new_object, Parameter):
                 if new_object.default is not None:
-                    warnings.warn(
-                        "Using the default field for Parameters in Annotations is deprecated since v5.16"
-                        "and will be removed in a future minor version, use a Python default value instead"
-                    )
-                    # TODO: raise error if override flag not enabled in 5.17:
-                    # if not global_config.experimental_features["..."]:
-                    #     raise ValueError(
-                    #         "default cannot be set via the Parameter's default, use a Python default value instead"
-                    #     )
+                    # TODO: in 5.18 remove the flag check and `warn`, and raise the ValueError directly (minus "flag" text)
+                    if not global_config.experimental_features[_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG]:
+                        warnings.warn(
+                            "Using the default field for Parameters in Annotations is deprecated since v5.16"
+                            "and will be removed in a future minor version, use a Python default value instead. "
+                        )
+                        raise ValueError(
+                            "default cannot be set via the Parameter's default, use a Python default value instead"
+                            "You can suppress this error by setting "
+                            f'global_config.experimental_features["{_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG}"] = True'
+                        )
                 if func_param.default != inspect.Parameter.empty:
                     # TODO: remove this check in 5.18:
                     if new_object.default is not None:
