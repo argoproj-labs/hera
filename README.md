@@ -1,9 +1,9 @@
 # Hera
 
-<img src =docs/assets/hera-logo.svg width="30%">
+<img src=https://raw.githubusercontent.com/argoproj-labs/hera/main/docs/assets/hera-logo.svg width="30%" alt="Hera mascot">
 
-Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make the Argo
-ecosystem accessible by simplifying workflow construction and submission.
+Hera makes Python code easy to orchestrate on Argo Workflows through native Python integrations. It lets you construct and
+submit your Workflows entirely in Python.
 
 [See the Quick Start guide](https://hera.readthedocs.io/en/stable/walk-through/quick-start/) to start using Hera to
 orchestrate your Argo Workflows!
@@ -13,9 +13,9 @@ The Argo was constructed by the shipwright Argus,
 and its crew were specially protected by the goddess Hera.
 ```
 
-### PyPi stats
+### PyPI stats
 
-[![Pypi](https://img.shields.io/pypi/v/hera.svg)](https://pypi.python.org/pypi/hera)
+[![PyPI](https://img.shields.io/pypi/v/hera.svg)](https://pypi.python.org/pypi/hera)
 [![Versions](https://img.shields.io/pypi/pyversions/hera.svg)](https://github.com/argoproj-labs/hera)
 
 [![Downloads](https://static.pepy.tech/badge/hera)](https://pepy.tech/project/hera)
@@ -128,15 +128,14 @@ w.create()
 
 ## Installation
 
-> **Note** Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published Python
-> package. If you'd like to install versions prior to `5.0.0`, you have to use `hera-workflows`. Hera currently
-> publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
+| Source                                               | Command                                                                                                 |
+|------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| [PyPI](https://pypi.org/project/hera/)               | `pip install hera`                                                                                      |
+| [GitHub repo](https://github.com/argoproj-labs/hera) | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed` |
 
-| Source                                                   | Command                                                                                              |
-|----------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| [PyPi](https://pypi.org/project/hera/)                   | `pip install hera`                                                                                   |
-| [PyPi](https://pypi.org/project/hera-workflows/)         | `pip install hera-workflows`                                                                         |
-| [GitHub repo](https://github.com/argoproj-labs/hera)     | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed; pip install .`  |
+> **Note** Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published Python
+> package. If you'd like to install versions prior to `5.0.0`, you should do `pip install hera-workflows<5`. Hera
+> currently publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
 
 ### Optional dependencies
 
