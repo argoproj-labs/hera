@@ -12,8 +12,9 @@ There have been other libraries available for structuring and submitting Argo Wo
 While the aforementioned libraries provided amazing functionality for Argo workflow construction and submission, they
 required an advanced understanding of Argo concepts. When [Dyno Therapeutics](https://dynotx.com) started using Argo
 Workflows, it was challenging to construct and submit experimental machine learning workflows. Scientists and engineers
-at [Dyno Therapeutics](https://dynotx.com) used a lot of time for workflow definition rather than the implementation of
-the atomic unit of execution - the Python function - that performed, for instance, model training.
+were using a lot of time for workflow definition rather than the implementation of the atomic unit of execution - the
+Python function - that performed, for instance, model training. Hera was created to help focus on the unit of execution,
+and was released as an open-source library for the benefit of Python Argo Workflows users.
 
 Hera presents an intuitive Python interface to the underlying API of Argo, with custom classes making use of context
 managers and callables, empowering users to focus on their own executable payloads rather than workflow setup.
@@ -145,8 +146,6 @@ class DagDiamond(Workflow):
 </details>
 
 ## Hera V5 vs V4
-
-_Reserving here for Bloomberg history with Argo/Hera._
 
 Hera v5 is a major release that introduces breaking changes from v4. The main reason for this is that v5 is a complete
 rewrite of the library, and is now based on the OpenAPI specification of Argo Workflows. This allows us to provide a
