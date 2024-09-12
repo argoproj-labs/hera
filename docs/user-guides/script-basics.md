@@ -147,7 +147,7 @@ as the Hera Runner runs the function by referencing it as an entrypoint of your 
 should be built from the source code package itself and its dependencies, so that the source code's functions,
 dependencies, and Hera itself are available to run.
 
-A function can set its `constructor` to `"runner"` to use the `RunnerScriptConstructor`, or use the
+A function can set its `constructor` to `"runner"` to use a default `RunnerScriptConstructor`, or use the
 `global_config.set_class_defaults` function to set it once for all script-decorated functions. We can write a script
 template function using Pydantic objects such as:
 
