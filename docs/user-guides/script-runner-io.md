@@ -25,8 +25,8 @@ allowing you to migrate at your own pace.
 ## Script inputs using `Input`
 
 For your script inputs, you can create a derived class of `Input`, and declare all your input parameters (and
-artifacts) as fields of the class. If you want to use `Annotated` to declare `Artifacts` add metadata to your
-`Parameters`, you will also need to enable the `"script_annotations"` experimental feature flag.
+artifacts) as fields of the class. You can use `Annotated` to declare `Artifacts` add metadata to your
+`Parameters`.
 
 ```py
 from typing import Annotated
