@@ -79,7 +79,7 @@
           - examples.workflows.dags.callable_dag_with_param_get:hello_with_output
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
       - dag:
           tasks:

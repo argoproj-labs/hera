@@ -43,5 +43,5 @@ spec:
         value: ''
       - name: hera__outputs_directory
         value: /tmp/user/chosen/outputs
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'

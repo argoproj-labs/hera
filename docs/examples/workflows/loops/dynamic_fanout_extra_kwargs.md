@@ -95,7 +95,7 @@ the job to dictate what the fanout should execute over.
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -113,7 +113,7 @@ the job to dictate what the fanout should execute over.
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys

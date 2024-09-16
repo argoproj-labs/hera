@@ -67,7 +67,7 @@ they may need to process. The fanout occurs over independent JSON payloads comin
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -84,7 +84,7 @@ they may need to process. The fanout occurs over independent JSON payloads comin
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys

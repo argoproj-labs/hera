@@ -41,7 +41,7 @@ This example showcases how to create a volume at a workflow level and use it in 
       entrypoint: test
       templates:
       - container:
-          image: python:3.8
+          image: python:3.9
           volumeMounts:
           - mountPath: /secrets
             name: service-account-credential

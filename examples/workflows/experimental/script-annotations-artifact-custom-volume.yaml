@@ -48,7 +48,7 @@ spec:
         value: ''
       - name: hera__outputs_directory
         value: /mnt/empty/dir
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'
       volumeMounts:
       - mountPath: /mnt/empty/dir
@@ -72,7 +72,7 @@ spec:
       env:
       - name: hera__script_annotations
         value: ''
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'
   - inputs:
       parameters:
@@ -95,7 +95,7 @@ spec:
         value: ''
       - name: hera__outputs_directory
         value: /mnt/here
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'
       volumeMounts:
       - mountPath: /mnt/here
@@ -116,7 +116,7 @@ spec:
       env:
       - name: hera__script_annotations
         value: ''
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'
       volumeMounts:
       - mountPath: /mnt/here
