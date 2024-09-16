@@ -1,11 +1,5 @@
-import sys
 from pathlib import Path
-from typing import List
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated, List
 
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Workflow, script
 

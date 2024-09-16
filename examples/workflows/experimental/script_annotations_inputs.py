@@ -1,10 +1,4 @@
-import sys
-from typing import Dict
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated, Dict
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script

@@ -1,14 +1,20 @@
 """Module that handles types and annotations."""
 
 import sys
-from typing import Any, Iterable, List, Optional, Tuple, Type, TypeVar, Union, overload
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated, get_args, get_origin
-else:
-    # Python 3.8 has get_origin() and get_args() but those implementations aren't
-    # Annotated-aware.
-    from typing_extensions import Annotated, get_args, get_origin
+from typing import (
+    Annotated,
+    Any,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    get_args,
+    get_origin,
+    overload,
+)
 
 if sys.version_info >= (3, 10):
     from types import UnionType

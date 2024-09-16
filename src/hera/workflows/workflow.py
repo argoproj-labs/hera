@@ -5,17 +5,9 @@ for more on Workflows.
 """
 
 import logging
-import sys
 import time
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated, get_args
-else:
-    # Python 3.8 has get_args() but the implementation isn't Annotated-aware.
-    from typing_extensions import Annotated, get_args
-
+from typing import Annotated, Any, Callable, Dict, List, Optional, Type, TypeVar, Union, get_args
 
 from typing_extensions import ParamSpec
 
