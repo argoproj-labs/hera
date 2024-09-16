@@ -137,7 +137,7 @@ class Script(
 ):
     """A Script acts as a wrapper around a container.
 
-    In Hera this defaults to a "python:3.8" image specified by global_config.image, which runs a python source
+    In Hera this defaults to a "python:3.9" image specified by global_config.image, which runs a python source
     specified by `Script.source`.
     """
 
