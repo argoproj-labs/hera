@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
-
-from typing_extensions import Annotated
+from typing import Annotated, Any, Dict, List, Optional
 
 from hera.shared._pydantic import BaseModel, Field
 
