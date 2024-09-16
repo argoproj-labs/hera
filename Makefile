@@ -11,9 +11,9 @@ install: ## Run poetry install with all extras for development
 	@poetry env use system
 	@poetry install --all-extras
 
-.PHONY: install-3.8
-install-3.8: ## Install python3.8 for generating test data
-	@poetry env use 3.8
+.PHONY: install-3.9
+install-3.9: ## Install and use Python 3.9 for generating test data
+	@poetry env use 3.9
 	@poetry install --all-extras
 
 .PHONY: ci
@@ -53,7 +53,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
-		--target-python-version 3.8 \
+		--target-python-version 3.9 \
 		--output src/hera/workflows/models \
 		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._pydantic.BaseModel \
@@ -76,7 +76,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
-		--target-python-version 3.8 \
+		--target-python-version 3.9 \
 		--output src/hera/events/models \
 		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._pydantic.BaseModel \
@@ -127,7 +127,7 @@ regenerate-example: install
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests, report missing examples
-regenerate-test-data: install-3.8
+regenerate-test-data: install-3.9
 	find examples -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 make test examples
 	@poetry run python -m pytest -k test_for_missing_examples --runxfail
