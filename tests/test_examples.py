@@ -16,12 +16,12 @@ from hera.workflows import (
     Workflow as HeraWorkflow,
     WorkflowTemplate as HeraWorkflowTemplate,
 )
-from hera.workflows._unparse import roundtrip
 from hera.workflows.models import (
     CronWorkflow as ModelCronWorkflow,
     Workflow as ModelWorkflow,
     WorkflowTemplate as ModelWorkflowTemplate,
 )
+from hera.workflows.script import InlineScriptConstructor
 
 ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/main/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
@@ -50,7 +50,7 @@ def _transform_workflow(obj):
         w.spec.templates.sort(key=lambda t: t.name)
         for t in w.spec.templates:
             if t.script:
-                t.script.source = roundtrip(t.script.source)
+                t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
     return w.dict()
 
 
@@ -63,7 +63,7 @@ def _transform_workflow_template(obj):
         w.spec.templates.sort(key=lambda t: t.name)
         for t in w.spec.templates:
             if t.script:
-                t.script.source = roundtrip(t.script.source)
+                t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
     return w.dict()
 
 
@@ -74,7 +74,7 @@ def _transform_cron_workflow(obj):
     wt.metadata.labels = {}
     for t in wt.spec.workflow_spec.templates:
         if t.script:
-            t.script.source = roundtrip(t.script.source)
+            t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
     return wt.dict()
 
 
