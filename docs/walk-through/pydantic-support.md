@@ -2,8 +2,8 @@
 
 ## The why and what
 
-As Argo deals with YAML objects, which are actually a subset of json, Pydantic support is almost built-in to Hera
-through Pydantic's serialization (to/from json) features. Using Pydantic objects (instead of dictionaries) in Script
+As Argo deals with YAML objects, which are actually a subset of JSON, Pydantic support is practically built-in to Hera
+through Pydantic's serialization (to/from JSON) features. Using Pydantic objects (instead of dictionaries) in Script
 templates makes them less error-prone, and easier to write! Using Pydantic classes yourself is as simple as inheriting
 from Pydantic's `BaseModel`. [Read more about Pydantic models here](https://docs.pydantic.dev/latest/usage/models/).
 
@@ -15,5 +15,6 @@ de-serializing features of Pydantic when running on Argo. Your functions can ret
 to another `Step` as a string argument, and then de-serialized in another function. This flow can be seen in
 [the callable scripts example](../examples/workflows/scripts/callable_script.md).
 
-The new experimental Runner IO feature provides a way to specify composite inputs using the class fields, which become the
-template's inputs. Read more in the [Script Runner IO guide](../user-guides/script-runner-io.md).
+The Script Runner IO experimental feature provides a way to specify template inputs and outputs using the class fields
+of the special `Input` and `Output` classes in Hera. Read more in the
+[Script Runner IO guide](../user-guides/script-runner-io.md).

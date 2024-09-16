@@ -123,9 +123,9 @@ Read the full guide on script annotations in [the script user guide](../user-gui
 
 Hera provides Pydantic models for you to create subclasses from, which allow you to more easily declare script template
 inputs. Any fields that you declare in your subclass of `Input` will become input parameters or artifacts, while
-`Output` fields will become output parameters artifacts. The fields that you declare can be `Annotated` as a
-`Parameter` or `Artifact`, as any fields with a basic type will become `Parameters` - you will also need the
-`script_annotations` experimental feature enabled.
+`Output` fields will become output parameters artifacts. The fields that you declare can be `Annotated` as a `Parameter`
+or `Artifact`, as any fields with a basic type will become `Parameters`. Turning on the `script_pydantic_io` flag will
+automatically enable the `script_annotations` experimental feature.
 
 To enable Hera input/output models, you must set the `experimental_feature` flag `script_pydantic_io`
 
