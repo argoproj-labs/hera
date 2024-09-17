@@ -42,10 +42,10 @@ else:
 
 
 def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
-    """Constructs a workflow annotation for all Pydantic fields based on their annotations.
+    """Constructs a Parameter or Artifact object for all Pydantic fields based on their annotations.
 
-    If a field has a workflow annotation, a copy will be returned, with name added if missing.
-    Otherwise, a Parameter annotation will be constructed.
+    If a field has a Parameter or Artifact annotation, a copy will be returned, with name added if missing.
+    Otherwise, a Parameter object will be constructed.
     """
     annotations = get_field_annotations(cls)
     for field, field_info in get_fields(cls).items():
