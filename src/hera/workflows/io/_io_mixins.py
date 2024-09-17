@@ -86,11 +86,11 @@ class InputMixin(BaseModel):
         for field, field_info, param in _construct_io_from_fields(cls):
             if isinstance(param, Parameter):
                 if param.default is not None:
+                    warnings.warn(
+                        "Using the default field for Parameters in Annotations is deprecated since v5.16"
+                        "and will be removed in a future minor version, use a Python default value instead. "
+                    )
                     if not global_config.experimental_features[_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG]:
-                        warnings.warn(
-                            "Using the default field for Parameters in Annotations is deprecated since v5.16"
-                            "and will be removed in a future minor version, use a Python default value instead. "
-                        )
                         raise ValueError(
                             "default cannot be set via the Parameter's default, use a Python default value instead. "
                             "You can suppress this error by setting "

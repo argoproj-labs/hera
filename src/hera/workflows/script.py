@@ -513,11 +513,11 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             elif isinstance(new_object, Parameter):
                 if new_object.default is not None:
                     # TODO: in 5.18 remove the flag check and `warn`, and raise the ValueError directly (minus "flag" text)
+                    warnings.warn(
+                        "Using the default field for Parameters in Annotations is deprecated since v5.16"
+                        "and will be removed in a future minor version, use a Python default value instead. "
+                    )
                     if not global_config.experimental_features[_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG]:
-                        warnings.warn(
-                            "Using the default field for Parameters in Annotations is deprecated since v5.16"
-                            "and will be removed in a future minor version, use a Python default value instead. "
-                        )
                         raise ValueError(
                             "default cannot be set via the Parameter's default, use a Python default value instead"
                             "You can suppress this error by setting "
