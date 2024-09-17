@@ -66,7 +66,7 @@ This example showcases conditional execution on success, failure, and error
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -80,7 +80,7 @@ This example showcases conditional execution on success, failure, and error
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -90,7 +90,7 @@ This example showcases conditional execution on success, failure, and error
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys

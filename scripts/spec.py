@@ -6,11 +6,7 @@ import sys
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import requests
-
-try:
-    from graphlib import TopologicalSorter
-except ImportError:
-    from .graphlib import TopologicalSorter
+from graphlib import TopologicalSorter
 
 logger: logging.Logger = logging.getLogger(__name__)
 

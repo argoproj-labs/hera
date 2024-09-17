@@ -179,7 +179,7 @@ wandb server!
               secretKeyRef:
                 key: wandb-api-key
                 name: wandb-api-key
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
     ```
 

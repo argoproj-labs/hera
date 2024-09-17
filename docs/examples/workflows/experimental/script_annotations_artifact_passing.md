@@ -8,13 +8,8 @@ This example will reuse the outputs volume across script steps.
 === "Hera"
 
     ```python linenums="1"
-    import sys
     from pathlib import Path
-
-    if sys.version_info >= (3, 9):
-        from typing import Annotated
-    else:
-        from typing_extensions import Annotated
+    from typing import Annotated
 
     from hera.shared import global_config
     from hera.workflows import (
@@ -101,7 +96,7 @@ This example will reuse the outputs volume across script steps.
             value: ''
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
       - inputs:
           artifacts:
@@ -119,7 +114,7 @@ This example will reuse the outputs volume across script steps.
           env:
           - name: hera__script_annotations
             value: ''
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
     ```
 

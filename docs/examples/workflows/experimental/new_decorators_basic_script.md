@@ -65,7 +65,7 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
       - inputs:
           parameters:
@@ -89,7 +89,7 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
     ```
 

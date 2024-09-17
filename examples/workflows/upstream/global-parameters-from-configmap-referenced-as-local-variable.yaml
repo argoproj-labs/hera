@@ -11,7 +11,6 @@ spec:
           key: msg
           name: simple-parameters
   entrypoint: print-message
-  serviceAccountName: argo
   templates:
   - container:
       args:

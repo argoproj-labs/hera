@@ -46,7 +46,7 @@ would otherwise have to define when using YAML.
 ### The `script` Decorator
 
 The `script` decorator can take kwargs that a `Script` can take. Importantly, you can specify the `image` of Python
-to use instead of the default `python:3.8` for your script if required:
+to use instead of the default `python:3.9` for your script if required:
 
 ```py
 @script(image="python:3.11")
