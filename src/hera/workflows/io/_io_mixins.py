@@ -41,7 +41,7 @@ else:
     BaseModel = object  # type: ignore
 
 
-def _get_workflow_annotations(cls: Type[BaseModel]) -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
+def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
     """Constructs a workflow annotation for all Pydantic fields based on their annotations.
 
     If a field has a workflow annotation, a copy will be returned, with name added if missing.
@@ -82,7 +82,7 @@ class InputMixin(BaseModel):
     def _get_parameters(cls, object_override: Optional[Self] = None) -> List[Parameter]:
         parameters = []
 
-        for field, field_info, param in _get_workflow_annotations(cls):
+        for field, field_info, param in _construct_io_from_fields(cls):
             if isinstance(param, Parameter):
                 if param.default is not None:
                     warnings.warn(
@@ -102,7 +102,7 @@ class InputMixin(BaseModel):
     def _get_artifacts(cls) -> List[Artifact]:
         artifacts = []
 
-        for _, _, artifact in _get_workflow_annotations(cls):
+        for _, _, artifact in _construct_io_from_fields(cls):
             if isinstance(artifact, Artifact):
                 if artifact.path is None:
                     artifact.path = artifact._get_default_inputs_path()
@@ -118,9 +118,9 @@ class InputMixin(BaseModel):
         """Returns the Input with templated values to propagate through a DAG/Steps function."""
         object_dict = {}
 
-        for field, _, annotation in _get_workflow_annotations(cls):
+        for field, _, annotation in _construct_io_from_fields(cls):
             input_type = "parameters" if isinstance(annotation, Parameter) else "artifacts"
-            object_dict[field] = f"{{{{inputs.{input_type}.{annotation.name}}}}}"
+            object_dict[field] = "{{" + f"inputs.{input_type}.{annotation.name}" + "}}"
 
         return cls.construct(None, **object_dict)
 
@@ -133,7 +133,7 @@ class InputMixin(BaseModel):
         elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
             self_dict = self.model_dump()
 
-        for field, _, annotation in _get_workflow_annotations(type(self)):
+        for field, _, annotation in _construct_io_from_fields(type(self)):
             # The value may be a static value (of any time) if it has a default value, so we need to serialize it
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
             templated_value = serialize(self_dict[field])
@@ -170,7 +170,7 @@ class OutputMixin(BaseModel):
     def _get_outputs(cls, add_missing_path: bool = False) -> List[Union[Artifact, Parameter]]:
         outputs: List[Union[Artifact, Parameter]] = []
 
-        for field, field_info, annotation in _get_workflow_annotations(cls):
+        for field, field_info, annotation in _construct_io_from_fields(cls):
             if field in {"exit_code", "result"}:
                 continue
             if isinstance(annotation, Parameter):
@@ -212,7 +212,7 @@ class OutputMixin(BaseModel):
         elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
             self_dict = self.model_dump()
 
-        for field, _, annotation in _get_workflow_annotations(type(self)):
+        for field, _, annotation in _construct_io_from_fields(type(self)):
             if field in {"exit_code", "result"}:
                 continue
 
