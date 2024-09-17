@@ -76,7 +76,7 @@ http requests to the server.
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -99,7 +99,7 @@ http requests to the server.
         script:
           command:
           - python
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys

@@ -9,14 +9,8 @@
 
     ```python linenums="1"
     import json
-    import sys
     from pathlib import Path
-    from typing import Dict
-
-    if sys.version_info >= (3, 9):
-        from typing import Annotated
-    else:
-        from typing_extensions import Annotated
+    from typing import Annotated, Dict
 
     from hera.shared import global_config
     from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
@@ -105,7 +99,7 @@
             value: ''
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
       - inputs:
           artifacts:
@@ -127,7 +121,7 @@
           env:
           - name: hera__script_annotations
             value: ''
-          image: python:3.8
+          image: python:3.9
           source: '{{inputs.parameters}}'
     ```
 

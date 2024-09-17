@@ -102,7 +102,7 @@ spec:
     script:
       command:
       - python
-      image: python:3.8
+      image: python:3.9
       source: 'import json
 
         try: s = json.loads(r''''''{{inputs.parameters.s}}'''''')

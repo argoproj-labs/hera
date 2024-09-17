@@ -4,14 +4,8 @@ See https://argoproj.github.io/argo-workflows/cron-workflows
 for more on CronWorkflows.
 """
 
-import sys
 from pathlib import Path
-from typing import Dict, Optional, Type, Union, cast
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated, Dict, Optional, Type, Union, cast
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel

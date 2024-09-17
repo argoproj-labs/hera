@@ -6,7 +6,7 @@ spec:
   entrypoint: test
   templates:
   - container:
-      image: python:3.8
+      image: python:3.9
       volumeMounts:
       - mountPath: /secrets
         name: service-account-credential

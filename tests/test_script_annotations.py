@@ -1,12 +1,7 @@
 """Test script annotations are built correctly within workflows."""
 
 import importlib
-import sys
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated
 
 import pytest
 

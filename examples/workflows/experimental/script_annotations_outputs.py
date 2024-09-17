@@ -1,11 +1,5 @@
-import sys
 from pathlib import Path
-from typing import Tuple
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated, Tuple
 
 from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Steps, Workflow, script

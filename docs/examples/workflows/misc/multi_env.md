@@ -52,7 +52,7 @@
             value: '2'
           - name: c
             value: '3'
-          image: python:3.8
+          image: python:3.9
           source: |-
             import os
             import sys
