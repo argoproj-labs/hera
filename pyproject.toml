@@ -2,7 +2,7 @@
 name = "hera"  # project-name
 # The version is automatically substituted by the CI
 version = "0.0.0-dev"
-description = "Hera is a Python framework for constructing and submitting Argo Workflows. The main goal of Hera is to make Argo Workflows more accessible by abstracting away some setup that is typically necessary for constructing Argo workflows."
+description = "Hera makes Python code easy to orchestrate on Argo Workflows through native Python integrations. It lets you construct and submit your Workflows entirely in Python."
 authors = ["Flaviu Vadan <flaviuvadan@gmail.com>", "Sambhav Kothari <sambhavs.email@gmail.com>", "Elliot Gunton <elliotgunton@gmail.com>"]
 maintainers = ["Flaviu Vadan <flaviuvadan@gmail.com>", "Sambhav Kothari <sambhavs.email@gmail.com>", "Elliot Gunton <elliotgunton@gmail.com>"]
 license = "Apache-2.0"
@@ -25,7 +25,7 @@ packages = [
 "Bug Tracker" = "https://github.com/argoproj-labs/hera/issues"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.9,<4"
 pyyaml = { version = ">=6.0", optional = true }
 requests = "*"
 pydantic = { extras = ["email"], version = ">=1.7,<3.0" }
@@ -46,7 +46,7 @@ ruff = "*"
 types-PyYAML = "*"
 jsonpath-ng = "^1.5.3"
 datamodel-code-generator = { extras = ["http"], version = "^0.25" }
-types-requests = "^2.28.11.12"
+types-requests = "^2.32.0.20240914"
 pytest-clarity = "^1.0.1"
 pytest-sugar = ">=0.9.6,<1.1.0"
 
@@ -73,7 +73,7 @@ markers = [
 namespace_packages = true
 explicit_package_bases = true
 show_traceback = true
-python_version = "3.8"
+python_version = "3.9"
 mypy_path = "src"
 check_untyped_defs = true
 no_implicit_optional = true
@@ -142,10 +142,8 @@ extend-select = ["I"]
 "**/__init__.py" = ["F401", "D107"]
 "examples/**" = ["D"]
 "src/hera/events/models/**" = ["D"]
-"src/hera/workflows/_unparse.py" = ["D"]
 "src/hera/workflows/models/**" = ["D"]
 "tests/**" = ["D"]
-"scripts/graphlib.py" = ["D"]
 "scripts/models.py" = ["D"]
 
 [tool.ruff.lint.isort]

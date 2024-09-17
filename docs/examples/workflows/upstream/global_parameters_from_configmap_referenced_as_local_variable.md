@@ -25,7 +25,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name="message",
             value_from=m.ValueFrom(config_map_key_ref=m.ConfigMapKeySelector(name="simple-parameters", key="msg")),
         ),
-        service_account_name="argo",
     ) as w:
         Container(
             name="print-message",
@@ -52,7 +51,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               key: msg
               name: simple-parameters
       entrypoint: print-message
-      serviceAccountName: argo
       templates:
       - container:
           args:

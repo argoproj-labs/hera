@@ -41,7 +41,7 @@ will see the function body dumped into the `source` of the Script template, whic
     script:
       command:
       - python
-      image: python:3.8
+      image: python:3.9
       source: |-
         import json
         try: message = json.loads(r'''{{inputs.parameters.message}}''')
@@ -50,7 +50,7 @@ will see the function body dumped into the `source` of the Script template, whic
         print(message)
 ```
 
-But wait, where did `image: python:3.8` come from? It's a default value for the `image` of a script-decorated function
+But wait, where did `image: python:3.9` come from? It's a default value for the `image` of a script-decorated function
 in Hera. Let's update that to a more recent version of Python in the decorator:
 
 ```py

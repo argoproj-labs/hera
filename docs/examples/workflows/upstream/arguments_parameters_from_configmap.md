@@ -21,7 +21,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     with Workflow(
         generate_name="arguments-parameters-from-configmap-",
         entrypoint="print-message-from-configmap",
-        service_account_name="argo",
     ) as w:
         Container(
             name="print-message-from-configmap",
@@ -49,7 +48,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       generateName: arguments-parameters-from-configmap-
     spec:
       entrypoint: print-message-from-configmap
-      serviceAccountName: argo
       templates:
       - container:
           args:

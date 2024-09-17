@@ -1,13 +1,17 @@
-# Hera Python -> expr transpiler
+# Python → expr transpiler
 
-[**Expr**](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md) is an expression evaluation language used by [**Argo**](https://argoproj.github.io/argo-workflows/variables/#expression).
+[Expr](https://expr-lang.org/) is a Go-centric expression language used by
+[Argo Workflows](https://argoproj.github.io/argo-workflows/variables/#expression).
 
-Hera provides an easy way to construct `expr` expressions in `Python`. It supports the full language definition of `expr` including the enhancements added by `Argo`.
+Hera provides an easy way to construct `expr` expressions in Python. It supports the full language definition of `expr`
+including the enhancements added by Argo.
 
 ## Usage
 
-The recommended way of using the `hera.expr` module is to construct the expression in Python. Once your expressions is ready to be used,
-you may call `str(<expression>)` to convert it to an appropriate `expr` expression. `hera` also supports formatting expressions such that they are surrounded by braces which is useful in Argo when substituting variables.. You can do this via Python string format literals and by adding `$` as a format string.
+The recommended way of using the `hera.expr` module is to construct the expression in Python. Once your expressions is
+ready to be used, you may call `str(<expression>)` to convert it to an appropriate `expr` expression. Hera also supports
+formatting expressions such that they are surrounded by braces which is useful in Argo when substituting variables. You
+can do this via Python string format literals and by adding `$` as a format string.
 
 Example:
 

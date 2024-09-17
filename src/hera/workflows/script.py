@@ -4,6 +4,7 @@ See https://argoproj.github.io/argo-workflows/workflow-concepts/#script
 for more on scripts.
 """
 
+import ast
 import copy
 import inspect
 import sys
@@ -58,7 +59,6 @@ from hera.workflows._mixins import (
     TemplateMixin,
     VolumeMountMixin,
 )
-from hera.workflows._unparse import roundtrip
 from hera.workflows.artifact import (
     Artifact,
 )
@@ -137,7 +137,7 @@ class Script(
 ):
     """A Script acts as a wrapper around a container.
 
-    In Hera this defaults to a "python:3.8" image specified by global_config.image, which runs a python source
+    In Hera this defaults to a "python:3.9" image specified by global_config.image, which runs a python source
     specified by `Script.source`.
     """
 
@@ -793,6 +793,13 @@ class InlineScriptConstructor(ScriptConstructor):
 
     add_cwd_to_sys_path: Optional[bool] = None
 
+    @staticmethod
+    def _roundtrip(source):
+        tree = ast.parse(source)
+        if hasattr(ast, "unparse"):
+            return ast.unparse(tree)
+        return ast.unparse(tree)
+
     def _get_param_script_portion(self, instance: Script) -> str:
         """Constructs and returns a script that loads the parameters of the specified arguments.
 
@@ -853,7 +860,7 @@ class InlineScriptConstructor(ScriptConstructor):
         # in order to have consistent looking functions and getting rid of any comments
         # parsing issues.
         # See https://github.com/argoproj-labs/hera/issues/572
-        content = roundtrip(textwrap.dedent(inspect.getsource(instance.source))).splitlines()
+        content = self._roundtrip(textwrap.dedent(inspect.getsource(instance.source))).splitlines()
         for i, line in enumerate(content):
             if line.startswith("def") or line.startswith("async def"):
                 break

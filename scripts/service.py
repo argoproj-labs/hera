@@ -176,7 +176,8 @@ class ServiceEndpoint:
         return f"""
     {signature}
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
-        resp = requests.{self.method}(
+        resp = self._request(
+            method="{self.method}",
             url={req_url},
             params={params},
             headers={headers},
@@ -422,6 +423,7 @@ class {models_type}Service:
         token: Optional[str] = None,
         client_certs: Optional[Tuple[str, str]] = None,
         namespace: Optional[str] = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         \"\"\"{models_type} service constructor.\"\"\"
         self.host = cast(str, host or global_config.host)
@@ -448,7 +450,25 @@ class {models_type}Service:
         else:
             self.token = None
 
+        self.session = session or requests.Session()
+
         self.namespace = namespace or global_config.namespace
+        
+    def _request(self, method, **kwargs):
+        \"\"\"Make a request using the session if enabled.\"\"\"
+        return self.session.request(method, **kwargs)
+    
+    def close(self):
+        \"\"\"Close the service session.\"\"\"
+        self.session.close()    
+    
+    def __enter__(self):
+        \"\"\"Open the service - session doesn't need to be opened.\"\"\"
+        return self
+        
+    def __exit__(self, *_):
+        \"\"\"Close the service.\"\"\"
+        self.close()
 """
 
 

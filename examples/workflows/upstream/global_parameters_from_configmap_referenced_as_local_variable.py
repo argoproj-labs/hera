@@ -12,7 +12,6 @@ with Workflow(
         name="message",
         value_from=m.ValueFrom(config_map_key_ref=m.ConfigMapKeySelector(name="simple-parameters", key="msg")),
     ),
-    service_account_name="argo",
 ) as w:
     Container(
         name="print-message",

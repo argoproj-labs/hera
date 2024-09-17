@@ -8,7 +8,6 @@ from hera.workflows import (
 with Workflow(
     generate_name="arguments-parameters-from-configmap-",
     entrypoint="print-message-from-configmap",
-    service_account_name="argo",
 ) as w:
     Container(
         name="print-message-from-configmap",

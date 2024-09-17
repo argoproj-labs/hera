@@ -1,12 +1,7 @@
 """This example will reuse the outputs volume across script steps."""
 
-import sys
 from pathlib import Path
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated
 
 from hera.shared import global_config
 from hera.workflows import (

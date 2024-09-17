@@ -1,7 +1,8 @@
 # Script Runner IO
 
-> ⚠️ The `RunnerInput` and `RunnerOutput` classes are deprecated since `v5.16.0`, please use `Input` and `Output` for
-> equivalent functionality. They will be removed in `v5.17.0`.
+> ⚠️ The `RunnerInput` and `RunnerOutput` classes have been renamed to align on the [decorators](decorators.md) feature
+> and are deprecated since `v5.16.0`, please use `Input` and `Output` for equivalent functionality. The "Runner*" type
+> aliases will be removed in `v5.17.0`.
 
 Hera provides the `Input` and `Output` Pydantic classes which can be used to more succinctly write your
 script function inputs and outputs, and requires use of the Hera Runner. Use of these classes also requires the
@@ -24,8 +25,8 @@ allowing you to migrate at your own pace.
 ## Script inputs using `Input`
 
 For your script inputs, you can create a derived class of `Input`, and declare all your input parameters (and
-artifacts) as fields of the class. If you want to use `Annotated` to declare `Artifacts` add metadata to your
-`Parameters`, you will also need to enable the `"script_annotations"` experimental feature flag.
+artifacts) as fields of the class. You can use `Annotated` to declare `Artifacts` add metadata to your
+`Parameters`.
 
 ```py
 from typing import Annotated

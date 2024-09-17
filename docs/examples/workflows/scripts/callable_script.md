@@ -8,13 +8,7 @@
 === "Hera"
 
     ```python linenums="1"
-    import sys
-    from typing import List, Union
-
-    if sys.version_info >= (3, 9):
-        from typing import Annotated
-    else:
-        from typing_extensions import Annotated
+    from typing import Annotated, List, Union
 
     from pydantic import BaseModel
 

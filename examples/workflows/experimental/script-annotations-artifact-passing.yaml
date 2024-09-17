@@ -40,7 +40,7 @@ spec:
         value: ''
       - name: hera__outputs_directory
         value: /tmp/hera-outputs
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'
   - inputs:
       artifacts:
@@ -58,5 +58,5 @@ spec:
       env:
       - name: hera__script_annotations
         value: ''
-      image: python:3.8
+      image: python:3.9
       source: '{{inputs.parameters}}'
