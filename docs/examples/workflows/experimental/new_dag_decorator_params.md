@@ -45,7 +45,7 @@
 
 
     class ConcatInput(Input):
-        word_a: Annotated[str, Parameter(name="word_a", default="")]
+        word_a: Annotated[str, Parameter(name="word_a")] = ""
         word_b: str
         concat_config: ConcatConfig = ConcatConfig(reverse=False)
 

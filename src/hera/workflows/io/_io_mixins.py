@@ -7,9 +7,10 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-from pydantic.fields import FieldInfo
 
-from hera.shared._pydantic import _PYDANTIC_VERSION, get_field_annotations, get_fields
+from hera.shared import global_config
+from hera.shared._global_config import _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG
+from hera.shared._pydantic import _PYDANTIC_VERSION, FieldInfo, get_field_annotations, get_fields
 from hera.shared._type_util import get_workflow_annotation
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
@@ -87,8 +88,14 @@ class InputMixin(BaseModel):
                 if param.default is not None:
                     warnings.warn(
                         "Using the default field for Parameters in Annotations is deprecated since v5.16"
-                        "and will be removed in a future minor version, use a Python default value instead"
+                        "and will be removed in a future minor version, use a Python default value instead. "
                     )
+                    if not global_config.experimental_features[_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG]:
+                        raise ValueError(
+                            "default cannot be set via the Parameter's default, use a Python default value instead. "
+                            "You can suppress this error by setting "
+                            f'global_config.experimental_features["{_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG}"] = True'
+                        )
                 if object_override:
                     param.default = serialize(getattr(object_override, field))
                 elif field_info.default is not None and field_info.default != PydanticUndefined:  # type: ignore

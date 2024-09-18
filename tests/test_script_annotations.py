@@ -68,6 +68,8 @@ def test_double_default_throws_a_value_error(global_config_fixture):
     """Test asserting that it is not possible to define default in the annotation and normal Python."""
 
     # GIVEN
+    global_config_fixture.experimental_features["suppress_parameter_default_error"] = True
+
     @script()
     def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
         print(an_int)
@@ -83,13 +85,14 @@ def test_double_default_throws_a_value_error(global_config_fixture):
     assert "default cannot be set via both the function parameter default and the Parameter's default" in str(e.value)
 
 
-@pytest.mark.skip(reason="Code change required in next Hera version")
-def test_parameter_default_throws_a_value_error(global_config_fixture):
-    """Test asserting that it is not possible to define default in the annotation."""
+def test_parameter_default_without_suppression_throws_a_value_error(global_config_fixture):
+    """Test asserting that it is not possible to define default in the annotation and normal Python."""
 
     # GIVEN
+    global_config_fixture.experimental_features["suppress_parameter_default_error"] = False
+
     @script()
-    def echo_int(an_int: Annotated[int, Parameter(default=1)] = 2):
+    def echo_int(an_int: Annotated[int, Parameter(default=1)]):
         print(an_int)
 
     global_config_fixture.experimental_features["script_annotations"] = True
@@ -100,7 +103,11 @@ def test_parameter_default_throws_a_value_error(global_config_fixture):
 
         w.to_dict()
 
-    assert "default cannot be set via the Parameter's default, use a Python default value instead" in str(e.value)
+    assert (
+        "default cannot be set via the Parameter's default, use a Python default value instead"
+        "You can suppress this error by setting "
+        'global_config.experimental_features["suppress_parameter_default_error"] = True'
+    ) in str(e.value)
 
 
 @pytest.mark.parametrize(

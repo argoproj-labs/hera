@@ -45,7 +45,8 @@ def echo_all(
 ```
 
 The fields allowed in the `Parameter` annotations are: `name`, `enum`, and `description`, `name` will be set to the
-variable name if not provided (when exporting to YAML or viewing in the Argo UI, the `name` variable will be used).
+variable name if not provided (when exporting to YAML or viewing in the Argo UI, the `name` variable will be used). A
+`default` must be set using standard Python syntax, i.e. `x: int = 42`.
 
 ## Artifacts
 
