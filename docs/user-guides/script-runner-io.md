@@ -1,9 +1,5 @@
 # Script Runner IO
 
-> ⚠️ The `RunnerInput` and `RunnerOutput` classes have been renamed to align on the [decorators](decorators.md) feature
-> and are deprecated since `v5.16.0`, please use `Input` and `Output` for equivalent functionality. The "Runner*" type
-> aliases will be removed in `v5.17.0`.
-
 Hera provides the `Input` and `Output` Pydantic classes which can be used to more succinctly write your
 script function inputs and outputs, and requires use of the Hera Runner. Use of these classes also requires the
 `"script_pydantic_io"` experimental feature flag to be enabled:

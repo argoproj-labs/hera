@@ -36,7 +36,7 @@ from hera.workflows.exceptions import (
     TemplateNameConflict,
 )
 from hera.workflows.http_template import HTTP
-from hera.workflows.io import Input, Output, RunnerInput, RunnerOutput
+from hera.workflows.io import Input, Output
 from hera.workflows.metrics import Counter, Gauge, Histogram, Label, Metric, Metrics
 from hera.workflows.operator import Operator
 from hera.workflows.parameter import Parameter
@@ -159,8 +159,6 @@ __all__ = [
     "Resources",
     "RetryPolicy",
     "RetryStrategy",
-    "RunnerInput",
-    "RunnerOutput",
     "RunnerScriptConstructor",
     "S3Artifact",
     "ScaleIOVolume",

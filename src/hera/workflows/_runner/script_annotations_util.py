@@ -152,7 +152,7 @@ def map_runner_input(
         kwargs: Dict[str, str],
     ) -> Any:
         annotation = runner_input_annotations.get(field)
-        assert annotation is not None, "RunnerInput fields must be type-annotated"
+        assert annotation is not None, "Input fields must be type-annotated"  # Note: not necessarily with `Annotated`
         ann_type = unwrap_annotation(annotation)
 
         if param_or_artifact := get_workflow_annotation(annotation):
