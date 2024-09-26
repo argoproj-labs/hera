@@ -110,7 +110,8 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
 
     if artifact_annotation.loader == ArtifactLoader.json.value:
         path = Path(artifact_annotation.path)
-        return json.load(path.open())
+        with path.open() as f:
+            return json.load(f)
 
     if artifact_annotation.loader == ArtifactLoader.file.value:
         path = Path(artifact_annotation.path)
