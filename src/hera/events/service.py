@@ -146,9 +146,7 @@ class EventsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -190,9 +188,7 @@ class EventsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -249,9 +245,7 @@ class EventsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -331,9 +325,7 @@ class EventsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -373,9 +365,7 @@ class EventsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )

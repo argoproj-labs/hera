@@ -263,9 +263,7 @@ class WorkflowsService:
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}/resubmit").format(uid=uid),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -283,9 +281,7 @@ class WorkflowsService:
             url=urljoin(self.host, "api/v1/archived-workflows/{uid}/retry").format(uid=uid),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -342,9 +338,7 @@ class WorkflowsService:
             url=urljoin(self.host, "api/v1/cluster-workflow-templates"),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -362,9 +356,7 @@ class WorkflowsService:
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/lint"),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -404,9 +396,7 @@ class WorkflowsService:
             url=urljoin(self.host, "api/v1/cluster-workflow-templates/{name}").format(name=name),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -502,9 +492,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -524,9 +512,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -570,9 +556,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -631,9 +615,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -655,9 +637,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -777,9 +757,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -801,9 +779,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -847,9 +823,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -950,9 +924,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -972,9 +944,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -994,9 +964,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1132,9 +1100,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1154,9 +1120,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1176,9 +1140,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1198,9 +1160,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1220,9 +1180,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1242,9 +1200,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
@@ -1266,9 +1222,7 @@ class WorkflowsService:
             ),
             params=None,
             headers={"Authorization": self.token, "Content-Type": "application/json"},
-            data=req.json(
-                exclude_none=True, by_alias=True, skip_defaults=True, exclude_unset=True, exclude_defaults=True
-            ),
+            data=req.json(exclude_none=True, by_alias=True, exclude_unset=True, exclude_defaults=True),
             verify=self.verify_ssl,
             cert=self.client_certs,
         )
