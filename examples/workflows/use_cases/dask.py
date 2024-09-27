@@ -19,16 +19,11 @@ def dask_computation(namespace: str = "default", n_workers: int = 1) -> None:
 
     import dask.array as da
     from dask.distributed import Client
-    from dask_kubernetes.classic import KubeCluster, make_pod_spec
+    from dask_kubernetes.operator import KubeCluster
 
     cluster = KubeCluster(
-        pod_template=make_pod_spec(
-            image="ghcr.io/dask/dask:latest",
-            memory_limit="4G",
-            memory_request="2G",
-            cpu_limit=1,
-            cpu_request=1,
-        ),
+        image="ghcr.io/dask/dask:latest",
+        resources={"requests": {"memory": "2G", "cpu": "1"}, "limits": {"memory": "4G", "cpu": "1"}},
         namespace=namespace,
         n_workers=n_workers,
     )
