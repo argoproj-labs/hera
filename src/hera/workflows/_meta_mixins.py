@@ -13,13 +13,14 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 if sys.version_info >= (3, 10):
     from inspect import get_annotations
     from types import NoneType
+    from typing import Concatenate, ParamSpec
 else:
+    from typing_extensions import Concatenate, ParamSpec
+
     from hera.shared._inspect import get_annotations
 
     NoneType = type(None)
 
-
-from typing_extensions import ParamSpec
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
@@ -474,7 +475,10 @@ def _add_type_hints(
 ) -> Callable[
     ...,
     Callable[
-        PydanticKwargs,  # this adds type hints to the underlying *library* function kwargs
+        Concatenate[
+            object,  # this is the `self` parameter
+            PydanticKwargs,  # this adds type hints to the underlying *library* function kwargs
+        ],
         Callable[  # we will return a function that is a decorator
             [Callable[FuncIns, FuncR]],  # taking underlying *user* function
             Callable[FuncIns, FuncR],  # and returning it
