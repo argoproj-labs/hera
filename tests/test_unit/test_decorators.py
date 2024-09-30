@@ -36,26 +36,24 @@ def test_dag_io_declaration():
 
     assert len(model_workflow.spec.templates) == 1
 
-    template = model_workflow.spec.templates[0]
+    dag_template = model_workflow.spec.templates[0]
 
-    assert template.inputs
-    assert len(template.inputs.parameters) == 2
-    assert template.inputs.parameters == [
+    assert dag_template.inputs
+    assert len(dag_template.inputs.parameters) == 2
+    assert dag_template.inputs.parameters == [
         ModelParameter(name="basic_input_parameter"),
         ModelParameter(name="my-input-param"),
     ]
-    assert len(template.inputs.artifacts) == 1
-    assert template.inputs.artifacts == [
-        ModelArtifact(name="my-input-artifact", path="/tmp/hera-inputs/artifacts/my-input-artifact"),
-    ]
+    assert len(dag_template.inputs.artifacts) == 1
+    assert dag_template.inputs.artifacts == [ModelArtifact(name="my-input-artifact")]
 
-    assert template.outputs
-    assert len(template.outputs.parameters) == 2
-    assert template.outputs.parameters == [
+    assert dag_template.outputs
+    assert len(dag_template.outputs.parameters) == 2
+    assert dag_template.outputs.parameters == [
         ModelParameter(name="basic_output_parameter"),
         ModelParameter(name="my-output-param"),
     ]
-    assert template.outputs.artifacts == [
+    assert dag_template.outputs.artifacts == [
         ModelArtifact(name="my-output-artifact"),
     ]
 

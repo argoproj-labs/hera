@@ -119,9 +119,7 @@
         inputs:
           artifacts:
           - name: artifact_a
-            path: /tmp/hera-inputs/artifacts/artifact_a
           - name: artifact_b
-            path: /tmp/hera-inputs/artifacts/artifact_b
         name: worker
         outputs:
           artifacts:

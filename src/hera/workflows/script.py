@@ -494,7 +494,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             else:
                 parameters.extend(input_class._get_parameters())
 
-            artifacts.extend(input_class._get_artifacts())
+            artifacts.extend(input_class._get_artifacts(add_missing_path=True))
 
         elif param_or_artifact := get_workflow_annotation(func_param.annotation):
             if param_or_artifact.output:

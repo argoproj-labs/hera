@@ -698,7 +698,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if len(func_inputs) >= 1:
                 input_arg = list(func_inputs.values())[0].annotation
                 if issubclass(input_arg, (InputV1, InputV2)):
-                    inputs = input_arg._get_inputs()
+                    inputs = input_arg._get_inputs(add_missing_path=True)
 
             func_return = signature.return_annotation
             outputs = []
