@@ -19,7 +19,7 @@ install-3.9: ## Install and use Python 3.9 for generating test data
 .PHONY: ci
 ci: ## Run all the CI checks
 ci: CI=1
-ci: lint test check-codegen
+ci: lint test test-type-hints check-codegen
 
 .PHONY: codegen
 codegen: ## Generate all the code (models, services, examples, and init files)
@@ -44,7 +44,11 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster"
+	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster" -k "not typehints"
+
+.PHONY: test-type-hints
+test-type-hints:  ## Run type hint tests for Hera
+	@poetry run python -m pytest -k "typehints"
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
@@ -129,7 +133,8 @@ regenerate-example: install
 regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests, report missing examples
 regenerate-test-data: install-3.9
 	find examples -name "*.yaml" -type f -delete
-	HERA_REGENERATE=1 make test examples
+	HERA_REGENERATE=1 poetry run python -m pytest -k test_examples
+	make examples
 	@poetry run python -m pytest -k test_for_missing_examples --runxfail
 
 .PHONY: install-k3d

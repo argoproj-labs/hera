@@ -32,6 +32,8 @@ Explore the examples through the side bar!
 | [conditionals-complex](https://github.com/argoproj/argo-workflows/blob/main/examples/conditionals-complex.yaml) |
 | [configmaps/simple-parameters-configmap](https://github.com/argoproj/argo-workflows/blob/main/examples/configmaps/simple-parameters-configmap.yaml) |
 | [cron-backfill](https://github.com/argoproj/argo-workflows/blob/main/examples/cron-backfill.yaml) |
+| [cron-when](https://github.com/argoproj/argo-workflows/blob/main/examples/cron-when.yaml) |
+| [cron-workflow-multiple-schedules](https://github.com/argoproj/argo-workflows/blob/main/examples/cron-workflow-multiple-schedules.yaml) |
 | [daemon-step](https://github.com/argoproj/argo-workflows/blob/main/examples/daemon-step.yaml) |
 | [daemoned-stateful-set-with-service](https://github.com/argoproj/argo-workflows/blob/main/examples/daemoned-stateful-set-with-service.yaml) |
 | [dag-coinflip](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-coinflip.yaml) |
@@ -105,7 +107,11 @@ Explore the examples through the side bar!
 | [secrets](https://github.com/argoproj/argo-workflows/blob/main/examples/secrets.yaml) |
 | [status-reference](https://github.com/argoproj/argo-workflows/blob/main/examples/status-reference.yaml) |
 | [step-level-timeout](https://github.com/argoproj/argo-workflows/blob/main/examples/step-level-timeout.yaml) |
+| [synchronization-mutex-tmpl-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-mutex-tmpl-level.yaml) |
 | [synchronization-mutex-wf-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-mutex-wf-level.yaml) |
+| [synchronization-mutex-wf-level-legacy](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-mutex-wf-level-legacy.yaml) |
+| [synchronization-tmpl-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-tmpl-level.yaml) |
+| [synchronization-wf-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-wf-level.yaml) |
 | [template-defaults](https://github.com/argoproj/argo-workflows/blob/main/examples/template-defaults.yaml) |
 | [testvolume](https://github.com/argoproj/argo-workflows/blob/main/examples/testvolume.yaml) |
 | [timeouts-step](https://github.com/argoproj/argo-workflows/blob/main/examples/timeouts-step.yaml) |
