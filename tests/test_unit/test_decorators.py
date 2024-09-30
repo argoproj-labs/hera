@@ -1,5 +1,6 @@
 import importlib
 import logging
+import re
 from typing import cast
 
 import pytest
@@ -286,7 +287,20 @@ def test_dag_func_two_inputs_errors(global_config_fixture):
     w = Workflow()
 
     # WHEN/THEN
-    with pytest.raises(SyntaxError, match="dag decorator must be used with a single `Input` arg, or no args."):
+    with pytest.raises(
+        SyntaxError, match=re.escape("dag decorator must be used with a single `Input` arg, or no args.")
+    ):
+
         @w.dag()
         def two_args_dag_func(_1: int, _2: str) -> None:
             pass
+
+
+def test_passing_input_as_kwarg_errors(global_config_fixture):
+    with pytest.raises(
+        SyntaxError,
+        match=re.escape(
+            "Found Input argument(s) in kwargs: ['concat_input']. Input must be passed as a positional-only argument."
+        ),
+    ):
+        importlib.import_module("tests.workflow_decorators.dag_kwarg_error").w

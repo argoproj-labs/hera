@@ -536,6 +536,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
             subnode_args = args[0]._get_as_arguments()
 
+        if input_in_kwargs := [k for k, v in kwargs.items() if isinstance(v, (InputV1, InputV2))]:
+            raise SyntaxError(
+                f"Found Input argument(s) in kwargs: {input_in_kwargs}. Input must be passed as a positional-only argument."
+            )
+
         signature = inspect.signature(func)
         output_class = signature.return_annotation
 
@@ -765,11 +770,13 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             func_inputs = signature.parameters
             inputs = []
             if len(func_inputs) == 1:
-                arg_class = list(func_inputs.values())[0].annotation
-                if issubclass(arg_class, (InputV1, InputV2)):
-                    inputs = arg_class._get_inputs()
+                input_arg = list(func_inputs.values())[0].annotation
+                if issubclass(input_arg, (InputV1, InputV2)):
+                    inputs = input_arg._get_inputs()
             elif len(func_inputs) > 1:
-                raise SyntaxError(f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args.")
+                raise SyntaxError(
+                    f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args."
+                )
 
             func_return = signature.return_annotation
             outputs = []
@@ -807,9 +814,9 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             # Open workflow context to cross-check task template names
             with self, template:
                 if len(func_inputs) == 1:
-                    arg_class = list(func_inputs.values())[0].annotation
-                    if issubclass(arg_class, (InputV1, InputV2)):
-                        input_obj = arg_class._get_as_templated_arguments()
+                    input_arg = list(func_inputs.values())[0].annotation
+                    if issubclass(input_arg, (InputV1, InputV2)):
+                        input_obj = input_arg._get_as_templated_arguments()
                         # "run" the dag/steps function to collect the tasks/steps
                         _context.declaring = True
                         func_return = func(input_obj)
