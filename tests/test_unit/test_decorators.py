@@ -304,3 +304,31 @@ def test_passing_input_as_kwarg_errors(global_config_fixture):
         ),
     ):
         importlib.import_module("tests.workflow_decorators.dag_kwarg_error").w
+
+
+def test_script_single_non_input_arg_errors(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError, match=re.escape("script decorator must be used with a single `Input` arg, or no args.")
+    ):
+
+        @w.script()
+        def two_args_script_func(_1: int) -> None:
+            pass
+
+
+def test_script_regular_args_errors(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError, match=re.escape("script decorator must be used with a single `Input` arg, or no args.")
+    ):
+
+        @w.script()
+        def two_args_script_func(_1: int, _2: str) -> None:
+            pass

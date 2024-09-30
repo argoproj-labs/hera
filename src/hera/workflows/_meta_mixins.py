@@ -638,6 +638,16 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
                 script_kwargs["constructor"] = RunnerScriptConstructor()
 
+            signature = inspect.signature(func)
+            func_inputs = signature.parameters
+            if len(func_inputs) > 1:
+                raise SyntaxError("script decorator must be used with a single `Input` arg, or no args.")
+
+            if len(func_inputs) == 1:
+                func_input = list(func_inputs.values())[0].annotation
+                if not issubclass(func_input, (InputV1, InputV2)):
+                    raise SyntaxError("script decorator must be used with a single `Input` arg, or no args.")
+
             # Open (Workflow) context to add `Script` object automatically
             with self:
                 script_template = Script(name=name, source=source, **script_kwargs)
