@@ -1,7 +1,7 @@
 from typing_extensions import Annotated
 
 from hera.shared import global_config
-from hera.workflows import Artifact, Input, Output, Workflow
+from hera.workflows import Artifact, ArtifactLoader, Input, Output, Workflow
 
 global_config.experimental_features["decorator_syntax"] = True
 
@@ -14,8 +14,8 @@ class ArtifactOutput(Output):
 
 
 class ConcatInput(Input):
-    word_a: Annotated[str, Artifact(name="word_a")]
-    word_b: Annotated[str, Artifact(name="word_b")]
+    word_a: Annotated[str, Artifact(name="word_a", loader=ArtifactLoader.json)]
+    word_b: Annotated[str, Artifact(name="word_b", loader=ArtifactLoader.json)]
 
 
 @w.script()
