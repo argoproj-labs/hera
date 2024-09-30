@@ -767,6 +767,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 arg_class = list(func_inputs.values())[0].annotation
                 if issubclass(arg_class, (InputV1, InputV2)):
                     inputs = arg_class._get_inputs()
+            elif len(func_inputs) > 1:
+                raise SyntaxError(f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args.")
 
             func_return = signature.return_annotation
             outputs = []
@@ -811,9 +813,13 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                         _context.declaring = True
                         func_return = func(input_obj)
                         _context.declaring = False
+                else:
+                    _context.declaring = True
+                    func_return = func()
+                    _context.declaring = False
 
-                        if func_return and isinstance(func_return, (OutputV1, OutputV2)):
-                            template.outputs = func_return._get_as_invocator_output()
+                if func_return and isinstance(func_return, (OutputV1, OutputV2)):
+                    template.outputs = func_return._get_as_invocator_output()
 
             return call_wrapper
 

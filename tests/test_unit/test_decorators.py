@@ -2,7 +2,11 @@ import importlib
 import logging
 from typing import cast
 
+import pytest
+
+import hera.workflows.models as m
 from hera.workflows import DAG, Workflow
+from hera.workflows.io.v1 import Input
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
@@ -237,3 +241,52 @@ def test_steps_with_parallel_steps_is_runnable(global_config_fixture):
     assert worker(WorkerInput(value_a="hello", value_b="world")) == WorkerOutput(
         value="hello linux42 world Setting things up"
     )
+
+
+def test_dag_func_no_inputs(global_config_fixture):
+    # GIVEN
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    @w.dag()
+    def no_arg_dag() -> None:
+        pass
+
+    # WHEN
+    model_workflow = cast(m.Workflow, w.build())
+
+    # THEN
+    assert model_workflow.spec.templates and model_workflow.spec.templates[0].inputs is None
+
+
+def test_dag_func_one_input(global_config_fixture):
+    # GIVEN
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    class DagInput(Input):
+        my_int: int
+
+    @w.dag()
+    def one_arg_dag_func(_: DagInput) -> None:
+        pass
+
+    # WHEN
+    model_workflow = cast(m.Workflow, w.build())
+
+    # THEN
+    assert model_workflow.spec.templates and model_workflow.spec.templates[0].inputs == m.Inputs(
+        parameters=[m.Parameter(name="my_int")]
+    )
+
+
+def test_dag_func_two_inputs_errors(global_config_fixture):
+    # GIVEN
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    # WHEN/THEN
+    with pytest.raises(SyntaxError, match="dag decorator must be used with a single `Input` arg, or no args."):
+        @w.dag()
+        def two_args_dag_func(_1: int, _2: str) -> None:
+            pass
