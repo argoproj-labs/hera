@@ -531,6 +531,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.task import Task
         from hera.workflows.workflow_template import WorkflowTemplate
 
+        subnode_name = subnode_name.replace("_", "-")
         subnode_args = None
         if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
             subnode_args = args[0]._get_as_arguments()

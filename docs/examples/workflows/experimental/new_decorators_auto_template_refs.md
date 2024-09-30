@@ -116,7 +116,7 @@
               clusterScope: true
               name: my-cluster-workflow-template
               template: run-setup-dag
-          - name: setup_task
+          - name: setup-task
             templateRef:
               clusterScope: true
               name: my-cluster-workflow-template
@@ -126,11 +126,11 @@
               - name: word_a
                 value: '{{inputs.parameters.value_a}}'
               - name: word_b
-                value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}{{tasks.setup_task.outputs.parameters.dummy-param}}'
+                value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}{{tasks.setup-task.outputs.parameters.dummy-param}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup_task
-            name: task_a
+            depends: setup-task
+            name: task-a
             templateRef:
               name: my-workflow-template
               template: concat
@@ -139,24 +139,24 @@
               - name: word_a
                 value: '{{inputs.parameters.value_b}}'
               - name: word_b
-                value: '{{tasks.setup_task.outputs.result}}'
+                value: '{{tasks.setup-task.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup_task
-            name: task_b
+            depends: setup-task
+            name: task-b
             templateRef:
               name: my-workflow-template
               template: concat
           - arguments:
               parameters:
               - name: word_a
-                value: '{{tasks.task_a.outputs.result}}'
+                value: '{{tasks.task-a.outputs.result}}'
               - name: word_b
-                value: '{{tasks.task_b.outputs.result}}'
+                value: '{{tasks.task-b.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: task_a && task_b
-            name: final_task
+            depends: task-a && task-b
+            name: final-task
             templateRef:
               name: my-workflow-template
               template: concat
@@ -174,6 +174,6 @@
           parameters:
           - name: value
             valueFrom:
-              parameter: '{{tasks.final_task.outputs.result}}'
+              parameter: '{{tasks.final-task.outputs.result}}'
     ```
 
