@@ -138,7 +138,7 @@ class InputMixin(BaseModel):
         if isinstance(self, V1BaseModel):
             self_dict = self.dict()
         elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
-            self_dict = self.model_dump()
+            self_dict = self.model_dump(warnings="none")
 
         for field, _, annotation in _construct_io_from_fields(type(self)):
             # The value may be a static value (of any time) if it has a default value, so we need to serialize it
@@ -217,7 +217,7 @@ class OutputMixin(BaseModel):
         if isinstance(self, V1BaseModel):
             self_dict = self.dict()
         elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
-            self_dict = self.model_dump()
+            self_dict = self.model_dump(warnings="none")
 
         for field, _, annotation in _construct_io_from_fields(type(self)):
             if field in {"exit_code", "result"}:
