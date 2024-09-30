@@ -19,7 +19,7 @@ install-3.9: ## Install and use Python 3.9 for generating test data
 .PHONY: ci
 ci: ## Run all the CI checks
 ci: CI=1
-ci: lint test test-lint check-codegen
+ci: lint test test-type-hints check-codegen
 
 .PHONY: codegen
 codegen: ## Generate all the code (models, services, examples, and init files)
@@ -46,8 +46,8 @@ lint:  ## Run a `lint` process on Hera and report problems
 test:  ## Run tests for Hera
 	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster" -k "not typehints"
 
-.PHONY: test-lint
-test-lint:  ## Run type hint tests for Hera
+.PHONY: test-type-hints
+test-type-hints:  ## Run type hint tests for Hera
 	@poetry run python -m pytest -k "typehints"
 
 .PHONY: workflows-models
