@@ -119,6 +119,13 @@ def test_get_artifacts_annotated_with_path():
     ]
 
 
+def test_get_artifacts_annotated_do_not_add_path():
+    class Foo(Input):
+        baz: Annotated[str, Artifact()]
+
+    assert Foo._get_artifacts(add_missing_path=False) == [Artifact(name="baz")]
+
+
 def test_get_artifacts_with_multiple_annotations():
     class Foo(Input):
         foo: Annotated[int, Parameter(name="f_oo"), Field(gt=0)]
