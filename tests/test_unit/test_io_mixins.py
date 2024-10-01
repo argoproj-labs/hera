@@ -556,9 +556,9 @@ def test_get_as_invocator_output_annotated_with_description():
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [
-        Parameter(name="foo", value_from=ValueFrom(parameter="{{...foo}}")),
-        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
-        Artifact(name="baz", from_="{{...baz}}"),
+        Parameter(name="foo", description="param foo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="bar", description="param bar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Artifact(name="baz", description="artifact baz", from_="{{...baz}}"),
     ]
 
 
@@ -573,6 +573,6 @@ def test_get_as_invocator_output_with_multiple_annotations():
 
     assert parameters == [
         Parameter(name="f_oo", value_from=ValueFrom(parameter="{{...foo}}")),
-        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Parameter(name="bar", description="param bar", value_from=ValueFrom(parameter="{{...bar}}")),
         Artifact(name="baz", from_="{{...baz}}"),
     ]

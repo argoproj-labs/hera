@@ -226,8 +226,10 @@ class OutputMixin(BaseModel):
             templated_value = self_dict[field]  # a string such as `"{{tasks.task_a.outputs.parameter.my_param}}"`
 
             if isinstance(annotation, Parameter):
-                outputs.append(Parameter(name=annotation.name, value_from=ValueFrom(parameter=templated_value)))
+                annotation.value_from = ValueFrom(parameter=templated_value)
+                outputs.append(annotation)
             else:
-                outputs.append(Artifact(name=annotation.name, from_=templated_value))
+                annotation.from_ = templated_value
+                outputs.append(annotation)
 
         return outputs

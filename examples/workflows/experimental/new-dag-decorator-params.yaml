@@ -11,9 +11,9 @@ spec:
       - name: environment_parameter
         valueFrom:
           path: /tmp/hera-outputs/parameters/environment_parameter
-      - name: dummy-param
+      - name: an_annotated_parameter
         valueFrom:
-          path: /tmp/hera-outputs/parameters/dummy-param
+          path: /tmp/hera-outputs/parameters/an_annotated_parameter
       - name: setup-config
         valueFrom:
           path: /tmp/hera-outputs/parameters/setup-config
@@ -68,7 +68,7 @@ spec:
           - name: word_a
             value: '{{inputs.parameters.value_a}}'
           - name: word_b
-            value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}{{tasks.setup-task.outputs.parameters.dummy-param}}'
+            value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
           - name: concat_config
             value: '{"reverse": false}'
         depends: setup-task
@@ -108,6 +108,9 @@ spec:
     name: worker
     outputs:
       parameters:
-      - name: value
+      - name: result_value
         valueFrom:
           parameter: '{{tasks.final-task.outputs.result}}'
+      - name: another_value
+        valueFrom:
+          parameter: '{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
