@@ -294,6 +294,28 @@ def test_dag_func_two_inputs_errors(global_config_fixture):
             pass
 
 
+def test_dag_return_must_be_new_output(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+
+    # WHEN/THEN
+    with pytest.raises(SyntaxError, match=re.escape("Function return must be a new Output object.")):
+        importlib.import_module("tests.workflow_decorators.dag_return_task_error").w
+
+
+def test_dag_return_without_annotation_errors(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError,
+        match=re.escape(
+            "Function returned <class 'tests.workflow_decorators.dag_return_none_error.ExampleOutput'>, "
+            "expected None (the function may be missing a return annotation)."
+        ),
+    ):
+        importlib.import_module("tests.workflow_decorators.dag_return_none_error").w
+
+
 def test_passing_input_as_kwarg_errors(global_config_fixture):
     with pytest.raises(
         SyntaxError,

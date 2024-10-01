@@ -798,10 +798,10 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                     )
                 inputs = input_arg._get_inputs()
 
-            func_return = signature.return_annotation
+            func_return_annotation = signature.return_annotation
             outputs = []
-            if func_return and issubclass(func_return, (OutputV1, OutputV2)):
-                outputs = func_return._get_outputs()
+            if func_return_annotation and issubclass(func_return_annotation, (OutputV1, OutputV2)):
+                outputs = func_return_annotation._get_outputs()
 
             # Add dag/steps to workflow
             with self:
@@ -847,8 +847,20 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 func_return = func(*input_objs)
                 _context.declaring = False
 
-                if func_return and isinstance(func_return, (OutputV1, OutputV2)):
-                    template.outputs = func_return._get_as_invocator_output()
+                if func_return:
+                    from hera.workflows.steps import Step
+                    from hera.workflows.task import Task
+
+                    if isinstance(func_return, (Step, Task)):
+                        raise SyntaxError("Function return must be a new Output object.")
+                    if func_return and func_return_annotation is inspect.Signature.empty:
+                        raise SyntaxError(
+                            f"Function returned {func_return.__class__}, expected None "
+                            "(the function may be missing a return annotation)."
+                        )
+
+                    if isinstance(func_return, (OutputV1, OutputV2)):
+                        template.outputs = func_return._get_as_invocator_output()
 
             return call_wrapper
 
