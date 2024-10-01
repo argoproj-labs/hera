@@ -227,9 +227,9 @@ class OutputMixin(BaseModel):
 
             if isinstance(annotation, Parameter):
                 annotation.value_from = ValueFrom(parameter=templated_value)
-                outputs.append(annotation)
             else:
                 annotation.from_ = templated_value
-                outputs.append(annotation)
+
+            outputs.append(annotation)
 
         return outputs
