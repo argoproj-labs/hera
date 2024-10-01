@@ -860,6 +860,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                         )
 
                     if isinstance(func_return, (OutputV1, OutputV2)):
+                        if func_return.result or func_return.exit_code:
+                            raise SyntaxError(
+                                "Cannot set `result` or `exit_code` on Output when used in a dag/steps function."
+                            )
+
                         template.outputs = func_return._get_as_invocator_output()
 
             return call_wrapper

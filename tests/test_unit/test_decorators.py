@@ -7,7 +7,7 @@ import pytest
 
 import hera.workflows.models as m
 from hera.workflows import DAG, Workflow
-from hera.workflows.io.v1 import Input
+from hera.workflows.io.v1 import Input, Output
 from hera.workflows.models import (
     Artifact as ModelArtifact,
     Parameter as ModelParameter,
@@ -352,3 +352,33 @@ def test_script_regular_args_errors(global_config_fixture):
         @w.script()
         def two_args_script_func(_1: int, _2: str) -> None:
             pass
+
+
+def test_dag_set_output_result_errors(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError, match="Cannot set `result` or `exit_code` on Output when used in a dag/steps function."
+    ):
+
+        @w.dag()
+        def set_output_result() -> Output:
+            output = Output(result="foo")
+            return output
+
+
+def test_dag_set_output_exit_code_errors(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError, match="Cannot set `result` or `exit_code` on Output when used in a dag/steps function."
+    ):
+
+        @w.dag()
+        def set_output_result() -> Output:
+            output = Output(exit_code=1)
+            return output
