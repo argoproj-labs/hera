@@ -22,6 +22,12 @@
         return Output(result="Setting things up")
 
 
+    @templates.dag()
+    def my_dag():
+        setup(name="task-a")
+        setup(name="task-b")
+
+
     w.add_template_set(templates)
     ```
 
@@ -52,5 +58,12 @@
             value: ''
           image: python:3.9
           source: '{{inputs.parameters}}'
+      - dag:
+          tasks:
+          - name: task-a
+            template: setup
+          - name: task-b
+            template: setup
+        name: my-dag
     ```
 

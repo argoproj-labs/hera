@@ -12,4 +12,10 @@ def setup() -> Output:
     return Output(result="Setting things up")
 
 
+@templates.dag()
+def my_dag():
+    setup(name="task-a")
+    setup(name="task-b")
+
+
 w.add_template_set(templates)
