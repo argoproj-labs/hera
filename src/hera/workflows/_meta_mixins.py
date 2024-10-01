@@ -531,7 +531,6 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         from hera.workflows.task import Task
         from hera.workflows.workflow_template import WorkflowTemplate
 
-        subnode_name = subnode_name.replace("_", "-")
         subnode_args = None
         if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
             subnode_args = args[0]._get_as_arguments()
@@ -659,15 +658,18 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    try:
-                        # ignore decorator function assignment
-                        subnode_name = varname()
-                    except ImproperUseError:
-                        # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = script_template.name  # type: ignore
+                    if "name" in kwargs:
+                        subnode_name = kwargs.pop("name")
+                    else:
+                        try:
+                            # ignore decorator function assignment
+                            subnode_name = varname()
+                        except ImproperUseError:
+                            # Template is being used without variable assignment (so use function name or provided name)
+                            subnode_name = script_template.name  # type: ignore
 
-                    subnode_name = kwargs.pop("name", subnode_name)
-                    assert isinstance(subnode_name, str)
+                        assert isinstance(subnode_name, str)
+                        subnode_name = subnode_name.replace("_", "-")
 
                     return self._create_subnode(subnode_name, func, script_template, *args, **kwargs)
 
@@ -719,15 +721,18 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             def container_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    try:
-                        # ignore decorator function assignment
-                        subnode_name = varname()
-                    except ImproperUseError:
-                        # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = container_template.name  # type: ignore
+                    if "name" in kwargs:
+                        subnode_name = kwargs.pop("name")
+                    else:
+                        try:
+                            # ignore decorator function assignment
+                            subnode_name = varname()
+                        except ImproperUseError:
+                            # Template is being used without variable assignment (so use function name or provided name)
+                            subnode_name = container_template.name  # type: ignore
 
-                    subnode_name = kwargs.pop("name", subnode_name)
-                    assert isinstance(subnode_name, str)
+                        assert isinstance(subnode_name, str)
+                        subnode_name = subnode_name.replace("_", "-")
 
                     return self._create_subnode(subnode_name, func, container_template, *args, **kwargs)
 
@@ -810,15 +815,18 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             @functools.wraps(func)
             def call_wrapper(*args, **kwargs):
                 if _context.declaring:
-                    # A sub-dag as a Step or Task is being created
-                    try:
-                        subnode_name = varname()
-                    except ImproperUseError:
-                        # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = name
+                    if "name" in kwargs:
+                        subnode_name = kwargs.pop("name")
+                    else:
+                        try:
+                            # ignore decorator function assignment
+                            subnode_name = varname()
+                        except ImproperUseError:
+                            # Template is being used without variable assignment (so use function name or provided name)
+                            subnode_name = name  # type: ignore
 
-                    subnode_name = kwargs.pop("name", subnode_name)
-                    assert isinstance(subnode_name, str)
+                        assert isinstance(subnode_name, str)
+                        subnode_name = subnode_name.replace("_", "-")
 
                     return self._create_subnode(subnode_name, func, template, *args, **kwargs)
 
