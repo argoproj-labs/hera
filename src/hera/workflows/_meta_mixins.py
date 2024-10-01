@@ -780,14 +780,18 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             signature = inspect.signature(func)
             func_inputs = signature.parameters
             inputs = []
-            if len(func_inputs) == 1:
-                input_arg = list(func_inputs.values())[0].annotation
-                if issubclass(input_arg, (InputV1, InputV2)):
-                    inputs = input_arg._get_inputs()
-            elif len(func_inputs) > 1:
+            if len(func_inputs) > 1:
                 raise SyntaxError(
                     f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args."
                 )
+
+            if len(func_inputs) == 1:
+                input_arg = list(func_inputs.values())[0].annotation
+                if not issubclass(input_arg, (InputV1, InputV2)):
+                    raise SyntaxError(
+                        f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args."
+                    )
+                inputs = input_arg._get_inputs()
 
             func_return = signature.return_annotation
             outputs = []
@@ -824,18 +828,16 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
             # Open workflow context to cross-check task template names
             with self, template:
+                input_objs = []
                 if len(func_inputs) == 1:
                     input_arg = list(func_inputs.values())[0].annotation
                     if issubclass(input_arg, (InputV1, InputV2)):
-                        input_obj = input_arg._get_as_templated_arguments()
-                        # "run" the dag/steps function to collect the tasks/steps
-                        _context.declaring = True
-                        func_return = func(input_obj)
-                        _context.declaring = False
-                else:
-                    _context.declaring = True
-                    func_return = func()
-                    _context.declaring = False
+                        input_objs.append(input_arg._get_as_templated_arguments())
+
+                # "run" the dag/steps function to collect the tasks/steps
+                _context.declaring = True
+                func_return = func(*input_objs)
+                _context.declaring = False
 
                 if func_return and isinstance(func_return, (OutputV1, OutputV2)):
                     template.outputs = func_return._get_as_invocator_output()
