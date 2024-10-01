@@ -673,7 +673,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                 if _context.pieces:
                     return script_template.__call__(*args, **kwargs)
-                return func(*args, **kwargs)
+
+                return func(*args)
 
             # Set the wrapped function to the original function so that we can use it later
             script_call_wrapper.wrapped_function = func  # type: ignore
@@ -732,7 +733,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                 if _context.pieces:
                     return container_template.__call__(*args, **kwargs)
-                return func(*args, **kwargs)
+                return func(*args)
 
             # Set the template name to the inferred name
             container_call_wrapper.template_name = name  # type: ignore
@@ -817,7 +818,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                     return self._create_subnode(subnode_name, func, template, *args, **kwargs)
 
-                return func(*args, **kwargs)
+                return func(*args)
 
             call_wrapper.template_name = name  # type: ignore
 

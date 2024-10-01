@@ -170,7 +170,7 @@ def test_dag_task_auto_depends():
     task_b = next(iter([t for t in dag_template.tasks if t.name == "task-b"]), None)
     assert task_b.depends == "setup-task"
 
-    final_task = next(iter([t for t in dag_template.tasks if t.name == "final-task"]), None)
+    final_task = next(iter([t for t in dag_template.tasks if t.name == "final-task-name"]), None)
     assert final_task.depends == "task-a && task-b"
 
 
