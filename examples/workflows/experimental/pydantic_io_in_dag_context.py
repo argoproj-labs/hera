@@ -11,7 +11,7 @@ from hera.shared import global_config
 from hera.workflows import DAG, Parameter, WorkflowTemplate, script
 from hera.workflows.io.v1 import Input, Output
 
-global_config.experimental_features["decorator_syntax"] = True
+global_config.experimental_features["context_manager_pydantic_io"] = True
 
 
 class CutInput(Input):
