@@ -170,3 +170,40 @@ We can simply call the script templates, passing the input objects in.
 
 For more complex examples, including use of a dag, see
 [the "experimental" examples](../examples/workflows/experimental/new_dag_decorator_params.md).
+
+## Incremental workflow migration
+
+If you have a larger workflow you want to migrate to decorator syntax, you can enable a hybrid mode where Pydantic types can be passed to functions in a Steps/DAG context block, intermixed with calls that pass dictionaries. This will allow you to make smaller changes, and verify that the generated YAML remains the same. For example:
+
+```py
+from hera.shared import global_config
+from hera.workflows import Input, Output, Steps, Workflow, script
+
+global_config.experimental_features["context_manager_pydantic_io"] = True
+
+class MyInput(Input):
+    value: int
+
+class MyOutput(Output):
+    value: int
+
+# Function migrated to Pydantic I/O
+@script()
+def double(input: MyInput) -> MyOutput:
+    return MyOutput(value = input.value * 2)
+
+# Not yet migrated to Pydantic I/O
+@script()
+def print_value(value: int) -> None:
+    print("Value was", value)
+
+# Not yet migrated to decorator syntax
+with Workflow(name="my-template") as w:
+    with Steps(name="steps"):
+        # Can now pass Pydantic types to/from functions
+        first_step = double(Input(value=5))
+        # Results can be passed into non-migrated functions
+        print_value(arguments={"value": first_step.value})
+```
+
+This feature is turned on by a different experimental flag, as we recommend only using this as a temporary stop-gap during a migration. Once you have fully migrated, you can disable the flag again to verify you are no longer using hybrid mode.

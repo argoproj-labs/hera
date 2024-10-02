@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: my-template
+spec:
+  templates:
+  - name: steps
+    steps:
+    - - name: double
+        template: double
+    - - arguments:
+          parameters:
+          - name: value
+            value: '{{steps.double.outputs.parameters.value}}'
+        name: print-value
+        template: print-value
+  - inputs:
+      parameters:
+      - name: value
+    name: double
+    outputs:
+      parameters:
+      - name: value
+    script:
+      command:
+      - python
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: value = json.loads(r'''{{inputs.parameters.value}}''')
+        except: value = r'''{{inputs.parameters.value}}'''
+
+        return MyOutput(value=input.value * 2)
+  - inputs:
+      parameters:
+      - name: value
+    name: print-value
+    script:
+      command:
+      - python
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: value = json.loads(r'''{{inputs.parameters.value}}''')
+        except: value = r'''{{inputs.parameters.value}}'''
+
+        print('Value was', value)
