@@ -41,7 +41,7 @@ from typing_extensions import ParamSpec, get_args, get_origin
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
-    _DECORATOR_SYNTAX_FLAG,
+    _CONTEXT_MANAGER_PYDANTIC_IO_FLAG,
     _SCRIPT_ANNOTATIONS_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
     _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG,
@@ -775,10 +775,10 @@ def script(**script_kwargs) -> Callable:
             """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
             if _context.active:
                 if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
-                    if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):
+                    if not _flag_enabled(_CONTEXT_MANAGER_PYDANTIC_IO_FLAG):
                         raise SyntaxError(
                             "Cannot pass a Pydantic type inside a context. "
-                            + _enable_experimental_feature_msg(_DECORATOR_SYNTAX_FLAG)
+                            + _enable_experimental_feature_msg(_CONTEXT_MANAGER_PYDANTIC_IO_FLAG)
                         )
                     arguments = args[0]._get_as_arguments()
                     arguments_list = [

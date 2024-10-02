@@ -15,9 +15,9 @@ TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]
 
 Hook = Callable[[TBase], TBase]
-"""`Hook` is a callable that takes a Hera objects and returns the same, optionally mutated, object. 
+"""`Hook` is a callable that takes a Hera objects and returns the same, optionally mutated, object.
 
-This can be a Workflow, a Script, a Container, etc - any Hera object. 
+This can be a Workflow, a Script, a Container, etc - any Hera object.
 """
 
 _HookMap = Dict[TypeTBase, List[Hook]]
@@ -202,14 +202,15 @@ register_pre_build_hook = global_config.register_pre_build_hook
 _SCRIPT_ANNOTATIONS_FLAG = "script_annotations"
 _SCRIPT_PYDANTIC_IO_FLAG = "script_pydantic_io"
 _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
+_CONTEXT_MANAGER_PYDANTIC_IO_FLAG = "context_manager_pydantic_io"
 _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG = "suppress_parameter_default_error"
 
 # A dictionary where each key is a flag that has a list of flags which supersede it, hence
 # the given flag key can also be switched on by any of the flags in the list. Using simple flat lists
 # for now, otherwise with many superseding flags we may want to have a recursive structure.
 _SUPERSEDING_FLAGS: Dict[str, List] = {
-    _SCRIPT_ANNOTATIONS_FLAG: [_SCRIPT_PYDANTIC_IO_FLAG, _DECORATOR_SYNTAX_FLAG],
-    _SCRIPT_PYDANTIC_IO_FLAG: [_DECORATOR_SYNTAX_FLAG],
+    _SCRIPT_ANNOTATIONS_FLAG: [_SCRIPT_PYDANTIC_IO_FLAG, _DECORATOR_SYNTAX_FLAG, _CONTEXT_MANAGER_PYDANTIC_IO_FLAG],
+    _SCRIPT_PYDANTIC_IO_FLAG: [_DECORATOR_SYNTAX_FLAG, _CONTEXT_MANAGER_PYDANTIC_IO_FLAG],
     _DECORATOR_SYNTAX_FLAG: [],
 }
 
