@@ -658,9 +658,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    if "name" in kwargs:
-                        subnode_name = kwargs.pop("name")
-                    else:
+                    subnode_name = kwargs.pop("name", None)
+                    if not subnode_name:
                         try:
                             # ignore decorator function assignment
                             subnode_name = varname()
@@ -721,9 +720,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             def container_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    if "name" in kwargs:
-                        subnode_name = kwargs.pop("name")
-                    else:
+                    subnode_name = kwargs.pop("name", None)
+                    if not subnode_name:
                         try:
                             # ignore decorator function assignment
                             subnode_name = varname()
@@ -802,6 +800,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             outputs = []
             if func_return_annotation and issubclass(func_return_annotation, (OutputV1, OutputV2)):
                 outputs = func_return_annotation._get_outputs()
+            elif func_return_annotation is not inspect.Signature.empty and func_return_annotation is not None:
+                raise SyntaxError(
+                    f"{invocator_type.__name__.lower()} decorator must be used with a single "
+                    "`Output` return annotation, or a `None`/empty return annotation."
+                )
 
             # Add dag/steps to workflow
             with self:
@@ -815,9 +818,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             @functools.wraps(func)
             def call_wrapper(*args, **kwargs):
                 if _context.declaring:
-                    if "name" in kwargs:
-                        subnode_name = kwargs.pop("name")
-                    else:
+                    subnode_name = kwargs.pop("name", None)
+                    if not subnode_name:
                         try:
                             # ignore decorator function assignment
                             subnode_name = varname()
@@ -847,19 +849,28 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 func_return = func(*input_objs)
                 _context.declaring = False
 
-                if func_return:
-                    from hera.workflows.steps import Step
-                    from hera.workflows.task import Task
-
-                    if isinstance(func_return, (Step, Task)):
-                        raise SyntaxError("Function return must be a new Output object.")
-                    if func_return and func_return_annotation is inspect.Signature.empty:
+                if func_return is not None:
+                    if func_return_annotation is inspect.Signature.empty or func_return_annotation is None:
                         raise SyntaxError(
                             f"Function returned {func_return.__class__}, expected None "
                             "(the function may be missing a return annotation)."
                         )
 
-                    if isinstance(func_return, (OutputV1, OutputV2)):
+                    from hera.workflows.steps import Step
+                    from hera.workflows.task import Task
+
+                    if isinstance(func_return, (Step, Task)):
+                        # User tried to return an `Output` from another step/task directly
+                        raise SyntaxError("Function return must be a new Output object.")
+
+                    if issubclass(func_return_annotation, (OutputV1, OutputV2)):
+                        if type(func_return) is not func_return_annotation:
+                            raise SyntaxError(
+                                "Function return does not match annotation, "
+                                f"expected: {func_return_annotation}; got: {func_return.__class__}."
+                            )
+                        assert isinstance(func_return, func_return_annotation)  # for type-checking
+
                         if func_return.result or func_return.exit_code:
                             raise SyntaxError(
                                 "Cannot set `result` or `exit_code` on Output when used in a dag/steps function."

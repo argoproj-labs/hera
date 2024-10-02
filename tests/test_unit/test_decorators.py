@@ -302,7 +302,21 @@ def test_dag_return_must_be_new_output(global_config_fixture):
         importlib.import_module("tests.workflow_decorators.dag_return_task_error").w
 
 
-def test_dag_return_without_annotation_errors(global_config_fixture):
+def test_dag_return_without_annotation_errors_if_output(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError,
+        match=re.escape(
+            "Function returned <class 'tests.workflow_decorators.dag_return_unannotated_error.ExampleOutput'>, "
+            "expected None (the function may be missing a return annotation)."
+        ),
+    ):
+        importlib.import_module("tests.workflow_decorators.dag_return_unannotated_error").w
+
+
+def test_dag_return_none_errors_if_output(global_config_fixture):
     global_config_fixture.experimental_features["decorator_syntax"] = True
 
     # WHEN/THEN
@@ -365,8 +379,7 @@ def test_dag_set_output_result_errors(global_config_fixture):
 
         @w.dag()
         def set_output_result() -> Output:
-            output = Output(result="foo")
-            return output
+            return Output(result="foo")
 
 
 def test_dag_set_output_exit_code_errors(global_config_fixture):
@@ -380,5 +393,23 @@ def test_dag_set_output_exit_code_errors(global_config_fixture):
 
         @w.dag()
         def set_output_result() -> Output:
-            output = Output(exit_code=1)
-            return output
+            return Output(exit_code=1)
+
+
+def test_dag_set_outputs_subclass_errors(global_config_fixture):
+    global_config_fixture.experimental_features["decorator_syntax"] = True
+    w = Workflow()
+
+    # WHEN/THEN
+    with pytest.raises(
+        SyntaxError,
+        match="Function return does not match annotation, "
+        "expected: <class 'hera.workflows.io.v1.Output'>; got: <class 'tests.test_unit.test_decorators.test_dag_set_outputs_subclass_errors.<locals>.SubOfOutput'>.",
+    ):
+
+        class SubOfOutput(Output):
+            pass
+
+        @w.dag()
+        def return_subclass() -> Output:
+            return SubOfOutput()

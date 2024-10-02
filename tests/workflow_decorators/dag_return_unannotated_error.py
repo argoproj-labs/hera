@@ -17,6 +17,6 @@ def my_script(_: Input) -> ExampleOutput:
 
 
 @w.dag()
-def dag(_: Input) -> None:
+def dag(_: Input):
     task = my_script(Input())
     return ExampleOutput(field=task.field)
