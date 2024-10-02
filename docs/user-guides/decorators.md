@@ -99,8 +99,8 @@ def goodbye(my_input: MyInput) -> Output:
 @w.set_entrypoint
 @w.steps()
 def my_steps() -> None:
-    hello_world(my_input=MyInput(user="elliot"))
-    goodbye(my_input=MyInput(user="elliot"))
+    hello_world(MyInput(user="elliot"))
+    goodbye(MyInput(user="elliot"))
 ```
 
 For the line-by-line explanation, let's start with
@@ -162,8 +162,8 @@ Then, we set up a `steps` template, setting it as the entrypoint, as follows:
 @w.set_entrypoint
 @w.steps()
 def my_steps() -> None:
-    hello_world(my_input=MyInput(user="elliot"))
-    goodbye(my_input=MyInput(user="elliot"))
+    hello_world(MyInput(user="elliot"))
+    goodbye(MyInput(user="elliot"))
 ```
 
 We can simply call the script templates, passing the input objects in.
