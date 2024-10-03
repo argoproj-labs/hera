@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import Annotated, Optional, Union
+from typing import Annotated, Dict, Optional, Union
 
 import pytest
 
-from hera.workflows import Workflow, script
+from hera.workflows import Output, Workflow, script
 from hera.workflows.artifact import Artifact
 from hera.workflows.parameter import Parameter
 from hera.workflows.script import _get_inputs_from_callable, _get_outputs_from_return_annotation
@@ -189,6 +189,42 @@ def test_invalid_script_when_multiple_input_workflow_annotations_are_given():
 
     with pytest.raises(ValueError, match="Annotation metadata cannot contain more than one Artifact/Parameter."):
         _get_inputs_from_callable(invalid_script)
+
+
+def test_script_returning_generic():
+    @script()
+    def valid_script(a_str: str = "123") -> Dict[str, str]:
+        return {"input": a_str}
+
+    result = _get_outputs_from_return_annotation(valid_script, None)
+
+    assert result == ([], [])
+
+
+def test_script_returning_annotated_generic():
+    @script()
+    def valid_script(a_str: str = "123") -> Annotated[Dict[str, str], Artifact(name="an_artifact")]:
+        return {"input": a_str}
+
+    result = _get_outputs_from_return_annotation(valid_script, None)
+
+    assert result == ([], [Artifact(name="an_artifact")])
+
+
+def test_script_returning_pydantic_type(global_config_fixture):
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+
+    class MyOutput(Output):
+        foo: str
+        bar: int
+
+    @script()
+    def valid_script(a_str: str = "123") -> MyOutput:
+        return MyOutput(foo=a_str, bar=int(a_str))
+
+    result = _get_outputs_from_return_annotation(valid_script, None)
+
+    assert result == ([Parameter(name="foo"), Parameter(name="bar")], [])
 
 
 def test_invalid_script_when_multiple_output_workflow_annotations_are_given():
