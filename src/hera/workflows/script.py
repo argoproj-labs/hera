@@ -407,7 +407,7 @@ def _get_outputs_from_return_annotation(
 
             if param_or_artifact := get_workflow_annotation(annotation):
                 append_annotation(param_or_artifact)
-    elif return_annotation and issubclass(return_annotation, (OutputV1, OutputV2)):
+    elif isinstance(return_annotation, type) and issubclass(return_annotation, (OutputV1, OutputV2)):
         if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
             raise ValueError(
                 (
