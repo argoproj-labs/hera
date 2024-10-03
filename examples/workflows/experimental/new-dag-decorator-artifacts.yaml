@@ -41,23 +41,21 @@ spec:
             name: word_a
           - from: '{{inputs.artifacts.artifact_b}}'
             name: word_b
-        name: concat_1
+        name: concat-1
         template: concat
       - arguments:
           artifacts:
-          - from: '{{tasks.concat_1.outputs.artifacts.an-artifact}}'
+          - from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
             name: word_a
-          - from: '{{tasks.concat_1.outputs.artifacts.an-artifact}}'
+          - from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
             name: word_b
-        depends: concat_1
+        depends: concat-1
         name: concat-2-custom-name
         template: concat
     inputs:
       artifacts:
       - name: artifact_a
-        path: /tmp/hera-inputs/artifacts/artifact_a
       - name: artifact_b
-        path: /tmp/hera-inputs/artifacts/artifact_b
     name: worker
     outputs:
       artifacts:

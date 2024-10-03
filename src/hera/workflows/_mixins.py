@@ -739,14 +739,11 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
                     return result_templated_str
 
                 if param_or_artifact := get_workflow_annotation(annotations[name]):
+                    output_name = param_or_artifact.name or name
                     if isinstance(param_or_artifact, Parameter):
-                        return (
-                            "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{param_or_artifact.name}" + "}}"
-                        )
+                        return "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{output_name}" + "}}"
                     else:
-                        return (
-                            "{{" + f"{subnode_type}.{subnode_name}.outputs.artifacts.{param_or_artifact.name}" + "}}"
-                        )
+                        return "{{" + f"{subnode_type}.{subnode_name}.outputs.artifacts.{output_name}" + "}}"
 
                 return "{{" + f"{subnode_type}.{subnode_name}.outputs.parameters.{name}" + "}}"
 

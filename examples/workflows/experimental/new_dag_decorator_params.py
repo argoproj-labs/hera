@@ -16,7 +16,7 @@ class SetupConfig(BaseModel):
 
 class SetupOutput(Output):
     environment_parameter: str
-    an_annotated_parameter: Annotated[int, Parameter(name="dummy-param")]  # use an annotated non-str
+    an_annotated_parameter: Annotated[int, Parameter()]  # use an annotated non-str, infer name from field
     setup_config: Annotated[SetupConfig, Parameter(name="setup-config")]  # use a pydantic BaseModel
 
 
@@ -61,7 +61,8 @@ class WorkerInput(Input):
 
 
 class WorkerOutput(Output):
-    value: str
+    result_value: str
+    another_value: str
 
 
 @w.set_entrypoint
@@ -77,4 +78,4 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
     task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
     final_task = concat(ConcatInput(word_a=task_a.result, word_b=task_b.result))
 
-    return WorkerOutput(value=final_task.result)
+    return WorkerOutput(result_value=final_task.result, another_value=setup_task.an_annotated_parameter)

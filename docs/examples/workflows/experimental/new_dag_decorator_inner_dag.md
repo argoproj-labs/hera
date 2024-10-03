@@ -123,34 +123,34 @@
           source: '{{inputs.parameters}}'
       - dag:
           tasks:
-          - name: setup_task
+          - name: setup-task
             template: setup
           - arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_a}}'
               - name: word_b
-                value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}'
-            depends: setup_task
-            name: task_a
+                value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}'
+            depends: setup-task
+            name: task-a
             template: concat
           - arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_b}}'
               - name: word_b
-                value: '{{tasks.setup_task.outputs.result}}'
-            depends: setup_task
-            name: task_b
+                value: '{{tasks.setup-task.outputs.result}}'
+            depends: setup-task
+            name: task-b
             template: concat
           - arguments:
               parameters:
               - name: word_a
-                value: '{{tasks.task_a.outputs.result}}'
+                value: '{{tasks.task-a.outputs.result}}'
               - name: word_b
-                value: '{{tasks.task_b.outputs.result}}'
-            depends: task_a && task_b
-            name: final_task
+                value: '{{tasks.task-b.outputs.result}}'
+            depends: task-a && task-b
+            name: final-task
             template: concat
         inputs:
           parameters:
@@ -161,7 +161,7 @@
           parameters:
           - name: value
             valueFrom:
-              parameter: '{{tasks.final_task.outputs.result}}'
+              parameter: '{{tasks.final-task.outputs.result}}'
       - dag:
           tasks:
           - arguments:
@@ -170,7 +170,7 @@
                 value: dag_a
               - name: value_b
                 value: '{{inputs.parameters.value_a}}'
-            name: sub_dag_a
+            name: sub-dag-a
             template: worker
           - arguments:
               parameters:
@@ -178,16 +178,16 @@
                 value: dag_b
               - name: value_b
                 value: '{{inputs.parameters.value_b}}'
-            name: sub_dag_b
+            name: sub-dag-b
             template: worker
           - arguments:
               parameters:
               - name: value_a
-                value: '{{tasks.sub_dag_a.outputs.parameters.value}}'
+                value: '{{tasks.sub-dag-a.outputs.parameters.value}}'
               - name: value_b
-                value: '{{tasks.sub_dag_b.outputs.parameters.value}}'
-            depends: sub_dag_a && sub_dag_b
-            name: sub_dag_c
+                value: '{{tasks.sub-dag-b.outputs.parameters.value}}'
+            depends: sub-dag-a && sub-dag-b
+            name: sub-dag-c
             template: worker
         inputs:
           parameters:
@@ -198,6 +198,6 @@
           parameters:
           - name: value
             valueFrom:
-              parameter: '{{tasks.sub_dag_c.outputs.parameters.value}}'
+              parameter: '{{tasks.sub-dag-c.outputs.parameters.value}}'
     ```
 

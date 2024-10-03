@@ -138,33 +138,33 @@
           parameters:
           - name: value
             valueFrom:
-              parameter: '{{steps.final_step.outputs.result}}'
+              parameter: '{{steps.final-step.outputs.result}}'
         steps:
-        - - name: setup_step
+        - - name: setup-step
             template: setup
         - - arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_a}}'
               - name: word_b
-                value: '{{steps.setup_step.outputs.parameters.environment_parameter}}{{steps.setup_step.outputs.parameters.dummy-param}}'
-            name: step_a
+                value: '{{steps.setup-step.outputs.parameters.environment_parameter}}{{steps.setup-step.outputs.parameters.dummy-param}}'
+            name: step-a
             template: concat
           - arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_b}}'
               - name: word_b
-                value: '{{steps.setup_step.outputs.result}}'
-            name: step_b
+                value: '{{steps.setup-step.outputs.result}}'
+            name: step-b
             template: concat
         - - arguments:
               parameters:
               - name: word_a
-                value: '{{steps.step_a.outputs.result}}'
+                value: '{{steps.step-a.outputs.result}}'
               - name: word_b
-                value: '{{steps.step_b.outputs.result}}'
-            name: final_step
+                value: '{{steps.step-b.outputs.result}}'
+            name: final-step
             template: concat
     ```
 

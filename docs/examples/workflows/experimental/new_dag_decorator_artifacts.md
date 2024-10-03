@@ -11,7 +11,7 @@
     from typing_extensions import Annotated
 
     from hera.shared import global_config
-    from hera.workflows import Artifact, Input, Output, Workflow
+    from hera.workflows import Artifact, ArtifactLoader, Input, Output, Workflow
 
     global_config.experimental_features["decorator_syntax"] = True
 
@@ -24,8 +24,8 @@
 
 
     class ConcatInput(Input):
-        word_a: Annotated[str, Artifact(name="word_a")]
-        word_b: Annotated[str, Artifact(name="word_b")]
+        word_a: Annotated[str, Artifact(name="word_a", loader=ArtifactLoader.json)]
+        word_b: Annotated[str, Artifact(name="word_b", loader=ArtifactLoader.json)]
 
 
     @w.script()
@@ -105,23 +105,21 @@
                 name: word_a
               - from: '{{inputs.artifacts.artifact_b}}'
                 name: word_b
-            name: concat_1
+            name: concat-1
             template: concat
           - arguments:
               artifacts:
-              - from: '{{tasks.concat_1.outputs.artifacts.an-artifact}}'
+              - from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
                 name: word_a
-              - from: '{{tasks.concat_1.outputs.artifacts.an-artifact}}'
+              - from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
                 name: word_b
-            depends: concat_1
+            depends: concat-1
             name: concat-2-custom-name
             template: concat
         inputs:
           artifacts:
           - name: artifact_a
-            path: /tmp/hera-inputs/artifacts/artifact_a
           - name: artifact_b
-            path: /tmp/hera-inputs/artifacts/artifact_b
         name: worker
         outputs:
           artifacts:

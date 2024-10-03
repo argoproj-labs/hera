@@ -535,6 +535,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
             subnode_args = args[0]._get_as_arguments()
 
+        if input_in_kwargs := [k for k, v in kwargs.items() if isinstance(v, (InputV1, InputV2))]:
+            raise SyntaxError(
+                f"Found Input argument(s) in kwargs: {input_in_kwargs}. Input must be passed as a positional-only argument."
+            )
+
         signature = inspect.signature(func)
         output_class = signature.return_annotation
 
@@ -632,6 +637,16 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if "constructor" not in script_kwargs and "constructor" not in global_config._get_class_defaults(Script):
                 script_kwargs["constructor"] = RunnerScriptConstructor()
 
+            signature = inspect.signature(func)
+            func_inputs = signature.parameters
+            if len(func_inputs) > 1:
+                raise SyntaxError("script decorator must be used with a single `Input` arg, or no args.")
+
+            if len(func_inputs) == 1:
+                func_input = list(func_inputs.values())[0].annotation
+                if not issubclass(func_input, (InputV1, InputV2)):
+                    raise SyntaxError("script decorator must be used with a single `Input` arg, or no args.")
+
             # Open (Workflow) context to add `Script` object automatically
             with self:
                 script_template = Script(name=name, source=source, **script_kwargs)
@@ -643,21 +658,24 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             def script_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    try:
-                        # ignore decorator function assignment
-                        subnode_name = varname()
-                    except ImproperUseError:
-                        # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = script_template.name  # type: ignore
+                    subnode_name = kwargs.pop("name", None)
+                    if not subnode_name:
+                        try:
+                            # ignore decorator function assignment
+                            subnode_name = varname()
+                        except ImproperUseError:
+                            # Template is being used without variable assignment (so use function name or provided name)
+                            subnode_name = script_template.name  # type: ignore
 
-                    subnode_name = kwargs.pop("name", subnode_name)
-                    assert isinstance(subnode_name, str)
+                        assert isinstance(subnode_name, str)
+                        subnode_name = subnode_name.replace("_", "-")
 
                     return self._create_subnode(subnode_name, func, script_template, *args, **kwargs)
 
                 if _context.pieces:
                     return script_template.__call__(*args, **kwargs)
-                return func(*args, **kwargs)
+
+                return func(*args)
 
             # Set the wrapped function to the original function so that we can use it later
             script_call_wrapper.wrapped_function = func  # type: ignore
@@ -682,7 +700,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if len(func_inputs) >= 1:
                 input_arg = list(func_inputs.values())[0].annotation
                 if issubclass(input_arg, (InputV1, InputV2)):
-                    inputs = input_arg._get_inputs()
+                    inputs = input_arg._get_inputs(add_missing_path=True)
 
             func_return = signature.return_annotation
             outputs = []
@@ -702,21 +720,23 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             def container_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
-                    try:
-                        # ignore decorator function assignment
-                        subnode_name = varname()
-                    except ImproperUseError:
-                        # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = container_template.name  # type: ignore
+                    subnode_name = kwargs.pop("name", None)
+                    if not subnode_name:
+                        try:
+                            # ignore decorator function assignment
+                            subnode_name = varname()
+                        except ImproperUseError:
+                            # Template is being used without variable assignment (so use function name or provided name)
+                            subnode_name = container_template.name  # type: ignore
 
-                    subnode_name = kwargs.pop("name", subnode_name)
-                    assert isinstance(subnode_name, str)
+                        assert isinstance(subnode_name, str)
+                        subnode_name = subnode_name.replace("_", "-")
 
                     return self._create_subnode(subnode_name, func, container_template, *args, **kwargs)
 
                 if _context.pieces:
                     return container_template.__call__(*args, **kwargs)
-                return func(*args, **kwargs)
+                return func(*args)
 
             # Set the template name to the inferred name
             container_call_wrapper.template_name = name  # type: ignore
@@ -763,15 +783,28 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             signature = inspect.signature(func)
             func_inputs = signature.parameters
             inputs = []
-            if len(func_inputs) == 1:
-                arg_class = list(func_inputs.values())[0].annotation
-                if issubclass(arg_class, (InputV1, InputV2)):
-                    inputs = arg_class._get_inputs()
+            if len(func_inputs) > 1:
+                raise SyntaxError(
+                    f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args."
+                )
 
-            func_return = signature.return_annotation
+            if len(func_inputs) == 1:
+                input_arg = list(func_inputs.values())[0].annotation
+                if not issubclass(input_arg, (InputV1, InputV2)):
+                    raise SyntaxError(
+                        f"{invocator_type.__name__.lower()} decorator must be used with a single `Input` arg, or no args."
+                    )
+                inputs = input_arg._get_inputs()
+
+            func_return_annotation = signature.return_annotation
             outputs = []
-            if func_return and issubclass(func_return, (OutputV1, OutputV2)):
-                outputs = func_return._get_outputs()
+            if func_return_annotation and issubclass(func_return_annotation, (OutputV1, OutputV2)):
+                outputs = func_return_annotation._get_outputs()
+            elif func_return_annotation is not inspect.Signature.empty and func_return_annotation is not None:
+                raise SyntaxError(
+                    f"{invocator_type.__name__.lower()} decorator must be used with a single "
+                    "`Output` return annotation, or a `None`/empty return annotation."
+                )
 
             # Add dag/steps to workflow
             with self:
@@ -785,35 +818,65 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             @functools.wraps(func)
             def call_wrapper(*args, **kwargs):
                 if _context.declaring:
-                    # A sub-dag as a Step or Task is being created
-                    try:
-                        subnode_name = varname()
-                    except ImproperUseError:
-                        # Template is being used without variable assignment (so use function name or provided name)
-                        subnode_name = name
+                    subnode_name = kwargs.pop("name", None)
+                    if not subnode_name:
+                        try:
+                            # ignore decorator function assignment
+                            subnode_name = varname()
+                        except ImproperUseError:
+                            # Template is being used without variable assignment (so use function name or provided name)
+                            subnode_name = name  # type: ignore
 
-                    subnode_name = kwargs.pop("name", subnode_name)
-                    assert isinstance(subnode_name, str)
+                        assert isinstance(subnode_name, str)
+                        subnode_name = subnode_name.replace("_", "-")
 
                     return self._create_subnode(subnode_name, func, template, *args, **kwargs)
 
-                return func(*args, **kwargs)
+                return func(*args)
 
             call_wrapper.template_name = name  # type: ignore
 
             # Open workflow context to cross-check task template names
             with self, template:
+                input_objs = []
                 if len(func_inputs) == 1:
-                    arg_class = list(func_inputs.values())[0].annotation
-                    if issubclass(arg_class, (InputV1, InputV2)):
-                        input_obj = arg_class._get_as_templated_arguments()
-                        # "run" the dag/steps function to collect the tasks/steps
-                        _context.declaring = True
-                        func_return = func(input_obj)
-                        _context.declaring = False
+                    input_arg = list(func_inputs.values())[0].annotation
+                    if issubclass(input_arg, (InputV1, InputV2)):
+                        input_objs.append(input_arg._get_as_templated_arguments())
 
-                        if func_return and isinstance(func_return, (OutputV1, OutputV2)):
-                            template.outputs = func_return._get_as_invocator_output()
+                # "run" the dag/steps function to collect the tasks/steps
+                _context.declaring = True
+                func_return = func(*input_objs)
+                _context.declaring = False
+
+                if func_return is not None:
+                    if func_return_annotation is inspect.Signature.empty or func_return_annotation is None:
+                        raise SyntaxError(
+                            f"Function returned {func_return.__class__}, expected None "
+                            "(the function may be missing a return annotation)."
+                        )
+
+                    from hera.workflows.steps import Step
+                    from hera.workflows.task import Task
+
+                    if isinstance(func_return, (Step, Task)):
+                        # User tried to return an `Output` from another step/task directly
+                        raise SyntaxError("Function return must be a new Output object.")
+
+                    if issubclass(func_return_annotation, (OutputV1, OutputV2)):
+                        if type(func_return) is not func_return_annotation:
+                            raise SyntaxError(
+                                "Function return does not match annotation, "
+                                f"expected: {func_return_annotation}; got: {func_return.__class__}."
+                            )
+                        assert isinstance(func_return, func_return_annotation)  # for type-checking
+
+                        if func_return.result or func_return.exit_code:
+                            raise SyntaxError(
+                                "Cannot set `result` or `exit_code` on Output when used in a dag/steps function."
+                            )
+
+                        template.outputs = func_return._get_as_invocator_output()
 
             return call_wrapper
 

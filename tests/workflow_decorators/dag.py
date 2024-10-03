@@ -43,6 +43,6 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
     setup_task = setup()
     task_a = concat(ConcatInput(word_a=worker_input.value_a, word_b=setup_task.environment_parameter))
     task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
-    final_task = concat(ConcatInput(word_a=task_a.result, word_b=task_b.result))
+    final_task = concat(ConcatInput(word_a=task_a.result, word_b=task_b.result), name="final-task-name")
 
     return WorkerOutput(value=final_task.result)

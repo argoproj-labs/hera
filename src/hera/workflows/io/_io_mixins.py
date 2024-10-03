@@ -106,19 +106,19 @@ class InputMixin(BaseModel):
         return parameters
 
     @classmethod
-    def _get_artifacts(cls) -> List[Artifact]:
+    def _get_artifacts(cls, add_missing_path: bool = False) -> List[Artifact]:
         artifacts = []
 
         for _, _, artifact in _construct_io_from_fields(cls):
             if isinstance(artifact, Artifact):
-                if artifact.path is None:
+                if add_missing_path and artifact.path is None:
                     artifact.path = artifact._get_default_inputs_path()
                 artifacts.append(artifact)
         return artifacts
 
     @classmethod
-    def _get_inputs(cls) -> List[Union[Artifact, Parameter]]:
-        return cls._get_artifacts() + cls._get_parameters()
+    def _get_inputs(cls, add_missing_path: bool = False) -> List[Union[Artifact, Parameter]]:
+        return cls._get_artifacts(add_missing_path) + cls._get_parameters()
 
     @classmethod
     def _get_as_templated_arguments(cls) -> Self:
@@ -226,8 +226,10 @@ class OutputMixin(BaseModel):
             templated_value = self_dict[field]  # a string such as `"{{tasks.task_a.outputs.parameter.my_param}}"`
 
             if isinstance(annotation, Parameter):
-                outputs.append(Parameter(name=annotation.name, value_from=ValueFrom(parameter=templated_value)))
+                annotation.value_from = ValueFrom(parameter=templated_value)
             else:
-                outputs.append(Artifact(name=annotation.name, from_=templated_value))
+                annotation.from_ = templated_value
+
+            outputs.append(annotation)
 
         return outputs

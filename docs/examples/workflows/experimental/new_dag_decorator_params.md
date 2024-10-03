@@ -26,7 +26,7 @@
 
     class SetupOutput(Output):
         environment_parameter: str
-        an_annotated_parameter: Annotated[int, Parameter(name="dummy-param")]  # use an annotated non-str
+        an_annotated_parameter: Annotated[int, Parameter()]  # use an annotated non-str, infer name from field
         setup_config: Annotated[SetupConfig, Parameter(name="setup-config")]  # use a pydantic BaseModel
 
 
@@ -71,7 +71,8 @@
 
 
     class WorkerOutput(Output):
-        value: str
+        result_value: str
+        another_value: str
 
 
     @w.set_entrypoint
@@ -87,7 +88,7 @@
         task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
         final_task = concat(ConcatInput(word_a=task_a.result, word_b=task_b.result))
 
-        return WorkerOutput(value=final_task.result)
+        return WorkerOutput(result_value=final_task.result, another_value=setup_task.an_annotated_parameter)
     ```
 
 === "YAML"
@@ -106,9 +107,9 @@
           - name: environment_parameter
             valueFrom:
               path: /tmp/hera-outputs/parameters/environment_parameter
-          - name: dummy-param
+          - name: an_annotated_parameter
             valueFrom:
-              path: /tmp/hera-outputs/parameters/dummy-param
+              path: /tmp/hera-outputs/parameters/an_annotated_parameter
           - name: setup-config
             valueFrom:
               path: /tmp/hera-outputs/parameters/setup-config
@@ -156,40 +157,40 @@
           source: '{{inputs.parameters}}'
       - dag:
           tasks:
-          - name: setup_task
+          - name: setup-task
             template: setup
           - arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_a}}'
               - name: word_b
-                value: '{{tasks.setup_task.outputs.parameters.environment_parameter}}{{tasks.setup_task.outputs.parameters.dummy-param}}'
+                value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup_task
-            name: task_a
+            depends: setup-task
+            name: task-a
             template: concat
           - arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_b}}'
               - name: word_b
-                value: '{{tasks.setup_task.outputs.result}}'
+                value: '{{tasks.setup-task.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup_task
-            name: task_b
+            depends: setup-task
+            name: task-b
             template: concat
           - arguments:
               parameters:
               - name: word_a
-                value: '{{tasks.task_a.outputs.result}}'
+                value: '{{tasks.task-a.outputs.result}}'
               - name: word_b
-                value: '{{tasks.task_b.outputs.result}}'
+                value: '{{tasks.task-b.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: task_a && task_b
-            name: final_task
+            depends: task-a && task-b
+            name: final-task
             template: concat
         inputs:
           parameters:
@@ -203,8 +204,11 @@
         name: worker
         outputs:
           parameters:
-          - name: value
+          - name: result_value
             valueFrom:
-              parameter: '{{tasks.final_task.outputs.result}}'
+              parameter: '{{tasks.final-task.outputs.result}}'
+          - name: another_value
+            valueFrom:
+              parameter: '{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
     ```
 

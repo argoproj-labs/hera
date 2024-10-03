@@ -79,7 +79,7 @@ def test_get_artifacts_unannotated():
         foo: int
         bar: str = "a default"
 
-    assert Foo._get_artifacts() == []
+    assert Foo._get_artifacts(add_missing_path=True) == []
 
 
 def test_get_artifacts_with_pydantic_annotations():
@@ -87,7 +87,7 @@ def test_get_artifacts_with_pydantic_annotations():
         foo: Annotated[int, Field(gt=0)]
         bar: Annotated[str, Field(max_length=10)] = "a default"
 
-    assert Foo._get_artifacts() == []
+    assert Foo._get_artifacts(add_missing_path=True) == []
 
 
 def test_get_artifacts_annotated_with_name():
@@ -96,7 +96,7 @@ def test_get_artifacts_annotated_with_name():
         bar: Annotated[str, Parameter(name="b_ar")] = "a default"
         baz: Annotated[str, Artifact(name="b_az")]
 
-    assert Foo._get_artifacts() == [Artifact(name="b_az", path="/tmp/hera-inputs/artifacts/b_az")]
+    assert Foo._get_artifacts(add_missing_path=True) == [Artifact(name="b_az", path="/tmp/hera-inputs/artifacts/b_az")]
 
 
 def test_get_artifacts_annotated_with_description():
@@ -105,7 +105,7 @@ def test_get_artifacts_annotated_with_description():
         bar: Annotated[str, Parameter(description="param bar")] = "a default"
         baz: Annotated[str, Artifact(description="artifact baz")]
 
-    assert Foo._get_artifacts() == [
+    assert Foo._get_artifacts(add_missing_path=True) == [
         Artifact(name="baz", path="/tmp/hera-inputs/artifacts/baz", description="artifact baz")
     ]
 
@@ -114,7 +114,16 @@ def test_get_artifacts_annotated_with_path():
     class Foo(Input):
         baz: Annotated[str, Artifact(path="/tmp/hera-inputs/artifacts/bishbosh")]
 
-    assert Foo._get_artifacts() == [Artifact(name="baz", path="/tmp/hera-inputs/artifacts/bishbosh")]
+    assert Foo._get_artifacts(add_missing_path=True) == [
+        Artifact(name="baz", path="/tmp/hera-inputs/artifacts/bishbosh")
+    ]
+
+
+def test_get_artifacts_annotated_do_not_add_path():
+    class Foo(Input):
+        baz: Annotated[str, Artifact()]
+
+    assert Foo._get_artifacts(add_missing_path=False) == [Artifact(name="baz")]
 
 
 def test_get_artifacts_with_multiple_annotations():
@@ -123,7 +132,7 @@ def test_get_artifacts_with_multiple_annotations():
         bar: Annotated[str, Field(max_length=10), Parameter(description="param bar")] = "a default"
         baz: Annotated[str, Field(max_length=15), Artifact()]
 
-    assert Foo._get_artifacts() == [Artifact(name="baz", path="/tmp/hera-inputs/artifacts/baz")]
+    assert Foo._get_artifacts(add_missing_path=True) == [Artifact(name="baz", path="/tmp/hera-inputs/artifacts/baz")]
 
 
 def test_get_as_arguments_unannotated():
@@ -554,9 +563,9 @@ def test_get_as_invocator_output_annotated_with_description():
     parameters = foo._get_as_invocator_output()
 
     assert parameters == [
-        Parameter(name="foo", value_from=ValueFrom(parameter="{{...foo}}")),
-        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
-        Artifact(name="baz", from_="{{...baz}}"),
+        Parameter(name="foo", description="param foo", value_from=ValueFrom(parameter="{{...foo}}")),
+        Parameter(name="bar", description="param bar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Artifact(name="baz", description="artifact baz", from_="{{...baz}}"),
     ]
 
 
@@ -571,6 +580,6 @@ def test_get_as_invocator_output_with_multiple_annotations():
 
     assert parameters == [
         Parameter(name="f_oo", value_from=ValueFrom(parameter="{{...foo}}")),
-        Parameter(name="bar", value_from=ValueFrom(parameter="{{...bar}}")),
+        Parameter(name="bar", description="param bar", value_from=ValueFrom(parameter="{{...bar}}")),
         Artifact(name="baz", from_="{{...baz}}"),
     ]
