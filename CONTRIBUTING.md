@@ -31,29 +31,43 @@ meetings first, and then we can help you propose the feature using
 
 ### Setting up
 
-If you plan to submit contributions to Hera you can install Hera in a virtual environment managed by `poetry` (which
-must first be installed with `pipx` or the Poetry installer - see the
-[Poetry Installation guide](https://python-poetry.org/docs/#installation)):
+If you plan to submit contributions to Hera, you will need the `make` and `poetry` CLI tools. Poetry manages Python
+virtual environments - see the [Poetry Installation guide](https://python-poetry.org/docs/#installation) to install with
+`pipx` or the Poetry installer. Make is used to set useful aliases as `make` targets. You should first install Hera's
+dependencies via the `make install` target which will create a virtual environment using the version of Python used on
+your system:
 
 ```shell
-poetry install
+make install
 ```
 
-Once the dependencies are installed, you can use the various `make` targets to replicate the `CI` jobs.
+Once the dependencies are installed, you can use the various `make` targets to replicate the `CI` jobs, starting with
+`make ci` to run all tests and linting checks.
+
+You can view the available `make` targets via `make help` or just `make`.
 
 ```
 make help
 check-codegen                  Check if the code is up to date
 ci                             Run all the CI checks
-codegen                        Generate all the code
+codegen                        Generate all models, services, examples, and init files
 events-models                  Generate the Events models portion of Argo Workflows
 events-service                 Generate the events service option of Hera
-examples                       Generate all the examples
+examples                       Generate documentation files for examples
 format                         Format and sort imports for source, tests, examples, etc.
 help                           Showcase the help instructions for all the available `make` commands
+init-files                     Generate the init-files of Hera
+install-argo                   Install argo client
+install                        Run poetry install with all extras for development
 lint                           Run a `lint` process on Hera and report problems
 models                         Generate all the Argo Workflows models
+regenerate-example             Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
+regenerate-test-data           Regenerates the test data from upstream examples and runs tests, report missing examples
+run-argo                       Start the argo server
 services                       Generate the services of Hera
+stop-argo                      Stop the argo server
+test-on-cluster                Run workflow tests (requires local argo cluster)
+test-type-hints                Run type hint tests for Hera
 test                           Run tests for Hera
 workflows-models               Generate the Workflows models portion of Argo Workflows
 workflows-service              Generate the Workflows service option of Hera
@@ -96,7 +110,8 @@ Hera has an automated-test harness that is coupled with our documentation. In or
 
 ### Local Hera examples
 
-Tests that do not correspond to any upstream Argo Workflow examples should live in `examples/workflows/*.py`
+Tests that do not correspond to any upstream Argo Workflow examples should live in one of the topic folders under
+`examples/workflows/`, e.g. `dags` or `loops`. Use `misc` if there isn't a specific topic that matches.
 
 In order to add a new workflow test to test Hera functionality, do the following -
 
