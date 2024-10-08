@@ -120,20 +120,19 @@ virtualenv = ["virtualenv (>=20.0.35)"]
 
 [[package]]
 name = "cappa"
-version = "0.22.5"
+version = "0.23.0"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = "<4,>=3.8"
 files = [
-    {file = "cappa-0.22.5-py3-none-any.whl", hash = "sha256:8df14b4845c72d52e0aa30276e000761f5f7feb8598ea9e95f6a03d41ce10e01"},
-    {file = "cappa-0.22.5.tar.gz", hash = "sha256:959f43a6080f209b5b1a0fadecc8cd7eba5c8bcf38c95abaf099cc9c941fa0e0"},
+    {file = "cappa-0.23.0-py3-none-any.whl", hash = "sha256:9a806e088405074bd722ce8b0fc7a98f7f6c94fdd59c86df0448bdf41116c123"},
+    {file = "cappa-0.23.0.tar.gz", hash = "sha256:7ab3dc7a13c09e48e76153370a6845095bbe5cbe1bc979ec7877b193020e68ff"},
 ]
 
 [package.dependencies]
-eval-type-backport = {version = "*", markers = "python_version < \"3.10\""}
 rich = "*"
+type-lens = ">=0.2.3"
 typing-extensions = ">=4.8.0"
-typing-inspect = ">=0.9.0"
 
 [package.extras]
 docstring = ["docstring-parser (>=0.15)"]
@@ -1259,6 +1258,21 @@ files = [
 ]
 
 [[package]]
+name = "type-lens"
+version = "0.2.3"
+description = "type-lens is a Python template project designed to simplify the setup of a new project."
+optional = true
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "type_lens-0.2.3-py3-none-any.whl", hash = "sha256:3c1850545de595a5d5df4e24f8ea8c0f6d9aff42317ca9941d5069b9ad5c1e2e"},
+    {file = "type_lens-0.2.3.tar.gz", hash = "sha256:8720176565c8129bf196fdbdb8c15fdabe150d779bbed101e6b2f418c54ed9bc"},
+]
+
+[package.dependencies]
+eval-type-backport = {version = "*", markers = "python_version < \"3.10\""}
+typing-extensions = ">=4.1.0"
+
+[[package]]
 name = "types-pyyaml"
 version = "6.0.12.20240917"
 description = "Typing stubs for PyYAML"
@@ -1293,21 +1307,6 @@ files = [
     {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
     {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
 ]
-
-[[package]]
-name = "typing-inspect"
-version = "0.9.0"
-description = "Runtime inspection utilities for typing module."
-optional = true
-python-versions = "*"
-files = [
-    {file = "typing_inspect-0.9.0-py3-none-any.whl", hash = "sha256:9ee6fc59062311ef8547596ab6b955e1b8aa46242d854bfc78f4f6b0eff35f9f"},
-    {file = "typing_inspect-0.9.0.tar.gz", hash = "sha256:b23fc42ff6f6ef6954e4852c1fb512cdd18dbea03134f91f856a95ccc9461f78"},
-]
-
-[package.dependencies]
-mypy-extensions = ">=0.3.0"
-typing-extensions = ">=3.7.4"
 
 [[package]]
 name = "urllib3"
@@ -1366,4 +1365,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "021050bba0875b179d24a4605c6882f41225f02a2c884cf45cc0b72786b5e3e2"
+content-hash = "d12cc155ce42b1857ae733c1a7d24baddf30dcee1f9fc18c09c9c1ecc57ca24d"
