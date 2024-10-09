@@ -25,7 +25,7 @@ else:
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
-from hera.shared._type_util import get_annotated_metadata
+from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.io.v1 import (
@@ -275,17 +275,19 @@ def _get_param_items_from_source(source: Callable) -> List[Parameter]:
     List[Parameter]
         A list of identified parameters (possibly empty).
     """
-    source_signature: List[str] = []
+    non_default_parameters: List[Parameter] = []
     for p in inspect.signature(source).parameters.values():
         if p.default == inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             # only add positional or keyword arguments that are not set to a default value
             # as the default value ones are captured by the automatically generated `Parameter` fields for positional
             # kwargs. Otherwise, we assume that the user sets the value of the parameter via the `with_param` field
-            source_signature.append(p.name)
+            io = construct_io_from_annotation(p.name, p.annotation)
+            if isinstance(io, Parameter) and io.default is None and not io.output:
+                non_default_parameters.append(io)
 
-    if len(source_signature) == 1:
-        return [Parameter(name=n, value="{{item}}") for n in source_signature]
-    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in source_signature]
+    for param in non_default_parameters:
+        param.value = "{{" + ("item" if len(non_default_parameters) == 1 else f"item.{param.name}") + "}}"
+    return non_default_parameters
 
 
 def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
