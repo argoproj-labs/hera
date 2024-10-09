@@ -82,6 +82,24 @@ def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Paramet
     return metadata[0]
 
 
+def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Parameter, Artifact]:
+    """Constructs a Parameter or Artifact object based on annotations.
+
+    If a field has a Parameter or Artifact annotation, a copy will be returned, with missing
+    fields filled out based on other metadata. Otherwise, a Parameter object will be constructed.
+
+    For a function parameter, python_name should be the parameter name.
+    For a Pydantic Input or Output class, python_name should be the field name.
+    """
+    if annotation := get_workflow_annotation(annotation):
+        # Copy so as to not modify the fields themselves
+        annotation_copy = annotation.copy()
+        annotation_copy.name = annotation.name or python_name
+        return annotation_copy
+    else:
+        return Parameter(name=python_name)
+
+
 def get_unsubscripted_type(t: Any) -> Any:
     """Return the origin of t, if subscripted, or t itself.
 
