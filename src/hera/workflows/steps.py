@@ -110,6 +110,9 @@ class Parallel(
 
     _node_names = PrivateAttr(default_factory=set)
 
+    def _create_leaf_node(self, **kwargs) -> Step:
+        return Step(**kwargs)
+
     def _add_sub(self, node: Any):
         if not isinstance(node, Step):
             raise InvalidType(type(node))
@@ -179,6 +182,9 @@ class Steps(
                 raise InvalidType(type(workflow_step))
 
         return steps or None
+
+    def _create_leaf_node(self, **kwargs) -> Step:
+        return Step(**kwargs)
 
     def _add_sub(self, node: Any):
         if not isinstance(node, (Step, Parallel)):
