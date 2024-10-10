@@ -264,6 +264,7 @@ class HookMixin(BaseMixin):
 
 
 def _get_pydantic_input_type(source: Callable) -> Union[None, Type[InputV1], Type[InputV2]]:
+    """Returns a Pydantic Input type for the source, if it is using Pydantic IO."""
     function_parameters = inspect.signature(source).parameters
     if len(function_parameters) != 1:
         return None
