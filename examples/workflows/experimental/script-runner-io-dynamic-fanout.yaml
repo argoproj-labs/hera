@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dynamic-fanout-
+spec:
+  entrypoint: d
+  templates:
+  - dag:
+      tasks:
+      - name: generate
+        template: generate
+      - arguments:
+          parameters:
+          - description: this is some value
+            name: some-value
+            value: '{{item}}'
+        depends: generate
+        name: consume
+        template: consume
+        withParam: '{{tasks.generate.outputs.parameters.some-values}}'
+    name: d
+  - name: generate
+    outputs:
+      parameters:
+      - name: some-values
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/some-values
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.script_runner_io_dynamic_fanout:generate
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+  - inputs:
+      parameters:
+      - description: this is some value
+        name: some-value
+    name: consume
+    script:
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.script_runner_io_dynamic_fanout:consume
+      command:
+      - python
+      env:
+      - name: hera__script_annotations
+        value: ''
+      - name: hera__script_pydantic_io
+        value: ''
+      image: python:3.9
+      source: '{{inputs.parameters}}'
