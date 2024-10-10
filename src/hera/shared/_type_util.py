@@ -96,8 +96,8 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Par
         annotation_copy = annotation.copy()
         annotation_copy.name = annotation.name or python_name
         return annotation_copy
-    else:
-        return Parameter(name=python_name)
+
+    return Parameter(name=python_name)
 
 
 def get_unsubscripted_type(t: Any) -> Any:
