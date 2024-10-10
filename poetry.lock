@@ -1327,13 +1327,13 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "varname"
-version = "0.13.3"
+version = "0.13.4"
 description = "Dark magics about variable names in python."
 optional = true
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "varname-0.13.3-py3-none-any.whl", hash = "sha256:c174e42a7c8b149add2a4ec62acd6c4f2949a26413c177a0175abf586ada0a9e"},
-    {file = "varname-0.13.3.tar.gz", hash = "sha256:fcaee413d28dc84301e5b2c6383b8c8b5d15eccc2218b5a1d1c50f21df024e2c"},
+    {file = "varname-0.13.4-py3-none-any.whl", hash = "sha256:98d472689dbd1ce247a9ac8fe5aabce62fa40b387fc87b5e0ffab110228fa7c8"},
+    {file = "varname-0.13.4.tar.gz", hash = "sha256:f98fd7744ce47f4995de125f97f28463eab9ea5cd4cab27e4e85a1dbf1ee6953"},
 ]
 
 [package.dependencies]
