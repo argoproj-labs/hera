@@ -25,7 +25,7 @@ else:
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.shared._pydantic import BaseModel, get_fields, root_validator
-from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata
+from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata, unwrap_annotation
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
 from hera.workflows.io.v1 import (
@@ -263,6 +263,17 @@ class HookMixin(BaseMixin):
         return output
 
 
+def _get_pydantic_input_type(source: Callable) -> Union[None, Type[InputV1], Type[InputV2]]:
+    function_parameters = inspect.signature(source).parameters
+    if len(function_parameters) != 1:
+        return None
+    parameter = next(iter(function_parameters.values()))
+    parameter_type = unwrap_annotation(parameter.annotation)
+    if not isinstance(parameter_type, type) or not issubclass(parameter_type, (InputV1, InputV2)):
+        return None
+    return parameter_type
+
+
 def _get_param_items_from_source(source: Callable) -> List[Parameter]:
     """Returns a list (possibly empty) of `Parameter` from the specified `source`.
 
@@ -276,14 +287,19 @@ def _get_param_items_from_source(source: Callable) -> List[Parameter]:
         A list of identified parameters (possibly empty).
     """
     non_default_parameters: List[Parameter] = []
-    for p in inspect.signature(source).parameters.values():
-        if p.default == inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            # only add positional or keyword arguments that are not set to a default value
-            # as the default value ones are captured by the automatically generated `Parameter` fields for positional
-            # kwargs. Otherwise, we assume that the user sets the value of the parameter via the `with_param` field
-            io = construct_io_from_annotation(p.name, p.annotation)
-            if isinstance(io, Parameter) and io.default is None and not io.output:
-                non_default_parameters.append(io)
+    if pydantic_input := _get_pydantic_input_type(source):
+        for parameter in pydantic_input._get_parameters():
+            if parameter.default is None:
+                non_default_parameters.append(parameter)
+    else:
+        for p in inspect.signature(source).parameters.values():
+            if p.default == inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                # only add positional or keyword arguments that are not set to a default value
+                # as the default value ones are captured by the automatically generated `Parameter` fields for positional
+                # kwargs. Otherwise, we assume that the user sets the value of the parameter via the `with_param` field
+                io = construct_io_from_annotation(p.name, p.annotation)
+                if isinstance(io, Parameter) and io.default is None and not io.output:
+                    non_default_parameters.append(io)
 
     for param in non_default_parameters:
         param.value = "{{" + ("item" if len(non_default_parameters) == 1 else f"item.{param.name}") + "}}"
