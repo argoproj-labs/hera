@@ -1,4 +1,14 @@
+import sys
 from typing import List, Optional, Union
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+if sys.version_info >= (3, 10):
+    from types import NoneType
+else:
+    NoneType = type(None)
 
 import pytest
 from annotated_types import Gt
@@ -8,15 +18,11 @@ from hera.shared._type_util import (
     get_unsubscripted_type,
     get_workflow_annotation,
     is_annotated,
-    origin_type_issubclass,
+    origin_type_issubtype,
+    origin_type_issupertype,
     unwrap_annotation,
 )
 from hera.workflows import Artifact, Parameter
-
-try:
-    from typing import Annotated
-except ImportError:
-    from typing_extensions import Annotated
 
 
 @pytest.mark.parametrize("annotation, expected", [[Annotated[str, "some metadata"], True], [str, False]])
@@ -104,11 +110,29 @@ def test_get_unsubscripted_type(annotation, expected):
 @pytest.mark.parametrize(
     "annotation, target, expected",
     [
-        [List[str], str, False],
-        [Optional[str], str, True],
-        [str, str, True],
-        [Union[int, str], int, True],
+        pytest.param(List[str], str, False, id="list-str-not-subtype-of-str"),
+        pytest.param(Optional[str], str, False, id="optional-str-not-subtype-of-str"),
+        pytest.param(str, str, True, id="str-is-subtype-of-str"),
+        pytest.param(Union[int, str], int, False, id="union-int-str-not-subtype-of-str"),
+        pytest.param(Optional[str], (str, NoneType), True, id="optional-str-is-subtype-of-optional-str"),
+        pytest.param(str, (str, NoneType), True, id="str-is-subtype-of-optional-str"),
+        pytest.param(Union[int, str], (str, NoneType), False, id="union-int-str-not-subtype-of-optional-str"),
     ],
 )
-def test_origin_type_issubclass(annotation, target, expected):
-    assert origin_type_issubclass(annotation, target) is expected
+def test_origin_type_issubtype(annotation, target, expected):
+    assert origin_type_issubtype(annotation, target) is expected
+
+
+@pytest.mark.parametrize(
+    "annotation, target, expected",
+    [
+        pytest.param(List[str], str, False, id="list-str-not-supertype-of-str"),
+        pytest.param(Optional[str], str, True, id="optional-str-is-supertype-of-str"),
+        pytest.param(str, str, True, id="str-is-supertype-of-str"),
+        pytest.param(Union[int, str], int, True, id="union-int-str-is-supertype-of-int"),
+        pytest.param(Optional[str], NoneType, True, id="optional-str-is-supertype-of-nonetype"),
+        pytest.param(str, NoneType, False, id="str-not-supertype-of-nonetype"),
+    ],
+)
+def test_origin_type_issupertype(annotation, target, expected):
+    assert origin_type_issupertype(annotation, target) is expected
