@@ -1,5 +1,5 @@
 import sys
-from typing import List, Optional, Union
+from typing import List, NoReturn, Optional, Union
 
 if sys.version_info >= (3, 9):
     from typing import Annotated
@@ -111,6 +111,7 @@ def test_get_unsubscripted_type(annotation, expected):
     "annotation, target, expected",
     [
         pytest.param(List[str], str, False, id="list-str-not-subtype-of-str"),
+        pytest.param(NoReturn, str, False, id="special-form-does-not-raise-error"),
         pytest.param(Optional[str], str, False, id="optional-str-not-subtype-of-str"),
         pytest.param(str, str, True, id="str-is-subtype-of-str"),
         pytest.param(Union[int, str], int, False, id="union-int-str-not-subtype-of-str"),
@@ -127,6 +128,7 @@ def test_origin_type_issubtype(annotation, target, expected):
     "annotation, target, expected",
     [
         pytest.param(List[str], str, False, id="list-str-not-supertype-of-str"),
+        pytest.param(NoReturn, str, False, id="special-form-does-not-raise-error"),
         pytest.param(Optional[str], str, True, id="optional-str-is-supertype-of-str"),
         pytest.param(str, str, True, id="str-is-supertype-of-str"),
         pytest.param(Union[int, str], int, True, id="union-int-str-is-supertype-of-int"),

@@ -102,7 +102,7 @@ def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]])
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:
         return all(origin_type_issubtype(arg, type_) for arg in get_args(annotation))
-    return issubclass(origin_type, type_)
+    return isinstance(origin_type, type) and issubclass(origin_type, type_)
 
 
 def origin_type_issupertype(annotation: Any, type_: type) -> bool:
@@ -111,7 +111,7 @@ def origin_type_issupertype(annotation: Any, type_: type) -> bool:
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:
         return any(origin_type_issupertype(arg, type_) for arg in get_args(annotation))
-    return issubclass(type_, origin_type)
+    return isinstance(origin_type, type) and issubclass(type_, origin_type)
 
 
 def is_subscripted(t: Any) -> bool:
