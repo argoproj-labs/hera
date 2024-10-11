@@ -116,6 +116,7 @@ def test_get_unsubscripted_type(annotation, expected):
         pytest.param(str, str, True, id="str-is-subtype-of-str"),
         pytest.param(Union[int, str], int, False, id="union-int-str-not-subtype-of-str"),
         pytest.param(Optional[str], (str, NoneType), True, id="optional-str-is-subtype-of-optional-str"),
+        pytest.param(Annotated[Optional[str], "foo"], (str, NoneType), True, id="annotated-optional"),
         pytest.param(str, (str, NoneType), True, id="str-is-subtype-of-optional-str"),
         pytest.param(Union[int, str], (str, NoneType), False, id="union-int-str-not-subtype-of-optional-str"),
     ],
@@ -133,6 +134,7 @@ def test_origin_type_issubtype(annotation, target, expected):
         pytest.param(str, str, True, id="str-is-supertype-of-str"),
         pytest.param(Union[int, str], int, True, id="union-int-str-is-supertype-of-int"),
         pytest.param(Optional[str], NoneType, True, id="optional-str-is-supertype-of-nonetype"),
+        pytest.param(Annotated[Optional[str], "foo"], NoneType, True, id="annotated-optional"),
         pytest.param(str, NoneType, False, id="str-not-supertype-of-nonetype"),
     ],
 )
