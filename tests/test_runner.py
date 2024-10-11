@@ -78,6 +78,12 @@ from hera.workflows.io.v1 import Output
             id="str-or-int-given-int",
         ),
         pytest.param(
+            "tests.script_runner.parameter_inputs:str_literal",
+            [{"name": "my_literal", "value": "1"}],
+            "type given: str",
+            id="str-literal",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},
@@ -88,6 +94,12 @@ from hera.workflows.io.v1 import Output
             [{"name": "my_json_str", "value": json.dumps([{"my": "dict"}])}],
             [{"my": "dict"}],
             id="str-json-param-as-list",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_str_literal",
+            [{"name": "my_literal", "value": "1"}],
+            "type given: str",
+            id="annotated-str-literal",
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:annotated_str_parameter_expects_jsonstr_dict",

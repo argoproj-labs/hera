@@ -6,6 +6,7 @@ from typing import (
     Any,
     Iterable,
     List,
+    Literal,
     Optional,
     Tuple,
     Type,
@@ -120,6 +121,8 @@ def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]])
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:
         return all(origin_type_issubtype(arg, type_) for arg in get_args(unwrapped_type))
+    if origin_type is Literal:
+        return all(isinstance(value, type_) for value in get_args(unwrapped_type))
     return isinstance(origin_type, type) and issubclass(origin_type, type_)
 
 

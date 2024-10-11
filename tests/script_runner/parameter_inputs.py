@@ -1,5 +1,5 @@
 import json
-from typing import Any, List, Union
+from typing import Any, List, Literal, Union
 
 try:
     from typing import Annotated
@@ -54,6 +54,11 @@ def annotated_basic_types_with_other_metadata(
 
 
 @script()
+def annotated_str_literal(my_literal: Annotated[Literal["1", "2"], Parameter(name="str-literal")]) -> str:
+    return f"type given: {type(my_literal).__name__}"
+
+
+@script()
 def annotated_object(annotated_input_value: Annotated[Input, Parameter(name="input-value")]) -> Output:
     return Output(output=[annotated_input_value])
 
@@ -79,6 +84,11 @@ def no_type_parameter(my_anything) -> Any:
 @script()
 def str_or_int_parameter(my_str_or_int: Union[int, str]) -> str:
     return f"type given: {type(my_str_or_int).__name__}"
+
+
+@script()
+def str_literal(my_literal: Literal["1", "2"]) -> str:
+    return f"type given: {type(my_literal).__name__}"
 
 
 @script()
