@@ -306,7 +306,7 @@ def _get_param_items_from_source(source: Callable) -> List[Parameter]:
         non_default_parameters[0].value == "{{item}}"
     else:
         for param in non_default_parameters:
-            param.value = "{{item." + param.name + "}}"
+            param.value = "{{item." + str(param.name) + "}}"
     return non_default_parameters
 
 
