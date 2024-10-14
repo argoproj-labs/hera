@@ -439,13 +439,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "executing"
-version = "2.0.1"
+version = "2.1.0"
 description = "Get the currently executing AST node of a frame, and other information"
 optional = true
-python-versions = ">=3.5"
+python-versions = ">=3.8"
 files = [
-    {file = "executing-2.0.1-py2.py3-none-any.whl", hash = "sha256:eac49ca94516ccc753f9fb5ce82603156e590b27525a8bc32cce8ae302eb61bc"},
-    {file = "executing-2.0.1.tar.gz", hash = "sha256:35afe2ce3affba8ee97f2d69927fa823b08b472b7b994e36a52a964b93d16147"},
+    {file = "executing-2.1.0-py2.py3-none-any.whl", hash = "sha256:8d63781349375b5ebccc3142f4b30350c0cd9c79f921cde38be2be4637e98eaf"},
+    {file = "executing-2.1.0.tar.gz", hash = "sha256:8ea27ddd260da8150fa5a708269c4a10e76161e2496ec3e587da9e3c0fe4b9ab"},
 ]
 
 [package.extras]
@@ -1327,17 +1327,17 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "varname"
-version = "0.13.3"
+version = "0.13.5"
 description = "Dark magics about variable names in python."
 optional = true
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "varname-0.13.3-py3-none-any.whl", hash = "sha256:c174e42a7c8b149add2a4ec62acd6c4f2949a26413c177a0175abf586ada0a9e"},
-    {file = "varname-0.13.3.tar.gz", hash = "sha256:fcaee413d28dc84301e5b2c6383b8c8b5d15eccc2218b5a1d1c50f21df024e2c"},
+    {file = "varname-0.13.5-py3-none-any.whl", hash = "sha256:55bc967573215ff93cbf77d6fe979c353b199080eac660adfb3b35b303f6eda2"},
+    {file = "varname-0.13.5.tar.gz", hash = "sha256:82076a5c08e1b8b4fd0c9b5b1bf4a211a86d5367f97aa7f91d8eccb84017b3bf"},
 ]
 
 [package.dependencies]
-executing = ">=2.0,<3.0"
+executing = ">=2.1,<3.0"
 
 [package.extras]
 all = ["asttokens (==2.*)", "pure_eval (==0.*)"]
