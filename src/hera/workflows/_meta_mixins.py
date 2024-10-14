@@ -302,8 +302,11 @@ def _get_param_items_from_source(source: Callable) -> List[Parameter]:
                 if isinstance(io, Parameter) and io.default is None and not io.output:
                     non_default_parameters.append(io)
 
-    for param in non_default_parameters:
-        param.value = "{{" + ("item" if len(non_default_parameters) == 1 else f"item.{param.name}") + "}}"
+    if len(non_default_parameters) == 1:
+        non_default_parameters[0].value == "{{item}}"
+    else:
+        for param in non_default_parameters:
+            param.value = "{{item." + param.name + "}}"
     return non_default_parameters
 
 
