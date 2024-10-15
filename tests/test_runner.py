@@ -65,17 +65,23 @@ from hera.workflows.io.v1 import Output
             {},
             id="no-type-dict",
         ),
-        pytest.param(
-            "tests.script_runner.parameter_inputs:str_or_int_parameter",
-            [{"name": "my_str_or_int", "value": "hi there"}],
-            "type given: str",
-            id="str-or-int-given-str",
-        ),
-        pytest.param(
-            "tests.script_runner.parameter_inputs:str_or_int_parameter",
-            [{"name": "my_str_or_int", "value": "3"}],
-            "type given: int",
-            id="str-or-int-given-int",
+        *(
+            [
+                pytest.param(
+                    "tests.script_runner.parameter_inputs:str_or_int_parameter",
+                    [{"name": "my_str_or_int", "value": "hi there"}],
+                    "type given: str",
+                    id="str-or-int-given-str",
+                ),
+                pytest.param(
+                    "tests.script_runner.parameter_inputs:str_or_int_parameter",
+                    [{"name": "my_str_or_int", "value": "3"}],
+                    "type given: int",
+                    id="str-or-int-given-int",
+                ),
+            ]
+            if _PYDANTIC_VERSION > 1
+            else []
         ),
         pytest.param(
             "tests.script_runner.parameter_inputs:str_parameter_expects_jsonstr_dict",
