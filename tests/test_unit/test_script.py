@@ -182,6 +182,15 @@ def test_invalid_script_when_optional_parameter_does_not_have_default_value_5():
         _get_inputs_from_callable(unknown_annotations_ignored)
 
 
+def test_invalid_script_when_optional_parameter_does_not_have_default_value_6():
+    @script()
+    def unknown_annotations_ignored(my_optional_string: Annotated[Optional[str], Parameter(name="my-string")]) -> str:
+        return "Got: {}".format(my_optional_string)
+
+    with pytest.raises(ValueError, match="Optional parameter 'my_optional_string' must have a default value of None."):
+        _get_inputs_from_callable(unknown_annotations_ignored)
+
+
 def test_invalid_script_when_multiple_input_workflow_annotations_are_given():
     @script()
     def invalid_script(a_str: Annotated[str, Artifact(name="a_str"), Parameter(name="a_str")] = "123") -> str:

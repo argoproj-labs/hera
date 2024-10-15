@@ -495,22 +495,18 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
             artifacts.extend(input_class._get_artifacts(add_missing_path=True))
 
-        elif param_or_artifact := get_workflow_annotation(func_param.annotation):
-            if param_or_artifact.output:
+        else:
+            io = construct_io_from_annotation(func_param.name, func_param.annotation)
+            if io.output:
                 continue
 
-            # Create a new object so we don't modify the Workflow itself
-            new_object = param_or_artifact.copy()
-            if not new_object.name:
-                new_object.name = func_param.name
+            if isinstance(io, Artifact):
+                if io.path is None:
+                    io.path = io._get_default_inputs_path()
 
-            if isinstance(new_object, Artifact):
-                if new_object.path is None:
-                    new_object.path = new_object._get_default_inputs_path()
-
-                artifacts.append(new_object)
-            elif isinstance(new_object, Parameter):
-                if new_object.default is not None:
+                artifacts.append(io)
+            elif isinstance(io, Parameter):
+                if io.default is not None:
                     # TODO: in 5.18 remove the flag check and `warn`, and raise the ValueError directly (minus "flag" text)
                     warnings.warn(
                         "Using the default field for Parameters in Annotations is deprecated since v5.16"
@@ -524,27 +520,15 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                         )
                 if func_param.default != inspect.Parameter.empty:
                     # TODO: remove this check in 5.18:
-                    if new_object.default is not None:
+                    if io.default is not None:
                         raise ValueError(
                             "default cannot be set via both the function parameter default and the Parameter's default"
                         )
-                    new_object.default = serialize(func_param.default)
-                parameters.append(new_object)
-        else:
-            if (
-                func_param.default != inspect.Parameter.empty
-                and func_param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
-            ):
-                default = func_param.default
-            else:
-                default = MISSING
+                    io.default = serialize(func_param.default)
 
-            if origin_type_issupertype(func_param.annotation, NoneType) and (
-                default is MISSING or default is not None
-            ):
-                raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
-
-            parameters.append(Parameter(name=func_param.name, default=default))
+                if origin_type_issupertype(func_param.annotation, NoneType) and io.default != "null":
+                    raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
+                parameters.append(io)
 
     return parameters, artifacts
 
