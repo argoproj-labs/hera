@@ -93,7 +93,11 @@ def get_unsubscripted_type(t: Any) -> Any:
 
 
 def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]]) -> bool:
-    """Return True if annotation is a subtype of type_."""
+    """Return True if annotation is a subtype of type_.
+
+    type_ may be a tuple of types, in which case return True if annotation is a subtype
+    of the union of the types in the tuple.
+    """
     unwrapped_type = unwrap_annotation(annotation)
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:
