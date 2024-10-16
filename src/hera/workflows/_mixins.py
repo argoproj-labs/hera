@@ -715,16 +715,18 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     _build_obj: Optional[HeraBuildObj] = PrivateAttr(None)
 
     def __getattribute__(self, name: str) -> Any:
-        if _context.declaring:
+        try:
             # Use object's __getattribute__ to avoid infinite recursion
             build_obj = object.__getattribute__(self, "_build_obj")
-            assert build_obj  # Assertions to fix type checking
+        except AttributeError:
+            build_obj = None
 
+        if build_obj and _context.active:
             fields = get_fields(build_obj.output_class)
             annotations = get_field_annotations(build_obj.output_class)
             if name in fields:
                 # If the attribute name is in the build_obj's output class fields, then
-                # as we are in a declaring context, the access is for a Task/Step output
+                # as we are in an active context, the access is for a Task/Step output
                 subnode_name = object.__getattribute__(self, "name")
                 subnode_type = object.__getattribute__(self, "_subtype")
 
