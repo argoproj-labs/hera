@@ -16,7 +16,7 @@
         Workflow,
     )
 
-    with Workflow(generate_name="data-") as w:
+    with Workflow(generate_name="data-", entrypoint="list-log-files") as w:
         Data(
             name="list-log-files",
             source=S3Artifact(name="test-bucket", bucket="my-bucket"),
@@ -33,6 +33,7 @@
     metadata:
       generateName: data-
     spec:
+      entrypoint: list-log-files
       templates:
       - data:
           source:
