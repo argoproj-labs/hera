@@ -59,6 +59,7 @@ help                           Showcase the help instructions for all the availa
 init-files                     Generate the init-files of Hera
 install-argo                   Install argo client
 install                        Run poetry install with all extras for development
+lint-argo                      Run argo lint command on examples folder and report problems (requires local argo cluster)
 lint                           Run a `lint` process on Hera and report problems
 models                         Generate all the Argo Workflows models
 regenerate-example             Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
