@@ -25,3 +25,12 @@ spec:
       volumeMounts:
       - mountPath: /whatever
         name: something
+  volumeClaimTemplates:
+  - metadata:
+      name: something
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 64Mi

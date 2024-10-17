@@ -26,7 +26,19 @@ This example showcases the user of a user container with a volume mount.
         print("hi")
 
 
-    with Workflow(generate_name="sidecar-volume-mount-", entrypoint="d") as w:
+    with Workflow(
+        generate_name="sidecar-volume-mount-",
+        entrypoint="d",
+        volume_claim_templates=[
+            m.PersistentVolumeClaim(
+                metadata=m.ObjectMeta(name="something"),
+                spec=m.PersistentVolumeClaimSpec(
+                    access_modes=["ReadWriteOnce"],
+                    resources=m.ResourceRequirements(requests={"storage": "64Mi"}),
+                ),
+            )
+        ],
+    ) as w:
         with DAG(name="d"):
             foo()
     ```
@@ -61,5 +73,14 @@ This example showcases the user of a user container with a volume mount.
           volumeMounts:
           - mountPath: /whatever
             name: something
+      volumeClaimTemplates:
+      - metadata:
+          name: something
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 64Mi
     ```
 
