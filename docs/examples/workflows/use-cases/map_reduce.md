@@ -34,7 +34,10 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
 
     @script(
         image="python:alpine3.6",
-        inputs=Artifact(name="part", path="/mnt/in/part.json"),
+        inputs=[
+            Parameter(name="part_id"),
+            Artifact(name="part", path="/mnt/in/part.json"),
+        ],
         outputs=S3Artifact(
             name="part",
             path="/mnt/out/part.json",
@@ -76,10 +79,13 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
 
     with Workflow(generate_name="map-reduce-", entrypoint="main", arguments=Parameter(name="num_parts", value="4")) as w:
         with DAG(name="main"):
-            s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.numParts}}"))
+            s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.num_parts}}"))
             m = map_(
                 with_param=s.result,
-                arguments=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+                arguments=[
+                    Parameter(name="part_id", value="{{item}}"),
+                    S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+                ],
             )
             s >> m >> reduce()
     ```
@@ -103,7 +109,7 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
           - arguments:
               parameters:
               - name: num_parts
-                value: '{{workflow.parameters.numParts}}'
+                value: '{{workflow.parameters.num_parts}}'
             name: split
             template: split
           - arguments:
@@ -111,6 +117,9 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
               - name: part
                 s3:
                   key: '{{workflow.name}}/parts/{{item}}.json'
+              parameters:
+              - name: part_id
+                value: '{{item}}'
             depends: split
             name: map-
             template: map-
@@ -156,6 +165,8 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
           artifacts:
           - name: part
             path: /mnt/in/part.json
+          parameters:
+          - name: part_id
         name: map-
         outputs:
           artifacts:

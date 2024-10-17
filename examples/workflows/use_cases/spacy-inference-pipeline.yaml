@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: spacy_inference_pipeline-
+  generateName: spacy-inference-pipeline-
   namespace: argo
 spec:
-  entrypoint: spacy_inference_pipeline
+  entrypoint: spacy-inference-pipeline
   serviceAccountName: hera
   templates:
-  - name: spacy_inference_pipeline
+  - name: spacy-inference-pipeline
     steps:
     - - name: data-prep
         template: data-prep

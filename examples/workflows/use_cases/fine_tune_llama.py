@@ -32,10 +32,10 @@ from hera.workflows import (
 NUM_NODES = 4
 
 """`create_ssd_storage_class` defines the K8s storage class required for an ssd that's created dynamically.
- 
+
 K8s will create the necessary PersistentVolumeClaim and PersistentVolume resources when a pod requests a volume
-rather than when the PVC/PV are _defined_. This helps avoid the risk of pod + volume zone mismatches. Note that this 
-was tested in GCP / GKE specifically. If you have a different cloud provider you have to change the `provisioner` 
+rather than when the PVC/PV are _defined_. This helps avoid the risk of pod + volume zone mismatches. Note that this
+was tested in GCP / GKE specifically. If you have a different cloud provider you have to change the `provisioner`
 field.
 """
 create_ssd_storage_class = Resource(
@@ -137,7 +137,7 @@ spec:
 
 """The delete resource removes the etcd client load balancer and the stateful set.
 
-Useful for cases when you want to dynamically spin up an etcd cluster and then delete it after the client application 
+Useful for cases when you want to dynamically spin up an etcd cluster and then delete it after the client application
 is done.
 """
 delete_etcd_resources = Resource(
@@ -237,8 +237,6 @@ finetune = Container(
             mount_path="/kubecon_na_23_llama2_finetune/finetune",
             name="{{inputs.parameters.node-vol}}",
         ),
-        # in addition, we set a volume mount for the empty dir volume that we use for communication between GPUs
-        m.VolumeMount(mount_path="/dev/shm", name="gpu-comm"),
     ],
 )
 

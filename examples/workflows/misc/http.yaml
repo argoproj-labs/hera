@@ -3,6 +3,7 @@ kind: Workflow
 metadata:
   generateName: http-
 spec:
+  entrypoint: http
   templates:
   - http:
       body: test body
@@ -16,4 +17,5 @@ spec:
     inputs:
       parameters:
       - name: url
+        value: https://example.com
     name: http

@@ -15,7 +15,7 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
 
 
     @script(image="jupyter/pyspark-notebook:latest", resources=Resources(cpu_request=4, memory_request="8Gi"))
-    def spark(n: int) -> None:
+    def spark(num_data: int) -> None:
         import random
         import subprocess
         import time
@@ -33,7 +33,7 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
         spark = SparkSession.builder.master("local[1]").appName("my-spark-example-running-in-hera.com").getOrCreate()
 
         # let's compare a regular dataframe vs a spark dataframe! First, we define the data to use
-        data, columns = [random.randint(0, n) for _ in range(n)], ["value"]
+        data, columns = [random.randint(0, num_data) for _ in range(num_data)], ["value"]
 
         # as a very simple and naive comparison, let's print out the average, min, and max of both dataframes
         # and now let's create a regular Pandas dataframe
@@ -58,8 +58,8 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
 
     with Workflow(generate_name="spark-", entrypoint="d") as w:
         with DAG(name="d"):
-            for i, n in enumerate([1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000]):
-                spark(name="spark-{i}".format(i=i), arguments={"n": n})
+            for i, num_data in enumerate([1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000]):
+                spark(name="spark-{i}".format(i=i), arguments={"num_data": num_data})
     ```
 
 === "YAML"
@@ -76,44 +76,44 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
           tasks:
           - arguments:
               parameters:
-              - name: n
+              - name: num_data
                 value: '1000'
             name: spark-0
             template: spark
           - arguments:
               parameters:
-              - name: n
+              - name: num_data
                 value: '10000'
             name: spark-1
             template: spark
           - arguments:
               parameters:
-              - name: n
+              - name: num_data
                 value: '100000'
             name: spark-2
             template: spark
           - arguments:
               parameters:
-              - name: n
+              - name: num_data
                 value: '1000000'
             name: spark-3
             template: spark
           - arguments:
               parameters:
-              - name: n
+              - name: num_data
                 value: '10000000'
             name: spark-4
             template: spark
           - arguments:
               parameters:
-              - name: n
+              - name: num_data
                 value: '100000000'
             name: spark-5
             template: spark
         name: d
       - inputs:
           parameters:
-          - name: n
+          - name: num_data
         name: spark
         script:
           command:
@@ -128,8 +128,8 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
             import sys
             sys.path.append(os.getcwd())
             import json
-            try: n = json.loads(r'''{{inputs.parameters.n}}''')
-            except: n = r'''{{inputs.parameters.n}}'''
+            try: num_data = json.loads(r'''{{inputs.parameters.num_data}}''')
+            except: num_data = r'''{{inputs.parameters.num_data}}'''
 
             import random
             import subprocess
@@ -138,7 +138,7 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
             import pandas as pd
             from pyspark.sql import SparkSession
             spark = SparkSession.builder.master('local[1]').appName('my-spark-example-running-in-hera.com').getOrCreate()
-            (data, columns) = ([random.randint(0, n) for _ in range(n)], ['value'])
+            (data, columns) = ([random.randint(0, num_data) for _ in range(num_data)], ['value'])
             pandas_df = pd.DataFrame(data=data, columns=columns)
             start = time.time()
             pandas_result = pandas_df.describe()

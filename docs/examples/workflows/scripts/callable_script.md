@@ -92,7 +92,7 @@
         return Output(output=[annotated_input_value])
 
 
-    with Workflow(name="my-workflow") as w:
+    with Workflow(name="my-workflow", entrypoint="my-steps") as w:
         with Steps(name="my-steps") as s:
             my_function(arguments={"input": Input(a=2, b="bar", c=42)})
             str_function(arguments={"input": serialize(Input(a=2, b="bar", c=42))})
@@ -109,6 +109,7 @@
     metadata:
       name: my-workflow
     spec:
+      entrypoint: my-steps
       templates:
       - name: my-steps
         steps:

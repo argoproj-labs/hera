@@ -14,7 +14,7 @@ spec:
       - arguments:
           parameters:
           - name: num_parts
-            value: '{{workflow.parameters.numParts}}'
+            value: '{{workflow.parameters.num_parts}}'
         name: split
         template: split
       - arguments:
@@ -22,6 +22,9 @@ spec:
           - name: part
             s3:
               key: '{{workflow.name}}/parts/{{item}}.json'
+          parameters:
+          - name: part_id
+            value: '{{item}}'
         depends: split
         name: map-
         template: map-
@@ -67,6 +70,8 @@ spec:
       artifacts:
       - name: part
         path: /mnt/in/part.json
+      parameters:
+      - name: part_id
     name: map-
     outputs:
       artifacts:

@@ -3,6 +3,7 @@ kind: Workflow
 metadata:
   name: my-workflow
 spec:
+  entrypoint: my-steps
   templates:
   - name: my-steps
     steps:

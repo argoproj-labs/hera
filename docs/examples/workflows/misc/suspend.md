@@ -10,7 +10,7 @@
     ```python linenums="1"
     from hera.workflows import Parameter, Suspend, Workflow
 
-    with Workflow(generate_name="suspend-") as w:
+    with Workflow(generate_name="suspend-", entrypoint="suspend-without-duration") as w:
         Suspend(name="suspend-without-duration")
         Suspend(name="suspend-with-duration", duration=30)
         Suspend(
@@ -31,6 +31,7 @@
     metadata:
       generateName: suspend-
     spec:
+      entrypoint: suspend-without-duration
       templates:
       - name: suspend-without-duration
         suspend: {}

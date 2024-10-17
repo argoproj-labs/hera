@@ -111,13 +111,13 @@ Step 2: Performs inference on the dataset in the volume path /mnt/data using Spa
 
 
     with Workflow(
-        generate_name="spacy_inference_pipeline-",
-        entrypoint="spacy_inference_pipeline",
+        generate_name="spacy-inference-pipeline-",
+        entrypoint="spacy-inference-pipeline",
         volumes=[Volume(name="data-dir", size="1Gi", mount_path="/mnt/data")],
         service_account_name="hera",
         namespace="argo",
     ) as w:
-        with Steps(name="spacy_inference_pipeline") as steps:
+        with Steps(name="spacy-inference-pipeline") as steps:
             data_prep(name="data-prep")
             inference_spacy(name="inference-spacy")
     ```
@@ -128,13 +128,13 @@ Step 2: Performs inference on the dataset in the volume path /mnt/data using Spa
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: spacy_inference_pipeline-
+      generateName: spacy-inference-pipeline-
       namespace: argo
     spec:
-      entrypoint: spacy_inference_pipeline
+      entrypoint: spacy-inference-pipeline
       serviceAccountName: hera
       templates:
-      - name: spacy_inference_pipeline
+      - name: spacy-inference-pipeline
         steps:
         - - name: data-prep
             template: data-prep

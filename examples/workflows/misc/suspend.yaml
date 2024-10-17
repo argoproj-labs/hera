@@ -3,6 +3,7 @@ kind: Workflow
 metadata:
   generateName: suspend-
 spec:
+  entrypoint: suspend-without-duration
   templates:
   - name: suspend-without-duration
     suspend: {}
