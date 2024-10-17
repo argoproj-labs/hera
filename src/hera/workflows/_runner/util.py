@@ -6,13 +6,19 @@ import importlib
 import inspect
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, cast
+
+if sys.version_info >= (3, 10):
+    from types import NoneType
+else:
+    NoneType = type(None)
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (
     get_workflow_annotation,
-    origin_type_issubclass,
+    origin_type_issubtype,
     unwrap_annotation,
 )
 from hera.shared.serialization import serialize
@@ -125,7 +131,7 @@ def _get_unannotated_type(key: str, f: Callable) -> Optional[type]:
 def _is_str_kwarg_of(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` has a type annotation that can be interpreted as a subclass of str."""
     if func_param_annotation := _get_function_param_annotation(key, f):
-        return origin_type_issubclass(func_param_annotation, str)
+        return origin_type_issubtype(func_param_annotation, (str, NoneType))
     return False
 
 

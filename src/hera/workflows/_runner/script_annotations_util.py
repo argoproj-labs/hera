@@ -3,15 +3,21 @@
 import inspect
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+
+if sys.version_info >= (3, 10):
+    from types import NoneType
+else:
+    NoneType = type(None)
 
 from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared._type_util import (
     get_unsubscripted_type,
     get_workflow_annotation,
     is_subscripted,
-    origin_type_issubclass,
+    origin_type_issubtype,
     unwrap_annotation,
 )
 from hera.shared.serialization import serialize
@@ -138,7 +144,7 @@ def map_runner_input(
     input_model_obj = {}
 
     def load_parameter_value(value: str, value_type: type) -> Any:
-        if origin_type_issubclass(value_type, str):
+        if origin_type_issubtype(value_type, (str, NoneType)):
             return value
 
         try:

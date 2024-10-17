@@ -1,5 +1,5 @@
 import json
-from typing import Any, List
+from typing import Any, List, Union
 
 try:
     from typing import Annotated
@@ -74,6 +74,11 @@ def annotated_parameter_no_name(
 def no_type_parameter(my_anything) -> Any:
     """`my_anything` will be whatever the json loader gives back."""
     return my_anything
+
+
+@script()
+def str_or_int_parameter(my_str_or_int: Union[str, int]) -> str:
+    return f"type given: {type(my_str_or_int).__name__}"
 
 
 @script()
