@@ -18,6 +18,18 @@ def foo():
     print("hi")
 
 
-with Workflow(generate_name="sidecar-volume-mount-", entrypoint="d") as w:
+with Workflow(
+    generate_name="sidecar-volume-mount-",
+    entrypoint="d",
+    volume_claim_templates=[
+        m.PersistentVolumeClaim(
+            metadata=m.ObjectMeta(name="something"),
+            spec=m.PersistentVolumeClaimSpec(
+                access_modes=["ReadWriteOnce"],
+                resources=m.ResourceRequirements(requests={"storage": m.Quantity(__root__="64Mi")}),
+            ),
+        )
+    ],
+) as w:
     with DAG(name="d"):
         foo()
