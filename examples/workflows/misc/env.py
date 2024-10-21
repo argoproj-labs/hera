@@ -11,6 +11,7 @@ from hera.workflows import (
 
 with Workflow(generate_name="secret-env-from-", entrypoint="whalesay") as w:
     whalesay = Container(
+        name="whalesay",
         image="docker/whalesay:latest",
         command=["cowsay"],
         env_from=[
