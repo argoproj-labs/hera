@@ -28,7 +28,10 @@ def split(num_parts: int) -> None:
 
 @script(
     image="python:alpine3.6",
-    inputs=Artifact(name="part", path="/mnt/in/part.json"),
+    inputs=[
+        Parameter(name="part_id"),
+        Artifact(name="part", path="/mnt/in/part.json"),
+    ],
     outputs=S3Artifact(
         name="part",
         path="/mnt/out/part.json",
@@ -70,9 +73,12 @@ def reduce() -> None:
 
 with Workflow(generate_name="map-reduce-", entrypoint="main", arguments=Parameter(name="num_parts", value="4")) as w:
     with DAG(name="main"):
-        s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.numParts}}"))
+        s = split(arguments=Parameter(name="num_parts", value="{{workflow.parameters.num_parts}}"))
         m = map_(
             with_param=s.result,
-            arguments=S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+            arguments=[
+                Parameter(name="part_id", value="{{item}}"),
+                S3Artifact(name="part", key="{{workflow.name}}/parts/{{item}}.json"),
+            ],
         )
         s >> m >> reduce()

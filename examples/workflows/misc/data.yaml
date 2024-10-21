@@ -3,6 +3,7 @@ kind: Workflow
 metadata:
   generateName: data-
 spec:
+  entrypoint: list-log-files
   templates:
   - data:
       source:
