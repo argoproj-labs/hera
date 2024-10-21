@@ -47,7 +47,7 @@ from hera.shared._global_config import (
     _flag_enabled,
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
-from hera.shared._type_util import get_workflow_annotation, is_subscripted, origin_type_issubclass
+from hera.shared._type_util import get_workflow_annotation, is_subscripted, origin_type_issupertype
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin
@@ -540,7 +540,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
             else:
                 default = MISSING
 
-            if origin_type_issubclass(func_param.annotation, NoneType) and (default is MISSING or default is not None):
+            if origin_type_issupertype(func_param.annotation, NoneType) and (
+                default is MISSING or default is not None
+            ):
                 raise ValueError(f"Optional parameter '{func_param.name}' must have a default value of None.")
 
             parameters.append(Parameter(name=func_param.name, default=default))
