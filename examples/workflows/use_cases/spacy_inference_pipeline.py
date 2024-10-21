@@ -105,12 +105,12 @@ def inference_spacy() -> None:
 
 
 with Workflow(
-    generate_name="spacy_inference_pipeline-",
-    entrypoint="spacy_inference_pipeline",
+    generate_name="spacy-inference-pipeline-",
+    entrypoint="spacy-inference-pipeline",
     volumes=[Volume(name="data-dir", size="1Gi", mount_path="/mnt/data")],
     service_account_name="hera",
     namespace="argo",
 ) as w:
-    with Steps(name="spacy_inference_pipeline") as steps:
+    with Steps(name="spacy-inference-pipeline") as steps:
         data_prep(name="data-prep")
         inference_spacy(name="inference-spacy")
