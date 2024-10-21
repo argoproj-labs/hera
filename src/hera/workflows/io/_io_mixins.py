@@ -11,7 +11,7 @@ else:
 from hera.shared import global_config
 from hera.shared._global_config import _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG
 from hera.shared._pydantic import _PYDANTIC_VERSION, FieldInfo, get_field_annotations, get_fields
-from hera.shared._type_util import get_workflow_annotation
+from hera.shared._type_util import construct_io_from_annotation, get_workflow_annotation
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
@@ -45,18 +45,12 @@ else:
 def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
     """Constructs a Parameter or Artifact object for all Pydantic fields based on their annotations.
 
-    If a field has a Parameter or Artifact annotation, a copy will be returned, with name added if missing.
-    Otherwise, a Parameter object will be constructed.
+    If a field has a Parameter or Artifact annotation, a copy will be returned, with missing
+    fields filled out based on other metadata. Otherwise, a Parameter object will be constructed.
     """
     annotations = get_field_annotations(cls)
     for field, field_info in get_fields(cls).items():
-        if annotation := get_workflow_annotation(annotations[field]):
-            # Copy so as to not modify the fields themselves
-            annotation_copy = annotation.copy()
-            annotation_copy.name = annotation.name or field
-            yield field, field_info, annotation_copy
-        else:
-            yield field, field_info, Parameter(name=field)
+        yield field, field_info, construct_io_from_annotation(field, annotations[field])
 
 
 class InputMixin(BaseModel):

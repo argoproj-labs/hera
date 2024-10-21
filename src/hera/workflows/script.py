@@ -47,7 +47,12 @@ from hera.shared._global_config import (
     _flag_enabled,
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
-from hera.shared._type_util import get_workflow_annotation, is_subscripted, origin_type_issupertype
+from hera.shared._type_util import (
+    construct_io_from_annotation,
+    get_workflow_annotation,
+    is_subscripted,
+    origin_type_issupertype,
+)
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin
@@ -434,25 +439,19 @@ def _get_outputs_from_parameter_annotations(
     artifacts: List[Artifact] = []
 
     for name, p in inspect.signature(source).parameters.items():
-        annotation = get_workflow_annotation(p.annotation)
-        if not annotation or not annotation.output:
+        annotation = construct_io_from_annotation(name, p.annotation)
+        if not annotation.output:
             continue
 
-        new_object = annotation.copy()
+        if isinstance(annotation, Parameter) and annotation.value_from is None and outputs_directory is not None:
+            annotation.value_from = ValueFrom(path=outputs_directory + f"/parameters/{annotation.name}")
+        elif isinstance(annotation, Artifact) and annotation.path is None and outputs_directory is not None:
+            annotation.path = outputs_directory + f"/artifacts/{annotation.name}"
 
-        # use the function parameter name when not provided by user
-        if not new_object.name:
-            new_object.name = name
-
-        if isinstance(new_object, Parameter) and new_object.value_from is None and outputs_directory is not None:
-            new_object.value_from = ValueFrom(path=outputs_directory + f"/parameters/{new_object.name}")
-        elif isinstance(new_object, Artifact) and new_object.path is None and outputs_directory is not None:
-            new_object.path = outputs_directory + f"/artifacts/{new_object.name}"
-
-        if isinstance(new_object, Artifact):
-            artifacts.append(new_object)
-        elif isinstance(new_object, Parameter):
-            parameters.append(new_object)
+        if isinstance(annotation, Artifact):
+            artifacts.append(annotation)
+        elif isinstance(annotation, Parameter):
+            parameters.append(annotation)
 
     return parameters, artifacts
 
@@ -591,8 +590,9 @@ def _extract_all_output_annotations(source: Callable) -> List:
     output = []
 
     for _, func_param in inspect.signature(source).parameters.items():
-        if (annotated := get_workflow_annotation(func_param.annotation)) and annotated.output:
-            output.append(annotated)
+        io = construct_io_from_annotation(func_param.name, func_param.annotation)
+        if io.output:
+            output.append(io)
 
     output.extend(_extract_return_annotation_output(source))
 
