@@ -77,7 +77,7 @@ def no_type_parameter(my_anything) -> Any:
 
 
 @script()
-def str_or_int_parameter(my_str_or_int: Union[str, int]) -> str:
+def str_or_int_parameter(my_str_or_int: Union[int, str]) -> str:
     return f"type given: {type(my_str_or_int).__name__}"
 
 
