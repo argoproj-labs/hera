@@ -180,8 +180,12 @@ test-on-cluster: ## Run workflow tests (requires local argo cluster)
 .PHONY: lint-argo
 lint-argo:  ## Run argo lint command on examples folder and report problems (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
-	@argo lint \
-		--argo-server=localhost:2746 \
-		--insecure-skip-verify \
-		--token=dummy \
-		examples
+	@argo lint --argo-server=localhost:2746 --insecure-skip-verify --token=dummy \
+		examples/workflows/artifacts \
+		examples/workflows/dags \
+		examples/workflows/experimental \
+		examples/workflows/loops \
+		examples/workflows/misc \
+		examples/workflows/scripts \
+		examples/workflows/steps \
+		examples/workflows/use_cases
