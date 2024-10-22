@@ -41,6 +41,7 @@ from typing_extensions import ParamSpec, get_args, get_origin
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
+    _CONTEXT_MANAGER_PYDANTIC_IO_FLAG,
     _SCRIPT_ANNOTATIONS_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
     _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG,
@@ -50,7 +51,7 @@ from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.shared._type_util import get_workflow_annotation, is_subscripted, origin_type_issupertype
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
-from hera.workflows._meta_mixins import CallableTemplateMixin
+from hera.workflows._meta_mixins import CallableTemplateMixin, HeraBuildObj
 from hera.workflows._mixins import (
     ArgumentsT,
     ContainerMixin,
@@ -379,6 +380,22 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
     return parameters
 
 
+def _enable_experimental_feature_msg(flag: str) -> str:
+    return (
+        "Please turn on experimental features by setting "
+        f'`hera.shared.global_config.experimental_features["{flag}"] = True`.'
+        " Note that experimental features are unstable and subject to breaking changes."
+    )
+
+
+def _assert_pydantic_io_enabled(annotation: str) -> None:
+    if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
+        raise ValueError(
+            f"Unable to instantiate {annotation} since it is an experimental feature. "
+            + _enable_experimental_feature_msg(_SCRIPT_PYDANTIC_IO_FLAG)
+        )
+
+
 def _get_outputs_from_return_annotation(
     source: Callable,
     outputs_directory: Optional[str],
@@ -408,16 +425,7 @@ def _get_outputs_from_return_annotation(
             if param_or_artifact := get_workflow_annotation(annotation):
                 append_annotation(param_or_artifact)
     elif isinstance(return_annotation, type) and issubclass(return_annotation, (OutputV1, OutputV2)):
-        if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-            raise ValueError(
-                (
-                    "Unable to instantiate {} since it is an experimental feature."
-                    " Please turn on experimental features by setting "
-                    '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                    " Note that experimental features are unstable and subject to breaking changes."
-                ).format(return_annotation, _SCRIPT_PYDANTIC_IO_FLAG)
-            )
-
+        _assert_pydantic_io_enabled(return_annotation)
         output_class = return_annotation
         for output in output_class._get_outputs():
             append_annotation(output)
@@ -471,15 +479,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
     for func_param in inspect.signature(source).parameters.values():
         if not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
-            if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-                raise ValueError(
-                    (
-                        "Unable to instantiate {} since it is an experimental feature."
-                        " Please turn on experimental features by setting "
-                        '`hera.shared.global_config.experimental_features["{}"] = True`.'
-                        " Note that experimental features are unstable and subject to breaking changes."
-                    ).format(func_param.annotation, _SCRIPT_PYDANTIC_IO_FLAG)
-                )
+            _assert_pydantic_io_enabled(func_param.annotation)
 
             if len(inspect.signature(source).parameters) != 1:
                 raise SyntaxError("Only one function parameter can be specified when using an Input.")
@@ -776,6 +776,32 @@ def script(**script_kwargs) -> Callable:
         def task_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
             """Invokes a `Script` object's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
             if _context.active:
+                if len(args) == 1 and isinstance(args[0], (InputV1, InputV2)):
+                    if not _flag_enabled(_CONTEXT_MANAGER_PYDANTIC_IO_FLAG):
+                        raise SyntaxError(
+                            "Cannot pass a Pydantic type inside a context. "
+                            + _enable_experimental_feature_msg(_CONTEXT_MANAGER_PYDANTIC_IO_FLAG)
+                        )
+                    arguments = args[0]._get_as_arguments()
+                    arguments_list = [
+                        *(arguments.artifacts or []),
+                        *(arguments.parameters or []),
+                    ]
+
+                    subnode = s.__call__(arguments=arguments_list, **kwargs)
+                    if not subnode:
+                        raise SyntaxError("Cannot use Pydantic I/O outside of a DAG, Steps or Parallel context")
+
+                    output_class = inspect.signature(func).return_annotation
+                    if not output_class or output_class is NoneType:
+                        return None
+
+                    if not issubclass(output_class, (OutputV1, OutputV2)):
+                        raise SyntaxError("Cannot use Pydantic input type without a Pydantic output type")
+
+                    _assert_pydantic_io_enabled(output_class)
+                    subnode._build_obj = HeraBuildObj(subnode._subtype, output_class)
+                    return subnode
                 return s.__call__(*args, **kwargs)
             return func(*args, **kwargs)
 
