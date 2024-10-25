@@ -438,3 +438,41 @@ def test_script_pydantic_without_experimental_flag(global_config_fixture):
         "Unable to instantiate <class 'tests.script_annotations.pydantic_io_v1.ParamOnlyInput'> since it is an experimental feature."
         in str(e.value)
     )
+
+
+@pytest.mark.parametrize(
+    "module_name",
+    [
+        "tests.script_annotations.with_param",  # annotated types
+        "tests.script_annotations.pydantic_io_with_param",  # Pydantic IO types
+    ],
+)
+def test_script_with_param(global_config_fixture, module_name):
+    """Test that with_param works correctly with annotated/Pydantic IO types."""
+    # GIVEN
+    global_config_fixture.experimental_features["script_annotations"] = True
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+
+    module = importlib.import_module(module_name)
+    importlib.reload(module)
+    workflow = importlib.import_module(module.__name__).w
+
+    # WHEN
+    workflow_dict = workflow.to_dict()
+    assert workflow == Workflow.from_dict(workflow_dict)
+    assert workflow == Workflow.from_yaml(workflow.to_yaml())
+
+    # THEN
+    (dag,) = (t for t in workflow_dict["spec"]["templates"] if t["name"] == "dag")
+    (consume_task,) = (t for t in dag["dag"]["tasks"] if t["name"] == "consume")
+
+    assert consume_task["arguments"]["parameters"] == [
+        {
+            "name": "some-value",
+            "value": "{{item}}",
+            "description": "this is some value",
+        }
+    ]
+    assert consume_task["withParam"] == "{{tasks.generate.outputs.parameters.some-values}}"

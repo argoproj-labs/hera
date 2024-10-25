@@ -14,6 +14,7 @@ import pytest
 from annotated_types import Gt
 
 from hera.shared._type_util import (
+    construct_io_from_annotation,
     get_annotated_metadata,
     get_unsubscripted_type,
     get_workflow_annotation,
@@ -94,6 +95,37 @@ def test_get_workflow_annotation(annotation, expected):
 def test_get_workflow_annotation_should_raise_error(annotation):
     with pytest.raises(ValueError):
         get_workflow_annotation(annotation)
+
+
+@pytest.mark.parametrize(
+    "annotation, expected",
+    [
+        [str, Parameter(name="python_name")],
+        [Annotated[str, Parameter(name="a_str")], Parameter(name="a_str")],
+        [Annotated[str, Artifact(name="a_str")], Artifact(name="a_str")],
+        [Annotated[int, Gt(10), Artifact(name="a_int")], Artifact(name="a_int")],
+        [Annotated[int, Artifact(name="a_int"), Gt(30)], Artifact(name="a_int")],
+        # this can happen when user uses already annotated types.
+        [Annotated[Annotated[int, Gt(10)], Artifact(name="a_int")], Artifact(name="a_int")],
+    ],
+)
+def test_construct_io_from_annotation(annotation, expected):
+    assert construct_io_from_annotation("python_name", annotation) == expected
+
+
+@pytest.mark.parametrize(
+    "annotation",
+    [
+        # Duplicated annotation
+        Annotated[str, Parameter(name="a_str"), Parameter(name="b_str")],
+        Annotated[str, Parameter(name="a_str"), Artifact(name="a_str")],
+        # Nested
+        Annotated[Annotated[str, Parameter(name="a_str")], Artifact(name="b_str")],
+    ],
+)
+def test_construct_io_from_annotation_should_raise_error(annotation):
+    with pytest.raises(ValueError):
+        construct_io_from_annotation("python_name", annotation)
 
 
 @pytest.mark.parametrize(
