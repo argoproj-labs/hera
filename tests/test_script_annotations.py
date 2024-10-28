@@ -486,10 +486,12 @@ def test_script_with_param(global_config_fixture, module_name):
         pytest.param("tests.script_annotations.pydantic_io_literals", "my_str", id="pydantic-io"),
     ],
 )
-def test_script_literals(global_config_fixture, module_name, input_name):
+@pytest.mark.parametrize("experimental_feature", ["", "script_annotations", "script_pydantic_io"])
+def test_script_literals(global_config_fixture, module_name, input_name, experimental_feature):
     """Test that Literals work correctly as direct type annotations."""
     # GIVEN
-    global_config_fixture.experimental_features["script_annotations"] = True
+    if experimental_feature:
+        global_config_fixture.experimental_features[experimental_feature] = True
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version

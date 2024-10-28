@@ -83,6 +83,13 @@ def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Paramet
     return metadata[0]
 
 
+def add_metadata_from_type(parameter: Parameter, annotation: Any) -> None:
+    if not parameter.enum:
+        type_ = unwrap_annotation(annotation)
+        if get_origin(type_) is Literal:
+            parameter.enum = list(get_args(type_))
+
+
 def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Parameter, Artifact]:
     """Constructs a Parameter or Artifact object based on annotations.
 

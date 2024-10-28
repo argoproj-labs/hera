@@ -48,6 +48,7 @@ from hera.shared._global_config import (
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.shared._type_util import (
+    add_metadata_from_type,
     construct_io_from_annotation,
     get_workflow_annotation,
     is_subscripted,
@@ -379,6 +380,7 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
             default = MISSING
 
         param = Parameter(name=p.name, default=default)
+        add_metadata_from_type(param, p.annotation)
         parameters.append(param)
 
     return parameters
