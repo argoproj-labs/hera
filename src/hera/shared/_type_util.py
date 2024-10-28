@@ -92,13 +92,19 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Par
     For a function parameter, python_name should be the parameter name.
     For a Pydantic Input or Output class, python_name should be the field name.
     """
-    if annotation := get_workflow_annotation(annotation):
+    if workflow_annotation := get_workflow_annotation(annotation):
         # Copy so as to not modify the fields themselves
-        annotation_copy = annotation.copy()
-        annotation_copy.name = annotation.name or python_name
-        return annotation_copy
+        io = workflow_annotation.copy()
+    else:
+        io = Parameter()
 
-    return Parameter(name=python_name)
+    io.name = io.name or python_name
+    if isinstance(io, Parameter) and not io.enum:
+        type_ = unwrap_annotation(annotation)
+        if get_origin(type_) is Literal:
+            io.enum = list(get_args(type_))
+
+    return io
 
 
 def get_unsubscripted_type(t: Any) -> Any:
