@@ -44,7 +44,7 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster" -k "not typehints"
+	@poetry run python -m pytest --cov-report=term-missing --cov=hera -m "not on_cluster" -k "not typehints"
 
 .PHONY: test-type-hints
 test-type-hints:  ## Run type hint tests for Hera
