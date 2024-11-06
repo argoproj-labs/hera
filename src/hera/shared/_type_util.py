@@ -106,10 +106,8 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Par
         io = Parameter()
 
     io.name = io.name or python_name
-    if isinstance(io, Parameter) and not io.enum:
-        type_ = unwrap_annotation(annotation)
-        if get_origin(type_) is Literal:
-            io.enum = list(get_args(type_))
+    if isinstance(io, Parameter):
+        add_metadata_from_type(io, annotation)
 
     return io
 
