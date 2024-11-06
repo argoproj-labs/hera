@@ -476,3 +476,35 @@ def test_script_with_param(global_config_fixture, module_name):
         }
     ]
     assert consume_task["withParam"] == "{{tasks.generate.outputs.parameters.some-values}}"
+
+
+@pytest.mark.parametrize(
+    ("module_name", "input_name"),
+    [
+        pytest.param("tests.script_annotations.literals", "my_str", id="bare-type-annotation"),
+        pytest.param("tests.script_annotations.annotated_literals", "my-str", id="annotated"),
+        pytest.param("tests.script_annotations.pydantic_io_literals", "my_str", id="pydantic-io"),
+    ],
+)
+@pytest.mark.parametrize("experimental_feature", ["", "script_annotations", "script_pydantic_io"])
+def test_script_literals(global_config_fixture, module_name, input_name, experimental_feature):
+    """Test that Literals work correctly as direct type annotations."""
+    # GIVEN
+    if experimental_feature:
+        global_config_fixture.experimental_features[experimental_feature] = True
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version
+    module = importlib.import_module(module_name)
+    importlib.reload(module)
+    workflow: Workflow = importlib.import_module(module.__name__).w
+
+    # WHEN
+    workflow_dict = workflow.to_dict()
+    assert workflow == Workflow.from_dict(workflow_dict)
+    assert workflow == Workflow.from_yaml(workflow.to_yaml())
+
+    # THEN
+    (literal_str,) = (t for t in workflow_dict["spec"]["templates"] if t["name"] == "literal-str")
+
+    assert literal_str["inputs"]["parameters"] == [{"name": input_name, "enum": ["foo", "bar"]}]

@@ -6,6 +6,7 @@ from typing import (
     Any,
     Iterable,
     List,
+    Literal,
     Optional,
     Tuple,
     Type,
@@ -82,6 +83,18 @@ def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Paramet
     return metadata[0]
 
 
+def set_enum_based_on_type(parameter: Parameter, annotation: Any) -> None:
+    """Sets the enum field of a Parameter based on its type annotation.
+
+    Currently, only supports Literals.
+    """
+    if parameter.enum:
+        return
+    type_ = unwrap_annotation(annotation)
+    if get_origin(type_) is Literal:
+        parameter.enum = list(get_args(type_))
+
+
 def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Parameter, Artifact]:
     """Constructs a Parameter or Artifact object based on annotations.
 
@@ -91,13 +104,17 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Par
     For a function parameter, python_name should be the parameter name.
     For a Pydantic Input or Output class, python_name should be the field name.
     """
-    if annotation := get_workflow_annotation(annotation):
+    if workflow_annotation := get_workflow_annotation(annotation):
         # Copy so as to not modify the fields themselves
-        annotation_copy = annotation.copy()
-        annotation_copy.name = annotation.name or python_name
-        return annotation_copy
+        io = workflow_annotation.copy()
+    else:
+        io = Parameter()
 
-    return Parameter(name=python_name)
+    io.name = io.name or python_name
+    if isinstance(io, Parameter):
+        set_enum_based_on_type(io, annotation)
+
+    return io
 
 
 def get_unsubscripted_type(t: Any) -> Any:
@@ -120,6 +137,8 @@ def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]])
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:
         return all(origin_type_issubtype(arg, type_) for arg in get_args(unwrapped_type))
+    if origin_type is Literal:
+        return all(isinstance(value, type_) for value in get_args(unwrapped_type))
     return isinstance(origin_type, type) and issubclass(origin_type, type_)
 
 

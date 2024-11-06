@@ -1,5 +1,5 @@
 import sys
-from typing import List, NoReturn, Optional, Union
+from typing import List, Literal, NoReturn, Optional, Union
 
 if sys.version_info >= (3, 9):
     from typing import Annotated
@@ -151,6 +151,10 @@ def test_get_unsubscripted_type(annotation, expected):
         pytest.param(Annotated[Optional[str], "foo"], (str, NoneType), True, id="annotated-optional"),
         pytest.param(str, (str, NoneType), True, id="str-is-subtype-of-optional-str"),
         pytest.param(Union[int, str], (str, NoneType), False, id="union-int-str-not-subtype-of-optional-str"),
+        pytest.param(Literal["foo", "bar"], (str, NoneType), True, id="literal-str-is-subtype-of-optional-str"),
+        pytest.param(Literal["foo", None], (str, NoneType), True, id="literal-none-is-subtype-of-optional-str"),
+        pytest.param(Literal[1, 2], (str, NoneType), False, id="literal-int-not-subtype-of-optional-str"),
+        pytest.param(Literal[1, "foo"], (str, NoneType), False, id="mixed-literal-not-subtype-of-optional-str"),
     ],
 )
 def test_origin_type_issubtype(annotation, target, expected):
