@@ -48,7 +48,7 @@ test:  ## Run tests for Hera
 
 .PHONY: test-type-hints
 test-type-hints:  ## Run type hint tests for Hera
-	@poetry run python -m pytest -k "typehints"
+	@poetry run python -m pytest --cov-append -k "typehints"
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
