@@ -83,11 +83,16 @@ def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Paramet
     return metadata[0]
 
 
-def add_metadata_from_type(parameter: Parameter, annotation: Any) -> None:
-    if not parameter.enum:
-        type_ = unwrap_annotation(annotation)
-        if get_origin(type_) is Literal:
-            parameter.enum = list(get_args(type_))
+def set_enum_based_on_type(parameter: Parameter, annotation: Any) -> None:
+    """Sets the enum field of a Parameter based on its type annotation.
+
+    Currently, only supports Literals.
+    """
+    if parameter.enum:
+        return
+    type_ = unwrap_annotation(annotation)
+    if get_origin(type_) is Literal:
+        parameter.enum = list(get_args(type_))
 
 
 def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Parameter, Artifact]:
@@ -107,7 +112,7 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Par
 
     io.name = io.name or python_name
     if isinstance(io, Parameter):
-        add_metadata_from_type(io, annotation)
+        set_enum_based_on_type(io, annotation)
 
     return io
 

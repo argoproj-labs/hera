@@ -48,11 +48,11 @@ from hera.shared._global_config import (
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.shared._type_util import (
-    add_metadata_from_type,
     construct_io_from_annotation,
     get_workflow_annotation,
     is_subscripted,
     origin_type_issupertype,
+    set_enum_based_on_type,
 )
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
@@ -380,7 +380,7 @@ def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
             default = MISSING
 
         param = Parameter(name=p.name, default=default)
-        add_metadata_from_type(param, p.annotation)
+        set_enum_based_on_type(param, p.annotation)
         parameters.append(param)
 
     return parameters
