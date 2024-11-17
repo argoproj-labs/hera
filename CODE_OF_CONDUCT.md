@@ -5,5 +5,6 @@ echoes the code of conduct presented by the CNCF. The CNCF code of conduct can b
 [here](https://github.com/cncf/foundation/blob/main/code-of-conduct.md). Full credit goes to the CNCF project for
 establishing the linked code of conduct principles.
 
-Instances of behaviors that are not aligned with the values proposed by CNCF can be reported to
-<flaviuvadan@gmail.com>.
+Instances of behaviors that are not aligned with the values proposed by CNCF can be reported to 
+[Sambhav Kothari](sambhavs.email@gmail.com) or [Elliot Gunton](elliotgunton@gmail.com).
+
