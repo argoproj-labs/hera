@@ -120,13 +120,13 @@ virtualenv = ["virtualenv (>=20.0.35)"]
 
 [[package]]
 name = "cappa"
-version = "0.24.1"
+version = "0.25.1"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = "<4,>=3.8"
 files = [
-    {file = "cappa-0.24.1-py3-none-any.whl", hash = "sha256:95c86550b94f613d54afafb88edde267e6f66dfadcf7c34358b8186f22452225"},
-    {file = "cappa-0.24.1.tar.gz", hash = "sha256:3c2ee69cf0d74447fa18aa9c2cc4de10fe40211d2f9a63b484269e44f45b9639"},
+    {file = "cappa-0.25.1-py3-none-any.whl", hash = "sha256:26a20d7c16b11f044fbea71c8242f44b48e312c17f3f472797a17760bf86fa5e"},
+    {file = "cappa-0.25.1.tar.gz", hash = "sha256:32265d60201dc166b45dc110fda93e21e7fea21aad15fd4c82a8741990d6be23"},
 ]
 
 [package.dependencies]
@@ -622,6 +622,8 @@ optional = false
 python-versions = "*"
 files = [
     {file = "jsonpath-ng-1.7.0.tar.gz", hash = "sha256:f6f5f7fd4e5ff79c785f1573b394043b39849fb2bb47bcead935d12b00beab3c"},
+    {file = "jsonpath_ng-1.7.0-py2-none-any.whl", hash = "sha256:898c93fc173f0c336784a3fa63d7434297544b7198124a68f9a3ef9597b0ae6e"},
+    {file = "jsonpath_ng-1.7.0-py3-none-any.whl", hash = "sha256:f3d7f9e848cba1b6da28c55b1c26ff915dc9e0b1ba7e752a53d6da8d5cbd00b6"},
 ]
 
 [package.dependencies]
@@ -1374,4 +1376,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "801b013cb5ea7c4debaf6594c99371a5f2a8d64cae3d9322a044464a2edd10a4"
+content-hash = "0cbcd18e55b39da27fa6620ad409b31b354afab474fdf656b99b2c05a1aaa0fa"
