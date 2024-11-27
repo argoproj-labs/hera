@@ -9,7 +9,6 @@ import copy
 import inspect
 import sys
 import textwrap
-import warnings
 from abc import abstractmethod
 from functools import wraps
 from typing import (
@@ -43,7 +42,6 @@ from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
     _SCRIPT_ANNOTATIONS_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
-    _SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG,
     _flag_enabled,
 )
 from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
@@ -509,23 +507,10 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
                 artifacts.append(io)
             elif isinstance(io, Parameter):
                 if io.default is not None:
-                    # TODO: in 5.18 remove the flag check and `warn`, and raise the ValueError directly (minus "flag" text)
-                    warnings.warn(
-                        "Using the default field for Parameters in Annotations is deprecated since v5.16"
-                        "and will be removed in a future minor version, use a Python default value instead. "
+                    raise ValueError(
+                        "default cannot be set via the Parameter's default, use a Python default value instead."
                     )
-                    if not global_config.experimental_features[_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG]:
-                        raise ValueError(
-                            "default cannot be set via the Parameter's default, use a Python default value instead"
-                            "You can suppress this error by setting "
-                            f'global_config.experimental_features["{_SUPPRESS_PARAMETER_DEFAULT_ERROR_FLAG}"] = True'
-                        )
                 if func_param.default != inspect.Parameter.empty:
-                    # TODO: remove this check in 5.18:
-                    if io.default is not None:
-                        raise ValueError(
-                            "default cannot be set via both the function parameter default and the Parameter's default"
-                        )
                     io.default = serialize(func_param.default)
 
                 if origin_type_issupertype(func_param.annotation, NoneType) and io.default != "null":
