@@ -1,5 +1,4 @@
 import sys
-import warnings
 from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union
 
 if sys.version_info >= (3, 11):
@@ -8,7 +7,6 @@ else:
     from typing_extensions import Self
 
 
-from hera.shared import global_config
 from hera.shared._pydantic import _PYDANTIC_VERSION, FieldInfo, get_field_annotations, get_fields
 from hera.shared._type_util import construct_io_from_annotation, get_workflow_annotation
 from hera.shared.serialization import MISSING, serialize
