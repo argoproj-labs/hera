@@ -7,6 +7,7 @@ import pytest
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.workflows import Workflow, script
+from hera.workflows.io import Input
 from hera.workflows.parameter import Parameter
 from hera.workflows.steps import Steps
 
@@ -71,6 +72,30 @@ def test_parameter_default_throws_a_value_error(global_config_fixture):
     @script()
     def echo_int(an_int: Annotated[int, Parameter(default=1)]):
         print(an_int)
+
+    global_config_fixture.experimental_features["script_annotations"] = True
+    with pytest.raises(ValueError) as e:
+        with Workflow(generate_name="test-default-", entrypoint="my-steps") as w:
+            with Steps(name="my-steps"):
+                echo_int()
+
+        w.to_dict()
+
+    assert ("default cannot be set via the Parameter's default, use a Python default value instead") in str(e.value)
+
+
+def test_pydantic_input_with_default_throws_a_value_error(global_config_fixture):
+    """Test asserting that it is not possible to define default in the annotation in a Hera Input class."""
+
+    # GIVEN
+    global_config_fixture.experimental_features["script_pydantic_io"] = True
+
+    class ExampleInput(Input):
+        an_int: Annotated[int, Parameter(default=1)]
+
+    @script()
+    def echo_int(pydantic_input: ExampleInput):
+        print(pydantic_input.an_int)
 
     global_config_fixture.experimental_features["script_annotations"] = True
     with pytest.raises(ValueError) as e:
