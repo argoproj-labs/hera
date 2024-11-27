@@ -124,6 +124,11 @@ init-files:
 examples:  ## Generate documentation files for examples
 	@(cd docs && poetry run python generate.py)
 
+.PHONY: build-docs
+build-docs: ## Generate (and host) documentation locally
+	@python -m pip install --exists-action=w --no-cache-dir -r docs/requirements.txt
+	@python -m mkdocs build --clean --site-dir build/docs/html --config-file mkdocs.yml
+
 .PHONY: regenerate-example
 regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
 regenerate-example: install
