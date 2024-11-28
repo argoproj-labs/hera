@@ -11,10 +11,9 @@
 
 ## Approvers
 
-...
+- Alice Purcell <alicederyn@gmail.com>
 
 ## Members
 
-- Alice Purcell <alicederyn@gmail.com>
 - Ukjae Jeong <jeongukjae@gmail.com>
 
