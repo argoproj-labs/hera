@@ -179,3 +179,14 @@ w.create()
 ## Contributing
 
 See the [contributing guide](./CONTRIBUTING.md)!
+
+## Hera Emeritus Maintainers
+
+These emeritus maintainers dedicated a part of their career to Hera and reviewed code, triaged bugs and pushed the
+project forward over a substantial period of time. Their contribution is greatly appreciated:
+
+- [Flaviu Vadan](https://github.com/flaviuvadan)
+
+## License
+
+Hera is licensed under Apache 2.0. See [License](https://github.com/argoproj-labs/hera/blob/main/LICENSE) for details.
