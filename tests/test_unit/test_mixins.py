@@ -3,8 +3,8 @@ import pytest
 from hera.workflows import Env, Parameter
 from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin
 from hera.workflows.models import (
-    Artifact as ModelArtifact,
     Arguments as ModelArguments,
+    Artifact as ModelArtifact,
     ImagePullPolicy,
     Inputs as ModelInputs,
 )
