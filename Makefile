@@ -169,8 +169,8 @@ set-up-cluster: ## Create the cluster and argo namespace
 	k3d kubeconfig merge test-cluster --kubeconfig-switch-context
 	kubectl get namespace argo || kubectl create namespace argo
 
-.PHONY: run-argo
-run-argo: ## Start the argo service
+.PHONY: set-up-argo
+set-up-argo: ## Start the argo service
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
 	kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=argo:default --namespace=argo
@@ -182,8 +182,8 @@ set-up-artifacts: ## Adds minio for running examples with artifact storage
 	kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj-labs/training-material/main/config/argo-workflows/workflows-controller-configmap.yaml
 	kubectl apply -n argo -f tests/submissions/roles.yaml
 
-.PHONY: stop-argo
-stop-argo:  ## Stop the argo server
+.PHONY: stop-cluster
+stop-cluster:  ## Stop the cluster
 	k3d cluster stop test-cluster
 
 .PHONY: test-on-cluster
