@@ -3,6 +3,7 @@ import pytest
 from hera.workflows import Env, Parameter
 from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin
 from hera.workflows.models import (
+    Artifact as ModelArtifact,
     Arguments as ModelArguments,
     ImagePullPolicy,
     Inputs as ModelInputs,
@@ -43,6 +44,26 @@ class TestIOMixin:
         self.io_mixin.inputs = ModelInputs(parameters=[Parameter(name="test", value="value")])
         with pytest.raises(KeyError):
             self.io_mixin.get_parameter("not_exist")
+
+    def get_artifact_success(self):
+        self.io_mixin.inputs = ModelInputs(artifacts=[ModelArtifact(name="test")])
+        param = self.io_mixin.get_artifact("test")
+        assert param.name == "test"
+        assert param.value == "{{inputs.parameters.test}}"
+
+    def get_artifact_no_inputs(self):
+        with pytest.raises(KeyError):
+            self.io_mixin.get_artifact("test")
+
+    def get_artifact_no_artifacts(self):
+        self.io_mixin.inputs = ModelInputs()
+        with pytest.raises(KeyError):
+            self.io_mixin.get_artifact("test")
+
+    def get_artifact_not_found(self):
+        self.io_mixin.inputs = ModelInputs(artifacts=[ModelArtifact(name="test")])
+        with pytest.raises(KeyError):
+            self.io_mixin.get_artifact("not_exist")
 
     def test_build_inputs_none(self):
         assert self.io_mixin._build_inputs() is None
