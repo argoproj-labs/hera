@@ -45,22 +45,22 @@ class TestIOMixin:
         with pytest.raises(KeyError):
             self.io_mixin.get_parameter("not_exist")
 
-    def get_artifact_success(self):
+    def test_get_artifact_success(self):
         self.io_mixin.inputs = ModelInputs(artifacts=[ModelArtifact(name="test")])
-        param = self.io_mixin.get_artifact("test")
-        assert param.name == "test"
-        assert param.value == "{{inputs.parameters.test}}"
+        artifact = self.io_mixin.get_artifact("test")
+        assert artifact.name == "test"
+        assert artifact.from_ == "{{inputs.artifacts.test}}"
 
-    def get_artifact_no_inputs(self):
+    def test_get_artifact_no_inputs(self):
         with pytest.raises(KeyError):
             self.io_mixin.get_artifact("test")
 
-    def get_artifact_no_artifacts(self):
+    def test_get_artifact_no_artifacts(self):
         self.io_mixin.inputs = ModelInputs()
         with pytest.raises(KeyError):
             self.io_mixin.get_artifact("test")
 
-    def get_artifact_not_found(self):
+    def test_get_artifact_not_found(self):
         self.io_mixin.inputs = ModelInputs(artifacts=[ModelArtifact(name="test")])
         with pytest.raises(KeyError):
             self.io_mixin.get_artifact("not_exist")
