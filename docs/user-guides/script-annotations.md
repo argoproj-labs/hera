@@ -147,8 +147,7 @@ be printed to stdout.
 
 Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
 parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
-Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
-`hera__script_annotations` will be added to the Script template (visible in the exported YAML file).
+Python function parameter.
 
 ## Outputs
 
