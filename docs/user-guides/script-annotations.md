@@ -6,7 +6,7 @@ fields such as a `description`, and allows Hera to automatically infer fields su
 
 ## Parameters
 
-In Hera, we can currently specify inputs inside the `@script` decorator as follows:
+In Hera, we can specify inputs inside the `@script` decorator as follows:
 
 ```python
 @script(
@@ -45,9 +45,8 @@ variable name if not provided (when exporting to YAML or viewing in the Argo UI,
 
 > Note: `Artifact` annotations are only supported when used with the `RunnerScriptConstructor`.
 
-The feature is even more powerful for `Artifact`s. In Hera we are currently able to specify `Artifact`s in `inputs`, but
-the given path is not programmatically linked to the code within the function unless defined outside the scope of the
-function:
+The feature is even more powerful for `Artifact`s. In Hera we are able to specify `Artifact`s in `inputs`, but the given
+path is not programmatically linked to the code within the function unless defined outside the scope of the function:
 
 ```python
 @script(inputs=Artifact(name="my-artifact", path="/tmp/file"))
