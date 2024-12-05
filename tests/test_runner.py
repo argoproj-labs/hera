@@ -116,7 +116,6 @@ def test_parameter_loading(
     monkeypatch: pytest.MonkeyPatch,
 ):
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -166,7 +165,6 @@ def test_runner_parameter_inputs(
     monkeypatch: pytest.MonkeyPatch,
 ):
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -229,7 +227,6 @@ def test_runner_annotated_parameter_inputs(
     monkeypatch: pytest.MonkeyPatch,
 ):
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -336,7 +333,6 @@ def test_script_annotations_outputs(
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
 
@@ -382,7 +378,6 @@ def test_script_raising_error_still_outputs(
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
 
@@ -438,7 +433,6 @@ def test_script_annotations_outputs_exceptions(
 ):
     """Test that the output annotations throw the expected exceptions."""
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     with pytest.raises(ValueError) as e:
@@ -446,29 +440,6 @@ def test_script_annotations_outputs_exceptions(
 
     # THEN
     assert exception in str(e.value)
-
-
-@pytest.mark.parametrize(
-    "entrypoint,kwargs_list,expected_output",
-    [
-        (
-            "tests.script_runner.annotated_outputs:script_param",
-            [{"name": "a_number", "value": "3"}],
-            "4",
-        )
-    ],
-)
-def test_script_annotations_outputs_no_global_config(
-    entrypoint,
-    kwargs_list: Dict[str, str],
-    expected_output,
-):
-    """Test that the output annotations are ignored when global_config is not set."""
-    # WHEN
-    output = _runner(entrypoint, kwargs_list)
-
-    # THEN
-    assert serialize(output) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -522,7 +493,6 @@ def test_script_annotations_artifact_inputs(
     importlib.reload(module)
 
     kwargs_list = []
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(f"{module.__name__}:{function}", kwargs_list)
@@ -538,7 +508,6 @@ def test_script_annotations_artifact_input_loader_error(
     # GIVEN
     function_name = "no_loader_invalid_type"
     kwargs_list = []
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version which will not have the correct ARTIFACT_PATH
@@ -579,7 +548,6 @@ def test_script_annotations_artifacts_no_path(
     monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
 
     kwargs_list = []
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -595,7 +563,6 @@ def test_script_annotations_artifacts_wrong_loader(
     # GIVEN
     entrypoint = "tests.script_runner.artifact_with_invalid_loader:invalid_loader"
     kwargs_list = []
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     with pytest.raises(ValueError) as e:
@@ -612,7 +579,6 @@ def test_script_annotations_unknown_type(
     expected_output = "a string"
     entrypoint = "tests.script_runner.unknown_annotation_types:unknown_annotations_ignored"
     kwargs_list = [{"name": "my_string", "value": expected_output}]
-    monkeypatch.setenv("hera__script_annotations", "")
 
     # WHEN
     output = _runner(entrypoint, kwargs_list)
@@ -721,7 +687,6 @@ def test_runner_pydantic_inputs_params(
     # GIVEN
     entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     # WHEN
@@ -754,7 +719,6 @@ def test_runner_pydantic_output_params(
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
@@ -807,7 +771,6 @@ def test_runner_pydantic_input_artifacts(
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
@@ -856,7 +819,6 @@ def test_runner_pydantic_output_artifacts(
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
@@ -899,7 +861,6 @@ def test_runner_pydantic_output_with_exit_code(
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
@@ -949,7 +910,6 @@ def test_run_pydantic_output_with_exit_code(
     mock_parse_args.return_value = args
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     import tests.script_runner.pydantic_io_v1 as module
@@ -996,7 +956,6 @@ def test_runner_pydantic_output_with_result(
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
@@ -1040,7 +999,6 @@ def test_runner_pydantic_with_invalid_annotations(
 ):
     # GIVEN
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
-    monkeypatch.setenv("hera__script_annotations", "")
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
@@ -1081,14 +1039,10 @@ def test_runner_pydantic_with_invalid_annotations(
     ],
 )
 def test_script_optional_parameter(
-    monkeypatch: pytest.MonkeyPatch,
     entrypoint,
     kwargs_list,
     expected_output,
 ):
-    # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
 
@@ -1127,14 +1081,10 @@ def test_script_optional_parameter(
     ],
 )
 def test_script_with_complex_types(
-    monkeypatch: pytest.MonkeyPatch,
     entrypoint,
     kwargs_list,
     expected_output,
 ):
-    # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
 
@@ -1142,9 +1092,8 @@ def test_script_with_complex_types(
     assert serialize(output) == expected_output
 
 
-def test_script_partially_annotated_tuple_should_raise_an_error(monkeypatch: pytest.MonkeyPatch):
+def test_script_partially_annotated_tuple_should_raise_an_error():
     # GIVEN
-    monkeypatch.setenv("hera__script_annotations", "")
     entrypoint = "tests.script_runner.parameter_with_complex_types:fn_with_output_tuple_partially_annotated"
     kwargs_list = [{"name": "my_string", "value": "123"}]
 
