@@ -1,15 +1,8 @@
 # Script Annotations
 
-Annotation syntax is an experimental feature that uses `typing.Annotated` to declare `Parameters` and `Artifacts` as
-metadata on the input and output types of a `script` function. This simplifies script functions with parameters and
-artifacts that require additional fields such as a `description`, and allows Hera to automatically infer fields such as
-`name` and `path`.
-
-This feature must be enabled by setting the `experimental_feature` flag `script_annotations` on the global config.
-
-```py
-global_config.experimental_features["script_annotations"] = True
-```
+Annotation syntax uses `typing.Annotated` to declare `Parameters` and `Artifacts` as metadata on the input and output
+types of a `script` function. This simplifies script functions with parameters and artifacts that require additional
+fields such as a `description`, and allows Hera to automatically infer fields such as `name` and `path`.
 
 ## Parameters
 
@@ -167,7 +160,7 @@ There are two ways to specify output Artifacts and Parameters.
 
 Function return annotations can be used to specify the output type information for output Artifacts and Parameters, and
 the function should return a value or tuple. An example can be seen
-[here](../examples/workflows/experimental/script_annotations_outputs.md).
+[here](../examples/workflows/scripts/script_annotations_outputs.md).
 
 For a simple hello world output artifact example we currently have:
 
