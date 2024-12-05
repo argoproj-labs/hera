@@ -49,7 +49,6 @@ from hera.shared._type_util import (
     get_workflow_annotation,
     is_subscripted,
     origin_type_issupertype,
-    set_enum_based_on_type,
 )
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
@@ -95,7 +94,7 @@ from hera.workflows.models import (
     TemplateRef,
     ValueFrom,
 )
-from hera.workflows.parameter import MISSING, Parameter
+from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.steps import Step
 from hera.workflows.task import Task
@@ -357,24 +356,6 @@ class Script(
 
         if volume not in self.volumes:
             self.volumes.append(volume)
-
-
-def _get_parameters_from_callable(source: Callable) -> List[Parameter]:
-    # If there are any kwargs arguments associated with the function signature,
-    # we store these as we can set them as default values for argo arguments
-    parameters = []
-
-    for p in inspect.signature(source).parameters.values():
-        if p.default != inspect.Parameter.empty and p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            default = p.default
-        else:
-            default = MISSING
-
-        param = Parameter(name=p.name, default=default)
-        set_enum_based_on_type(param, p.annotation)
-        parameters.append(param)
-
-    return parameters
 
 
 def _get_outputs_from_return_annotation(
