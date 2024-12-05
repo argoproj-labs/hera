@@ -193,3 +193,31 @@ give a real `image` here, but we assume it exists in this example. Finally, the 
 passed to `source` is dumped to a file, and then the filename is passed as the final `arg` to the `command`. Therefore,
 the `source` will actually contain a list of parameters as dictionaries, which are dumped to a file which is passed to
 `hera.workflows.runner`. Of course, this is all handled for you!
+
+#### Integrated Pydantic Support
+
+As Argo deals with a limited set of YAML objects (YAML is generally a superset of JSON), Pydantic support is practically
+built-in to Hera through Pydantic's serialization to, and from, JSON. Using Pydantic objects (instead of dictionaries)
+in Runner Script templates makes them less error-prone, and easier to write! Using Pydantic classes in function inputs
+is as simple as inheriting from Pydantic's `BaseModel`.
+[Read more about Pydantic models here](https://docs.pydantic.dev/latest/usage/models/).
+
+```py
+from pydantic import BaseModel
+from hera.workflows import script
+
+class MyModel(BaseModel):
+    my_int: int
+    my_string: str
+
+@script(constructor="runner")
+def my_pydantic_function(my_pydantic_input: MyModel):
+    print(my_pydantic_input.my_string, my_pydantic_input.my_int)
+```
+
+Your functions can also return objects that are serialized, passed to another `Step` as a string argument, and then
+de-serialized in another function. This flow can be seen in
+[the callable scripts example](../examples/workflows/scripts/callable_script.md).
+
+Read on to [Script Annotations](script-annotations.md) to learn how to write Script template functions even more
+effectively!
