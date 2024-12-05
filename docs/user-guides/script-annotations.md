@@ -121,6 +121,8 @@ def read_dict_artifact(dict_artifact: Annotated[dict, Artifact(loader=ArtifactLo
     return dict_artifact["my-key"]
 ```
 
+#### Pydantic Integration
+
 A dictionary artifact would have no validation on its contents, so having safe code relies on you knowing or manually
 validating the keys that exist in it. Instead, by specifying a Pydantic type, the dictionary can be automatically
 validated and parsed to that type:

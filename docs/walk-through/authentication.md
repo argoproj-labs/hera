@@ -1,4 +1,4 @@
-# Authentication
+# Authenticating in Hera
 
 The way you authenticate generally depends on your unique organization setup. You could either directly authenticate against the Argo server, or you handle authentication directly through the reverse proxy, or even both. 
 

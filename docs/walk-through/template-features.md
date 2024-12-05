@@ -1,6 +1,6 @@
-# Advanced Template Features
+# Template Features
 
-This section exemplifies `template` features found in Argo, but are beyond the scope of the Walk Through.
+This section signposts some `template` features found in Argo and their equivalent in Hera, but are beyond the scope of the Walk Through.
 
 ## Template-Level Lifecycle Hooks
 
