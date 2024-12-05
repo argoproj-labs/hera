@@ -10,10 +10,7 @@
     ```python linenums="1"
     from typing import Annotated, Dict
 
-    from hera.shared import global_config
     from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
-
-    global_config.experimental_features["script_annotations"] = True
 
 
     @script(constructor="runner")
@@ -100,12 +97,10 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_inputs:output_dict_artifact
+          - examples.workflows.scripts.script_annotations_inputs:output_dict_artifact
           command:
           - python
           env:
-          - name: hera__script_annotations
-            value: ''
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
           image: python:3.9
@@ -132,12 +127,9 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_inputs:echo_all
+          - examples.workflows.scripts.script_annotations_inputs:echo_all
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: python:3.9
           source: '{{inputs.parameters}}'
     ```

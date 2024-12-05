@@ -91,8 +91,6 @@
           command:
           - python
           env:
-          - name: hera__script_annotations
-            value: ''
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
@@ -113,8 +111,6 @@
           command:
           - python
           env:
-          - name: hera__script_annotations
-            value: ''
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io

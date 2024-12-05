@@ -71,6 +71,11 @@
           parameters:
           - name: name
         name: hello-with-output
+        outputs:
+          parameters:
+          - name: output-message
+            valueFrom:
+              path: /tmp/hera-outputs/parameters/output-message
         script:
           args:
           - -m
@@ -79,6 +84,9 @@
           - examples.workflows.dags.callable_dag_with_param_get:hello_with_output
           command:
           - python
+          env:
+          - name: hera__outputs_directory
+            value: /tmp/hera-outputs
           image: python:3.9
           source: '{{inputs.parameters}}'
       - dag:

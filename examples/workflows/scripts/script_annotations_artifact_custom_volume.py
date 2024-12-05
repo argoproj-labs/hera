@@ -2,7 +2,6 @@
 
 from typing import Annotated
 
-from hera.shared import global_config
 from hera.workflows import (
     Artifact,
     EmptyDirVolume,
@@ -15,8 +14,6 @@ from hera.workflows import (
 )
 from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.volume import Volume
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script(
