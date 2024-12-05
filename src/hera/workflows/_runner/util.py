@@ -95,9 +95,6 @@ def _parse(value: str, key: str, f: Callable) -> Any:
     if _is_str_kwarg_of(key, f) or _is_artifact_loaded(key, f) or _is_output_kwarg(key, f):
         return value
     try:
-        if os.environ.get("hera__script_annotations", None) is None:
-            return json.loads(value)
-
         type_ = _get_unannotated_type(key, f)
         loaded_json_value = json.loads(value)
 
@@ -178,11 +175,7 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         value = kwarg["value"]
         kwargs[key] = value
 
-    if os.environ.get("hera__script_annotations", None) is None:
-        # Do a simple replacement for hyphens to get valid Python parameter names.
-        kwargs = {key.replace("-", "_"): value for key, value in kwargs.items()}
-    else:
-        kwargs = _map_argo_inputs_to_function(function, kwargs)
+    kwargs = _map_argo_inputs_to_function(function, kwargs)
 
     # The imported validate_arguments uses smart union by default just in case clients do not rely on it. This means that if a function uses a union
     # type for any of its inputs, then this will at least try to map those types correctly if the input object is
@@ -201,18 +194,17 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
 
     function = _ignore_unmatched_kwargs(function)
 
-    if os.environ.get("hera__script_annotations", None) is not None:
-        output_annotations = _extract_return_annotation_output(function)
+    output_annotations = _extract_return_annotation_output(function)
 
-        if output_annotations:
-            # This will save outputs returned from the function only. Any function parameters/artifacts marked as
-            # outputs should be written to within the function itself.
-            try:
-                output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
-            except Exception as e:
-                _save_dummy_outputs(output_annotations)
-                raise e
-            return output or None
+    if output_annotations:
+        # This will save outputs returned from the function only. Any function parameters/artifacts marked as
+        # outputs should be written to within the function itself.
+        try:
+            output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+        except Exception as e:
+            _save_dummy_outputs(output_annotations)
+            raise e
+        return output or None
 
     return function(**kwargs)
 

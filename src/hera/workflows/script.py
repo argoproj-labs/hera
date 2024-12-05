@@ -40,7 +40,6 @@ from typing_extensions import ParamSpec, get_args, get_origin
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
-    _SCRIPT_ANNOTATIONS_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
     _flag_enabled,
 )
@@ -280,10 +279,7 @@ class Script(
         func_parameters: List[Parameter] = []
         func_artifacts: List[Artifact] = []
         if callable(self.source):
-            if _flag_enabled(_SCRIPT_ANNOTATIONS_FLAG):
-                func_parameters, func_artifacts = _get_inputs_from_callable(self.source)
-            else:
-                func_parameters = _get_parameters_from_callable(self.source)
+            func_parameters, func_artifacts = _get_inputs_from_callable(self.source)
 
         return cast(Optional[ModelInputs], self._aggregate_callable_io(inputs, func_parameters, func_artifacts, False))
 
@@ -291,9 +287,6 @@ class Script(
         outputs = super()._build_outputs()
 
         if not callable(self.source):
-            return outputs
-
-        if not _flag_enabled(_SCRIPT_ANNOTATIONS_FLAG):
             return outputs
 
         outputs_directory = None
@@ -575,8 +568,6 @@ def _output_annotations_used(source: Callable) -> bool:
 
     This includes parameters marked as outputs and the return annotation of `source`.
     """
-    if not _flag_enabled(_SCRIPT_ANNOTATIONS_FLAG):
-        return False
     if not callable(source):
         return False
 
@@ -901,16 +892,18 @@ class RunnerScriptConstructor(ScriptConstructor):
         self, instance: "Script", script: _ModelScriptTemplate
     ) -> _ModelScriptTemplate:
         """A hook to transform the generated script template."""
-        if _flag_enabled(_SCRIPT_ANNOTATIONS_FLAG):
-            if not script.env:
-                script.env = []
-            script.env.append(EnvVar(name="hera__script_annotations", value=""))
-            if self.outputs_directory:
-                script.env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
-            if self.pydantic_mode:
-                script.env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
-            if _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
-                script.env.append(EnvVar(name="hera__script_pydantic_io", value=""))
+        script_env = []
+
+        if self.outputs_directory:
+            script_env.append(EnvVar(name="hera__outputs_directory", value=self.outputs_directory))
+        if self.pydantic_mode:
+            script_env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
+        if _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
+            script_env.append(EnvVar(name="hera__script_pydantic_io", value=""))
+
+        if script_env:
+            script.env = script_env
+
         return script
 
 
