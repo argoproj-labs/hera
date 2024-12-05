@@ -16,18 +16,13 @@ spec:
     - - arguments:
           artifacts:
           - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
-            name: my-artifact
+            name: my-artifact-path
           - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
-            name: my-artifact-no-path
-          parameters:
-          - name: an_int
-            value: '1'
-          - name: a_bool
-            value: 'true'
-          - name: a_string
-            value: a
-        name: echo-all
-        template: echo-all
+            name: my-artifact-as-str
+          - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+            name: my-artifact-as-json
+        name: artifact-loaders
+        template: artifact-loaders
   - inputs:
       parameters:
       - name: a_number
@@ -41,43 +36,30 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.experimental.script_annotations_inputs:output_dict_artifact
+      - examples.workflows.scripts.script_annotations_artifact_loaders:output_dict_artifact
       command:
       - python
       env:
-      - name: hera__script_annotations
-        value: ''
       - name: hera__outputs_directory
         value: /tmp/hera-outputs
       image: python:3.9
       source: '{{inputs.parameters}}'
   - inputs:
       artifacts:
-      - name: my-artifact
-        path: /tmp/file
-      - name: my-artifact-no-path
-        path: /tmp/hera-inputs/artifacts/my-artifact-no-path
-      parameters:
-      - default: '1'
-        description: an_int parameter
-        name: an_int
-      - default: 'true'
-        description: a_bool parameter
-        name: a_bool
-      - default: a
-        description: a_string parameter
-        name: a_string
-    name: echo-all
+      - name: my-artifact-path
+        path: /tmp/hera-inputs/artifacts/my-artifact-path
+      - name: my-artifact-as-str
+        path: /tmp/hera-inputs/artifacts/my-artifact-as-str
+      - name: my-artifact-as-json
+        path: /tmp/hera-inputs/artifacts/my-artifact-as-json
+    name: artifact-loaders
     script:
       args:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.experimental.script_annotations_inputs:echo_all
+      - examples.workflows.scripts.script_annotations_artifact_loaders:artifact_loaders
       command:
       - python
-      env:
-      - name: hera__script_annotations
-        value: ''
       image: python:3.9
       source: '{{inputs.parameters}}'

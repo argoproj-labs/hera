@@ -1,9 +1,6 @@
 from typing import Annotated, Dict
 
-from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
-
-global_config.experimental_features["script_annotations"] = True
 
 
 @script(constructor="runner")

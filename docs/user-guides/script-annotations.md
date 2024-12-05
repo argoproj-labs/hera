@@ -1,19 +1,12 @@
 # Script Annotations
 
-Annotation syntax is an experimental feature that uses `typing.Annotated` to declare `Parameters` and `Artifacts` as
-metadata on the input and output types of a `script` function. This simplifies script functions with parameters and
-artifacts that require additional fields such as a `description`, and allows Hera to automatically infer fields such as
-`name` and `path`.
-
-This feature must be enabled by setting the `experimental_feature` flag `script_annotations` on the global config.
-
-```py
-global_config.experimental_features["script_annotations"] = True
-```
+Annotation syntax uses `typing.Annotated` to declare `Parameters` and `Artifacts` as metadata on the input and output
+types of a `script` function. This simplifies script functions with parameters and artifacts that require additional
+fields such as a `description`, and allows Hera to automatically infer fields such as `name` and `path`.
 
 ## Parameters
 
-In Hera, we can currently specify inputs inside the `@script` decorator as follows:
+In Hera, we can specify inputs inside the `@script` decorator as follows:
 
 ```python
 @script(
@@ -52,9 +45,8 @@ variable name if not provided (when exporting to YAML or viewing in the Argo UI,
 
 > Note: `Artifact` annotations are only supported when used with the `RunnerScriptConstructor`.
 
-The feature is even more powerful for `Artifact`s. In Hera we are currently able to specify `Artifact`s in `inputs`, but
-the given path is not programmatically linked to the code within the function unless defined outside the scope of the
-function:
+The feature is even more powerful for `Artifact`s. In Hera we are able to specify `Artifact`s in `inputs`, but the given
+path is not programmatically linked to the code within the function unless defined outside the scope of the function:
 
 ```python
 @script(inputs=Artifact(name="my-artifact", path="/tmp/file"))
@@ -154,8 +146,7 @@ be printed to stdout.
 
 Script annotations can work on top of the `RunnerScriptConstructor` for name aliasing of function
 parameters, in particular to allow a public `kebab-case` parameter, while using a `snake_case`
-Python function parameter. When using a `RunnerScriptConstructor`, an environment variable
-`hera__script_annotations` will be added to the Script template (visible in the exported YAML file).
+Python function parameter.
 
 ## Outputs
 
@@ -167,7 +158,7 @@ There are two ways to specify output Artifacts and Parameters.
 
 Function return annotations can be used to specify the output type information for output Artifacts and Parameters, and
 the function should return a value or tuple. An example can be seen
-[here](../examples/workflows/experimental/script_annotations_outputs.md).
+[here](../examples/workflows/scripts/script_annotations_outputs.md).
 
 For a simple hello world output artifact example we currently have:
 

@@ -199,7 +199,6 @@ class BaseMixin(BaseModel):
 GlobalConfig = global_config = _GlobalConfig()
 register_pre_build_hook = global_config.register_pre_build_hook
 
-_SCRIPT_ANNOTATIONS_FLAG = "script_annotations"
 _SCRIPT_PYDANTIC_IO_FLAG = "script_pydantic_io"
 _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
 
@@ -207,7 +206,6 @@ _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
 # the given flag key can also be switched on by any of the flags in the list. Using simple flat lists
 # for now, otherwise with many superseding flags we may want to have a recursive structure.
 _SUPERSEDING_FLAGS: Dict[str, List] = {
-    _SCRIPT_ANNOTATIONS_FLAG: [_SCRIPT_PYDANTIC_IO_FLAG, _DECORATOR_SYNTAX_FLAG],
     _SCRIPT_PYDANTIC_IO_FLAG: [_DECORATOR_SYNTAX_FLAG],
     _DECORATOR_SYNTAX_FLAG: [],
 }

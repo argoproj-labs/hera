@@ -1,7 +1,7 @@
 # Advanced Hera Features
 
 This section is used to publicize Hera's features beyond the essentials covered in the walk through. Note that these
-features do not exist in Argo as they are specific to the `hera` module.
+features do not exist in Argo as they are specific to Hera.
 
 ## Pre-Build Hooks
 
@@ -104,21 +104,6 @@ usually announce changes in [the Hera slack channel](https://cloud-native.slack.
 
 ## Currently supported experimental features:
 
-### Script Annotations
-
-Annotation syntax using `typing.Annotated` is supported for `Parameter`s and `Artifact`s as inputs and outputs for
-functions decorated as `scripts`. They use `Annotated` as the type in the function parameters and allow us to simplify
-writing scripts with parameters and artifacts that require additional fields such as a `description` or alternative
-`name`.
-
-This feature can be enabled by setting the `experimental_feature` flag `script_annotations`
-
-```py
-global_config.experimental_features["script_annotations"] = True
-```
-
-Read the full guide on script annotations in [the script user guide](../user-guides/script-annotations.md).
-
 ### Script IO Models
 
 Hera provides Pydantic models for you to create subclasses from, which allow you to more easily declare script template
@@ -159,7 +144,7 @@ Once an experimental feature is robust and reliable, we "graduate" them to allow
 `experimental_features` flag of the `global_config`. This comes with better support and guarantees for their feature
 set. We list graduated features here so you can keep up to date.
 
-### `RunnerScriptConstructor`
+### `RunnerScriptConstructor` (since 5.10)
 
 The `RunnerScriptConstructor` found in `hera.workflows.script` and seen in the
 [callable script example](../examples/workflows/scripts/callable_script.md) is a robust way to run Python functions on
@@ -168,3 +153,12 @@ source code's functions, dependencies, and Hera itself are available to run. The
 compatible with Pydantic so supports deserializing inputs to Python objects and serializing outputs to json strings.
 
 Read [the Script Guide](../user-guides/script-basics.md#runnerscriptconstructor) to learn more!
+
+### Script Annotations (since 5.19)
+
+Annotation syntax using `typing.Annotated` is supported for `Parameter`s and `Artifact`s as inputs and outputs for
+functions decorated as `scripts`. They use `Annotated` as the type in the function parameters and allow us to simplify
+writing scripts with parameters and artifacts that require additional fields such as a `description` or alternative
+`name`.
+
+Read the full guide on script annotations in [the script user guide](../user-guides/script-annotations.md).

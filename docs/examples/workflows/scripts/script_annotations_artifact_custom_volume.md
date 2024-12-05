@@ -10,7 +10,6 @@ This example will reuse the outputs volume across script steps.
     ```python linenums="1"
     from typing import Annotated
 
-    from hera.shared import global_config
     from hera.workflows import (
         Artifact,
         EmptyDirVolume,
@@ -23,8 +22,6 @@ This example will reuse the outputs volume across script steps.
     )
     from hera.workflows.artifact import ArtifactLoader
     from hera.workflows.volume import Volume
-
-    global_config.experimental_features["script_annotations"] = True
 
 
     @script(
@@ -135,12 +132,10 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_artifact_custom_volume:output_artifact_empty_dir
+          - examples.workflows.scripts.script_annotations_artifact_custom_volume:output_artifact_empty_dir
           command:
           - python
           env:
-          - name: hera__script_annotations
-            value: ''
           - name: hera__outputs_directory
             value: /mnt/empty/dir
           image: python:3.9
@@ -161,12 +156,9 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_artifact_custom_volume:use_artifact
+          - examples.workflows.scripts.script_annotations_artifact_custom_volume:use_artifact
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: python:3.9
           source: '{{inputs.parameters}}'
       - inputs:
@@ -182,12 +174,10 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_artifact_custom_volume:output_artifact_existing_vol
+          - examples.workflows.scripts.script_annotations_artifact_custom_volume:output_artifact_existing_vol
           command:
           - python
           env:
-          - name: hera__script_annotations
-            value: ''
           - name: hera__outputs_directory
             value: /mnt/here
           image: python:3.9
@@ -205,12 +195,9 @@ This example will reuse the outputs volume across script steps.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_artifact_custom_volume:use_artifact_existing_vol
+          - examples.workflows.scripts.script_annotations_artifact_custom_volume:use_artifact_existing_vol
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: python:3.9
           source: '{{inputs.parameters}}'
           volumeMounts:

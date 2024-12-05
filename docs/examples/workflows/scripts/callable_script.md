@@ -23,9 +23,6 @@
     # and serializes the output.
     global_config.image = "my-image-with-python-source-code-and-dependencies"
     global_config.set_class_defaults(Script, constructor="runner")
-    # Script annotations is still an experimental feature and we need to explicitly opt in to it
-    # Note that experimental features are subject to breaking changes in future releases of the same major version
-    global_config.experimental_features["script_annotations"] = True
 
 
     # An optional pydantic input type
@@ -157,9 +154,6 @@
           - examples.workflows.scripts.callable_script:my_function
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - inputs:
@@ -174,9 +168,6 @@
           - examples.workflows.scripts.callable_script:str_function
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - inputs:
@@ -191,9 +182,6 @@
           - examples.workflows.scripts.callable_script:another_function
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - inputs:
@@ -213,9 +201,6 @@
           - examples.workflows.scripts.callable_script:function_kebab
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
       - inputs:
@@ -230,9 +215,6 @@
           - examples.workflows.scripts.callable_script:function_kebab_object
           command:
           - python
-          env:
-          - name: hera__script_annotations
-            value: ''
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
     ```

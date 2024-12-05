@@ -14,8 +14,6 @@
     from hera.shared import global_config
     from hera.workflows import Artifact, Parameter, RunnerScriptConstructor, Steps, Workflow, script
 
-    global_config.experimental_features["script_annotations"] = True
-
     global_config.set_class_defaults(RunnerScriptConstructor, outputs_directory="/tmp/user/chosen/outputs")
 
 
@@ -75,12 +73,10 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.experimental.script_annotations_outputs:script_param_artifact_in_function_signature_and_return_type
+          - examples.workflows.scripts.script_annotations_outputs:script_param_artifact_in_function_signature_and_return_type
           command:
           - python
           env:
-          - name: hera__script_annotations
-            value: ''
           - name: hera__outputs_directory
             value: /tmp/user/chosen/outputs
           image: python:3.9

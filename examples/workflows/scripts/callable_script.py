@@ -13,9 +13,6 @@ from hera.workflows import Parameter, Script, Steps, Workflow, script
 # and serializes the output.
 global_config.image = "my-image-with-python-source-code-and-dependencies"
 global_config.set_class_defaults(Script, constructor="runner")
-# Script annotations is still an experimental feature and we need to explicitly opt in to it
-# Note that experimental features are subject to breaking changes in future releases of the same major version
-global_config.experimental_features["script_annotations"] = True
 
 
 # An optional pydantic input type

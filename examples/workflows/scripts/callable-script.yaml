@@ -51,9 +51,6 @@ spec:
       - examples.workflows.scripts.callable_script:my_function
       command:
       - python
-      env:
-      - name: hera__script_annotations
-        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - inputs:
@@ -68,9 +65,6 @@ spec:
       - examples.workflows.scripts.callable_script:str_function
       command:
       - python
-      env:
-      - name: hera__script_annotations
-        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - inputs:
@@ -85,9 +79,6 @@ spec:
       - examples.workflows.scripts.callable_script:another_function
       command:
       - python
-      env:
-      - name: hera__script_annotations
-        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - inputs:
@@ -107,9 +98,6 @@ spec:
       - examples.workflows.scripts.callable_script:function_kebab
       command:
       - python
-      env:
-      - name: hera__script_annotations
-        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'
   - inputs:
@@ -124,8 +112,5 @@ spec:
       - examples.workflows.scripts.callable_script:function_kebab_object
       command:
       - python
-      env:
-      - name: hera__script_annotations
-        value: ''
       image: my-image-with-python-source-code-and-dependencies
       source: '{{inputs.parameters}}'

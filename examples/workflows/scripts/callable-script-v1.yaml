@@ -52,8 +52,6 @@ spec:
       command:
       - python
       env:
-      - name: hera__script_annotations
-        value: ''
       - name: hera__pydantic_mode
         value: '1'
       image: my-image-with-python-source-code-and-dependencies
@@ -71,8 +69,6 @@ spec:
       command:
       - python
       env:
-      - name: hera__script_annotations
-        value: ''
       - name: hera__pydantic_mode
         value: '1'
       image: my-image-with-python-source-code-and-dependencies
@@ -90,8 +86,6 @@ spec:
       command:
       - python
       env:
-      - name: hera__script_annotations
-        value: ''
       - name: hera__pydantic_mode
         value: '1'
       image: my-image-with-python-source-code-and-dependencies
@@ -114,8 +108,6 @@ spec:
       command:
       - python
       env:
-      - name: hera__script_annotations
-        value: ''
       - name: hera__pydantic_mode
         value: '1'
       image: my-image-with-python-source-code-and-dependencies
@@ -133,8 +125,6 @@ spec:
       command:
       - python
       env:
-      - name: hera__script_annotations
-        value: ''
       - name: hera__pydantic_mode
         value: '1'
       image: my-image-with-python-source-code-and-dependencies
