@@ -19,7 +19,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     )
 
     with Workflow(
-        generate_name="artifactory-repository-ref-",
+        generate_name="artifact-repository-ref-",
         entrypoint="main",
         artifact_repository_ref=m.ArtifactRepositoryRef(key="my-key"),
     ) as w:
@@ -38,7 +38,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: artifactory-repository-ref-
+      generateName: artifact-repository-ref-
     spec:
       artifactRepositoryRef:
         key: my-key

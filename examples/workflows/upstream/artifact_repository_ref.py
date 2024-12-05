@@ -6,7 +6,7 @@ from hera.workflows import (
 )
 
 with Workflow(
-    generate_name="artifactory-repository-ref-",
+    generate_name="artifact-repository-ref-",
     entrypoint="main",
     artifact_repository_ref=m.ArtifactRepositoryRef(key="my-key"),
 ) as w:
