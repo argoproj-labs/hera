@@ -147,7 +147,7 @@ install-k3d: ## Install k3d client
 	curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
 .PHONY: install-argo
-install-argo:  ## Install argo client
+install-argo:  ## Install argo CLI client
 	# Download the binary
 	curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/argo-linux-amd64.gz
 
@@ -163,18 +163,27 @@ install-argo:  ## Install argo client
 	# Test installation
 	argo version
 
-.PHONY: run-argo
-run-argo: ## Start the argo server
+.PHONY: set-up-cluster
+set-up-cluster: ## Create the cluster and argo namespace
 	k3d cluster list | grep test-cluster || k3d cluster create test-cluster
 	k3d kubeconfig merge test-cluster --kubeconfig-switch-context
 	kubectl get namespace argo || kubectl create namespace argo
+
+.PHONY: set-up-argo
+set-up-argo: ## Start the argo service
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
 	kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=argo:default --namespace=argo
 	kubectl rollout status -n argo deployment/argo-server --timeout=120s --watch=true
 
-.PHONY: stop-argo
-stop-argo:  ## Stop the argo server
+.PHONY: set-up-artifacts
+set-up-artifacts: ## Adds minio for running examples with artifact storage
+	kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj-labs/training-material/main/config/minio/minio.yaml
+	kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj-labs/training-material/main/config/argo-workflows/workflows-controller-configmap.yaml
+	kubectl apply -n argo -f tests/submissions/roles.yaml
+
+.PHONY: stop-cluster
+stop-cluster:  ## Stop the cluster
 	k3d cluster stop test-cluster
 
 .PHONY: test-on-cluster

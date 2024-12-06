@@ -256,6 +256,30 @@ class IOMixin(BaseMixin):
                 return param
         raise KeyError(f"Parameter {name} not found.")
 
+    def get_artifact(self, name: str) -> Artifact:
+        """Finds and returns the artifact with the supplied name.
+
+        Note that this method will raise an error if the artifact is not found.
+
+        Args:
+            name: name of the input artifact to find and return.
+
+        Returns:
+            Artifact: the artifact with the supplied name.
+
+        Raises:
+            KeyError: if the artifact is not found.
+        """
+        inputs = self._build_inputs()
+        if inputs is None:
+            raise KeyError(f"No inputs set. Artifact {name} not found.")
+        if inputs.artifacts is None:
+            raise KeyError(f"No artifacts set. Artifact {name} not found.")
+        for artifact in inputs.artifacts:
+            if artifact.name == name:
+                return Artifact(name=name, from_=f"{{{{inputs.artifacts.{artifact.name}}}}}")
+        raise KeyError(f"Artifact {name} not found.")
+
     def _build_inputs(self) -> Optional[ModelInputs]:
         """Processes the `inputs` field and returns a generated `ModelInputs`."""
         if self.inputs is None:

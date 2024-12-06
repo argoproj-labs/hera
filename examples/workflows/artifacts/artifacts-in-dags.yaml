@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: artifacts-in-dags-
+spec:
+  entrypoint: runner-dag
+  templates:
+  - container:
+      args:
+      - sleep 1; echo hello world | tee /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+      image: busybox
+    name: hello-world-to-file
+    outputs:
+      artifacts:
+      - name: hello-art
+        path: /tmp/hello_world.txt
+  - container:
+      args:
+      - cat /tmp/message
+      command:
+      - sh
+      - -c
+      image: alpine:latest
+    inputs:
+      artifacts:
+      - name: message
+        path: /tmp/message
+    name: print-message-from-file
+  - dag:
+      tasks:
+      - name: hello-world-to-file
+        template: hello-world-to-file
+    name: generate-artifact-dag
+    outputs:
+      artifacts:
+      - from: '{{tasks.hello-world-to-file.outputs.artifacts.hello-art}}'
+        name: hello-file
+  - dag:
+      tasks:
+      - arguments:
+          artifacts:
+          - from: '{{inputs.artifacts.hello-file-input}}'
+            name: message
+        name: print-message-from-file
+        template: print-message-from-file
+    inputs:
+      artifacts:
+      - name: hello-file-input
+    name: consume-artifact-dag
+  - dag:
+      tasks:
+      - name: generate-artifact-dag
+        template: generate-artifact-dag
+      - arguments:
+          artifacts:
+          - from: '{{tasks.generate-artifact-dag.outputs.artifacts.hello-file}}'
+            name: hello-file-input
+        depends: generate-artifact-dag
+        name: consume-artifact-dag
+        template: consume-artifact-dag
+    name: runner-dag
