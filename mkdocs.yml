@@ -18,12 +18,12 @@ nav:
     - walk-through/loops.md
     - walk-through/conditionals.md
     - walk-through/suspending.md
-    - Advanced Features:
-      - walk-through/authentication.md
-      - walk-through/advanced-workflow-features.md
-      - walk-through/advanced-template-features.md
-      - walk-through/advanced-hera-features.md
-      - walk-through/pydantic-support.md
+    - walk-through/hera-developer-features.md
+    - walk-through/authentication.md
+    - walk-through/experimental-hera-features.md
+    - Further Reading:
+      - walk-through/workflow-features.md
+      - walk-through/template-features.md
   - User Guides:
     - Core Concepts: user-guides/core-concepts.md
     - Scripts:

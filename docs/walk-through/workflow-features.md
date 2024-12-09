@@ -1,6 +1,6 @@
-# Advanced Workflow Features
+# Workflow Features
 
-This section exemplifies Workflow features found in Argo, but are beyond the scope of the Walk Through.
+This section signposts some more Workflow features found in Argo, but are beyond the scope of the Walk Through.
 
 ## Workflow-Level Lifecycle Hooks
 
@@ -13,7 +13,7 @@ or when the workflow has a `Running` status.
 ## Exit Handlers (deprecated)
 
 Exit handlers are templates that always execute (regardless of success or failure) at the end of a workflow. They were
-replaced by workflow-level ([above](#workflow-level-lifecycle-hooks)) and [template-level hooks](./advanced-template-features.md#template-level-lifecycle-hooks).
+replaced by workflow-level ([above](#workflow-level-lifecycle-hooks)) and [template-level hooks](./template-features.md#template-level-lifecycle-hooks).
 
 Some use cases listed from [Argo Workflows](https://argoproj.github.io/argo-workflows/walk-through/exit-handlers/)
 include:
