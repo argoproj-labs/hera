@@ -883,7 +883,11 @@ class RunnerScriptConstructor(ScriptConstructor):
             script_env.append(EnvVar(name="hera__script_pydantic_io", value=""))
 
         if script_env:
-            script.env = script_env
+            if not script.env:
+                # If user did not set any env vars themselves then we need to initialise the list
+                script.env = []
+
+            script.env.extend(script_env)
 
         return script
 
