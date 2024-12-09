@@ -26,7 +26,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
 
-      - name: setup python ${{ matrix.python-version }}
+      - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -75,7 +75,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
 
-      - name: setup python ${{ matrix.python-version }}
+      - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -109,7 +109,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
 
-      - name: setup python 3.9
+      - name: set up python 3.9
         uses: actions/setup-python@v5
         with:
           python-version: 3.9
@@ -118,17 +118,14 @@ jobs:
       - name: Install dependencies
         run: poetry install --all-extras
 
-      - name: setup k3d cluster
-        run: make install-k3d
-
-      - name: setup and run argo
-        run: make run-argo
+      - name: set up cluster
+        run: make install-k3d set-up-cluster set-up-argo set-up-artifacts
 
       - name: run workflow tests
         run: make test-on-cluster
 
       - name: stop argo cluster
-        run: make stop-argo
+        run: make stop-cluster
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
