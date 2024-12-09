@@ -1,8 +1,10 @@
 from pathlib import Path
-from typing import Annotated, Dict, Optional, Union, cast
+from typing import Annotated, Dict, List, Optional, Union, cast
 
 import pytest
 
+from hera.shared._global_config import _GlobalConfig
+from hera.workflows._mixins import EnvT
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env
 from hera.workflows.io import Output
@@ -284,7 +286,7 @@ class TestRunnerScriptEnv:
             ],
         ),
     )
-    def test_runner_script_no_added_env_vars(self, user_env, expected_env):
+    def test_runner_script_no_added_env_vars(self, user_env: EnvT, expected_env):
         built_workflow = self.build_workflow(user_env)
 
         script_template = cast(ScriptTemplate, built_workflow.spec.templates[0].script)
@@ -309,7 +311,7 @@ class TestRunnerScriptEnv:
             ],
         ),
     )
-    def test_runner_script_output_dir_env_var(self, user_env, expected_env):
+    def test_runner_script_output_dir_env_var(self, user_env: EnvT, expected_env: Optional[List[ModelEnvVar]]):
         # GIVEN
         constructor = RunnerScriptConstructor(outputs_directory="/my/tmp/dir")
 
@@ -337,7 +339,7 @@ class TestRunnerScriptEnv:
             ],
         ),
     )
-    def test_runner_script_pydantic_mode_env_var(self, user_env, expected_env):
+    def test_runner_script_pydantic_mode_env_var(self, user_env: EnvT, expected_env: Optional[List[ModelEnvVar]]):
         # GIVEN
         constructor = RunnerScriptConstructor(pydantic_mode=1)
 
@@ -365,7 +367,12 @@ class TestRunnerScriptEnv:
             ],
         ),
     )
-    def test_runner_script_pydantic_io_env_var(self, global_config_fixture, user_env, expected_env):
+    def test_runner_script_pydantic_io_env_var(
+        self,
+        global_config_fixture: _GlobalConfig,
+        user_env: EnvT,
+        expected_env: Optional[List[ModelEnvVar]],
+    ):
         # GIVEN
         global_config_fixture.experimental_features["script_pydantic_io"] = True
         constructor = RunnerScriptConstructor()
