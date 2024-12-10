@@ -19,6 +19,7 @@ def my_function(
     Annotated[int, Parameter(name="another-param-int-output")],
     Annotated[str, Parameter(name="a-str-param-output")],
 ]:
+    print(param_int)
     ...
     return 42, -1, "Hello, world!"  # Hope I didn't mix these up!
 ```
@@ -42,6 +43,7 @@ class MyOutput(Output):
 
 @script(constructor="runner")
 def my_function(my_input: MyInput) -> MyOutput:
+    print(my_input.param_int)
     ...
     return MyOutput(
         param_int_output=42,
