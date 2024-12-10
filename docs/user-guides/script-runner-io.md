@@ -48,7 +48,6 @@ def my_function(my_input: MyInput) -> MyOutput:
         another_param_int_output=-1,
         a_str_param_output="Hello, world!",
     )
-
 ```
 
 Using the IO classes requires use of the Hera Runner and the `"script_pydantic_io"` experimental feature flag to be
@@ -149,7 +148,6 @@ class MyOutput(Output):
 @script(constructor="runner")
 def pydantic_io() -> MyOutput:
     return MyOutput(exit_code=1, result="Test!", param_int=42, artifact_int=my_input.param_int)
-
 ```
 
 See the full Pydantic IO example [here](../examples/workflows/experimental/script_runner_io.md)!

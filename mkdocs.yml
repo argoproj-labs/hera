@@ -32,6 +32,7 @@ nav:
       - Script Runner IO: user-guides/script-runner-io.md
     - Decorators: user-guides/decorators.md
     - Expr Transpiler: user-guides/expr.md
+    - Experimental Features: user-guides/experimental-features.md
   - Examples:
     - About: examples/workflows-examples.md
     - Idiomatic Hera Examples:

@@ -1,6 +1,6 @@
 # Workflow Features
 
-This section signposts some more Workflow features found in Argo, but are beyond the scope of the Walk Through.
+This section signposts some more Workflow features found in Argo, which are beyond the scope of the Walk Through.
 
 ## Workflow-Level Lifecycle Hooks
 
