@@ -1,8 +1,59 @@
 # Script Runner IO
 
-Hera provides the `Input` and `Output` Pydantic classes which can be used to more succinctly write your
-script function inputs and outputs, and requires use of the Hera Runner. Use of these classes also requires the
-`"script_pydantic_io"` experimental feature flag to be enabled:
+Hera provides the `Input` and `Output` Pydantic classes to help combat sprawling function declarations of inputs and
+outputs when using script annotations. It has the added bonus of letting you return values by referencing their name,
+instead of setting outputs by position in a `Tuple`.
+
+It lets you go from a function declaration and `return` like this:
+
+```py
+@script(constructor="runner")
+def my_function(
+    param_int: Annotated[int, Parameter(name="param-input")] = 42,
+    an_object: Annotated[MyObject, Parameter(name="obj-input")] = MyObject(
+        a_dict={"my-key": "a-value"}, a_str="hello world!"
+    ),
+    artifact_int: Annotated[int, Artifact(name="artifact-input", loader=ArtifactLoader.json)],
+) -> Tuple[
+    Annotated[int, Parameter(name="param-int-output")],
+    Annotated[int, Parameter(name="another-param-int-output")],
+    Annotated[str, Parameter(name="a-str-param-output")],
+]:
+    print(param_int)
+    ...
+    return 42, -1, "Hello, world!"  # Hope I didn't mix these up!
+```
+
+to a function that uses the `Input` and `Output` classes:
+
+```py
+from hera.workflows.io import Input, Output
+
+class MyInput(Input):
+    param_int: Annotated[int, Parameter(name="param-input")] = 42
+    an_object: Annotated[MyObject, Parameter(name="obj-input")] = MyObject(
+        a_dict={"my-key": "a-value"}, a_str="hello world!"
+    )
+    artifact_int: Annotated[int, Artifact(name="artifact-input", loader=ArtifactLoader.json)]
+
+class MyOutput(Output):
+    param_int_output: Annotated[int, Parameter(name="param-int-output")],
+    another_param_int_output: Annotated[int, Parameter(name="another-param-int-output")],
+    a_str_param_output: Annotated[str, Parameter(name="a-str-param-output")],
+
+@script(constructor="runner")
+def my_function(my_input: MyInput) -> MyOutput:
+    print(my_input.param_int)
+    ...
+    return MyOutput(
+        param_int_output=42,
+        another_param_int_output=-1,
+        a_str_param_output="Hello, world!",
+    )
+```
+
+Using the IO classes requires use of the Hera Runner and the `"script_pydantic_io"` experimental feature flag to be
+enabled:
 
 ```py
 global_config.experimental_features["script_pydantic_io"] = True
@@ -99,7 +150,6 @@ class MyOutput(Output):
 @script(constructor="runner")
 def pydantic_io() -> MyOutput:
     return MyOutput(exit_code=1, result="Test!", param_int=42, artifact_int=my_input.param_int)
-
 ```
 
 See the full Pydantic IO example [here](../examples/workflows/experimental/script_runner_io.md)!

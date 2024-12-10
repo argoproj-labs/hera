@@ -125,9 +125,15 @@ examples:  ## Generate documentation files for examples
 	@(cd docs && poetry run python generate.py)
 
 .PHONY: build-docs
-build-docs: ## Generate (and host) documentation locally
+build-docs: ## Generate documentation locally
 	@python -m pip install --exists-action=w --no-cache-dir -r docs/requirements.txt
 	@python -m mkdocs build --clean --site-dir build/docs/html --config-file mkdocs.yml
+
+# If you run this target mkdocs will watch the `docs` folder, so any changes
+# will be reflected in your browser momentarily (without refreshing!)
+.PHONY: host-docs
+host-docs: ## Host and open the documentation locally (and rebuild automatically)
+	@python -m mkdocs serve --open --clean --config-file mkdocs.yml
 
 .PHONY: regenerate-example
 regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
