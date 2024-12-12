@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: sleep-when
+spec:
+  concurrencyPolicy: Allow
+  schedule: '* * * * *'
+  when: '{{= cronworkflow.lastScheduledTime == nil || (now() - cronworkflow.lastScheduledTime).Seconds()
+    > 360 }}'
+  workflowSpec:
+    entrypoint: sleep-busybox
+    templates:
+    - container:
+        args:
+        - '10'
+        command:
+        - sleep
+        image: busybox
+      name: sleep-busybox
