@@ -58,7 +58,6 @@ from hera.workflows.models import (
     Synchronization,
     Template,
     TemplateRef,
-    TerminationMessagePolicy,
     Toleration,
     UserContainer as ModelUserContainer,
     Volume as ModelVolume,
@@ -185,7 +184,7 @@ class ContainerMixin(BaseMixin):
     stdin: Optional[bool] = None
     stdin_once: Optional[bool] = None
     termination_message_path: Optional[str] = None
-    termination_message_policy: Optional[TerminationMessagePolicy] = None
+    termination_message_policy: Optional[str] = None
     tty: Optional[bool] = None
 
     def _build_image_pull_policy(self) -> Optional[str]:

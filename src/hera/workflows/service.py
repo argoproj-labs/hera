@@ -128,6 +128,7 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
         name_prefix: Optional[str] = None,
         namespace: Optional[str] = None,
     ) -> WorkflowList:
@@ -146,6 +147,7 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
                 "namePrefix": name_prefix,
                 "namespace": namespace,
             },
@@ -189,6 +191,7 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
         namespace: Optional[str] = None,
     ) -> LabelValues:
         """API documentation."""
@@ -206,6 +209,7 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
                 "namespace": namespace,
             },
             headers={"Authorization": self.token},
@@ -302,6 +306,7 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> ClusterWorkflowTemplateList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -318,6 +323,7 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -452,6 +458,7 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> CronWorkflowList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -470,6 +477,7 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -714,6 +722,7 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> WorkflowTemplateList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -733,6 +742,7 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -882,7 +892,9 @@ class WorkflowsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
         fields: Optional[str] = None,
+        name_filter: Optional[str] = None,
     ) -> WorkflowList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -901,7 +913,9 @@ class WorkflowsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
                 "fields": fields,
+                "nameFilter": name_filter,
             },
             headers={"Authorization": self.token},
             data=None,

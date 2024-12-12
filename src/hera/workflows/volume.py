@@ -34,12 +34,12 @@ from hera.workflows.models import (
     ProjectedVolumeSource as _ModelProjectedVolumeSource,
     QuobyteVolumeSource as _ModelQuobyteVolumeSource,
     RBDVolumeSource as _ModelRBDVolumeSource,
-    ResourceRequirements,
     ScaleIOVolumeSource as _ModelScaleIOVolumeSource,
     SecretVolumeSource as _ModelSecretVolumeSource,
     StorageOSVolumeSource as _ModelStorageOSVolumeSource,
     Volume as _ModelVolume,
     VolumeMount as _ModelVolumeMount,
+    VolumeResourceRequirements,
     VsphereVirtualDiskVolumeSource as _ModelVsphereVirtualDiskVolumeSource,
 )
 from hera.workflows.validators import validate_storage_units
@@ -540,7 +540,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     """
 
     size: Optional[str] = None  # type: ignore
-    resources: Optional[ResourceRequirements] = None
+    resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
     access_modes: Optional[List[Union[str, AccessMode]]] = [AccessMode.read_write_once]  # type: ignore
     storage_class_name: Optional[str] = None
@@ -565,7 +565,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     @root_validator(pre=True)
     def _merge_reqs(cls, values):
         if "size" in values and "resources" in values:
-            resources: ResourceRequirements = values.get("resources")
+            resources: VolumeResourceRequirements = values.get("resources")
             if resources.requests is not None:
                 if "storage" in resources.requests:
                     pass  # take the storage specification in resources
@@ -575,9 +575,9 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
         elif "resources" not in values:
             assert "size" in values, "at least one of `size` or `resources` must be specified"
             validate_storage_units(cast(str, values.get("size")))
-            values["resources"] = ResourceRequirements(requests={"storage": values.get("size")})
+            values["resources"] = VolumeResourceRequirements(requests={"storage": values.get("size")})
         elif "resources" in values:
-            resources = cast(ResourceRequirements, values.get("resources"))
+            resources = cast(VolumeResourceRequirements, values.get("resources"))
             assert resources.requests is not None, "Resource requests are required"
             storage = resources.requests.get("storage")
             assert storage is not None, "At least one of `size` or `resources.requests.storage` must be specified"
