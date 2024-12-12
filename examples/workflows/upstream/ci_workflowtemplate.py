@@ -21,7 +21,7 @@ with WorkflowTemplate(
             metadata=m.ObjectMeta(name="work"),
             spec=m.PersistentVolumeClaimSpec(
                 access_modes=["ReadWriteOnce"],
-                resources=m.ResourceRequirements(
+                resources=m.VolumeResourceRequirements(
                     requests={
                         "storage": m.Quantity(__root__="64Mi"),
                     }

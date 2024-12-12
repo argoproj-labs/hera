@@ -260,7 +260,7 @@ There are several implicit dependencies in this script:
             m.PersistentVolumeClaim(
                 metadata=m.ObjectMeta(name=f"rank-{i}"),
                 spec=m.PersistentVolumeClaimSpec(
-                    resources=m.ResourceRequirements(requests={"storage": "20Gi"}, limits={"storage": "20Gi"}),
+                    resources=m.VolumeResourceRequirements(requests={"storage": "20Gi"}, limits={"storage": "20Gi"}),
                     # TODO: it's possible to spin up pods in one zone of a region and a disk in another zone of a region!
                     #       I recommend setting a `storage_class_name` that specifically tells K8s that it should create
                     #       the volumes only when pods actually want to _mount_ a volume! That way the disks are

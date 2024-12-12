@@ -30,7 +30,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 metadata=m.ObjectMeta(name="workdir"),
                 spec=m.PersistentVolumeClaimSpec(
                     access_modes=["ReadWriteOnce"],
-                    resources=m.ResourceRequirements(
+                    resources=m.VolumeResourceRequirements(
                         requests={
                             "storage": m.Quantity(__root__="1Gi"),
                         }

@@ -154,7 +154,6 @@ class Workflow(
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
     annotations: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.annotations")] = None
-    cluster_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.cluster_name")] = None
     creation_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.creation_timestamp")] = None
     deletion_grace_period_seconds: Annotated[
         Optional[int], _WorkflowModelMapper("metadata.deletion_grace_period_seconds")
