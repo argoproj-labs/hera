@@ -2627,7 +2627,7 @@ class NodeStatus(BaseModel):
 
 class PodGC(BaseModel):
     delete_delay_duration: Annotated[
-        Optional[v1_1.Duration],
+        Optional[str],
         Field(
             alias="deleteDelayDuration",
             description=("DeleteDelayDuration specifies the duration before pods in the GC queue" " get deleted."),
