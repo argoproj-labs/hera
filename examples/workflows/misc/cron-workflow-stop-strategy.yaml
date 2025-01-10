@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: hello-world-multiple-schedules
+spec:
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 4
+  schedules:
+  - '*/3 * * * *'
+  - '*/2 * * * *'
+  startingDeadlineSeconds: 0
+  stopStrategy:
+    expression: cronworkflow.failed >= 3
+  successfulJobsHistoryLimit: 4
+  suspend: false
+  timezone: America/Los_Angeles
+  workflowSpec:
+    entrypoint: whalesay
+    templates:
+    - container:
+        args:
+        - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
+        command:
+        - cowsay
+        image: docker/whalesay:latest
+      name: whalesay
