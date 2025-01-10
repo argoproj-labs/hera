@@ -21,6 +21,7 @@ from hera.workflows.models import (
     CronWorkflowSpec,
     CronWorkflowStatus,
     LintCronWorkflowRequest,
+    StopStrategy,
     UpdateCronWorkflowRequest,
     Workflow as _ModelWorkflow,
 )
@@ -81,6 +82,7 @@ class CronWorkflow(Workflow):
     starting_deadline_seconds: Annotated[Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")] = (
         None
     )
+    stop_strategy: Annotated[Optional[StopStrategy], _CronWorkflowModelMapper("spec.stop_strategy")]
     successful_jobs_history_limit: Annotated[
         Optional[int], _CronWorkflowModelMapper("spec.successful_jobs_history_limit")
     ] = None
