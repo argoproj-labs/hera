@@ -64,6 +64,7 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
+from hera.workflows.models import ContainerResizePolicy
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
@@ -483,6 +484,8 @@ class ResourceMixin(BaseMixin):
     """`ResourceMixin` provides the capability to set resources such as compute requirements like CPU, GPU, etc."""
 
     resources: Optional[Union[ResourceRequirements, Resources]] = None
+    resize_policy: Optional[List[ContainerResizePolicy]] = None
+    restart_policy: Optional[str] = None
 
     def _build_resources(self) -> Optional[ResourceRequirements]:
         """Parses the resources and returns a generated `ResourceRequirements` object."""
