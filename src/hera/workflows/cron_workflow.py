@@ -5,7 +5,7 @@ for more on CronWorkflows.
 """
 
 from pathlib import Path
-from typing import Annotated, Dict, Optional, Type, Union, cast
+from typing import Annotated, Dict, List, Optional, Type, Union, cast
 
 from hera.exceptions import NotFound
 from hera.shared._pydantic import BaseModel
@@ -21,6 +21,7 @@ from hera.workflows.models import (
     CronWorkflowSpec,
     CronWorkflowStatus,
     LintCronWorkflowRequest,
+    StopStrategy,
     UpdateCronWorkflowRequest,
     Workflow as _ModelWorkflow,
 )
@@ -76,15 +77,18 @@ class CronWorkflow(Workflow):
     failed_jobs_history_limit: Annotated[Optional[int], _CronWorkflowModelMapper("spec.failed_jobs_history_limit")] = (
         None
     )
-    schedule: Annotated[str, _CronWorkflowModelMapper("spec.schedule")]
+    schedule: Annotated[Optional[str], _CronWorkflowModelMapper("spec.schedule")] = None
+    schedules: Annotated[Optional[List[str]], _CronWorkflowModelMapper("spec.schedules")] = None
     starting_deadline_seconds: Annotated[Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")] = (
         None
     )
+    stop_strategy: Annotated[Optional[StopStrategy], _CronWorkflowModelMapper("spec.stop_strategy")]
     successful_jobs_history_limit: Annotated[
         Optional[int], _CronWorkflowModelMapper("spec.successful_jobs_history_limit")
     ] = None
     cron_suspend: Annotated[Optional[bool], _CronWorkflowModelMapper("spec.suspend")] = None
     timezone: Annotated[Optional[str], _CronWorkflowModelMapper("spec.timezone")] = None
+    when: Annotated[Optional[str], _CronWorkflowModelMapper("spec.when")] = None
     cron_status: Annotated[Optional[CronWorkflowStatus], _CronWorkflowModelMapper("status")] = None
 
     def create(self) -> TWorkflow:  # type: ignore
@@ -149,7 +153,6 @@ class CronWorkflow(Workflow):
         model_cron_workflow = _ModelCronWorkflow(
             metadata=model_workflow.metadata,
             spec=CronWorkflowSpec(
-                schedule=self.schedule,
                 workflow_spec=model_workflow.spec,
             ),
         )
@@ -160,7 +163,7 @@ class CronWorkflow(Workflow):
     def _from_model(cls, model: BaseModel) -> ModelMapperMixin:
         """Parse from given model to cls's type."""
         assert isinstance(model, _ModelCronWorkflow)
-        hera_cron_workflow = cls(schedule="")
+        hera_cron_workflow = cls()
 
         for attr, annotation in cls._get_all_annotations().items():
             if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
