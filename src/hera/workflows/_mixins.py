@@ -32,6 +32,7 @@ from hera.workflows.models import (
     Artifact as ModelArtifact,
     ArtifactLocation,
     ContainerPort,
+    ContainerResizePolicy,
     ContinueOn,
     EnvFromSource,
     EnvVar,
@@ -64,7 +65,6 @@ from hera.workflows.models import (
     VolumeDevice,
     VolumeMount,
 )
-from hera.workflows.models import ContainerResizePolicy
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources

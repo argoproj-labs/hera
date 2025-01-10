@@ -82,7 +82,7 @@ class CronWorkflow(Workflow):
     starting_deadline_seconds: Annotated[Optional[int], _CronWorkflowModelMapper("spec.starting_deadline_seconds")] = (
         None
     )
-    stop_strategy: Annotated[Optional[StopStrategy], _CronWorkflowModelMapper("spec.stop_strategy")]
+    stop_strategy: Annotated[Optional[StopStrategy], _CronWorkflowModelMapper("spec.stop_strategy")] = None
     successful_jobs_history_limit: Annotated[
         Optional[int], _CronWorkflowModelMapper("spec.successful_jobs_history_limit")
     ] = None
