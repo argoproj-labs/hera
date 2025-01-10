@@ -25,6 +25,7 @@ def get_workflow() -> Workflow:
             namespace="argo",
             verify_ssl=False,
         ),
+        service_account_name="argo",
     ) as w:
         with Steps(name="steps"):
             print_msg(name="step-1", arguments={"message": "Hello world!"})
