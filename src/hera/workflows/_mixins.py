@@ -32,6 +32,7 @@ from hera.workflows.models import (
     Artifact as ModelArtifact,
     ArtifactLocation,
     ContainerPort,
+    ContainerResizePolicy,
     ContinueOn,
     EnvFromSource,
     EnvVar,
@@ -58,7 +59,6 @@ from hera.workflows.models import (
     Synchronization,
     Template,
     TemplateRef,
-    TerminationMessagePolicy,
     Toleration,
     UserContainer as ModelUserContainer,
     Volume as ModelVolume,
@@ -185,7 +185,7 @@ class ContainerMixin(BaseMixin):
     stdin: Optional[bool] = None
     stdin_once: Optional[bool] = None
     termination_message_path: Optional[str] = None
-    termination_message_policy: Optional[TerminationMessagePolicy] = None
+    termination_message_policy: Optional[str] = None
     tty: Optional[bool] = None
 
     def _build_image_pull_policy(self) -> Optional[str]:
@@ -484,6 +484,8 @@ class ResourceMixin(BaseMixin):
     """`ResourceMixin` provides the capability to set resources such as compute requirements like CPU, GPU, etc."""
 
     resources: Optional[Union[ResourceRequirements, Resources]] = None
+    resize_policy: Optional[List[ContainerResizePolicy]] = None
+    restart_policy: Optional[str] = None
 
     def _build_resources(self) -> Optional[ResourceRequirements]:
         """Parses the resources and returns a generated `ResourceRequirements` object."""

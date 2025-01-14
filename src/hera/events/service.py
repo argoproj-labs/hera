@@ -106,6 +106,7 @@ class EventsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> EventSourceList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -124,6 +125,7 @@ class EventsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -285,6 +287,7 @@ class EventsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> SensorList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -303,6 +306,7 @@ class EventsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -424,6 +428,7 @@ class EventsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> EventSourceWatchEvent:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -442,6 +447,7 @@ class EventsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -518,6 +524,7 @@ class EventsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> Event:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -536,6 +543,7 @@ class EventsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -560,6 +568,7 @@ class EventsService:
         timeout_seconds: Optional[str] = None,
         limit: Optional[str] = None,
         continue_: Optional[str] = None,
+        send_initial_events: Optional[bool] = None,
     ) -> SensorWatchEvent:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -578,6 +587,7 @@ class EventsService:
                 "listOptions.timeoutSeconds": timeout_seconds,
                 "listOptions.limit": limit,
                 "listOptions.continue": continue_,
+                "listOptions.sendInitialEvents": send_initial_events,
             },
             headers={"Authorization": self.token},
             data=None,

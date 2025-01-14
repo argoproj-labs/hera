@@ -20,16 +20,8 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = [
     "cluster-workflow-template__clustertemplates.upstream.yaml",
     "cron-backfill.upstream.yaml",
     "memoize-simple.upstream.yaml",
-    "pod-gc-strategy-with-label-selector.upstream.yaml",
-    "pod-gc-strategy.upstream.yaml",
     "webhdfs-input-output-artifacts.upstream.yaml",
     "workflow-template__templates.upstream.yaml",
-    "synchronization-wf-level.upstream.yaml",
-    "synchronization-mutex-tmpl-level.upstream.yaml",
-    "synchronization-mutex-wf-level.upstream.yaml",
-    "synchronization-tmpl-level.upstream.yaml",
-    "cron-when.upstream.yaml",
-    "cron-workflow-multiple-schedules.upstream.yaml",
 ]
 
 

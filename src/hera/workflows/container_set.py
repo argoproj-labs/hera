@@ -113,15 +113,15 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
             name=self.name,
             ports=self.ports,
             readiness_probe=self.readiness_probe,
+            resize_policy=self.resize_policy,
             resources=self._build_resources(),
+            restart_policy=self.restart_policy,
             security_context=self.security_context,
             startup_probe=self.startup_probe,
             stdin=self.stdin,
             stdin_once=self.stdin_once,
             termination_message_path=self.termination_message_path,
-            termination_message_policy=self.termination_message_policy.value
-            if self.termination_message_policy
-            else None,
+            termination_message_policy=self.termination_message_policy,
             tty=self.tty,
             volume_devices=self.volume_devices,
             volume_mounts=self._build_volume_mounts(),

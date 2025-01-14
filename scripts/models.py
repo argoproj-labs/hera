@@ -142,15 +142,6 @@ def write_imports(references: List[ImportReference], models_type: str, openapi_s
 
         enums = [
             "ImagePullPolicy",
-            "TerminationMessagePolicy",
-            "Protocol",
-            "Scheme",
-            "Operator",
-            "Type",
-            "Phase",
-            "TypeModel",
-            "Effect",
-            "OperatorModel",
         ]
         for enum in enums:
             references.append(ImportReference(f"hera.{models_type}.models.io.k8s.api.core.v1", enum))

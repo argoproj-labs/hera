@@ -34,7 +34,7 @@ This example showcases the user of a user container with a volume mount.
                 metadata=m.ObjectMeta(name="something"),
                 spec=m.PersistentVolumeClaimSpec(
                     access_modes=["ReadWriteOnce"],
-                    resources=m.ResourceRequirements(requests={"storage": "64Mi"}),
+                    resources=m.VolumeResourceRequirements(requests={"storage": "64Mi"}),
                 ),
             )
         ],

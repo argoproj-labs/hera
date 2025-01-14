@@ -13,6 +13,7 @@ def get_workflow() -> Workflow:
             namespace="argo",
             verify_ssl=False,
         ),
+        service_account_name="argo",
     ) as w:
         hello_world_to_file = Container(
             name="hello-world-to-file",

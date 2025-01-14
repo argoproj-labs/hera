@@ -70,12 +70,6 @@ FIELD_REMAPPINGS: Dict[
             ("type", "integer"),
         ),
     },
-    "io.k8s.api.core.v1.Container": {
-        "imagePullPolicy": (
-            ("enum", None),
-            None,
-        )
-    },
 }
 for obj_name, field in FIELD_REMAPPINGS.items():
     try:
