@@ -222,10 +222,10 @@ def _constant_repr(obj):
     if isinstance(obj, range):
         return f"{obj.start}..{obj.stop - 1}"
     if isinstance(obj, list):
-        return f'[{", ".join(map(_constant_repr, obj))}]'
+        return f"[{', '.join(map(_constant_repr, obj))}]"
     if isinstance(obj, dict):
         key_value_pairs = [f"{_constant_repr(key)}: {_constant_repr(value)}" for key, value in obj.items()]
-        return f'{{{", ".join(key_value_pairs)}}}'
+        return f"{{{', '.join(key_value_pairs)}}}"
     return repr(obj)
 
 

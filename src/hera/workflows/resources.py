@@ -76,18 +76,18 @@ class Resources(_BaseModel):
         if memory_limit is not None:
             validate_memory_units(memory_limit)
             if memory_request is not None:
-                assert convert_memory_units(memory_request) <= convert_memory_units(
-                    memory_limit
-                ), "Memory request must be smaller or equal to limit"
+                assert convert_memory_units(memory_request) <= convert_memory_units(memory_limit), (
+                    "Memory request must be smaller or equal to limit"
+                )
 
         if ephemeral_request is not None:
             validate_storage_units(ephemeral_request)
         if ephemeral_limit is not None:
             validate_storage_units(ephemeral_limit)
             if ephemeral_request is not None:
-                assert convert_storage_units(ephemeral_request) <= convert_storage_units(
-                    ephemeral_limit
-                ), "Ephemeral request must be smaller or equal to limit"
+                assert convert_storage_units(ephemeral_request) <= convert_storage_units(ephemeral_limit), (
+                    "Ephemeral request must be smaller or equal to limit"
+                )
 
         if cpu_request is not None and isinstance(cpu_request, (int, float)):
             assert cpu_request >= 0, "CPU request must be positive"
@@ -101,9 +101,9 @@ class Resources(_BaseModel):
         if cpu_limit is not None and isinstance(cpu_limit, str):
             validate_cpu_units(cpu_limit)
             if cpu_request is not None and isinstance(cpu_request, str):
-                assert convert_cpu_units(cpu_request) <= convert_cpu_units(
-                    cpu_limit
-                ), "CPU request must be smaller or equal to limit"
+                assert convert_cpu_units(cpu_request) <= convert_cpu_units(cpu_limit), (
+                    "CPU request must be smaller or equal to limit"
+                )
 
         return values
 

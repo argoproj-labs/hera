@@ -860,7 +860,7 @@ class RunnerScriptConstructor(ScriptConstructor):
             "-m",
             "hera.workflows.runner",
             "-e",
-            f'{values["source"].__module__}:{values["source"].__name__}',
+            f"{values['source'].__module__}:{values['source'].__name__}",
         ]
 
         return values

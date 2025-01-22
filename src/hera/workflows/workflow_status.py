@@ -29,7 +29,7 @@ class WorkflowStatus(str, Enum):
 
         ss = switch.get(s)
         if not ss:
-            raise KeyError(f"Unrecognized status {s}. " f"Available Argo statuses are: {list(switch.keys())}")
+            raise KeyError(f"Unrecognized status {s}. Available Argo statuses are: {list(switch.keys())}")
         return ss
 
 

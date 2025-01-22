@@ -94,9 +94,9 @@ class Task(
             if isinstance(o, Task):
                 o.next(self)
             else:
-                assert isinstance(
-                    o, str
-                ), f"Unknown list item type {type(o)} specified using reverse right bitshift operator"
+                assert isinstance(o, str), (
+                    f"Unknown list item type {type(o)} specified using reverse right bitshift operator"
+                )
                 if self.depends is None:
                     self.depends = o
                 else:
@@ -109,9 +109,9 @@ class Task(
             return self.next(other)
         elif isinstance(other, list):
             for o in other:
-                assert isinstance(
-                    o, Task
-                ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                assert isinstance(o, Task), (
+                    f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                )
                 self.next(o)
             return other
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
@@ -156,17 +156,17 @@ class Task(
 
     def when_any_succeeded(self, other: Task) -> Task:
         """Sets the current task to run when the given `other` task succeedds."""
-        assert (self.with_param is not None) or (
-            self.with_sequence is not None
-        ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
+        assert (self.with_param is not None) or (self.with_sequence is not None), (
+            "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
+        )
 
         return self.next(other, on=TaskResult.any_succeeded)
 
     def when_all_failed(self, other: Task) -> Task:
         """Sets the current task to run when the given `other` task has failed."""
-        assert (self.with_param is not None) or (
-            self.with_sequence is not None
-        ), "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
+        assert (self.with_param is not None) or (self.with_sequence is not None), (
+            "Can only use `when_all_failed` when using `with_param` or `with_sequence`"
+        )
 
         return self.next(other, on=TaskResult.all_failed)
 
