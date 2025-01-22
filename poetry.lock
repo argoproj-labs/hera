@@ -1346,20 +1346,20 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "varname"
-version = "0.13.5"
+version = "0.14.0"
 description = "Dark magics about variable names in python."
 optional = true
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "varname-0.13.5-py3-none-any.whl", hash = "sha256:55bc967573215ff93cbf77d6fe979c353b199080eac660adfb3b35b303f6eda2"},
-    {file = "varname-0.13.5.tar.gz", hash = "sha256:82076a5c08e1b8b4fd0c9b5b1bf4a211a86d5367f97aa7f91d8eccb84017b3bf"},
+    {file = "varname-0.14.0-py3-none-any.whl", hash = "sha256:2d7a968ec7cdf8026a54cce808ace2c46718df652189a024eab8da94a4fde928"},
+    {file = "varname-0.14.0.tar.gz", hash = "sha256:35384677e083202a60a8ed18ff336020e5d017cf8dc1691d09485539c45aa38b"},
 ]
 
 [package.dependencies]
 executing = ">=2.1,<3.0"
 
 [package.extras]
-all = ["asttokens (==2.*)", "pure_eval (==0.*)"]
+all = ["asttokens (==3.*)", "pure_eval (==0.*)"]
 
 [[package]]
 name = "zipp"
@@ -1384,4 +1384,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "db113b7ab832a14be806489c48589a1ffca26af5cc5f4f45c05a0e604181627a"
+content-hash = "882b31f2407533010a54b2b39624a1075124df96bc4a29090338270ed19a2f4e"
