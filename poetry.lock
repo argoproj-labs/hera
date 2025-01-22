@@ -120,13 +120,13 @@ virtualenv = ["virtualenv (>=20.0.35)"]
 
 [[package]]
 name = "cappa"
-version = "0.26.1"
+version = "0.26.4"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = "<4,>=3.8"
 files = [
-    {file = "cappa-0.26.1-py3-none-any.whl", hash = "sha256:3392c2b4b06fe1b5039e15304030324a645ab41cfe34af982175d834c2eff45e"},
-    {file = "cappa-0.26.1.tar.gz", hash = "sha256:de36f043998efce2fb16326936ccf4d87be3008d6f029a1c00b8af776266c6ac"},
+    {file = "cappa-0.26.4-py3-none-any.whl", hash = "sha256:99760087b1efdca334a3e8bc1599cb61dff50f84d8627d8b19844b6fcd97c26a"},
+    {file = "cappa-0.26.4.tar.gz", hash = "sha256:3b289126f9e388352d407769b7e5909370b4ec90c0539528fb06ed252c2ab440"},
 ]
 
 [package.dependencies]
