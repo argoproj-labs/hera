@@ -73,7 +73,7 @@ def _main():
         if os.path.isdir(os.path.join(f"../{examples_workflows}", name)) and name != "__pycache__"
     ]:
         # Use hyphens for website URL paths
-        docs_example_sub_folder = f'examples/{example_sub_folder.replace("_", "-")}'
+        docs_example_sub_folder = f"examples/{example_sub_folder.replace('_', '-')}"
         shutil.rmtree(docs_example_sub_folder, ignore_errors=True)
         Path(docs_example_sub_folder).mkdir(parents=True, exist_ok=True)
         for path in Path(f"../examples/{example_sub_folder}").glob("*.py"):

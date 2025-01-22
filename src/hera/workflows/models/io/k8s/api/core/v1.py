@@ -200,7 +200,7 @@ class AzureFileVolumeSource(BaseModel):
         str,
         Field(
             alias="secretName",
-            description=("secretName is the  name of secret that contains Azure Storage Account" " Name and Key"),
+            description=("secretName is the  name of secret that contains Azure Storage Account Name and Key"),
         ),
     ]
     share_name: Annotated[str, Field(alias="shareName", description="shareName is the azure share Name")]
@@ -249,7 +249,7 @@ class ContainerPort(BaseModel):
         Field(
             alias="containerPort",
             description=(
-                "Number of port to expose on the pod's IP address. This must be a valid" " port number, 0 < x < 65536."
+                "Number of port to expose on the pod's IP address. This must be a valid port number, 0 < x < 65536."
             ),
         ),
     ]
@@ -290,7 +290,7 @@ class ContainerResizePolicy(BaseModel):
         Field(
             alias="resourceName",
             description=(
-                "Name of the resource to which this resource resize policy applies." " Supported values: cpu, memory."
+                "Name of the resource to which this resource resize policy applies. Supported values: cpu, memory."
             ),
         ),
     ]
@@ -311,7 +311,7 @@ class ObjectFieldSelector(BaseModel):
         Optional[str],
         Field(
             alias="apiVersion",
-            description=("Version of the schema the FieldPath is written in terms of, defaults" ' to "v1".'),
+            description=('Version of the schema the FieldPath is written in terms of, defaults to "v1".'),
         ),
     ] = None
     field_path: Annotated[
@@ -487,7 +487,7 @@ class FlockerVolumeSource(BaseModel):
         Optional[str],
         Field(
             alias="datasetUUID",
-            description=("datasetUUID is the UUID of the dataset. This is unique identifier of a" " Flocker dataset"),
+            description=("datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset"),
         ),
     ] = None
 
@@ -546,7 +546,7 @@ class GCEPersistentDiskVolumeSource(BaseModel):
 class GRPCAction(BaseModel):
     port: Annotated[
         int,
-        Field(description=("Port number of the gRPC service. Number must be in the range 1 to" " 65535.")),
+        Field(description=("Port number of the gRPC service. Number must be in the range 1 to 65535.")),
     ]
     service: Annotated[
         Optional[str],
@@ -875,7 +875,7 @@ class PersistentVolumeClaimVolumeSource(BaseModel):
         Optional[bool],
         Field(
             alias="readOnly",
-            description=("readOnly Will force the ReadOnly setting in VolumeMounts. Default" " false."),
+            description=("readOnly Will force the ReadOnly setting in VolumeMounts. Default false."),
         ),
     ] = None
 
@@ -1071,7 +1071,7 @@ class QuobyteVolumeSource(BaseModel):
     ] = None
     volume: Annotated[
         str,
-        Field(description=("volume is a string that references an already created Quobyte volume" " by name.")),
+        Field(description=("volume is a string that references an already created Quobyte volume by name.")),
     ]
 
 
@@ -1196,7 +1196,7 @@ class ServiceAccountTokenProjection(BaseModel):
     ] = None
     path: Annotated[
         str,
-        Field(description=("path is the path relative to the mount point of the file to project" " the token into.")),
+        Field(description=("path is the path relative to the mount point of the file to project the token into.")),
     ]
 
 
@@ -1287,7 +1287,7 @@ class VsphereVirtualDiskVolumeSource(BaseModel):
         Optional[str],
         Field(
             alias="storagePolicyName",
-            description=("storagePolicyName is the storage Policy Based Management (SPBM)" " profile name."),
+            description=("storagePolicyName is the storage Policy Based Management (SPBM) profile name."),
         ),
     ] = None
     volume_path: Annotated[
@@ -1304,7 +1304,7 @@ class VolumeDevice(BaseModel):
         str,
         Field(
             alias="devicePath",
-            description=("devicePath is the path inside of the container that the device will be" " mapped to."),
+            description=("devicePath is the path inside of the container that the device will be mapped to."),
         ),
     ]
     name: Annotated[
@@ -1318,7 +1318,7 @@ class VolumeMount(BaseModel):
         str,
         Field(
             alias="mountPath",
-            description=("Path within the container at which the volume should be mounted.  Must" " not contain ':'."),
+            description=("Path within the container at which the volume should be mounted.  Must not contain ':'."),
         ),
     ]
     mount_propagation: Annotated[
@@ -1340,9 +1340,7 @@ class VolumeMount(BaseModel):
         Optional[bool],
         Field(
             alias="readOnly",
-            description=(
-                "Mounted read-only if true, read-write otherwise (false or" " unspecified). Defaults to false."
-            ),
+            description=("Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false."),
         ),
     ] = None
     recursive_read_only: Annotated[
@@ -1408,12 +1406,12 @@ class PersistentVolumeClaimCondition(BaseModel):
         Optional[v1.Time],
         Field(
             alias="lastTransitionTime",
-            description=("lastTransitionTime is the time the condition transitioned from one" " status to another."),
+            description=("lastTransitionTime is the time the condition transitioned from one status to another."),
         ),
     ] = None
     message: Annotated[
         Optional[str],
-        Field(description=("message is the human-readable message indicating details about last" " transition.")),
+        Field(description=("message is the human-readable message indicating details about last transition.")),
     ] = None
     reason: Annotated[
         Optional[str],
@@ -1486,7 +1484,7 @@ class ServicePort(BaseModel):
     port: Annotated[int, Field(description="The port that will be exposed by this service.")]
     protocol: Annotated[
         Optional[str],
-        Field(description=('The IP protocol for this port. Supports "TCP", "UDP", and "SCTP".' " Default is TCP.")),
+        Field(description=('The IP protocol for this port. Supports "TCP", "UDP", and "SCTP". Default is TCP.')),
     ] = None
     target_port: Annotated[
         Optional[intstr.IntOrString],
@@ -1562,7 +1560,7 @@ class CSIVolumeSource(BaseModel):
         Field(
             alias="readOnly",
             description=(
-                "readOnly specifies a read-only configuration for the volume. Defaults" " to false (read/write)."
+                "readOnly specifies a read-only configuration for the volume. Defaults to false (read/write)."
             ),
         ),
     ] = None
@@ -1592,7 +1590,7 @@ class CephFSVolumeSource(BaseModel):
     path: Annotated[
         Optional[str],
         Field(
-            description=("path is Optional: Used as the mounted root, rather than the full Ceph" " tree, default is /")
+            description=("path is Optional: Used as the mounted root, rather than the full Ceph tree, default is /")
         ),
     ] = None
     read_only: Annotated[
@@ -1668,8 +1666,7 @@ class CinderVolumeSource(BaseModel):
         Field(
             alias="secretRef",
             description=(
-                "secretRef is optional: points to a secret object containing parameters"
-                " used to connect to OpenStack."
+                "secretRef is optional: points to a secret object containing parameters used to connect to OpenStack."
             ),
         ),
     ] = None
@@ -1735,14 +1732,14 @@ class ISCSIVolumeSource(BaseModel):
         Optional[bool],
         Field(
             alias="chapAuthDiscovery",
-            description=("chapAuthDiscovery defines whether support iSCSI Discovery CHAP" " authentication"),
+            description=("chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication"),
         ),
     ] = None
     chap_auth_session: Annotated[
         Optional[bool],
         Field(
             alias="chapAuthSession",
-            description=("chapAuthSession defines whether support iSCSI Session CHAP" " authentication"),
+            description=("chapAuthSession defines whether support iSCSI Session CHAP authentication"),
         ),
     ] = None
     fs_type: Annotated[
@@ -1775,7 +1772,7 @@ class ISCSIVolumeSource(BaseModel):
         Field(
             alias="iscsiInterface",
             description=(
-                "iscsiInterface is the interface Name that uses an iSCSI transport." " Defaults to 'default' (tcp)."
+                "iscsiInterface is the interface Name that uses an iSCSI transport. Defaults to 'default' (tcp)."
             ),
         ),
     ] = None
@@ -1794,14 +1791,14 @@ class ISCSIVolumeSource(BaseModel):
         Optional[bool],
         Field(
             alias="readOnly",
-            description=("readOnly here will force the ReadOnly setting in VolumeMounts." " Defaults to false."),
+            description=("readOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false."),
         ),
     ] = None
     secret_ref: Annotated[
         Optional[LocalObjectReference],
         Field(
             alias="secretRef",
-            description=("secretRef is the CHAP Secret for iSCSI target and initiator" " authentication"),
+            description=("secretRef is the CHAP Secret for iSCSI target and initiator authentication"),
         ),
     ] = None
     target_portal: Annotated[
@@ -1835,8 +1832,7 @@ class RBDVolumeSource(BaseModel):
         str,
         Field(
             description=(
-                "image is the rados image name. More info:"
-                " https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+                "image is the rados image name. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
             )
         ),
     ]
@@ -1921,9 +1917,7 @@ class ScaleIOVolumeSource(BaseModel):
         Optional[str],
         Field(
             alias="protectionDomain",
-            description=(
-                "protectionDomain is the name of the ScaleIO Protection Domain for the" " configured storage."
-            ),
+            description=("protectionDomain is the name of the ScaleIO Protection Domain for the configured storage."),
         ),
     ] = None
     read_only: Annotated[
@@ -1951,7 +1945,7 @@ class ScaleIOVolumeSource(BaseModel):
         Optional[bool],
         Field(
             alias="sslEnabled",
-            description=("sslEnabled Flag enable/disable SSL communication with Gateway, default" " false"),
+            description=("sslEnabled Flag enable/disable SSL communication with Gateway, default false"),
         ),
     ] = None
     storage_mode: Annotated[
@@ -1968,7 +1962,7 @@ class ScaleIOVolumeSource(BaseModel):
         Optional[str],
         Field(
             alias="storagePool",
-            description=("storagePool is the ScaleIO Storage Pool associated with the protection" " domain."),
+            description=("storagePool is the ScaleIO Storage Pool associated with the protection domain."),
         ),
     ] = None
     system: Annotated[
@@ -2097,9 +2091,7 @@ class EnvFromSource(BaseModel):
     ] = None
     prefix: Annotated[
         Optional[str],
-        Field(
-            description=("An optional identifier to prepend to each key in the ConfigMap. Must" " be a C_IDENTIFIER.")
-        ),
+        Field(description=("An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.")),
     ] = None
     secret_ref: Annotated[
         Optional[SecretEnvSource],
@@ -2255,9 +2247,7 @@ class PreferredSchedulingTerm(BaseModel):
     ]
     weight: Annotated[
         int,
-        Field(
-            description=("Weight associated with matching the corresponding nodeSelectorTerm, in" " the range 1-100.")
-        ),
+        Field(description=("Weight associated with matching the corresponding nodeSelectorTerm, in the range 1-100.")),
     ]
 
 
@@ -2675,7 +2665,7 @@ class EnvVar(BaseModel):
         Optional[EnvVarSource],
         Field(
             alias="valueFrom",
-            description=("Source for the environment variable's value. Cannot be used if value" " is not empty."),
+            description=("Source for the environment variable's value. Cannot be used if value is not empty."),
         ),
     ] = None
 
@@ -3208,7 +3198,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         Optional[str],
         Field(
             alias="volumeName",
-            description=("volumeName is the binding reference to the PersistentVolume backing" " this claim."),
+            description=("volumeName is the binding reference to the PersistentVolume backing this claim."),
         ),
     ] = None
 
@@ -3224,9 +3214,7 @@ class LifecycleHandler(BaseModel):
     ] = None
     sleep: Annotated[
         Optional[SleepAction],
-        Field(
-            description=("Sleep represents the duration that the container should sleep before" " being terminated.")
-        ),
+        Field(description=("Sleep represents the duration that the container should sleep before being terminated.")),
     ] = None
     tcp_socket: Annotated[
         Optional[TCPSocketAction],
@@ -3280,7 +3268,7 @@ class Probe(BaseModel):
         Optional[int],
         Field(
             alias="periodSeconds",
-            description=("How often (in seconds) to perform the probe. Default to 10 seconds." " Minimum value is 1."),
+            description=("How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1."),
         ),
     ] = None
     success_threshold: Annotated[
@@ -3376,7 +3364,7 @@ class VolumeProjection(BaseModel):
         Optional[ServiceAccountTokenProjection],
         Field(
             alias="serviceAccountToken",
-            description=("serviceAccountToken is information about the serviceAccountToken data" " to project"),
+            description=("serviceAccountToken is information about the serviceAccountToken data to project"),
         ),
     ] = None
 
@@ -3386,14 +3374,12 @@ class WeightedPodAffinityTerm(BaseModel):
         PodAffinityTerm,
         Field(
             alias="podAffinityTerm",
-            description=("Required. A pod affinity term, associated with the corresponding" " weight."),
+            description=("Required. A pod affinity term, associated with the corresponding weight."),
         ),
     ]
     weight: Annotated[
         int,
-        Field(
-            description=("weight associated with matching the corresponding podAffinityTerm, in" " the range 1-100.")
-        ),
+        Field(description=("weight associated with matching the corresponding podAffinityTerm, in the range 1-100.")),
     ]
 
 
@@ -3423,9 +3409,7 @@ class Event(BaseModel):
         Optional[v1.Time],
         Field(
             alias="firstTimestamp",
-            description=(
-                "The time at which the event was first recorded. (Time of server" " receipt is in TypeMeta.)"
-            ),
+            description=("The time at which the event was first recorded. (Time of server receipt is in TypeMeta.)"),
         ),
     ] = None
     involved_object: Annotated[
@@ -3447,7 +3431,7 @@ class Event(BaseModel):
         Optional[v1.Time],
         Field(
             alias="lastTimestamp",
-            description=("The time at which the most recent occurrence of this event was" " recorded."),
+            description=("The time at which the most recent occurrence of this event was recorded."),
         ),
     ] = None
     message: Annotated[
@@ -3480,7 +3464,7 @@ class Event(BaseModel):
         Optional[str],
         Field(
             alias="reportingComponent",
-            description=("Name of the controller that emitted this Event, e.g." " `kubernetes.io/kubelet`."),
+            description=("Name of the controller that emitted this Event, e.g. `kubernetes.io/kubelet`."),
         ),
     ] = None
     reporting_instance: Annotated[
@@ -3492,15 +3476,15 @@ class Event(BaseModel):
     ] = None
     series: Annotated[
         Optional[EventSeries],
-        Field(description=("Data about the Event series this event represents or nil if it's a" " singleton Event.")),
+        Field(description=("Data about the Event series this event represents or nil if it's a singleton Event.")),
     ] = None
     source: Annotated[
         Optional[EventSource],
-        Field(description=("The component reporting this event. Should be a short machine" " understandable string.")),
+        Field(description=("The component reporting this event. Should be a short machine understandable string.")),
     ] = None
     type: Annotated[
         Optional[str],
-        Field(description=("Type of this event (Normal, Warning), new types could be added in the" " future")),
+        Field(description=("Type of this event (Normal, Warning), new types could be added in the future")),
     ] = None
 
 
@@ -3680,7 +3664,7 @@ class Container(BaseModel):
     ] = None
     env: Annotated[
         Optional[List[EnvVar]],
-        Field(description=("List of environment variables to set in the container. Cannot be" " updated.")),
+        Field(description=("List of environment variables to set in the container. Cannot be updated.")),
     ] = None
     env_from: Annotated[
         Optional[List[EnvFromSource]],
@@ -3914,14 +3898,14 @@ class Container(BaseModel):
         Optional[List[VolumeDevice]],
         Field(
             alias="volumeDevices",
-            description=("volumeDevices is the list of block devices to be used by the" " container."),
+            description=("volumeDevices is the list of block devices to be used by the container."),
         ),
     ] = None
     volume_mounts: Annotated[
         Optional[List[VolumeMount]],
         Field(
             alias="volumeMounts",
-            description=("Pod volumes to mount into the container's filesystem. Cannot be" " updated."),
+            description=("Pod volumes to mount into the container's filesystem. Cannot be updated."),
         ),
     ] = None
     working_dir: Annotated[
@@ -4079,19 +4063,19 @@ class Volume(BaseModel):
         Optional[AzureDiskVolumeSource],
         Field(
             alias="azureDisk",
-            description=("azureDisk represents an Azure Data Disk mount on the host and bind" " mount to the pod."),
+            description=("azureDisk represents an Azure Data Disk mount on the host and bind mount to the pod."),
         ),
     ] = None
     azure_file: Annotated[
         Optional[AzureFileVolumeSource],
         Field(
             alias="azureFile",
-            description=("azureFile represents an Azure File Service mount on the host and bind" " mount to the pod."),
+            description=("azureFile represents an Azure File Service mount on the host and bind mount to the pod."),
         ),
     ] = None
     cephfs: Annotated[
         Optional[CephFSVolumeSource],
-        Field(description=("cephFS represents a Ceph FS mount on the host that shares a pod's" " lifetime")),
+        Field(description=("cephFS represents a Ceph FS mount on the host that shares a pod's lifetime")),
     ] = None
     cinder: Annotated[
         Optional[CinderVolumeSource],
@@ -4123,7 +4107,7 @@ class Volume(BaseModel):
         Optional[DownwardAPIVolumeSource],
         Field(
             alias="downwardAPI",
-            description=("downwardAPI represents downward API about the pod that should populate" " this volume"),
+            description=("downwardAPI represents downward API about the pod that should populate this volume"),
         ),
     ] = None
     empty_dir: Annotated[
@@ -4288,18 +4272,16 @@ class Volume(BaseModel):
         Optional[PortworxVolumeSource],
         Field(
             alias="portworxVolume",
-            description=(
-                "portworxVolume represents a portworx volume attached and mounted on" " kubelets host machine"
-            ),
+            description=("portworxVolume represents a portworx volume attached and mounted on kubelets host machine"),
         ),
     ] = None
     projected: Annotated[
         Optional[ProjectedVolumeSource],
-        Field(description=("projected items for all in one resources secrets, configmaps, and" " downward API")),
+        Field(description=("projected items for all in one resources secrets, configmaps, and downward API")),
     ] = None
     quobyte: Annotated[
         Optional[QuobyteVolumeSource],
-        Field(description=("quobyte represents a Quobyte mount on the host that shares a pod's" " lifetime")),
+        Field(description=("quobyte represents a Quobyte mount on the host that shares a pod's lifetime")),
     ] = None
     rbd: Annotated[
         Optional[RBDVolumeSource],
@@ -4315,9 +4297,7 @@ class Volume(BaseModel):
         Optional[ScaleIOVolumeSource],
         Field(
             alias="scaleIO",
-            description=(
-                "scaleIO represents a ScaleIO persistent volume attached and mounted on" " Kubernetes nodes."
-            ),
+            description=("scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes."),
         ),
     ] = None
     secret: Annotated[
@@ -4331,12 +4311,12 @@ class Volume(BaseModel):
     ] = None
     storageos: Annotated[
         Optional[StorageOSVolumeSource],
-        Field(description=("storageOS represents a StorageOS volume attached and mounted on" " Kubernetes nodes.")),
+        Field(description=("storageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.")),
     ] = None
     vsphere_volume: Annotated[
         Optional[VsphereVirtualDiskVolumeSource],
         Field(
             alias="vsphereVolume",
-            description=("vsphereVolume represents a vSphere volume attached and mounted on" " kubelets host machine"),
+            description=("vsphereVolume represents a vSphere volume attached and mounted on kubelets host machine"),
         ),
     ] = None

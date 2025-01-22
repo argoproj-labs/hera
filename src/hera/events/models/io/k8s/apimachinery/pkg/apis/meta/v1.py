@@ -77,7 +77,7 @@ class ListMeta(BaseModel):
         Field(
             alias="selfLink",
             description=(
-                "Deprecated: selfLink is a legacy read-only field that is no longer" " populated by the system."
+                "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system."
             ),
         ),
     ] = None
@@ -253,7 +253,7 @@ class ManagedFieldsEntry(BaseModel):
         Optional[FieldsV1],
         Field(
             alias="fieldsV1",
-            description=("FieldsV1 holds the first JSON version format as described in the" ' "FieldsV1" type.'),
+            description=('FieldsV1 holds the first JSON version format as described in the "FieldsV1" type.'),
         ),
     ] = None
     manager: Annotated[
@@ -303,7 +303,7 @@ class LabelSelector(BaseModel):
         Optional[List[LabelSelectorRequirement]],
         Field(
             alias="matchExpressions",
-            description=("matchExpressions is a list of label selector requirements. The" " requirements are ANDed."),
+            description=("matchExpressions is a list of label selector requirements. The requirements are ANDed."),
         ),
     ] = None
     match_labels: Annotated[
@@ -524,7 +524,7 @@ class ObjectMeta(BaseModel):
         Field(
             alias="selfLink",
             description=(
-                "Deprecated: selfLink is a legacy read-only field that is no longer" " populated by the system."
+                "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system."
             ),
         ),
     ] = None

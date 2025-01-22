@@ -91,9 +91,9 @@ class ContainerNode(ContainerMixin, VolumeMountMixin, ResourceMixin, EnvMixin, S
             return self.next(other)
         elif isinstance(other, list):
             for o in other:
-                assert isinstance(
-                    o, ContainerNode
-                ), f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                assert isinstance(o, ContainerNode), (
+                    f"Unknown list item type {type(o)} specified using right bitshift operator `>>`"
+                )
                 self.next(o)
             return other
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
