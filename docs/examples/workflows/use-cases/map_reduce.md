@@ -25,7 +25,7 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
 
         os.mkdir("/mnt/out")
 
-        part_ids = list(map_(lambda x: str(x), range(num_parts)))
+        part_ids = list(map(lambda x: str(x), range(num_parts)))
         for i, part_id in enumerate(part_ids, start=1):
             with open("/mnt/out/" + part_id + ".json", "w") as f:
                 json.dump({"foo": i}, f)
@@ -70,7 +70,7 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
         os.mkdir("/mnt/out")
 
         total = 0
-        for f in list(map_(lambda x: open("/mnt/in/" + x), os.listdir("/mnt/in"))):
+        for f in list(map(lambda x: open("/mnt/in/" + x), os.listdir("/mnt/in"))):
             result = json.load(f)
             total = total + result["bar"]
         with open("/mnt/out/total.json", "w") as f:
@@ -156,7 +156,7 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
             import os
             import sys
             os.mkdir('/mnt/out')
-            part_ids = list(map_(lambda x: str(x), range(num_parts)))
+            part_ids = list(map(lambda x: str(x), range(num_parts)))
             for (i, part_id) in enumerate(part_ids, start=1):
                 with open('/mnt/out/' + part_id + '.json', 'w') as f:
                     json.dump({'foo': i}, f)
@@ -218,7 +218,7 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
             import os
             os.mkdir('/mnt/out')
             total = 0
-            for f in list(map_(lambda x: open('/mnt/in/' + x), os.listdir('/mnt/in'))):
+            for f in list(map(lambda x: open('/mnt/in/' + x), os.listdir('/mnt/in'))):
                 result = json.load(f)
                 total = total + result['bar']
             with open('/mnt/out/total.json', 'w') as f:
