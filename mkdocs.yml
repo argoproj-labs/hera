@@ -146,7 +146,6 @@ plugins:
             show_bases: false
             separate_signature: true
             docstring_style: google
-          rendering:
             show_source: true
           paths: [src]
           import:
