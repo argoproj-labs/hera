@@ -8,9 +8,8 @@ Please open a PR with your organization or project name in the following section
 ## Organizations/projects using Hera
 
 1. [Dyno Therapeutics](https://www.dynotx.com)
-2. [Pipekit](https://www.pipekit.io)
-3. [Reverie Labs](https://www.reverielabs.com/)
-4. [Infinite Lambda](https://infinitelambda.com/)
-5. [Bloomberg](https://techatbloomberg.com)
-6. [PayIt](https://payitgov.com)
-7. [Intuition Machines](https://www.imachines.com/)
+1. [Pipekit](https://www.pipekit.io)
+1. [Infinite Lambda](https://infinitelambda.com/)
+1. [Bloomberg](https://techatbloomberg.com)
+1. [PayIt](https://payitgov.com)
+1. [Intuition Machines](https://www.imachines.com/)
