@@ -91,6 +91,18 @@ from hera.workflows.parameter import Parameter
             ),
             id="key-model-param-dict",
         ),
+        pytest.param(
+            {"a-key": Parameter(value="a-value")},
+            ModelArguments(
+                parameters=[
+                    ModelParameter(
+                        name="a-key",
+                        value="a-value",
+                    )
+                ],
+            ),
+            id="unnamed-param",
+        ),
     ),
 )
 def test_argument_parameter_build(arguments, expected_built_arguments):
@@ -192,6 +204,18 @@ model_artifact = ModelArtifact(name="artifact-name", from_="somewhere")
                 ],
             ),
             id="hera-artifact-ignore-alt-name",
+        ),
+        pytest.param(
+            {"a-key": Artifact(from_="somewhere")},
+            ModelArguments(
+                artifacts=[
+                    ModelArtifact(
+                        name="a-key",
+                        from_="somewhere",
+                    )
+                ],
+            ),
+            id="unnamed-artifact",
         ),
     ),
 )
