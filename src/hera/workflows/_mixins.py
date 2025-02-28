@@ -611,7 +611,8 @@ class ArgumentsMixin(BaseMixin):
                 # "built" yet (see the `_check_name` function)
                 add_argument(arg.name or "", arg, result)
             else:
-                raise ValueError(f"Invalid argument type {type(arg)}")
+                # Unreachable code (if Pydantic is validating correctly)
+                raise TypeError(f"Invalid argument type {type(arg)}")
 
         # returning `None` for `Arguments` means the submission to the server will not even have the
         # `arguments` field set, which saves some payload
