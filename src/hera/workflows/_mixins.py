@@ -592,10 +592,8 @@ class ArgumentsMixin(BaseMixin):
                 copy_art.name = k
                 result.artifacts = [copy_art] if result.artifacts is None else result.artifacts + [copy_art]
             elif isinstance(v, Artifact):
-                v = v.with_name(k)
-                result.artifacts = (
-                    [v._build_artifact()] if result.artifacts is None else result.artifacts + [v._build_artifact()]
-                )
+                copy_art = v.with_name(k)._build_artifact()
+                result.artifacts = [copy_art] if result.artifacts is None else result.artifacts + [copy_art]
             else:
                 # POD types are assumed to be parameters, which will be serialised upon creation
                 value = Parameter(name=k, value=v).as_argument()
