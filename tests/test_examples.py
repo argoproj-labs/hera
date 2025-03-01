@@ -122,8 +122,7 @@ def test_hera_output(path, module_name, filename, global_config_fixture):
 
     # THEN
     if _generate_yaml(generated_yaml_path):
-        generated_yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
-
+        generated_yaml_path.write_text(workflow.to_yaml())
     # Check there have been no regressions from the generated yaml committed in the repo
     assert generated_yaml_path.exists()
     _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
@@ -154,7 +153,7 @@ def test_hera_output_upstream(module_name, global_config_fixture):
 
     # THEN - generate the yaml if HERA_REGENERATE or it does not exist
     if _generate_yaml(generated_yaml_path):
-        generated_yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
+        generated_yaml_path.write_text(workflow.to_yaml())
     if _generate_yaml(upstream_yaml_path):
         upstream_yaml_path.write_text(
             requests.get(f"{ARGO_EXAMPLES_URL}/{module_name.replace('__', '/').replace('_', '-')}.yaml").text
