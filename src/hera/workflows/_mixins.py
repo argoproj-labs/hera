@@ -579,14 +579,19 @@ class ArgumentsMixin(BaseMixin):
         elif isinstance(self.arguments, ModelArguments):
             return self.arguments
 
+        from hera.workflows.workflow_template import WorkflowTemplate
+
         def add_argument(k: str, v: Any, result: ModelArguments):
+            is_workflow_template = isinstance(self, WorkflowTemplate)
+
             if isinstance(v, Parameter):
-                parameter = v.with_name(k).as_argument()
-                result.parameters = (result.parameters or []) + [parameter]
+                param_copy = v.with_name(k)
+                param_as_argument = param_copy.as_input() if is_workflow_template else param_copy.as_argument()
+                result.parameters = (result.parameters or []) + [param_as_argument]
             elif isinstance(v, ModelParameter):
-                parameter = Parameter.from_model(v).as_argument()
-                parameter.name = k
-                result.parameters = (result.parameters or []) + [parameter]
+                param_copy = Parameter.from_model(v).with_name(k)
+                param_as_argument = param_copy.as_input() if is_workflow_template else param_copy.as_argument()
+                result.parameters = (result.parameters or []) + [param_as_argument]
             elif isinstance(v, ModelArtifact):
                 artifact = v.copy(deep=True)
                 artifact.name = k
@@ -596,7 +601,8 @@ class ArgumentsMixin(BaseMixin):
                 result.artifacts = (result.artifacts or []) + [artifact]
             else:
                 # Primitive types are assumed to be parameters, which will be serialised upon creation
-                parameter = Parameter(name=k, value=v).as_argument()
+                parameter = Parameter(name=k, value=v)
+                param_as_argument = parameter.as_input() if is_workflow_template else parameter.as_argument()
                 result.parameters = (result.parameters or []) + [parameter]
 
         result = ModelArguments()
