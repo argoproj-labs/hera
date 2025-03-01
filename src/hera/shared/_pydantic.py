@@ -92,6 +92,9 @@ class BaseModel(PydanticBaseModel):
         smart_union = True
         """uses smart union for matching a field's specified value to the underlying type that's part of a union"""
 
+        validate_assignment = True
+        """validates on assignment to a field"""
+
 
 __all__ = [
     "BaseModel",
