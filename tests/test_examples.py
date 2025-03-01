@@ -125,8 +125,7 @@ def test_hera_output(path, module_name, filename, global_config_fixture):
         generated_yaml_path.write_text(workflow.to_yaml())
     # Check there have been no regressions from the generated yaml committed in the repo
     assert generated_yaml_path.exists()
-    if generated_yaml_path.exists():
-        _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
+    _compare_workflows(workflow, output, yaml.safe_load(generated_yaml_path.read_text()))
 
     if isinstance(workflow, HeraWorkflowTemplate):
         assert workflow == HeraWorkflowTemplate.from_dict(workflow.to_dict())
@@ -152,7 +151,7 @@ def test_hera_output_upstream(module_name, global_config_fixture):
     # WHEN
     output = workflow.to_dict()
 
-    # THEN - generate the yaml if HERA_REGENERATE or it does not exist and no regressions
+    # THEN - generate the yaml if HERA_REGENERATE or it does not exist
     if _generate_yaml(generated_yaml_path):
         generated_yaml_path.write_text(workflow.to_yaml())
     if _generate_yaml(upstream_yaml_path):
