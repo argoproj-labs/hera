@@ -156,9 +156,20 @@ def test_hera_output_upstream(module_name, global_config_fixture):
     if _generate_yaml(generated_yaml_path):
         generated_yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
     if _generate_yaml(upstream_yaml_path):
-        upstream_yaml_path.write_text(
-            requests.get(f"{ARGO_EXAMPLES_URL}/{module_name.replace('__', '/').replace('_', '-')}.yaml").text
-        )
+        # Compare current local YAML with upstream from GitHub
+        upstream_yaml = requests.get(
+            f"{ARGO_EXAMPLES_URL}/{module_name.replace('__', '/').replace('_', '-')}.yaml"
+        ).text
+        if upstream_yaml_path.exists():
+            current_yaml = upstream_yaml_path.read_text()
+            if current_yaml != upstream_yaml:
+                assert False, (
+                    f"Local copy of upstream YAML does not match actual upstream YAML for {module_name}"
+                    " fetch new YAML by running `make fetch-upstream-examples` (you may then need to edit"
+                    " the code in the Python file)."
+                )
+
+        upstream_yaml_path.write_text(upstream_yaml)
 
     # Check there have been no regressions from the generated yaml
     assert generated_yaml_path.exists()

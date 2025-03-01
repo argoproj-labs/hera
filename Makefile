@@ -140,13 +140,23 @@ regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE
 regenerate-example: install
 	@HERA_REGENERATE=1 poetry run python -m pytest -k $(EXAMPLE_FILENAME)
 
-.PHONY: regenerate-test-data
-regenerate-test-data:  ## Regenerates the test data from upstream examples and runs tests, report missing examples
-regenerate-test-data: install-3.9
-	find examples -name "*.yaml" -type f -delete
-	HERA_REGENERATE=1 poetry run python -m pytest -k test_examples
+.PHONY: regenerate-upstream-test-data
+regenerate-upstream-test-data:  ## Regenerates test data and docs for upstream examples
+regenerate-upstream-test-data: install-3.9
+	HERA_REGENERATE=1 poetry run python -m pytest -k "test_examples and test_hera_output_upstream"
 	make examples
-	@poetry run python -m pytest -k test_for_missing_examples --runxfail
+
+.PHONY: fetch-upstream-examples
+fetch-upstream-examples:  ## Fetch the upstream examples, add missing examples report to docs
+fetch-upstream-examples: install-3.9
+	HERA_REGENERATE=1 poetry run python -m pytest -k test_for_missing_examples --runxfail
+
+.PHONY: regenerate-test-data
+regenerate-test-data:  ## Regenerates test data and docs for non-upstream examples
+regenerate-test-data: install-3.9
+	find examples -not -path "*/upstream/*" -a -name "*.yaml" -type f -delete
+	HERA_REGENERATE=1 poetry run python -m pytest -k "test_examples and not test_hera_output_upstream"
+	make examples
 
 .PHONY: install-k3d
 install-k3d: ## Install k3d client
