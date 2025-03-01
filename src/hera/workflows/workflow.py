@@ -362,9 +362,9 @@ class Workflow(
                 return 2
             return 3
 
-        def order_dict(d: dict) -> dict:
+        def order_dict(d: dict) -> dict[str, Any]:
             """Recursively orders `d` by the custom_ordering function by inserting them into a copy of the dict in order."""
-            d_copy = dict()
+            d_copy: dict[str, Any] = dict()
             for k, v in sorted(d.items(), key=human_readable_ordering):
                 if isinstance(v, dict):
                     d_copy[k] = order_dict(v)
