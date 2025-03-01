@@ -42,28 +42,26 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: writer
             template: writer
-          - arguments:
-              artifacts:
-              - from: '{{tasks.writer.outputs.artifacts.out-art}}'
-                name: in-art
+          - name: consumer
             depends: writer
-            name: consumer
             template: consumer
-        name: d
+            arguments:
+              artifacts:
+              - name: in-art
+                from: '{{tasks.writer.outputs.artifacts.out-art}}'
       - name: writer
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: out-art
+          - name: out-art
             path: /tmp/file
+            archive:
+              none: {}
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -71,14 +69,14 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             sys.path.append(os.getcwd())
             with open('/tmp/file', 'w+') as f:
                 f.write('Hello, world!')
-      - inputs:
+          command:
+          - python
+      - name: consumer
+        inputs:
           artifacts:
           - name: in-art
             path: /tmp/file
-        name: consumer
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -86,5 +84,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             sys.path.append(os.getcwd())
             with open('/tmp/file', 'r') as f:
                 print(f.readlines())
+          command:
+          - python
     ```
 

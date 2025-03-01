@@ -41,21 +41,21 @@
       entrypoint: whalesay
       serviceAccountName: argo-account
       templates:
-      - activeDeadlineSeconds: 100
+      - name: whalesay
+        activeDeadlineSeconds: 100
         container:
+          image: docker/whalesay:latest
           command:
           - cowsay
-          image: docker/whalesay:latest
-        name: whalesay
       - name: say
         script:
-          command:
-          - python3
           image: image-say
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('hello')
+          command:
+          - python3
     ```
 

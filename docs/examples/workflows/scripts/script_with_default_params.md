@@ -34,31 +34,34 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
-          - arguments:
+          - name: b-unset-c-unset
+            template: foo
+            arguments:
               parameters:
               - name: a
                 value: '1'
-            name: b-unset-c-unset
+          - name: b-set-c-unset
             template: foo
-          - arguments:
+            arguments:
               parameters:
               - name: a
                 value: '1'
               - name: b
                 value: '2'
-            name: b-set-c-unset
+          - name: b-unset-c-set
             template: foo
-          - arguments:
+            arguments:
               parameters:
               - name: a
                 value: '1'
               - name: c
                 value: '2'
-            name: b-unset-c-set
+          - name: b-set-c-set
             template: foo
-          - arguments:
+            arguments:
               parameters:
               - name: a
                 value: '1'
@@ -66,20 +69,15 @@
                 value: '2'
               - name: c
                 value: '3'
-            name: b-set-c-set
-            template: foo
-        name: d
-      - inputs:
+      - name: foo
+        inputs:
           parameters:
           - name: a
-          - default: '42'
-            name: b
-          - default: 'null'
-            name: c
-        name: foo
+          - name: b
+            default: '42'
+          - name: c
+            default: 'null'
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -94,5 +92,7 @@
             except: c = r'''{{inputs.parameters.c}}'''
 
             print(a, b, c)
+          command:
+          - python
     ```
 

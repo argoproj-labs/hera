@@ -55,34 +55,32 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
-          - arguments:
+          - name: v1
+            template: foo
+            arguments:
               parameters:
               - name: vol
                 value: v1
-            name: v1
+          - name: v2
             template: foo
-          - arguments:
+            arguments:
               parameters:
               - name: vol
                 value: v2
-            name: v2
+          - name: v3
             template: foo
-          - arguments:
+            arguments:
               parameters:
               - name: vol
                 value: v3
-            name: v3
-            template: foo
-        name: d
-      - inputs:
+      - name: foo
+        inputs:
           parameters:
           - name: vol
-        name: foo
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -92,9 +90,11 @@
             import subprocess
             print(os.listdir('/mnt'))
             print(subprocess.run('cd /mnt && df -h', shell=True, capture_output=True).stdout.decode())
+          command:
+          - python
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: '{{inputs.parameters.vol}}'
+          - name: '{{inputs.parameters.vol}}'
+            mountPath: /mnt/vol
       volumeClaimTemplates:
       - metadata:
           name: v1

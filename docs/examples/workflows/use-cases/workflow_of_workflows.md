@@ -76,13 +76,13 @@
             spec:
               entrypoint: echo
               templates:
-              - container:
+              - name: echo
+                container:
+                  image: docker/whalesay:latest
                   args:
                   - I'm workflow 1
                   command:
                   - cowsay
-                  image: docker/whalesay:latest
-                name: echo
           successCondition: status.phase == Succeeded
       - name: w2-resource
         resource:
@@ -96,13 +96,13 @@
             spec:
               entrypoint: echo
               templates:
-              - container:
+              - name: echo
+                container:
+                  image: docker/whalesay:latest
                   args:
                   - I'm workflow 2
                   command:
                   - cowsay
-                  image: docker/whalesay:latest
-                name: echo
           successCondition: status.phase == Succeeded
       - name: main
         steps:

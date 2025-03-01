@@ -109,19 +109,22 @@
     spec:
       entrypoint: worker
       templates:
-      - dag:
+      - name: worker
+        dag:
           tasks:
           - name: run-setup-dag
             templateRef:
-              clusterScope: true
               name: my-cluster-workflow-template
+              clusterScope: true
               template: run-setup-dag
           - name: setup-task
             templateRef:
-              clusterScope: true
               name: my-cluster-workflow-template
+              clusterScope: true
               template: setup
-          - arguments:
+          - name: task-a
+            depends: setup-task
+            arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_a}}'
@@ -129,12 +132,12 @@
                 value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}{{tasks.setup-task.outputs.parameters.dummy-param}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup-task
-            name: task-a
             templateRef:
               name: my-workflow-template
               template: concat
-          - arguments:
+          - name: task-b
+            depends: setup-task
+            arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_b}}'
@@ -142,12 +145,12 @@
                 value: '{{tasks.setup-task.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup-task
-            name: task-b
             templateRef:
               name: my-workflow-template
               template: concat
-          - arguments:
+          - name: final-task
+            depends: task-a && task-b
+            arguments:
               parameters:
               - name: word_a
                 value: '{{tasks.task-a.outputs.result}}'
@@ -155,21 +158,18 @@
                 value: '{{tasks.task-b.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: task-a && task-b
-            name: final-task
             templateRef:
               name: my-workflow-template
               template: concat
         inputs:
           parameters:
-          - default: my default
-            name: value_a
+          - name: value_a
+            default: my default
           - name: value_b
-          - default: '42'
-            name: an_int_value
-          - default: '{"param_1": "Hello", "param_2": "world"}'
-            name: a_basemodel
-        name: worker
+          - name: an_int_value
+            default: '42'
+          - name: a_basemodel
+            default: '{"param_1": "Hello", "param_2": "world"}'
         outputs:
           parameters:
           - name: value

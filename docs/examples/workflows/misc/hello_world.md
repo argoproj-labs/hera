@@ -32,19 +32,13 @@
     metadata:
       generateName: hello-world-
     spec:
-      arguments:
-        parameters:
-        - name: s
-          value: world
       entrypoint: hello
       templates:
-      - inputs:
+      - name: hello
+        inputs:
           parameters:
           - name: s
-        name: hello
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -55,5 +49,11 @@
             except: s = r'''{{inputs.parameters.s}}'''
 
             print('Hello, {s}!'.format(s=s))
+          command:
+          - python
+      arguments:
+        parameters:
+        - name: s
+          value: world
     ```
 

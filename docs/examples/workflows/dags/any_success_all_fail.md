@@ -50,39 +50,37 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
-          - arguments:
-              parameters:
-              - name: a
-                value: '{{item}}'
-            name: t1
+          - name: t1
             template: random-fail
             withParam: '[1, 2, 3]'
-          - arguments:
+            arguments:
               parameters:
               - name: a
                 value: '{{item}}'
+          - name: t2
             depends: t1.AnySucceeded
-            name: t2
             template: fail
             withParam: '[1, 2, 3]'
-          - arguments:
+            arguments:
               parameters:
               - name: a
                 value: '{{item}}'
+          - name: t3
             depends: t2.AllFailed
-            name: t3
             template: foo
             withParam: '[1, 2, 3]'
-        name: d
-      - inputs:
+            arguments:
+              parameters:
+              - name: a
+                value: '{{item}}'
+      - name: random-fail
+        inputs:
           parameters:
           - name: a
-        name: random-fail
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -96,13 +94,13 @@
             random.seed(a)
             if random.random() < 0.5:
                 raise Exception('Oh, no!')
-      - inputs:
-          parameters:
-          - name: a
-        name: fail
-        script:
           command:
           - python
+      - name: fail
+        inputs:
+          parameters:
+          - name: a
+        script:
           image: python:3.9
           source: |-
             import os
@@ -113,13 +111,13 @@
             except: a = r'''{{inputs.parameters.a}}'''
 
             raise Exception(a)
-      - inputs:
-          parameters:
-          - name: a
-        name: foo
-        script:
           command:
           - python
+      - name: foo
+        inputs:
+          parameters:
+          - name: a
+        script:
           image: python:3.9
           source: |-
             import os
@@ -130,5 +128,7 @@
             except: a = r'''{{inputs.parameters.a}}'''
 
             print(a)
+          command:
+          - python
     ```
 

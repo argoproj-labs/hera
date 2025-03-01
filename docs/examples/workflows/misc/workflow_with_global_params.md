@@ -29,20 +29,14 @@
     metadata:
       generateName: global-parameters-
     spec:
-      arguments:
-        parameters:
-        - name: v
-          value: '42'
       entrypoint: s
       templates:
-      - inputs:
+      - name: s
+        inputs:
           parameters:
           - name: v
             value: '{{workflow.parameters.v}}'
-        name: s
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -53,5 +47,11 @@
             except: v = r'''{{inputs.parameters.v}}'''
 
             print(v)
+          command:
+          - python
+      arguments:
+        parameters:
+        - name: v
+          value: '42'
     ```
 

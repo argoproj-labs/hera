@@ -47,21 +47,19 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: fail-or-succeed
             template: fail-or-succeed
-          - depends: fail-or-succeed.Failed
-            name: when-failed
+          - name: when-failed
+            depends: fail-or-succeed.Failed
             template: when-failed
-          - depends: fail-or-succeed.Succeeded
-            name: when-succeeded
+          - name: when-succeeded
+            depends: fail-or-succeed.Succeeded
             template: when-succeeded
-        name: d
       - name: fail-or-succeed
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -70,25 +68,27 @@
             import random
             if random.randint(0, 1) == 0:
                 raise ValueError
-      - name: when-failed
-        script:
           command:
           - python
+      - name: when-failed
+        script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('It was a failure')
-      - name: when-succeeded
-        script:
           command:
           - python
+      - name: when-succeeded
+        script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('It was a success')
+          command:
+          - python
     ```
 

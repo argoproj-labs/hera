@@ -119,16 +119,16 @@
     spec:
       entrypoint: hello-hello-hello
       templates:
-      - container:
+      - name: whalesay
+        container:
+          image: docker/whalesay
           args:
           - '{{inputs.parameters.message}}'
           command:
           - cowsay
-          image: docker/whalesay
         inputs:
           parameters:
           - name: message
-        name: whalesay
       - name: hello-hello-hello
         steps:
         - - arguments:

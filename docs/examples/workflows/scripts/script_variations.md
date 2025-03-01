@@ -38,37 +38,35 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: hello-world
             template: hello-world
-          - arguments:
+          - name: multiline-function
+            template: multiline-function
+            arguments:
               parameters:
               - name: test
                 value: test string
               - name: another_test
                 value: another test string
-            name: multiline-function
-            template: multiline-function
-        name: d
       - name: hello-world
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('Hello World!')
-      - inputs:
+          command:
+          - python
+      - name: multiline-function
+        inputs:
           parameters:
           - name: test
           - name: another_test
-        name: multiline-function
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -82,5 +80,7 @@
 
             print(test)
             print(another_test)
+          command:
+          - python
     ```
 

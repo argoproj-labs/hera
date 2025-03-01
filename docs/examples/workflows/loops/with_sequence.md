@@ -44,49 +44,47 @@ This example showcases how to generate and parallelize generated sequences
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: t1
             template: gen-num
-          - arguments:
+          - name: t2
+            depends: t1
+            template: say
+            arguments:
               parameters:
               - name: message
                 value: '{{item}}'
-            depends: t1
-            name: t2
-            template: say
             withSequence:
               count: '{{tasks.t1.outputs.result}}'
               start: '0'
-          - arguments:
+          - name: t3
+            depends: t1
+            template: say
+            arguments:
               parameters:
               - name: message
                 value: '{{item}}'
-            depends: t1
-            name: t3
-            template: say
             withSequence:
               end: '5'
               format: 2020-05-%02X
               start: '{{tasks.t1.outputs.result}}'
-        name: d
       - name: gen-num
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print(3)
-      - inputs:
-          parameters:
-          - name: message
-        name: say
-        script:
           command:
           - python
+      - name: say
+        inputs:
+          parameters:
+          - name: message
+        script:
           image: python:3.9
           source: |-
             import os
@@ -97,5 +95,7 @@ This example showcases how to generate and parallelize generated sequences
             except: message = r'''{{inputs.parameters.message}}'''
 
             print(message)
+          command:
+          - python
     ```
 

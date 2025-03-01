@@ -73,10 +73,10 @@ See https://argo-workflows.readthedocs.io/en/latest/walk-through/volumes/
     spec:
       entrypoint: generate-and-use-volume
       templates:
-      - inputs:
+      - name: generate-volume
+        inputs:
           parameters:
           - name: pvc-size
-        name: generate-volume
         outputs:
           parameters:
           - name: pvc-name
@@ -95,42 +95,42 @@ See https://argo-workflows.readthedocs.io/en/latest/walk-through/volumes/
                 requests:
                   storage: '{{inputs.parameters.pvc-size}}'
           setOwnerReference: true
-      - container:
+      - name: whalesay
+        volumes:
+        - name: workdir
+          persistentVolumeClaim:
+            claimName: '{{inputs.parameters.pvc-name}}'
+        container:
+          image: docker/whalesay:latest
           args:
           - echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt
           command:
           - sh
           - -c
-          image: docker/whalesay:latest
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
+          - name: workdir
+            mountPath: /mnt/vol
         inputs:
           parameters:
           - name: pvc-name
-        name: whalesay
+      - name: print-message
         volumes:
         - name: workdir
           persistentVolumeClaim:
             claimName: '{{inputs.parameters.pvc-name}}'
-      - container:
+        container:
+          image: alpine:latest
           args:
           - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
           command:
           - sh
           - -c
-          image: alpine:latest
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
+          - name: workdir
+            mountPath: /mnt/vol
         inputs:
           parameters:
           - name: pvc-name
-        name: print-message
-        volumes:
-        - name: workdir
-          persistentVolumeClaim:
-            claimName: '{{inputs.parameters.pvc-name}}'
       - name: generate-and-use-volume
         steps:
         - - arguments:

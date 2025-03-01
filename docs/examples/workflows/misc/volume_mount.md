@@ -40,14 +40,14 @@ This example showcases how to create a volume at a workflow level and use it in 
     spec:
       entrypoint: test
       templates:
-      - container:
+      - name: git-sync
+        container:
           image: python:3.9
           volumeMounts:
-          - mountPath: /secrets
-            name: service-account-credential
-          - mountPath: /tmp/pod
-            name: tmp-pod
-        name: git-sync
+          - name: service-account-credential
+            mountPath: /secrets
+          - name: tmp-pod
+            mountPath: /tmp/pod
       - name: test
         steps:
         - - name: git-sync

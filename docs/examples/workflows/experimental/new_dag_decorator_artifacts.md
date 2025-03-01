@@ -69,18 +69,20 @@
     spec:
       entrypoint: worker
       templates:
-      - inputs:
+      - name: concat
+        inputs:
           artifacts:
           - name: word_a
             path: /tmp/hera-inputs/artifacts/word_a
           - name: word_b
             path: /tmp/hera-inputs/artifacts/word_b
-        name: concat
         outputs:
           artifacts:
           - name: an-artifact
             path: /tmp/hera-outputs/artifacts/an-artifact
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -93,35 +95,33 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - dag:
+      - name: worker
+        dag:
           tasks:
-          - arguments:
-              artifacts:
-              - from: '{{inputs.artifacts.artifact_a}}'
-                name: word_a
-              - from: '{{inputs.artifacts.artifact_b}}'
-                name: word_b
-            name: concat-1
+          - name: concat-1
             template: concat
-          - arguments:
+            arguments:
               artifacts:
-              - from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
-                name: word_a
-              - from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
-                name: word_b
+              - name: word_a
+                from: '{{inputs.artifacts.artifact_a}}'
+              - name: word_b
+                from: '{{inputs.artifacts.artifact_b}}'
+          - name: concat-2-custom-name
             depends: concat-1
-            name: concat-2-custom-name
             template: concat
+            arguments:
+              artifacts:
+              - name: word_a
+                from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
+              - name: word_b
+                from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
         inputs:
           artifacts:
           - name: artifact_a
           - name: artifact_b
-        name: worker
         outputs:
           artifacts:
-          - from: '{{tasks.concat-2-custom-name.outputs.artifacts.an-artifact}}'
-            name: an-artifact
+          - name: an-artifact
+            from: '{{tasks.concat-2-custom-name.outputs.artifacts.an-artifact}}'
     ```
 

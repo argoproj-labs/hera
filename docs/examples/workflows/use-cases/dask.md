@@ -62,16 +62,14 @@ This example showcases how to run Dask within a Hera submitted Argo workflow.
         steps:
         - - name: dask-computation
             template: dask-computation
-      - inputs:
+      - name: dask-computation
+        inputs:
           parameters:
-          - default: default
-            name: namespace
-          - default: '1'
-            name: n_workers
-        name: dask-computation
+          - name: namespace
+            default: default
+          - name: n_workers
+            default: '1'
         script:
-          command:
-          - python
           image: ghcr.io/dask/dask:latest
           source: |-
             import os
@@ -93,5 +91,7 @@ This example showcases how to run Dask within a Hera submitted Argo workflow.
             array = da.ones((1000, 1000, 1000))
             print('Array mean = {array_mean}, expected = 1.0'.format(array_mean=array.mean().compute()))
             client.close()
+          command:
+          - python
     ```
 

@@ -112,9 +112,12 @@ wandb server!
     spec:
       entrypoint: train
       templates:
-      - dag:
+      - name: train
+        dag:
           tasks:
-          - arguments:
+          - name: train-1
+            template: train-model
+            arguments:
               parameters:
               - name: project_name
                 value: wandb-ml-monitoring
@@ -126,9 +129,9 @@ wandb server!
                 value: MNIST
               - name: epochs
                 value: '10'
-            name: train-1
+          - name: train-2
             template: train-model
-          - arguments:
+            arguments:
               parameters:
               - name: project_name
                 value: wandb-ml-monitoring
@@ -140,9 +143,9 @@ wandb server!
                 value: MNIST
               - name: epochs
                 value: '10'
-            name: train-2
+          - name: train-3
             template: train-model
-          - arguments:
+            arguments:
               parameters:
               - name: project_name
                 value: wandb-ml-monitoring
@@ -154,18 +157,17 @@ wandb server!
                 value: MNIST
               - name: epochs
                 value: '10'
-            name: train-3
-            template: train-model
-        name: train
-      - inputs:
+      - name: train-model
+        inputs:
           parameters:
           - name: project_name
           - name: learning_rate
           - name: architecture
           - name: dataset
           - name: epochs
-        name: train-model
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -177,9 +179,7 @@ wandb server!
           - name: WANDB_API_KEY
             valueFrom:
               secretKeyRef:
-                key: wandb-api-key
                 name: wandb-api-key
-          image: python:3.9
-          source: '{{inputs.parameters}}'
+                key: wandb-api-key
     ```
 

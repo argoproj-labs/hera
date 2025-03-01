@@ -55,8 +55,6 @@
             when: '{{steps.random-roll.outputs.result}} != 0'
       - name: random-roll
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -64,6 +62,8 @@
             sys.path.append(os.getcwd())
             import random
             return random.randint(0, 2)
+          command:
+          - python
       - name: steps
         steps:
         - - name: sub-steps

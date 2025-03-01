@@ -64,21 +64,26 @@ the job to dictate what the fanout should execute over.
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: generate
             template: generate
-          - arguments:
+          - name: c1
+            depends: generate
+            template: consume
+            withParam: '{{tasks.generate.outputs.result}}'
+            arguments:
               parameters:
               - name: value
                 value: '{{item}}'
               - name: extra_param1
                 value: hello world
+          - name: c2
             depends: generate
-            name: c1
             template: consume
             withParam: '{{tasks.generate.outputs.result}}'
-          - arguments:
+            arguments:
               parameters:
               - name: value
                 value: '{{item}}'
@@ -86,15 +91,8 @@ the job to dictate what the fanout should execute over.
                 value: hello world
               - name: extra_param2
                 value: '123'
-            depends: generate
-            name: c2
-            template: consume
-            withParam: '{{tasks.generate.outputs.result}}'
-        name: d
       - name: generate
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -103,16 +101,16 @@ the job to dictate what the fanout should execute over.
             import json
             import sys
             json.dump([i for i in range(10)], sys.stdout)
-      - inputs:
+          command:
+          - python
+      - name: consume
+        inputs:
           parameters:
           - name: value
           - name: extra_param1
-          - default: '42'
-            name: extra_param2
-        name: consume
+          - name: extra_param2
+            default: '42'
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -127,5 +125,7 @@ the job to dictate what the fanout should execute over.
             except: value = r'''{{inputs.parameters.value}}'''
 
             print('Received value={value}, extra_param1={extra_param1}, extra_param2={extra_param2}!'.format(value=value, extra_param1=extra_param1, extra_param2=extra_param2))
+          command:
+          - python
     ```
 

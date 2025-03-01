@@ -5,17 +5,17 @@ metadata:
 spec:
   entrypoint: http
   templates:
-  - http:
+  - name: http
+    http:
       body: test body
-      headers:
-      - name: x-header-name
-        value: test-value
       method: GET
       successCondition: response.body contains 'google'
       timeoutSeconds: 20
       url: '{{inputs.parameters.url}}'
+      headers:
+      - name: x-header-name
+        value: test-value
     inputs:
       parameters:
       - name: url
         value: https://example.com
-    name: http

@@ -5,30 +5,28 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: generate
         template: generate
-      - arguments:
+      - name: fanout
+        depends: generate
+        template: fanout
+        withParam: '{{tasks.generate.outputs.result}}'
+        arguments:
           parameters:
           - name: object
             value: '{{item}}'
-        depends: generate
-        name: fanout
-        template: fanout
-        withParam: '{{tasks.generate.outputs.result}}'
-      - arguments:
+      - name: fanin
+        depends: fanout
+        template: fanin
+        arguments:
           parameters:
           - name: values
             value: '{{tasks.fanout.outputs.parameters.value}}'
-        depends: fanout
-        name: fanin
-        template: fanin
-    name: d
   - name: generate
     script:
-      command:
-      - python
       image: python:3.9
       source: |-
         import os
@@ -37,18 +35,18 @@ spec:
         import json
         import sys
         json.dump([{'value': i} for i in range(10)], sys.stdout)
-  - inputs:
+      command:
+      - python
+  - name: fanout
+    inputs:
       parameters:
       - name: object
-    name: fanout
     outputs:
       parameters:
       - name: value
         valueFrom:
           path: /tmp/value
     script:
-      command:
-      - python
       image: python:3.9
       source: |-
         import os
@@ -62,13 +60,13 @@ spec:
         value = object['value']
         with open('/tmp/value', 'w') as f:
             f.write(str(value))
-  - inputs:
-      parameters:
-      - name: values
-    name: fanin
-    script:
       command:
       - python
+  - name: fanin
+    inputs:
+      parameters:
+      - name: values
+    script:
       image: python:3.9
       source: |-
         import os
@@ -79,3 +77,5 @@ spec:
         except: values = r'''{{inputs.parameters.values}}'''
 
         print('Received values: {values}!'.format(values=values))
+      command:
+      - python

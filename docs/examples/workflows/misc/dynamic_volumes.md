@@ -33,15 +33,13 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: foo
             template: foo
-        name: d
       - name: foo
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -49,9 +47,11 @@
             sys.path.append(os.getcwd())
             import subprocess
             print(subprocess.run('cd && /mnt && df -h', shell=True, capture_output=True).stdout.decode())
+          command:
+          - python
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: v
+          - name: v
+            mountPath: /mnt/vol
       volumeClaimTemplates:
       - metadata:
           name: v

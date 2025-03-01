@@ -12,6 +12,8 @@ spec:
         valueFrom:
           path: /tmp/hera-outputs/parameters/environment_parameter
     script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
       args:
       - -m
       - hera.workflows.runner
@@ -24,14 +26,14 @@ spec:
         value: /tmp/hera-outputs
       - name: hera__script_pydantic_io
         value: ''
-      image: python:3.9
-      source: '{{inputs.parameters}}'
-  - inputs:
+  - name: concat
+    inputs:
       parameters:
       - name: word_a
       - name: word_b
-    name: concat
     script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
       args:
       - -m
       - hera.workflows.runner
@@ -44,81 +46,79 @@ spec:
         value: /tmp/hera-outputs
       - name: hera__script_pydantic_io
         value: ''
-      image: python:3.9
-      source: '{{inputs.parameters}}'
-  - dag:
+  - name: worker
+    dag:
       tasks:
       - name: setup-task
         template: setup
-      - arguments:
+      - name: task-a
+        depends: setup-task
+        template: concat
+        arguments:
           parameters:
           - name: word_a
             value: '{{inputs.parameters.value_a}}'
           - name: word_b
             value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}'
+      - name: task-b
         depends: setup-task
-        name: task-a
         template: concat
-      - arguments:
+        arguments:
           parameters:
           - name: word_a
             value: '{{inputs.parameters.value_b}}'
           - name: word_b
             value: '{{tasks.setup-task.outputs.result}}'
-        depends: setup-task
-        name: task-b
+      - name: final-task
+        depends: task-a && task-b
         template: concat
-      - arguments:
+        arguments:
           parameters:
           - name: word_a
             value: '{{tasks.task-a.outputs.result}}'
           - name: word_b
             value: '{{tasks.task-b.outputs.result}}'
-        depends: task-a && task-b
-        name: final-task
-        template: concat
     inputs:
       parameters:
       - name: value_a
       - name: value_b
-    name: worker
     outputs:
       parameters:
       - name: value
         valueFrom:
           parameter: '{{tasks.final-task.outputs.result}}'
-  - dag:
+  - name: outer-dag
+    dag:
       tasks:
-      - arguments:
+      - name: sub-dag-a
+        template: worker
+        arguments:
           parameters:
           - name: value_a
             value: dag_a
           - name: value_b
             value: '{{inputs.parameters.value_a}}'
-        name: sub-dag-a
+      - name: sub-dag-b
         template: worker
-      - arguments:
+        arguments:
           parameters:
           - name: value_a
             value: dag_b
           - name: value_b
             value: '{{inputs.parameters.value_b}}'
-        name: sub-dag-b
+      - name: sub-dag-c
+        depends: sub-dag-a && sub-dag-b
         template: worker
-      - arguments:
+        arguments:
           parameters:
           - name: value_a
             value: '{{tasks.sub-dag-a.outputs.parameters.value}}'
           - name: value_b
             value: '{{tasks.sub-dag-b.outputs.parameters.value}}'
-        depends: sub-dag-a && sub-dag-b
-        name: sub-dag-c
-        template: worker
     inputs:
       parameters:
       - name: value_a
       - name: value_b
-    name: outer-dag
     outputs:
       parameters:
       - name: value

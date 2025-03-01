@@ -46,23 +46,21 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: flip
             template: flip
-          - depends: flip
-            name: heads
+          - name: heads
+            depends: flip
             template: heads
             when: '{{tasks.flip.outputs.result}} == heads'
-          - depends: flip
-            name: tails
+          - name: tails
+            depends: flip
             template: tails
             when: '{{tasks.flip.outputs.result}} == tails'
-        name: d
       - name: flip
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -71,25 +69,27 @@
             import random
             result = 'heads' if random.randint(0, 1) == 0 else 'tails'
             print(result)
-      - name: heads
-        script:
           command:
           - python
+      - name: heads
+        script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('it was heads')
-      - name: tails
-        script:
           command:
           - python
+      - name: tails
+        script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('it was tails')
+          command:
+          - python
     ```
 
