@@ -579,13 +579,18 @@ class ArgumentsMixin(BaseMixin):
         elif isinstance(self.arguments, ModelArguments):
             return self.arguments
 
+        from hera.workflows.workflow_template import WorkflowTemplate
+
+        is_workflow_template = isinstance(self, WorkflowTemplate)
+
         def add_argument(k: str, v: Any, result: ModelArguments):
             if isinstance(v, Parameter):
-                value = v.with_name(k).as_argument()
+                param_copy = v.with_name(k)
+                value = param_copy.as_input() if is_workflow_template else param_copy.as_argument()
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(v, ModelParameter):
-                value = Parameter.from_model(v).as_argument()
-                value.name = k
+                param_copy = Parameter.from_model(v).with_name(k)
+                value = param_copy.as_input() if is_workflow_template else param_copy.as_argument()
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
             elif isinstance(v, ModelArtifact):
                 copy_art = v.copy(deep=True)
@@ -596,7 +601,8 @@ class ArgumentsMixin(BaseMixin):
                 result.artifacts = [copy_art] if result.artifacts is None else result.artifacts + [copy_art]
             else:
                 # POD types are assumed to be parameters, which will be serialised upon creation
-                value = Parameter(name=k, value=v).as_argument()
+                param = Parameter(name=k, value=v)
+                value = param.as_input() if is_workflow_template else param.as_argument()
                 result.parameters = [value] if result.parameters is None else result.parameters + [value]
 
         result = ModelArguments()
