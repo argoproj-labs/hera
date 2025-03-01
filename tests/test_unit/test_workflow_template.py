@@ -11,6 +11,7 @@ from hera.workflows.models import (
     WorkflowTemplateLintRequest,
     WorkflowTemplateUpdateRequest,
 )
+from hera.workflows.parameter import Parameter
 from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import NAME_LIMIT, Workflow
 from hera.workflows.workflow_template import _TRUNCATE_LENGTH, WorkflowTemplate
@@ -236,3 +237,18 @@ def test_workflow_template_update_non_existent():
         WorkflowTemplateCreateRequest(template=wt.build()), namespace="my-namespace"
     )
     wt.workflows_service.update_workflow_template.assert_not_called()
+
+
+def test_workflow_template_with_default_param_arguments():
+    # GIVEN
+    with WorkflowTemplate(
+        name="my-wt",
+        arguments=Parameter(name="my-arg", default="foo"),
+    ) as wt:
+        pass
+
+    # WHEN
+    built_wt = wt.build()
+
+    # THEN
+    assert built_wt.spec.arguments.parameters[0].default == "foo"
