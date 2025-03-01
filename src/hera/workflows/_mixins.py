@@ -574,6 +574,9 @@ class ArgumentsMixin(BaseMixin):
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
+        # Reapply the validator in case arguments was assigned to as a dictionary
+        self.arguments = normalize_to_list_or(ModelArguments)(self.arguments)
+
         if self.arguments is None:
             return None
         elif isinstance(self.arguments, ModelArguments):

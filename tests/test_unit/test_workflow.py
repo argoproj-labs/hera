@@ -6,7 +6,11 @@ import pytest
 
 from hera.workflows.container import Container
 from hera.workflows.exceptions import InvalidTemplateCall
-from hera.workflows.models import ImagePullPolicy, WorkflowCreateRequest
+from hera.workflows.models import (
+    ImagePullPolicy,
+    Parameter as ModelParameter,
+    WorkflowCreateRequest,
+)
 from hera.workflows.parameter import Parameter
 from hera.workflows.script import script
 from hera.workflows.service import WorkflowsService
@@ -133,3 +137,18 @@ def test_builds_successfully_using_containers():
         Container(image_pull_policy="Always")
 
     w.to_yaml()
+
+
+def test_reassign_workflow_arguments():
+    with Workflow(name="my-workflow", arguments={"a-param": "a-value"}) as w:
+        pass
+
+    built_workflow = w.build()
+
+    assert built_workflow.spec.arguments.parameters == [ModelParameter(name="a-param", value="a-value")]
+
+    w.arguments = {"another-param": "another-value"}
+
+    built_workflow = w.build()
+
+    assert built_workflow.spec.arguments.parameters == [ModelParameter(name="another-param", value="another-value")]
