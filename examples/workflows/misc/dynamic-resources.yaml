@@ -5,31 +5,31 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: compute-resources
         template: compute-resources
-      - arguments:
-          parameters:
-          - name: cpu
-            value: '{{item.cpu}}'
-          - name: mem
-            value: '{{item.mem}}'
+      - name: resource-consumer
         depends: compute-resources
-        name: resource-consumer
         template: resource-consumer
         withParam: '{{tasks.compute-resources.outputs.result}}'
-      - arguments:
+        arguments:
           parameters:
           - name: cpu
             value: '{{item.cpu}}'
           - name: mem
             value: '{{item.mem}}'
+      - name: another-resource-consumer
         depends: compute-resources
-        name: another-resource-consumer
         template: another-resource-consumer
         withParam: '{{tasks.compute-resources.outputs.result}}'
-    name: d
+        arguments:
+          parameters:
+          - name: cpu
+            value: '{{item.cpu}}'
+          - name: mem
+            value: '{{item.mem}}'
   - name: compute-resources
     script:
       command:
@@ -46,14 +46,14 @@ spec:
         for i in range(1, 4):
             resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})
         json.dump(resources, sys.stdout)
-  - inputs:
-      parameters:
-      - name: cpu
-      - name: mem
-    name: resource-consumer
+  - name: resource-consumer
     podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
       "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
       {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+    inputs:
+      parameters:
+      - name: cpu
+      - name: mem
     script:
       command:
       - python
@@ -70,16 +70,16 @@ spec:
 
         """Perform some computation."""
         print('received cpu {cpu} and mem {mem}'.format(cpu=cpu, mem=mem))
-  - inputs:
-      parameters:
-      - default: '1'
-        name: cpu
-      - default: 100Mi
-        name: mem
-    name: another-resource-consumer
+  - name: another-resource-consumer
     podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
       "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
       {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+    inputs:
+      parameters:
+      - name: cpu
+        default: '1'
+      - name: mem
+        default: 100Mi
     script:
       command:
       - python

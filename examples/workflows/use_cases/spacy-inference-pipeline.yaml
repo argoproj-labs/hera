@@ -18,10 +18,6 @@ spec:
       command:
       - python
       image: jupyter/datascience-notebook:latest
-      resources:
-        requests:
-          cpu: '0.5'
-          memory: 1Gi
       source: |-
         import os
         import sys
@@ -38,17 +34,17 @@ spec:
         print('Data preparation completed')
         print(subprocess.run('cd /mnt/data && ls -l', shell=True, capture_output=True).stdout.decode())
       volumeMounts:
-      - mountPath: /mnt/data
-        name: data-dir
+      - name: data-dir
+        mountPath: /mnt/data
+      resources:
+        requests:
+          cpu: '0.5'
+          memory: 1Gi
   - name: inference-spacy
     script:
       command:
       - python
       image: jupyter/datascience-notebook:latest
-      resources:
-        requests:
-          cpu: '0.5'
-          memory: 1Gi
       source: |-
         import os
         import sys
@@ -99,8 +95,12 @@ spec:
             json.dump(ner_output_list, json_file)
         print(subprocess.run('cd /mnt/data && ls -l ', shell=True, capture_output=True).stdout.decode())
       volumeMounts:
-      - mountPath: /mnt/data
-        name: data-dir
+      - name: data-dir
+        mountPath: /mnt/data
+      resources:
+        requests:
+          cpu: '0.5'
+          memory: 1Gi
   volumeClaimTemplates:
   - metadata:
       name: data-dir

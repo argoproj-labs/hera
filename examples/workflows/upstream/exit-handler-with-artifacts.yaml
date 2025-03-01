@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
+  generateName: exit-handler-with-artifacts-
   annotations:
     workflows.argoproj.io/description: onExitTemplate enables workflow to pass the
       arguments (parameters/Artifacts) to exit handler template.
     workflows.argoproj.io/version: '>= 3.1.0'
-  generateName: exit-handler-with-artifacts-
   labels:
     workflows.argoproj.io/test: 'true'
 spec:
@@ -23,7 +23,8 @@ spec:
       source: |-
         with open('result.txt', 'w') as f:
             f.write('Welcome')
-  - container:
+  - name: exit
+    container:
       args:
       - cat /tmp/message
       command:
@@ -34,7 +35,6 @@ spec:
       artifacts:
       - name: message
         path: /tmp/message
-    name: exit
   - name: main
     steps:
     - - hooks:

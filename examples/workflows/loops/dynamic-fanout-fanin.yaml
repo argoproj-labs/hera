@@ -5,26 +5,26 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: generate
         template: generate
-      - arguments:
+      - name: fanout
+        depends: generate
+        template: fanout
+        withParam: '{{tasks.generate.outputs.result}}'
+        arguments:
           parameters:
           - name: object
             value: '{{item}}'
-        depends: generate
-        name: fanout
-        template: fanout
-        withParam: '{{tasks.generate.outputs.result}}'
-      - arguments:
+      - name: fanin
+        depends: fanout
+        template: fanin
+        arguments:
           parameters:
           - name: values
             value: '{{tasks.fanout.outputs.parameters.value}}'
-        depends: fanout
-        name: fanin
-        template: fanin
-    name: d
   - name: generate
     script:
       command:
@@ -37,10 +37,10 @@ spec:
         import json
         import sys
         json.dump([{'value': i} for i in range(10)], sys.stdout)
-  - inputs:
+  - name: fanout
+    inputs:
       parameters:
       - name: object
-    name: fanout
     outputs:
       parameters:
       - name: value
@@ -62,10 +62,10 @@ spec:
         value = object['value']
         with open('/tmp/value', 'w') as f:
             f.write(str(value))
-  - inputs:
+  - name: fanin
+    inputs:
       parameters:
       - name: values
-    name: fanin
     script:
       command:
       - python

@@ -3,13 +3,10 @@ kind: Workflow
 metadata:
   generateName: expression-reusing-verbose-snippets-
 spec:
-  arguments:
-    parameters:
-    - name: weather
-      value: '{"weekWeather": "eyJ0ZW1wcyI6IFszNCwgMjcsIDE1LCA1NywgNDZdfQ=="}'
   entrypoint: c
   templates:
-  - container:
+  - name: c
+    container:
       command:
       - echo
       - The week's average temperature was $AVG with a minimum of $MIN and a maximum
@@ -29,4 +26,7 @@ spec:
           ''$.weekWeather'')), ''$.temps'')], {toJson({''avg'': sprig.add(#[0], #[1],
           #[2], #[3], #[4]) / 5, ''min'': sprig.min(#[0], #[1], #[2], #[3], #[4]),
           ''max'': sprig.max(#[0], #[1], #[2], #[3], #[4])})})[0]}}'
-    name: c
+  arguments:
+    parameters:
+    - name: weather
+      value: '{"weekWeather": "eyJ0ZW1wcyI6IFszNCwgMjcsIDE1LCA1NywgNDZdfQ=="}'

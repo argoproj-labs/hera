@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: loop-example
   templates:
-  - container:
+  - name: print-message
+    container:
       args:
       - '{{inputs.parameters.message}}'
       command:
@@ -14,7 +15,6 @@ spec:
     inputs:
       parameters:
       - name: message
-    name: print-message
   - name: loop-example
     steps:
     - - arguments:

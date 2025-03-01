@@ -5,11 +5,11 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: env
         template: env
-    name: d
   - name: env
     script:
       command:

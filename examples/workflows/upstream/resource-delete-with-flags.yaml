@@ -17,10 +17,10 @@ spec:
             cleanup: "true"
         data:
           key: value
-  - inputs:
+  - name: delete-resource
+    inputs:
       parameters:
       - name: selector
-    name: delete-resource
     resource:
       action: delete
       flags:

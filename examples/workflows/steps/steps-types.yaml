@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: hello-hello-hello
   templates:
-  - container:
+  - name: whalesay
+    container:
       args:
       - '{{inputs.parameters.message}}'
       command:
@@ -14,7 +15,6 @@ spec:
     inputs:
       parameters:
       - name: message
-    name: whalesay
   - name: hello-hello-hello
     steps:
     - - arguments:

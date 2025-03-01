@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: raw-contents
   templates:
-  - container:
+  - name: raw-contents
+    container:
       args:
       - cat /tmp/file
       command:
@@ -21,4 +22,3 @@ spec:
             this is
             the raw file
             contents
-    name: raw-contents

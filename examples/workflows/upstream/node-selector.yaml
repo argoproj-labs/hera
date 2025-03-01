@@ -3,13 +3,10 @@ kind: Workflow
 metadata:
   generateName: node-selector-
 spec:
-  arguments:
-    parameters:
-    - name: arch
-      value: amd64
   entrypoint: print-arch
   templates:
-  - container:
+  - name: print-arch
+    container:
       args:
       - uname -a
       command:
@@ -19,6 +16,9 @@ spec:
     inputs:
       parameters:
       - name: arch
-    name: print-arch
     nodeSelector:
       beta.kubernetes.io/arch: '{{inputs.parameters.arch}}'
+  arguments:
+    parameters:
+    - name: arch
+      value: amd64

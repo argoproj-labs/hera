@@ -10,10 +10,10 @@ spec:
   workflowSpec:
     entrypoint: sleep-busybox
     templates:
-    - container:
+    - name: sleep-busybox
+      container:
         args:
         - '10'
         command:
         - sleep
         image: busybox
-      name: sleep-busybox

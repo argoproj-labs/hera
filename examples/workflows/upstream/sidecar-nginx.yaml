@@ -5,7 +5,15 @@ metadata:
 spec:
   entrypoint: sidecar-nginx-example
   templates:
-  - container:
+  - name: sidecar-nginx-example
+    sidecars:
+    - name: nginx
+      command:
+      - nginx
+      - -g
+      - daemon off;
+      image: nginx:1.13
+    container:
       args:
       - until `curl -G 'http://127.0.0.1/' >& /tmp/out`; do echo sleep && sleep 1;
         done && cat /tmp/out
@@ -13,11 +21,3 @@ spec:
       - sh
       - -c
       image: appropriate/curl
-    name: sidecar-nginx-example
-    sidecars:
-    - command:
-      - nginx
-      - -g
-      - daemon off;
-      image: nginx:1.13
-      name: nginx

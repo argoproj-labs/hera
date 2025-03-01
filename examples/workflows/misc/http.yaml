@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: http
   templates:
-  - http:
+  - name: http
+    http:
       body: test body
       headers:
       - name: x-header-name
@@ -18,4 +19,3 @@ spec:
       parameters:
       - name: url
         value: https://example.com
-    name: http

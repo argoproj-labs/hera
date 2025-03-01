@@ -5,26 +5,27 @@ metadata:
 spec:
   entrypoint: artifact-example
   templates:
-  - container:
+  - name: hello-world-to-file
+    container:
       args:
       - echo hello world | tee /tmp/hello_world.txt
       command:
       - sh
       - -c
       image: busybox
-    name: hello-world-to-file
     outputs:
       artifacts:
-      - hdfs:
+      - name: hello-art
+        path: /tmp/hello_world.txt
+        hdfs:
           addresses:
           - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
           - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
           force: true
           hdfsUser: root
           path: /tmp/argo/foo
-        name: hello-art
-        path: /tmp/hello_world.txt
-  - container:
+  - name: print-message-from-hdfs
+    container:
       args:
       - cat /tmp/message
       command:
@@ -33,16 +34,15 @@ spec:
       image: alpine:latest
     inputs:
       artifacts:
-      - hdfs:
+      - name: message
+        path: /tmp/message
+        hdfs:
           addresses:
           - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
           - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
           force: true
           hdfsUser: root
           path: /tmp/argo/foo
-        name: message
-        path: /tmp/message
-    name: print-message-from-hdfs
   - name: artifact-example
     steps:
     - - name: generate-artifact

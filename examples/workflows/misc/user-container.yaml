@@ -5,12 +5,17 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: foo
         template: foo
-    name: d
   - name: foo
+    sidecars:
+    - name: sidecar-name
+      volumeMounts:
+      - name: something
+        mountPath: /whatever
     script:
       command:
       - python
@@ -20,11 +25,6 @@ spec:
         import sys
         sys.path.append(os.getcwd())
         print('hi')
-    sidecars:
-    - name: sidecar-name
-      volumeMounts:
-      - mountPath: /whatever
-        name: something
   volumeClaimTemplates:
   - metadata:
       name: something

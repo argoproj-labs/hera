@@ -3,13 +3,10 @@ kind: WorkflowTemplate
 metadata:
   name: event-consumer
 spec:
-  arguments:
-    parameters:
-    - name: salutation
-      value: hello
   entrypoint: main
   templates:
-  - container:
+  - name: argosay
+    container:
       args:
       - echo
       - '{{inputs.parameters.salutation}} {{inputs.parameters.appellation}}'
@@ -18,7 +15,6 @@ spec:
       parameters:
       - name: salutation
       - name: appellation
-    name: argosay
   - name: main
     steps:
     - - arguments:
@@ -29,3 +25,7 @@ spec:
             value: '{{workflow.parameters.appellation}}'
         name: a
         template: argosay
+  arguments:
+    parameters:
+    - name: salutation
+      value: hello

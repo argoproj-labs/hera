@@ -30,11 +30,11 @@ spec:
         sys.path.append(os.getcwd())
         with open('/tmp/hello_world.txt', 'w') as f:
             f.write('hello world')
-  - inputs:
+  - name: print-message
+    inputs:
       artifacts:
       - name: message
         path: /tmp/message
-    name: print-message
     script:
       command:
       - python

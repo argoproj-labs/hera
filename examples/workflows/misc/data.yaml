@@ -5,15 +5,15 @@ metadata:
 spec:
   entrypoint: list-log-files
   templates:
-  - data:
+  - name: list-log-files
+    data:
+      transformation:
+      - expression: filter(data, {# endsWith 'main.log'})
       source:
         artifactPaths:
           name: test-bucket
           s3:
             bucket: my-bucket
-      transformation:
-      - expression: filter(data, {# endsWith 'main.log'})
-    name: list-log-files
     outputs:
       artifacts:
       - name: file

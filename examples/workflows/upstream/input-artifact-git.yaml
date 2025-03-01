@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: git-clone
   templates:
-  - container:
+  - name: git-clone
+    container:
       args:
       - git status && ls && cat VERSION
       command:
@@ -15,9 +16,8 @@ spec:
       workingDir: /src
     inputs:
       artifacts:
-      - git:
+      - name: argo-source
+        path: /src
+        git:
           repo: https://github.com/argoproj/argo-workflows.git
           revision: v2.1.1
-        name: argo-source
-        path: /src
-    name: git-clone

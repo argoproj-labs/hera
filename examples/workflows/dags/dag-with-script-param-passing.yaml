@@ -5,18 +5,18 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: out
         template: out
-      - arguments:
+      - name: in-
+        depends: out
+        template: in-
+        arguments:
           parameters:
           - name: a
             value: '{{tasks.out.outputs.result}}'
-        depends: out
-        name: in-
-        template: in-
-    name: d
   - name: out
     script:
       command:
@@ -27,10 +27,10 @@ spec:
         import sys
         sys.path.append(os.getcwd())
         print(42)
-  - inputs:
+  - name: in-
+    inputs:
       parameters:
       - name: a
-    name: in-
     script:
       command:
       - python

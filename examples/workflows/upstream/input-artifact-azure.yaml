@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: input-artifact-s3-example
   templates:
-  - container:
+  - name: input-artifact-s3-example
+    container:
       args:
       - ls -l /my-artifact
       command:
@@ -14,13 +15,12 @@ spec:
       image: debian:latest
     inputs:
       artifacts:
-      - azure:
-          accountKeySecret:
-            key: accountKey
-            name: my-azure-credentials
+      - name: my-art
+        path: /my-artifact
+        azure:
           blob: path/in/container
           container: my-container
           endpoint: https://myazurestorageaccountname.blob.core.windows.net
-        name: my-art
-        path: /my-artifact
-    name: input-artifact-s3-example
+          accountKeySecret:
+            name: my-azure-credentials
+            key: accountKey

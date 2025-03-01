@@ -5,40 +5,40 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
-      - arguments:
+      - name: a
+        template: foo
+        arguments:
           parameters:
           - name: p
             value: '0.6'
-        name: a
+      - name: b
+        depends: a
         template: foo
-      - arguments:
+        arguments:
           parameters:
           - name: p
             value: '0.3'
+      - name: c
         depends: a
-        name: b
         template: foo
-      - arguments:
+        arguments:
           parameters:
           - name: p
             value: '0.7'
-        depends: a
-        name: c
+      - name: d
+        depends: a && (b || c)
         template: foo
-      - arguments:
+        arguments:
           parameters:
           - name: p
             value: '0.9'
-        depends: a && (b || c)
-        name: d
-        template: foo
-    name: d
-  - inputs:
+  - name: foo
+    inputs:
       parameters:
       - name: p
-    name: foo
     script:
       command:
       - python

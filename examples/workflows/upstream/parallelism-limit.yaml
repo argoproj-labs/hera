@@ -6,13 +6,13 @@ spec:
   entrypoint: parallelism-limit
   parallelism: 2
   templates:
-  - container:
+  - name: sleep
+    container:
       command:
       - sh
       - -c
       - sleep 10
       image: alpine:latest
-    name: sleep
   - name: parallelism-limit
     steps:
     - - name: sleep

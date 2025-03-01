@@ -1,29 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
+  generateName: coinflip-
   annotations:
     workflows.argoproj.io/description: This is an example of coin flip defined as
       a sequence of conditional steps.
-  generateName: coinflip-
 spec:
   entrypoint: coinflip
   templates:
-  - container:
+  - name: heads
+    container:
       args:
       - echo "it was heads"
       command:
       - sh
       - -c
       image: alpine:3.6
-    name: heads
-  - container:
+  - name: tails
+    container:
       args:
       - echo "it was tails"
       command:
       - sh
       - -c
       image: alpine:3.6
-    name: tails
   - name: coinflip
     steps:
     - - name: flip-coin

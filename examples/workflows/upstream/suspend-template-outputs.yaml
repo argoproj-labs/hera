@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: suspend
   templates:
-  - container:
+  - name: print-message
+    container:
       args:
       - '{{inputs.parameters.message}}'
       command:
@@ -14,7 +15,6 @@ spec:
     inputs:
       parameters:
       - name: message
-    name: print-message
   - name: suspend
     steps:
     - - name: approve

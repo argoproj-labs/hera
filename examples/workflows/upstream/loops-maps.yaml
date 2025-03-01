@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: loop-map-example
   templates:
-  - container:
+  - name: cat-os-release
+    container:
       args:
       - /etc/os-release
       command:
@@ -15,7 +16,6 @@ spec:
       parameters:
       - name: image
       - name: tag
-    name: cat-os-release
   - name: loop-map-example
     steps:
     - - arguments:

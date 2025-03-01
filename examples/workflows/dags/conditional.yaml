@@ -5,17 +5,17 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: random
         template: random
-      - depends: random.Succeeded
-        name: success
+      - name: success
+        depends: random.Succeeded
         template: success
-      - depends: random.Failed
-        name: failure
+      - name: failure
+        depends: random.Failed
         template: failure
-    name: d
   - name: random
     script:
       command:

@@ -5,36 +5,36 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - containerSet:
+  - name: group
+    containerSet:
       containers:
-      - args:
+      - name: main
+        args:
         - |
           print("hi")
         command:
         - python
         - -c
         image: python:alpine3.6
-        name: main
-    name: group
-  - inputs:
+  - name: verify
+    inputs:
       parameters:
       - name: x
-    name: verify
     script:
       command:
       - python
       image: python:alpine3.6
       source: assert '{{inputs.parameters.x}}' == 'hi'
-  - dag:
+  - name: main
+    dag:
       tasks:
       - name: a
         template: group
-      - arguments:
+      - name: b
+        dependencies:
+        - a
+        template: verify
+        arguments:
           parameters:
           - name: x
             value: '{{tasks.a.outputs.result}}'
-        dependencies:
-        - a
-        name: b
-        template: verify
-    name: main

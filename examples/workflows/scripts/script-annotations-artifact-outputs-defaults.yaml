@@ -19,10 +19,10 @@ spec:
             name: successor_in
         name: use-artifact
         template: use-artifact
-  - inputs:
+  - name: output-artifact
+    inputs:
       parameters:
       - name: a_number
-    name: output-artifact
     outputs:
       artifacts:
       - name: successor_out
@@ -40,11 +40,11 @@ spec:
         value: /tmp/hera-outputs
       image: python:3.9
       source: '{{inputs.parameters}}'
-  - inputs:
+  - name: use-artifact
+    inputs:
       artifacts:
       - name: successor_in
         path: /tmp/file
-    name: use-artifact
     script:
       args:
       - -m

@@ -5,9 +5,9 @@ metadata:
 spec:
   entrypoint: cowsay
   templates:
-  - container:
+  - name: cowsay
+    container:
       command:
       - cowsay
       - foo
       image: docker/whalesay
-    name: cowsay

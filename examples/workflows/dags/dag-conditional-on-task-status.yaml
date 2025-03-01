@@ -5,17 +5,17 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: fail-or-succeed
         template: fail-or-succeed
-      - depends: fail-or-succeed.Failed
-        name: when-failed
+      - name: when-failed
+        depends: fail-or-succeed.Failed
         template: when-failed
-      - depends: fail-or-succeed.Succeeded
-        name: when-succeeded
+      - name: when-succeeded
+        depends: fail-or-succeed.Succeeded
         template: when-succeeded
-    name: d
   - name: fail-or-succeed
     script:
       command:

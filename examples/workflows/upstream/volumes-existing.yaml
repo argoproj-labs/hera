@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: volumes-existing-example
   templates:
-  - container:
+  - name: append-to-accesslog
+    container:
       args:
       - 'echo accessed at: $(date) | tee -a /mnt/vol/accesslog'
       command:
@@ -13,10 +14,10 @@ spec:
       - -c
       image: alpine:latest
       volumeMounts:
-      - mountPath: /mnt/vol
-        name: workdir
-    name: append-to-accesslog
-  - container:
+      - name: workdir
+        mountPath: /mnt/vol
+  - name: print-accesslog
+    container:
       args:
       - echo 'Volume access log:'; cat /mnt/vol/accesslog
       command:
@@ -24,9 +25,8 @@ spec:
       - -c
       image: alpine:latest
       volumeMounts:
-      - mountPath: /mnt/vol
-        name: workdir
-    name: print-accesslog
+      - name: workdir
+        mountPath: /mnt/vol
   - name: volumes-existing-example
     steps:
     - - name: generate

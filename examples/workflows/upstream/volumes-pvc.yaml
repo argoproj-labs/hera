@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: volumes-pvc-example
   templates:
-  - container:
+  - name: hello-world-to-file
+    container:
       args:
       - echo generating message in volume; echo hello world | tee /mnt/vol/hello_world.txt
       command:
@@ -13,10 +14,10 @@ spec:
       - -c
       image: busybox
       volumeMounts:
-      - mountPath: /mnt/vol
-        name: workdir
-    name: hello-world-to-file
-  - container:
+      - name: workdir
+        mountPath: /mnt/vol
+  - name: print-message-from-file
+    container:
       args:
       - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
       command:
@@ -24,9 +25,8 @@ spec:
       - -c
       image: alpine:latest
       volumeMounts:
-      - mountPath: /mnt/vol
-        name: workdir
-    name: print-message-from-file
+      - name: workdir
+        mountPath: /mnt/vol
   - name: volumes-pvc-example
     steps:
     - - name: generate

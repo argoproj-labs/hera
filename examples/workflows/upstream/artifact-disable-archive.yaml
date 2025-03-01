@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: artifact-disable-archive
   templates:
-  - container:
+  - name: hello-world-to-file
+    container:
       args:
       - echo hello world | tee /tmp/hello_world.txt | tee /tmp/hello_world_nc.txt
         ; sleep 1
@@ -13,23 +14,23 @@ spec:
       - sh
       - -c
       image: busybox
-    name: hello-world-to-file
     outputs:
       artifacts:
-      - archive:
-          none: {}
-        name: etc
+      - name: etc
         path: /etc
-      - archive:
+        archive:
           none: {}
-        name: hello-txt
+      - name: hello-txt
         path: /tmp/hello_world.txt
-      - archive:
+        archive:
+          none: {}
+      - name: hello-txt-nc
+        path: /tmp/hello_world_nc.txt
+        archive:
           tar:
             compressionLevel: 0
-        name: hello-txt-nc
-        path: /tmp/hello_world_nc.txt
-  - container:
+  - name: print-message-from-files
+    container:
       args:
       - cat /tmp/hello.txt && cat /tmp/hello_nc.txt && cd /tmp/etc && find .
       command:
@@ -44,7 +45,6 @@ spec:
         path: /tmp/hello.txt
       - name: hello-txt-nc
         path: /tmp/hello_nc.txt
-    name: print-message-from-files
   - name: artifact-disable-archive
     steps:
     - - name: generate-artifact

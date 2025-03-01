@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: print-message-from-configmap
   templates:
-  - container:
+  - name: print-message-from-configmap
+    container:
       args:
       - '{{inputs.parameters.message}}'
       command:
@@ -16,6 +17,5 @@ spec:
       - name: message
         valueFrom:
           configMapKeyRef:
-            key: msg
             name: simple-parameters
-    name: print-message-from-configmap
+            key: msg

@@ -5,20 +5,21 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - container:
+  - name: generate
+    container:
       args:
       - echo
       - hello
       - /mnt/file
       image: argoproj/argosay:v2
-    name: generate
     outputs:
       artifacts:
       - name: file
         path: /mnt/file
         s3:
           key: my-file
-  - container:
+  - name: consume
+    container:
       args:
       - cat
       - /tmp/file
@@ -29,12 +30,11 @@ spec:
         path: /tmp/file
         s3:
           key: my-file
-    name: consume
-  - dag:
+  - name: main
+    dag:
       tasks:
       - name: generate
         template: generate
-      - depends: generate
-        name: consume
+      - name: consume
+        depends: generate
         template: consume
-    name: main

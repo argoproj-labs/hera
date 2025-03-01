@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: input-artifact-s3-example
   templates:
-  - container:
+  - name: input-artifact-s3-example
+    container:
       args:
       - ls -l /my-artifact
       command:
@@ -17,14 +18,13 @@ spec:
       - name: my-art
         path: /my-artifact
         s3:
-          accessKeySecret:
-            key: accessKey
-            name: my-s3-credentials
           bucket: my-bucket-name
           endpoint: s3.amazonaws.com
           key: path/in/bucket
           region: us-west-2
-          secretKeySecret:
-            key: secretKey
+          accessKeySecret:
             name: my-s3-credentials
-    name: input-artifact-s3-example
+            key: accessKey
+          secretKeySecret:
+            name: my-s3-credentials
+            key: secretKey

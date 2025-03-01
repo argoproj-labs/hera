@@ -3,22 +3,10 @@ kind: Workflow
 metadata:
   generateName: artifact-path-placeholders-
 spec:
-  arguments:
-    artifacts:
-    - name: text
-      raw:
-        data: |
-          1
-          2
-          3
-          4
-          5
-    parameters:
-    - name: lines-count
-      value: '3'
   entrypoint: head-lines
   templates:
-  - container:
+  - name: head-lines
+    container:
       command:
       - sh
       - -c
@@ -32,7 +20,6 @@ spec:
         path: /inputs/text/data
       parameters:
       - name: lines-count
-    name: head-lines
     outputs:
       artifacts:
       - name: text
@@ -41,3 +28,16 @@ spec:
       - name: actual-lines-count
         valueFrom:
           path: /outputs/actual-lines-count/data
+  arguments:
+    artifacts:
+    - name: text
+      raw:
+        data: |
+          1
+          2
+          3
+          4
+          5
+    parameters:
+    - name: lines-count
+      value: '3'

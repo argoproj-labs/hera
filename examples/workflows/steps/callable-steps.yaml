@@ -5,10 +5,7 @@ metadata:
 spec:
   entrypoint: calling-steps
   templates:
-  - inputs:
-      parameters:
-      - name: my-step-input
-    name: my-steps
+  - name: my-steps
     steps:
     - - arguments:
           parameters:
@@ -22,10 +19,13 @@ spec:
             value: hello-2-{{inputs.parameters.my-step-input}}
         name: hello-2
         template: hello
-  - inputs:
+    inputs:
+      parameters:
+      - name: my-step-input
+  - name: hello
+    inputs:
       parameters:
       - name: name
-    name: hello
     script:
       command:
       - python

@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: loop-param-result-example
   templates:
-  - container:
+  - name: sleep-n-sec
+    container:
       args:
       - echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}};
         echo done
@@ -16,7 +17,6 @@ spec:
     inputs:
       parameters:
       - name: seconds
-    name: sleep-n-sec
   - name: loop-param-result-example
     steps:
     - - name: generate

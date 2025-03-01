@@ -3,14 +3,11 @@ kind: WorkflowTemplate
 metadata:
   name: ci
 spec:
-  arguments:
-    parameters:
-    - name: branch
-      value: master
   entrypoint: main
   onExit: cache-store
   templates:
-  - container:
+  - name: cache-restore
+    container:
       args:
       - |
         mkdir -p $(go env GOMODCACHE)
@@ -22,11 +19,11 @@ spec:
       - -euxc
       image: golang:1.18
       volumeMounts:
-      - mountPath: /go/pkg/mod
-        name: work
+      - name: work
+        mountPath: /go/pkg/mod
         subPath: mod
-      - mountPath: /root/.cache/go-build
-        name: work
+      - name: work
+        mountPath: /root/.cache/go-build
         subPath: cache
       workingDir: /go/src/github.com/golang/example
     inputs:
@@ -41,8 +38,8 @@ spec:
         path: /mnt/GOCACHE
         s3:
           key: github.com/golang/examples/{{workflow.parameters.branch}}/GOCACHE
-    name: cache-restore
-  - container:
+  - name: clone
+    container:
       args:
       - |
         git clone -v -b "{{workflow.parameters.branch}}" --single-branch --depth 1 https://github.com/golang/example.git .
@@ -51,18 +48,18 @@ spec:
       - -euxc
       image: golang:1.18
       volumeMounts:
-      - mountPath: /go/src/github.com/golang/example
-        name: work
+      - name: work
+        mountPath: /go/src/github.com/golang/example
         subPath: src
-      - mountPath: /go/pkg/mod
-        name: work
+      - name: work
+        mountPath: /go/pkg/mod
         subPath: GOMODCACHE
-      - mountPath: /root/.cache/go-build
-        name: work
+      - name: work
+        mountPath: /root/.cache/go-build
         subPath: GOCACHE
       workingDir: /go/src/github.com/golang/example
-    name: clone
-  - container:
+  - name: deps
+    container:
       args:
       - |
         go mod download -x
@@ -71,18 +68,18 @@ spec:
       - -xuce
       image: golang:1.18
       volumeMounts:
-      - mountPath: /go/src/github.com/golang/example
-        name: work
+      - name: work
+        mountPath: /go/src/github.com/golang/example
         subPath: src
-      - mountPath: /go/pkg/mod
-        name: work
+      - name: work
+        mountPath: /go/pkg/mod
         subPath: GOMODCACHE
-      - mountPath: /root/.cache/go-build
-        name: work
+      - name: work
+        mountPath: /root/.cache/go-build
         subPath: GOCACHE
       workingDir: /go/src/github.com/golang/example
-    name: deps
-  - container:
+  - name: build
+    container:
       args:
       - |
         go build ./...
@@ -91,18 +88,18 @@ spec:
       - -xuce
       image: golang:1.18
       volumeMounts:
-      - mountPath: /go/src/github.com/golang/example
-        name: work
+      - name: work
+        mountPath: /go/src/github.com/golang/example
         subPath: src
-      - mountPath: /go/pkg/mod
-        name: work
+      - name: work
+        mountPath: /go/pkg/mod
         subPath: GOMODCACHE
-      - mountPath: /root/.cache/go-build
-        name: work
+      - name: work
+        mountPath: /root/.cache/go-build
         subPath: GOCACHE
       workingDir: /go/src/github.com/golang/example
-    name: build
-  - container:
+  - name: test
+    container:
       args:
       - |
         go install github.com/jstemmer/go-junit-report@latest
@@ -116,36 +113,35 @@ spec:
       - -euxc
       image: golang:1.18
       volumeMounts:
-      - mountPath: /go/src/github.com/golang/example
-        name: work
+      - name: work
+        mountPath: /go/src/github.com/golang/example
         subPath: src
-      - mountPath: /go/pkg/mod
-        name: work
+      - name: work
+        mountPath: /go/pkg/mod
         subPath: GOMODCACHE
-      - mountPath: /root/.cache/go-build
-        name: work
+      - name: work
+        mountPath: /root/.cache/go-build
         subPath: GOCACHE
       workingDir: /go/src/github.com/golang/example
-    name: test
     outputs:
       artifacts:
-      - archive:
-          none: {}
-        name: test-report
+      - name: test-report
         path: /go/src/github.com/golang/example/test-report.html
+        archive:
+          none: {}
         s3:
           key: '{{workflow.parameters.branch}}/test-report.html'
-  - container:
+  - name: cache-store
+    container:
       image: golang:1.18
       volumeMounts:
-      - mountPath: /go/pkg/mod
-        name: work
+      - name: work
+        mountPath: /go/pkg/mod
         subPath: GOMODCACHE
-      - mountPath: /root/.cache/go-build
-        name: work
+      - name: work
+        mountPath: /root/.cache/go-build
         subPath: GOCACHE
       workingDir: /go/src/github.com/golang/example
-    name: cache-store
     outputs:
       artifacts:
       - name: GOMODCACHE
@@ -158,26 +154,26 @@ spec:
         path: /root/.cache/go-build
         s3:
           key: github.com/golang/examples/{{workflow.parameters.branch}}/GOCACHE
-  - dag:
+  - name: main
+    dag:
       tasks:
       - name: cache-restore
         template: cache-restore
       - name: clone
         template: clone
-      - dependencies:
+      - name: deps
+        dependencies:
         - clone
         - cache-restore
-        name: deps
         template: deps
-      - dependencies:
+      - name: build
+        dependencies:
         - deps
-        name: build
         template: build
-      - dependencies:
+      - name: test
+        dependencies:
         - build
-        name: test
         template: test
-    name: main
   volumeClaimTemplates:
   - metadata:
       name: work
@@ -187,3 +183,7 @@ spec:
       resources:
         requests:
           storage: 64Mi
+  arguments:
+    parameters:
+    - name: branch
+      value: master

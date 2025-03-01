@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
+  generateName: conditional-artifacts-
   annotations:
     workflows.argoproj.io/description: Conditional aartifacts provide a way to choose
       the output artifacts based on expression. In this example the main template
       has two steps which will run conditionall using `when` . Based on the `when`
       condition one of step will not execute. The main template's output artifact
       named "result" will be set to the executed step's output.
-  generateName: conditional-artifacts-
   labels:
     workflows.argoproj.io/test: 'true'
 spec:
@@ -46,11 +46,6 @@ spec:
         with open('result.txt', 'w') as f:
             f.write('it was tails')
   - name: main
-    outputs:
-      artifacts:
-      - fromExpression: 'steps[''flip-coin''].outputs.result == ''heads'' ? steps.heads.outputs.artifacts.result
-          : steps.tails.outputs.artifacts.result'
-        name: result
     steps:
     - - name: flip-coin
         template: flip-coin
@@ -60,3 +55,8 @@ spec:
       - name: tails
         template: tails
         when: '{{steps.flip-coin.outputs.result}} == tails'
+    outputs:
+      artifacts:
+      - name: result
+        fromExpression: 'steps[''flip-coin''].outputs.result == ''heads'' ? steps.heads.outputs.artifacts.result
+          : steps.tails.outputs.artifacts.result'

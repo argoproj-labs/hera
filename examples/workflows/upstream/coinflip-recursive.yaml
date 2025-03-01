@@ -5,14 +5,14 @@ metadata:
 spec:
   entrypoint: coinflip
   templates:
-  - container:
+  - name: heads
+    container:
       args:
       - echo "it was heads"
       command:
       - sh
       - -c
       image: alpine:3.6
-    name: heads
   - name: coinflip
     steps:
     - - name: flip-coin

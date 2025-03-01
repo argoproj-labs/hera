@@ -5,10 +5,10 @@ metadata:
 spec:
   entrypoint: goodbye-world
   templates:
-  - inputs:
+  - name: hello-world
+    inputs:
       parameters:
       - name: user
-    name: hello-world
     script:
       args:
       - -m
@@ -24,13 +24,13 @@ spec:
         value: ''
       image: python:3.9
       source: '{{inputs.parameters}}'
-  - inputs:
+  - name: goodbye-world
+    inputs:
       parameters:
       - name: user
     metadata:
       labels:
         my-label: my-value
-    name: goodbye-world
     script:
       args:
       - -m

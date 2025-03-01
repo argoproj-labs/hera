@@ -5,20 +5,23 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - containerSet:
+  - name: main
+    volumes:
+    - name: workspace
+      emptyDir: {}
+    containerSet:
       containers:
-      - args:
+      - name: a
+        args:
         - echo
         - hi
         - /workspace/out
         image: argoproj/argosay:v2
-        name: a
-      - image: argoproj/argosay:v2
-        name: main
+      - name: main
+        image: argoproj/argosay:v2
       volumeMounts:
-      - mountPath: /workspace
-        name: workspace
-    name: main
+      - name: workspace
+        mountPath: /workspace
     outputs:
       artifacts:
       - name: out
@@ -27,6 +30,3 @@ spec:
       - name: out
         valueFrom:
           path: /workspace/out
-    volumes:
-    - emptyDir: {}
-      name: workspace

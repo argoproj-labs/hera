@@ -3,17 +3,13 @@ kind: WorkflowTemplate
 metadata:
   generateName: global-parameters-
 spec:
-  arguments:
-    parameters:
-    - name: v
-      value: '42'
   entrypoint: s
   templates:
-  - inputs:
+  - name: s
+    inputs:
       parameters:
       - name: v
         value: '{{workflow.parameters.v}}'
-    name: s
     script:
       command:
       - python
@@ -27,3 +23,7 @@ spec:
         except: v = r'''{{inputs.parameters.v}}'''
 
         print(v)
+  arguments:
+    parameters:
+    - name: v
+      value: '42'

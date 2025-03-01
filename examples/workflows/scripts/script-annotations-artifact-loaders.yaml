@@ -23,10 +23,10 @@ spec:
             name: my-artifact-as-json
         name: artifact-loaders
         template: artifact-loaders
-  - inputs:
+  - name: output-dict-artifact
+    inputs:
       parameters:
       - name: a_number
-    name: output-dict-artifact
     outputs:
       artifacts:
       - name: a_dict
@@ -44,7 +44,8 @@ spec:
         value: /tmp/hera-outputs
       image: python:3.9
       source: '{{inputs.parameters}}'
-  - inputs:
+  - name: artifact-loaders
+    inputs:
       artifacts:
       - name: my-artifact-path
         path: /tmp/hera-inputs/artifacts/my-artifact-path
@@ -52,7 +53,6 @@ spec:
         path: /tmp/hera-inputs/artifacts/my-artifact-as-str
       - name: my-artifact-as-json
         path: /tmp/hera-inputs/artifacts/my-artifact-as-json
-    name: artifact-loaders
     script:
       args:
       - -m

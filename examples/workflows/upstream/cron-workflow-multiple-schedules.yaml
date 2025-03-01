@@ -15,10 +15,10 @@ spec:
   workflowSpec:
     entrypoint: whalesay
     templates:
-    - container:
+    - name: whalesay
+      container:
         args:
         - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
         command:
         - cowsay
         image: docker/whalesay:latest
-      name: whalesay

@@ -5,10 +5,10 @@ metadata:
 spec:
   entrypoint: generate-and-use-volume
   templates:
-  - inputs:
+  - name: generate-volume
+    inputs:
       parameters:
       - name: pvc-size
-    name: generate-volume
     outputs:
       parameters:
       - name: pvc-name
@@ -27,7 +27,12 @@ spec:
             requests:
               storage: '{{inputs.parameters.pvc-size}}'
       setOwnerReference: true
-  - container:
+  - name: whalesay
+    volumes:
+    - name: workdir
+      persistentVolumeClaim:
+        claimName: '{{inputs.parameters.pvc-name}}'
+    container:
       args:
       - echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt
       command:
@@ -35,17 +40,17 @@ spec:
       - -c
       image: docker/whalesay:latest
       volumeMounts:
-      - mountPath: /mnt/vol
-        name: workdir
+      - name: workdir
+        mountPath: /mnt/vol
     inputs:
       parameters:
       - name: pvc-name
-    name: whalesay
+  - name: print-message
     volumes:
     - name: workdir
       persistentVolumeClaim:
         claimName: '{{inputs.parameters.pvc-name}}'
-  - container:
+    container:
       args:
       - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
       command:
@@ -53,16 +58,11 @@ spec:
       - -c
       image: alpine:latest
       volumeMounts:
-      - mountPath: /mnt/vol
-        name: workdir
+      - name: workdir
+        mountPath: /mnt/vol
     inputs:
       parameters:
       - name: pvc-name
-    name: print-message
-    volumes:
-    - name: workdir
-      persistentVolumeClaim:
-        claimName: '{{inputs.parameters.pvc-name}}'
   - name: generate-and-use-volume
     steps:
     - - arguments:

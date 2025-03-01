@@ -5,19 +5,19 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: flip
         template: flip
-      - depends: flip
-        name: heads
+      - name: heads
+        depends: flip
         template: heads
         when: '{{tasks.flip.outputs.result}} == heads'
-      - depends: flip
-        name: tails
+      - name: tails
+        depends: flip
         template: tails
         when: '{{tasks.flip.outputs.result}} == tails'
-    name: d
   - name: flip
     script:
       command:

@@ -5,7 +5,8 @@ metadata:
 spec:
   entrypoint: c
   templates:
-  - container:
+  - name: c
+    container:
       args:
       - echo Hello, world!
       command:
@@ -17,4 +18,3 @@ spec:
           cpu: '1'
           memory: 5Gi
           ephemeral-storage: 5Gi
-    name: c

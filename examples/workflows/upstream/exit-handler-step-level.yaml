@@ -5,14 +5,15 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - container:
+  - name: exit
+    container:
       args:
       - step cleanup
       command:
       - echo
       image: busybox
-    name: exit
-  - container:
+  - name: print-message
+    container:
       args:
       - '{{inputs.parameters.message}}'
       command:
@@ -21,7 +22,6 @@ spec:
     inputs:
       parameters:
       - name: message
-    name: print-message
   - name: main
     steps:
     - - arguments:

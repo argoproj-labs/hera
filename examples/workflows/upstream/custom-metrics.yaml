@@ -4,34 +4,25 @@ metadata:
   generateName: hello-world-
 spec:
   entrypoint: steps
-  metrics:
-    prometheus:
-    - gauge:
-        realtime: true
-        value: '{{workflow.duration}}'
-      help: Duration gauge by name
-      labels:
-      - key: name
-        value: workflow
-      name: duration_gauge
   templates:
-  - metrics:
-      prometheus:
-      - gauge:
-          realtime: true
-          value: '{{duration}}'
-        help: Duration gauge by name
-        labels:
-        - key: name
-          value: steps
-        name: duration_gauge
-    name: steps
+  - name: steps
     steps:
     - - name: random-int
         template: random-int
     - - name: flakey
         template: flakey
-  - container:
+    metrics:
+      prometheus:
+      - name: duration_gauge
+        help: Duration gauge by name
+        labels:
+        - key: name
+          value: steps
+        gauge:
+          realtime: true
+          value: '{{duration}}'
+  - name: random-int
+    container:
       args:
       - RAND_INT=$((1 + RANDOM % 10)); echo $RAND_INT; echo $RAND_INT > /tmp/rand_int.txt
       command:
@@ -40,7 +31,9 @@ spec:
       image: alpine:latest
     metrics:
       prometheus:
-      - help: Value of the int emitted by random-int at step level
+      - name: random_int_step_histogram
+        help: Value of the int emitted by random-int at step level
+        when: '{{status}} == Succeeded'
         histogram:
           buckets:
           - 2.01
@@ -49,24 +42,22 @@ spec:
           - 8.01
           - 10.01
           value: '{{outputs.parameters.rand-int-value}}'
-        name: random_int_step_histogram
-        when: '{{status}} == Succeeded'
-      - gauge:
-          realtime: true
-          value: '{{duration}}'
+      - name: duration_gauge
         help: Duration gauge by name
         labels:
         - key: name
           value: random-int
-        name: duration_gauge
-    name: random-int
+        gauge:
+          realtime: true
+          value: '{{duration}}'
     outputs:
       parameters:
-      - globalName: rand-int-value
-        name: rand-int-value
+      - name: rand-int-value
+        globalName: rand-int-value
         valueFrom:
           path: /tmp/rand_int.txt
-  - container:
+  - name: flakey
+    container:
       args:
       - import random; import sys; exit_code = random.choice([0, 1, 1]); sys.exit(exit_code)
       command:
@@ -75,13 +66,22 @@ spec:
       image: python:alpine3.6
     metrics:
       prometheus:
-      - counter:
-          value: '1'
+      - name: result_counter
         help: Count of step execution by result status
         labels:
         - key: name
           value: flakey
         - key: status
           value: '{{status}}'
-        name: result_counter
-    name: flakey
+        counter:
+          value: '1'
+  metrics:
+    prometheus:
+    - name: duration_gauge
+      help: Duration gauge by name
+      labels:
+      - key: name
+        value: workflow
+      gauge:
+        realtime: true
+        value: '{{workflow.duration}}'

@@ -5,21 +5,21 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: generator
         template: generator
-      - depends: generator
-        name: consumer-default
+      - name: consumer-default
+        depends: generator
         template: consumer
-      - arguments:
+      - name: consumer-param
+        depends: generator
+        template: consumer
+        arguments:
           parameters:
           - name: message
             value: '{{tasks.generator.outputs.result}}'
-        depends: generator
-        name: consumer-param
-        template: consumer
-    name: d
   - name: generator
     script:
       command:
@@ -30,11 +30,11 @@ spec:
         import sys
         sys.path.append(os.getcwd())
         print('Another message for the world!')
-  - inputs:
+  - name: consumer
+    inputs:
       parameters:
-      - default: Hello, world!
-        name: message
-    name: consumer
+      - name: message
+        default: Hello, world!
     script:
       command:
       - python

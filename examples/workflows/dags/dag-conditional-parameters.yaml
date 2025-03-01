@@ -5,19 +5,19 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - dag:
+  - name: main
+    dag:
       tasks:
       - name: flip-coin
         template: flip-coin
-      - depends: flip-coin
-        name: heads
+      - name: heads
+        depends: flip-coin
         template: heads
         when: '{{tasks.flip-coin.outputs.result}} == heads'
-      - depends: flip-coin
-        name: tails
+      - name: tails
+        depends: flip-coin
         template: tails
         when: '{{tasks.flip-coin.outputs.result}} == tails'
-    name: main
     outputs:
       parameters:
       - name: stepresult

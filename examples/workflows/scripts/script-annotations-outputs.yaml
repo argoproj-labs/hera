@@ -13,10 +13,10 @@ spec:
             value: '3'
         name: script-param-artifact-in-function-signature-and-return-type
         template: script-param-artifact-in-function-signature-and-return-type
-  - inputs:
+  - name: script-param-artifact-in-function-signature-and-return-type
+    inputs:
       parameters:
       - name: a_number
-    name: script-param-artifact-in-function-signature-and-return-type
     outputs:
       artifacts:
       - name: successor2
