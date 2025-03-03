@@ -579,34 +579,39 @@ class ArgumentsMixin(BaseMixin):
         elif isinstance(self.arguments, ModelArguments):
             return self.arguments
 
+        def add_argument(k: str, v: Any, result: ModelArguments):
+            if isinstance(v, Parameter):
+                parameter = v.with_name(k).as_argument()
+                result.parameters = (result.parameters or []) + [parameter]
+            elif isinstance(v, ModelParameter):
+                parameter = Parameter.from_model(v).as_argument()
+                parameter.name = k
+                result.parameters = (result.parameters or []) + [parameter]
+            elif isinstance(v, ModelArtifact):
+                artifact = v.copy(deep=True)
+                artifact.name = k
+                result.artifacts = (result.artifacts or []) + [artifact]
+            elif isinstance(v, Artifact):
+                artifact = v.with_name(k)._build_artifact()
+                result.artifacts = (result.artifacts or []) + [artifact]
+            else:
+                # Primitive types are assumed to be parameters, which will be serialised upon creation
+                parameter = Parameter(name=k, value=v).as_argument()
+                result.parameters = (result.parameters or []) + [parameter]
+
         result = ModelArguments()
         for arg in self.arguments:
             if isinstance(arg, dict):
                 for k, v in arg.items():
-                    if isinstance(v, Parameter):
-                        value = v.with_name(k).as_argument()
-                    elif isinstance(v, ModelParameter):
-                        value = Parameter.from_model(v).as_argument()
-                        value.name = k
-                    else:
-                        value = Parameter(name=k, value=v).as_argument()
+                    add_argument(k, v, result)
+            elif isinstance(arg, (Parameter, ModelParameter, Artifact, ModelArtifact)):
+                # name can only be None for Parameters/Artifacts if they have not been
+                # "built" yet (see the `_check_name` function)
+                add_argument(arg.name or "", arg, result)
+            else:
+                # Unreachable code (unless model validation is overridden)
+                raise TypeError(f"Invalid argument type {type(arg)}")
 
-                    if result.parameters is None:
-                        result.parameters = [value]
-                    else:
-                        result.parameters.append(value)
-            elif isinstance(arg, ModelArtifact):
-                result.artifacts = [arg] if result.artifacts is None else result.artifacts + [arg]
-            elif isinstance(arg, Artifact):
-                result.artifacts = (
-                    [arg._build_artifact()] if result.artifacts is None else result.artifacts + [arg._build_artifact()]
-                )
-            elif isinstance(arg, Parameter):
-                result.parameters = (
-                    [arg.as_argument()] if result.parameters is None else result.parameters + [arg.as_argument()]
-                )
-            elif isinstance(arg, ModelParameter):
-                result.parameters = [arg] if result.parameters is None else result.parameters + [arg]
         # returning `None` for `Arguments` means the submission to the server will not even have the
         # `arguments` field set, which saves some payload
         if result.parameters is None and result.artifacts is None:
