@@ -155,7 +155,7 @@ def test_hera_output_upstream(module_name, global_config_fixture):
     # THEN - generate the workflow yaml if HERA_REGENERATE or it does not exist
     if _generate_yaml(generated_yaml_path):
         generated_yaml_path.write_text(workflow.to_yaml())
- 
+
     if _generate_yaml(upstream_yaml_path):
         if not upstream_yaml_path.exists():
             # Only fetch and write upstream YAML if it doesn't exist (use
