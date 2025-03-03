@@ -574,10 +574,13 @@ class ArgumentsMixin(BaseMixin):
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
-        if self.arguments is None:
+        # Reapply the validator in case arguments was assigned to as a dictionary
+        normalized_arguments = normalize_to_list_or(ModelArguments)(self.arguments)
+
+        if normalized_arguments is None:
             return None
-        elif isinstance(self.arguments, ModelArguments):
-            return self.arguments
+        elif isinstance(normalized_arguments, ModelArguments):
+            return normalized_arguments
 
         from hera.workflows.workflow_template import WorkflowTemplate
 
@@ -606,7 +609,7 @@ class ArgumentsMixin(BaseMixin):
                 result.parameters = (result.parameters or []) + [parameter]
 
         result = ModelArguments()
-        for arg in self.arguments:
+        for arg in normalized_arguments:
             if isinstance(arg, dict):
                 for k, v in arg.items():
                     add_argument(k, v, result)
