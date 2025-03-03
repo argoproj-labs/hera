@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-
+spec:
+  entrypoint: loop-example
+  templates:
+  - name: loop-example
+    steps:
+    - - arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'
+        name: print-message-loop-with-items-list
+        template: print-message
+        withItems:
+        - hello world
+        - goodbye world
+    - - arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'
+        name: print-message-loop-with-items-dict
+        template: print-message
+        withItems:
+        - message: hello world
+        - message: goodbye world
+    - - arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'
+        name: print-message-loop-with-items-list-of-dicts
+        template: print-message
+        withItems:
+        - '{"my-key": "hello world"}'
+        - '{"my-other-key": "goodbye world"}'
+  - name: print-message
+    inputs:
+      parameters:
+      - name: message
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: message = json.loads(r'''{{inputs.parameters.message}}''')
+        except: message = r'''{{inputs.parameters.message}}'''
+
+        print(message)
+      command:
+      - python
