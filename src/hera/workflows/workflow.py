@@ -349,7 +349,7 @@ class Workflow(
 
             Ordering is:
             1. "name" keys always first (if present)
-            2. POD (not dicts/lists)
+            2. Primitives (not dicts/lists)
             3. lists
             4. dict
             """
@@ -365,7 +365,7 @@ class Workflow(
         def order_dict(d: dict) -> dict[str, Any]:
             """Recursively orders `d` by the custom_ordering function by inserting them into a copy of the dict in order."""
             d_copy: dict[str, Any] = dict()
-            for k, v in sorted(d.items(), key=human_readable_ordering):
+            for k, v in sorted(d.items(), key=lambda x: (human_readable_ordering(x), x[0])):
                 if isinstance(v, dict):
                     d_copy[k] = order_dict(v)
                 elif isinstance(v, list):
