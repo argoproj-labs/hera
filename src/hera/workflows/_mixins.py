@@ -606,7 +606,7 @@ class ArgumentsMixin(BaseMixin):
                 # Primitive types are assumed to be parameters, which will be serialised upon creation
                 parameter = Parameter(name=k, value=v)
                 param_as_argument = parameter.as_input() if is_workflow_template else parameter.as_argument()
-                result.parameters = (result.parameters or []) + [parameter]
+                result.parameters = (result.parameters or []) + [param_as_argument]
 
         result = ModelArguments()
         for arg in normalized_arguments:
