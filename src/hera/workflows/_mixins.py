@@ -581,23 +581,23 @@ class ArgumentsMixin(BaseMixin):
 
         def add_argument(k: str, v: Any, result: ModelArguments):
             if isinstance(v, Parameter):
-                value = v.with_name(k).as_argument()
-                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+                parameter = v.with_name(k).as_argument()
+                result.parameters = (result.parameters or []) + [parameter]
             elif isinstance(v, ModelParameter):
-                value = Parameter.from_model(v).as_argument()
-                value.name = k
-                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+                parameter = Parameter.from_model(v).as_argument()
+                parameter.name = k
+                result.parameters = (result.parameters or []) + [parameter]
             elif isinstance(v, ModelArtifact):
-                copy_art = v.copy(deep=True)
-                copy_art.name = k
-                result.artifacts = [copy_art] if result.artifacts is None else result.artifacts + [copy_art]
+                artifact = v.copy(deep=True)
+                artifact.name = k
+                result.artifacts = (result.artifacts or []) + [artifact]
             elif isinstance(v, Artifact):
-                copy_art = v.with_name(k)._build_artifact()
-                result.artifacts = [copy_art] if result.artifacts is None else result.artifacts + [copy_art]
+                artifact = v.with_name(k)._build_artifact()
+                result.artifacts = (result.artifacts or []) + [artifact]
             else:
-                # POD types are assumed to be parameters, which will be serialised upon creation
-                value = Parameter(name=k, value=v).as_argument()
-                result.parameters = [value] if result.parameters is None else result.parameters + [value]
+                # Primitive types are assumed to be parameters, which will be serialised upon creation
+                parameter = Parameter(name=k, value=v).as_argument()
+                result.parameters = (result.parameters or []) + [parameter]
 
         result = ModelArguments()
         for arg in self.arguments:
@@ -609,7 +609,7 @@ class ArgumentsMixin(BaseMixin):
                 # "built" yet (see the `_check_name` function)
                 add_argument(arg.name or "", arg, result)
             else:
-                # Unreachable code (if Pydantic is validating correctly)
+                # Unreachable code (unless model validation is overridden)
                 raise TypeError(f"Invalid argument type {type(arg)}")
 
         # returning `None` for `Arguments` means the submission to the server will not even have the

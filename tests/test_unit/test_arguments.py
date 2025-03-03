@@ -114,9 +114,6 @@ def test_argument_parameter_build(arguments, expected_built_arguments):
     )
 
 
-model_artifact = ModelArtifact(name="artifact-name", from_="somewhere")
-
-
 @pytest.mark.parametrize(
     "arguments,expected_built_arguments",
     (
@@ -173,27 +170,6 @@ model_artifact = ModelArtifact(name="artifact-name", from_="somewhere")
             id="model-artifact-in-dict",
         ),
         pytest.param(
-            [
-                {
-                    "a-key": model_artifact,
-                },
-                model_artifact,
-            ],
-            ModelArguments(
-                artifacts=[
-                    ModelArtifact(
-                        name="a-key",
-                        from_="somewhere",
-                    ),
-                    ModelArtifact(
-                        name="artifact-name",
-                        from_="somewhere",
-                    ),
-                ],
-            ),
-            id="do-not-rename-original-artifact-object",
-        ),
-        pytest.param(
             {"a-key": Artifact(name="artifact-name", from_="somewhere").with_name("ignore-me")},
             ModelArguments(
                 artifacts=[
@@ -226,6 +202,35 @@ def test_argument_artifact_build(arguments, expected_built_arguments):
         )._build_arguments()
         == expected_built_arguments
     )
+
+
+def test_original_artifact_is_unchanged():
+    model_artifact = ModelArtifact(name="artifact-name", from_="somewhere")
+    arguments = [
+        {
+            "a-key": model_artifact,
+        },
+        model_artifact,
+    ]
+    expected_built_arguments = ModelArguments(
+        artifacts=[
+            ModelArtifact(
+                name="a-key",
+                from_="somewhere",
+            ),
+            ModelArtifact(
+                name="artifact-name",
+                from_="somewhere",
+            ),
+        ],
+    )
+    assert (
+        ArgumentsMixin(
+            arguments=arguments,
+        )._build_arguments()
+        == expected_built_arguments
+    )
+    assert model_artifact.name == "artifact-name"
 
 
 @pytest.mark.parametrize(
