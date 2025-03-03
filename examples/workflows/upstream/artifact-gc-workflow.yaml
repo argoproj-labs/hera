@@ -3,11 +3,11 @@ kind: Workflow
 metadata:
   generateName: artifact-gc-
 spec:
-  artifactGC:
-    strategy: OnWorkflowDeletion
   entrypoint: main
   templates:
-  - container:
+  - name: main
+    container:
+      image: argoproj/argosay:v2
       args:
       - |
         echo "hello world" > /tmp/on-completion.txt
@@ -15,17 +15,17 @@ spec:
       command:
       - sh
       - -c
-      image: argoproj/argosay:v2
-    name: main
     outputs:
       artifacts:
-      - artifactGC:
-          strategy: OnWorkflowCompletion
-        name: on-completion
+      - name: on-completion
         path: /tmp/on-completion.txt
+        artifactGC:
+          strategy: OnWorkflowCompletion
         s3:
           key: on-completion.txt
       - name: on-deletion
         path: /tmp/on-deletion.txt
         s3:
           key: on-deletion.txt
+  artifactGC:
+    strategy: OnWorkflowDeletion

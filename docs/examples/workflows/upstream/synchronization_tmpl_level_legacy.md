@@ -49,19 +49,19 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: synchronization-tmpl-level-example
       templates:
-      - container:
+      - name: acquire-lock
+        container:
+          image: alpine:latest
           args:
           - sleep 10; echo acquired lock
           command:
           - sh
           - -c
-          image: alpine:latest
-        name: acquire-lock
         synchronization:
           semaphore:
             configMapKeyRef:
-              key: template
               name: my-config
+              key: template
       - name: synchronization-tmpl-level-example
         steps:
         - - arguments:

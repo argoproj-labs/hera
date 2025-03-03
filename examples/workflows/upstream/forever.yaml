@@ -5,10 +5,10 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - container:
+  - name: main
+    container:
+      image: busybox
       command:
       - sh
       - -c
       - for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done
-      image: busybox
-    name: main

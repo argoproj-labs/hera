@@ -45,22 +45,18 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       name: event-consumer
     spec:
-      arguments:
-        parameters:
-        - name: salutation
-          value: hello
       entrypoint: main
       templates:
-      - container:
+      - name: argosay
+        container:
+          image: argoproj/argosay:v2
           args:
           - echo
           - '{{inputs.parameters.salutation}} {{inputs.parameters.appellation}}'
-          image: argoproj/argosay:v2
         inputs:
           parameters:
           - name: salutation
           - name: appellation
-        name: argosay
       - name: main
         steps:
         - - arguments:
@@ -71,5 +67,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 value: '{{workflow.parameters.appellation}}'
             name: a
             template: argosay
+      arguments:
+        parameters:
+        - name: salutation
+          value: hello
     ```
 

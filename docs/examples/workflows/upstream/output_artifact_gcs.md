@@ -46,23 +46,23 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: hello-world-to-file
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
-          - gcs:
+          - name: message
+            path: /tmp
+            gcs:
               bucket: my-bucket
               key: path/in/bucket/hello_world.txt.tgz
               serviceAccountKeySecret:
-                key: serviceAccountKey
                 name: my-gcs-credentials
-            name: message
-            path: /tmp
+                key: serviceAccountKey
     ```
 

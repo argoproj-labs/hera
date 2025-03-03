@@ -36,13 +36,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: cluster-workflow-template-hello-world-
     spec:
+      entrypoint: print-message
       arguments:
         parameters:
         - name: message
           value: hello world
-      entrypoint: print-message
       workflowTemplateRef:
-        clusterScope: true
         name: cluster-workflow-template-print-message
+        clusterScope: true
     ```
 

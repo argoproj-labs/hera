@@ -106,44 +106,44 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: ci-example
       templates:
-      - container:
+      - name: build-golang-example
+        container:
+          image: golang:1.8
           args:
           - ' cd /go/src/github.com/golang/example/hello && go build -v . '
           command:
           - sh
           - -c
-          image: golang:1.8
           volumeMounts:
-          - mountPath: /go
-            name: workdir
+          - name: workdir
+            mountPath: /go
         inputs:
           artifacts:
-          - git:
+          - name: code
+            path: /go/src/github.com/golang/example
+            git:
               repo: https://github.com/golang/example.git
               revision: cfe12d6
-            name: code
-            path: /go/src/github.com/golang/example
-        name: build-golang-example
-      - container:
+      - name: run-hello
+        container:
+          image: '{{inputs.parameters.os-image}}'
           args:
           - ' uname -a ; cat /etc/os-release ; /go/src/github.com/golang/example/hello/hello '
           command:
           - sh
           - -c
-          image: '{{inputs.parameters.os-image}}'
           volumeMounts:
-          - mountPath: /go
-            name: workdir
+          - name: workdir
+            mountPath: /go
         inputs:
           parameters:
           - name: os-image
-        name: run-hello
-      - container:
+      - name: release-artifact
+        container:
           image: alpine:3.8
           volumeMounts:
-          - mountPath: /go
-            name: workdir
-        name: release-artifact
+          - name: workdir
+            mountPath: /go
         outputs:
           artifacts:
           - name: release

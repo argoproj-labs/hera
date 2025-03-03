@@ -1,4 +1,5 @@
 from hera.workflows import Container, Steps, Workflow
+from hera.workflows.models import LifecycleHook
 
 with Workflow(generate_name="container-on-exit-", entrypoint="step-template") as w:
     exit_container = Container(
@@ -14,5 +15,5 @@ with Workflow(generate_name="container-on-exit-", entrypoint="step-template") as
         args=["hello world"],
     )
     with Steps(name="step-template"):
-        hello_world(name="stepA", on_exit=exit_container)
-        hello_world(name="stepB", on_exit=exit_container)
+        hello_world(name="stepA", hooks={"exit": LifecycleHook(template=exit_container.name)})
+        hello_world(name="stepB", hooks={"exit": LifecycleHook(template=exit_container.name)})

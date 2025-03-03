@@ -43,7 +43,20 @@ This example showcases how one can run Docker in Docker with a sidecar container
     spec:
       entrypoint: dind-sidecar-example
       templates:
-      - container:
+      - name: dind-sidecar-example
+        sidecars:
+        - name: dind
+          image: docker:19.03.13-dind
+          mirrorVolumeMounts: true
+          command:
+          - dockerd-entrypoint.sh
+          env:
+          - name: DOCKER_TLS_CERTDIR
+            value: ''
+          securityContext:
+            privileged: true
+        container:
+          image: docker:19.03.13
           args:
           - until docker ps; do sleep 3; done; docker run --rm debian:latest cat /etc/os-release
           command:
@@ -52,18 +65,5 @@ This example showcases how one can run Docker in Docker with a sidecar container
           env:
           - name: DOCKER_HOST
             value: 127.0.0.1
-          image: docker:19.03.13
-        name: dind-sidecar-example
-        sidecars:
-        - command:
-          - dockerd-entrypoint.sh
-          env:
-          - name: DOCKER_TLS_CERTDIR
-            value: ''
-          image: docker:19.03.13-dind
-          mirrorVolumeMounts: true
-          name: dind
-          securityContext:
-            privileged: true
     ```
 

@@ -34,12 +34,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - container:
+      - name: main
+        container:
+          image: busybox
           command:
           - sh
           - -c
           - for I in $(seq 1 1000) ; do echo $I ; sleep 1s; done
-          image: busybox
-        name: main
     ```
 

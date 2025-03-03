@@ -55,18 +55,18 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: loop-param-result-example
       templates:
-      - container:
+      - name: sleep-n-sec
+        container:
+          image: alpine:latest
           args:
           - echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}};
             echo done
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           parameters:
           - name: seconds
-        name: sleep-n-sec
       - name: loop-param-result-example
         steps:
         - - name: generate
@@ -80,12 +80,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             withParam: '{{steps.generate.outputs.result}}'
       - name: gen-number-list
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: |-
             import json
             import sys
             json.dump([i for i in range(20, 31)], sys.stdout)
+          command:
+          - python
     ```
 

@@ -50,11 +50,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - name: print-colors
         script:
-          command:
-          - python
-          env:
-          - name: PYTHONUNBUFFERED
-            value: '1'
           image: python:3.7
           source: |-
             import time
@@ -63,5 +58,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             for i in range(1, 100):
                 print(random.choice(messages))
                 time.sleep(1)
+          command:
+          - python
+          env:
+          - name: PYTHONUNBUFFERED
+            value: '1'
     ```
 

@@ -72,46 +72,46 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: artifact-example
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
-          - artifactory:
-              passwordSecret:
-                key: password
-                name: my-artifactory-credentials
-              url: http://artifactory:8081/artifactory/generic-local/hello_world.tgz
-              usernameSecret:
-                key: username
-                name: my-artifactory-credentials
-            name: hello-art
+          - name: hello-art
             path: /tmp/hello_world.txt
-      - container:
+            artifactory:
+              url: http://artifactory:8081/artifactory/generic-local/hello_world.tgz
+              passwordSecret:
+                name: my-artifactory-credentials
+                key: password
+              usernameSecret:
+                name: my-artifactory-credentials
+                key: username
+      - name: print-message-from-file
+        container:
+          image: alpine:latest
           args:
           - cat /tmp/message
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
-          - artifactory:
-              passwordSecret:
-                key: password
-                name: my-artifactory-credentials
-              url: http://artifactory:8081/artifactory/generic-local/hello_world.tgz
-              usernameSecret:
-                key: username
-                name: my-artifactory-credentials
-            name: message
+          - name: message
             path: /tmp/message
-        name: print-message-from-file
+            artifactory:
+              url: http://artifactory:8081/artifactory/generic-local/hello_world.tgz
+              passwordSecret:
+                name: my-artifactory-credentials
+                key: password
+              usernameSecret:
+                name: my-artifactory-credentials
+                key: username
       - name: artifact-example
         steps:
         - - name: generate-artifact

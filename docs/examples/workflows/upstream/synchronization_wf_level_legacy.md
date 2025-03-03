@@ -46,18 +46,18 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       generateName: synchronization-wf-level-
     spec:
       entrypoint: hello-world
-      synchronization:
-        semaphore:
-          configMapKeyRef:
-            key: workflow
-            name: my-config
       templates:
-      - container:
+      - name: hello-world
+        container:
+          image: busybox
           args:
           - hello world
           command:
           - echo
-          image: busybox
-        name: hello-world
+      synchronization:
+        semaphore:
+          configMapKeyRef:
+            name: my-config
+            key: workflow
     ```
 

@@ -49,42 +49,42 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: diamond
       templates:
-      - container:
+      - name: pass
+        container:
+          image: alpine:3.7
           command:
           - sh
           - -c
           - exit 0
+      - name: fail
+        container:
           image: alpine:3.7
-        name: pass
-      - container:
           command:
           - sh
           - -c
           - exit 1
-          image: alpine:3.7
-        name: fail
-      - dag:
+      - name: diamond
+        dag:
           tasks:
           - name: A
             template: pass
-          - depends: A
-            name: B
+          - name: B
+            depends: A
             template: pass
-          - depends: A
-            name: C
+          - name: C
+            depends: A
             template: fail
-          - depends: A && (C.Succeeded || C.Failed)
-            name: should-execute-1
+          - name: should-execute-1
+            depends: A && (C.Succeeded || C.Failed)
             template: pass
-          - depends: B || C
-            name: should-execute-2
+          - name: should-execute-2
+            depends: B || C
             template: pass
-          - depends: B && C
-            name: should-not-execute
+          - name: should-not-execute
+            depends: B && C
             template: pass
-          - depends: should-execute-2.Succeeded || should-not-execute
-            name: should-execute-3
+          - name: should-execute-3
+            depends: should-execute-2.Succeeded || should-not-execute
             template: pass
-        name: diamond
     ```
 

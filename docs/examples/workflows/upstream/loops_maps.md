@@ -51,17 +51,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: loop-map-example
       templates:
-      - container:
+      - name: cat-os-release
+        container:
+          image: '{{inputs.parameters.image}}:{{inputs.parameters.tag}}'
           args:
           - /etc/os-release
           command:
           - cat
-          image: '{{inputs.parameters.image}}:{{inputs.parameters.tag}}'
         inputs:
           parameters:
           - name: image
           - name: tag
-        name: cat-os-release
       - name: loop-map-example
         steps:
         - - arguments:

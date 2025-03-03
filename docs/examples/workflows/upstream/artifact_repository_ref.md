@@ -40,21 +40,21 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: artifact-repository-ref-
     spec:
-      artifactRepositoryRef:
-        key: my-key
       entrypoint: main
       templates:
-      - container:
+      - name: main
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: main
         outputs:
           artifacts:
           - name: hello_world
             path: /tmp/hello_world.txt
+      artifactRepositoryRef:
+        key: my-key
     ```
 

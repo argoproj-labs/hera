@@ -5,25 +5,29 @@ metadata:
 spec:
   entrypoint: step-template
   templates:
-  - container:
+  - name: exitContainer
+    container:
+      image: busybox
       args:
       - goodbye world
       command:
       - echo
+  - name: hello-world
+    container:
       image: busybox
-    name: exitContainer
-  - container:
       args:
       - hello world
       command:
       - echo
-      image: busybox
-    name: hello-world
   - name: step-template
     steps:
-    - - name: stepA
-        onExit: exitContainer
+    - - hooks:
+          exit:
+            template: exitContainer
+        name: stepA
         template: hello-world
-    - - name: stepB
-        onExit: exitContainer
+    - - hooks:
+          exit:
+            template: exitContainer
+        name: stepB
         template: hello-world

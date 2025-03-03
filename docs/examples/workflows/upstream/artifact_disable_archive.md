@@ -71,37 +71,38 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: artifact-disable-archive
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt | tee /tmp/hello_world_nc.txt
             ; sleep 1
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: etc
+          - name: etc
             path: /etc
-          - archive:
+            archive:
               none: {}
-            name: hello-txt
+          - name: hello-txt
             path: /tmp/hello_world.txt
-          - archive:
+            archive:
+              none: {}
+          - name: hello-txt-nc
+            path: /tmp/hello_world_nc.txt
+            archive:
               tar:
                 compressionLevel: 0
-            name: hello-txt-nc
-            path: /tmp/hello_world_nc.txt
-      - container:
+      - name: print-message-from-files
+        container:
+          image: alpine:latest
           args:
           - cat /tmp/hello.txt && cat /tmp/hello_nc.txt && cd /tmp/etc && find .
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
           - name: etc
@@ -110,7 +111,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             path: /tmp/hello.txt
           - name: hello-txt-nc
             path: /tmp/hello_nc.txt
-        name: print-message-from-files
       - name: artifact-disable-archive
         steps:
         - - name: generate-artifact

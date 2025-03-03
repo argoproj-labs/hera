@@ -34,18 +34,18 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: global-parameters-
     spec:
-      arguments:
-        parameters:
-        - name: message
-          value: hello world
       entrypoint: print-message
       templates:
-      - container:
+      - name: print-message
+        container:
+          image: busybox
           args:
           - '{{workflow.parameters.message}}'
           command:
           - echo
-          image: busybox
-        name: print-message
+      arguments:
+        parameters:
+        - name: message
+          value: hello world
     ```
 

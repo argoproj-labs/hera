@@ -41,38 +41,38 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: diamond
       templates:
-      - container:
+      - name: echo
+        timeout: '{{inputs.parameters.timeout}}'
+        container:
+          image: alpine:3.7
           command:
           - sleep
           - 15s
-          image: alpine:3.7
         inputs:
           parameters:
           - name: timeout
-        name: echo
-        timeout: '{{inputs.parameters.timeout}}'
-      - dag:
+      - name: diamond
+        dag:
           tasks:
-          - arguments:
+          - name: A
+            template: echo
+            arguments:
               parameters:
               - name: timeout
                 value: 20s
-            name: A
+          - name: B
+            depends: A
             template: echo
-          - arguments:
+            arguments:
               parameters:
               - name: timeout
                 value: 10s
+          - name: C
             depends: A
-            name: B
             template: echo
-          - arguments:
+            arguments:
               parameters:
               - name: timeout
                 value: 20s
-            depends: A
-            name: C
-            template: echo
-        name: diamond
     ```
 

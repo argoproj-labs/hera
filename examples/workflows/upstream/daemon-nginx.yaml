@@ -5,28 +5,28 @@ metadata:
 spec:
   entrypoint: daemon-nginx-example
   templates:
-  - container:
+  - name: nginx-server
+    daemon: true
+    container:
       image: nginx:1.13
       readinessProbe:
+        initialDelaySeconds: 2
+        timeoutSeconds: 1
         httpGet:
           path: /
           port: 80
-        initialDelaySeconds: 2
-        timeoutSeconds: 1
-    daemon: true
-    name: nginx-server
-  - container:
+  - name: nginx-client
+    container:
+      image: appropriate/curl:latest
       args:
       - echo curl --silent -G http://{{inputs.parameters.server-ip}}:80/ && curl --silent
         -G http://{{inputs.parameters.server-ip}}:80/
       command:
       - /bin/sh
       - -c
-      image: appropriate/curl:latest
     inputs:
       parameters:
       - name: server-ip
-    name: nginx-client
   - name: daemon-nginx-example
     steps:
     - - name: nginx-server

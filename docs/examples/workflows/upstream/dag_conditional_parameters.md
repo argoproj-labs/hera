@@ -70,37 +70,37 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - name: heads
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: print('heads')
+          command:
+          - python
       - name: tails
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: print('tails')
-      - name: flip-coin
-        script:
           command:
           - python
+      - name: flip-coin
+        script:
           image: python:alpine3.6
           source: |-
             import random
             print('heads' if random.randint(0, 1) == 0 else 'tails')
-      - dag:
+          command:
+          - python
+      - name: main
+        dag:
           tasks:
           - name: flip-coin
             template: flip-coin
-          - depends: flip-coin
-            name: heads
+          - name: heads
+            depends: flip-coin
             template: heads
             when: '{{tasks.flip-coin.outputs.result}} == heads'
-          - depends: flip-coin
-            name: tails
+          - name: tails
+            depends: flip-coin
             template: tails
             when: '{{tasks.flip-coin.outputs.result}} == tails'
-        name: main
         outputs:
           parameters:
           - name: stepresult

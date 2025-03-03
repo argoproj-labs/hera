@@ -5,30 +5,30 @@ metadata:
 spec:
   entrypoint: output-parameter
   templates:
-  - container:
+  - name: hello-world-to-file
+    container:
+      image: busybox
       args:
       - sleep 1; echo -n hello world > /tmp/hello_world.txt
       command:
       - sh
       - -c
-      image: busybox
-    name: hello-world-to-file
     outputs:
       parameters:
       - name: hello-param
         valueFrom:
           default: Foobar
           path: /tmp/hello_world.txt
-  - container:
+  - name: print-message
+    container:
+      image: busybox
       args:
       - '{{inputs.parameters.message}}'
       command:
       - echo
-      image: busybox
     inputs:
       parameters:
       - name: message
-    name: print-message
   - name: output-parameter
     steps:
     - - name: generate-parameter

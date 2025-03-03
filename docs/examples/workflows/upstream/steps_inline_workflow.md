@@ -33,11 +33,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
+      generateName: steps-inline-
       annotations:
         workflows.argoproj.io/description: This workflow demonstrates running a steps
           with inline templates.
         workflows.argoproj.io/version: '>= 3.2.0'
-      generateName: steps-inline-
     spec:
       entrypoint: main
       templates:

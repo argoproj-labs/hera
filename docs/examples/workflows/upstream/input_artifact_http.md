@@ -40,20 +40,20 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: http-artifact-example
       templates:
-      - container:
+      - name: http-artifact-example
+        container:
+          image: debian:9.4
           args:
           - kubectl version
           command:
           - sh
           - -c
-          image: debian:9.4
         inputs:
           artifacts:
-          - http:
-              url: https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
+          - name: kubectl
             mode: 493
-            name: kubectl
             path: /bin/kubectl
-        name: http-artifact-example
+            http:
+              url: https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
     ```
 

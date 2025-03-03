@@ -55,16 +55,16 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: suspend
       templates:
-      - container:
+      - name: print-message
+        container:
+          image: busybox
           args:
           - '{{inputs.parameters.message}}'
           command:
           - echo
-          image: busybox
         inputs:
           parameters:
           - name: message
-        name: print-message
       - name: suspend
         steps:
         - - name: approve

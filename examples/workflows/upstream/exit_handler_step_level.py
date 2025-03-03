@@ -1,4 +1,5 @@
 from hera.workflows import Container, Parameter, Steps, Workflow
+from hera.workflows.models import LifecycleHook
 
 with Workflow(
     generate_name="exit-handler-step-level-",
@@ -21,16 +22,16 @@ with Workflow(
         print_message(
             name="hello1",
             arguments=[Parameter(name="message", value="hello1")],
-            on_exit=exit_,
+            hooks={"exit": LifecycleHook(template=exit_.name)},
         )
         with s.parallel():
             print_message(
                 name="hello2a",
                 arguments=[Parameter(name="message", value="hello2a")],
-                on_exit=exit_,
+                hooks={"exit": LifecycleHook(template=exit_.name)},
             )
             print_message(
                 name="hello2b",
                 arguments=[Parameter(name="message", value="hello2b")],
-                on_exit=exit_,
+                hooks={"exit": LifecycleHook(template=exit_.name)},
             )

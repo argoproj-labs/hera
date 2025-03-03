@@ -32,12 +32,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - containerSet:
+      - name: main
+        containerSet:
           containers:
-          - image: argoproj/argosay:v2
-            name: a
-          - image: argoproj/argosay:v2
-            name: b
-        name: main
+          - name: a
+            image: argoproj/argosay:v2
+          - name: b
+            image: argoproj/argosay:v2
     ```
 

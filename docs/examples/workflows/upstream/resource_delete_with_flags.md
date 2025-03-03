@@ -80,10 +80,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 cleanup: "true"
             data:
               key: value
-      - inputs:
+      - name: delete-resource
+        inputs:
           parameters:
           - name: selector
-        name: delete-resource
         resource:
           action: delete
           flags:

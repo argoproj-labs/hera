@@ -57,28 +57,28 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: volumes-existing-example
       templates:
-      - container:
+      - name: append-to-accesslog
+        container:
+          image: alpine:latest
           args:
           - 'echo accessed at: $(date) | tee -a /mnt/vol/accesslog'
           command:
           - sh
           - -c
-          image: alpine:latest
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
-        name: append-to-accesslog
-      - container:
+          - name: workdir
+            mountPath: /mnt/vol
+      - name: print-accesslog
+        container:
+          image: alpine:latest
           args:
           - echo 'Volume access log:'; cat /mnt/vol/accesslog
           command:
           - sh
           - -c
-          image: alpine:latest
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
-        name: print-accesslog
+          - name: workdir
+            mountPath: /mnt/vol
       - name: volumes-existing-example
         steps:
         - - name: generate

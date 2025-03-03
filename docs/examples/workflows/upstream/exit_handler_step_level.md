@@ -12,6 +12,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     ```python linenums="1"
     from hera.workflows import Container, Parameter, Steps, Workflow
+    from hera.workflows.models import LifecycleHook
 
     with Workflow(
         generate_name="exit-handler-step-level-",
@@ -34,18 +35,18 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             print_message(
                 name="hello1",
                 arguments=[Parameter(name="message", value="hello1")],
-                on_exit=exit_,
+                hooks={"exit": LifecycleHook(template=exit_.name)},
             )
             with s.parallel():
                 print_message(
                     name="hello2a",
                     arguments=[Parameter(name="message", value="hello2a")],
-                    on_exit=exit_,
+                    hooks={"exit": LifecycleHook(template=exit_.name)},
                 )
                 print_message(
                     name="hello2b",
                     arguments=[Parameter(name="message", value="hello2b")],
-                    on_exit=exit_,
+                    hooks={"exit": LifecycleHook(template=exit_.name)},
                 )
     ```
 
@@ -59,45 +60,51 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - container:
+      - name: exit
+        container:
+          image: busybox
           args:
           - step cleanup
           command:
           - echo
+      - name: print-message
+        container:
           image: busybox
-        name: exit
-      - container:
           args:
           - '{{inputs.parameters.message}}'
           command:
           - echo
-          image: busybox
         inputs:
           parameters:
           - name: message
-        name: print-message
       - name: main
         steps:
         - - arguments:
               parameters:
               - name: message
                 value: hello1
+            hooks:
+              exit:
+                template: exit
             name: hello1
-            onExit: exit
             template: print-message
         - - arguments:
               parameters:
               - name: message
                 value: hello2a
+            hooks:
+              exit:
+                template: exit
             name: hello2a
-            onExit: exit
             template: print-message
           - arguments:
               parameters:
               - name: message
                 value: hello2b
+            hooks:
+              exit:
+                template: exit
             name: hello2b
-            onExit: exit
             template: print-message
     ```
 

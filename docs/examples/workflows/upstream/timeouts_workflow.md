@@ -41,15 +41,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       activeDeadlineSeconds: 30
       entrypoint: bunch-of-sleeps
       templates:
-      - container:
+      - name: sleep
+        container:
+          image: debian:9.5-slim
           command:
           - sleep
           - 1d
-          image: debian:9.5-slim
-        name: sleep
-      - container:
+      - name: unschedulable
+        container:
           image: alpine:latest
-        name: unschedulable
         nodeSelector:
           beta.kubernetes.io/arch: no-such-arch
       - name: bunch-of-sleeps

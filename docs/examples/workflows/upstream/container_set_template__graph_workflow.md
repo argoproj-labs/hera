@@ -36,23 +36,23 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - containerSet:
+      - name: main
+        containerSet:
           containers:
-          - image: argoproj/argosay:v2
-            name: a
-          - dependencies:
-            - a
+          - name: a
             image: argoproj/argosay:v2
-            name: b
-          - dependencies:
-            - a
+          - name: b
             image: argoproj/argosay:v2
-            name: c
-          - dependencies:
+            dependencies:
+            - a
+          - name: c
+            image: argoproj/argosay:v2
+            dependencies:
+            - a
+          - name: d
+            image: argoproj/argosay:v2
+            dependencies:
             - b
             - c
-            image: argoproj/argosay:v2
-            name: d
-        name: main
     ```
 

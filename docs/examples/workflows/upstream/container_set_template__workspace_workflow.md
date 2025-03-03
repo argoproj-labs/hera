@@ -48,20 +48,23 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - containerSet:
+      - name: main
+        volumes:
+        - name: workspace
+          emptyDir: {}
+        containerSet:
           containers:
-          - args:
+          - name: a
+            image: argoproj/argosay:v2
+            args:
             - echo
             - hi
             - /workspace/out
+          - name: main
             image: argoproj/argosay:v2
-            name: a
-          - image: argoproj/argosay:v2
-            name: main
           volumeMounts:
-          - mountPath: /workspace
-            name: workspace
-        name: main
+          - name: workspace
+            mountPath: /workspace
         outputs:
           artifacts:
           - name: out
@@ -70,8 +73,5 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - name: out
             valueFrom:
               path: /workspace/out
-        volumes:
-        - emptyDir: {}
-          name: workspace
     ```
 

@@ -8,11 +8,11 @@ spec:
   - name: main
     resource:
       action: patch
-      flags:
-      - workflow
-      - '{{workflow.name}}'
       manifest: |
         - op: add
           path: /metadata/labels/foo
           value: bar
       mergeStrategy: json
+      flags:
+      - workflow
+      - '{{workflow.name}}'

@@ -47,24 +47,24 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: hello-world-to-file
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
-          - azure:
-              accountKeySecret:
-                key: accountKey
-                name: my-azure-credentials
+          - name: message
+            path: /tmp
+            azure:
               blob: path/in/container/hello_world.txt.tgz
               container: my-container
               endpoint: https://myazurestorageaccountname.blob.core.windows.net
-            name: message
-            path: /tmp
+              accountKeySecret:
+                name: my-azure-credentials
+                key: accountKey
     ```
 

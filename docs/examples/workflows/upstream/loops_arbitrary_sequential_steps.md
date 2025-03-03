@@ -64,6 +64,36 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: loop-arbitrary-sequential-steps-
     spec:
+      entrypoint: loop-arbitrary-sequential-steps-example
+      templates:
+      - name: unit-step-template
+        container:
+          image: alpine
+          args:
+          - echo {{inputs.parameters.message}}; exit {{inputs.parameters.exit_code}}
+          command:
+          - /bin/sh
+          - -c
+        inputs:
+          parameters:
+          - name: exit_code
+          - name: message
+      - name: loop-arbitrary-sequential-steps-example
+        failFast: true
+        parallelism: 1
+        steps:
+        - - arguments:
+              parameters:
+              - name: exit_code
+                value: '{{item.exit_code}}'
+              - name: message
+                value: '{{item.message}}'
+            name: unit-step
+            template: unit-step-template
+            withParam: '{{inputs.parameters.step_params}}'
+        inputs:
+          parameters:
+          - name: step_params
       arguments:
         parameters:
         - name: step_params
@@ -76,35 +106,5 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               { "exit_code": 0, "message": "will not run" },
               { "exit_code": 0, "message": "will not run" }
             ]
-      entrypoint: loop-arbitrary-sequential-steps-example
-      templates:
-      - container:
-          args:
-          - echo {{inputs.parameters.message}}; exit {{inputs.parameters.exit_code}}
-          command:
-          - /bin/sh
-          - -c
-          image: alpine
-        inputs:
-          parameters:
-          - name: exit_code
-          - name: message
-        name: unit-step-template
-      - failFast: true
-        inputs:
-          parameters:
-          - name: step_params
-        name: loop-arbitrary-sequential-steps-example
-        parallelism: 1
-        steps:
-        - - arguments:
-              parameters:
-              - name: exit_code
-                value: '{{item.exit_code}}'
-              - name: message
-                value: '{{item.message}}'
-            name: unit-step
-            template: unit-step-template
-            withParam: '{{inputs.parameters.step_params}}'
     ```
 

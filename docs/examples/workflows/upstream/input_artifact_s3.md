@@ -55,28 +55,28 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: input-artifact-s3-example
       templates:
-      - container:
+      - name: input-artifact-s3-example
+        container:
+          image: debian:latest
           args:
           - ls -l /my-artifact
           command:
           - sh
           - -c
-          image: debian:latest
         inputs:
           artifacts:
           - name: my-art
             path: /my-artifact
             s3:
-              accessKeySecret:
-                key: accessKey
-                name: my-s3-credentials
               bucket: my-bucket-name
               endpoint: s3.amazonaws.com
               key: path/in/bucket
               region: us-west-2
-              secretKeySecret:
-                key: secretKey
+              accessKeySecret:
                 name: my-s3-credentials
-        name: input-artifact-s3-example
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
     ```
 

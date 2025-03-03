@@ -39,13 +39,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       entrypoint: parallelism-limit
       parallelism: 2
       templates:
-      - container:
+      - name: sleep
+        container:
+          image: alpine:latest
           command:
           - sh
           - -c
           - sleep 10
-          image: alpine:latest
-        name: sleep
       - name: parallelism-limit
         steps:
         - - name: sleep

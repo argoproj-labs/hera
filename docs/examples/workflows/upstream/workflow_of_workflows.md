@@ -74,10 +74,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - inputs:
+      - name: resource-without-argument
+        inputs:
           parameters:
           - name: workflowtemplate
-        name: resource-without-argument
         resource:
           action: create
           failureCondition: status.phase in (Failed, Error)
@@ -90,11 +90,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               workflowTemplateRef:
                 name: {{inputs.parameters.workflowtemplate}}
           successCondition: status.phase == Succeeded
-      - inputs:
+      - name: resource-with-argument
+        inputs:
           parameters:
           - name: workflowtemplate
           - name: message
-        name: resource-with-argument
         resource:
           action: create
           failureCondition: status.phase in (Failed, Error)

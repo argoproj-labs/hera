@@ -40,17 +40,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       generateName: default-pdb-support-
     spec:
       entrypoint: pdbcreate
-      podDisruptionBudget:
-        minAvailable: 9999
       serviceAccountName: default
       templates:
-      - container:
+      - name: pdbcreate
+        container:
+          image: alpine:latest
           args:
           - sleep 10
           command:
           - sh
           - -c
-          image: alpine:latest
-        name: pdbcreate
+      podDisruptionBudget:
+        minAvailable: 9999
     ```
 

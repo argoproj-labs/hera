@@ -38,44 +38,44 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: diamond
       templates:
-      - container:
+      - name: echo
+        container:
+          image: alpine:3.7
           command:
           - echo
           - '{{inputs.parameters.message}}'
-          image: alpine:3.7
         inputs:
           parameters:
           - name: message
-        name: echo
-      - dag:
+      - name: diamond
+        dag:
           tasks:
-          - arguments:
+          - name: A
+            template: echo
+            arguments:
               parameters:
               - name: message
                 value: A
-            name: A
+          - name: B
+            depends: A
             template: echo
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: B
+          - name: C
             depends: A
-            name: B
             template: echo
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: C
-            depends: A
-            name: C
+          - name: D
+            depends: B && C
             template: echo
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: D
-            depends: B && C
-            name: D
-            template: echo
-        name: diamond
     ```
 

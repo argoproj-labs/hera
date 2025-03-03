@@ -48,24 +48,24 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: init-container-example
       templates:
-      - container:
+      - name: init-container-example
+        initContainers:
+        - name: hello
+          image: alpine:latest
+          mirrorVolumeMounts: true
+          command:
+          - echo
+          - hello
+        container:
+          image: alpine:latest
           command:
           - echo
           - bye
-          image: alpine:latest
           volumeMounts:
-          - mountPath: /foo
-            name: foo
-        initContainers:
-        - command:
-          - echo
-          - hello
-          image: alpine:latest
-          mirrorVolumeMounts: true
-          name: hello
-        name: init-container-example
+          - name: foo
+            mountPath: /foo
       volumes:
-      - emptyDir: {}
-        name: foo
+      - name: foo
+        emptyDir: {}
     ```
 

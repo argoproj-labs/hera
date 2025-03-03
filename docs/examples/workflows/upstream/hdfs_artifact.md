@@ -79,44 +79,44 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: artifact-example
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
-          - hdfs:
-              addresses:
-              - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
-              - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
+          - name: hello-art
+            path: /tmp/hello_world.txt
+            hdfs:
               force: true
               hdfsUser: root
               path: /tmp/argo/foo
-            name: hello-art
-            path: /tmp/hello_world.txt
-      - container:
+              addresses:
+              - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
+              - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
+      - name: print-message-from-hdfs
+        container:
+          image: alpine:latest
           args:
           - cat /tmp/message
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
-          - hdfs:
-              addresses:
-              - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
-              - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
+          - name: message
+            path: /tmp/message
+            hdfs:
               force: true
               hdfsUser: root
               path: /tmp/argo/foo
-            name: message
-            path: /tmp/message
-        name: print-message-from-hdfs
+              addresses:
+              - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
+              - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
       - name: artifact-example
         steps:
         - - name: generate-artifact

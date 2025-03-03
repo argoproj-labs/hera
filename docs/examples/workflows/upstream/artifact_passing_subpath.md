@@ -72,44 +72,44 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: artifact-example
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - sleep 1; echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: hello-art
+          - name: hello-art
             path: /tmp/
-      - container:
+            archive:
+              none: {}
+      - name: print-message-dir
+        container:
+          image: alpine:latest
           args:
           - ls /tmp/message
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
           - name: message
             path: /tmp/message
-        name: print-message-dir
-      - container:
+      - name: print-message-from-file
+        container:
+          image: alpine:latest
           args:
           - cat /tmp/message
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
           - name: message
             path: /tmp/message
-        name: print-message-from-file
       - name: artifact-example
         steps:
         - - name: generate-artifact

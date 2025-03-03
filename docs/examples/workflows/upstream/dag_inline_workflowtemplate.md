@@ -33,20 +33,20 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     apiVersion: argoproj.io/v1alpha1
     kind: WorkflowTemplate
     metadata:
+      name: dag-inline
       annotations:
         workflows.argoproj.io/description: This example demonstrates running a DAG with
           inline templates.
         workflows.argoproj.io/version: '>= 3.2.0'
-      name: dag-inline
     spec:
       entrypoint: main
       templates:
-      - dag:
+      - name: main
+        dag:
           tasks:
-          - inline:
+          - name: a
+            inline:
               container:
                 image: argoproj/argosay:v2
-            name: a
-        name: main
     ```
 

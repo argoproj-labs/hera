@@ -5,12 +5,12 @@ metadata:
 spec:
   entrypoint: hello-world
   templates:
-  - archiveLocation:
+  - name: hello-world
+    archiveLocation:
       archiveLogs: true
     container:
+      image: busybox
       args:
       - hello world
       command:
       - echo
-      image: busybox
-    name: hello-world
