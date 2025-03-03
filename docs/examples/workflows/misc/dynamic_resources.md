@@ -99,35 +99,33 @@ you can compute the resources dynamically based on the amount of data you need t
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: compute-resources
             template: compute-resources
-          - arguments:
-              parameters:
-              - name: cpu
-                value: '{{item.cpu}}'
-              - name: mem
-                value: '{{item.mem}}'
+          - name: resource-consumer
             depends: compute-resources
-            name: resource-consumer
             template: resource-consumer
             withParam: '{{tasks.compute-resources.outputs.result}}'
-          - arguments:
+            arguments:
               parameters:
               - name: cpu
                 value: '{{item.cpu}}'
               - name: mem
                 value: '{{item.mem}}'
+          - name: another-resource-consumer
             depends: compute-resources
-            name: another-resource-consumer
             template: another-resource-consumer
             withParam: '{{tasks.compute-resources.outputs.result}}'
-        name: d
+            arguments:
+              parameters:
+              - name: cpu
+                value: '{{item.cpu}}'
+              - name: mem
+                value: '{{item.mem}}'
       - name: compute-resources
         script:
-          command:
-          - python
           image: python:3.10
           source: |-
             import os
@@ -140,17 +138,17 @@ you can compute the resources dynamically based on the amount of data you need t
             for i in range(1, 4):
                 resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})
             json.dump(resources, sys.stdout)
-      - inputs:
+          command:
+          - python
+      - name: resource-consumer
+        podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
+          "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
+          {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+        inputs:
           parameters:
           - name: cpu
           - name: mem
-        name: resource-consumer
-        podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
-          "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
-          {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
         script:
-          command:
-          - python
           image: python:3.10
           source: |-
             import os
@@ -164,19 +162,19 @@ you can compute the resources dynamically based on the amount of data you need t
 
             """Perform some computation."""
             print('received cpu {cpu} and mem {mem}'.format(cpu=cpu, mem=mem))
-      - inputs:
+          command:
+          - python
+      - name: another-resource-consumer
+        podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
+          "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
+          {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+        inputs:
           parameters:
-          - default: '1'
-            name: cpu
-          - default: 100Mi
-            name: mem
-        name: another-resource-consumer
-        podSpecPatch: '{"containers": [{"name": "main", "resources": {"limits": {"cpu":
-          "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}, "requests":
-          {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"}}}]}'
+          - name: cpu
+            default: '1'
+          - name: mem
+            default: 100Mi
         script:
-          command:
-          - python
           image: python:3.10
           source: |-
             import os
@@ -190,5 +188,7 @@ you can compute the resources dynamically based on the amount of data you need t
 
             """Perform some computation."""
             print('received cpu {cpu} and mem {mem}'.format(cpu=cpu, mem=mem))
+          command:
+          - python
     ```
 

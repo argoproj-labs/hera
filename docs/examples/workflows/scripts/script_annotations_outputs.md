@@ -51,10 +51,10 @@
                 value: '3'
             name: script-param-artifact-in-function-signature-and-return-type
             template: script-param-artifact-in-function-signature-and-return-type
-      - inputs:
+      - name: script-param-artifact-in-function-signature-and-return-type
+        inputs:
           parameters:
           - name: a_number
-        name: script-param-artifact-in-function-signature-and-return-type
         outputs:
           artifacts:
           - name: successor2
@@ -69,6 +69,8 @@
             valueFrom:
               path: /tmp/user/chosen/outputs/parameters/successor3
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -79,7 +81,5 @@
           env:
           - name: hera__outputs_directory
             value: /tmp/user/chosen/outputs
-          image: python:3.9
-          source: '{{inputs.parameters}}'
     ```
 

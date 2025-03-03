@@ -33,8 +33,6 @@
       templates:
       - name: task-with-image-pull-policy
         script:
-          command:
-          - python
           image: python:3.9
           imagePullPolicy: Always
           source: |-
@@ -42,5 +40,7 @@
             import sys
             sys.path.append(os.getcwd())
             print('ok')
+          command:
+          - python
     ```
 

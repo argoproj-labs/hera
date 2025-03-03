@@ -30,18 +30,18 @@
     spec:
       entrypoint: c
       templates:
-      - container:
+      - name: c
+        container:
+          image: alpine:3.7
           args:
           - echo Hello, world!
           command:
           - sh
           - -c
-          image: alpine:3.7
           resources:
             requests:
               cpu: '1'
               memory: 5Gi
               ephemeral-storage: 5Gi
-        name: c
     ```
 

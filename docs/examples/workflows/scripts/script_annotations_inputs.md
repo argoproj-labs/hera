@@ -84,15 +84,17 @@
                 value: a
             name: echo-all
             template: echo-all
-      - inputs:
+      - name: output-dict-artifact
+        inputs:
           parameters:
           - name: a_number
-        name: output-dict-artifact
         outputs:
           artifacts:
           - name: a_dict
             path: /tmp/hera-outputs/artifacts/a_dict
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -103,26 +105,26 @@
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: echo-all
+        inputs:
           artifacts:
           - name: my-artifact
             path: /tmp/file
           - name: my-artifact-no-path
             path: /tmp/hera-inputs/artifacts/my-artifact-no-path
           parameters:
-          - default: '1'
+          - name: an_int
+            default: '1'
             description: an_int parameter
-            name: an_int
-          - default: 'true'
+          - name: a_bool
+            default: 'true'
             description: a_bool parameter
-            name: a_bool
-          - default: a
+          - name: a_string
+            default: a
             description: a_string parameter
-            name: a_string
-        name: echo-all
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -130,7 +132,5 @@
           - examples.workflows.scripts.script_annotations_inputs:echo_all
           command:
           - python
-          image: python:3.9
-          source: '{{inputs.parameters}}'
     ```
 

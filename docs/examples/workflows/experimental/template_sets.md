@@ -42,6 +42,8 @@
       templates:
       - name: setup
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -54,14 +56,12 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - dag:
+      - name: my-dag
+        dag:
           tasks:
           - name: task-a
             template: setup
           - name: task-b
             template: setup
-        name: my-dag
     ```
 

@@ -318,24 +318,28 @@ There are several implicit dependencies in this script:
       entrypoint: fine-tune
       onExit: exit
       templates:
-      - dag:
+      - name: fine-tune
+        dag:
           tasks:
           - name: create-ssd-storage-class
             template: create-ssd-storage-class
-          - depends: create-ssd-storage-class
-            name: create-etcd-stateful-set
+          - name: create-etcd-stateful-set
+            depends: create-ssd-storage-class
             template: create-etcd-stateful-set
-          - depends: create-ssd-storage-class
-            name: create-etcd-load-balancer
+          - name: create-etcd-load-balancer
+            depends: create-ssd-storage-class
             template: create-etcd-load-balancer
-          - arguments:
+          - name: wait-for-etcd-load-balancer-ip
+            depends: create-etcd-stateful-set && create-etcd-load-balancer
+            template: wait-for-etcd-load-balancer-ip
+            arguments:
               parameters:
               - name: service-name
                 value: '{{tasks.create-etcd-load-balancer.outputs.parameters.etcd-svc-name}}'
-            depends: create-etcd-stateful-set && create-etcd-load-balancer
-            name: wait-for-etcd-load-balancer-ip
-            template: wait-for-etcd-load-balancer-ip
-          - arguments:
+          - name: finetune-rank-0
+            depends: wait-for-etcd-load-balancer-ip
+            template: fine-tune-rank-n
+            arguments:
               parameters:
               - name: rdvz-id
                 value: '42'
@@ -345,10 +349,10 @@ There are several implicit dependencies in this script:
                 value: rank-0
               - name: etcd-ip
                 value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+          - name: finetune-rank-1
             depends: wait-for-etcd-load-balancer-ip
-            name: finetune-rank-0
             template: fine-tune-rank-n
-          - arguments:
+            arguments:
               parameters:
               - name: rdvz-id
                 value: '42'
@@ -358,10 +362,10 @@ There are several implicit dependencies in this script:
                 value: rank-1
               - name: etcd-ip
                 value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+          - name: finetune-rank-2
             depends: wait-for-etcd-load-balancer-ip
-            name: finetune-rank-1
             template: fine-tune-rank-n
-          - arguments:
+            arguments:
               parameters:
               - name: rdvz-id
                 value: '42'
@@ -371,10 +375,10 @@ There are several implicit dependencies in this script:
                 value: rank-2
               - name: etcd-ip
                 value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
+          - name: finetune-rank-3
             depends: wait-for-etcd-load-balancer-ip
-            name: finetune-rank-2
             template: fine-tune-rank-n
-          - arguments:
+            arguments:
               parameters:
               - name: rdvz-id
                 value: '42'
@@ -384,10 +388,6 @@ There are several implicit dependencies in this script:
                 value: rank-3
               - name: etcd-ip
                 value: '{{tasks.wait-for-etcd-load-balancer-ip.outputs.parameters.etcd-ip}}'
-            depends: wait-for-etcd-load-balancer-ip
-            name: finetune-rank-3
-            template: fine-tune-rank-n
-        name: fine-tune
       - name: create-ssd-storage-class
         resource:
           action: create
@@ -473,7 +473,9 @@ There are several implicit dependencies in this script:
                   targetPort: 2379
               selector:
                 app: etcd
-      - container:
+      - name: wait-for-etcd-load-balancer-ip
+        container:
+          image: alpine/k8s:1.23.17
           args:
           - etcd_ip=""; while [ -z $etcd_ip ]; do echo "Waiting for end point..."; etcd_ip=$(kubectl
             get svc etcd-client --template="{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}");
@@ -481,17 +483,27 @@ There are several implicit dependencies in this script:
             > /etcd-ip;
           command:
           - bash -c
-          image: alpine/k8s:1.23.17
         inputs:
           parameters:
           - name: service-name
-        name: wait-for-etcd-load-balancer-ip
         outputs:
           parameters:
           - name: etcd-ip
             valueFrom:
               path: /etcd-ip
-      - container:
+      - name: fine-tune-rank-n
+        tolerations:
+        - effect: NoSchedule
+          key: nvidia.com/gpu
+          operator: Equal
+          value: present
+        volumes:
+        - name: gpu-comm
+          emptyDir:
+            sizeLimit: 50Gi
+        container:
+          image: flaviuvadan/kubecon-na-23-finetune-llama2:latest
+          imagePullPolicy: Always
           args:
           - --nnodes
           - '4'
@@ -516,14 +528,17 @@ There are several implicit dependencies in this script:
           - name: HF_TOKEN
             valueFrom:
               secretKeyRef:
-                key: token
                 name: hf-token
+                key: token
           - name: LOCAL_IP
             valueFrom:
               fieldRef:
                 fieldPath: status.podIP
-          image: flaviuvadan/kubecon-na-23-finetune-llama2:latest
-          imagePullPolicy: Always
+          volumeMounts:
+          - name: '{{inputs.parameters.node-vol}}'
+            mountPath: /kubecon_na_23_llama2_finetune/finetune
+          - name: gpu-comm
+            mountPath: /dev/shm
           resources:
             limits:
               cpu: '12'
@@ -533,34 +548,19 @@ There are several implicit dependencies in this script:
               cpu: '8'
               memory: 112Gi
               nvidia.com/gpu: '4'
-          volumeMounts:
-          - mountPath: /kubecon_na_23_llama2_finetune/finetune
-            name: '{{inputs.parameters.node-vol}}'
-          - mountPath: /dev/shm
-            name: gpu-comm
         inputs:
           parameters:
           - name: rdvz-id
           - name: node-rank
           - name: node-vol
           - name: etcd-ip
-        name: fine-tune-rank-n
         nodeSelector:
           cloud.google.com/gke-accelerator: nvidia-tesla-v100
-        tolerations:
-        - effect: NoSchedule
-          key: nvidia.com/gpu
-          operator: Equal
-          value: present
-        volumes:
-        - emptyDir:
-            sizeLimit: 50Gi
-          name: gpu-comm
-      - dag:
+      - name: exit
+        dag:
           tasks:
           - name: delete-etcd-pod
             template: delete-etcd-pod
-        name: exit
       - name: delete-etcd-pod
         resource:
           action: delete
@@ -571,6 +571,7 @@ There are several implicit dependencies in this script:
       - metadata:
           name: rank-0
         spec:
+          storageClassName: ssd
           accessModes:
           - ReadWriteOnce
           resources:
@@ -578,10 +579,10 @@ There are several implicit dependencies in this script:
               storage: 20Gi
             requests:
               storage: 20Gi
-          storageClassName: ssd
       - metadata:
           name: rank-1
         spec:
+          storageClassName: ssd
           accessModes:
           - ReadWriteOnce
           resources:
@@ -589,10 +590,10 @@ There are several implicit dependencies in this script:
               storage: 20Gi
             requests:
               storage: 20Gi
-          storageClassName: ssd
       - metadata:
           name: rank-2
         spec:
+          storageClassName: ssd
           accessModes:
           - ReadWriteOnce
           resources:
@@ -600,10 +601,10 @@ There are several implicit dependencies in this script:
               storage: 20Gi
             requests:
               storage: 20Gi
-          storageClassName: ssd
       - metadata:
           name: rank-3
         spec:
+          storageClassName: ssd
           accessModes:
           - ReadWriteOnce
           resources:
@@ -611,6 +612,5 @@ There are several implicit dependencies in this script:
               storage: 20Gi
             requests:
               storage: 20Gi
-          storageClassName: ssd
     ```
 

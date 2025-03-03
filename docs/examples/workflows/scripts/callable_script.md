@@ -142,11 +142,13 @@
                 value: '{"a": 3, "b": "bar", "c": "42"}'
             name: function-kebab-object
             template: function-kebab-object
-      - inputs:
+      - name: my-function
+        inputs:
           parameters:
           - name: input
-        name: my-function
         script:
+          image: my-image-with-python-source-code-and-dependencies
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -154,13 +156,13 @@
           - examples.workflows.scripts.callable_script:my_function
           command:
           - python
-          image: my-image-with-python-source-code-and-dependencies
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: str-function
+        inputs:
           parameters:
           - name: input
-        name: str-function
         script:
+          image: my-image-with-python-source-code-and-dependencies
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -168,13 +170,13 @@
           - examples.workflows.scripts.callable_script:str_function
           command:
           - python
-          image: my-image-with-python-source-code-and-dependencies
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: another-function
+        inputs:
           parameters:
           - name: inputs
-        name: another-function
         script:
+          image: my-image-with-python-source-code-and-dependencies
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -182,18 +184,18 @@
           - examples.workflows.scripts.callable_script:another_function
           command:
           - python
+      - name: function-kebab
+        inputs:
+          parameters:
+          - name: a-but-kebab
+            default: '2'
+          - name: b-but-kebab
+            default: foo
+          - name: c-but-kebab
+            default: '42.0'
+        script:
           image: my-image-with-python-source-code-and-dependencies
           source: '{{inputs.parameters}}'
-      - inputs:
-          parameters:
-          - default: '2'
-            name: a-but-kebab
-          - default: foo
-            name: b-but-kebab
-          - default: '42.0'
-            name: c-but-kebab
-        name: function-kebab
-        script:
           args:
           - -m
           - hera.workflows.runner
@@ -201,13 +203,13 @@
           - examples.workflows.scripts.callable_script:function_kebab
           command:
           - python
-          image: my-image-with-python-source-code-and-dependencies
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: function-kebab-object
+        inputs:
           parameters:
           - name: input-value
-        name: function-kebab-object
         script:
+          image: my-image-with-python-source-code-and-dependencies
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -215,7 +217,5 @@
           - examples.workflows.scripts.callable_script:function_kebab_object
           command:
           - python
-          image: my-image-with-python-source-code-and-dependencies
-          source: '{{inputs.parameters}}'
     ```
 

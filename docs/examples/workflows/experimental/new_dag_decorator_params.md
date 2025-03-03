@@ -114,6 +114,8 @@
             valueFrom:
               path: /tmp/hera-outputs/parameters/setup-config
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -126,17 +128,17 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
+      - name: concat
+        inputs:
+          parameters:
+          - name: word_a
+            default: ''
+          - name: word_b
+          - name: concat_config
+            default: '{"reverse": false}'
+        script:
           image: python:3.9
           source: '{{inputs.parameters}}'
-      - inputs:
-          parameters:
-          - default: ''
-            name: word_a
-          - name: word_b
-          - default: '{"reverse": false}'
-            name: concat_config
-        name: concat
-        script:
           args:
           - -m
           - hera.workflows.runner
@@ -149,13 +151,15 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - dag:
+      - name: worker
+        dag:
           tasks:
           - name: setup-task
             template: setup
-          - arguments:
+          - name: task-a
+            depends: setup-task
+            template: concat
+            arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_a}}'
@@ -163,10 +167,10 @@
                 value: '{{tasks.setup-task.outputs.parameters.environment_parameter}}{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
               - name: concat_config
                 value: '{"reverse": false}'
+          - name: task-b
             depends: setup-task
-            name: task-a
             template: concat
-          - arguments:
+            arguments:
               parameters:
               - name: word_a
                 value: '{{inputs.parameters.value_b}}'
@@ -174,10 +178,10 @@
                 value: '{{tasks.setup-task.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: setup-task
-            name: task-b
+          - name: final-task
+            depends: task-a && task-b
             template: concat
-          - arguments:
+            arguments:
               parameters:
               - name: word_a
                 value: '{{tasks.task-a.outputs.result}}'
@@ -185,19 +189,15 @@
                 value: '{{tasks.task-b.outputs.result}}'
               - name: concat_config
                 value: '{"reverse": false}'
-            depends: task-a && task-b
-            name: final-task
-            template: concat
         inputs:
           parameters:
-          - default: my default
-            name: value_a
+          - name: value_a
+            default: my default
           - name: value_b
-          - default: '42'
-            name: an_int_value
-          - default: '{"param_1": "Hello", "param_2": "world"}'
-            name: a_basemodel
-        name: worker
+          - name: an_int_value
+            default: '42'
+          - name: a_basemodel
+            default: '{"param_1": "Hello", "param_2": "world"}'
         outputs:
           parameters:
           - name: result_value

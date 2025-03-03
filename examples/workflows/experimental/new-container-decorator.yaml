@@ -5,18 +5,18 @@ metadata:
 spec:
   entrypoint: basic-hello-world
   templates:
-  - container:
+  - name: basic-hello-world
+    container:
+      image: busybox
       args:
       - echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt
       command:
       - sh
       - -c
-      image: busybox
     inputs:
       parameters:
-      - default: Hera
-        name: user
-    name: basic-hello-world
+      - name: user
+        default: Hera
     outputs:
       parameters:
       - name: container-greeting

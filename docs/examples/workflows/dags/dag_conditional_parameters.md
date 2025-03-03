@@ -53,19 +53,19 @@
     spec:
       entrypoint: main
       templates:
-      - dag:
+      - name: main
+        dag:
           tasks:
           - name: flip-coin
             template: flip-coin
-          - depends: flip-coin
-            name: heads
+          - name: heads
+            depends: flip-coin
             template: heads
             when: '{{tasks.flip-coin.outputs.result}} == heads'
-          - depends: flip-coin
-            name: tails
+          - name: tails
+            depends: flip-coin
             template: tails
             when: '{{tasks.flip-coin.outputs.result}} == tails'
-        name: main
         outputs:
           parameters:
           - name: stepresult
@@ -74,23 +74,23 @@
                 : tasks.tails.outputs.result'
       - name: flip-coin
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: |-
             import random
             print('heads' if random.randint(0, 1) == 0 else 'tails')
+          command:
+          - python
       - name: heads
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: print('heads')
-      - name: tails
-        script:
           command:
           - python
+      - name: tails
+        script:
           image: python:alpine3.6
           source: print('tails')
+          command:
+          - python
     ```
 

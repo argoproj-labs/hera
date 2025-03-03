@@ -60,14 +60,12 @@
               key_2: value:2-3
             - key_1: value:1-4
               key_2: value:2-4
-      - inputs:
+      - name: test-key-mapping
+        inputs:
           parameters:
           - name: key_1
           - name: key_2
-        name: test-key-mapping
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -80,5 +78,7 @@
             except: key_2 = r'''{{inputs.parameters.key_2}}'''
 
             print('{key_1}, {key_2}'.format(key_1=key_1, key_2=key_2))
+          command:
+          - python
     ```
 

@@ -43,13 +43,11 @@ This example showcases how to run a init_containers with env
     spec:
       entrypoint: cowsay
       templates:
-      - container:
-          command:
-          - cowsay
-          - foo
-          image: docker/whalesay
+      - name: cowsay
         initContainers:
-        - command:
+        - name: init
+          image: busybox
+          command:
           - sh
           - -c
           - echo Hello from the init container ($FOO, $SECRET)
@@ -59,10 +57,12 @@ This example showcases how to run a init_containers with env
           - name: SECRET
             valueFrom:
               secretKeyRef:
-                key: password
                 name: my-secret
-          image: busybox
-          name: init
-        name: cowsay
+                key: password
+        container:
+          image: docker/whalesay
+          command:
+          - cowsay
+          - foo
     ```
 

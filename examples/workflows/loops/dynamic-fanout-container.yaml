@@ -5,31 +5,31 @@ metadata:
 spec:
   entrypoint: d
   templates:
-  - dag:
+  - name: d
+    dag:
       tasks:
       - name: generate
         template: generate
-      - arguments:
+      - name: fanout
+        depends: generate
+        template: fanout
+        withParam: '{{tasks.generate.outputs.result}}'
+        arguments:
           parameters:
           - name: value
             value: '{{item.value}}'
-        depends: generate
-        name: fanout
-        template: fanout
-        withParam: '{{tasks.generate.outputs.result}}'
-    name: d
-  - container:
+  - name: generate
+    container:
+      image: alpine:latest
       command:
       - echo
       - '[{"value": "a"}, {"value": "b"}, {"value": "c"}]'
+  - name: fanout
+    container:
       image: alpine:latest
-    name: generate
-  - container:
       command:
       - echo
       - '{{inputs.parameters.value}}'
-      image: alpine:latest
     inputs:
       parameters:
       - name: value
-    name: fanout

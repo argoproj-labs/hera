@@ -6,46 +6,44 @@ spec:
   entrypoint: d
   onExit: exit-procedure
   templates:
-  - dag:
+  - name: exit-procedure
+    dag:
       tasks:
-      - arguments:
+      - name: t3
+        template: echo
+        when: '{{workflow.status}} == Succeeded'
+        arguments:
           parameters:
           - name: s
             value: '1'
-        name: t3
+      - name: t4
+        depends: t3
         template: echo
         when: '{{workflow.status}} == Succeeded'
-      - arguments:
+        arguments:
           parameters:
           - name: s
             value: '2'
-        depends: t3
-        name: t4
+      - name: t5
         template: echo
-        when: '{{workflow.status}} == Succeeded'
-      - arguments:
+        when: '{{workflow.status}} == Error'
+        arguments:
           parameters:
           - name: s
             value: '3'
-        name: t5
+      - name: t6
+        depends: t5
         template: echo
         when: '{{workflow.status}} == Error'
-      - arguments:
+        arguments:
           parameters:
           - name: s
             value: '4'
-        depends: t5
-        name: t6
-        template: echo
-        when: '{{workflow.status}} == Error'
-    name: exit-procedure
-  - inputs:
+  - name: echo
+    inputs:
       parameters:
       - name: s
-    name: echo
     script:
-      command:
-      - python
       image: python:3.9
       source: |-
         import os
@@ -56,19 +54,21 @@ spec:
         except: s = r'''{{inputs.parameters.s}}'''
 
         print(s)
-  - dag:
+      command:
+      - python
+  - name: d
+    dag:
       tasks:
-      - arguments:
+      - name: t1
+        template: echo
+        arguments:
           parameters:
           - name: s
             value: a
-        name: t1
+      - name: t2
+        depends: t1
         template: echo
-      - arguments:
+        arguments:
           parameters:
           - name: s
             value: b
-        depends: t1
-        name: t2
-        template: echo
-    name: d

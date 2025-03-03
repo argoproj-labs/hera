@@ -119,15 +119,20 @@ This example will reuse the outputs volume across script steps.
             template: output-artifact-existing-vol
         - - name: use-artifact-existing-vol
             template: use-artifact-existing-vol
-      - inputs:
+      - name: output-artifact-empty-dir
+        volumes:
+        - name: my-empty-dir
+          emptyDir: {}
+        inputs:
           parameters:
           - name: a_number
-        name: output-artifact-empty-dir
         outputs:
           artifacts:
           - name: successor_out
             path: /mnt/empty/dir/artifacts/successor_out
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -138,20 +143,17 @@ This example will reuse the outputs volume across script steps.
           env:
           - name: hera__outputs_directory
             value: /mnt/empty/dir
-          image: python:3.9
-          source: '{{inputs.parameters}}'
           volumeMounts:
-          - mountPath: /mnt/empty/dir
-            name: my-empty-dir
-        volumes:
-        - emptyDir: {}
-          name: my-empty-dir
-      - inputs:
+          - name: my-empty-dir
+            mountPath: /mnt/empty/dir
+      - name: use-artifact
+        inputs:
           artifacts:
           - name: successor_in
             path: /tmp/hera-inputs/artifacts/successor_in
-        name: use-artifact
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -159,17 +161,17 @@ This example will reuse the outputs volume across script steps.
           - examples.workflows.scripts.script_annotations_artifact_custom_volume:use_artifact
           command:
           - python
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: output-artifact-existing-vol
+        inputs:
           parameters:
           - name: a_number
-        name: output-artifact-existing-vol
         outputs:
           artifacts:
           - name: successor_out
             path: /mnt/here/artifacts/successor_out
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -180,17 +182,17 @@ This example will reuse the outputs volume across script steps.
           env:
           - name: hera__outputs_directory
             value: /mnt/here
-          image: python:3.9
-          source: '{{inputs.parameters}}'
           volumeMounts:
-          - mountPath: /mnt/here
-            name: my-vol
-      - inputs:
+          - name: my-vol
+            mountPath: /mnt/here
+      - name: use-artifact-existing-vol
+        inputs:
           artifacts:
           - name: successor_in
             path: /mnt/here/artifacts/successor_out
-        name: use-artifact-existing-vol
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -198,11 +200,9 @@ This example will reuse the outputs volume across script steps.
           - examples.workflows.scripts.script_annotations_artifact_custom_volume:use_artifact_existing_vol
           command:
           - python
-          image: python:3.9
-          source: '{{inputs.parameters}}'
           volumeMounts:
-          - mountPath: /mnt/here
-            name: my-vol
+          - name: my-vol
+            mountPath: /mnt/here
       volumeClaimTemplates:
       - metadata:
           name: my-vol

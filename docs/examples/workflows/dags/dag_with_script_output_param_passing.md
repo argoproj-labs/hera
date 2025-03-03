@@ -46,18 +46,18 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: out
             template: out
-          - arguments:
+          - name: in-
+            depends: out
+            template: in-
+            arguments:
               parameters:
               - name: a
                 value: '{{tasks.out.outputs.parameters.a}}'
-            depends: out
-            name: in-
-            template: in-
-        name: d
       - name: out
         outputs:
           parameters:
@@ -65,8 +65,6 @@
             valueFrom:
               path: /test
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -74,13 +72,13 @@
             sys.path.append(os.getcwd())
             with open('/test', 'w') as f_out:
                 f_out.write('test')
-      - inputs:
-          parameters:
-          - name: a
-        name: in-
-        script:
           command:
           - python
+      - name: in-
+        inputs:
+          parameters:
+          - name: a
+        script:
           image: python:3.9
           source: |-
             import os
@@ -91,5 +89,7 @@
             except: a = r'''{{inputs.parameters.a}}'''
 
             print(a)
+          command:
+          - python
     ```
 

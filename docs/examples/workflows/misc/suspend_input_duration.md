@@ -46,23 +46,23 @@
     spec:
       entrypoint: suspend
       templates:
-      - inputs:
+      - name: suspend-with-intermediate-param
+        inputs:
           parameters:
-          - default: 'null'
-            name: duration
+          - name: duration
+            default: 'null'
             value: 'null'
-        name: suspend-with-intermediate-param
         outputs:
           parameters:
           - name: duration
             valueFrom:
               supplied: {}
         suspend: {}
-      - inputs:
+      - name: input-duration-suspend
+        inputs:
           parameters:
-          - default: '10'
-            name: duration
-        name: input-duration-suspend
+          - name: duration
+            default: '10'
         suspend:
           duration: '{{inputs.parameters.duration}}'
       - name: suspend

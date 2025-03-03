@@ -46,11 +46,13 @@
     spec:
       entrypoint: goodbye-world
       templates:
-      - inputs:
+      - name: hello-world
+        inputs:
           parameters:
           - name: user
-        name: hello-world
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -63,16 +65,16 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: goodbye-world
+        inputs:
           parameters:
           - name: user
         metadata:
           labels:
             my-label: my-value
-        name: goodbye-world
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -85,7 +87,5 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.9
-          source: '{{inputs.parameters}}'
     ```
 

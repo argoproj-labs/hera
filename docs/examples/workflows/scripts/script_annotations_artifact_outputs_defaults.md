@@ -76,15 +76,17 @@ This example will reuse the outputs volume across script steps.
                 name: successor_in
             name: use-artifact
             template: use-artifact
-      - inputs:
+      - name: output-artifact
+        inputs:
           parameters:
           - name: a_number
-        name: output-artifact
         outputs:
           artifacts:
           - name: successor_out
             path: /tmp/hera-outputs/artifacts/successor_out
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -95,14 +97,14 @@ This example will reuse the outputs volume across script steps.
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: use-artifact
+        inputs:
           artifacts:
           - name: successor_in
             path: /tmp/file
-        name: use-artifact
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -110,8 +112,6 @@ This example will reuse the outputs volume across script steps.
           - examples.workflows.scripts.script_annotations_artifact_outputs_defaults:use_artifact
           command:
           - python
-          image: python:3.9
-          source: '{{inputs.parameters}}'
       volumeClaimTemplates:
       - metadata:
           name: my-vol

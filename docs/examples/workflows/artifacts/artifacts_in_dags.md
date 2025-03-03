@@ -60,62 +60,62 @@ This example shows how to use artifacts as inputs and outputs of DAGs.
     spec:
       entrypoint: runner-dag
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - sleep 1; echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
           - name: hello-art
             path: /tmp/hello_world.txt
-      - container:
+      - name: print-message-from-file
+        container:
+          image: alpine:latest
           args:
           - cat /tmp/message
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
           - name: message
             path: /tmp/message
-        name: print-message-from-file
-      - dag:
+      - name: generate-artifact-dag
+        dag:
           tasks:
           - name: hello-world-to-file
             template: hello-world-to-file
-        name: generate-artifact-dag
         outputs:
           artifacts:
-          - from: '{{tasks.hello-world-to-file.outputs.artifacts.hello-art}}'
-            name: hello-file
-      - dag:
+          - name: hello-file
+            from: '{{tasks.hello-world-to-file.outputs.artifacts.hello-art}}'
+      - name: consume-artifact-dag
+        dag:
           tasks:
-          - arguments:
-              artifacts:
-              - from: '{{inputs.artifacts.hello-file-input}}'
-                name: message
-            name: print-message-from-file
+          - name: print-message-from-file
             template: print-message-from-file
+            arguments:
+              artifacts:
+              - name: message
+                from: '{{inputs.artifacts.hello-file-input}}'
         inputs:
           artifacts:
           - name: hello-file-input
-        name: consume-artifact-dag
-      - dag:
+      - name: runner-dag
+        dag:
           tasks:
           - name: generate-artifact-dag
             template: generate-artifact-dag
-          - arguments:
-              artifacts:
-              - from: '{{tasks.generate-artifact-dag.outputs.artifacts.hello-file}}'
-                name: hello-file-input
+          - name: consume-artifact-dag
             depends: generate-artifact-dag
-            name: consume-artifact-dag
             template: consume-artifact-dag
-        name: runner-dag
+            arguments:
+              artifacts:
+              - name: hello-file-input
+                from: '{{tasks.generate-artifact-dag.outputs.artifacts.hello-file}}'
     ```
 

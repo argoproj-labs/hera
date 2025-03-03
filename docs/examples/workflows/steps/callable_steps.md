@@ -39,10 +39,7 @@
     spec:
       entrypoint: calling-steps
       templates:
-      - inputs:
-          parameters:
-          - name: my-step-input
-        name: my-steps
+      - name: my-steps
         steps:
         - - arguments:
               parameters:
@@ -56,13 +53,14 @@
                 value: hello-2-{{inputs.parameters.my-step-input}}
             name: hello-2
             template: hello
-      - inputs:
+        inputs:
+          parameters:
+          - name: my-step-input
+      - name: hello
+        inputs:
           parameters:
           - name: name
-        name: hello
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -73,6 +71,8 @@
             except: name = r'''{{inputs.parameters.name}}'''
 
             print('Hello, {name}!'.format(name=name))
+          command:
+          - python
       - name: calling-steps
         steps:
         - - arguments:
