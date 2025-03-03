@@ -25,6 +25,7 @@ from hera.workflows.script import InlineScriptConstructor
 
 ARGO_EXAMPLES_URL = "https://raw.githubusercontent.com/argoproj/argo-workflows/main/examples"
 HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
+REPORT_DIFFS = os.environ.get("REPORT_DIFFS")
 CI_MODE = os.environ.get("CI")
 
 LOWEST_SUPPORTED_PY_VERSION = (3, 9)
@@ -152,13 +153,29 @@ def test_hera_output_upstream(module_name, global_config_fixture):
     # WHEN
     output = workflow.to_dict()
 
-    # THEN - generate the yaml if HERA_REGENERATE or it does not exist
+    # THEN - generate the workflow yaml if HERA_REGENERATE or it does not exist
     if _generate_yaml(generated_yaml_path):
         generated_yaml_path.write_text(yaml.dump(output, sort_keys=False, default_flow_style=False))
+
     if _generate_yaml(upstream_yaml_path):
-        upstream_yaml_path.write_text(
-            requests.get(f"{ARGO_EXAMPLES_URL}/{module_name.replace('__', '/').replace('_', '-')}.yaml").text
-        )
+        if not upstream_yaml_path.exists():
+            # Only fetch and write upstream YAML if it doesn't exist (use
+            # `make fetch-upstream-examples` to update all existing examples)
+            upstream_yaml_path.write_text(
+                requests.get(f"{ARGO_EXAMPLES_URL}/{module_name.replace('__', '/').replace('_', '-')}.yaml").text
+            )
+        elif REPORT_DIFFS:
+            # Compare current local YAML with upstream from GitHub
+            remote_upstream_yaml = requests.get(
+                f"{ARGO_EXAMPLES_URL}/{module_name.replace('__', '/').replace('_', '-')}.yaml"
+            ).text
+            local_yaml = upstream_yaml_path.read_text()
+            if local_yaml != remote_upstream_yaml:
+                assert False, (
+                    f"Local copy of upstream YAML does not match actual upstream YAML for {module_name}"
+                    " fetch new YAML by running `make fetch-upstream-examples` (you may then need to edit"
+                    " the code in the Python file)."
+                )
 
     # Check there have been no regressions from the generated yaml
     assert generated_yaml_path.exists()
