@@ -69,13 +69,11 @@ https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing
     metadata:
       generateName: expression-reusing-verbose-snippets-
     spec:
-      arguments:
-        parameters:
-        - name: weather
-          value: '{"weekWeather": "eyJ0ZW1wcyI6IFszNCwgMjcsIDE1LCA1NywgNDZdfQ=="}'
       entrypoint: c
       templates:
-      - container:
+      - name: c
+        container:
+          image: alpine:3.7
           command:
           - echo
           - The week's average temperature was $AVG with a minimum of $MIN and a maximum
@@ -87,7 +85,6 @@ https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing
             value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.max'')}}'
           - name: AVG
             value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.avg'')}}'
-          image: alpine:3.7
         inputs:
           parameters:
           - name: week-temps
@@ -95,6 +92,9 @@ https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing
               ''$.weekWeather'')), ''$.temps'')], {toJson({''avg'': sprig.add(#[0], #[1],
               #[2], #[3], #[4]) / 5, ''min'': sprig.min(#[0], #[1], #[2], #[3], #[4]),
               ''max'': sprig.max(#[0], #[1], #[2], #[3], #[4])})})[0]}}'
-        name: c
+      arguments:
+        parameters:
+        - name: weather
+          value: '{"weekWeather": "eyJ0ZW1wcyI6IFszNCwgMjcsIDE1LCA1NywgNDZdfQ=="}'
     ```
 

@@ -32,16 +32,16 @@
       templates:
       - name: task-with-memory-request
         script:
-          command:
-          - python
           image: python:3.9
-          resources:
-            requests:
-              memory: 5Gi
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('ok')
+          command:
+          - python
+          resources:
+            requests:
+              memory: 5Gi
     ```
 

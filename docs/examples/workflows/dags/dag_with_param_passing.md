@@ -40,36 +40,36 @@
     spec:
       entrypoint: d
       templates:
-      - container:
+      - name: out
+        container:
+          image: docker/whalesay:latest
           command:
           - cowsay
-          image: docker/whalesay:latest
-        name: out
         outputs:
           parameters:
           - name: x
             value: '42'
-      - container:
+      - name: in
+        container:
+          image: docker/whalesay:latest
           args:
           - '{{inputs.parameters.a}}'
           command:
           - cowsay
-          image: docker/whalesay:latest
         inputs:
           parameters:
           - name: a
-        name: in
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: a
             template: out
-          - arguments:
+          - name: b
+            depends: a
+            template: in
+            arguments:
               parameters:
               - name: a
                 value: '{{tasks.a.outputs.parameters.x}}'
-            depends: a
-            name: b
-            template: in
-        name: d
     ```
 

@@ -38,24 +38,24 @@
       - name: suspend-with-duration
         suspend:
           duration: '30'
-      - inputs:
+      - name: suspend-with-intermediate-param-enum
+        inputs:
           parameters:
-          - default: 'NO'
+          - name: approve
+            default: 'NO'
             enum:
             - 'YES'
             - 'NO'
-            name: approve
-        name: suspend-with-intermediate-param-enum
         outputs:
           parameters:
           - name: approve
             valueFrom:
               supplied: {}
         suspend: {}
-      - inputs:
+      - name: suspend-with-intermediate-param
+        inputs:
           parameters:
           - name: approve
-        name: suspend-with-intermediate-param
         outputs:
           parameters:
           - name: approve

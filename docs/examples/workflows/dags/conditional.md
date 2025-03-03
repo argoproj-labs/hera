@@ -51,21 +51,19 @@ This example showcases conditional execution on success, failure, and error
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: random
             template: random
-          - depends: random.Succeeded
-            name: success
+          - name: success
+            depends: random.Succeeded
             template: success
-          - depends: random.Failed
-            name: failure
+          - name: failure
+            depends: random.Failed
             template: failure
-        name: d
       - name: random
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -76,25 +74,27 @@ This example showcases conditional execution on success, failure, and error
             if p <= 0.5:
                 raise Exception('failure')
             print('success')
-      - name: success
-        script:
           command:
           - python
+      - name: success
+        script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('success')
-      - name: failure
-        script:
           command:
           - python
+      - name: failure
+        script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('failure')
+          command:
+          - python
     ```
 

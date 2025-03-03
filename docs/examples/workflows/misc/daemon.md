@@ -59,23 +59,21 @@ http requests to the server.
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: server
             template: server
-          - arguments:
+          - name: consumer
+            depends: server
+            template: consumer
+            arguments:
               parameters:
               - name: ip
                 value: '{{tasks.server.ip}}'
-            depends: server
-            name: consumer
-            template: consumer
-        name: d
-      - daemon: true
-        name: server
+      - name: server
+        daemon: true
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -92,13 +90,13 @@ http requests to the server.
                     self.wfile.write(bytes("{'name':'John'}", 'utf-8'))
             webServer = HTTPServer(('0.0.0.0', 8080), MyServer)
             webServer.serve_forever()
-      - inputs:
-          parameters:
-          - name: ip
-        name: consumer
-        script:
           command:
           - python
+      - name: consumer
+        inputs:
+          parameters:
+          - name: ip
+        script:
           image: python:3.9
           source: |-
             import os
@@ -116,5 +114,7 @@ http requests to the server.
             connection.request('GET', '/')
             response = connection.getresponse()
             print(response.read())
+          command:
+          - python
     ```
 

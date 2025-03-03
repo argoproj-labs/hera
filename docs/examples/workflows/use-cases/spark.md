@@ -72,57 +72,51 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
-          - arguments:
+          - name: spark-0
+            template: spark
+            arguments:
               parameters:
               - name: num_data
                 value: '1000'
-            name: spark-0
+          - name: spark-1
             template: spark
-          - arguments:
+            arguments:
               parameters:
               - name: num_data
                 value: '10000'
-            name: spark-1
+          - name: spark-2
             template: spark
-          - arguments:
+            arguments:
               parameters:
               - name: num_data
                 value: '100000'
-            name: spark-2
+          - name: spark-3
             template: spark
-          - arguments:
+            arguments:
               parameters:
               - name: num_data
                 value: '1000000'
-            name: spark-3
+          - name: spark-4
             template: spark
-          - arguments:
+            arguments:
               parameters:
               - name: num_data
                 value: '10000000'
-            name: spark-4
+          - name: spark-5
             template: spark
-          - arguments:
+            arguments:
               parameters:
               - name: num_data
                 value: '100000000'
-            name: spark-5
-            template: spark
-        name: d
-      - inputs:
+      - name: spark
+        inputs:
           parameters:
           - name: num_data
-        name: spark
         script:
-          command:
-          - python
           image: jupyter/pyspark-notebook:latest
-          resources:
-            requests:
-              cpu: '4'
-              memory: 8Gi
           source: |-
             import os
             import sys
@@ -153,5 +147,11 @@ compares a regular Pandas dataframe with a Spark dataframe. Inspired by: https:/
             print('Spark dataframe: ')
             print(spark_result)
             print('Spark dataframe took {spark_elapsed} seconds to compute'.format(spark_elapsed=spark_elapsed))
+          command:
+          - python
+          resources:
+            requests:
+              cpu: '4'
+              memory: 8Gi
     ```
 

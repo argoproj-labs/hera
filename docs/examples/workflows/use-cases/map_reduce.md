@@ -98,21 +98,22 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
     metadata:
       generateName: map-reduce-
     spec:
-      arguments:
-        parameters:
-        - name: num_parts
-          value: '4'
       entrypoint: main
       templates:
-      - dag:
+      - name: main
+        dag:
           tasks:
-          - arguments:
+          - name: split
+            template: split
+            arguments:
               parameters:
               - name: num_parts
                 value: '{{workflow.parameters.num_parts}}'
-            name: split
-            template: split
-          - arguments:
+          - name: map-
+            depends: split
+            template: map-
+            withParam: '{{tasks.split.outputs.result}}'
+            arguments:
               artifacts:
               - name: part
                 s3:
@@ -120,29 +121,22 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
               parameters:
               - name: part_id
                 value: '{{item}}'
-            depends: split
-            name: map-
-            template: map-
-            withParam: '{{tasks.split.outputs.result}}'
-          - depends: map-
-            name: reduce
+          - name: reduce
+            depends: map-
             template: reduce
-        name: main
-      - inputs:
+      - name: split
+        inputs:
           parameters:
           - name: num_parts
-        name: split
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: parts
+          - name: parts
             path: /mnt/out
+            archive:
+              none: {}
             s3:
               key: '{{workflow.name}}/parts'
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: |-
             import os
@@ -161,24 +155,24 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
                 with open('/mnt/out/' + part_id + '.json', 'w') as f:
                     json.dump({'foo': i}, f)
             json.dump(part_ids, sys.stdout)
-      - inputs:
+          command:
+          - python
+      - name: map-
+        inputs:
           artifacts:
           - name: part
             path: /mnt/in/part.json
           parameters:
           - name: part_id
-        name: map-
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: part
+          - name: part
             path: /mnt/out/part.json
+            archive:
+              none: {}
             s3:
               key: '{{workflow.name}}/results/{{inputs.parameters.part_id}}.json'
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: |-
             import os
@@ -191,24 +185,24 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
                 part = json.load(f)
             with open('/mnt/out/part.json', 'w') as f:
                 json.dump({'bar': part['foo'] * 2}, f)
-      - inputs:
+          command:
+          - python
+      - name: reduce
+        inputs:
           artifacts:
           - name: results
             path: /mnt/in
             s3:
               key: '{{workflow.name}}/results'
-        name: reduce
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: total
+          - name: total
             path: /mnt/out/total.json
+            archive:
+              none: {}
             s3:
               key: '{{workflow.name}}/total.json'
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: |-
             import os
@@ -223,5 +217,11 @@ See the upstream example [here](https://github.com/argoproj/argo-workflows/blob/
                 total = total + result['bar']
             with open('/mnt/out/total.json', 'w') as f:
                 json.dump({'total': total}, f)
+          command:
+          - python
+      arguments:
+        parameters:
+        - name: num_parts
+          value: '4'
     ```
 

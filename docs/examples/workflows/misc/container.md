@@ -24,11 +24,11 @@ This example showcases how to run a container, rather than a Python, function, a
     spec:
       entrypoint: cowsay
       templates:
-      - container:
+      - name: cowsay
+        container:
+          image: docker/whalesay
           command:
           - cowsay
           - foo
-          image: docker/whalesay
-        name: cowsay
     ```
 

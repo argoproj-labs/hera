@@ -75,15 +75,17 @@
                 name: my-artifact-as-json
             name: artifact-loaders
             template: artifact-loaders
-      - inputs:
+      - name: output-dict-artifact
+        inputs:
           parameters:
           - name: a_number
-        name: output-dict-artifact
         outputs:
           artifacts:
           - name: a_dict
             path: /tmp/hera-outputs/artifacts/a_dict
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -94,9 +96,8 @@
           env:
           - name: hera__outputs_directory
             value: /tmp/hera-outputs
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: artifact-loaders
+        inputs:
           artifacts:
           - name: my-artifact-path
             path: /tmp/hera-inputs/artifacts/my-artifact-path
@@ -104,8 +105,9 @@
             path: /tmp/hera-inputs/artifacts/my-artifact-as-str
           - name: my-artifact-as-json
             path: /tmp/hera-inputs/artifacts/my-artifact-as-json
-        name: artifact-loaders
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -113,7 +115,5 @@
           - examples.workflows.scripts.script_annotations_artifact_loaders:artifact_loaders
           command:
           - python
-          image: python:3.9
-          source: '{{inputs.parameters}}'
     ```
 

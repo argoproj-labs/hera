@@ -71,8 +71,6 @@
       - name: create-route-without-validation
         resource:
           action: create
-          flags:
-          - --validate=false
           manifest: |
             apiVersion: route.openshift.io/v1
             kind: Route
@@ -82,6 +80,8 @@
               to:
                 kind: Service
                 name: service-name
+          flags:
+          - --validate=false
       - name: resource-validate-example
         steps:
         - - continueOn:

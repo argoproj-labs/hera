@@ -343,7 +343,39 @@ class Workflow(
 
     def to_yaml(self, *args, **kwargs) -> str:
         """Builds the Workflow as an Argo schema Workflow object and returns it as yaml string."""
-        return _yaml.dump(self.to_dict(), *args, **kwargs)
+
+        def human_readable_ordering(kv: tuple) -> int:
+            """Key ordering function for ordering in a more human-readable fashion.
+
+            Ordering is:
+            1. "name" keys always first (if present)
+            2. Primitives (not dicts/lists)
+            3. lists
+            4. dict
+            """
+            k, v = kv
+            if k == "name" and isinstance(v, str):
+                return 0
+            if not isinstance(v, (dict, list)):
+                return 1
+            if isinstance(v, list):
+                return 2
+            return 3
+
+        def order_dict(d: dict) -> dict[str, Any]:
+            """Recursively orders `d` by the custom_ordering function by inserting them into a copy of the dict in order."""
+            d_copy: dict[str, Any] = dict()
+            for k, v in sorted(d.items(), key=lambda x: (human_readable_ordering(x), x[0])):
+                if isinstance(v, dict):
+                    d_copy[k] = order_dict(v)
+                elif isinstance(v, list):
+                    d_copy[k] = [order_dict(i) if isinstance(i, dict) else i for i in v]
+                else:
+                    d_copy[k] = v
+            return d_copy
+
+        human_ordered_dict = order_dict(self.to_dict())
+        return _yaml.dump(human_ordered_dict, *args, **kwargs)
 
     def create(self, wait: bool = False, poll_interval: int = 5) -> TWorkflow:
         """Creates the Workflow on the Argo cluster.

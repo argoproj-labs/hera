@@ -42,38 +42,36 @@
       templates:
       - name: bye
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('Bye Hera')
-      - dag:
+          command:
+          - python
+      - name: d
+        dag:
           tasks:
-          - arguments:
+          - name: s1
+            onExit: bye
+            template: hello
+            arguments:
               parameters:
               - name: s
                 value: from Task1
-            name: s1
-            onExit: bye
+          - name: s2
+            depends: s1
             template: hello
-          - arguments:
+            arguments:
               parameters:
               - name: s
                 value: from Task2
-            depends: s1
-            name: s2
-            template: hello
-        name: d
-      - inputs:
+      - name: hello
+        inputs:
           parameters:
           - name: s
-        name: hello
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -84,5 +82,7 @@
             except: s = r'''{{inputs.parameters.s}}'''
 
             print('Hello Hera, {s}'.format(s=s))
+          command:
+          - python
     ```
 

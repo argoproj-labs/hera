@@ -40,31 +40,29 @@
     spec:
       entrypoint: calling-dag
       templates:
-      - dag:
+      - name: my-dag
+        dag:
           tasks:
-          - arguments:
+          - name: hello-1
+            template: hello
+            arguments:
               parameters:
               - name: name
                 value: hello-1-{{inputs.parameters.my-dag-input}}
-            name: hello-1
+          - name: hello-2
             template: hello
-          - arguments:
+            arguments:
               parameters:
               - name: name
                 value: hello-2-{{inputs.parameters.my-dag-input}}
-            name: hello-2
-            template: hello
         inputs:
           parameters:
           - name: my-dag-input
-        name: my-dag
-      - inputs:
+      - name: hello
+        inputs:
           parameters:
           - name: name
-        name: hello
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -75,21 +73,23 @@
             except: name = r'''{{inputs.parameters.name}}'''
 
             print('Hello, {name}!'.format(name=name))
-      - dag:
+          command:
+          - python
+      - name: calling-dag
+        dag:
           tasks:
-          - arguments:
+          - name: call-1
+            template: my-dag
+            arguments:
               parameters:
               - name: my-dag-input
                 value: call-1
-            name: call-1
+          - name: call-2
+            depends: call-1
             template: my-dag
-          - arguments:
+            arguments:
               parameters:
               - name: my-dag-input
                 value: call-2
-            depends: call-1
-            name: call-2
-            template: my-dag
-        name: calling-dag
     ```
 

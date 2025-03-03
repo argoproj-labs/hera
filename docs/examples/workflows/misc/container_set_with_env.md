@@ -49,9 +49,12 @@
     spec:
       entrypoint: whalesay
       templates:
-      - containerSet:
+      - name: whalesay
+        containerSet:
           containers:
-          - command:
+          - name: node
+            image: docker/whalesay:latest
+            command:
             - cowsay
             env:
             - name: test
@@ -59,8 +62,8 @@
             - name: s1
               valueFrom:
                 secretKeyRef:
-                  key: s1
                   name: abc
+                  key: s1
             - name: r1
               valueFrom:
                 resourceFieldRef:
@@ -68,19 +71,16 @@
             - name: c1
               valueFrom:
                 configMapKeyRef:
-                  key: c1
                   name: abc
+                  key: c1
             envFrom:
             - prefix: abc
               secretRef:
                 name: secret
                 optional: false
-            - configMapRef:
+            - prefix: abc
+              configMapRef:
                 name: configmap
                 optional: false
-              prefix: abc
-            image: docker/whalesay:latest
-            name: node
-        name: whalesay
     ```
 

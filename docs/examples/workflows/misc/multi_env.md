@@ -36,22 +36,13 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: env
             template: env
-        name: d
       - name: env
         script:
-          command:
-          - python
-          env:
-          - name: a
-            value: '1'
-          - name: b
-            value: '2'
-          - name: c
-            value: '3'
           image: python:3.9
           source: |-
             import os
@@ -61,5 +52,14 @@
             assert os.environ['a'] == '1', os.environ['a']
             assert os.environ['b'] == '2', os.environ['b']
             assert os.environ['c'] == '3', os.environ['c']
+          command:
+          - python
+          env:
+          - name: a
+            value: '1'
+          - name: b
+            value: '2'
+          - name: c
+            value: '3'
     ```
 

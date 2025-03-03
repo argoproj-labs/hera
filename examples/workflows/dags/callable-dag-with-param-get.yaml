@@ -5,33 +5,35 @@ metadata:
 spec:
   entrypoint: calling-dag
   templates:
-  - dag:
+  - name: my-dag-with-outputs
+    dag:
       tasks:
-      - arguments:
+      - name: hello
+        template: hello-with-output
+        arguments:
           parameters:
           - name: name
             value: hello {{inputs.parameters.my-dag-input}}
-        name: hello
-        template: hello-with-output
     inputs:
       parameters:
       - name: my-dag-input
-    name: my-dag-with-outputs
     outputs:
       parameters:
       - name: my-dag-output
         valueFrom:
           parameter: '{{hello.outputs.parameters.output-message}}'
-  - inputs:
+  - name: hello-with-output
+    inputs:
       parameters:
       - name: name
-    name: hello-with-output
     outputs:
       parameters:
       - name: output-message
         valueFrom:
           path: /tmp/hera-outputs/parameters/output-message
     script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
       args:
       - -m
       - hera.workflows.runner
@@ -42,21 +44,19 @@ spec:
       env:
       - name: hera__outputs_directory
         value: /tmp/hera-outputs
-      image: python:3.9
-      source: '{{inputs.parameters}}'
-  - dag:
+  - name: calling-dag
+    dag:
       tasks:
-      - arguments:
+      - name: call-1
+        template: my-dag-with-outputs
+        arguments:
           parameters:
           - name: my-dag-input
             value: call-1
-        name: call-1
+      - name: call-2
+        depends: call-1
         template: my-dag-with-outputs
-      - arguments:
+        arguments:
           parameters:
           - name: my-dag-input
             value: '{{tasks.call-1.outputs.parameters.my-dag-output}}'
-        depends: call-1
-        name: call-2
-        template: my-dag-with-outputs
-    name: calling-dag

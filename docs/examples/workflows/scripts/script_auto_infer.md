@@ -46,26 +46,24 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: produce
             template: produce
-          - arguments:
-              artifacts:
-              - from: '{{tasks.produce.outputs.artifacts.result}}'
-                name: i
+          - name: consume
             depends: produce
-            name: consume
             template: consume
-        name: d
+            arguments:
+              artifacts:
+              - name: i
+                from: '{{tasks.produce.outputs.artifacts.result}}'
       - name: produce
         outputs:
           artifacts:
           - name: result
             path: /tmp/result
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -75,14 +73,14 @@
             result = 'foo testing'
             with open('/tmp/result', 'wb') as f:
                 pickle.dump(result, f)
-      - inputs:
+          command:
+          - python
+      - name: consume
+        inputs:
           artifacts:
           - name: i
             path: /tmp/i
-        name: consume
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -92,5 +90,7 @@
             with open('/tmp/i', 'rb') as f:
                 i = pickle.load(f)
             print(i)
+          command:
+          - python
     ```
 

@@ -59,8 +59,6 @@
           - name: hello-art
             path: /tmp/hello_world.txt
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -68,14 +66,14 @@
             sys.path.append(os.getcwd())
             with open('/tmp/hello_world.txt', 'w') as f:
                 f.write('hello world')
-      - inputs:
+          command:
+          - python
+      - name: print-message
+        inputs:
           artifacts:
           - name: message
             path: /tmp/message
-        name: print-message
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -84,5 +82,7 @@
             with open('/tmp/message', 'r') as f:
                 message = f.readline()
             print(message)
+          command:
+          - python
     ```
 

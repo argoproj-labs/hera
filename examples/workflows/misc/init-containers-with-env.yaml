@@ -5,13 +5,11 @@ metadata:
 spec:
   entrypoint: cowsay
   templates:
-  - container:
-      command:
-      - cowsay
-      - foo
-      image: docker/whalesay
+  - name: cowsay
     initContainers:
-    - command:
+    - name: init
+      image: busybox
+      command:
       - sh
       - -c
       - echo Hello from the init container ($FOO, $SECRET)
@@ -21,8 +19,10 @@ spec:
       - name: SECRET
         valueFrom:
           secretKeyRef:
-            key: password
             name: my-secret
-      image: busybox
-      name: init
-    name: cowsay
+            key: password
+    container:
+      image: docker/whalesay
+      command:
+      - cowsay
+      - foo

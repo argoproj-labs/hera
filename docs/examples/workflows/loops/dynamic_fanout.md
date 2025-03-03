@@ -46,23 +46,21 @@ they may need to process.
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: generate
             template: generate
-          - arguments:
+          - name: consume
+            depends: generate
+            template: consume
+            withParam: '{{tasks.generate.outputs.result}}'
+            arguments:
               parameters:
               - name: value
                 value: '{{item}}'
-            depends: generate
-            name: consume
-            template: consume
-            withParam: '{{tasks.generate.outputs.result}}'
-        name: d
       - name: generate
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -71,13 +69,13 @@ they may need to process.
             import json
             import sys
             json.dump([i for i in range(10)], sys.stdout)
-      - inputs:
-          parameters:
-          - name: value
-        name: consume
-        script:
           command:
           - python
+      - name: consume
+        inputs:
+          parameters:
+          - name: value
+        script:
           image: python:3.9
           source: |-
             import os
@@ -88,5 +86,7 @@ they may need to process.
             except: value = r'''{{inputs.parameters.value}}'''
 
             print('Received value: {value}!'.format(value=value))
+          command:
+          - python
     ```
 

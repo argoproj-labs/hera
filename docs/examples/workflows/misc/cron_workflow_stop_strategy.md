@@ -44,24 +44,24 @@
     spec:
       concurrencyPolicy: Replace
       failedJobsHistoryLimit: 4
-      schedules:
-      - '*/3 * * * *'
-      - '*/2 * * * *'
       startingDeadlineSeconds: 0
-      stopStrategy:
-        expression: cronworkflow.failed >= 3
       successfulJobsHistoryLimit: 4
       suspend: false
       timezone: America/Los_Angeles
+      schedules:
+      - '*/3 * * * *'
+      - '*/2 * * * *'
+      stopStrategy:
+        expression: cronworkflow.failed >= 3
       workflowSpec:
         entrypoint: whalesay
         templates:
-        - container:
+        - name: whalesay
+          container:
+            image: docker/whalesay:latest
             args:
             - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
             command:
             - cowsay
-            image: docker/whalesay:latest
-          name: whalesay
     ```
 

@@ -32,7 +32,9 @@
     spec:
       entrypoint: whalesay
       templates:
-      - container:
+      - name: whalesay
+        container:
+          image: docker/whalesay:latest
           command:
           - cowsay
           envFrom:
@@ -40,11 +42,9 @@
             secretRef:
               name: secret
               optional: false
-          - configMapRef:
+          - prefix: abc
+            configMapRef:
               name: configmap
               optional: false
-            prefix: abc
-          image: docker/whalesay:latest
-        name: whalesay
     ```
 

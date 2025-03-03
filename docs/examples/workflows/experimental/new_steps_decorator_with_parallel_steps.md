@@ -87,6 +87,8 @@
             valueFrom:
               path: /tmp/hera-outputs/parameters/dummy-param
         script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -99,15 +101,15 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
+      - name: concat
+        inputs:
+          parameters:
+          - name: word_a
+            default: ''
+          - name: word_b
+        script:
           image: python:3.9
           source: '{{inputs.parameters}}'
-      - inputs:
-          parameters:
-          - default: ''
-            name: word_a
-          - name: word_b
-        name: concat
-        script:
           args:
           - -m
           - hera.workflows.runner
@@ -120,21 +122,7 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-      - inputs:
-          parameters:
-          - default: my default
-            name: value_a
-          - name: value_b
-          - default: '42'
-            name: an_int_value
-        name: worker
-        outputs:
-          parameters:
-          - name: value
-            valueFrom:
-              parameter: '{{steps.final-step.outputs.result}}'
+      - name: worker
         steps:
         - - name: setup-step
             template: setup
@@ -162,5 +150,17 @@
                 value: '{{steps.step-b.outputs.result}}'
             name: final-step
             template: concat
+        inputs:
+          parameters:
+          - name: value_a
+            default: my default
+          - name: value_b
+          - name: an_int_value
+            default: '42'
+        outputs:
+          parameters:
+          - name: value
+            valueFrom:
+              parameter: '{{steps.final-step.outputs.result}}'
     ```
 

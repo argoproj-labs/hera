@@ -53,26 +53,26 @@ This example showcases the user of a user container with a volume mount.
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: foo
             template: foo
-        name: d
       - name: foo
+        sidecars:
+        - name: sidecar-name
+          volumeMounts:
+          - name: something
+            mountPath: /whatever
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             print('hi')
-        sidecars:
-        - name: sidecar-name
-          volumeMounts:
-          - mountPath: /whatever
-            name: something
+          command:
+          - python
       volumeClaimTemplates:
       - metadata:
           name: something

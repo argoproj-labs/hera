@@ -142,13 +142,7 @@ Step 2: Performs inference on the dataset in the volume path /mnt/data using Spa
             template: inference-spacy
       - name: data-prep
         script:
-          command:
-          - python
           image: jupyter/datascience-notebook:latest
-          resources:
-            requests:
-              cpu: '0.5'
-              memory: 1Gi
           source: |-
             import os
             import sys
@@ -164,18 +158,18 @@ Step 2: Performs inference on the dataset in the volume path /mnt/data using Spa
                 json.dump(sentences, json_file)
             print('Data preparation completed')
             print(subprocess.run('cd /mnt/data && ls -l', shell=True, capture_output=True).stdout.decode())
-          volumeMounts:
-          - mountPath: /mnt/data
-            name: data-dir
-      - name: inference-spacy
-        script:
           command:
           - python
-          image: jupyter/datascience-notebook:latest
+          volumeMounts:
+          - name: data-dir
+            mountPath: /mnt/data
           resources:
             requests:
               cpu: '0.5'
               memory: 1Gi
+      - name: inference-spacy
+        script:
+          image: jupyter/datascience-notebook:latest
           source: |-
             import os
             import sys
@@ -225,9 +219,15 @@ Step 2: Performs inference on the dataset in the volume path /mnt/data using Spa
             with open('/mnt/data/output_data.json', 'w') as json_file:
                 json.dump(ner_output_list, json_file)
             print(subprocess.run('cd /mnt/data && ls -l ', shell=True, capture_output=True).stdout.decode())
+          command:
+          - python
           volumeMounts:
-          - mountPath: /mnt/data
-            name: data-dir
+          - name: data-dir
+            mountPath: /mnt/data
+          resources:
+            requests:
+              cpu: '0.5'
+              memory: 1Gi
       volumeClaimTemplates:
       - metadata:
           name: data-dir

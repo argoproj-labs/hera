@@ -95,11 +95,13 @@
       - name: writer
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: int-artifact
+          - name: int-artifact
             path: /tmp/hera-outputs/artifacts/int-artifact
+            archive:
+              none: {}
         script:
+          image: python-image-built-with-my-package
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -112,18 +114,16 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python-image-built-with-my-package
-          source: '{{inputs.parameters}}'
-      - inputs:
+      - name: pydantic-io
+        inputs:
           artifacts:
           - name: artifact-input
             path: /tmp/hera-inputs/artifacts/artifact-input
           parameters:
-          - default: '42'
-            name: param-input
-          - default: '{"a_dict": {"my-key": "a-value"}, "a_str": "hello world!"}'
-            name: obj-input
-        name: pydantic-io
+          - name: param-input
+            default: '42'
+          - name: obj-input
+            default: '{"a_dict": {"my-key": "a-value"}, "a_str": "hello world!"}'
         outputs:
           artifacts:
           - name: artifact-output
@@ -133,6 +133,8 @@
             valueFrom:
               path: /tmp/hera-outputs/parameters/param-output
         script:
+          image: python-image-built-with-my-package
+          source: '{{inputs.parameters}}'
           args:
           - -m
           - hera.workflows.runner
@@ -145,7 +147,5 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-          image: python-image-built-with-my-package
-          source: '{{inputs.parameters}}'
     ```
 

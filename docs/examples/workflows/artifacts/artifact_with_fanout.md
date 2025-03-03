@@ -55,36 +55,34 @@
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: writer
             template: writer
-          - arguments:
-              artifacts:
-              - from: '{{tasks.writer.outputs.artifacts.out-art}}'
-                name: in-art
+          - name: fanout
             depends: writer
-            name: fanout
             template: fanout
-          - arguments:
+            arguments:
+              artifacts:
+              - name: in-art
+                from: '{{tasks.writer.outputs.artifacts.out-art}}'
+          - name: consumer
+            depends: fanout
+            template: consumer
+            withParam: '{{tasks.fanout.outputs.result}}'
+            arguments:
               parameters:
               - name: i
                 value: '{{item}}'
-            depends: fanout
-            name: consumer
-            template: consumer
-            withParam: '{{tasks.fanout.outputs.result}}'
-        name: d
       - name: writer
         outputs:
           artifacts:
-          - archive:
-              none: {}
-            name: out-art
+          - name: out-art
             path: /tmp/file
+            archive:
+              none: {}
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -94,14 +92,14 @@
             with open('/tmp/file', 'w+') as f:
                 for i in range(10):
                     f.write(json.dumps(i) + '\n')
-      - inputs:
+          command:
+          - python
+      - name: fanout
+        inputs:
           artifacts:
           - name: in-art
             path: /tmp/file
-        name: fanout
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -114,13 +112,13 @@
                 for line in f.readlines():
                     indices.append(line.strip())
             json.dump(indices, sys.stdout)
-      - inputs:
-          parameters:
-          - name: i
-        name: consumer
-        script:
           command:
           - python
+      - name: consumer
+        inputs:
+          parameters:
+          - name: i
+        script:
           image: python:3.9
           source: |-
             import os
@@ -131,5 +129,7 @@
             except: i = r'''{{inputs.parameters.i}}'''
 
             print(i)
+          command:
+          - python
     ```
 

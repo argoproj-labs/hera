@@ -46,11 +46,16 @@ they may need to process. The fanout occurs over independent JSON payloads comin
     spec:
       entrypoint: d
       templates:
-      - dag:
+      - name: d
+        dag:
           tasks:
           - name: generate
             template: generate
-          - arguments:
+          - name: consume
+            depends: generate
+            template: consume
+            withParam: '{{tasks.generate.outputs.result}}'
+            arguments:
               parameters:
               - name: p1
                 value: '{{item.p1}}'
@@ -58,15 +63,8 @@ they may need to process. The fanout occurs over independent JSON payloads comin
                 value: '{{item.p2}}'
               - name: p3
                 value: '{{item.p3}}'
-            depends: generate
-            name: consume
-            template: consume
-            withParam: '{{tasks.generate.outputs.result}}'
-        name: d
       - name: generate
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -75,15 +73,15 @@ they may need to process. The fanout occurs over independent JSON payloads comin
             import json
             import sys
             json.dump([{'p1': i + 1, 'p2': i + 2, 'p3': i + 3} for i in range(10)], sys.stdout)
-      - inputs:
+          command:
+          - python
+      - name: consume
+        inputs:
           parameters:
           - name: p1
           - name: p2
           - name: p3
-        name: consume
         script:
-          command:
-          - python
           image: python:3.9
           source: |-
             import os
@@ -98,5 +96,7 @@ they may need to process. The fanout occurs over independent JSON payloads comin
             except: p3 = r'''{{inputs.parameters.p3}}'''
 
             print('Received p1={p1}, p2={p2}, p3={p3}'.format(p1=p1, p2=p2, p3=p3))
+          command:
+          - python
     ```
 
