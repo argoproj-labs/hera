@@ -48,24 +48,30 @@ You can view the available `make` targets via `make help` or just `make`.
 
 ```
 make help
+build-docs                     Generate documentation locally
 check-codegen                  Check if the code is up to date
 ci                             Run all the CI checks
 codegen                        Generate all models, services, examples, and init files
 events-models                  Generate the Events models portion of Argo Workflows
 events-service                 Generate the events service option of Hera
 examples                       Generate documentation files for examples
+fetch-upstream-examples        Fetch the upstream examples, add missing examples report to docs
 format                         Format and sort imports for source, tests, examples, etc.
 help                           Showcase the help instructions for all the available `make` commands
+host-docs                      Host and open the documentation locally (and rebuild automatically)
 init-files                     Generate the init-files of Hera
-install-argo                   Install argo client
+install-argo                   Install argo CLI client
 install                        Run poetry install with all extras for development
 lint                           Run a `lint` process on Hera and report problems
 models                         Generate all the Argo Workflows models
 regenerate-example             Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
-regenerate-test-data           Regenerates the test data from upstream examples and runs tests, report missing examples
-run-argo                       Start the argo server
+regenerate-test-data           Regenerates test data and docs for non-upstream examples
+regenerate-upstream-test-data  Regenerates test data and docs for upstream examples
 services                       Generate the services of Hera
-stop-argo                      Stop the argo server
+set-up-argo                    Start the argo service
+set-up-artifacts               Adds minio for running examples with artifact storage
+set-up-cluster                 Create the cluster and argo namespace
+stop-cluster                   Stop the cluster
 test-on-cluster                Run workflow tests (requires local argo cluster)
 test-type-hints                Run type hint tests for Hera
 test                           Run tests for Hera
@@ -140,7 +146,7 @@ In order to add a new workflow test to test Hera functionality, do the following
 * Run tests using `make test`. Hera tests will generate a golden copy of the output YAML with the name
   `archive-location.yaml` and also generate a local copy of the upstream yaml file with the name
   `archive-location.upstream.yaml`
-* If you would like to update the golden copy of the test files, you can run `make regenerate-test-data`
+* If you would like to update the golden copy of the test files, you can run `make regenerate-upstream-test-data`
 * The golden copies must be checked in to ensure that regressions may be caught in the future
 
 ## Adding new Workflow on-cluster tests
