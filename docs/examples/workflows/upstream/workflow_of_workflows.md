@@ -113,19 +113,19 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           successCondition: status.phase == Succeeded
       - name: main
         steps:
-        - - arguments:
+        - - name: workflow1
+            template: resource-without-argument
+            arguments:
               parameters:
               - name: workflowtemplate
                 value: workflow-template-submittable
-            name: workflow1
-            template: resource-without-argument
-        - - arguments:
+        - - name: workflow2
+            template: resource-with-argument
+            arguments:
               parameters:
               - name: workflowtemplate
                 value: workflow-template-submittable
               - name: message
                 value: Welcome Argo
-            name: workflow2
-            template: resource-with-argument
     ```
 

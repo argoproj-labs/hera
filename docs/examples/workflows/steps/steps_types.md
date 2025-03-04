@@ -131,67 +131,67 @@
           - name: message
       - name: hello-hello-hello
         steps:
-        - - arguments:
+        - - name: manually-adding-my-step
+            template: whalesay
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: manually-adding-my-step
+        - - name: list-of-step-1
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: list-of-step-1
+        - - name: list-of-step-2
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: list-of-step-2
+        - - name: list-of-step-1
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: list-of-step-1
+          - name: list-of-step-2
             template: whalesay
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: list-of-step-2
+        - - name: implicitly-adding-step-on-init
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: implicitly-adding-step-on-init
+        - - name: model-workflow-step
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello-model1
-            name: model-workflow-step
+        - - name: parallel-step-1
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello2a
-            name: parallel-step-1
+          - name: parallel-step-2-model-workflow-step
             template: whalesay
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello-model2b
-            name: parallel-step-2-model-workflow-step
-            template: whalesay
       - name: my-model-template
         steps:
-        - - arguments:
+        - - name: model-template-workflow-step
+            template: whalesay
+            arguments:
               parameters:
               - name: message
                 value: hello-model-template
-            name: model-template-workflow-step
-            template: whalesay
     ```
 

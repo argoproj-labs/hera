@@ -85,19 +85,19 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name: test
       - name: synchronization-tmpl-level-mutex-example
         steps:
-        - - arguments:
-              parameters:
-              - name: seconds
-                value: '{{item}}'
-            name: synchronization-acquire-lock
+        - - name: synchronization-acquire-lock
             template: acquire-lock
             withParam: '["1","2","3","4","5"]'
-          - arguments:
+            arguments:
               parameters:
               - name: seconds
                 value: '{{item}}'
-            name: synchronization-acquire-lock1
+          - name: synchronization-acquire-lock1
             template: acquire-lock-1
             withParam: '["1","2","3","4","5"]'
+            arguments:
+              parameters:
+              - name: seconds
+                value: '{{item}}'
     ```
 

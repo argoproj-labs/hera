@@ -65,21 +65,21 @@ spec:
       - name: pvc-name
   - name: generate-and-use-volume
     steps:
-    - - arguments:
+    - - name: generate-volume
+        template: generate-volume
+        arguments:
           parameters:
           - name: pvc-size
             value: 1Gi
-        name: generate-volume
-        template: generate-volume
-    - - arguments:
-          parameters:
-          - name: pvc-name
-            value: '{{steps.generate-volume.outputs.parameters.pvc-name}}'
-        name: generate
+    - - name: generate
         template: whalesay
-    - - arguments:
+        arguments:
           parameters:
           - name: pvc-name
             value: '{{steps.generate-volume.outputs.parameters.pvc-name}}'
-        name: print
+    - - name: print
         template: print-message
+        arguments:
+          parameters:
+          - name: pvc-name
+            value: '{{steps.generate-volume.outputs.parameters.pvc-name}}'

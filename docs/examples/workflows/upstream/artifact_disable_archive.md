@@ -115,15 +115,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: generate-artifact
             template: hello-world-to-file
-        - - arguments:
-              artifacts:
-              - from: '{{steps.generate-artifact.outputs.artifacts.etc}}'
-                name: etc
-              - from: '{{steps.generate-artifact.outputs.artifacts.hello-txt}}'
-                name: hello-txt
-              - from: '{{steps.generate-artifact.outputs.artifacts.hello-txt-nc}}'
-                name: hello-txt-nc
-            name: consume-artifact
+        - - name: consume-artifact
             template: print-message-from-files
+            arguments:
+              artifacts:
+              - name: etc
+                from: '{{steps.generate-artifact.outputs.artifacts.etc}}'
+              - name: hello-txt
+                from: '{{steps.generate-artifact.outputs.artifacts.hello-txt}}'
+              - name: hello-txt-nc
+                from: '{{steps.generate-artifact.outputs.artifacts.hello-txt-nc}}'
     ```
 

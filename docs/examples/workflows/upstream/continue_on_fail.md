@@ -75,10 +75,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             template: hello-world
         - - name: B
             template: hello-world
-          - continueOn:
-              failed: true
-            name: C
+          - name: C
             template: intentional-fail
+            continueOn:
+              failed: true
         - - name: D
             template: hello-world
     ```

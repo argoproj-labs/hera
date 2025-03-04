@@ -86,11 +86,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: generate-parameter
             template: hello-world-to-file
-        - - arguments:
+        - - name: consume-parameter
+            template: print-message
+            arguments:
               parameters:
               - name: message
                 value: '{{steps.generate-parameter.outputs.parameters.hello-param}}'
-            name: consume-parameter
-            template: print-message
     ```
 

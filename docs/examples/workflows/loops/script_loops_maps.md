@@ -43,13 +43,7 @@
       templates:
       - name: loop-map-example
         steps:
-        - - arguments:
-              parameters:
-              - name: key_1
-                value: '{{item.key_1}}'
-              - name: key_2
-                value: '{{item.key_2}}'
-            name: test-key-mapping
+        - - name: test-key-mapping
             template: test-key-mapping
             withItems:
             - key_1: value:1-1
@@ -60,6 +54,12 @@
               key_2: value:2-3
             - key_1: value:1-4
               key_2: value:2-4
+            arguments:
+              parameters:
+              - name: key_1
+                value: '{{item.key_1}}'
+              - name: key_2
+                value: '{{item.key_2}}'
       - name: test-key-mapping
         inputs:
           parameters:

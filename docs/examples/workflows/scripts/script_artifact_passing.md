@@ -47,12 +47,12 @@
         steps:
         - - name: generate-artifact
             template: whalesay
-        - - arguments:
-              artifacts:
-              - from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
-                name: message
-            name: consume-artifact
+        - - name: consume-artifact
             template: print-message
+            arguments:
+              artifacts:
+              - name: message
+                from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
       - name: whalesay
         outputs:
           artifacts:

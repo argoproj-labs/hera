@@ -64,12 +64,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               key: template
       - name: synchronization-tmpl-level-example
         steps:
-        - - arguments:
+        - - name: synchronization-acquire-lock
+            template: acquire-lock
+            withParam: '["1","2","3","4","5"]'
+            arguments:
               parameters:
               - name: seconds
                 value: '{{item}}'
-            name: synchronization-acquire-lock
-            template: acquire-lock
-            withParam: '["1","2","3","4","5"]'
     ```
 

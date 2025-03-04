@@ -87,11 +87,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: nginx-server
             template: nginx-server
-        - - arguments:
+        - - name: nginx-client
+            template: nginx-client
+            arguments:
               parameters:
               - name: server-ip
                 value: '{{steps.nginx-server.ip}}'
-            name: nginx-client
-            template: nginx-client
     ```
 

@@ -17,12 +17,12 @@ spec:
       - name: message
   - name: loop-example
     steps:
-    - - arguments:
-          parameters:
-          - name: message
-            value: '{{item}}'
-        name: print-message-loop
+    - - name: print-message-loop
         template: print-message
         withItems:
         - hello world
         - goodbye world
+        arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'

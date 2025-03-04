@@ -79,32 +79,32 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - name: message
       - name: main
         steps:
-        - - arguments:
+        - - name: hello1
+            template: print-message
+            arguments:
               parameters:
               - name: message
                 value: hello1
             hooks:
               exit:
                 template: exit
-            name: hello1
+        - - name: hello2a
             template: print-message
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello2a
             hooks:
               exit:
                 template: exit
-            name: hello2a
+          - name: hello2b
             template: print-message
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello2b
             hooks:
               exit:
                 template: exit
-            name: hello2b
-            template: print-message
     ```
 

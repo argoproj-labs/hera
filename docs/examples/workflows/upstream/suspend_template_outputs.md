@@ -69,12 +69,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: approve
             template: approve
-        - - arguments:
+        - - name: release
+            template: print-message
+            arguments:
               parameters:
               - name: message
                 value: '{{steps.approve.outputs.parameters.message}}'
-            name: release
-            template: print-message
       - name: approve
         outputs:
           parameters:

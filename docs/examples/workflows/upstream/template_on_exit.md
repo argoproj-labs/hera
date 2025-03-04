@@ -58,15 +58,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - echo
       - name: step-template
         steps:
-        - - hooks:
+        - - name: stepA
+            template: hello-world
+            hooks:
               exit:
                 template: exitContainer
-            name: stepA
+        - - name: stepB
             template: hello-world
-        - - hooks:
+            hooks:
               exit:
                 template: exitContainer
-            name: stepB
-            template: hello-world
     ```
 

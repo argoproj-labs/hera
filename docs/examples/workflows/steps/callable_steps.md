@@ -41,18 +41,18 @@
       templates:
       - name: my-steps
         steps:
-        - - arguments:
+        - - name: hello-1
+            template: hello
+            arguments:
               parameters:
               - name: name
                 value: hello-1-{{inputs.parameters.my-step-input}}
-            name: hello-1
+        - - name: hello-2
             template: hello
-        - - arguments:
+            arguments:
               parameters:
               - name: name
                 value: hello-2-{{inputs.parameters.my-step-input}}
-            name: hello-2
-            template: hello
         inputs:
           parameters:
           - name: my-step-input
@@ -75,17 +75,17 @@
           - python
       - name: calling-steps
         steps:
-        - - arguments:
+        - - name: call-1
+            template: my-steps
+            arguments:
               parameters:
               - name: my-step-input
                 value: call-1
-            name: call-1
+        - - name: call-2
             template: my-steps
-        - - arguments:
+            arguments:
               parameters:
               - name: my-step-input
                 value: call-2
-            name: call-2
-            template: my-steps
     ```
 

@@ -46,13 +46,13 @@
         steps:
         - - name: random-roll
             template: random-roll
-        - - arguments:
+        - - name: recurse
+            template: sub-steps
+            when: '{{steps.random-roll.outputs.result}} != 0'
+            arguments:
               parameters:
               - name: input-num
                 value: '{{steps.random-roll.outputs.result}}'
-            name: recurse
-            template: sub-steps
-            when: '{{steps.random-roll.outputs.result}} != 0'
       - name: random-roll
         script:
           image: python:3.9

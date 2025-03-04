@@ -18,13 +18,7 @@ spec:
       - name: tag
   - name: loop-map-example
     steps:
-    - - arguments:
-          parameters:
-          - name: image
-            value: '{{item.image}}'
-          - name: tag
-            value: '{{item.tag}}'
-        name: test-linux
+    - - name: test-linux
         template: cat-os-release
         withItems:
         - image: debian
@@ -35,3 +29,9 @@ spec:
           tag: '3.6'
         - image: ubuntu
           tag: '17.10'
+        arguments:
+          parameters:
+          - name: image
+            value: '{{item.image}}'
+          - name: tag
+            value: '{{item.tag}}'

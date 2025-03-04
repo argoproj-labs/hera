@@ -152,11 +152,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: build
             template: build-golang-example
-        - - arguments:
-              parameters:
-              - name: os-image
-                value: '{{item.image}}:{{item.tag}}'
-            name: test
+        - - name: test
             template: run-hello
             withItems:
             - image: debian
@@ -165,6 +161,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               tag: '3.6'
             - image: ubuntu
               tag: '17.10'
+            arguments:
+              parameters:
+              - name: os-image
+                value: '{{item.image}}:{{item.tag}}'
         - - name: release
             template: release-artifact
       volumeClaimTemplates:

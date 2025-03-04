@@ -113,38 +113,38 @@
       templates:
       - name: my-steps
         steps:
-        - - arguments:
-              parameters:
-              - name: input
-                value: '{"a": 2, "b": "bar", "c": 42}'
-            name: my-function
+        - - name: my-function
             template: my-function
-        - - arguments:
+            arguments:
               parameters:
               - name: input
                 value: '{"a": 2, "b": "bar", "c": 42}'
-            name: str-function
+        - - name: str-function
             template: str-function
-        - - arguments:
+            arguments:
+              parameters:
+              - name: input
+                value: '{"a": 2, "b": "bar", "c": 42}'
+        - - name: another-function
+            template: another-function
+            arguments:
               parameters:
               - name: inputs
                 value: '[{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]'
-            name: another-function
-            template: another-function
-        - - arguments:
+        - - name: function-kebab
+            template: function-kebab
+            arguments:
               parameters:
               - name: a-but-kebab
                 value: '3'
               - name: b-but-kebab
                 value: bar
-            name: function-kebab
-            template: function-kebab
-        - - arguments:
+        - - name: function-kebab-object
+            template: function-kebab-object
+            arguments:
               parameters:
               - name: input-value
                 value: '{"a": 3, "b": "bar", "c": "42"}'
-            name: function-kebab-object
-            template: function-kebab-object
       - name: my-function
         inputs:
           parameters:

@@ -64,18 +64,18 @@ This example will reuse the outputs volume across script steps.
       templates:
       - name: my-steps
         steps:
-        - - arguments:
+        - - name: output-artifact
+            template: output-artifact
+            arguments:
               parameters:
               - name: a_number
                 value: '3'
-            name: output-artifact
-            template: output-artifact
-        - - arguments:
-              artifacts:
-              - from: '{{steps.output-artifact.outputs.artifacts.successor_out}}'
-                name: successor_in
-            name: use-artifact
+        - - name: use-artifact
             template: use-artifact
+            arguments:
+              artifacts:
+              - name: successor_in
+                from: '{{steps.output-artifact.outputs.artifacts.successor_out}}'
       - name: output-artifact
         inputs:
           parameters:

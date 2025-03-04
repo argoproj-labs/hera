@@ -80,18 +80,18 @@
         steps:
         - - name: writer
             template: writer
-        - - arguments:
+        - - name: pydantic-io
+            template: pydantic-io
+            arguments:
               artifacts:
-              - from: '{{steps.writer.outputs.artifacts.int-artifact}}'
-                name: artifact-input
+              - name: artifact-input
+                from: '{{steps.writer.outputs.artifacts.int-artifact}}'
               parameters:
               - name: param_int
                 value: '101'
               - name: an_object
                 value: '{"a_dict": {"my-new-key": "my-new-value"}, "a_str": "a default
                   string"}'
-            name: pydantic-io
-            template: pydantic-io
       - name: writer
         outputs:
           artifacts:

@@ -69,11 +69,11 @@
         steps:
         - - name: get-value-step
             template: suspend-with-intermediate-param
-        - - arguments:
+        - - name: custom-delay-step
+            template: input-duration-suspend
+            arguments:
               parameters:
               - name: duration
                 value: '{{steps.get-value-step.outputs.parameters.duration}}'
-            name: custom-delay-step
-            template: input-duration-suspend
     ```
 

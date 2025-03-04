@@ -159,14 +159,14 @@ spec:
             path: /tmp/message
       - name: main
         steps:
-        - - hooks:
+        - - name: step-1
+            template: output
+            hooks:
               exit:
+                template: exit
                 arguments:
                   artifacts:
-                  - from: '{{steps.step-1.outputs.artifacts.result}}'
-                    name: message
-                template: exit
-            name: step-1
-            template: output
+                  - name: message
+                    from: '{{steps.step-1.outputs.artifacts.result}}'
     ```
 

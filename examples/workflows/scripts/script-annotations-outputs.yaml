@@ -7,12 +7,12 @@ spec:
   templates:
   - name: my-steps
     steps:
-    - - arguments:
+    - - name: script-param-artifact-in-function-signature-and-return-type
+        template: script-param-artifact-in-function-signature-and-return-type
+        arguments:
           parameters:
           - name: a_number
             value: '3'
-        name: script-param-artifact-in-function-signature-and-return-type
-        template: script-param-artifact-in-function-signature-and-return-type
   - name: script-param-artifact-in-function-signature-and-return-type
     inputs:
       parameters:
