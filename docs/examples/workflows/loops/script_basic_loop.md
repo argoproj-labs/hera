@@ -56,33 +56,33 @@
       templates:
       - name: loop-example
         steps:
-        - - arguments:
-              parameters:
-              - name: message
-                value: '{{item}}'
-            name: print-message-loop-with-items-list
+        - - name: print-message-loop-with-items-list
             template: print-message
             withItems:
             - hello world
             - goodbye world
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: '{{item}}'
-            name: print-message-loop-with-items-dict
+        - - name: print-message-loop-with-items-dict
             template: print-message
             withItems:
             - message: hello world
             - message: goodbye world
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: '{{item}}'
-            name: print-message-loop-with-items-list-of-dicts
+        - - name: print-message-loop-with-items-list-of-dicts
             template: print-message
             withItems:
             - '{"my-key": "hello world"}'
             - '{"my-other-key": "goodbye world"}'
+            arguments:
+              parameters:
+              - name: message
+                value: '{{item}}'
       - name: print-message
         inputs:
           parameters:
