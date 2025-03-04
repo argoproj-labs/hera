@@ -63,18 +63,20 @@
       templates:
       - name: my-steps
         steps:
-        - - arguments:
+        - - name: output-dict-artifact
+            template: output-dict-artifact
+            arguments:
               parameters:
               - name: a_number
                 value: '3'
-            name: output-dict-artifact
-            template: output-dict-artifact
-        - - arguments:
+        - - name: echo-all
+            template: echo-all
+            arguments:
               artifacts:
-              - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
-                name: my-artifact
-              - from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
-                name: my-artifact-no-path
+              - name: my-artifact
+                from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+              - name: my-artifact-no-path
+                from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
               parameters:
               - name: an_int
                 value: '1'
@@ -82,8 +84,6 @@
                 value: 'true'
               - name: a_string
                 value: a
-            name: echo-all
-            template: echo-all
       - name: output-dict-artifact
         inputs:
           parameters:

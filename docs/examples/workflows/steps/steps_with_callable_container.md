@@ -61,23 +61,23 @@
           - name: message
       - name: hello-hello-hello
         steps:
-        - - arguments:
+        - - name: hello1
+            template: whalesay
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: hello1
+        - - name: hello2a
             template: whalesay
-        - - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello2a
-            name: hello2a
+          - name: hello2b
             template: whalesay
-          - arguments:
+            arguments:
               parameters:
               - name: message
                 value: hello2b
-            name: hello2b
-            template: whalesay
     ```
 

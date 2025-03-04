@@ -41,7 +41,7 @@
           resources:
             requests:
               cpu: '1'
-              memory: 5Gi
               ephemeral-storage: 5Gi
+              memory: 5Gi
     ```
 

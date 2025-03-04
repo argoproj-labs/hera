@@ -61,28 +61,28 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - name: hello-hello-hello
         steps:
-        - - arguments:
+        - - name: hello1
+            arguments:
               parameters:
               - name: message
                 value: hello1
-            name: hello1
             templateRef:
               name: workflow-template-print-message
               template: print-message
-        - - arguments:
+        - - name: hello2a
+            arguments:
               parameters:
               - name: message
                 value: hello2a
-            name: hello2a
             templateRef:
-              clusterScope: true
               name: cluster-workflow-template-inner-steps
+              clusterScope: true
               template: inner-steps
-          - arguments:
+          - name: hello2b
+            arguments:
               parameters:
               - name: message
                 value: hello2b
-            name: hello2b
             templateRef:
               name: workflow-template-print-message
               template: print-message

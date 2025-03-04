@@ -84,10 +84,10 @@
           - --validate=false
       - name: resource-validate-example
         steps:
-        - - continueOn:
-              failed: true
-            name: submit-resource
+        - - name: submit-resource
             template: create-route
+            continueOn:
+              failed: true
         - - name: submit-resource-without-validation
             template: create-route-without-validation
             when: '{{steps.submit-resource.status}} == Failed'

@@ -94,11 +94,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: submit-resource
             template: create-configmap
-        - - arguments:
+        - - name: delete-resource
+            template: delete-resource
+            arguments:
               parameters:
               - name: selector
                 value: cleanup=true
-            name: delete-resource
-            template: delete-resource
     ```
 

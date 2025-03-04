@@ -82,15 +82,15 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         failFast: true
         parallelism: 1
         steps:
-        - - arguments:
+        - - name: unit-step
+            template: unit-step-template
+            withParam: '{{inputs.parameters.step_params}}'
+            arguments:
               parameters:
               - name: exit_code
                 value: '{{item.exit_code}}'
               - name: message
                 value: '{{item.message}}'
-            name: unit-step
-            template: unit-step-template
-            withParam: '{{inputs.parameters.step_params}}'
         inputs:
           parameters:
           - name: step_params

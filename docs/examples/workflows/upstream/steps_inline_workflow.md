@@ -43,9 +43,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - name: main
         steps:
-        - - inline:
+        - - name: a
+            inline:
               container:
                 image: argoproj/argosay:v2
-            name: a
     ```
 

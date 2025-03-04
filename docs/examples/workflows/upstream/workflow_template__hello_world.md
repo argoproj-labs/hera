@@ -42,11 +42,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       templates:
       - name: hello-world-from-templateRef
         steps:
-        - - arguments:
+        - - name: call-print-message
+            arguments:
               parameters:
               - name: message
                 value: hello world
-            name: call-print-message
             templateRef:
               name: workflow-template-print-message
               template: print-message

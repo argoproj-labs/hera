@@ -64,13 +64,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - name: tag
       - name: loop-map-example
         steps:
-        - - arguments:
-              parameters:
-              - name: image
-                value: '{{item.image}}'
-              - name: tag
-                value: '{{item.tag}}'
-            name: test-linux
+        - - name: test-linux
             template: cat-os-release
             withItems:
             - image: debian
@@ -81,5 +75,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               tag: '3.6'
             - image: ubuntu
               tag: '17.10'
+            arguments:
+              parameters:
+              - name: image
+                value: '{{item.image}}'
+              - name: tag
+                value: '{{item.tag}}'
     ```
 

@@ -54,30 +54,30 @@ spec:
     steps:
     - - name: setup-step
         template: setup
-    - - arguments:
+    - - name: step-a
+        template: concat
+        arguments:
           parameters:
           - name: word_a
             value: '{{inputs.parameters.value_a}}'
           - name: word_b
             value: '{{steps.setup-step.outputs.parameters.environment_parameter}}{{steps.setup-step.outputs.parameters.dummy-param}}'
-        name: step-a
+      - name: step-b
         template: concat
-      - arguments:
+        arguments:
           parameters:
           - name: word_a
             value: '{{inputs.parameters.value_b}}'
           - name: word_b
             value: '{{steps.setup-step.outputs.result}}'
-        name: step-b
+    - - name: final-step
         template: concat
-    - - arguments:
+        arguments:
           parameters:
           - name: word_a
             value: '{{steps.step-a.outputs.result}}'
           - name: word_b
             value: '{{steps.step-b.outputs.result}}'
-        name: final-step
-        template: concat
     inputs:
       parameters:
       - name: value_a

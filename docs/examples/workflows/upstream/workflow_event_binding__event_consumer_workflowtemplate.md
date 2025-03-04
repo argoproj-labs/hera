@@ -59,14 +59,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - name: appellation
       - name: main
         steps:
-        - - arguments:
+        - - name: a
+            template: argosay
+            arguments:
               parameters:
               - name: salutation
                 value: '{{workflow.parameters.salutation}}'
               - name: appellation
                 value: '{{workflow.parameters.appellation}}'
-            name: a
-            template: argosay
       arguments:
         parameters:
         - name: salutation

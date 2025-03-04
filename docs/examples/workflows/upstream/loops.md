@@ -52,14 +52,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - name: message
       - name: loop-example
         steps:
-        - - arguments:
-              parameters:
-              - name: message
-                value: '{{item}}'
-            name: print-message-loop
+        - - name: print-message-loop
             template: print-message
             withItems:
             - hello world
             - goodbye world
+            arguments:
+              parameters:
+              - name: message
+                value: '{{item}}'
     ```
 

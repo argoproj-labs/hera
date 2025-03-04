@@ -31,9 +31,9 @@ spec:
     steps:
     - - name: submit-resource
         template: create-configmap
-    - - arguments:
+    - - name: delete-resource
+        template: delete-resource
+        arguments:
           parameters:
           - name: selector
             value: cleanup=true
-        name: delete-resource
-        template: delete-resource

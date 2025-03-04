@@ -71,13 +71,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         steps:
         - - name: generate
             template: gen-number-list
-        - - arguments:
+        - - name: sleep
+            template: sleep-n-sec
+            withParam: '{{steps.generate.outputs.result}}'
+            arguments:
               parameters:
               - name: seconds
                 value: '{{item}}'
-            name: sleep
-            template: sleep-n-sec
-            withParam: '{{steps.generate.outputs.result}}'
       - name: gen-number-list
         script:
           image: python:alpine3.6

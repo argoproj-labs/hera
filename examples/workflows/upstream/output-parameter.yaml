@@ -33,9 +33,9 @@ spec:
     steps:
     - - name: generate-parameter
         template: hello-world-to-file
-    - - arguments:
+    - - name: consume-parameter
+        template: print-message
+        arguments:
           parameters:
           - name: message
             value: '{{steps.generate-parameter.outputs.parameters.hello-param}}'
-        name: consume-parameter
-        template: print-message
