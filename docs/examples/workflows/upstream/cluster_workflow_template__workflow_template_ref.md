@@ -31,7 +31,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       generateName: cluster-workflow-template-hello-world-
     spec:
       workflowTemplateRef:
-        clusterScope: true
         name: cluster-workflow-template-submittable
+        clusterScope: true
     ```
 

@@ -61,43 +61,43 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: diamond
       templates:
-      - dag:
+      - name: diamond
+        dag:
           tasks:
-          - arguments:
+          - name: A
+            arguments:
               parameters:
               - name: message
                 value: A
-            name: A
             templateRef:
-              clusterScope: true
               name: cluster-workflow-template-print-message
+              clusterScope: true
               template: print-message
-          - arguments:
+          - name: B
+            depends: A
+            arguments:
               parameters:
               - name: message
                 value: B
-            depends: A
-            name: B
             templateRef:
-              clusterScope: true
               name: cluster-workflow-template-print-message
-              template: print-message
-          - depends: A
-            name: C
-            templateRef:
               clusterScope: true
+              template: print-message
+          - name: C
+            depends: A
+            templateRef:
               name: cluster-workflow-template-inner-dag
+              clusterScope: true
               template: inner-diamond
-          - arguments:
+          - name: D
+            depends: B && C
+            arguments:
               parameters:
               - name: message
                 value: D
-            depends: B && C
-            name: D
             templateRef:
-              clusterScope: true
               name: cluster-workflow-template-print-message
+              clusterScope: true
               template: print-message
-        name: diamond
     ```
 

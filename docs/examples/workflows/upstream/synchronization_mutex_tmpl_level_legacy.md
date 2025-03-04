@@ -61,25 +61,25 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: synchronization-tmpl-level-mutex-example
       templates:
-      - container:
+      - name: acquire-lock
+        container:
+          image: alpine:latest
           args:
           - sleep 20; echo acquired lock
           command:
           - sh
           - -c
-          image: alpine:latest
-        name: acquire-lock
         synchronization:
           mutex:
             name: welcome
-      - container:
+      - name: acquire-lock-1
+        container:
+          image: alpine:latest
           args:
           - sleep 50; echo acquired lock
           command:
           - sh
           - -c
-          image: alpine:latest
-        name: acquire-lock-1
         synchronization:
           mutex:
             name: test

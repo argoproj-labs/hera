@@ -55,28 +55,28 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: hello-world-to-file
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo hello world | tee /tmp/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
-        name: hello-world-to-file
         outputs:
           artifacts:
           - name: message
             path: /tmp
             s3:
-              accessKeySecret:
-                key: accessKey
-                name: my-s3-credentials
               bucket: my-bucket
               endpoint: s3.amazonaws.com
               key: path/in/bucket/hello_world.txt.tgz
               region: us-west-2
-              secretKeySecret:
-                key: secretKey
+              accessKeySecret:
                 name: my-s3-credentials
+                key: accessKey
+              secretKeySecret:
+                name: my-s3-credentials
+                key: secretKey
     ```
 

@@ -4,5 +4,5 @@ metadata:
   generateName: cluster-workflow-template-hello-world-
 spec:
   workflowTemplateRef:
-    clusterScope: true
     name: cluster-workflow-template-submittable
+    clusterScope: true

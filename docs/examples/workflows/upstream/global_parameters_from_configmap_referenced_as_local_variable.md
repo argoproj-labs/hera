@@ -43,24 +43,24 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: global-parameter-from-configmap-referenced-as-local-variable-
     spec:
+      entrypoint: print-message
+      templates:
+      - name: print-message
+        container:
+          image: busybox
+          args:
+          - '{{inputs.parameters.message}}'
+          command:
+          - echo
+        inputs:
+          parameters:
+          - name: message
       arguments:
         parameters:
         - name: message
           valueFrom:
             configMapKeyRef:
-              key: msg
               name: simple-parameters
-      entrypoint: print-message
-      templates:
-      - container:
-          args:
-          - '{{inputs.parameters.message}}'
-          command:
-          - echo
-          image: busybox
-        inputs:
-          parameters:
-          - name: message
-        name: print-message
+              key: msg
     ```
 

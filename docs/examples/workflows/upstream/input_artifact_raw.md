@@ -39,13 +39,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: raw-contents
       templates:
-      - container:
+      - name: raw-contents
+        container:
+          image: alpine:latest
           args:
           - cat /tmp/file
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           artifacts:
           - name: myfile
@@ -55,6 +56,5 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 this is
                 the raw file
                 contents
-        name: raw-contents
     ```
 

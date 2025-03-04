@@ -55,6 +55,31 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: artifact-path-placeholders-
     spec:
+      entrypoint: head-lines
+      templates:
+      - name: head-lines
+        container:
+          image: busybox
+          command:
+          - sh
+          - -c
+          - mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" "$(dirname "{{outputs.parameters.actual-lines-count.path}}")"
+            ; head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}"
+            | tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"
+        inputs:
+          artifacts:
+          - name: text
+            path: /inputs/text/data
+          parameters:
+          - name: lines-count
+        outputs:
+          artifacts:
+          - name: text
+            path: /outputs/text/data
+          parameters:
+          - name: actual-lines-count
+            valueFrom:
+              path: /outputs/actual-lines-count/data
       arguments:
         artifacts:
         - name: text
@@ -68,30 +93,5 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         parameters:
         - name: lines-count
           value: '3'
-      entrypoint: head-lines
-      templates:
-      - container:
-          command:
-          - sh
-          - -c
-          - mkdir -p "$(dirname "{{outputs.artifacts.text.path}}")" "$(dirname "{{outputs.parameters.actual-lines-count.path}}")"
-            ; head -n {{inputs.parameters.lines-count}} < "{{inputs.artifacts.text.path}}"
-            | tee "{{outputs.artifacts.text.path}}" | wc -l > "{{outputs.parameters.actual-lines-count.path}}"
-          image: busybox
-        inputs:
-          artifacts:
-          - name: text
-            path: /inputs/text/data
-          parameters:
-          - name: lines-count
-        name: head-lines
-        outputs:
-          artifacts:
-          - name: text
-            path: /outputs/text/data
-          parameters:
-          - name: actual-lines-count
-            valueFrom:
-              path: /outputs/actual-lines-count/data
     ```
 

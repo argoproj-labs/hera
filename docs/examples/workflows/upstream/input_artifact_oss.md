@@ -54,27 +54,27 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: input-artifact-oss-example
       templates:
-      - container:
+      - name: input-artifact-oss-example
+        container:
+          image: debian:latest
           args:
           - ls -l /my-artifact
           command:
           - sh
           - -c
-          image: debian:latest
         inputs:
           artifacts:
           - name: my-art
+            path: /my-artifact
             oss:
-              accessKeySecret:
-                key: accessKey
-                name: my-oss-credentials
               bucket: test-bucket-name
               endpoint: http://oss-cn-hangzhou-zmf.aliyuncs.com
               key: test/mydirectory/
-              secretKeySecret:
-                key: secretKey
+              accessKeySecret:
                 name: my-oss-credentials
-            path: /my-artifact
-        name: input-artifact-oss-example
+                key: accessKey
+              secretKeySecret:
+                name: my-oss-credentials
+                key: secretKey
     ```
 

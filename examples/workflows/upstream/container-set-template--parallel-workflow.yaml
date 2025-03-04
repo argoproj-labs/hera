@@ -5,10 +5,10 @@ metadata:
 spec:
   entrypoint: main
   templates:
-  - containerSet:
+  - name: main
+    containerSet:
       containers:
-      - image: argoproj/argosay:v2
-        name: a
-      - image: argoproj/argosay:v2
-        name: b
-    name: main
+      - name: a
+        image: argoproj/argosay:v2
+      - name: b
+        image: argoproj/argosay:v2

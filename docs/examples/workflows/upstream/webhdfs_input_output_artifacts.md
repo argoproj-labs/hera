@@ -84,56 +84,56 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: input-output-artifact-webhdfs-example
       templates:
-      - container:
+      - name: input-output-artifact-webhdfs-example
+        container:
+          image: debian:latest
           args:
           - cat /my-artifact
           command:
           - sh
           - -c
-          image: debian:latest
         inputs:
           artifacts:
-          - http:
+          - name: my-art
+            path: /my-artifact
+            http:
+              url: https://mywebhdfsprovider.com/webhdfs/v1/file.txt?op=OPEN
+              headers:
+              - name: CustomHeader
+                value: CustomValue
               auth:
                 oauth2:
-                  clientIDSecret:
-                    key: clientID
-                    name: oauth-sec
-                  clientSecretSecret:
-                    key: clientSecret
-                    name: oauth-sec
                   endpointParams:
                   - key: customkey
                     value: customvalue
                   scopes:
                   - some
                   - scopes
-                  tokenURLSecret:
-                    key: tokenURL
+                  clientIDSecret:
                     name: oauth-sec
+                    key: clientID
+                  clientSecretSecret:
+                    name: oauth-sec
+                    key: clientSecret
+                  tokenURLSecret:
+                    name: oauth-sec
+                    key: tokenURL
+        outputs:
+          artifacts:
+          - name: my-art2
+            path: /my-artifact
+            http:
+              url: https://mywebhdfsprovider.com/webhdfs/v1/file.txt?op=CREATE&overwrite=true
               headers:
               - name: CustomHeader
                 value: CustomValue
-              url: https://mywebhdfsprovider.com/webhdfs/v1/file.txt?op=OPEN
-            name: my-art
-            path: /my-artifact
-        name: input-output-artifact-webhdfs-example
-        outputs:
-          artifacts:
-          - http:
               auth:
                 clientCert:
                   clientCertSecret:
+                    name: cert-sec
                     key: certificate.pem
-                    name: cert-sec
                   clientKeySecret:
-                    key: key.pem
                     name: cert-sec
-              headers:
-              - name: CustomHeader
-                value: CustomValue
-              url: https://mywebhdfsprovider.com/webhdfs/v1/file.txt?op=CREATE&overwrite=true
-            name: my-art2
-            path: /my-artifact
+                    key: key.pem
     ```
 

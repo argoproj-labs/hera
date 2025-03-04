@@ -67,19 +67,19 @@ spec:
     spec:
       entrypoint: retry-backoff
       templates:
-      - container:
+      - name: retry-backoff
+        container:
+          image: python:alpine3.6
           args:
           - import random; import sys; exit_code = random.choice([0, 1, 1]); sys.exit(exit_code)
           command:
           - python
           - -c
-          image: python:alpine3.6
-        name: retry-backoff
         retryStrategy:
+          limit: '10'
           backoff:
             duration: '1'
             factor: '2'
             maxDuration: 1m
-          limit: '10'
     ```
 

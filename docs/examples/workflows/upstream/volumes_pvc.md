@@ -44,28 +44,28 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: volumes-pvc-example
       templates:
-      - container:
+      - name: hello-world-to-file
+        container:
+          image: busybox
           args:
           - echo generating message in volume; echo hello world | tee /mnt/vol/hello_world.txt
           command:
           - sh
           - -c
-          image: busybox
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
-        name: hello-world-to-file
-      - container:
+          - name: workdir
+            mountPath: /mnt/vol
+      - name: print-message-from-file
+        container:
+          image: alpine:latest
           args:
           - echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt
           command:
           - sh
           - -c
-          image: alpine:latest
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
-        name: print-message-from-file
+          - name: workdir
+            mountPath: /mnt/vol
       - name: volumes-pvc-example
         steps:
         - - name: generate

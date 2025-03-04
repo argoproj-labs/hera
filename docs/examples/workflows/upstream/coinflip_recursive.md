@@ -51,14 +51,14 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: coinflip
       templates:
-      - container:
+      - name: heads
+        container:
+          image: alpine:3.6
           args:
           - echo "it was heads"
           command:
           - sh
           - -c
-          image: alpine:3.6
-        name: heads
       - name: coinflip
         steps:
         - - name: flip-coin
@@ -71,12 +71,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             when: '{{steps.flip-coin.outputs.result}} == tails'
       - name: flip-coin
         script:
-          command:
-          - python
           image: python:alpine3.6
           source: |-
             import random
             result = 'heads' if random.randint(0, 1) == 0 else 'tails'
             print(result)
+          command:
+          - python
     ```
 

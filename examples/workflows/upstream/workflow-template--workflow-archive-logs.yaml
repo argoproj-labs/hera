@@ -6,10 +6,10 @@ spec:
   archiveLogs: true
   entrypoint: hello-world
   templates:
-  - container:
+  - name: hello-world
+    container:
+      image: busybox
       args:
       - hello world
       command:
       - echo
-      image: busybox
-    name: hello-world

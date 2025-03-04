@@ -108,87 +108,87 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       generateName: dag-task-
     spec:
       entrypoint: dag-task
-      metrics:
-        prometheus:
-        - gauge:
-            realtime: false
-            value: '{{workflow.duration}}'
-          help: Duration gauge by workflow level
-          labels:
-          - key: playground_id_workflow
-            value: test
-          - key: status
-            value: '{{workflow.status}}'
-          name: playground_workflow_duration
-        - counter:
-            value: '1'
-          help: Count of workflow execution by result status  - workflow level
-          labels:
-          - key: playground_id_workflow_counter
-            value: test
-          - key: status
-            value: '{{workflow.status}}'
-          name: playground_workflow_result_counter
       templates:
-      - dag:
+      - name: dag-task
+        dag:
           tasks:
-          - arguments:
+          - name: TEST-ONE
+            template: echo
+            withItems:
+            - command: ONE-A
+              tag: TEST-ONE-A
+            - command: ONE-B
+              tag: TEST-ONE-B
+            arguments:
               parameters:
               - name: message
                 value: console output-->TEST-{{item.command}}
               - name: tag
                 value: '{{item.tag}}'
-            name: TEST-ONE
+          - name: TEST-TWO
             template: echo
             withItems:
-            - tag: TEST-ONE-A
-              command: ONE-A
-            - tag: TEST-ONE-B
-              command: ONE-B
-          - arguments:
+            - command: TWO-A
+              tag: TEST-TWO-A
+            - command: TWO-B
+              tag: TEST-TWO-B
+            arguments:
               parameters:
               - name: message
                 value: console output-->TEST-{{item.command}}
               - name: tag
                 value: '{{item.tag}}'
-            name: TEST-TWO
-            template: echo
-            withItems:
-            - tag: TEST-TWO-A
-              command: TWO-A
-            - tag: TEST-TWO-B
-              command: TWO-B
-        name: dag-task
-      - container:
+      - name: echo
+        container:
+          image: alpine:3.7
           command:
           - echo
           - '{{inputs.parameters.message}}'
-          image: alpine:3.7
         inputs:
           parameters:
           - name: message
           - name: tag
         metrics:
           prometheus:
-          - gauge:
-              realtime: false
-              value: '{{duration}}'
+          - name: playground_workflow_duration_task_seconds
             help: Duration gauge by task name in seconds - task level
             labels:
             - key: playground_task_name
               value: '{{inputs.parameters.tag}}'
             - key: status
               value: '{{status}}'
-            name: playground_workflow_duration_task_seconds
-          - counter:
-              value: '1'
+            gauge:
+              realtime: false
+              value: '{{duration}}'
+          - name: playground_workflow_result_task_counter
             help: Count of task execution by result status  - task level
             labels:
             - key: playground_task_name_counter
               value: '{{inputs.parameters.tag}}'
             - key: status
               value: '{{status}}'
-            name: playground_workflow_result_task_counter
-        name: echo
+            counter:
+              value: '1'
+      metrics:
+        prometheus:
+        - name: playground_workflow_duration
+          help: Duration gauge by workflow level
+          labels:
+          - key: playground_id_workflow
+            value: test
+          - key: status
+            value: '{{workflow.status}}'
+          gauge:
+            realtime: false
+            value: '{{workflow.duration}}'
+        - name: playground_workflow_result_counter
+          help: Count of workflow execution by result status  - workflow level
+          labels:
+          - key: playground_id_workflow_counter
+            value: test
+          - key: status
+            value: '{{workflow.status}}'
+          counter:
+            value: '1'
     ```
 

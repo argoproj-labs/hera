@@ -45,7 +45,14 @@ This example showcases how one can run a sidecar container with Hera
     spec:
       entrypoint: sidecar-example
       templates:
-      - container:
+      - name: sidecar-example
+        sidecars:
+        - name: influxdb
+          image: influxdb:1.2
+          command:
+          - influxd
+        container:
+          image: alpine:latest
           args:
           - ' apk update && apk add curl && until curl -XPOST ''http://127.0.0.1:8086/query''
             --data-urlencode ''q=CREATE DATABASE mydb'' ; do sleep .5; done && for i in
@@ -54,12 +61,5 @@ This example showcases how one can run a sidecar container with Hera
           command:
           - sh
           - -c
-          image: alpine:latest
-        name: sidecar-example
-        sidecars:
-        - command:
-          - influxd
-          image: influxdb:1.2
-          name: influxdb
     ```
 

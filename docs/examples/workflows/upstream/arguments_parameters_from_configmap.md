@@ -49,19 +49,19 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: print-message-from-configmap
       templates:
-      - container:
+      - name: print-message-from-configmap
+        container:
+          image: busybox
           args:
           - '{{inputs.parameters.message}}'
           command:
           - echo
-          image: busybox
         inputs:
           parameters:
           - name: message
             valueFrom:
               configMapKeyRef:
-                key: msg
                 name: simple-parameters
-        name: print-message-from-configmap
+                key: msg
     ```
 

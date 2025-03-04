@@ -44,13 +44,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       - name: main
         resource:
           action: patch
-          flags:
-          - workflow
-          - '{{workflow.name}}'
           manifest: |
             - op: add
               path: /metadata/labels/foo
               value: bar
           mergeStrategy: json
+          flags:
+          - workflow
+          - '{{workflow.name}}'
     ```
 

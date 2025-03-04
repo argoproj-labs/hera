@@ -33,21 +33,21 @@ This example showcases how one can run an Nginx sidecar container with Hera
     spec:
       entrypoint: sidecar-nginx-example
       templates:
-      - container:
+      - name: sidecar-nginx-example
+        sidecars:
+        - name: nginx
+          image: nginx:1.13
+          command:
+          - nginx
+          - -g
+          - daemon off;
+        container:
+          image: appropriate/curl
           args:
           - until `curl -G 'http://127.0.0.1/' >& /tmp/out`; do echo sleep && sleep 1;
             done && cat /tmp/out
           command:
           - sh
           - -c
-          image: appropriate/curl
-        name: sidecar-nginx-example
-        sidecars:
-        - command:
-          - nginx
-          - -g
-          - daemon off;
-          image: nginx:1.13
-          name: nginx
     ```
 

@@ -35,21 +35,21 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: arguments-parameters-
     spec:
-      arguments:
-        parameters:
-        - name: message
-          value: hello world
       entrypoint: print-message
       templates:
-      - container:
+      - name: print-message
+        container:
+          image: busybox
           args:
           - '{{inputs.parameters.message}}'
           command:
           - echo
-          image: busybox
         inputs:
           parameters:
           - name: message
-        name: print-message
+      arguments:
+        parameters:
+        - name: message
+          value: hello world
     ```
 

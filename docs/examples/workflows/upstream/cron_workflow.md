@@ -50,12 +50,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       workflowSpec:
         entrypoint: hello-world-with-time
         templates:
-        - container:
+        - name: hello-world-with-time
+          container:
+            image: busybox
             args:
             - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
             command:
             - echo
-            image: busybox
-          name: hello-world-with-time
     ```
 

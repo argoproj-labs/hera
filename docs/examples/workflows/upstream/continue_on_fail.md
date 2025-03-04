@@ -54,21 +54,21 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       entrypoint: workflow-ignore
       parallelism: 1
       templates:
-      - container:
+      - name: hello-world
+        container:
+          image: busybox
           args:
           - hello world
           command:
           - echo
-          image: busybox
-        name: hello-world
-      - container:
+      - name: intentional-fail
+        container:
+          image: alpine:latest
           args:
           - echo intentional failure; exit 1
           command:
           - sh
           - -c
-          image: alpine:latest
-        name: intentional-fail
       - name: workflow-ignore
         steps:
         - - name: A

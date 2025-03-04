@@ -45,22 +45,22 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       concurrencyPolicy: Replace
       failedJobsHistoryLimit: 4
-      schedules:
-      - '*/3 * * * *'
-      - '*/2 * * * *'
       startingDeadlineSeconds: 0
       successfulJobsHistoryLimit: 4
       suspend: false
       timezone: America/Los_Angeles
+      schedules:
+      - '*/3 * * * *'
+      - '*/2 * * * *'
       workflowSpec:
         entrypoint: whalesay
         templates:
-        - container:
+        - name: whalesay
+          container:
+            image: docker/whalesay:latest
             args:
             - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
             command:
             - cowsay
-            image: docker/whalesay:latest
-          name: whalesay
     ```
 

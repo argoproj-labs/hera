@@ -45,21 +45,21 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: git-clone
       templates:
-      - container:
+      - name: git-clone
+        container:
+          image: golang:1.10
+          workingDir: /src
           args:
           - git status && ls && cat VERSION
           command:
           - sh
           - -c
-          image: golang:1.10
-          workingDir: /src
         inputs:
           artifacts:
-          - git:
+          - name: argo-source
+            path: /src
+            git:
               repo: https://github.com/argoproj/argo-workflows.git
               revision: v2.1.1
-            name: argo-source
-            path: /src
-        name: git-clone
     ```
 

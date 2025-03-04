@@ -39,13 +39,13 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: suspend
       templates:
-      - container:
+      - name: hello-world
+        container:
+          image: busybox
           args:
           - hello world
           command:
           - echo
-          image: busybox
-        name: hello-world
       - name: approve
         suspend: {}
       - name: delay

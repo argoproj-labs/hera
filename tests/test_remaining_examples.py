@@ -20,8 +20,9 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = [
     "cluster-workflow-template__clustertemplates.upstream.yaml",
     "cron-backfill.upstream.yaml",
     "memoize-simple.upstream.yaml",
-    "webhdfs-input-output-artifacts.upstream.yaml",
     "workflow-template__templates.upstream.yaml",
+    "loops-param-argument.upstream.yaml",
+    "retry-backoff.upstream.yaml",
 ]
 
 

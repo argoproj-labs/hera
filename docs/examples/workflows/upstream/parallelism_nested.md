@@ -64,34 +64,22 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: parallelism-nested-
     spec:
-      arguments:
-        parameters:
-        - name: seq-list
-          value: |
-            ["a","b","c","d"]
-        - name: parallel-list
-          value: |
-            [1,2,3,4]
       entrypoint: parallel-worker
       templates:
-      - container:
+      - name: one-job
+        container:
+          image: alpine
           args:
           - echo {{inputs.parameters.parallel-id}} {{inputs.parameters.seq-id}}; sleep
             10
           command:
           - /bin/sh
           - -c
-          image: alpine
         inputs:
           parameters:
           - name: seq-id
           - name: parallel-id
-        name: one-job
-      - inputs:
-          parameters:
-          - name: seq-list
-          - name: parallel-id
-        name: seq-worker
+      - name: seq-worker
         parallelism: 1
         steps:
         - - arguments:
@@ -103,11 +91,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name: seq-step
             template: one-job
             withParam: '{{inputs.parameters.seq-list}}'
-      - inputs:
+        inputs:
           parameters:
           - name: seq-list
-          - name: parallel-list
-        name: parallel-worker
+          - name: parallel-id
+      - name: parallel-worker
         steps:
         - - arguments:
               parameters:
@@ -118,5 +106,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             name: parallel-worker
             template: seq-worker
             withParam: '{{inputs.parameters.parallel-list}}'
+        inputs:
+          parameters:
+          - name: seq-list
+          - name: parallel-list
+      arguments:
+        parameters:
+        - name: seq-list
+          value: |
+            ["a","b","c","d"]
+        - name: parallel-list
+          value: |
+            [1,2,3,4]
     ```
 

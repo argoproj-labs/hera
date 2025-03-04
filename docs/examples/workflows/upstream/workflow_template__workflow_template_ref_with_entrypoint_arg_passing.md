@@ -35,11 +35,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: workflow-template-hello-world-
     spec:
+      entrypoint: print-message
       arguments:
         parameters:
         - name: message
           value: hello world
-      entrypoint: print-message
       workflowTemplateRef:
         name: workflow-template-print-message
     ```

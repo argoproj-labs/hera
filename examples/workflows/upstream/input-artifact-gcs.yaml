@@ -5,21 +5,21 @@ metadata:
 spec:
   entrypoint: input-artifact-gcs-example
   templates:
-  - container:
+  - name: input-artifact-gcs-example
+    container:
+      image: debian:latest
       args:
       - ls -l /my-artifact
       command:
       - sh
       - -c
-      image: debian:latest
     inputs:
       artifacts:
-      - gcs:
+      - name: my-art
+        path: /my-artifact
+        gcs:
           bucket: my-bucket-name
           key: path/in/bucket
           serviceAccountKeySecret:
-            key: serviceAccountKey
             name: my-gcs-credentials
-        name: my-art
-        path: /my-artifact
-    name: input-artifact-gcs-example
+            key: serviceAccountKey

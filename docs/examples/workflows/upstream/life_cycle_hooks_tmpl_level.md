@@ -60,17 +60,17 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - container:
+      - name: echo
+        container:
+          image: alpine:3.6
           args:
           - echo "it was heads"
           command:
           - sh
           - -c
-          image: alpine:3.6
-        name: echo
-      - http:
+      - name: http
+        http:
           url: https://raw.githubusercontent.com/argoproj/argo-workflows/4e450e250168e6b4d51a126b784e90b11a0162bc/pkg/apis/workflow/v1alpha1/generated.swagger.json
-        name: http
       - name: main
         steps:
         - - hooks:

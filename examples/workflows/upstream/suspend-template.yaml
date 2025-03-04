@@ -5,13 +5,13 @@ metadata:
 spec:
   entrypoint: suspend
   templates:
-  - container:
+  - name: hello-world
+    container:
+      image: busybox
       args:
       - hello world
       command:
       - echo
-      image: busybox
-    name: hello-world
   - name: approve
     suspend: {}
   - name: delay

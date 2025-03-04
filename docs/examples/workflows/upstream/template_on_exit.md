@@ -12,6 +12,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     ```python linenums="1"
     from hera.workflows import Container, Steps, Workflow
+    from hera.workflows.models import LifecycleHook
 
     with Workflow(generate_name="container-on-exit-", entrypoint="step-template") as w:
         exit_container = Container(
@@ -27,8 +28,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             args=["hello world"],
         )
         with Steps(name="step-template"):
-            hello_world(name="stepA", on_exit=exit_container)
-            hello_world(name="stepB", on_exit=exit_container)
+            hello_world(name="stepA", hooks={"exit": LifecycleHook(template=exit_container.name)})
+            hello_world(name="stepB", hooks={"exit": LifecycleHook(template=exit_container.name)})
     ```
 
 === "YAML"
@@ -41,27 +42,31 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: step-template
       templates:
-      - container:
+      - name: exitContainer
+        container:
+          image: busybox
           args:
           - goodbye world
           command:
           - echo
+      - name: hello-world
+        container:
           image: busybox
-        name: exitContainer
-      - container:
           args:
           - hello world
           command:
           - echo
-          image: busybox
-        name: hello-world
       - name: step-template
         steps:
-        - - name: stepA
-            onExit: exitContainer
+        - - hooks:
+              exit:
+                template: exitContainer
+            name: stepA
             template: hello-world
-        - - name: stepB
-            onExit: exitContainer
+        - - hooks:
+              exit:
+                template: exitContainer
+            name: stepB
             template: hello-world
     ```
 

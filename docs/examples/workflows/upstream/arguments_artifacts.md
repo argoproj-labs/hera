@@ -40,25 +40,25 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: arguments-artifacts-
     spec:
-      arguments:
-        artifacts:
-        - http:
-            url: https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
-          name: kubectl
       entrypoint: kubectl-input-artifact
       templates:
-      - container:
+      - name: kubectl-input-artifact
+        container:
+          image: debian:9.4
           args:
           - kubectl version
           command:
           - sh
           - -c
-          image: debian:9.4
         inputs:
           artifacts:
-          - mode: 493
-            name: kubectl
+          - name: kubectl
+            mode: 493
             path: /usr/local/bin/kubectl
-        name: kubectl-input-artifact
+      arguments:
+        artifacts:
+        - name: kubectl
+          http:
+            url: https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
     ```
 

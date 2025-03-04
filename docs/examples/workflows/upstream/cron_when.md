@@ -43,12 +43,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       workflowSpec:
         entrypoint: sleep-busybox
         templates:
-        - container:
+        - name: sleep-busybox
+          container:
+            image: busybox
             args:
             - '10'
             command:
             - sleep
-            image: busybox
-          name: sleep-busybox
     ```
 

@@ -41,42 +41,42 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: loops-dag
       templates:
-      - container:
+      - name: print-message
+        container:
+          image: busybox
           args:
           - '{{inputs.parameters.message}}'
           command:
           - echo
-          image: busybox
         inputs:
           parameters:
           - name: message
-        name: print-message
-      - dag:
+      - name: loops-dag
+        dag:
           tasks:
-          - arguments:
+          - name: A
+            template: print-message
+            arguments:
               parameters:
               - name: message
                 value: A
-            name: A
-            template: print-message
-          - arguments:
-              parameters:
-              - name: message
-                value: '{{item}}'
+          - name: B
             depends: A
-            name: B
             template: print-message
             withItems:
             - foo
             - bar
             - baz
-          - arguments:
+            arguments:
+              parameters:
+              - name: message
+                value: '{{item}}'
+          - name: C
+            depends: B
+            template: print-message
+            arguments:
               parameters:
               - name: message
                 value: C
-            depends: B
-            name: C
-            template: print-message
-        name: loops-dag
     ```
 

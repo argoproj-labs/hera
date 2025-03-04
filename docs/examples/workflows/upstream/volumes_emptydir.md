@@ -47,20 +47,20 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: volumes-emptydir-example
       templates:
-      - container:
+      - name: volumes-emptydir-example
+        container:
+          image: debian:latest
           args:
           - ' vol_found=`mount | grep /mnt/vol` && if [[ -n $vol_found ]]; then echo "Volume
             mounted and found"; else echo "Not found"; fi '
           command:
           - /bin/bash
           - -c
-          image: debian:latest
           volumeMounts:
-          - mountPath: /mnt/vol
-            name: workdir
-        name: volumes-emptydir-example
+          - name: workdir
+            mountPath: /mnt/vol
       volumes:
-      - emptyDir: {}
-        name: workdir
+      - name: workdir
+        emptyDir: {}
     ```
 

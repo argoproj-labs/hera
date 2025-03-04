@@ -53,38 +53,38 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: main
       templates:
-      - container:
+      - name: generate
+        container:
+          image: argoproj/argosay:v2
           args:
           - echo
           - hello
           - /mnt/file
-          image: argoproj/argosay:v2
-        name: generate
         outputs:
           artifacts:
           - name: file
             path: /mnt/file
             s3:
               key: my-file
-      - container:
+      - name: consume
+        container:
+          image: argoproj/argosay:v2
           args:
           - cat
           - /tmp/file
-          image: argoproj/argosay:v2
         inputs:
           artifacts:
           - name: file
             path: /tmp/file
             s3:
               key: my-file
-        name: consume
-      - dag:
+      - name: main
+        dag:
           tasks:
           - name: generate
             template: generate
-          - depends: generate
-            name: consume
+          - name: consume
+            depends: generate
             template: consume
-        name: main
     ```
 

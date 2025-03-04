@@ -43,12 +43,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: pod-spec-patch-
     spec:
-      arguments:
-        parameters:
-        - name: cpu-limit
-          value: 100m
-        - name: mem-limit
-          value: 100Mi
       entrypoint: hello-world
       podSpecPatch: |
         containers:
@@ -57,14 +51,20 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
               limits:
                 memory: "{{workflow.parameters.mem-limit}}"
       templates:
-      - container:
+      - name: hello-world
+        podSpecPatch: '{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}"
+          }}}]}'
+        container:
+          image: busybox
           args:
           - hello world
           command:
           - echo
-          image: busybox
-        name: hello-world
-        podSpecPatch: '{"containers":[{"name":"main", "resources":{"limits":{"cpu": "{{workflow.parameters.cpu-limit}}"
-          }}}]}'
+      arguments:
+        parameters:
+        - name: cpu-limit
+          value: 100m
+        - name: mem-limit
+          value: 100Mi
     ```
 

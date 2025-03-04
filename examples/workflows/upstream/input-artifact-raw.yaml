@@ -5,13 +5,14 @@ metadata:
 spec:
   entrypoint: raw-contents
   templates:
-  - container:
+  - name: raw-contents
+    container:
+      image: alpine:latest
       args:
       - cat /tmp/file
       command:
       - sh
       - -c
-      image: alpine:latest
     inputs:
       artifacts:
       - name: myfile
@@ -21,4 +22,3 @@ spec:
             this is
             the raw file
             contents
-    name: raw-contents

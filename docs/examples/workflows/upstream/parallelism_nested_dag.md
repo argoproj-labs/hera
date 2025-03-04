@@ -47,80 +47,80 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       entrypoint: A
       templates:
-      - dag:
+      - name: B
+        dag:
           tasks:
-          - arguments:
+          - name: c1
+            template: one-job
+            arguments:
               parameters:
               - name: msg
                 value: '{{inputs.parameters.msg}} c1'
-            name: c1
+          - name: c2
+            depends: c1
             template: one-job
-          - arguments:
+            arguments:
               parameters:
               - name: msg
                 value: '{{inputs.parameters.msg}} c2'
+          - name: c3
             depends: c1
-            name: c2
             template: one-job
-          - arguments:
+            arguments:
               parameters:
               - name: msg
                 value: '{{inputs.parameters.msg}} c3'
-            depends: c1
-            name: c3
-            template: one-job
         inputs:
           parameters:
           - name: msg
-        name: B
-      - container:
+      - name: one-job
+        container:
+          image: alpine
           args:
           - echo {{inputs.parameters.msg}}; sleep 10
           command:
           - /bin/sh
           - -c
-          image: alpine
         inputs:
           parameters:
           - name: msg
-        name: one-job
-      - dag:
+      - name: A
+        parallelism: 2
+        dag:
           tasks:
-          - arguments:
+          - name: b1
+            template: B
+            arguments:
               parameters:
               - name: msg
                 value: '1'
-            name: b1
+          - name: b2
+            depends: b1
             template: B
-          - arguments:
+            arguments:
               parameters:
               - name: msg
                 value: '2'
+          - name: b3
             depends: b1
-            name: b2
             template: B
-          - arguments:
+            arguments:
               parameters:
               - name: msg
                 value: '3'
+          - name: b4
             depends: b1
-            name: b3
             template: B
-          - arguments:
+            arguments:
               parameters:
               - name: msg
                 value: '4'
-            depends: b1
-            name: b4
+          - name: b5
+            depends: b2 && b3 && b4
             template: B
-          - arguments:
+            arguments:
               parameters:
               - name: msg
                 value: '5'
-            depends: b2 && b3 && b4
-            name: b5
-            template: B
-        name: A
-        parallelism: 2
     ```
 

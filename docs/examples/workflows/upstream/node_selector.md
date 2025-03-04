@@ -36,24 +36,24 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     metadata:
       generateName: node-selector-
     spec:
-      arguments:
-        parameters:
-        - name: arch
-          value: amd64
       entrypoint: print-arch
       templates:
-      - container:
+      - name: print-arch
+        container:
+          image: alpine:latest
           args:
           - uname -a
           command:
           - sh
           - -c
-          image: alpine:latest
         inputs:
           parameters:
           - name: arch
-        name: print-arch
         nodeSelector:
           beta.kubernetes.io/arch: '{{inputs.parameters.arch}}'
+      arguments:
+        parameters:
+        - name: arch
+          value: amd64
     ```
 
