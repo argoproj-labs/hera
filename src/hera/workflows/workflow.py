@@ -369,7 +369,12 @@ class Workflow(
                 if isinstance(v, dict):
                     d_copy[k] = order_dict(v)
                 elif isinstance(v, list):
-                    d_copy[k] = [order_dict(i) if isinstance(i, dict) else i for i in v]
+                    if v and isinstance(v[0], dict):
+                        d_copy[k] = [order_dict(i) if isinstance(i, dict) else i for i in v]
+                    elif v and isinstance(v[0], list):
+                        d_copy[k] = [[order_dict(i) for i in sublist] for sublist in v]
+                    else:
+                        d_copy[k] = v
                 else:
                     d_copy[k] = v
             return d_copy
