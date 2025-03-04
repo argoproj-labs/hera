@@ -275,12 +275,13 @@ def _get_pydantic_input_type(source: Callable) -> Union[None, Type[InputV1], Typ
     return parameter_type
 
 
-def _get_param_items_from_source(source: Callable) -> List[Parameter]:
-    """Returns a list (possibly empty) of `Parameter` from the specified `source`.
+def _get_unset_source_parameters_as_items(source: Callable) -> List[Parameter]:
+    """Get a list of `Parameter` with their values set to corresponding templated item strings.
 
-    This infers that each non-keyword, positional, argument of the given source is a parameter that stems from a
-    fanout. Therefore, each parameter value takes the form of `{{item}}` when there's a single argument or
-    `{{item.<argument name>}}` when there are other arguments.
+    We infer that each non-keyword, positional, argument of the given source function is a
+    parameter that stems from a fanout. Therefore, each parameter value takes the form of
+    `{{item}}` when there's a single argument or `{{item.<argument name>}}` when there are
+    other arguments.
 
     Returns:
     -------
@@ -310,24 +311,49 @@ def _get_param_items_from_source(source: Callable) -> List[Parameter]:
     return non_default_parameters
 
 
-def _get_params_from_items(with_items: List[Any]) -> Optional[List[Parameter]]:
-    """Returns an optional list of `Parameter` from the specified list of `with_items`.
+def _get_parameters_used_in_with_items(with_items: Any) -> Optional[List[Parameter]]:
+    """Get the optional list of Parameters used in with_items, with their values set to corresponding templated item strings.
 
     The assembled list of `Parameter` contains all the unique parameters identified from the `with_items` list. For
     example, if the `with_items` list contains 3 serializable elements such as
     `[{'a': 1, 'b': 2}, {'a': 3, 'b': 4}, {'a': 5, 'b': 6}]`, then only 2 `Parameter`s are returned. Namely, only
-     `Parameter(name='a')` and `Parameter(name='b')` is returned, with values `{{item.a}}` and `{{item.b}}`,
-     respectively. This helps with the parallel/serial processing of the supplied items.
+    `Parameter(name='a')` and `Parameter(name='b')` is returned, with values `{{item.a}}` and `{{item.b}}`,
+    respectively. This helps with the parallel/serial processing of the supplied items. If the list is of
+    plain values and not key-values, then `None` is returned as there are no parameter substitutions.
     """
-    if len(with_items) == 0:
+    if not with_items:
         return None
-    elif len(with_items) == 1:
-        el = with_items[0]
-        if len(el.keys()) == 1:
-            return [Parameter(name=n, value="{{item}}") for n in el.keys()]
-        else:
-            return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in el.keys()]
-    return [Parameter(name=n, value=f"{{{{item.{n}}}}}") for n in with_items[0].keys()]
+
+    if isinstance(with_items[0], dict):
+        if not all(isinstance(item, dict) for item in with_items):
+            raise ValueError(
+                "List must contain all dictionaries or no dictionaries. "
+                "Alternatively, serialize the dictionaries with `hera.shared.serialization.serialize()`."
+            )
+        # Check all dictionaries have the same keys, values will be serialised so we don't consider them
+        if not all(set(item.keys()) == set(with_items[0].keys()) for item in with_items[1:]):
+            raise ValueError(
+                "All dictionaries in with_items must have the same keys. "
+                "Alternatively, serialize the dictionaries with `hera.shared.serialization.serialize()`."
+            )
+
+        # Create a Parameter for each key in the dictionaries
+        # Special case for dictionary len 1 as the value is just the item itself
+        if len(with_items[0]) == 1:
+            param_name = list(with_items[0].keys())[0]
+            return [Parameter(name=param_name, value="{{item}}")]
+
+        # Just use first dictionary as we checked type and key equality above
+        return [Parameter(name=key, value=f"{{{{item.{key}}}}}") for key in with_items[0].keys()]
+
+    else:
+        # Ensure no dictionaries in the list
+        if any(isinstance(item, dict) for item in with_items):
+            raise ValueError(
+                "List must contain all dictionaries or no dictionaries. "
+                "Alternatively, serialize the dictionaries with `hera.shared.serialization.serialize()`."
+            )
+    return None
 
 
 class CallableTemplateMixin(BaseMixin):
@@ -349,8 +375,8 @@ class CallableTemplateMixin(BaseMixin):
             kwargs["name"] = self.name  # type: ignore
 
         arguments = self._get_arguments(**kwargs)
-        parameter_names = self._get_parameter_names(arguments)
-        artifact_names = self._get_artifact_names(arguments)
+        parameter_argument_names = self._get_parameter_names(arguments)
+        artifact_argument_names = self._get_artifact_names(arguments)
 
         # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
         # set it here in order for the following logic to capture it
@@ -358,9 +384,17 @@ class CallableTemplateMixin(BaseMixin):
             kwargs["source"] = self.source  # type: ignore
 
         if "source" in kwargs and "with_param" in kwargs:
-            arguments += self._get_deduped_params_from_source(parameter_names, artifact_names, kwargs["source"])
+            arguments += self._get_templated_source_args(
+                parameter_argument_names,
+                artifact_argument_names,
+                kwargs["source"],
+            )
         elif "source" in kwargs and "with_items" in kwargs:
-            arguments += self._get_deduped_params_from_items(parameter_names, kwargs["with_items"])
+            arguments += self._get_templated_arguments_from_items(
+                parameter_argument_names,
+                kwargs["with_items"],
+                kwargs["source"],
+            )
 
         # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`
         # additional parameters are inferred and have to be added to the `kwargs['arguments']`, otherwise
@@ -422,10 +456,13 @@ class CallableTemplateMixin(BaseMixin):
         artifacts = [arg for arg in arguments if isinstance(arg, (ModelArtifact, Artifact))]
         return {a if isinstance(a, str) else a.name for a in artifacts if a.name}
 
-    def _get_deduped_params_from_source(
-        self, parameter_names: Set[str], artifact_names: Set[str], source: Callable
+    def _get_templated_source_args(
+        self,
+        parameter_argument_names: Set[str],
+        artifact_argument_names: Set[str],
+        source: Callable,
     ) -> List[Parameter]:
-        """Infer arguments from the given source and deduplicates based on the given params and artifacts.
+        """Get list of inferred arguments to set from the given source.
 
         Argo uses the `inputs` field to indicate the expected parameters of a specific template whereas the
         `arguments` are used to indicate exactly what _values_ are assigned to the set inputs. Here,
@@ -435,10 +472,10 @@ class CallableTemplateMixin(BaseMixin):
 
         Parameters
         ----------
-        parameter_names: Set[str]
-            Set of already constructed parameter names.
-        artifact_names: Set[str]
-            Set of already constructed artifact names.
+        parameter_argument_names: Set[str]
+            Set of parameter names already constructed from arguments passed in.
+        artifact_argument_names: Set[str]
+            Set of artifact names already constructed from arguments passed in.
         source: Callable
             The source function to infer the arguments from.
 
@@ -448,13 +485,18 @@ class CallableTemplateMixin(BaseMixin):
             The list of inferred arguments to set.
         """
         new_arguments = []
-        new_parameters = _get_param_items_from_source(source)
-        for p in new_parameters:
-            if p.name not in parameter_names and p.name not in artifact_names:
+        source_params_as_items = _get_unset_source_parameters_as_items(source)
+        for p in source_params_as_items:
+            if p.name not in parameter_argument_names and p.name not in artifact_argument_names:
                 new_arguments.append(p)
         return new_arguments
 
-    def _get_deduped_params_from_items(self, parameter_names: Set[str], items: List[Any]) -> List[Parameter]:
+    def _get_templated_arguments_from_items(
+        self,
+        parameter_argument_names: Set[str],
+        items: Any,
+        source: Callable,
+    ) -> List[Parameter]:
         """Infer arguments from the given items.
 
         The main difference between `with_items` and `with_param` is that param is a serialized version of
@@ -466,20 +508,31 @@ class CallableTemplateMixin(BaseMixin):
         ----------
         parameter_names: Set[str]
             Set of already constructed parameter names.
-        items: List[Any]
+        items: Any
             The items to infer the arguments from.
+        source: Callable
+            The source function to confirm parameter names from.
 
         Returns:
         -------
         List[Parameter]
             The list of inferred arguments to set.
         """
-        item_params = _get_params_from_items(items)
+        item_params = _get_parameters_used_in_with_items(items)
+        if item_params is None:
+            return []
+
+        source_param_names = {name for name in inspect.signature(source).parameters.keys()}
         new_params = []
-        if item_params is not None:
-            for p in item_params:
-                if p.name not in parameter_names:
-                    new_params.append(p)
+        for p in item_params:
+            if p.name not in source_param_names:
+                raise ValueError(
+                    f"Parameter '{p.name}' not found in source function '{source.__name__}' "
+                    "(you may need to serialize the dictionaries with `hera.shared.serialization.serialize()`)"
+                )
+
+            if p.name not in parameter_argument_names:
+                new_params.append(p)
         return new_params
 
 
