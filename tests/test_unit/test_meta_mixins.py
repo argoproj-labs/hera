@@ -220,3 +220,24 @@ def test_callable_script_non_matching_keys_raises():
                         {"message": "goodbye world"},
                     ],
                 )
+
+
+@pytest.mark.parametrize(
+    "with_items_list",
+    [
+        [{"message": "hello world"}, "goodbye world"],
+        ["hello world", {"message": "goodbye world"}],
+    ],
+)
+def test_callable_script_mixed_types_raises(with_items_list):
+    @script()
+    def print_message(message):
+        print(message)
+
+    with pytest.raises(ValueError, match="List must contain all dictionaries or no dictionaries"):
+        with Workflow(generate_name="loops-", entrypoint="loop-bad-example"):
+            with Steps(name="loop-bad-example"):
+                print_message(
+                    name="print-message-loop-with-items-dict",
+                    with_items=with_items_list,
+                )

@@ -325,6 +325,11 @@ def _get_parameters_used_in_with_items(with_items: Any) -> Optional[List[Paramet
         return None
 
     if isinstance(with_items[0], dict):
+        if not all(isinstance(item, dict) for item in with_items):
+            raise ValueError(
+                "List must contain all dictionaries or no dictionaries. "
+                "Alternatively, serialize the dictionaries with `hera.shared.serialization.serialize()`."
+            )
         # Check all dictionaries have the same keys, values will be serialised so we don't consider them
         if not all(set(item.keys()) == set(with_items[0].keys()) for item in with_items[1:]):
             raise ValueError(
@@ -341,6 +346,13 @@ def _get_parameters_used_in_with_items(with_items: Any) -> Optional[List[Paramet
         # Just use first dictionary as we checked type and key equality above
         return [Parameter(name=key, value=f"{{{{item.{key}}}}}") for key in with_items[0].keys()]
 
+    else:
+        # Ensure no dictionaries in the list
+        if any(isinstance(item, dict) for item in with_items):
+            raise ValueError(
+                "List must contain all dictionaries or no dictionaries. "
+                "Alternatively, serialize the dictionaries with `hera.shared.serialization.serialize()`."
+            )
     return None
 
 
