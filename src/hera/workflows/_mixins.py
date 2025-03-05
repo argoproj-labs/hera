@@ -327,6 +327,13 @@ class IOMixin(BaseMixin):
         if not self.outputs:
             return None
         elif isinstance(self.outputs, ModelOutputs):
+            # Special case as Parameter is a subclass of ModelParameter
+            # We need to convert Parameters to ModelParameters
+            if self.outputs.parameters:
+                self.outputs.parameters = [
+                    ModelParameter.parse_obj(p.dict()) if isinstance(p, Parameter) else p
+                    for p in self.outputs.parameters
+                ]
             return self.outputs
 
         result = ModelOutputs()

@@ -7,6 +7,7 @@ from hera.workflows.models import (
     Artifact as ModelArtifact,
     ImagePullPolicy,
     Inputs as ModelInputs,
+    Outputs as ModelOutputs,
     Parameter as ModelParameter,
 )
 
@@ -82,6 +83,16 @@ class TestIOMixin:
 
     def test_build_outputs_none(self):
         assert self.io_mixin._build_outputs() is None
+
+    def test_build_outputs_artifact_success(self):
+        self.io_mixin.outputs = ModelOutputs(artifacts=[ModelArtifact(name="test")])
+        built_outputs = self.io_mixin._build_outputs()
+        assert built_outputs and built_outputs.artifacts == [ModelArtifact(name="test")]
+
+    def test_build_outputs_of_parameter_converted(self):
+        self.io_mixin.outputs = ModelOutputs(parameters=[Parameter(name="my-param-1")])
+        built_outputs = self.io_mixin._build_outputs()
+        assert built_outputs and built_outputs.parameters == [ModelParameter(name="my-param-1")]
 
 
 class TestArgumentsMixin:
