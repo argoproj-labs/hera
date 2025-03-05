@@ -7,6 +7,7 @@ from hera.workflows.models import (
     Artifact as ModelArtifact,
     ImagePullPolicy,
     Inputs as ModelInputs,
+    Parameter as ModelParameter,
 )
 
 
@@ -26,7 +27,13 @@ class TestIOMixin:
         self.io_mixin = IOMixin()
 
     def test_get_parameter_success(self):
-        self.io_mixin.inputs = ModelInputs(parameters=[Parameter(name="test", value="value")])
+        self.io_mixin.inputs = Parameter(name="test", value="value")
+        param = self.io_mixin.get_parameter("test")
+        assert param.name == "test"
+        assert param.value == "{{inputs.parameters.test}}"
+
+    def test_get_model_parameter_success(self):
+        self.io_mixin.inputs = ModelParameter(name="test", value="value")
         param = self.io_mixin.get_parameter("test")
         assert param.name == "test"
         assert param.value == "{{inputs.parameters.test}}"
@@ -41,7 +48,7 @@ class TestIOMixin:
             self.io_mixin.get_parameter("test")
 
     def test_get_parameter_not_found(self):
-        self.io_mixin.inputs = ModelInputs(parameters=[Parameter(name="test", value="value")])
+        self.io_mixin.inputs = Parameter(name="test", value="value")
         with pytest.raises(KeyError):
             self.io_mixin.get_parameter("not_exist")
 
@@ -68,10 +75,10 @@ class TestIOMixin:
     def test_build_inputs_none(self):
         assert self.io_mixin._build_inputs() is None
 
-    def test_build_inputs_from_model_inputs(self):
-        model_inputs = ModelInputs(parameters=[Parameter(name="test", value="value")])
-        self.io_mixin.inputs = model_inputs
-        assert self.io_mixin._build_inputs() == model_inputs
+    def test_build_inputs_from_model_inputs_with_hera_parameter(self):
+        # We must rebuild Parameter otherwise it will extra fields (output) that are not in ModelParameter
+        self.io_mixin.inputs = ModelInputs(parameters=[Parameter(name="test", value="value")])
+        assert self.io_mixin._build_inputs() == ModelInputs(parameters=[ModelParameter(name="test", value="value")])
 
     def test_build_outputs_none(self):
         assert self.io_mixin._build_outputs() is None
