@@ -587,6 +587,13 @@ class ArgumentsMixin(BaseMixin):
         if normalized_arguments is None:
             return None
         elif isinstance(normalized_arguments, ModelArguments):
+            # Special case as Parameter is a subclass of ModelParameter
+            # We need to convert Parameters to ModelParameters
+            if normalized_arguments.parameters:
+                normalized_arguments.parameters = [
+                    ModelParameter.parse_obj(p.dict()) if isinstance(p, Parameter) else p
+                    for p in normalized_arguments.parameters
+                ]
             return normalized_arguments
 
         from hera.workflows.workflow_template import WorkflowTemplate

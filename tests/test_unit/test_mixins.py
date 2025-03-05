@@ -1,6 +1,6 @@
 import pytest
 
-from hera.workflows import Env, Parameter
+from hera.workflows import Env, Parameter, Workflow
 from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin
 from hera.workflows.models import (
     Arguments as ModelArguments,
@@ -111,6 +111,21 @@ class TestArgumentsMixin:
         args_mixin = ArgumentsMixin(arguments=ModelArguments())
 
         assert args_mixin.arguments == ModelArguments()
+
+    def test_build_arguments_of_parameter_converted(self):
+        args_mixin = ArgumentsMixin(arguments=[Parameter(name="my-param-1")])
+        built_args = args_mixin._build_arguments()
+        assert built_args and built_args.parameters == [ModelParameter(name="my-param-1")]
+
+    def test_build_workflow(self):
+        with Workflow(
+            name="test",
+            arguments=ModelArguments(parameters=[Parameter(name="test", value="value")]),
+        ) as w:
+            pass
+
+        workflow = w.build()
+        assert workflow.spec.arguments.parameters == [ModelParameter(name="test", value="value")]
 
 
 class TestEnvMixin:
