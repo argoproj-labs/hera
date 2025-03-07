@@ -1,11 +1,10 @@
 """The script_annotations_util module contains functionality for the script annotations feature when used with the runner."""
 
-import inspect
 import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 if sys.version_info >= (3, 10):
     from types import NoneType
@@ -16,7 +15,6 @@ from hera.shared._pydantic import BaseModel, get_field_annotations, get_fields
 from hera.shared._type_util import (
     get_unsubscripted_type,
     get_workflow_annotation,
-    is_subscripted,
     origin_type_issubtype,
     unwrap_annotation,
 )
@@ -24,18 +22,15 @@ from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
 from hera.workflows.io.v1 import (
-    Input as InputV1,
     Output as OutputV1,
 )
 
 try:
     from hera.workflows.io.v2 import (  # type: ignore
-        Input as InputV2,
         Output as OutputV2,
     )
 except ImportError:
     from hera.workflows.io.v1 import (  # type: ignore
-        Input as InputV2,
         Output as OutputV2,
     )
 
@@ -53,19 +48,20 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
-def _get_annotated_input_param_value(
+def _get_param_value_from_kwargs(
     func_param_name: str,
-    param_annotation: Parameter,
+    param_annotation_name: Optional[str],
     kwargs: Dict[str, str],
 ) -> str:
-    if param_annotation.name in kwargs:
-        return kwargs[param_annotation.name]
+    """Get the value from the kwargs dict using whichever name is provided."""
+    if param_annotation_name in kwargs:
+        return kwargs[param_annotation_name]
 
     if func_param_name in kwargs:
         return kwargs[func_param_name]
 
     raise RuntimeError(
-        f"Parameter {param_annotation.name if param_annotation.name else func_param_name} was not given a value"
+        f"Parameter {param_annotation_name if param_annotation_name else func_param_name} was not given a value"
     )
 
 
@@ -88,7 +84,7 @@ def get_annotated_param_value(
         # Automatically create the parent directory (if required)
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
-    return _get_annotated_input_param_value(func_param_name, param_annotation, kwargs)
+    return _get_param_value_from_kwargs(func_param_name, param_annotation.name, kwargs)
 
 
 def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
@@ -166,7 +162,7 @@ def map_runner_input(
             if isinstance(param_or_artifact, Parameter):
                 assert not param_or_artifact.output
                 return load_parameter_value(
-                    _get_annotated_input_param_value(field, param_or_artifact, kwargs),
+                    _get_param_value_from_kwargs(field, param_or_artifact.name, kwargs),
                     ann_type,
                 )
             else:
@@ -178,37 +174,6 @@ def map_runner_input(
         input_model_obj[field] = map_field(field, kwargs)
 
     return cast(T, runner_input_class.parse_raw(json.dumps(input_model_obj)))
-
-
-def _map_argo_inputs_to_function(function: Callable, kwargs: Dict[str, str]) -> Dict:
-    """Map kwargs from Argo to the function parameters using the function's parameter annotations.
-
-    For Parameter inputs:
-    * if the Parameter has a "name", replace it with the function parameter name
-    * otherwise use the function parameter name as-is
-    For Parameter outputs:
-    * update value to a Path object from the value_from.path value, or the default if not provided
-
-    For Artifact inputs:
-    * load the Artifact according to the given ArtifactLoader
-    For Artifact outputs:
-    * update value to a Path object
-    """
-    mapped_kwargs: Dict[str, Any] = {}
-
-    for func_param_name, func_param in inspect.signature(function).parameters.items():
-        if param_or_artifact := get_workflow_annotation(func_param.annotation):
-            if isinstance(param_or_artifact, Parameter):
-                mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param_or_artifact, kwargs)
-            else:
-                mapped_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
-
-        elif not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
-            mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
-
-        else:
-            mapped_kwargs[func_param_name] = kwargs[func_param_name]
-    return mapped_kwargs
 
 
 def _save_annotated_return_outputs(
