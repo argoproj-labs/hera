@@ -154,7 +154,7 @@ def _is_output_kwarg(key: str, f: Callable) -> bool:
     return False
 
 
-def _map_function_annotations(function: Callable, kwargs: Dict[str, str]) -> Dict:
+def _map_function_annotations(function: Callable, template_inputs: Dict[str, str]) -> Dict:
     """Parse annotations to substitute values from Argo for the function parameters.
 
     For Parameter inputs:
@@ -169,33 +169,35 @@ def _map_function_annotations(function: Callable, kwargs: Dict[str, str]) -> Dic
     * update value to a Path object
     """
     if _contains_var_kwarg(function):
-        return kwargs
+        return template_inputs
 
-    mapped_kwargs: Dict[str, Any] = {}
+    function_kwargs: Dict[str, Any] = {}
 
     for func_param_name, func_param in inspect.signature(function).parameters.items():
         if param_or_artifact := get_workflow_annotation(func_param.annotation):
             if isinstance(param_or_artifact, Parameter):
-                mapped_kwargs[func_param_name] = get_annotated_param_value(func_param_name, param_or_artifact, kwargs)
+                function_kwargs[func_param_name] = get_annotated_param_value(
+                    func_param_name, param_or_artifact, template_inputs
+                )
             else:
-                mapped_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
+                function_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
 
         elif not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
             # We collect all relevant kwargs for the single `Input` function parameter
-            mapped_kwargs[func_param_name] = map_runner_input(func_param.annotation, kwargs)
+            function_kwargs[func_param_name] = map_runner_input(func_param.annotation, template_inputs)
 
         else:
             # Use the kwarg value as-is
-            mapped_kwargs[func_param_name] = kwargs[func_param_name]
-    return mapped_kwargs
+            function_kwargs[func_param_name] = template_inputs[func_param_name]
+    return function_kwargs
 
 
-def _runner(entrypoint: str, kwargs_list: List) -> Any:
+def _runner(entrypoint: str, template_inputs_list: List) -> Any:
     """Run the function defined by the entrypoint with the given list of kwargs.
 
     Args:
         entrypoint: The module path to the script within the container to execute. "package.submodule:function"
-        kwargs_list: A list of dicts with "name" and "value" keys, representing the kwargs of the function.
+        template_inputs_list: A list of dicts with "name" and "value" keys, to be mapped to the kwargs of the function.
 
     Returns:
         The result of the function or `None` if the outputs are to be saved.
@@ -207,17 +209,18 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
     # this may happen if the function is decorated with @script
     if hasattr(function, "wrapped_function"):
         function = function.wrapped_function
-    # convert the kwargs list to a dict
-    kwargs: Dict[str, str] = {}
-    for kwarg in kwargs_list:
+
+    # convert the template inputs list to a dict
+    template_inputs: Dict[str, str] = {}
+    for kwarg in template_inputs_list:
         if "name" not in kwarg or "value" not in kwarg:
             continue
         # sanitize the key for python
         key = cast(str, serialize(kwarg["name"]))
         value = kwarg["value"]
-        kwargs[key] = value
+        template_inputs[key] = value
 
-    kwargs = _map_function_annotations(function, kwargs)
+    function_kwargs = _map_function_annotations(function, template_inputs)
 
     # The imported validate_arguments uses smart union by default just in case clients do not rely on it. This means that if a function uses a union
     # type for any of its inputs, then this will at least try to map those types correctly if the input object is
@@ -242,13 +245,13 @@ def _runner(entrypoint: str, kwargs_list: List) -> Any:
         # This will save outputs returned from the function only. Any function parameters/artifacts marked as
         # outputs should be written to within the function itself.
         try:
-            output = _save_annotated_return_outputs(function(**kwargs), output_annotations)
+            output = _save_annotated_return_outputs(function(**function_kwargs), output_annotations)
         except Exception as e:
             _save_dummy_outputs(output_annotations)
             raise e
         return output or None
 
-    return function(**kwargs)
+    return function(**function_kwargs)
 
 
 def _parse_args() -> argparse.Namespace:
@@ -272,9 +275,9 @@ def _run() -> None:
     # 1. Protect against trying to json.loads on empty files with inner `or r"[]`
     # 2. Protect against files containing `null` as text with outer `or []` (as a result of using
     #    `{{inputs.parameters}}` where the parameters key doesn't exist in `inputs`)
-    kwargs_list = json.loads(args.args_path.read_text() or r"[]") or []
-    assert isinstance(kwargs_list, List)
-    result = _runner(args.entrypoint, kwargs_list)
+    template_inputs = json.loads(args.args_path.read_text() or r"[]") or []
+    assert isinstance(template_inputs, List)
+    result = _runner(args.entrypoint, template_inputs)
     if not result:
         return
 
