@@ -96,6 +96,15 @@ def normalize_to_list_or(*valid_types: Type) -> Callable[[Optional[OneOrMany]], 
     return normalize_to_list_if_not_valid_type
 
 
+def convert_to_model_parameters(parameters: List[ModelParameter]) -> List[ModelParameter]:
+    """Convert a list of `ModelParameter` (or subclass) objects to a list of `ModelParameter` objects.
+
+    This is needed as `Parameter` is a subclass of `ModelParameter`, so we must convert
+    `Parameter` objects to `ModelParameter` when building a Workflow.
+    """
+    return [ModelParameter.parse_obj(p.dict()) if isinstance(p, Parameter) else p for p in parameters]
+
+
 InputsT = Optional[
     Union[
         ModelInputs,
@@ -285,6 +294,10 @@ class IOMixin(BaseMixin):
         if self.inputs is None:
             return None
         elif isinstance(self.inputs, ModelInputs):
+            # Special case as Parameter is a subclass of ModelParameter
+            # We need to convert Parameters to ModelParameters
+            if self.inputs.parameters:
+                self.inputs.parameters = convert_to_model_parameters(self.inputs.parameters)
             return self.inputs
 
         result = ModelInputs()
@@ -320,6 +333,10 @@ class IOMixin(BaseMixin):
         if not self.outputs:
             return None
         elif isinstance(self.outputs, ModelOutputs):
+            # Special case as Parameter is a subclass of ModelParameter
+            # We need to convert Parameters to ModelParameters
+            if self.outputs.parameters:
+                self.outputs.parameters = convert_to_model_parameters(self.outputs.parameters)
             return self.outputs
 
         result = ModelOutputs()
@@ -580,6 +597,10 @@ class ArgumentsMixin(BaseMixin):
         if normalized_arguments is None:
             return None
         elif isinstance(normalized_arguments, ModelArguments):
+            # Special case as Parameter is a subclass of ModelParameter
+            # We need to convert Parameters to ModelParameters
+            if normalized_arguments.parameters:
+                normalized_arguments.parameters = convert_to_model_parameters(normalized_arguments.parameters)
             return normalized_arguments
 
         from hera.workflows.workflow_template import WorkflowTemplate
