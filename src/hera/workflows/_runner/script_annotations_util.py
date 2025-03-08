@@ -48,43 +48,35 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
-def _get_param_value_from_kwargs(
+def get_annotated_input_param(
     func_param_name: str,
-    param_annotation_name: Optional[str],
+    param_annotation: Parameter,
     kwargs: Dict[str, str],
 ) -> str:
-    """Get the value from the kwargs dict using whichever name is provided."""
-    if param_annotation_name in kwargs:
-        return kwargs[param_annotation_name]
+    """Get the value from a given function param and its annotation.
+
+    Return the string value from the kwargs dict,
+    which could be from the param_annotation.name if given, or func_param_name.
+    """
+    if param_annotation.name in kwargs:
+        return kwargs[param_annotation.name]
 
     if func_param_name in kwargs:
         return kwargs[func_param_name]
 
     raise RuntimeError(
-        f"Parameter {param_annotation_name if param_annotation_name else func_param_name} was not given a value"
+        f"Parameter {param_annotation.name if param_annotation.name else func_param_name} was not given a value"
     )
 
 
-def get_annotated_param_value(
-    func_param_name: str,
-    param_annotation: Parameter,
-    kwargs: Dict[str, str],
-) -> Union[Path, str]:
-    """Get the value from a given function param and its annotation.
-
-    If the parameter is an output, return the path it will write to.
-    If the parameter is an input, return the string value from the kwargs dict,
-    which could be from the param_annotation.name if given, or func_param_name.
-    """
-    if param_annotation.output:
-        if param_annotation.value_from and param_annotation.value_from.path:
-            path = Path(param_annotation.value_from.path)
-        else:
-            path = _get_outputs_path(param_annotation)
-        # Automatically create the parent directory (if required)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
-    return _get_param_value_from_kwargs(func_param_name, param_annotation.name, kwargs)
+def get_annotated_output_param(param_annotation: Parameter) -> Path:
+    if param_annotation.value_from and param_annotation.value_from.path:
+        path = Path(param_annotation.value_from.path)
+    else:
+        path = _get_outputs_path(param_annotation)
+    # Automatically create the parent directory (if required)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
@@ -162,7 +154,7 @@ def map_runner_input(
             if isinstance(param_or_artifact, Parameter):
                 assert not param_or_artifact.output
                 return load_parameter_value(
-                    _get_param_value_from_kwargs(field, param_or_artifact.name, kwargs),
+                    get_annotated_input_param(field, param_or_artifact, kwargs),
                     ann_type,
                 )
             else:
@@ -173,7 +165,7 @@ def map_runner_input(
     for field in get_fields(runner_input_class):
         input_model_obj[field] = map_field(field, kwargs)
 
-    return cast(T, runner_input_class.parse_raw(json.dumps(input_model_obj)))
+    return cast(T, runner_input_class.parse_obj(input_model_obj))
 
 
 def _save_annotated_return_outputs(

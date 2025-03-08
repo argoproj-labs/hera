@@ -113,10 +113,7 @@ def test_parameter_loading(
     entrypoint: str,
     kwargs_list: List[Dict[str, str]],
     expected_output: Any,
-    monkeypatch: pytest.MonkeyPatch,
 ):
-    # GIVEN
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
 
@@ -162,10 +159,7 @@ def test_runner_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    monkeypatch: pytest.MonkeyPatch,
 ):
-    # GIVEN
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
     # THEN
