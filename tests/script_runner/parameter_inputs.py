@@ -104,3 +104,47 @@ def str_parameter_expects_jsonstr_list(my_json_str: str) -> list:
 @script()
 def annotated_str_parameter_expects_jsonstr_dict(my_json_str: Annotated[str, "some metadata"]) -> list:
     return json.loads(my_json_str)
+
+
+class MyParameter(BaseModel):
+    a: str = "a"
+    b: str = "b"
+
+
+@script(constructor="runner")
+def base_model_auto_load(
+    a_parameter: Annotated[MyParameter, Parameter(name="my-parameter")],
+) -> str:
+    return a_parameter.a + a_parameter.b
+
+
+class NonUserNonBaseModelClass:
+    """Represents a non-user-defined class (e.g. pandas DataFrame) that does not inherit from BaseModel."""
+
+    def __init__(self, a: str, b: str):
+        self.a = a
+        self.b = b
+
+    @classmethod
+    def from_json(cls, json_str) -> "NonUserNonBaseModelClass":
+        return cls(**json.loads(json_str))
+
+
+@script(constructor="runner")
+def non_base_model_with_class_loader(
+    a_parameter: Annotated[
+        NonUserNonBaseModelClass,
+        Parameter(name="my-parameter", loader=NonUserNonBaseModelClass.from_json),
+    ],
+) -> str:
+    return a_parameter.a + a_parameter.b
+
+
+@script(constructor="runner")
+def non_base_model_with_lambda_function_loader(
+    a_parameter: Annotated[
+        NonUserNonBaseModelClass,
+        Parameter(name="my-parameter", loader=lambda json_str: NonUserNonBaseModelClass(**json.loads(json_str))),
+    ],
+) -> str:
+    return a_parameter.a + a_parameter.b

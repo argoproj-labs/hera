@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Annotated, List
 
@@ -101,3 +102,28 @@ def pydantic_input_artifact(
 @script(constructor="runner")
 def pydantic_output_artifact() -> ArtifactOnlyOutput:
     return ArtifactOnlyOutput(an_artifact="test")
+
+
+class NonUserNonBaseModelClass:
+    """Represents a non-user-defined class (e.g. pandas DataFrame) that does not inherit from BaseModel."""
+
+    def __init__(self, a: str, b: str):
+        self.a = a
+        self.b = b
+
+    @classmethod
+    def from_json(cls, json_str) -> "NonUserNonBaseModelClass":
+        return cls(**json.loads(json_str))
+
+
+class MyInput(Input):
+    non_user_defined_class: Annotated[
+        NonUserNonBaseModelClass, Parameter(name="my-parameter", loader=NonUserNonBaseModelClass.from_json)
+    ]
+
+
+@script(constructor="runner")
+def pydantic_input_with_loader_on_attribute(
+    my_input: MyInput,
+) -> str:
+    return my_input.non_user_defined_class.a + my_input.non_user_defined_class.b

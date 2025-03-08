@@ -107,6 +107,24 @@ from hera.workflows.io.v1 import Output
             {"my": "dict"},
             id="str-json-annotated-param-as-dict",
         ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:base_model_auto_load",
+            [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            "hello world",
+            id="load-base-models-automatically",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:non_base_model_with_class_loader",
+            [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            "hello world",
+            id="load-non-base-model-with-class-loader",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_inputs:non_base_model_with_lambda_function_loader",
+            [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            "hello world",
+            id="load-non-base-model-with-lambda-function-loader",
+        ),
     ),
 )
 def test_parameter_loading(
@@ -657,6 +675,12 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
             ],
             "1",
             id="test generic usage (reverts to regular pydantic class implementation)",
+        ),
+        pytest.param(
+            "tests.script_runner.pydantic_io_vX:pydantic_input_with_loader_on_attribute",
+            [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            "hello world",
+            id="pydantic-input-with-loader-on-attribute",
         ),
     ],
 )
