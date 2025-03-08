@@ -4,7 +4,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 if sys.version_info >= (3, 10):
     from types import NoneType
@@ -61,6 +61,18 @@ def get_annotated_input_param(
     raise RuntimeError(
         f"Parameter {param_annotation.name if param_annotation.name else func_param_name} was not given a value"
     )
+
+
+def load_param_input(
+    param_value: str,
+    func_param_annotation: type,
+    loader: Callable[[str], Any],
+) -> Any:
+    loaded_value = loader(param_value)
+    actual_type = unwrap_annotation(func_param_annotation)
+    if not isinstance(loaded_value, actual_type):
+        raise ValueError("Loader return value does not match function parameter type")
+    return loaded_value
 
 
 def get_annotated_output_param(param_annotation: Parameter) -> Path:
@@ -125,9 +137,16 @@ def map_runner_input(
     """
     input_model_obj = {}
 
-    def load_parameter_value(value: str, value_type: type) -> Any:
+    def load_parameter_value(
+        value: str,
+        value_type: type,
+        loader: Optional[Callable[[str], Any]] = None,
+    ) -> Any:
         if origin_type_issubtype(value_type, (str, NoneType)):
             return value
+
+        if loader is not None:
+            return load_param_input(value, value_type, loader)
 
         try:
             return json.loads(value)
@@ -150,6 +169,7 @@ def map_runner_input(
                 return load_parameter_value(
                     get_annotated_input_param(field, param_or_artifact, kwargs),
                     ann_type,
+                    param_or_artifact.loader,
                 )
             else:
                 return get_annotated_artifact_value(param_or_artifact)
