@@ -6,7 +6,7 @@ for a tutorial on Parameters.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from hera.shared._pydantic import root_validator
 from hera.shared.serialization import MISSING, serialize
@@ -24,6 +24,9 @@ class Parameter(_ModelParameter):
 
     output: Optional[bool] = False
     """used to specify parameter as an output in function signature annotations"""
+
+    loader: Optional[Callable[[str], Any]] = None
+    """used to specify a loader function to load the parameter value for Annotated parameters"""
 
     def _check_name(self):
         if not self.name:
