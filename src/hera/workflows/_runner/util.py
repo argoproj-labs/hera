@@ -28,7 +28,8 @@ from hera.workflows._runner.script_annotations_util import (
     _save_annotated_return_outputs,
     _save_dummy_outputs,
     get_annotated_artifact_value,
-    get_annotated_param_value,
+    get_annotated_input_param,
+    get_annotated_output_param,
     map_runner_input,
 )
 from hera.workflows.artifact import ArtifactLoader
@@ -173,12 +174,18 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
 
     function_kwargs: Dict[str, Any] = {}
 
+    # Iterate over the _function parameters_ and map the template inputs to them
+    # e.g. for `function=func(param: Annotated[int, Parameter(name="my-param")])`,
+    # and template_inputs={"my-param": "5"}, the function_kwargs will be {"param": 5}
     for func_param_name, func_param in inspect.signature(function).parameters.items():
         if param_or_artifact := get_workflow_annotation(func_param.annotation):
             if isinstance(param_or_artifact, Parameter):
-                function_kwargs[func_param_name] = get_annotated_param_value(
-                    func_param_name, param_or_artifact, template_inputs
-                )
+                if param_or_artifact.output:
+                    function_kwargs[func_param_name] = get_annotated_output_param(param_or_artifact)
+                else:
+                    function_kwargs[func_param_name] = get_annotated_input_param(
+                        func_param_name, param_or_artifact, template_inputs
+                    )
             else:
                 function_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
 
