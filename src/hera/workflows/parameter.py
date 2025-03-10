@@ -68,8 +68,8 @@ class Parameter(_ModelParameter):
 
     @classmethod
     def from_model(cls, model: _ModelParameter) -> Parameter:
-        """Creates a `Parameter` from a `Parameter` model."""
-        return cls(**model.dict())
+        """Creates a `Parameter` from a `Parameter` model without running validation."""
+        return cls.construct(**model.dict())
 
     def with_name(self, name: str) -> Parameter:
         """Returns a copy of the parameter with the name set to the value."""

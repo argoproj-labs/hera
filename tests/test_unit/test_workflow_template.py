@@ -5,6 +5,7 @@ import pytest
 from hera.exceptions import NotFound
 from hera.workflows import Container, Steps
 from hera.workflows.models import (
+    Parameter as ModelParameter,
     WorkflowCreateRequest,
     WorkflowStatus,
     WorkflowTemplateCreateRequest,
@@ -251,4 +252,36 @@ def test_workflow_template_with_default_param_arguments():
     built_wt = wt.build()
 
     # THEN
-    assert built_wt.spec.arguments.parameters[0].default == "foo"
+
+    assert built_wt.spec.arguments.parameters[0] == ModelParameter(
+        default="foo",
+        description=None,
+        enum=None,
+        global_name=None,
+        name="my-arg",
+        value=None,
+        value_from=None,
+    )
+
+
+def test_workflow_template_with_default_param_arguments_model_parameter():
+    # GIVEN
+    with WorkflowTemplate(
+        name="my-wt",
+        arguments=ModelParameter(name="my-arg", default="foo"),
+    ) as wt:
+        pass
+
+    # WHEN
+    built_wt = wt.build()
+
+    # THEN
+    assert built_wt.spec.arguments.parameters[0] == ModelParameter(
+        default="foo",
+        description=None,
+        enum=None,
+        global_name=None,
+        name="my-arg",
+        value=None,
+        value_from=None,
+    )
