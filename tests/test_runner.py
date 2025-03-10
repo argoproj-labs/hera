@@ -113,10 +113,7 @@ def test_parameter_loading(
     entrypoint: str,
     kwargs_list: List[Dict[str, str]],
     expected_output: Any,
-    monkeypatch: pytest.MonkeyPatch,
 ):
-    # GIVEN
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
 
@@ -162,10 +159,7 @@ def test_runner_parameter_inputs(
     entrypoint,
     kwargs_list: List[Dict[str, str]],
     expected_output,
-    monkeypatch: pytest.MonkeyPatch,
 ):
-    # GIVEN
-
     # WHEN
     output = _runner(entrypoint, kwargs_list)
     # THEN
@@ -333,7 +327,6 @@ def test_script_annotations_outputs(
 ):
     """Test that the output annotations are parsed correctly and save outputs to correct destinations."""
     # GIVEN
-
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
@@ -429,11 +422,8 @@ def test_script_annotations_outputs_exceptions(
     function_name,
     kwargs_list: List[Dict[str, str]],
     exception,
-    monkeypatch: pytest.MonkeyPatch,
 ):
     """Test that the output annotations throw the expected exceptions."""
-    # GIVEN
-
     # WHEN
     with pytest.raises(ValueError) as e:
         _ = _runner(f"tests.script_runner.annotated_outputs:{function_name}", kwargs_list)
@@ -501,9 +491,7 @@ def test_script_annotations_artifact_inputs(
     assert serialize(output) == expected_output
 
 
-def test_script_annotations_artifact_input_loader_error(
-    monkeypatch: pytest.MonkeyPatch,
-):
+def test_script_annotations_artifact_input_loader_error():
     """Test that the input artifact loaded with wrong type throws the expected exception."""
     # GIVEN
     function_name = "no_loader_invalid_type"
@@ -556,9 +544,7 @@ def test_script_annotations_artifacts_no_path(
     assert serialize(output) == expected_output
 
 
-def test_script_annotations_artifacts_wrong_loader(
-    monkeypatch: pytest.MonkeyPatch,
-):
+def test_script_annotations_artifacts_wrong_loader():
     """Test that the input artifact annotation with no loader throws an exception."""
     # GIVEN
     entrypoint = "tests.script_runner.artifact_with_invalid_loader:invalid_loader"
@@ -572,9 +558,7 @@ def test_script_annotations_artifacts_wrong_loader(
     assert "value is not a valid enumeration member" in str(e.value)
 
 
-def test_script_annotations_unknown_type(
-    monkeypatch: pytest.MonkeyPatch,
-):
+def test_script_annotations_unknown_type():
     # GIVEN
     expected_output = "a string"
     entrypoint = "tests.script_runner.unknown_annotation_types:unknown_annotations_ignored"
@@ -682,7 +666,6 @@ def test_runner_pydantic_inputs_params(
     expected_output,
     pydantic_mode,
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
 ):
     # GIVEN
     entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
