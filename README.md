@@ -1,9 +1,7 @@
 # Hera
 
-<img src=https://raw.githubusercontent.com/argoproj-labs/hera/main/docs/assets/hera-logo.svg width="30%" alt="Hera mascot">
-
-Hera makes Python code easy to orchestrate on Argo Workflows through native Python integrations. It lets you construct and
-submit your Workflows entirely in Python.
+| <img src="https://raw.githubusercontent.com/argoproj-labs/hera/main/docs/assets/hera-logo.svg" alt="Hera mascot"> | Hera is the go-to Python SDK to make Argo Workflows simple and intuitive. Easily turn Python functions into containerised templates that run on Kubernetes, with full access to its capabilities. |
+|---|---|
 
 [See the Quick Start guide](https://hera.readthedocs.io/en/stable/walk-through/quick-start/) to start using Hera to
 orchestrate your Argo Workflows!
@@ -29,50 +27,20 @@ and its crew were specially protected by the goddess Hera.
 [![Docs](https://readthedocs.org/projects/hera/badge/?version=latest)](https://hera.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/argoproj-labs/hera/branch/main/graph/badge.svg?token=x4tvsQRKXP)](https://codecov.io/gh/argoproj-labs/hera)
 
-#### Explore the code
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/argoproj-labs/hera)
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/argoproj-labs/hera)
-
 ## Hera at a glance
-
-### Steps diamond
-
-```python
-from hera.workflows import Steps, Workflow, script
-
-
-@script()
-def echo(message: str):
-    print(message)
-
-
-with Workflow(
-    generate_name="single-script-",
-    entrypoint="steps",
-) as w:
-    with Steps(name="steps") as s:
-        echo(name="A", arguments={"message": "I'm a step"})
-        with s.parallel():
-            echo(name="B", arguments={"message": "We're steps"})
-            echo(name="C", arguments={"message": "in parallel!"})
-        echo(name="D", arguments={"message": "I'm another step!"})
-
-w.create()
-```
-
-### DAG diamond
 
 ```python
 from hera.workflows import DAG, Workflow, script
 
 
+# Turn a function into a reusable "Script template"
+# using the script decorator
 @script()
 def echo(message: str):
     print(message)
 
 
+# Orchestration logic lives *outside* of business logic
 with Workflow(
     generate_name="dag-diamond-",
     entrypoint="diamond",
@@ -82,35 +50,28 @@ with Workflow(
         B = echo(name="B", arguments={"message": "B"})
         C = echo(name="C", arguments={"message": "C"})
         D = echo(name="D", arguments={"message": "D"})
-        A >> [B, C] >> D
+        A >> [B, C] >> D  # Define execution order
 
+# Create the workflow directly on your Argo Workflows cluster!
 w.create()
 ```
 
-See the [examples](./examples/workflows-examples.md) for a collection of Argo workflow construction and submission via
-Hera!
+Check out the [examples](./examples/workflows-examples.md) to see how to construct and submit Argo Workflows with Hera!
 
 ## Requirements
 
-Hera requires an Argo server to be deployed to a Kubernetes cluster. Currently, Hera assumes that the Argo server sits
-behind an authentication layer that can authenticate workflow submission requests by using the Bearer token on the
-request. To learn how to deploy Argo to your own Kubernetes cluster you can follow
-the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
+Hera requires an Argo Workflows server to be deployed to a Kubernetes cluster. To learn how to deploy Argo to your own
+Kubernetes cluster you can follow the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
 
-Another option for workflow submission without the authentication layer is using port forwarding to your Argo server
-deployment and submitting workflows to `localhost:2746` (2746 is the default, but you are free to change it). Please
-refer to the documentation of [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) to see the
-command for port forward!
-
-> **Note** Since the deprecation of tokens being automatically created for ServiceAccounts and Argo using Bearer tokens
-> in place, it is necessary to use `--auth=server` and/or `--auth=client` when setting up Argo Workflows on Kubernetes
-> v1.24+ in order for hera to communicate to the Argo Server.
+Hera assumes that the Argo server sits behind an authentication layer, so workflow submission requests are authenticated
+using a Bearer token on the request. Another option for workflow submission without the authentication layer is using
+port forwarding to your Argo server deployment and submitting workflows to `localhost:2746`.
 
 ### Authenticating in Hera
 
 There are a few ways to authenticate in Hera - read more in the
-[authentication walk through](https://hera.readthedocs.io/en/stable/walk-through/authentication/) - for now, with the
-`argo` cli tool installed, this example will get you up and running:
+[authentication walkthrough](https://hera.readthedocs.io/en/stable/walk-through/authentication/) - for now, with the
+`argo` cli tool installed, and the server port-forwarded to `localhost:2746`, this example will get you up and running:
 
 ```py
 from hera.workflows import Workflow, Container
@@ -133,9 +94,6 @@ w.create()
 | [PyPI](https://pypi.org/project/hera/)               | `pip install hera`                                                                                      |
 | [GitHub repo](https://github.com/argoproj-labs/hera) | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed` |
 
-> **Note** Hera went through a name change - from `hera-workflows` to `hera`. This is reflected in the published Python
-> package. If you'd like to install versions prior to `5.0.0`, you should do `pip install hera-workflows<5`. Hera
-> currently publishes releases to both `hera` and `hera-workflows` for backwards compatibility purposes.
 
 ### Optional dependencies
 
@@ -159,9 +117,14 @@ w.create()
 
 ## Presentations
 
+<!-- Add 3 most recent talks here -->
+
 - [KubeCon/ArgoCon NA 2024 - Data Science Workflows Made Easy: Python-Powered Argo for Your Organization](https://www.youtube.com/watch?v=hZOcj5uVQOo&list=PLj6h78yzYM2Ow7Jy0paxwrimeuFGONU_7&index=14)
 - [KubeCon/ArgoCon EU 2024 - Orchestrating Python Functions Natively in Argo Using Hera](https://www.youtube.com/watch?v=4G3Q6VMBvfI&list=PLj6h78yzYM2NA4NbSC6_mQNza2r3WV87h&index=4)
 - [CNCF TAG App-Delivery @ KubeCon NA 2023 - Automating the Deployment of Data Workloads to Kubernetes with ArgoCD, Argo Workflows, and Hera](https://www.youtube.com/watch?v=NZCmYRVziGY&t=12481s&ab_channel=CNCFTAGAppDelivery)
+
+<details><summary><i>More presentations</i></summary>
+
 - [KubeCon/ArgoCon NA 2023 - How to Train an LLM with Argo Workflows and Hera](https://www.youtube.com/watch?v=nRYf3GkKpss&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D)
     - [Featured code](https://github.com/flaviuvadan/kubecon_na_23_llama2_finetune)
 - [KubeCon/ArgoCon EU 2023 - Scaling gene therapy with Argo Workflows and Hera](https://www.youtube.com/watch?v=h2TEw8kd1Ds)
@@ -169,7 +132,12 @@ w.create()
 - [Argo Workflows and Events Community Meeting 15 June 2022 - Hera project update](https://youtu.be/sdkBDPOdQ-g?t=231)
 - [Argo Workflows and Events Community Meeting 20 Oct 2021 - Hera introductory presentation](https://youtu.be/QETfzfVV-GY?t=181)
 
+</details>
+
 ## Blogs
+
+<!-- Add 3 most recent blogs here -->
+<!-- Currently 4 blogs - add collapsable section when next blog is added, and remove this comment -->
 
 - [How To Get the Most out of Hera for Data Science](https://pipekit.io/blog/how-to-get-the-most-out-of-hera-for-data-science)
 - [Data Validation with Great Expectations and Argo Workflows](https://towardsdatascience.com/data-validation-with-great-expectations-and-argo-workflows-b8e3e2da2fcc)
@@ -178,7 +146,12 @@ w.create()
 
 ## Contributing
 
-See the [contributing guide](./CONTRIBUTING.md)!
+Use one of the following to open the repo in a cloud dev box:
+
+<a href="https://codespaces.new/argoproj-labs/hera"><img src=https://github.com/codespaces/badge.svg height="40" alt="Open in GitHub Codespaces"></a>
+<a href="https://gitpod.io/#https://github.com/argoproj-labs/hera"><img src=https://gitpod.io/button/open-in-gitpod.svg height="40" alt="Open in Gitpod"></a>
+
+Read more in the [contributing guide](./CONTRIBUTING.md)!
 
 ## Hera Emeritus Maintainers
 
