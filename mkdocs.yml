@@ -1,12 +1,13 @@
 ---
 site_name: Hera
+site_description: Hera is a Python SDK for defining, running, and monitoring Argo Workflows in Python.
 site_author: Flaviu Vadan, Sambhav Kothari, Elliot Gunton
 site_url: https://hera.readthedocs.io/en/latest/
-copyright: Copyright &copy; 2023 Flaviu Vadan, Sambhav Kothari, Elliot Gunton
+copyright: Copyright &copy; 2025 Flaviu Vadan, Sambhav Kothari, Elliot Gunton
 
 nav:
-  - Home: README.md
-  - Walk Through:
+  - Home: index.md
+  - Walkthrough:
     - walk-through/quick-start.md
     - walk-through/about-hera.md
     - walk-through/hera-tour.md
