@@ -5,10 +5,10 @@ in the context of Hera.
 
 ## The `Workflow` class
 
-The main resource in Argo, and the key class of Hera, the [Workflow](../api/workflows/hera.md#hera.workflows.Workflow) is
-responsible for holding your templates, setting an entrypoint and running the templates. In Hera, the `Workflow`
-implements the context manager interface, so it loosely mirrors the YAML dictionary structure and as we are using a
-Python class, there are fewer fields you need to specify, such as the `apiVersion` and `kind` seen in YAML. The
+The main resource in Argo, and the key class of Hera, the [Workflow](../api/workflows/hera.md#hera.workflows.Workflow)
+is responsible for holding your templates, setting an entrypoint and running the templates. In Hera, the `Workflow`
+implements the context manager interface, so it loosely mirrors the YAML dictionary structure. As we are using a Python
+class, there are fewer boilerplate fields you need to specify, such as the `apiVersion` and `kind` seen in YAML. The
 structure of the Workflow comes from the [template](#template-classes) objects instantiated within its context.
 
 See the `hello_world.py` example below:
@@ -178,7 +178,8 @@ and easier to use. Read more in the [suspending walk-through](../walk-through/su
 
 ## Template invocators
 
-Template invocators to arrange templates, and are templates themselves, so can in fact recursively call themselves.
+Template invocators can be used to arrange template execution order, and are templates themselves, so can in fact
+recursively call themselves.
 
 ### Steps
 
@@ -244,7 +245,7 @@ Read more about `Steps` in the [walk-through](../walk-through/steps.md)!
 ### DAG
 
 A DAG is composed of Tasks with dependencies to form an acyclic graph. The syntax in Hera is similar to Steps, but with
-the rshift convenience syntax for specifying simple Task dependencies. Read more at 
+the rshift convenience syntax for specifying simple Task dependencies.
 
 ```py
 from hera.workflows import DAG, Workflow, script

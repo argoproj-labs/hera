@@ -33,7 +33,7 @@ we have not _yet_ written Hera Workflows for all the examples).
 If you are a new user of Argo, we encourage you to become familiar with
 [Argo's Core Concepts](https://argoproj.github.io/argo-workflows/workflow-concepts/), which provide a foundation of
 understanding when working with Hera. Working through the
-[Argo Walk Through](https://argoproj.github.io/argo-workflows/walk-through/) will also help you understand key concepts
+[Argo Walkthrough](https://argoproj.github.io/argo-workflows/walk-through/) will also help you understand key concepts
 before moving to Python.
 
 ## Context Managers

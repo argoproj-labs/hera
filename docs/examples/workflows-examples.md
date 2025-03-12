@@ -13,7 +13,7 @@ recreate in Hera.
 > [Contributing Guide](../CONTRIBUTING.md)!
 
 The "Hera" collection shows off features and idiomatic usage of Hera such as the
-[Coinflip example](workflows/scripts/coinflip.md) using the script decorator.
+[Coinflip example](workflows/scripts/coinflip.md) recreated using the script decorator.
 
 Explore the examples through the side bar!
 

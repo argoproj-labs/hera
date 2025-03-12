@@ -74,7 +74,7 @@ import scripts from some place other than the file where the Workflow/DAG are us
 
 ## Parallel Steps Example as a DAG
 
-If we look at the parallel steps example from [the Steps walk through](steps.md#parallel-steps), we can write a Workflow
+If we look at the parallel steps example from [the Steps walkthrough](steps.md#parallel-steps), we can write a Workflow
 using a `DAG` that behaves in the same way.
 
 Looking at the `with Steps` section:
