@@ -63,11 +63,11 @@ Check out the [examples](./examples/workflows-examples.md) to see how to constru
 Hera requires an Argo Workflows server to be deployed to a Kubernetes cluster. To learn how to deploy Argo to your own
 Kubernetes cluster you can follow the [Argo Workflows](https://argoproj.github.io/argo-workflows/quick-start/) guide!
 
+### Authenticating in Hera
+
 Hera assumes that the Argo server sits behind an authentication layer, so workflow submission requests are authenticated
 using a Bearer token on the request. Another option for workflow submission without the authentication layer is using
 port forwarding to your Argo server deployment and submitting workflows to `localhost:2746`.
-
-### Authenticating in Hera
 
 There are a few ways to authenticate in Hera - read more in the
 [authentication walkthrough](https://hera.readthedocs.io/en/stable/walk-through/authentication/) - for now, with the
@@ -148,8 +148,8 @@ w.create()
 
 Use one of the following to open the repo in a cloud dev box:
 
-<a href="https://codespaces.new/argoproj-labs/hera"><img src=https://github.com/codespaces/badge.svg height="40" alt="Open in GitHub Codespaces"></a>
-<a href="https://gitpod.io/#https://github.com/argoproj-labs/hera"><img src=https://gitpod.io/button/open-in-gitpod.svg height="40" alt="Open in Gitpod"></a>
+<a href="https://codespaces.new/argoproj-labs/hera"><img src=https://github.com/codespaces/badge.svg height="32" alt="Open in GitHub Codespaces"></a>
+<a href="https://gitpod.io/#https://github.com/argoproj-labs/hera"><img src=https://gitpod.io/button/open-in-gitpod.svg height="32" alt="Open in Gitpod"></a>
 
 Read more in the [contributing guide](./CONTRIBUTING.md)!
 
