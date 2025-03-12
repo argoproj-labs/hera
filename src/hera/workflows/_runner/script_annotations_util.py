@@ -21,18 +21,12 @@ from hera.shared._type_util import (
 from hera.shared.serialization import serialize
 from hera.workflows import Artifact, Parameter
 from hera.workflows.artifact import ArtifactLoader
-from hera.workflows.io.v1 import (
-    Output as OutputV1,
-)
+from hera.workflows.io.v1 import Output as OutputV1
 
 try:
-    from hera.workflows.io.v2 import (  # type: ignore
-        Output as OutputV2,
-    )
+    from hera.workflows.io.v2 import Output as OutputV2
 except ImportError:
-    from hera.workflows.io.v1 import (  # type: ignore
-        Output as OutputV2,
-    )
+    from hera.workflows.io.v1 import Output as OutputV2  # type: ignore
 
 
 def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
