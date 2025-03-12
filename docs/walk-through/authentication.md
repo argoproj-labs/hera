@@ -7,8 +7,8 @@ directly you have multiple ways to authenticate with the Argo server.
 
 Note that the follow examples combine a global config with a workflow submission for illustration purposes. You can
 write a thin wrapper for your own organization, such as `myorg.workflows`, that provides an `__init__.py` to set these
-global configurations, along with a `from hera.workflows import *`! Then, if users import everything from your own
-module all the configs will apply, and only the workflow definition and submission will be central to a user's
+global configurations, along with a `from hera.workflows import *`. Then, if users import everything from your own
+module, all the configs will apply, and only the workflow definition and submission will be central to a user's
 experience. This greatly simplifies the experience, and allows your users to focus on workflow definition + submission.
 
 ## Bearer token
