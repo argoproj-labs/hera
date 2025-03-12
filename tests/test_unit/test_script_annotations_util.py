@@ -8,7 +8,8 @@ import pytest
 from hera.workflows._runner.script_annotations_util import (
     _get_outputs_path,
     get_annotated_artifact_value,
-    get_annotated_param_value,
+    get_annotated_input_param,
+    get_annotated_output_param,
     map_runner_input,
 )
 from hera.workflows.artifact import Artifact, ArtifactLoader
@@ -59,39 +60,47 @@ def test_get_outputs_path(destination: Union[Parameter, Artifact], expected_path
             "value",
             id="user-passes-func-param-name-instead-of-annotation",
         ),
-        pytest.param(
-            "dummy_name",
-            Parameter(name="output-default-path-test", output=True),
-            {},
-            Path("/tmp/hera-outputs/parameters/output-default-path-test"),
-            id="output-parameter-with-default",
-        ),
-        pytest.param(
-            "dummy_name",
-            Parameter(name="output-path-test", value_from=ValueFrom(path="/tmp/test"), output=True),
-            {},
-            Path("/tmp/test"),
-            id="output-parameter-with-custom-path",
-        ),
     ],
 )
-def test_get_annotated_param_value(
+def test_get_annotated_input_param(
     func_param_name,
     param_annotation,
     kwargs,
     expected_value,
 ):
-    assert get_annotated_param_value(func_param_name, param_annotation, kwargs) == expected_value
+    assert get_annotated_input_param(func_param_name, param_annotation, kwargs) == expected_value
 
 
-def test_get_annotated_param_value_error():
+@pytest.mark.parametrize(
+    "param_annotation,expected_value",
+    [
+        pytest.param(
+            Parameter(name="output-default-path-test", output=True),
+            Path("/tmp/hera-outputs/parameters/output-default-path-test"),
+            id="output-parameter-with-default",
+        ),
+        pytest.param(
+            Parameter(name="output-path-test", value_from=ValueFrom(path="/tmp/test"), output=True),
+            Path("/tmp/test"),
+            id="output-parameter-with-custom-path",
+        ),
+    ],
+)
+def test_get_annotated_output_param(
+    param_annotation,
+    expected_value,
+):
+    assert get_annotated_output_param(param_annotation) == expected_value
+
+
+def test_get_annotated_input_param_error():
     with pytest.raises(RuntimeError, match="my_func_param was not given a value"):
-        get_annotated_param_value("my_func_param", Parameter(), {})
+        get_annotated_input_param("my_func_param", Parameter(), {})
 
 
-def test_get_annotated_param_value_error_param_name():
+def test_get_annotated_input_param_error_param_name():
     with pytest.raises(RuntimeError, match="my-func-param was not given a value"):
-        get_annotated_param_value("my_func_param", Parameter(name="my-func-param"), {})
+        get_annotated_input_param("my_func_param", Parameter(name="my-func-param"), {})
 
 
 @pytest.mark.parametrize(
