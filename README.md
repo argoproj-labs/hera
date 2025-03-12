@@ -117,7 +117,7 @@ w.create()
 
 ## Presentations
 
-<!-- Add 3 most recent talks here -->
+<!-- Add 3 most recent talks here. Keep in sync with docs homepage (docs/index.md). -->
 
 - [KubeCon/ArgoCon NA 2024 - Data Science Workflows Made Easy: Python-Powered Argo for Your Organization](https://www.youtube.com/watch?v=hZOcj5uVQOo&list=PLj6h78yzYM2Ow7Jy0paxwrimeuFGONU_7&index=14)
 - [KubeCon/ArgoCon EU 2024 - Orchestrating Python Functions Natively in Argo Using Hera](https://www.youtube.com/watch?v=4G3Q6VMBvfI&list=PLj6h78yzYM2NA4NbSC6_mQNza2r3WV87h&index=4)
@@ -136,7 +136,7 @@ w.create()
 
 ## Blogs
 
-<!-- Add 3 most recent blogs here -->
+<!-- Add 3 most recent blogs here. Keep in sync with docs homepage (docs/index.md). -->
 <!-- Currently 4 blogs - add collapsable section when next blog is added, and remove this comment -->
 
 - [How To Get the Most out of Hera for Data Science](https://pipekit.io/blog/how-to-get-the-most-out-of-hera-for-data-science)
