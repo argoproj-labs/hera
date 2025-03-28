@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: recursive-dag-
+spec:
+  entrypoint: dag
+  templates:
+  - name: dag
+    dag:
+      tasks:
+      - name: roll
+        template: random-roll
+      - name: recurse-if-not-six
+        depends: roll
+        template: dag
+        when: '{{tasks.roll.outputs.result}} != 6'
+  - name: random-roll
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import random
+        print(random.randint(1, 6))
+      command:
+      - python
