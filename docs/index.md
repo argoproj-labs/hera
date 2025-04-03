@@ -57,13 +57,18 @@ Check out the [Quick Start](walk-through/quick-start.md) for more!
 
 <!-- Add 3 most recent talks here. Keep in sync with README.md. -->
 
+- [KubeCon/ArgoCon EU 2025 - One Engine To Rule Them All: Unifying Cloud Workloads With Argo Workflows](https://www.youtube.com/watch?v=Xpo5218Ark8&list=PLj6h78yzYM2N9MWCsU_4upn64NDtHGv6i&index=18)
 - [KubeCon/ArgoCon NA 2024 - Data Science Workflows Made Easy: Python-Powered Argo for Your Organization](https://www.youtube.com/watch?v=hZOcj5uVQOo&list=PLj6h78yzYM2Ow7Jy0paxwrimeuFGONU_7&index=14)
 - [KubeCon/ArgoCon EU 2024 - Orchestrating Python Functions Natively in Argo Using Hera](https://www.youtube.com/watch?v=4G3Q6VMBvfI&list=PLj6h78yzYM2NA4NbSC6_mQNza2r3WV87h&index=4)
-- [CNCF TAG App-Delivery @ KubeCon NA 2023 - Automating the Deployment of Data Workloads to Kubernetes with ArgoCD, Argo Workflows, and Hera](https://www.youtube.com/watch?v=NZCmYRVziGY&t=12481s&ab_channel=CNCFTAGAppDelivery)
 
 <details><summary><i>More presentations</i></summary>
 
 <ul>
+  <li>
+    <a href="https://www.youtube.com/watch?v=NZCmYRVziGY&t=12481s&ab_channel=CNCFTAGAppDelivery">
+      CNCF TAG App-Delivery @ KubeCon NA 2023 - Automating the Deployment of Data Workloads to Kubernetes with ArgoCD, Argo Workflows, and Hera
+    </a>
+  </li>
   <li>
     <a href="https://www.youtube.com/watch?v=nRYf3GkKpss&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D">
       KubeCon/ArgoCon NA 2023 - How to Train an LLM with Argo Workflows and Hera
