@@ -23,6 +23,7 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = [
     "workflow-template__templates.upstream.yaml",
     "loops-param-argument.upstream.yaml",
     "retry-backoff.upstream.yaml",
+    "workflow-event-binding__github-path-filter-workflowtemplate.upstream.yaml",
 ]
 
 

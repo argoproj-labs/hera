@@ -118,4 +118,6 @@ Explore the examples through the side bar!
 | [work-avoidance](https://github.com/argoproj/argo-workflows/blob/main/examples/work-avoidance.yaml) |
 | [workflow-count-resourcequota](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-count-resourcequota.yaml) |
 | [workflow-event-binding/event-consumer-workfloweventbinding](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/event-consumer-workfloweventbinding.yaml) |
+| [workflow-event-binding/github-path-filter-workfloweventbinding](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/github-path-filter-workfloweventbinding.yaml) |
+| [workflow-event-binding/github-path-filter-workflowtemplate](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-event-binding/github-path-filter-workflowtemplate.yaml) |
 | [workflow-template/templates](https://github.com/argoproj/argo-workflows/blob/main/examples/workflow-template/templates.yaml) |
