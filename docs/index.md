@@ -108,14 +108,28 @@ Check out the [Quick Start](walk-through/quick-start.md) for more!
 
 ## Community Blogs
 
-<!-- Add 3 most recent blogs here. Keep in sync with README.md. -->
-<!-- Currently 4 blogs - add collapsable section when next blog is added, and remove this comment -->
+<!-- Add 3 most recent blogs here. Keep in sync with docs homepage (docs/index.md). -->
 
+- [Hera Developer Survey 2025](https://dev.to/elliot_gunton_73028975583/hera-developer-survey-2025-168d)
 - [How To Get the Most out of Hera for Data Science](https://pipekit.io/blog/how-to-get-the-most-out-of-hera-for-data-science)
 - [Data Validation with Great Expectations and Argo Workflows](https://towardsdatascience.com/data-validation-with-great-expectations-and-argo-workflows-b8e3e2da2fcc)
-- [Hera introduction and motivation](https://www.dynotx.com/hera-the-missing-argo-workflows-python-sdk/)
-- [Dyno is scaling gene therapy research with cloud-native tools like Argo Workflows and Hera](https://www.dynotx.com/argo-workflows-hera/)
 
+<details><summary><i>More blogs</i></summary>
+
+<ul>
+  <li>
+    <a href="https://www.dynotx.com/hera-the-missing-argo-workflows-python-sdk/">
+      Hera introduction and motivation
+    </a>
+  </li>
+  <li>
+    <a href="https://www.dynotx.com/argo-workflows-hera/">
+      Dyno is scaling gene therapy research with cloud-native tools like Argo Workflows and Hera
+    </a>
+  </li>
+</ul>
+
+</details>
 
 ## License
 
