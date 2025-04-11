@@ -750,7 +750,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                 if _context.pieces:
                     return script_template.__call__(*args, **kwargs)
 
-                return func(*args)
+                # Do not allow kwargs
+                return func(*args)  # type: ignore
 
             # Set the wrapped function to the original function so that we can use it later
             script_call_wrapper.wrapped_function = func  # type: ignore
@@ -811,7 +812,9 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                 if _context.pieces:
                     return container_template.__call__(*args, **kwargs)
-                return func(*args)
+
+                # Do not allow kwargs
+                return func(*args)  # type: ignore
 
             # Set the template name to the inferred name
             container_call_wrapper.template_name = name  # type: ignore
@@ -907,7 +910,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                     return self._create_subnode(subnode_name, func, template, *args, **kwargs)
 
-                return func(*args)
+                # Do not allow kwargs
+                return func(*args)  # type: ignore
 
             call_wrapper.template_name = name  # type: ignore
 
@@ -921,7 +925,8 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
                 # "run" the dag/steps function to collect the tasks/steps
                 _context.declaring = True
-                func_return = func(*input_objs)
+                # Do not allow kwargs
+                func_return = func(*input_objs)  # type: ignore
                 _context.declaring = False
 
                 if func_return is not None:
