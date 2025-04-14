@@ -23,9 +23,22 @@ from hera.workflows.script import (
 from hera.workflows.workflow import Workflow
 
 
+def test_script_function_original_is_usable_with_args_and_kwargs():
+    # GIVEN
+    @script()
+    def my_function(a: int, b: int):
+        return a + b
+
+    # THEN
+    assert my_function(1, 2) == 3  # args
+    assert my_function(a=1, b=2) == 3  # kwargs
+    assert my_function(b=2, a=1) == 3  # kwargs (order doesn't matter)
+    assert my_function(1, b=2) == 3  # args and kwargs
+
+
 def test_get_inputs_from_callable_simple_params():
     # GIVEN
-    def my_function(a: int, b: str):
+    def my_function(a: int, b: int):
         return a + b
 
     # WHEN
