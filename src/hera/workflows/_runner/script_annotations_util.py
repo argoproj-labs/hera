@@ -42,6 +42,13 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
+def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
+    if isinstance(destination, Parameter) and destination.dumper is not None:
+        return destination.dumper
+
+    return serialize
+
+
 def get_annotated_input_param(
     func_param_name: str,
     param_annotation: Parameter,
@@ -215,7 +222,7 @@ def _save_annotated_return_outputs(
 
                 matching_output = output_value._get_output(field)
                 path = _get_outputs_path(matching_output)
-                _write_to_path(path, value)
+                _write_to_path(path, value, _get_dumper_function(matching_output))
         else:
             assert isinstance(dest, tuple)
 
@@ -229,7 +236,7 @@ def _save_annotated_return_outputs(
                 raise ValueError("The name was not provided for one of the outputs.")
 
             path = _get_outputs_path(dest[1])
-            _write_to_path(path, output_value)
+            _write_to_path(path, output_value, _get_dumper_function(dest[1]))
 
     if os.environ.get("hera__script_pydantic_io", None) is not None:
         return return_obj
@@ -282,9 +289,9 @@ def _save_dummy_outputs(
             _write_to_path(path, "")
 
 
-def _write_to_path(path: Path, output_value: Any) -> None:
+def _write_to_path(path: Path, output_value: Any, dumper: Callable = serialize) -> None:
     """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
-    output_string = serialize(output_value)
+    output_string = dumper(output_value)
     if output_string is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(output_string)
