@@ -8,6 +8,11 @@ from tests.helper import ARTIFACT_PATH
 from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, script
 
+try:
+    from pydantic.v1 import BaseModel
+except ImportError:
+    from pydantic import BaseModel
+
 global_config.experimental_features["script_annotations"] = True
 
 
@@ -134,3 +139,13 @@ def script_param_artifact_in_function_signature_and_return_type(
     successor.write_text(str(a_number + 1))
     successor2.write_text(str(a_number + 2))
     return a_number + 3, a_number + 4
+
+
+class MyParameter(BaseModel):
+    a: str
+    b: str
+
+
+@script(constructor="runner")
+def return_base_model() -> Annotated[MyParameter, Parameter(name="base-model-output")]:
+    return MyParameter(a="foo", b="bar")
