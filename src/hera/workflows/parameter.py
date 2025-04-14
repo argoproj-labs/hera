@@ -25,6 +25,9 @@ class Parameter(_ModelParameter):
     output: Optional[bool] = False
     """used to specify parameter as an output in function signature annotations"""
 
+    dumper: Optional[Callable[[Any], str]] = None
+    """used to specify a dumper function to serialise the parameter value for Annotated parameters"""
+
     loader: Optional[Callable[[str], Any]] = None
     """used to specify a loader function to load the parameter value for Annotated parameters"""
 
