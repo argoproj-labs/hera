@@ -73,8 +73,11 @@ def get_annotated_input_param(
 def load_param_input(
     param_value: str,
     func_param_annotation: type,
-    loader: Callable[[str], Any],
+    loader: Optional[Callable[[str], Any]],
 ) -> Any:
+    if loader is None:
+        return param_value
+
     loaded_value = loader(param_value)
     actual_type = unwrap_annotation(func_param_annotation)
     if not isinstance(loaded_value, actual_type):
