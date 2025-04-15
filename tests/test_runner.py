@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Literal
 from unittest.mock import MagicMock, patch
 
 import pytest
-from pydantic import ValidationError
 
 import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
@@ -494,23 +493,6 @@ def test_script_annotations_artifact_inputs(
 
     # THEN
     assert serialize(output) == expected_output
-
-
-def test_script_annotations_artifact_input_loader_error():
-    """Test that the input artifact loaded with wrong type throws the expected exception."""
-    # GIVEN
-    function_name = "no_loader_invalid_type"
-    kwargs_list = []
-
-    # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version which will not have the correct ARTIFACT_PATH
-    import tests.script_runner.artifact_loaders as module
-
-    importlib.reload(module)
-
-    # THEN
-    with pytest.raises(ValidationError):
-        _ = _runner(f"{module.__name__}:{function_name}", kwargs_list)
 
 
 @pytest.mark.parametrize(

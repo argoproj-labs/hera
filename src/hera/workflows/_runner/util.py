@@ -190,8 +190,10 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
                     function_kwargs[func_param_name] = load_param_input(
                         param_value, func_param.annotation, param_or_artifact.loader
                     )
-            else:
-                function_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
+            elif isinstance(param_or_artifact, Artifact):
+                function_kwargs[func_param_name] = get_annotated_artifact_value(
+                    param_or_artifact, func_param.annotation
+                )
 
         elif not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
             # We collect all relevant kwargs for the single `Input` function parameter
