@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Callable, Optional, Union
 
 import pytest
 
@@ -10,6 +10,7 @@ from hera.workflows._runner.script_annotations_util import (
     get_annotated_artifact_value,
     get_annotated_input_param,
     get_annotated_output_param,
+    load_param_input,
     map_runner_input,
 )
 from hera.workflows.artifact import Artifact, ArtifactLoader
@@ -69,6 +70,38 @@ def test_get_annotated_input_param(
     expected_value,
 ):
     assert get_annotated_input_param(func_param_name, param_annotation, kwargs) == expected_value
+
+
+@pytest.mark.parametrize(
+    "param_value,param_type,loader,expected_value",
+    [
+        pytest.param("hello", str, None, "hello", id="string-no-loader"),
+        pytest.param("hello", str, lambda _: "other", "other", id="string-loader"),
+    ],
+)
+def test_load_param_input(
+    param_value: str,
+    param_type: type,
+    loader: Optional[Callable[[str], Any]],
+    expected_value: str,
+):
+    assert (
+        load_param_input(
+            param_value,
+            param_type,
+            loader,
+        )
+        == expected_value
+    )
+
+
+def test_load_param_wrong_type_errors():
+    with pytest.raises(ValueError, match="Loaded value does not match function parameter type"):
+        load_param_input(
+            "hello",
+            int,
+            lambda _: "other",
+        )
 
 
 @pytest.mark.parametrize(
