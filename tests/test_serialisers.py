@@ -7,7 +7,15 @@ import pytest
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.workflows._runner.util import _runner
 from hera.workflows.io.v1 import Output as OutputV1
-from hera.workflows.io.v2 import Output as OutputV2
+
+try:
+    from hera.workflows.io.v2 import (  # type: ignore
+        Output as OutputV2,
+    )
+except ImportError:
+    from hera.workflows.io.v1 import (  # type: ignore
+        Output as OutputV2,
+    )
 
 
 @pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
