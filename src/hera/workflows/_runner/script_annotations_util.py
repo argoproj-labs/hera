@@ -81,7 +81,7 @@ def load_param_input(
     loaded_value = loader(param_value)
     actual_type = unwrap_annotation(func_param_annotation)
     if not isinstance(loaded_value, actual_type):
-        raise ValueError("Loader return value does not match function parameter type")
+        raise ValueError("Loaded value does not match function parameter type")
     return loaded_value
 
 
