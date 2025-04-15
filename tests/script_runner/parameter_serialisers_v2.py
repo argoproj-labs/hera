@@ -14,14 +14,14 @@ except ImportError:
 global_config.experimental_features["script_pydantic_io"] = True
 
 
-class MyParameter(BaseModel):
+class MyBaseModel(BaseModel):
     a: str = "a"
     b: str = "b"
 
 
 @script(constructor="runner")
 def base_model_auto_load(
-    a_parameter: Annotated[MyParameter, Parameter(name="my-parameter")],
+    a_parameter: Annotated[MyBaseModel, Parameter(name="my-parameter")],
 ) -> str:
     return a_parameter.a + a_parameter.b
 
@@ -84,8 +84,8 @@ def pydantic_input_with_loader_on_attribute(
 def base_model_auto_save(
     a: str,
     b: str,
-) -> Annotated[MyParameter, Parameter(name="my-output")]:
-    return MyParameter(a=a, b=b)
+) -> Annotated[MyBaseModel, Parameter(name="my-output")]:
+    return MyBaseModel(a=a, b=b)
 
 
 @script(constructor="runner")
