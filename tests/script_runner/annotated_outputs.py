@@ -141,11 +141,11 @@ def script_param_artifact_in_function_signature_and_return_type(
     return a_number + 3, a_number + 4
 
 
-class MyParameter(BaseModel):
+class MyBaseModel(BaseModel):
     a: str
     b: str
 
 
 @script(constructor="runner")
-def return_base_model() -> Annotated[MyParameter, Parameter(name="base-model-output")]:
-    return MyParameter(a="foo", b="bar")
+def return_base_model() -> Annotated[MyBaseModel, Parameter(name="base-model-output")]:
+    return MyBaseModel(a="foo", b="bar")
