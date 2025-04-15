@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from typing import List, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Union, cast
 
 from hera.shared._pydantic import BaseModel
 from hera.workflows.archive import ArchiveStrategy
@@ -84,10 +84,16 @@ class Artifact(BaseModel):
     sub_path: Optional[str] = None
     """allows the specification of an artifact from a subpath within the main source."""
 
-    loader: Optional[ArtifactLoader] = None
+    loader: Union[Optional[ArtifactLoader], Optional[Callable[[str], Any]]] = None
     """used for input Artifact annotations for determining how to load the data.
 
-    Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
+    Use a callable to specify a dumper function to serialise the Artifact value for Annotated Artifacts.
+    Otherwise, use an ArtifactLoader to automatically load the Artifact value (deserialising the JSON string
+    or loading the file contents as a string). A loader value of 'None' must be used with an underlying type
+    of 'str' or Path-like class to load the Artifact as a Path."""
+
+    dumper: Optional[Callable[[Any], str]] = None
+    """used to specify a dumper function to serialise the Artifact value for Annotated Artifacts"""
 
     optional: Optional[bool] = None
     """whether the Artifact is optional. For an input Artifact, this means it may possibly not

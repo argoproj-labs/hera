@@ -46,6 +46,9 @@ def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
     if isinstance(destination, Parameter) and destination.dumps is not None:
         return destination.dumps
 
+    if isinstance(destination, Artifact) and destination.dumper is not None:
+        return destination.dumper
+
     return serialize
 
 
@@ -87,7 +90,17 @@ def get_annotated_output_param(param_annotation: Parameter) -> Path:
     return path
 
 
-def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
+def get_annotated_output_artifact(artifact_annotation: Artifact) -> Path:
+    if artifact_annotation.path:
+        path = Path(artifact_annotation.path)
+    else:
+        path = _get_outputs_path(artifact_annotation)
+    # Automatically create the parent directory (if required)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annotation: type) -> Union[Path, Any]:
     """Get the value of the given Artifact annotation.
 
     If the artifact is an output, return the path it will write to.
@@ -99,30 +112,32 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     the `kwargs` or the function parameter name.
     """
     if artifact_annotation.output:
-        if artifact_annotation.path:
-            path = Path(artifact_annotation.path)
-        else:
-            path = _get_outputs_path(artifact_annotation)
-        # Automatically create the parent directory (if required)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
+        return get_annotated_output_artifact(artifact_annotation)
 
     if not artifact_annotation.path:
         # Path is added to the spec automatically when built. As it isn't present in the annotation itself,
         # we need to add it back in for the runner.
         artifact_annotation.path = artifact_annotation._get_default_inputs_path()
 
-    if artifact_annotation.loader == ArtifactLoader.json.value:
-        path = Path(artifact_annotation.path)
+    actual_type = unwrap_annotation(func_param_annotation)
+
+    if artifact_annotation.loader is None:
+        if issubclass(actual_type, Path):
+            return artifact_annotation.path
+
+    path = Path(artifact_annotation.path)
+    if artifact_annotation.loader == ArtifactLoader.file:
+        return path.read_text()
+
+    if artifact_annotation.loader == ArtifactLoader.json or artifact_annotation.loader is None:
         with path.open() as f:
             return json.load(f)
 
-    if artifact_annotation.loader == ArtifactLoader.file.value:
-        path = Path(artifact_annotation.path)
-        return path.read_text()
-
-    if artifact_annotation.loader is None:
-        return artifact_annotation.path
+    if isinstance(artifact_annotation.loader, Callable):
+        loaded_value = artifact_annotation.loader(path.read_text())
+        if not isinstance(loaded_value, actual_type):
+            raise ValueError("Loader return value does not match function parameter type")
+        return loaded_value
 
     raise RuntimeError(f"Artifact {artifact_annotation.name} was not given a value")
 
@@ -176,7 +191,7 @@ def map_runner_input(
                     param_or_artifact.loads,
                 )
             else:
-                return get_annotated_artifact_value(param_or_artifact)
+                return get_annotated_artifact_value(param_or_artifact, ann_type)
         else:
             return load_parameter_value(kwargs[field], ann_type)
 
