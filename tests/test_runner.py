@@ -316,6 +316,11 @@ def test_runner_annotated_parameter_inputs(
             [],
             [{"subpath": "tmp/hera-outputs/parameters/dict-of-str", "value": '{"my-key": "my-value"}'}],
         ),
+        (
+            "return_base_model",
+            [],
+            [{"subpath": "tmp/hera-outputs/parameters/base-model-output", "value": '{"a": "foo", "b": "bar"}'}],
+        ),
     ],
 )
 def test_script_annotations_outputs(
