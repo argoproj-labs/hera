@@ -187,12 +187,9 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
                 else:
                     param_value = get_annotated_input_param(func_param_name, param_or_artifact, template_inputs)
 
-                    if param_or_artifact.loader:
-                        function_kwargs[func_param_name] = load_param_input(
-                            param_value, func_param.annotation, param_or_artifact.loader
-                        )
-                    else:
-                        function_kwargs[func_param_name] = param_value
+                    function_kwargs[func_param_name] = load_param_input(
+                        param_value, func_param.annotation, param_or_artifact.loader
+                    )
             else:
                 function_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
 
