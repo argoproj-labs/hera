@@ -623,9 +623,9 @@ class CronWorkflowStatus(BaseModel):
         Field(description="Conditions is a list of conditions the CronWorkflow may have"),
     ] = None
     failed: Annotated[
-        int,
+        Optional[int],
         Field(description=("v3.6 and after: Failed counts how many times child workflows failed")),
-    ]
+    ] = 0
     last_scheduled_time: Annotated[
         Optional[v1_1.Time],
         Field(
@@ -634,18 +634,18 @@ class CronWorkflowStatus(BaseModel):
         ),
     ] = None
     phase: Annotated[
-        str,
+        Optional[str],
         Field(
             description=(
                 "v3.6 and after: Phase is an enum of Active or Stopped. It changes to"
                 " Stopped when stopStrategy.expression is true"
             )
         ),
-    ]
+    ] = None
     succeeded: Annotated[
-        int,
+        Optional[int],
         Field(description=("v3.6 and after: Succeeded counts how many times child workflows succeeded")),
-    ]
+    ] = 0
 
 
 class ArtifactoryArtifact(BaseModel):
