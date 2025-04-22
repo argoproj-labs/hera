@@ -1,5 +1,7 @@
 import json
 
+from typing_extensions import TypedDict
+
 from hera.shared import global_config
 from hera.workflows import Parameter, script
 from hera.workflows.io.v1 import Input, Output
@@ -26,6 +28,31 @@ def base_model_auto_load(
     a_parameter: Annotated[MyBaseModel, Parameter(name="my-parameter")],
 ) -> str:
     return a_parameter.a + a_parameter.b
+
+
+class NonTypeCheckableTypedDict(TypedDict):
+    a: str
+    b: str
+
+
+@script(constructor="runner")
+def load_typed_dict(
+    a_parameter: Annotated[
+        NonTypeCheckableTypedDict,
+        Parameter(name="my-parameter", loader=lambda json_str: NonTypeCheckableTypedDict(**json.loads(json_str))),
+    ],
+) -> str:
+    return a_parameter["a"] + a_parameter["b"]
+
+
+@script(constructor="runner")
+def load_wrong_type(
+    a_parameter: Annotated[
+        float,
+        Parameter(name="my-parameter", loader=lambda _: "hello"),
+    ],
+) -> str:
+    return a_parameter + " world"
 
 
 class NonUserNonBaseModelClass:

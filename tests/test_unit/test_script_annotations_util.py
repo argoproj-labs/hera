@@ -73,35 +73,24 @@ def test_get_annotated_input_param(
 
 
 @pytest.mark.parametrize(
-    "param_value,param_type,loader,expected_value",
+    "param_value,loader,expected_value",
     [
-        pytest.param("hello", str, None, "hello", id="string-no-loader"),
-        pytest.param("hello", str, lambda _: "other", "other", id="string-loader"),
+        pytest.param("hello", None, "hello", id="string-no-loader"),
+        pytest.param("hello", lambda _: "other", "other", id="string-loader"),
     ],
 )
 def test_load_param_input(
     param_value: str,
-    param_type: type,
     loader: Optional[Callable[[str], Any]],
     expected_value: str,
 ):
     assert (
         load_param_input(
             param_value,
-            param_type,
             loader,
         )
         == expected_value
     )
-
-
-def test_load_param_wrong_type_errors():
-    with pytest.raises(ValueError, match="Loaded value does not match function parameter type"):
-        load_param_input(
-            "hello",
-            int,
-            lambda _: "other",
-        )
 
 
 @pytest.mark.parametrize(

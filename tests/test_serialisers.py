@@ -17,6 +17,13 @@ except ImportError:
         Output as OutputV2,
     )
 
+from pydantic import ValidationError as V2ValidationError
+
+try:
+    from pydantic.v1 import ValidationError as V1ValidationError
+except ImportError:
+    from pydantic import ValidationError as V1ValidationError
+
 
 @pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
@@ -27,6 +34,12 @@ except ImportError:
             [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}],
             "hello world",
             id="load-base-models-automatically",
+        ),
+        pytest.param(
+            "tests.script_runner.parameter_serialisers_vX:load_typed_dict",
+            [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            "hello world",
+            id="allow-non-type-checkable-types",
         ),
         pytest.param(
             "tests.script_runner.parameter_serialisers_vX:non_base_model_with_class_loader",
@@ -64,6 +77,28 @@ def test_parameter_loading(
 
     # THEN
     assert output == expected_output
+
+
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
+def test_loading_wrong_type(
+    pydantic_mode: int,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    # GIVEN
+    if pydantic_mode == 1:
+        error = V1ValidationError
+    else:
+        error = V2ValidationError
+
+    monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
+    monkeypatch.setenv("hera__script_pydantic_io", "")
+    entrypoint = "tests.script_runner.parameter_serialisers_vX:load_wrong_type"
+    entrypoint = entrypoint.replace("parameter_serialisers_vX", f"parameter_serialisers_v{pydantic_mode}")
+    kwargs_list = [{"name": "my-parameter", "value": json.dumps({"a": "hello ", "b": "world"})}]
+
+    with pytest.raises(error):
+        # WHEN
+        _runner(entrypoint, kwargs_list)
 
 
 @pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])

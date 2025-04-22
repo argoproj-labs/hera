@@ -72,16 +72,12 @@ def get_annotated_input_param(
 
 def load_param_input(
     param_value: str,
-    func_param_annotation: type,
     loader: Optional[Callable[[str], Any]],
 ) -> Any:
     if loader is None:
         return param_value
 
     loaded_value = loader(param_value)
-    actual_type = unwrap_annotation(func_param_annotation)
-    if not isinstance(loaded_value, actual_type):
-        raise ValueError("Loaded value does not match function parameter type")
     return loaded_value
 
 
@@ -156,7 +152,7 @@ def map_runner_input(
             return value
 
         if loader is not None:
-            return load_param_input(value, value_type, loader)
+            return load_param_input(value, loader)
 
         try:
             return json.loads(value)
