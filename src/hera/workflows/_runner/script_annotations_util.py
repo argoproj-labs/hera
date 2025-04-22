@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
@@ -122,6 +123,13 @@ def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annot
     actual_type = unwrap_annotation(func_param_annotation)
 
     if artifact_annotation.loader is None:
+        if os.environ.get("hera__artifact_path_as_string", None) is not None and issubclass(actual_type, str):
+            warnings.warn(
+                "The artifact path is being passed as a string. This is deprecated and will be removed in future versions. "
+                "Please use a Path type for the function parameter.",
+            )
+            return artifact_annotation.path
+
         if issubclass(actual_type, Path):
             return artifact_annotation.path
 

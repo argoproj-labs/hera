@@ -232,7 +232,12 @@ def test_artifact_loading(
                 {"name": "a", "value": "hello "},
                 {"name": "b", "value": "world"},
             ],
-            [{"subpath": "tmp/hera-outputs/artifacts/my-output-artifact", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            [
+                {
+                    "subpath": "tmp/hera-outputs/artifacts/my-output-artifact",
+                    "value": json.dumps({"a": "hello ", "b": "world"}),
+                }
+            ],
             id="save-base-models-automatically",
         ),
         pytest.param(
@@ -241,7 +246,12 @@ def test_artifact_loading(
                 {"name": "a", "value": "hello "},
                 {"name": "b", "value": "world"},
             ],
-            [{"subpath": "tmp/hera-outputs/artifacts/my-output-artifact", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            [
+                {
+                    "subpath": "tmp/hera-outputs/artifacts/my-output-artifact",
+                    "value": json.dumps({"a": "hello ", "b": "world"}),
+                }
+            ],
             id="save-non-base-model-with-class-loader",
         ),
         pytest.param(
@@ -250,7 +260,12 @@ def test_artifact_loading(
                 {"name": "a", "value": "hello "},
                 {"name": "b", "value": "world"},
             ],
-            [{"subpath": "tmp/hera-outputs/artifacts/my-output-artifact", "value": json.dumps({"a": "hello ", "b": "world"})}],
+            [
+                {
+                    "subpath": "tmp/hera-outputs/artifacts/my-output-artifact",
+                    "value": json.dumps({"a": "hello ", "b": "world"}),
+                }
+            ],
             id="save-pydantic-output-with-custom-field-serialiser",
         ),
     ),

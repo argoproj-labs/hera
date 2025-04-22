@@ -445,11 +445,6 @@ def test_script_annotations_outputs_exceptions(
             "First test!",
         ),
         (
-            "no_loader_as_string",
-            "Another test",
-            "Another test",
-        ),
-        (
             "json_object_loader",
             """{"a": "Hello ", "b": "there!"}""",
             "Hello there!",
@@ -479,6 +474,46 @@ def test_script_annotations_artifact_inputs(
     filepath.write_text(file_contents)
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(filepath))
+
+    # Force a reload of the test module, as the runner performs "importlib.import_module", which
+    # may fetch a cached version which will not have the correct ARTIFACT_PATH
+    import tests.script_runner.artifact_loaders as module
+
+    importlib.reload(module)
+
+    kwargs_list = []
+
+    # WHEN
+    output = _runner(f"{module.__name__}:{function}", kwargs_list)
+
+    # THEN
+    assert serialize(output) == expected_output
+
+
+@pytest.mark.parametrize(
+    "function,file_contents,expected_output",
+    [
+        (
+            "no_loader_as_string",
+            "Another test",
+            "Another test",
+        ),
+    ],
+)
+def test_deprecated_load_artifact_path_to_string(
+    function,
+    file_contents,
+    expected_output,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test that the input artifact annotations are parsed correctly and the loaders behave as intended."""
+    # GIVEN
+    filepath = tmp_path / "my_file.txt"
+    filepath.write_text(file_contents)
+
+    monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(filepath))
+    monkeypatch.setenv("hera__artifact_path_as_string", "")
 
     # Force a reload of the test module, as the runner performs "importlib.import_module", which
     # may fetch a cached version which will not have the correct ARTIFACT_PATH
@@ -742,6 +777,7 @@ def test_runner_pydantic_input_artifacts(
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
+    monkeypatch.setenv("hera__artifact_path_as_string", "")
 
     import tests.script_runner.pydantic_io_v1 as module
 

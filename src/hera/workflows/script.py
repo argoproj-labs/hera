@@ -40,6 +40,7 @@ from typing_extensions import ParamSpec, get_args, get_origin
 from hera.expr import g
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import (
+    _ARTIFACT_PATH_AS_STRING_FLAG,
     _SCRIPT_PYDANTIC_IO_FLAG,
     _flag_enabled,
 )
@@ -881,6 +882,8 @@ class RunnerScriptConstructor(ScriptConstructor):
             script_env.append(EnvVar(name="hera__pydantic_mode", value=str(self.pydantic_mode)))
         if _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
             script_env.append(EnvVar(name="hera__script_pydantic_io", value=""))
+        if _flag_enabled(_ARTIFACT_PATH_AS_STRING_FLAG):
+            script_env.append(EnvVar(name="hera__artifact_path_as_string", value=""))
 
         if script_env:
             if not script.env:
