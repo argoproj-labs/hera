@@ -95,7 +95,9 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     """Get the value of the given Artifact annotation.
 
     If the artifact is an output, return the path it will write to.
-    If the artifact is an input, return the loaded value (json, path or string) using its ArtifactLoader.
+    If the artifact is an input, and it has an ArtifactLoader enum as its loader, return the
+    loaded value according to the predefined behaviour (json obj, path or string), otherwise,
+    if the loader is a Callable, it is used directly to load the value.
 
     As Artifacts are always Annotated in function parameters, we don't need to consider
     the `kwargs` or the function parameter name.
