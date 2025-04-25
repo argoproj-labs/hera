@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, cast
 
 if sys.version_info >= (3, 10):
     from types import NoneType
@@ -30,6 +30,7 @@ from hera.workflows._runner.script_annotations_util import (
     get_annotated_artifact_value,
     get_annotated_input_param,
     get_annotated_output_param,
+    load_param_input,
     map_runner_input,
 )
 from hera.workflows.artifact import ArtifactLoader
@@ -161,6 +162,7 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
     For Parameter inputs:
     * if the Parameter has a "name", replace it with the function parameter name
     * otherwise use the function parameter name as-is
+    * use the Parameter loader if provided
     For Parameter outputs:
     * update value to a Path object from the value_from.path value, or the default if not provided
 
@@ -183,9 +185,9 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
                 if param_or_artifact.output:
                     function_kwargs[func_param_name] = get_annotated_output_param(param_or_artifact)
                 else:
-                    function_kwargs[func_param_name] = get_annotated_input_param(
-                        func_param_name, param_or_artifact, template_inputs
-                    )
+                    param_value = get_annotated_input_param(func_param_name, param_or_artifact, template_inputs)
+
+                    function_kwargs[func_param_name] = load_param_input(param_value, param_or_artifact.loader)
             else:
                 function_kwargs[func_param_name] = get_annotated_artifact_value(param_or_artifact)
 
@@ -234,15 +236,19 @@ def _runner(entrypoint: str, template_inputs_list: List) -> Any:
     # not a pydantic model with smart_union enabled
     _pydantic_mode = int(os.environ.get("hera__pydantic_mode", _PYDANTIC_VERSION))
     if _pydantic_mode == 2:
-        from pydantic import validate_call  # type: ignore
+        from pydantic import ConfigDict, validate_call  # type: ignore
 
-        function = validate_call(function)
+        function = validate_call(config=ConfigDict(arbitrary_types_allowed=True))(function)
     else:
-        if _PYDANTIC_VERSION == 1:
-            from pydantic import validate_arguments
+        if TYPE_CHECKING:
+            from pydantic.v1 import validate_arguments
         else:
-            from pydantic.v1 import validate_arguments  # type: ignore
-        function = validate_arguments(function, config=dict(smart_union=True, arbitrary_types_allowed=True))  # type: ignore
+            if _PYDANTIC_VERSION == 1:
+                from pydantic import validate_arguments
+            else:
+                from pydantic.v1 import validate_arguments
+
+        function = validate_arguments(config=dict(smart_union=True, arbitrary_types_allowed=True))(function)
 
     function = _ignore_unmatched_kwargs(function)
 

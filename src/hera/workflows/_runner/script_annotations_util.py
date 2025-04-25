@@ -4,7 +4,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 if sys.version_info >= (3, 10):
     from types import NoneType
@@ -42,6 +42,13 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
     return path
 
 
+def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
+    if isinstance(destination, Parameter) and destination.dumper is not None:
+        return destination.dumper
+
+    return serialize
+
+
 def get_annotated_input_param(
     func_param_name: str,
     param_annotation: Parameter,
@@ -63,6 +70,13 @@ def get_annotated_input_param(
     )
 
 
+def load_param_input(
+    param_value: str,
+    loader: Optional[Callable[[str], Any]],
+) -> Any:
+    return param_value if loader is None else loader(param_value)
+
+
 def get_annotated_output_param(param_annotation: Parameter) -> Path:
     if param_annotation.value_from and param_annotation.value_from.path:
         path = Path(param_annotation.value_from.path)
@@ -77,7 +91,9 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     """Get the value of the given Artifact annotation.
 
     If the artifact is an output, return the path it will write to.
-    If the artifact is an input, return the loaded value (json, path or string) using its ArtifactLoader.
+    If the artifact is an input, and it has an ArtifactLoader enum as its loader, return the
+    loaded value according to the predefined behaviour (json obj, path or string), otherwise,
+    if the loader is a Callable, it is used directly to load the value.
 
     As Artifacts are always Annotated in function parameters, we don't need to consider
     the `kwargs` or the function parameter name.
@@ -125,9 +141,16 @@ def map_runner_input(
     """
     input_model_obj = {}
 
-    def load_parameter_value(value: str, value_type: type) -> Any:
+    def load_parameter_value(
+        value: str,
+        value_type: type,
+        loader: Optional[Callable[[str], Any]] = None,
+    ) -> Any:
         if origin_type_issubtype(value_type, (str, NoneType)):
             return value
+
+        if loader is not None:
+            return load_param_input(value, loader)
 
         try:
             return json.loads(value)
@@ -150,6 +173,7 @@ def map_runner_input(
                 return load_parameter_value(
                     get_annotated_input_param(field, param_or_artifact, kwargs),
                     ann_type,
+                    param_or_artifact.loader,
                 )
             else:
                 return get_annotated_artifact_value(param_or_artifact)
@@ -195,7 +219,7 @@ def _save_annotated_return_outputs(
 
                 matching_output = output_value._get_output(field)
                 path = _get_outputs_path(matching_output)
-                _write_to_path(path, value)
+                _write_to_path(path, value, _get_dumper_function(matching_output))
         else:
             assert isinstance(dest, tuple)
 
@@ -209,7 +233,7 @@ def _save_annotated_return_outputs(
                 raise ValueError("The name was not provided for one of the outputs.")
 
             path = _get_outputs_path(dest[1])
-            _write_to_path(path, output_value)
+            _write_to_path(path, output_value, _get_dumper_function(dest[1]))
 
     if os.environ.get("hera__script_pydantic_io", None) is not None:
         return return_obj
@@ -262,9 +286,9 @@ def _save_dummy_outputs(
             _write_to_path(path, "")
 
 
-def _write_to_path(path: Path, output_value: Any) -> None:
+def _write_to_path(path: Path, output_value: Any, dumper: Callable = serialize) -> None:
     """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
-    output_string = serialize(output_value)
+    output_string = dumper(output_value)
     if output_string is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(output_string)
