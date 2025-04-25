@@ -160,13 +160,13 @@ spec:
 We should be able to generate the following Python code:
 
 ```py
-from hera.workflows import Container, Workflow
+from hera.workflows import Container, Workflow, Parameter
 
 with Workflow(
     generate_name="hello-world-",
     entrypoint="hello-world",
     arguments={
-      "echo-message": "test",
+      "message": "test",
     }
 ) as w:
     Container(
@@ -174,6 +174,7 @@ with Workflow(
         image="busybox",
         command=["echo"],
         args=["{{inputs.parameters.message}}"],
+        inputs=[Parameter(name="message")],
     )
 ```
 
