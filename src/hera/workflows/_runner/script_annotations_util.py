@@ -143,8 +143,6 @@ def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annot
 
     if isinstance(artifact_annotation.loader, Callable):  # type: ignore
         loaded_value = artifact_annotation.loader(path.read_text())
-        if not isinstance(loaded_value, actual_type):
-            raise ValueError("Loader return value does not match function parameter type")
         return loaded_value
 
     raise RuntimeError(f"Artifact {artifact_annotation.name} was not given a value")
