@@ -385,11 +385,66 @@ print(i)""",
 
 # Implementation
 
-We will give a proof-of-concept for generating Python code from basic Containers/DAG YAMLs, which can be expanded on for the remaining fields from the API and other template types.
+We will give a proof-of-concept for generating the Python object from YAMLs and describe the algorithm for the code:
 
-## Link to the Implementation PR
+* Given a Workflow YAML, we know the values contained are limited to basic data types, lists and dictionaries.
+* We should then be able to iterate through the _attributes of the `Workflow` class_ and intelligently map the given YAML values to produce Python assignments, e.g.
+  * Basic data types such as `str` and `int` are assigned directly, e.g. for a Workflow's `name`, we will produce the Python assignment in code as `name="some-name",`
+  * Lists must be iterated through, and by using type of the values in the list, we recursively extract the correct assignment, e.g. a `list[str]` will produce the Python assignment `things=["a", "b", "c"]`, whereas `list[list[str]]` produces `things=[["a", "b"], ["c", "d"]]`
+  * Dictionaries must be iterated through, and by using the type of the values (the keys are always strings coming from YAML), we can recursively extract the correct assignment, e.g. a `dict[str, int]` will produce the assignment `things={"a": 1, "b": 2}`
+  * Workflow attributes can be a `BaseModel`, which can be recursively mapped per the algorithm above. We must also remember the class for importing if it is from `hera.workflows.models`.
+  * Certain attributes will be specially treated, starting with `templates`: we can skip this field in the assignment phase, and iterate through it to produce a series of template definitions within the Workflow context.
 
-POC for generating Containers and DAGs to begin with.
+So, after the initial processing of a YAML Workflow, we might have the following ready to output:
+
+```py
+from hera.workflows import Workflow
+
+with Workflow(
+    api_version="argoproj.io/v1alpha1",
+    kind="Workflow",
+    annotations={"workflows.argoproj.io/description": "This is a simple hello world example."},
+    generate_name="hello-world-",
+    labels={"workflows.argoproj.io/archive-strategy": "false"},
+    entrypoint="hello-world",
+) as w:
+```
+
+> We can also skip automatically "known" values such as `api_version` and `kind`.
+
+Then, we will iterate through the `templates` of the YAML, to create assignments such as:
+
+```py
+Container(
+    name="hello-world",
+    args=["hello world"],
+    command=["echo"],
+    image="busybox",
+)
+```
+
+To produce the final output of:
+
+```py
+from hera.workflows import Container, Workflow
+
+with Workflow(
+    api_version="argoproj.io/v1alpha1",
+    kind="Workflow",
+    annotations={"workflows.argoproj.io/description": "This is a simple hello world example."},
+    generate_name="hello-world-",
+    labels={"workflows.argoproj.io/archive-strategy": "false"},
+    entrypoint="hello-world",
+) as w:
+    Container(
+        name="hello-world",
+        args=["hello world"],
+        command=["echo"],
+        image="busybox",
+    )
+```
+
+As long as we produce valid Python code, we can run the output through a formatter such as `ruff` to get a consistent, correctly-indented output.
 
 # Migration (OPTIONAL)
 
