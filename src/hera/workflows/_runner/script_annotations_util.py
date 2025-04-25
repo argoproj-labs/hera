@@ -74,11 +74,7 @@ def load_param_input(
     param_value: str,
     loader: Optional[Callable[[str], Any]],
 ) -> Any:
-    if loader is None:
-        return param_value
-
-    loaded_value = loader(param_value)
-    return loaded_value
+    return param_value if loader is None else loader(param_value)
 
 
 def get_annotated_output_param(param_annotation: Parameter) -> Path:
