@@ -1,5 +1,4 @@
-from hera.workflows import Workflow
-from hera.workflows.models import Container, Template
+from hera.workflows import Container, Workflow
 
 with Workflow(
     api_version="argoproj.io/v1alpha1",
@@ -8,15 +7,10 @@ with Workflow(
     generate_name="hello-world-",
     labels={"workflows.argoproj.io/archive-strategy": "false"},
     entrypoint="hello-world",
-    templates=[
-        Template(
-            container=Container(
-                args=["hello world"],
-                command=["echo"],
-                image="busybox",
-            ),
-            name="hello-world",
-        )
-    ],
 ) as w:
-    pass
+    Container(
+        name="hello-world",
+        image="busybox",
+        command=["echo"],
+        args=["hello world"],
+    )

@@ -2,7 +2,7 @@ import os
 import sys
 from collections import ChainMap
 from pathlib import Path
-from typing import Any, Generator, Iterable, List, Optional, Tuple
+from typing import Any, Generator, Iterable, List, Optional, Tuple, get_args
 
 import yaml
 
@@ -11,7 +11,10 @@ from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths
 from hera.shared._pydantic import BaseModel
 from hera.shared._type_util import get_annotated_metadata, is_optionally_subtype, unwrap_annotation
 from hera.workflows._meta_mixins import ModelMapperMixin, _get_model_attr
-from hera.workflows.models import Workflow as _ModelWorkflow
+from hera.workflows.models import (
+    Template,
+    Workflow as _ModelWorkflow,
+)
 from hera.workflows.workflow import Workflow
 
 try:
@@ -104,9 +107,27 @@ def json_to_python(value: Any, annotation: Optional[type] = None) -> Tuple[str, 
         raise ValueError(f"Unsupported type: {annotation} for value {value}")
 
 
+def container_to_python(model: Template) -> Tuple[str, List[str]]:
+    return (
+        f"""\
+Container(
+    name="{model.name}",
+    image="{model.container.image}",
+    command={model.container.command},
+    args={model.container.args},
+)
+""",
+        [],
+    )
+
+
 def model_to_python(model: BaseModel) -> Tuple[str, List[str]]:
-    model_imports = [model.__class__.__name__]
-    class_def = [f"{model.__class__.__name__}("]
+    model_name = model.__class__.__name__
+    if model_name == "Template":
+        return container_to_python(model)
+
+    model_imports = [model_name]
+    class_def = [f"{model_name}("]
     for attr in ChainMap(*(get_annotations(c) for c in model.__class__.__mro__)):
         if attr == "__slots__" or getattr(model, attr) is None:
             continue
@@ -123,6 +144,7 @@ def workflow_to_python(model: _ModelWorkflow) -> str:
     hera_imports = ["Workflow"]
     model_imports = []
     class_def = ["with Workflow("]
+    context_def = []
     for attr, annotation in Workflow._get_all_annotations().items():
         if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
             if len(mappers) != 1:
@@ -130,15 +152,21 @@ def workflow_to_python(model: _ModelWorkflow) -> str:
             if mappers[0].model_path:
                 value = _get_model_attr(model, mappers[0].model_path)
                 if value is not None:
-                    value, sub_model_imports = json_to_python(value, unwrap_annotation(annotation))
-                    model_imports.extend(sub_model_imports)
-
-                    class_def.append(f"{attr}={value},")
+                    if attr == "templates":
+                        for template in value:
+                            t, sub_model_imports = json_to_python(template, get_args(unwrap_annotation(annotation)))
+                            hera_imports.append("Container")
+                            model_imports.extend(sub_model_imports)
+                            context_def.append("    " + t)
+                    else:
+                        value, sub_model_imports = json_to_python(value, unwrap_annotation(annotation))
+                        model_imports.extend(sub_model_imports)
+                        class_def.append(f"{attr}={value},")
 
     imports = list(map(lambda x: f"from hera.workflows import {x}", hera_imports))
     imports.extend(map(lambda x: f"from hera.workflows.models import {x}", model_imports))
 
-    return "\n".join(imports + class_def + [") as w:", "    pass"])
+    return "\n".join(imports + class_def + [") as w:"] + context_def)
 
 
 def join_workflows(workflows: Iterable[str]) -> str:
