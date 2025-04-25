@@ -22,7 +22,8 @@ import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner
-from hera.workflows.io.v1 import Output
+from hera.workflows.io.v1 import Output as OutputV1
+from hera.workflows.io.v2 import Output as OutputV2
 
 
 @pytest.mark.parametrize(
@@ -734,7 +735,7 @@ def test_runner_pydantic_output_params(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert isinstance(output, Output)
+    assert isinstance(output, (OutputV1, OutputV2))
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
@@ -774,13 +775,12 @@ def test_runner_pydantic_input_artifacts(
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
+    module = importlib.import_module(entrypoint.split(":")[0])
+    importlib.reload(module)
+
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
     monkeypatch.setenv("hera__artifact_path_as_string", "")
-
-    import tests.script_runner.pydantic_io_v1 as module
-
-    importlib.reload(module)
 
     # WHEN
     output = _runner(entrypoint, [])
@@ -834,7 +834,7 @@ def test_runner_pydantic_output_artifacts(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert isinstance(output, Output)
+    assert isinstance(output, (OutputV1, OutputV2))
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
@@ -885,7 +885,7 @@ def test_runner_pydantic_output_with_exit_code(
     "entrypoint,expected_files",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io_v1:pydantic_output_using_exit_code",
+            "tests.script_runner.pydantic_io_vX:pydantic_output_using_exit_code",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
@@ -904,6 +904,7 @@ def test_run_pydantic_output_with_exit_code(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     file_path = Path(tmp_path / "test_params")
     file_path.write_text("")
     args = MagicMock(entrypoint=entrypoint, args_path=file_path)
@@ -912,8 +913,7 @@ def test_run_pydantic_output_with_exit_code(
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
-    import tests.script_runner.pydantic_io_v1 as module
-
+    module = importlib.import_module(entrypoint.split(":")[0])
     importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
