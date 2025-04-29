@@ -1,7 +1,7 @@
 # Meta
 [meta]: #meta
 - Name: YAML Code Converter
-- Start Date: (fill in today's date: YYYY-MM-DD)
+- Start Date: (fill in today's date: 2025-04-29)
 - Update date (optional): (fill in today's date: YYYY-MM-DD)
 - Author(s): [@elliotgunton](https://github.com/elliotgunton)
 - Supersedes: N/A
@@ -16,14 +16,10 @@
 - [Proposal](#proposal)
   - [Terminology](#terminology)
   - [Code Examples](#code-examples)
-  - [How to teach (OPTIONAL)](#how-to-teach-optional)
-- [Implementation (OPTIONAL)](#implementation-optional)
-  - [Link to the Implementation PR](#link-to-the-implementation-pr)
-- [Migration (OPTIONAL)](#migration-optional)
+- [Implementation](#implementation)
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
 - [Prior Art](#prior-art)
-- [Unresolved Questions (OPTIONAL)](#unresolved-questions-optional)
 
 # Overview
 [overview]: #overview
@@ -447,26 +443,29 @@ with Workflow(
 
 As long as we produce valid Python code, we can run the output through a formatter such as `ruff` to get a consistent, correctly-indented output.
 
-# Migration (OPTIONAL)
-
-This section should document breaks to public API and breaks in compatibility due to this HEP's proposed changes. In addition, it should document the proposed steps that one would need to take to work through these changes.
-
 # Drawbacks
 
 Why should we **not** do this?
 
+* We risk perpetuating bad programming practices due to the boilerplate nature of the code generator, e.g. reusing string values across templates
+  * Users are likely to take the code and run with it, not updating these "bad" sections of code
+* People may not find the generated code very useful (i.e. we should work on other things given the time investment it will take)
+  * I am more convinced people _will_ find it useful due to the community activity on the issue. Even converting a YAML workflow into a single `Workflow(...)` value would be a good starting point, and if we can build the code generator incrementally, then we can eventually produce the code matching the examples (incorporating best practices)
+
 # Alternatives
 
 - What other designs have been considered?
+  - There is no current or other way to generate Python code from YAML, we need a custom solution. We can read YAML Workflows into a Python object (discussed below in [Prior Art](#prior-art)), but we cannot write the object to a `.py` file as a string representing Python code.
 - Why is this proposal the best?
+  - We will be in control of the code that is generated, and we do not have to promise that the code generator can work on existing Python files (i.e. merge generated and existing code), meaning it will be more flexible to improve in future implementations.
 - What is the impact of not doing this?
+  - Users who are interested in using Hera (maybe to orchestrate non-Python templates) but already have all their Workflows/WorkflowTemplates in YAML will be less likely to adopt Hera.
 
 # Prior Art
 
-Discuss [prior art](https://en.wikipedia.org/wiki/Prior_art), both the good and bad.
-
-# Unresolved Questions (OPTIONAL)
-
-- What parts of the design do you expect to be resolved before this gets merged?
-- What parts of the design do you expect to be resolved through implementation of the feature?
-- What related issues do you consider out of scope for this HEP that could be addressed in the future independently of the solution that comes out of this HEP?
+Something like https://github.com/koxudaxi/datamodel-code-generator exists in a similar space, but with a more
+well-defined objective: to convert JSON/YAML schemas into Pydantic. We already use it to create the Pydantic models, and
+we are able to convert YAMLs into Workflow objects through the `ModelMapperMixin`, which maps to and from our custom
+`Workflow` class to the generated `Workflow` class. This is how we already have the `from_file` function for Workflows.
+We will now likely build around this functionality to be able to generate the Python code itself, not just a Python
+object (in memory).
