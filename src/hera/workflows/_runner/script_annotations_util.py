@@ -43,8 +43,8 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
 
 
 def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
-    if isinstance(destination, Parameter) and destination.dumper is not None:
-        return destination.dumper
+    if isinstance(destination, Parameter) and destination.dumps is not None:
+        return destination.dumps
 
     return serialize
 
@@ -173,7 +173,7 @@ def map_runner_input(
                 return load_parameter_value(
                     get_annotated_input_param(field, param_or_artifact, kwargs),
                     ann_type,
-                    param_or_artifact.loader,
+                    param_or_artifact.loads,
                 )
             else:
                 return get_annotated_artifact_value(param_or_artifact)
