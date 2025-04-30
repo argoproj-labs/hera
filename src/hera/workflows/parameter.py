@@ -25,10 +25,10 @@ class Parameter(_ModelParameter):
     output: Optional[bool] = False
     """used to specify parameter as an output in function signature annotations"""
 
-    dumper: Optional[Callable[[Any], str]] = None
+    dumps: Optional[Callable[[Any], str]] = None
     """used to specify a dumper function to serialise an output parameter value as a string for Annotated parameters"""
 
-    loader: Optional[Callable[[str], Any]] = None
+    loads: Optional[Callable[[str], Any]] = None
     """used to specify a loader function to deserialise a string representation of an object for Annotated parameters"""
 
     def _check_name(self):

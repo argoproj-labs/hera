@@ -39,7 +39,7 @@ class NonTypeCheckableTypedDict(TypedDict):
 def load_typed_dict(
     a_parameter: Annotated[
         NonTypeCheckableTypedDict,
-        Parameter(name="my-parameter", loader=lambda json_str: NonTypeCheckableTypedDict(**json.loads(json_str))),
+        Parameter(name="my-parameter", loads=lambda json_str: NonTypeCheckableTypedDict(**json.loads(json_str))),
     ],
 ) -> str:
     return a_parameter["a"] + a_parameter["b"]
@@ -49,7 +49,7 @@ def load_typed_dict(
 def load_wrong_type(
     a_parameter: Annotated[
         float,
-        Parameter(name="my-parameter", loader=lambda _: "hello"),
+        Parameter(name="my-parameter", loads=lambda _: "hello"),
     ],
 ) -> str:
     return a_parameter + " world"
@@ -78,7 +78,7 @@ class NonUserNonBaseModelClass:
 def non_base_model_with_class_loader(
     a_parameter: Annotated[
         NonUserNonBaseModelClass,
-        Parameter(name="my-parameter", loader=NonUserNonBaseModelClass.from_json),
+        Parameter(name="my-parameter", loads=NonUserNonBaseModelClass.from_json),
     ],
 ) -> str:
     return a_parameter.a + a_parameter.b
@@ -88,7 +88,7 @@ def non_base_model_with_class_loader(
 def non_base_model_with_lambda_function_loader(
     a_parameter: Annotated[
         NonUserNonBaseModelClass,
-        Parameter(name="my-parameter", loader=lambda json_str: NonUserNonBaseModelClass(**json.loads(json_str))),
+        Parameter(name="my-parameter", loads=lambda json_str: NonUserNonBaseModelClass(**json.loads(json_str))),
     ],
 ) -> str:
     return a_parameter.a + a_parameter.b
@@ -96,7 +96,7 @@ def non_base_model_with_lambda_function_loader(
 
 class MyInput(Input):
     non_user_defined_class: Annotated[
-        NonUserNonBaseModelClass, Parameter(name="my-parameter", loader=NonUserNonBaseModelClass.from_json)
+        NonUserNonBaseModelClass, Parameter(name="my-parameter", loads=NonUserNonBaseModelClass.from_json)
     ]
 
 
@@ -121,14 +121,14 @@ def non_base_model_with_class_serialiser(
     b: str,
 ) -> Annotated[
     NonUserNonBaseModelClass,
-    Parameter(name="my-output", dumper=NonUserNonBaseModelClass.to_json),
+    Parameter(name="my-output", dumps=NonUserNonBaseModelClass.to_json),
 ]:
     return NonUserNonBaseModelClass(a=a, b=b)
 
 
 class MyOutput(Output):
     non_user_defined_class: Annotated[
-        NonUserNonBaseModelClass, Parameter(name="my-output", dumper=NonUserNonBaseModelClass.to_json)
+        NonUserNonBaseModelClass, Parameter(name="my-output", dumps=NonUserNonBaseModelClass.to_json)
     ]
 
 
