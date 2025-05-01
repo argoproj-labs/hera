@@ -144,7 +144,9 @@ def _is_artifact_loaded(key: str, f: Callable) -> bool:
     """Check if param `key` of function `f` is actually an Artifact that has already been loaded."""
     if param_annotation := _get_function_param_annotation(key, f):
         if (artifact := get_workflow_annotation(param_annotation)) and isinstance(artifact, Artifact):
-            return artifact.loader == ArtifactLoader.json.value or artifact.loads is not None
+            return (
+                artifact.loader == ArtifactLoader.json.value or artifact.loads is not None or artifact.load is not None
+            )
     return False
 
 

@@ -1,4 +1,5 @@
 import json
+import pickle
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, script
@@ -58,6 +59,16 @@ def non_base_model_with_class_loader(
 
 
 @script(constructor="runner")
+def bytes_loader(
+    an_artifact: Annotated[
+        bytes,
+        Artifact(name="my-artifact", load=lambda b: pickle.loads(b)),
+    ],
+) -> bytes:
+    return an_artifact
+
+
+@script(constructor="runner")
 def non_base_model_with_lambda_function_loader(
     an_artifact: Annotated[
         NonUserNonBaseModelClass,
@@ -86,6 +97,14 @@ def base_model_auto_save(
     b: str,
 ) -> Annotated[MyBaseModel, Artifact(name="my-output-artifact")]:
     return MyBaseModel(a=a, b=b)
+
+
+@script(constructor="runner")
+def bytes_dumper(
+    a: str,
+    b: str,
+) -> Annotated[bytes, Artifact(name="my-output-artifact", dump=lambda x: pickle.dumps(x))]:
+    return (a + b).encode("utf-8")
 
 
 @script(constructor="runner")

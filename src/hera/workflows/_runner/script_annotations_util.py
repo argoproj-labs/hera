@@ -46,8 +46,11 @@ def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
     if isinstance(destination, Parameter) and destination.dumps is not None:
         return destination.dumps
 
-    if isinstance(destination, Artifact) and destination.dumps is not None:
-        return destination.dumps
+    if isinstance(destination, Artifact):
+        if destination.dumps is not None:
+            return destination.dumps
+        if destination.dump is not None:
+            return destination.dump
 
     return serialize
 
@@ -131,6 +134,9 @@ def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annot
     path = Path(artifact_annotation.path)
     if artifact_annotation.loads is not None and isinstance(artifact_annotation.loads, Callable):  # type: ignore
         return artifact_annotation.loads(path.read_text())
+
+    if artifact_annotation.load is not None and isinstance(artifact_annotation.load, Callable):  # type: ignore
+        return artifact_annotation.load(path.read_bytes())
 
     if artifact_annotation.loader is None:
         return artifact_annotation.path
@@ -299,7 +305,10 @@ def _save_dummy_outputs(
 
 def _write_to_path(path: Path, output_value: Any, dumper: Callable = serialize) -> None:
     """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
-    output_string = dumper(output_value)
-    if output_string is not None:
+    dumped_output = dumper(output_value)
+    if dumped_output is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(output_string)
+        if isinstance(dumped_output, str):
+            path.write_text(dumped_output)
+        elif isinstance(dumped_output, bytes):
+            path.write_bytes(dumped_output)

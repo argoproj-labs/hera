@@ -1,4 +1,5 @@
 import json
+import pickle
 
 from pydantic import BaseModel, ConfigDict
 
@@ -24,6 +25,16 @@ def base_model_auto_load(
     an_artifact: Annotated[MyBaseModel, Artifact(name="my-artifact", loader=ArtifactLoader.json)],
 ) -> str:
     return an_artifact.a + an_artifact.b
+
+
+@script(constructor="runner")
+def bytes_loader(
+    an_artifact: Annotated[
+        bytes,
+        Artifact(name="my-artifact", load=lambda b: pickle.loads(b)),
+    ],
+) -> bytes:
+    return an_artifact
 
 
 class NonUserNonBaseModelClass:
@@ -85,6 +96,14 @@ def base_model_auto_save(
     b: str,
 ) -> Annotated[MyBaseModel, Artifact(name="my-output-artifact")]:
     return MyBaseModel(a=a, b=b)
+
+
+@script(constructor="runner")
+def bytes_dumper(
+    a: str,
+    b: str,
+) -> Annotated[bytes, Artifact(name="my-output-artifact", dump=lambda x: pickle.dumps(x))]:
+    return (a + b).encode("utf-8")
 
 
 @script(constructor="runner")
