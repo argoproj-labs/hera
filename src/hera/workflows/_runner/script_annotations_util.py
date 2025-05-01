@@ -47,8 +47,8 @@ def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
     if isinstance(destination, Parameter) and destination.dumps is not None:
         return destination.dumps
 
-    if isinstance(destination, Artifact) and destination.dumper is not None:
-        return destination.dumper
+    if isinstance(destination, Artifact) and destination.dumps is not None:
+        return destination.dumps
 
     return serialize
 

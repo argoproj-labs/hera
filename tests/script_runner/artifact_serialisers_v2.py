@@ -93,14 +93,14 @@ def non_base_model_with_class_serialiser(
     b: str,
 ) -> Annotated[
     NonUserNonBaseModelClass,
-    Artifact(name="my-output-artifact", dumper=NonUserNonBaseModelClass.to_json),
+    Artifact(name="my-output-artifact", dumps=NonUserNonBaseModelClass.to_json),
 ]:
     return NonUserNonBaseModelClass(a=a, b=b)
 
 
 class MyOutput(Output):
     non_user_defined_class: Annotated[
-        NonUserNonBaseModelClass, Artifact(name="my-output-artifact", dumper=NonUserNonBaseModelClass.to_json)
+        NonUserNonBaseModelClass, Artifact(name="my-output-artifact", dumps=NonUserNonBaseModelClass.to_json)
     ]
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

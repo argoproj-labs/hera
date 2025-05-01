@@ -87,13 +87,13 @@ class Artifact(BaseModel):
     loader: Union[Optional[ArtifactLoader], Optional[Callable[[str], Any]]] = None
     """used for input Artifact annotations for determining how to load the data.
 
-    Use a callable to specify a dumper function to serialise the Artifact value for Annotated Artifacts.
+    Use a callable to specify a loader function to serialise the Artifact value for Annotated Artifacts.
     Otherwise, use an ArtifactLoader to automatically load the Artifact value (deserialising the JSON string
     or loading the file contents as a string). A loader value of 'None' must be used with an underlying type
     of 'str' or Path-like class to load the Artifact as a Path."""
 
-    dumper: Optional[Callable[[Any], str]] = None
-    """used to specify a dumper function to serialise the Artifact value for Annotated Artifacts"""
+    dumps: Optional[Callable[[Any], str]] = None
+    """used to specify a dumper function to serialise the Artifact value as a string for Annotated Artifacts"""
 
     optional: Optional[bool] = None
     """whether the Artifact is optional. For an input Artifact, this means it may possibly not
