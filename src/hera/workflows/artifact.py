@@ -84,16 +84,16 @@ class Artifact(BaseModel):
     sub_path: Optional[str] = None
     """allows the specification of an artifact from a subpath within the main source."""
 
-    loader: Union[Optional[ArtifactLoader], Optional[Callable[[str], Any]]] = None
+    loader: Optional[ArtifactLoader] = None
     """used for input Artifact annotations for determining how to load the data.
 
-    Use a callable to specify a loader function to serialise the Artifact value for Annotated Artifacts.
-    Otherwise, use an ArtifactLoader to automatically load the Artifact value (deserialising the JSON string
-    or loading the file contents as a string). A loader value of 'None' must be used with an underlying type
-    of 'str' or Path-like class to load the Artifact as a Path."""
+    Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
+
+    loads: Union[Optional[Callable[[str], Any]]] = None
+    """used to specify a loader function to deserialise a string representation of an object for Annotated Artifact function parameters"""
 
     dumps: Optional[Callable[[Any], str]] = None
-    """used to specify a dumper function to serialise the Artifact value as a string for Annotated Artifacts"""
+    """used to specify a dumper function to serialise the Artifact value as a string for Annotated Artifact function parameters"""
 
     optional: Optional[bool] = None
     """whether the Artifact is optional. For an input Artifact, this means it may possibly not

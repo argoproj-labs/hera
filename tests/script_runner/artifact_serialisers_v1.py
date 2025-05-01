@@ -51,7 +51,7 @@ class NonUserNonBaseModelClass:
 def non_base_model_with_class_loader(
     an_artifact: Annotated[
         NonUserNonBaseModelClass,
-        Artifact(name="my-artifact", loader=NonUserNonBaseModelClass.from_json),
+        Artifact(name="my-artifact", loads=NonUserNonBaseModelClass.from_json),
     ],
 ) -> str:
     return an_artifact.a + an_artifact.b
@@ -61,7 +61,7 @@ def non_base_model_with_class_loader(
 def non_base_model_with_lambda_function_loader(
     an_artifact: Annotated[
         NonUserNonBaseModelClass,
-        Artifact(name="my-artifact", loader=lambda json_str: NonUserNonBaseModelClass(**json.loads(json_str))),
+        Artifact(name="my-artifact", loads=lambda json_str: NonUserNonBaseModelClass(**json.loads(json_str))),
     ],
 ) -> str:
     return an_artifact.a + an_artifact.b
@@ -69,7 +69,7 @@ def non_base_model_with_lambda_function_loader(
 
 class MyInput(Input):
     non_user_defined_class: Annotated[
-        NonUserNonBaseModelClass, Artifact(name="my-artifact", loader=NonUserNonBaseModelClass.from_json)
+        NonUserNonBaseModelClass, Artifact(name="my-artifact", loads=NonUserNonBaseModelClass.from_json)
     ]
 
 

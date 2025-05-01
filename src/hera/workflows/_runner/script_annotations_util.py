@@ -3,7 +3,6 @@
 import json
 import os
 import sys
-import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
@@ -107,7 +106,7 @@ def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annot
     If the artifact is an output, return the path it will write to.
     If the artifact is an input, and it has an ArtifactLoader enum as its loader, return the
     loaded value according to the predefined behaviour (json obj, path or string), otherwise,
-    if the loader is a Callable, it is used directly to load the value.
+    if the `loads` is not None, it is used directly to load the value.
 
     As Artifacts are always Annotated in function parameters, we don't need to consider
     the `kwargs` or the function parameter name.
@@ -120,30 +119,21 @@ def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annot
         # we need to add it back in for the runner.
         artifact_annotation.path = artifact_annotation._get_default_inputs_path()
 
-    actual_type = unwrap_annotation(func_param_annotation)
-
-    if artifact_annotation.loader is None:
-        if os.environ.get("hera__artifact_path_as_string", None) is not None and issubclass(actual_type, str):
-            warnings.warn(
-                "The artifact path is being passed as a string. This is deprecated and will be removed in future versions. "
-                "Please use a Path type for the function parameter.",
-            )
-            return artifact_annotation.path
-
-        if issubclass(actual_type, Path):
-            return artifact_annotation.path
-
-    path = Path(artifact_annotation.path)
-    if artifact_annotation.loader == ArtifactLoader.file:
-        return path.read_text()
-
-    if artifact_annotation.loader == ArtifactLoader.json or artifact_annotation.loader is None:
+    if artifact_annotation.loader == ArtifactLoader.json.value:
+        path = Path(artifact_annotation.path)
         with path.open() as f:
             return json.load(f)
 
-    if isinstance(artifact_annotation.loader, Callable):  # type: ignore
-        loaded_value = artifact_annotation.loader(path.read_text())
-        return loaded_value
+    if artifact_annotation.loader == ArtifactLoader.file.value:
+        path = Path(artifact_annotation.path)
+        return path.read_text()
+
+    path = Path(artifact_annotation.path)
+    if artifact_annotation.loads is not None and isinstance(artifact_annotation.loads, Callable):  # type: ignore
+        return artifact_annotation.loads(path.read_text())
+
+    if artifact_annotation.loader is None:
+        return artifact_annotation.path
 
     raise RuntimeError(f"Artifact {artifact_annotation.name} was not given a value")
 

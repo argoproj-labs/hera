@@ -201,7 +201,6 @@ register_pre_build_hook = global_config.register_pre_build_hook
 
 _SCRIPT_PYDANTIC_IO_FLAG = "script_pydantic_io"
 _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
-_ARTIFACT_PATH_AS_STRING_FLAG = "artifact_path_as_string"
 
 # A dictionary where each key is a flag that has a list of flags which supersede it, hence
 # the given flag key can also be switched on by any of the flags in the list. Using simple flat lists
