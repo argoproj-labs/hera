@@ -103,13 +103,14 @@ def get_annotated_output_artifact(artifact_annotation: Artifact) -> Path:
     return path
 
 
-def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annotation: type) -> Union[Path, Any]:
+def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
     """Get the value of the given Artifact annotation.
 
     If the artifact is an output, return the path it will write to.
-    If the artifact is an input, and it has an ArtifactLoader enum as its loader, return the
-    loaded value according to the predefined behaviour (json obj, path or string), otherwise,
-    if the `loads` is not None, it is used directly to load the value.
+    If the artifact is an input, and one of the `loads` or `load` functions are not None,
+    they are used directly to load the value.
+    Otherwise, if it has an ArtifactLoader enum as its loader, return the
+    loaded value according to the predefined behaviour (json obj, path or string).
 
     As Artifacts are always Annotated in function parameters, we don't need to consider
     the `kwargs` or the function parameter name.
@@ -122,21 +123,19 @@ def get_annotated_artifact_value(artifact_annotation: Artifact, func_param_annot
         # we need to add it back in for the runner.
         artifact_annotation.path = artifact_annotation._get_default_inputs_path()
 
-    if artifact_annotation.loader == ArtifactLoader.json.value:
-        path = Path(artifact_annotation.path)
-        with path.open() as f:
-            return json.load(f)
-
-    if artifact_annotation.loader == ArtifactLoader.file.value:
-        path = Path(artifact_annotation.path)
-        return path.read_text()
-
     path = Path(artifact_annotation.path)
     if artifact_annotation.loads is not None and isinstance(artifact_annotation.loads, Callable):  # type: ignore
         return artifact_annotation.loads(path.read_text())
 
     if artifact_annotation.load is not None and isinstance(artifact_annotation.load, Callable):  # type: ignore
         return artifact_annotation.load(path.read_bytes())
+
+    if artifact_annotation.loader == ArtifactLoader.json.value:
+        with path.open() as f:
+            return json.load(f)
+
+    if artifact_annotation.loader == ArtifactLoader.file.value:
+        return path.read_text()
 
     if artifact_annotation.loader is None:
         return artifact_annotation.path
@@ -193,7 +192,7 @@ def map_runner_input(
                     param_or_artifact.loads,
                 )
             else:
-                return get_annotated_artifact_value(param_or_artifact, ann_type)
+                return get_annotated_artifact_value(param_or_artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
 

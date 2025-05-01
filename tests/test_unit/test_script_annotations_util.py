@@ -126,54 +126,47 @@ def test_get_annotated_input_param_error_param_name():
 
 
 @pytest.mark.parametrize(
-    "file_contents,artifact,param_type,expected_return",
+    "file_contents,artifact,expected_return",
     [
-        pytest.param(
-            '{"json": "object"}', Artifact(loader=ArtifactLoader.json), dict, {"json": "object"}, id="json-load"
-        ),
-        pytest.param(
-            '{"json": "object"}', Artifact(loader=ArtifactLoader.file), str, '{"json": "object"}', id="file-load"
-        ),
+        pytest.param('{"json": "object"}', Artifact(loader=ArtifactLoader.json), {"json": "object"}, id="json-load"),
+        pytest.param('{"json": "object"}', Artifact(loader=ArtifactLoader.file), '{"json": "object"}', id="file-load"),
     ],
 )
 def test_get_annotated_artifact_value_inputs_with_loaders(
     file_contents: str,
     artifact: Artifact,
-    param_type: type,
     expected_return: Any,
     tmp_path: Path,
 ):
     file_path = tmp_path / "contents.txt"
     file_path.write_text(file_contents)
     artifact.path = file_path
-    assert get_annotated_artifact_value(artifact, param_type) == expected_return
+    assert get_annotated_artifact_value(artifact) == expected_return
 
 
 @pytest.mark.parametrize(
-    "file_contents,artifact,param_type",
+    "file_contents,artifact",
     [
-        pytest.param('{"json": "object"}', Artifact(loader=None), Path, id="file-load"),
+        pytest.param('{"json": "object"}', Artifact(loader=None), id="file-load"),
     ],
 )
 def test_get_annotated_artifact_value_path_inputs(
     file_contents: str,
     artifact: Artifact,
-    param_type: type,
     tmp_path: Path,
 ):
     file_path = tmp_path / "contents.txt"
     file_path.write_text(file_contents)
     artifact.path = file_path
-    assert get_annotated_artifact_value(artifact, param_type) == file_path
+    assert get_annotated_artifact_value(artifact) == file_path
 
 
 @pytest.mark.parametrize(
-    "artifact,param_type,expected_path",
+    "artifact,expected_path",
     [
-        pytest.param(Artifact(path="/tmp/test.txt", output=True), Path, "/tmp/test.txt", id="given-path"),
+        pytest.param(Artifact(path="/tmp/test.txt", output=True), "/tmp/test.txt", id="given-path"),
         pytest.param(
             Artifact(name="artifact-name", output=True),
-            Path,
             "/tmp/hera-outputs/artifacts/artifact-name",
             id="default-path",
         ),
@@ -181,10 +174,9 @@ def test_get_annotated_artifact_value_path_inputs(
 )
 def test_get_annotated_artifact_value_path_outputs(
     artifact: Artifact,
-    param_type: type,
     expected_path: str,
 ):
-    assert get_annotated_artifact_value(artifact, param_type) == Path(expected_path)
+    assert get_annotated_artifact_value(artifact) == Path(expected_path)
 
 
 def test_map_runner_input():
