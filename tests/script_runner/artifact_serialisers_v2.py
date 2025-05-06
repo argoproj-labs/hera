@@ -31,7 +31,7 @@ def base_model_auto_load(
 def bytes_loader(
     an_artifact: Annotated[
         bytes,
-        Artifact(name="my-artifact", load=lambda b: pickle.loads(b)),
+        Artifact(name="my-artifact", loadb=lambda b: pickle.loads(b)),
     ],
 ) -> bytes:
     return an_artifact
@@ -102,7 +102,7 @@ def base_model_auto_save(
 def bytes_dumper(
     a: str,
     b: str,
-) -> Annotated[bytes, Artifact(name="my-output-artifact", dump=lambda x: pickle.dumps(x))]:
+) -> Annotated[bytes, Artifact(name="my-output-artifact", dumpb=lambda x: pickle.dumps(x))]:
     return (a + b).encode("utf-8")
 
 

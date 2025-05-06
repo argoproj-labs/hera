@@ -49,8 +49,8 @@ def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
     if isinstance(destination, Artifact):
         if destination.dumps is not None:
             return destination.dumps
-        if destination.dump is not None:
-            return destination.dump
+        if destination.dumpb is not None:
+            return destination.dumpb
 
     return serialize
 
@@ -127,8 +127,8 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     if artifact_annotation.loads is not None and isinstance(artifact_annotation.loads, Callable):  # type: ignore
         return artifact_annotation.loads(path.read_text())
 
-    if artifact_annotation.load is not None and isinstance(artifact_annotation.load, Callable):  # type: ignore
-        return artifact_annotation.load(path.read_bytes())
+    if artifact_annotation.loadb is not None and isinstance(artifact_annotation.loadb, Callable):  # type: ignore
+        return artifact_annotation.loadb(path.read_bytes())
 
     if artifact_annotation.loader == ArtifactLoader.json.value:
         with path.open() as f:
