@@ -125,15 +125,15 @@ virtualenv = ["virtualenv (>=20.0.35)"]
 
 [[package]]
 name = "cappa"
-version = "0.26.6"
+version = "0.27.2"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = "<4,>=3.8"
 groups = ["main"]
 markers = "extra == \"cli\""
 files = [
-    {file = "cappa-0.26.6-py3-none-any.whl", hash = "sha256:369a7164c75fd270c568a142c3181849cba4e07d95fb2b444479b64a4eb74ba2"},
-    {file = "cappa-0.26.6.tar.gz", hash = "sha256:8984bb3cdd933d8f19fcc5dda713e0c81a818c7f9521092d913f9074c9f127e0"},
+    {file = "cappa-0.27.2-py3-none-any.whl", hash = "sha256:7d99b01c1591f3f10e3cb056f06ca59a1d521db99f43015f68ee1f358ef26c66"},
+    {file = "cappa-0.27.2.tar.gz", hash = "sha256:382f12cd75bb7c645f5e235f58f5d2a2b798a015a04c8f37ad6532264f97a9ea"},
 ]
 
 [package.dependencies]
@@ -280,7 +280,7 @@ description = "Cross-platform colored terminal text."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 groups = ["dev"]
-markers = "sys_platform == \"win32\" or os_name == \"nt\" or platform_system == \"Windows\""
+markers = "os_name == \"nt\" or sys_platform == \"win32\" or platform_system == \"Windows\""
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
@@ -1234,7 +1234,7 @@ files = [
     {file = "PyYAML-6.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:39693e1f8320ae4f43943590b49779ffb98acb81f788220ea932a6b6c51004d8"},
     {file = "pyyaml-6.0.2.tar.gz", hash = "sha256:d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e"},
 ]
-markers = {main = "extra == \"yaml\" or extra == \"cli\""}
+markers = {main = "extra == \"cli\" or extra == \"yaml\""}
 
 [[package]]
 name = "requests"
@@ -1527,4 +1527,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "882b31f2407533010a54b2b39624a1075124df96bc4a29090338270ed19a2f4e"
+content-hash = "a2f372dcce5e759b4962ae2a4d632130251c336ff84a9ba25201f45a139edeaa"
