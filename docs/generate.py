@@ -29,7 +29,7 @@ def generate_markdown(path: Path, sub_folder: str) -> str:
     else:
         docstring = ""
     # remove the module docstring at the top of the python file using regex
-    py_contents = re.sub(r'^(""".*?""")', "", py_contents, 1, re.DOTALL)
+    py_contents = re.sub(r'^(""".*?""")', "", py_contents, count=1, flags=re.DOTALL)
     title = path.stem.replace("_", " ").title()
     yaml_filename = path.stem.replace("_", "-")
     yaml_contents = (path.parent / (yaml_filename + ".yaml")).read_text()
