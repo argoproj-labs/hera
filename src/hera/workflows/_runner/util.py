@@ -145,7 +145,9 @@ def _is_artifact_loaded(key: str, f: Callable) -> bool:
     if param_annotation := _get_function_param_annotation(key, f):
         if (artifact := get_workflow_annotation(param_annotation)) and isinstance(artifact, Artifact):
             return (
-                artifact.loader == ArtifactLoader.json.value or artifact.loads is not None or artifact.loadb is not None
+                artifact.loader == ArtifactLoader.json.value
+                or artifact.loads is not None
+                or artifact.loadb is not None
             )
     return False
 
