@@ -1,8 +1,8 @@
 # Meta
 [meta]: #meta
 - Name: YAML Code Converter
-- Start Date: (fill in today's date: 2025-04-29)
-- Update date (optional): (fill in today's date: YYYY-MM-DD)
+- Start Date: 2025-04-29
+<!-- - Update date (optional): (fill in today's date: YYYY-MM-DD) -->
 - Author(s): [@elliotgunton](https://github.com/elliotgunton)
 - Supersedes: N/A
 
@@ -11,10 +11,8 @@
 - [Meta](#meta)
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-- [Definitions](#definitions)
 - [Motivation](#motivation)
 - [Proposal](#proposal)
-  - [Terminology](#terminology)
   - [Code Examples](#code-examples)
 - [Implementation](#implementation)
 - [Drawbacks](#drawbacks)
@@ -25,11 +23,6 @@
 [overview]: #overview
 
 This HEP introduces a way to generate boilerplate Hera code from existing YAML Workflows, allowing existing Argo Workflows users to get their adoption of Hera kick started.
-
-# Definitions
-[definitions]: #definitions
-
-Make a list of the definitions that may be useful for those reviewing. Include phrases and words that Hera users or other interested parties may not be familiar with.
 
 # Motivation
 [motivation]: #motivation
@@ -63,11 +56,6 @@ hera generate python --from <yaml-file> [--to <filepath>]
 which would take in a YAML file and generate the Python code to stdout, or the file if provided.
 
 This would be a destructive operation, i.e. we would not consider if the file exists and contains code already. This is because we want to generate boilerplate for the user to build on, rather than interpreting what they already have, which would probably more than double the effort of implementation (being able to read and interpret the existing code, vs generating templated boilerplate from the YAML). This way, we can progressively build the Python code generator, such as generating Containers-only first, then DAGs, scripts, etc.
-
-## Terminology
-
-Define any new terminology.
-
 
 ## Code Examples
 
@@ -385,7 +373,7 @@ print(i)""",
 We will give a proof-of-concept for generating the Python object from YAMLs and describe the algorithm for the code:
 
 * Given a Workflow YAML, we know the values contained are limited to basic data types, lists and dictionaries.
-* We should then be able to iterate through the _attributes of the `Workflow` class_ and intelligently map the given YAML values to produce Python assignments, e.g.
+* We should then be able to iterate through the _attributes of the `Workflow` class_ and intelligently map the given YAML values to produce Python assignments with the help of `repr`, e.g.
   * Basic data types such as `str` and `int` are assigned directly, e.g. for a Workflow's `name`, we will produce the Python assignment in code as `name="some-name",`
   * Lists must be iterated through, and by using type of the values in the list, we recursively extract the correct assignment, e.g. a `list[str]` will produce the Python assignment `things=["a", "b", "c"]`, whereas `list[list[str]]` produces `things=[["a", "b"], ["c", "d"]]`
   * Dictionaries must be iterated through, and by using the type of the values (the keys are always strings coming from YAML), we can recursively extract the correct assignment, e.g. a `dict[str, int]` will produce the assignment `things={"a": 1, "b": 2}`
@@ -407,7 +395,7 @@ with Workflow(
 ) as w:
 ```
 
-> We can also skip automatically "known" values such as `api_version` and `kind`.
+_Note: We can also skip automatically "known" values such as `api_version` and `kind`._
 
 Then, we will iterate through the `templates` of the YAML, to create assignments such as:
 
