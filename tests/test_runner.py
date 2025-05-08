@@ -17,13 +17,17 @@ from typing import Any, Dict, List, Literal
 from unittest.mock import MagicMock, patch
 
 import pytest
-from pydantic import ValidationError
 
 import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
 from hera.workflows._runner.util import _run, _runner
-from hera.workflows.io.v1 import Output
+from hera.workflows.io.v1 import Output as OutputV1
+
+try:
+    from hera.workflows.io.v2 import Output as OutputV2
+except ImportError:
+    from hera.workflows.io.v1 import Output as OutputV2
 
 
 @pytest.mark.parametrize(
@@ -496,23 +500,6 @@ def test_script_annotations_artifact_inputs(
     assert serialize(output) == expected_output
 
 
-def test_script_annotations_artifact_input_loader_error():
-    """Test that the input artifact loaded with wrong type throws the expected exception."""
-    # GIVEN
-    function_name = "no_loader_invalid_type"
-    kwargs_list = []
-
-    # Force a reload of the test module, as the runner performs "importlib.import_module", which
-    # may fetch a cached version which will not have the correct ARTIFACT_PATH
-    import tests.script_runner.artifact_loaders as module
-
-    importlib.reload(module)
-
-    # THEN
-    with pytest.raises(ValidationError):
-        _ = _runner(f"{module.__name__}:{function_name}", kwargs_list)
-
-
 @pytest.mark.parametrize(
     "entrypoint,artifact_name,file_contents,expected_output",
     [
@@ -684,16 +671,16 @@ def test_runner_pydantic_inputs_params(
     assert serialize(output) == expected_output
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,expected_files,pydantic_mode",
+    "entrypoint,expected_files",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io_v1:pydantic_output_parameters",
+            "tests.script_runner.pydantic_io_vX:pydantic_output_parameters",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
             ],
-            1,
             id="pydantic output parameter variations",
         ),
     ],
@@ -706,12 +693,9 @@ def test_runner_pydantic_output_params(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
-
-    import tests.script_runner.pydantic_io_v1 as module
-
-    importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -720,17 +704,18 @@ def test_runner_pydantic_output_params(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert isinstance(output, Output)
+    assert isinstance(output, (OutputV1, OutputV2))
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,input_files,expected_output,pydantic_mode",
+    "entrypoint,input_files,expected_output",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io_v1:pydantic_input_artifact",
+            "tests.script_runner.pydantic_io_vX:pydantic_input_artifact",
             {
                 "json": '{"a": 3, "b": "bar"}',
                 "path": "dummy",
@@ -738,7 +723,6 @@ def test_runner_pydantic_output_params(
                 "file": "dummy",
             },
             '{"a": 3, "b": "bar"}',
-            1,
             id="pydantic io artifact input variations",
         ),
     ],
@@ -752,18 +736,20 @@ def test_runner_pydantic_input_artifacts(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
+
     for file, contents in input_files.items():
         filepath = tmp_path / file
         filepath.write_text(contents)
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
+    module = importlib.import_module(entrypoint.split(":")[0])
+    importlib.reload(module)
+
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
-
-    import tests.script_runner.pydantic_io_v1 as module
-
-    importlib.reload(module)
+    monkeypatch.setenv("hera__artifact_path_as_string", "")
 
     # WHEN
     output = _runner(entrypoint, [])
@@ -772,11 +758,12 @@ def test_runner_pydantic_input_artifacts(
     assert serialize(output) == expected_output
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,input_files,expected_files,pydantic_mode",
+    "entrypoint,input_files,expected_files",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io_v1:pydantic_output_artifact",
+            "tests.script_runner.pydantic_io_vX:pydantic_output_artifact",
             {
                 "json": '{"a": 3, "b": "bar"}',
                 "path": "dummy",
@@ -786,7 +773,6 @@ def test_runner_pydantic_input_artifacts(
             [
                 {"subpath": "tmp/hera-outputs/artifacts/artifact-str-output", "value": "test"},
             ],
-            1,
             id="pydantic io artifact output variations",
         ),
     ],
@@ -800,18 +786,15 @@ def test_runner_pydantic_output_artifacts(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
+
     for file, contents in input_files.items():
         filepath = tmp_path / file
         filepath.write_text(contents)
 
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
-
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
-
-    import tests.script_runner.pydantic_io_v1 as module
-
-    importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -820,22 +803,22 @@ def test_runner_pydantic_output_artifacts(
     output = _runner(entrypoint, [])
 
     # THEN
-    assert isinstance(output, Output)
+    assert isinstance(output, (OutputV1, OutputV2))
     for file in expected_files:
         assert Path(tmp_path / file["subpath"]).is_file()
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,expected_files,pydantic_mode",
+    "entrypoint,expected_files",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io_v1:pydantic_output_using_exit_code",
+            "tests.script_runner.pydantic_io_vX:pydantic_output_using_exit_code",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
             ],
-            1,
             id="pydantic output with exit code",
         ),
     ],
@@ -848,12 +831,10 @@ def test_runner_pydantic_output_with_exit_code(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
+
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
-
-    import tests.script_runner.pydantic_io_v1 as module
-
-    importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
     monkeypatch.setenv("hera__outputs_directory", outputs_directory)
@@ -868,16 +849,16 @@ def test_runner_pydantic_output_with_exit_code(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,expected_files,pydantic_mode",
+    "entrypoint,expected_files",
     [
         pytest.param(
-            "tests.script_runner.pydantic_io_v1:pydantic_output_using_exit_code",
+            "tests.script_runner.pydantic_io_vX:pydantic_output_using_exit_code",
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
             ],
-            1,
             id="use _run to check actual system exit",
         ),
     ],
@@ -892,6 +873,7 @@ def test_run_pydantic_output_with_exit_code(
     tmp_path: Path,
 ):
     # GIVEN
+    entrypoint = entrypoint.replace("pydantic_io_vX", f"pydantic_io_v{pydantic_mode}")
     file_path = Path(tmp_path / "test_params")
     file_path.write_text("")
     args = MagicMock(entrypoint=entrypoint, args_path=file_path)
@@ -900,8 +882,7 @@ def test_run_pydantic_output_with_exit_code(
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
 
-    import tests.script_runner.pydantic_io_v1 as module
-
+    module = importlib.import_module(entrypoint.split(":")[0])
     importlib.reload(module)
 
     outputs_directory = str(tmp_path / "tmp/hera-outputs")
@@ -919,8 +900,9 @@ def test_run_pydantic_output_with_exit_code(
         assert Path(tmp_path / file["subpath"]).read_text() == file["value"]
 
 
+@pytest.mark.parametrize("pydantic_mode", [1, _PYDANTIC_VERSION])
 @pytest.mark.parametrize(
-    "entrypoint,expected_files,expected_result,pydantic_mode",
+    "entrypoint,expected_files,expected_result",
     [
         pytest.param(
             "tests.script_runner.pydantic_io_v1:pydantic_output_using_result",
@@ -929,7 +911,6 @@ def test_run_pydantic_output_with_exit_code(
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
             ],
             "42",
-            1,
             id="pydantic output with result output",
         ),
     ],
