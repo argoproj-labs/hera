@@ -89,13 +89,13 @@ class Artifact(BaseModel):
 
     Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
 
-    loadb: Union[Optional[Callable[[bytes], Any]]] = None
+    loadb: Optional[Callable[[bytes], Any]] = None
     """used to specify a loader function to deserialise from bytes for Annotated Artifact function parameters"""
 
     dumpb: Optional[Callable[[Any], bytes]] = None
     """used to specify a dumper function to serialise the Artifact value as bytes for Annotated Artifact function parameters"""
 
-    loads: Union[Optional[Callable[[str], Any]]] = None
+    loads: Optional[Callable[[str], Any]] = None
     """used to specify a loader function to deserialise a string representation of an object for Annotated Artifact function parameters"""
 
     dumps: Optional[Callable[[Any], str]] = None
