@@ -43,8 +43,10 @@ def _get_outputs_path(destination: Union[Parameter, Artifact]) -> Path:
 
 
 def _get_dumper_function(destination: Union[Parameter, Artifact]) -> Callable:
-    if isinstance(destination, Parameter) and destination.dumps is not None:
+    if destination.dumps is not None:
         return destination.dumps
+    if isinstance(destination, Artifact) and destination.dumpb is not None:
+        return destination.dumpb
 
     return serialize
 
@@ -87,38 +89,48 @@ def get_annotated_output_param(param_annotation: Parameter) -> Path:
     return path
 
 
+def get_annotated_output_artifact(artifact_annotation: Artifact) -> Path:
+    if artifact_annotation.path:
+        path = Path(artifact_annotation.path)
+    else:
+        path = _get_outputs_path(artifact_annotation)
+    # Automatically create the parent directory (if required)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
     """Get the value of the given Artifact annotation.
 
     If the artifact is an output, return the path it will write to.
-    If the artifact is an input, and it has an ArtifactLoader enum as its loader, return the
-    loaded value according to the predefined behaviour (json obj, path or string), otherwise,
-    if the loader is a Callable, it is used directly to load the value.
+    If the artifact is an input, and one of the `loads` or `load` functions are not None,
+    they are used directly to load the value.
+    Otherwise, if it has an ArtifactLoader enum as its loader, return the
+    loaded value according to the predefined behaviour (json obj, path or string).
 
     As Artifacts are always Annotated in function parameters, we don't need to consider
     the `kwargs` or the function parameter name.
     """
     if artifact_annotation.output:
-        if artifact_annotation.path:
-            path = Path(artifact_annotation.path)
-        else:
-            path = _get_outputs_path(artifact_annotation)
-        # Automatically create the parent directory (if required)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
+        return get_annotated_output_artifact(artifact_annotation)
 
     if not artifact_annotation.path:
         # Path is added to the spec automatically when built. As it isn't present in the annotation itself,
         # we need to add it back in for the runner.
         artifact_annotation.path = artifact_annotation._get_default_inputs_path()
 
+    path = Path(artifact_annotation.path)
+    if artifact_annotation.loads is not None:
+        return artifact_annotation.loads(path.read_text())
+
+    if artifact_annotation.loadb is not None:
+        return artifact_annotation.loadb(path.read_bytes())
+
     if artifact_annotation.loader == ArtifactLoader.json.value:
-        path = Path(artifact_annotation.path)
         with path.open() as f:
             return json.load(f)
 
     if artifact_annotation.loader == ArtifactLoader.file.value:
-        path = Path(artifact_annotation.path)
         return path.read_text()
 
     if artifact_annotation.loader is None:
@@ -288,7 +300,10 @@ def _save_dummy_outputs(
 
 def _write_to_path(path: Path, output_value: Any, dumper: Callable = serialize) -> None:
     """Write the output_value as serialized text to the provided path. Create the necessary parent directories."""
-    output_string = dumper(output_value)
-    if output_string is not None:
+    dumped_output = dumper(output_value)
+    if dumped_output is not None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(output_string)
+        if isinstance(dumped_output, str):
+            path.write_text(dumped_output)
+        elif isinstance(dumped_output, bytes):
+            path.write_bytes(dumped_output)

@@ -166,7 +166,9 @@ def test_get_annotated_artifact_value_path_inputs(
     [
         pytest.param(Artifact(path="/tmp/test.txt", output=True), "/tmp/test.txt", id="given-path"),
         pytest.param(
-            Artifact(name="artifact-name", output=True), "/tmp/hera-outputs/artifacts/artifact-name", id="default-path"
+            Artifact(name="artifact-name", output=True),
+            "/tmp/hera-outputs/artifacts/artifact-name",
+            id="default-path",
         ),
     ],
 )

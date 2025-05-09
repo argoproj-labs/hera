@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from typing import List, Optional, Union, cast
+from typing import Any, Callable, List, Optional, Union, cast
 
 from hera.shared._pydantic import BaseModel
 from hera.workflows.archive import ArchiveStrategy
@@ -88,6 +88,18 @@ class Artifact(BaseModel):
     """used for input Artifact annotations for determining how to load the data.
 
     Note: A loader value of 'None' must be used with an underlying type of 'str' or Path-like class."""
+
+    loadb: Optional[Callable[[bytes], Any]] = None
+    """used to specify a loader function to deserialise from bytes for Annotated Artifact function parameters"""
+
+    dumpb: Optional[Callable[[Any], bytes]] = None
+    """used to specify a dumper function to serialise the Artifact value as bytes for Annotated Artifact function parameters"""
+
+    loads: Optional[Callable[[str], Any]] = None
+    """used to specify a loader function to deserialise a string representation of an object for Annotated Artifact function parameters"""
+
+    dumps: Optional[Callable[[Any], str]] = None
+    """used to specify a dumper function to serialise the Artifact value as a string for Annotated Artifact function parameters"""
 
     optional: Optional[bool] = None
     """whether the Artifact is optional. For an input Artifact, this means it may possibly not

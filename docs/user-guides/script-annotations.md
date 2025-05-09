@@ -41,6 +41,12 @@ The fields allowed in the `Parameter` annotations are: `name`, `enum`, and `desc
 variable name if not provided (when exporting to YAML or viewing in the Argo UI, the `name` variable will be used). A
 `default` must be set using standard Python syntax, i.e. `x: int = 42`.
 
+### Custom Serialisation
+
+If you are using a type that is not a built in (`int`, `str`, `dict` etc) or a Pydantic `BaseModel`, you can provide
+functions to the Parameter's `loads` and `dumps` attributes, which will be used by the Hera Runner (and so requires
+the use of "runner" templates). These will then be used to deserialise from, and serialise to, strings.
+
 ## Artifacts
 
 > Note: `Artifact` annotations are only supported when used with the `RunnerScriptConstructor`.
@@ -73,15 +79,22 @@ def read_artifact(an_artifact: Annotated[Path, Artifact(name="my-artifact-name",
     print(an_artifact.read_text())
 ```
 
-The fields allowed in the `Artifact` annotations are: `name`, `path`, and `loader`. You are also able to use artifact
-repository types such as `S3Artifact` (which are subclasses of `Artifact`) to first fetch the artifact from storage and
-mount it to the container at the inferred path (or your custom path).
+The fields allowed in the `Artifact` annotations are: `name`, `path`, `loader`, `loads`, `dumps`, `loadb` and `dumpb`.
+You are also able to use artifact repository types such as `S3Artifact` (which are subclasses of `Artifact`) to first
+fetch the artifact from storage and mount it to the container at the inferred path (or your custom path).
 
-## Artifact Loaders
+## Custom Serialisation
 
-Artifact loaders specify how the Hera Runner should load the Artifact into the Python variable. There are three
-different ways that the Hera Runner can set the variable: as the Path to the Artifact, as the string contents of the
-Artifact, or as the deserialized JSON object stored in the Artifact.
+If you are using a type that is not a built in (`int`, `str`, `dict` etc) or a Pydantic `BaseModel`, you can provide
+functions to the Artifact's `loads` and `dumps` attributes or the `loadb` and `dumpb` attributes, which will be used by
+the Hera Runner (and so requires the use of "runner" templates). `loads` and `dumps` are used to deserialise from, and
+serialise to, strings, while `loadb` and `dump` are used to deserialise from, and serialise to, a Python `bytes` object.
+
+For simple use cases, you can set `loader` to an `ArtifactLoader` enum.
+
+The `ArtifactLoader` enum lets you specify how the Hera Runner should load the Artifact into the Python variable. There
+are three different ways that the Hera Runner can set the variable: as the Path to the Artifact, as the string contents
+of the Artifact, or as the deserialized JSON object stored in the Artifact.
 
 ### `None` loader
 

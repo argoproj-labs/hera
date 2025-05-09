@@ -207,12 +207,11 @@ _DECORATOR_SYNTAX_FLAG = "decorator_syntax"
 # for now, otherwise with many superseding flags we may want to have a recursive structure.
 _SUPERSEDING_FLAGS: Dict[str, List] = {
     _SCRIPT_PYDANTIC_IO_FLAG: [_DECORATOR_SYNTAX_FLAG],
-    _DECORATOR_SYNTAX_FLAG: [],
 }
 
 
 def _flag_enabled(flag: str) -> bool:
     """Return true if the flag is set, or any of its superseding flags."""
     return global_config.experimental_features[flag] or any(
-        global_config.experimental_features[f] for f in _SUPERSEDING_FLAGS[flag]
+        global_config.experimental_features[f] for f in _SUPERSEDING_FLAGS.get(flag, [])
     )
