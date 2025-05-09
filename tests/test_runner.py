@@ -749,7 +749,6 @@ def test_runner_pydantic_input_artifacts(
 
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
-    monkeypatch.setenv("hera__artifact_path_as_string", "")
 
     # WHEN
     output = _runner(entrypoint, [])
