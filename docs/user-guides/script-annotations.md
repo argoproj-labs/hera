@@ -79,9 +79,9 @@ def read_artifact(an_artifact: Annotated[Path, Artifact(name="my-artifact-name",
     print(an_artifact.read_text())
 ```
 
-The fields allowed in the `Artifact` annotations are: `name`, `path`, `loads`, `dumps`, `loadb` and `dumpb`. You are
-also able to use artifact repository types such as `S3Artifact` (which are subclasses of `Artifact`) to first fetch the
-artifact from storage and mount it to the container at the inferred path (or your custom path).
+The fields allowed in the `Artifact` annotations are: `name`, `path`, `loader`, `loads`, `dumps`, `loadb` and `dumpb`.
+You are also able to use artifact repository types such as `S3Artifact` (which are subclasses of `Artifact`) to first
+fetch the artifact from storage and mount it to the container at the inferred path (or your custom path).
 
 ## Custom Serialisation
 
