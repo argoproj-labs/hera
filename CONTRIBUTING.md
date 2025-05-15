@@ -97,7 +97,7 @@ You can [take a look at `test_submission.py`](https://github.com/argoproj-labs/h
 make test-on-cluster
 ```
 
-See the [Viewing the Argo UI from a Codespace](../CONTRIBUTING.md#viewing-the-argo-ui-from-a-codespace) guide to see the Workflow in the UI.
+See the [Viewing the Argo UI from a Codespace](#viewing-the-argo-ui-from-a-codespace) guide to see the Workflow in the UI.
 
 Otherwise you can install the Argo CLI with
 
