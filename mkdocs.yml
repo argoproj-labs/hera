@@ -10,7 +10,6 @@ nav:
   - Walkthrough:
     - walk-through/quick-start.md
     - walk-through/about-hera.md
-    - walk-through/hera-tour.md
     - walk-through/hello-world.md
     - walk-through/parameters.md
     - walk-through/steps.md
@@ -26,6 +25,7 @@ nav:
       - walk-through/workflow-features.md
       - walk-through/template-features.md
   - User Guides:
+    - Intro Tutorial: user-guides/hera-tutorial.md
     - Core Concepts: user-guides/core-concepts.md
     - Scripts:
       - Script Basics: user-guides/script-basics.md
