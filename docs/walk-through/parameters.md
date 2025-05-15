@@ -1,13 +1,13 @@
 # Parameters
 
-In [Hello World](hello-world.md), a simple use of parameters was introduced, namely a Python function that takes
-kwargs. We'll now explore how Hera exposes other features of Argo's
-[Parameters](https://argoproj.github.io/argo-workflows/fields/#parameter).
+In Argo Workflows, [Parameters](https://argoproj.github.io/argo-workflows/fields/#parameter) are used to specify inputs
+and outputs of templates, as well as the arguments for template inputs when using the template. Hera aims to simplify
+the use of Parameters through integrations with native functions.
 
 ## Default Values
 
-A Python function naturally allows default values in its definition. When you decorate a function with Hera's `script`
-decorator, it lifts out the default value into a Parameter's `default`.
+Python functions allow default values in the function definition. When you decorate a function with Hera's `script`
+decorator, any Python default values become default Parameter values for the template. For example, the Hera code below,
 
 ```py
 @script()
@@ -15,116 +15,159 @@ def echo(message: str = "Hello world!"):
     print(message)
 ```
 
-We can run this function in a workflow as defined below:
+becomes:
 
-```py
-with Workflow(
-    generate_name="hello-world-",
-    entrypoint="steps",
-) as w:
-    with Steps(name="steps"):
-        echo()
+```yaml
+- name: echo
+  inputs:
+    parameters:
+    - name: message
+      default: Hello world!
+  script:
+    image: python:3.9
+    source: |-
+      import os
+      import sys
+      sys.path.append(os.getcwd())
+      import json
+      try: message = json.loads(r'''{{inputs.parameters.message}}''')
+      except: message = r'''{{inputs.parameters.message}}'''
+
+      print(message)
+    command:
+    - python
 ```
 
-And we'll see logs in Argo like
+## Function Input Types
 
-```console
-hello-world-r96ww-echo-1258475821: Hello world!
-```
+### Basic Usage for Inline Scripts
 
-## Types
+YAML accepts all the key basic types of JSON, including strings, numbers, bools, lists and dictionaries. For Inline
+scripts, Hera interprets values passed into your function based on `json.loads`, *not the type you specify*, so the
+example below will add `a` and `b` if the values passed in are interpreted as ints by `json.loads`, or concatenate them
+if they are both strings:
 
-Python functions don't just take strings, of course, and the key basic types YAML allows are strings, ints, bools and
-dictionaries. Hera interprets values passed into your function via `json.loads`, so the below will add `a` and `b` if
-the values passed in are interpreted as ints by `json.loads`.
+=== "Hera"
 
-```py
-@script()
-def add_values(a: int, b: int):
-    print("Adding values")
-    print(a + b)
-```
+    ```py
+    @script()
+    def add_values(a: int, b: str):
+        print("Do we add or concatenate the values?")
+        print(a + b)
+    ```
 
-i.e. the two calls to `add_values` below are equivalent as the strings in the second call are interpreted as integers.
-Note that when reusing a function in multiple steps, you must give unique names to the `name` parameter.
+=== "YAML"
 
-```py
-with Steps(name="steps"):
-        add_values(name="first", arguments={"a": 1, "b": 2})
-        add_values(name="second", arguments={"a": "1", "b": "2"})  # "1" and "2" will be treated as ints
-```
+    ```yaml
+    - name: add-values
+      inputs:
+        parameters:
+        - name: a
+        - name: b
+      script:
+        image: python:3.9
+        source: |-
+          import os
+          import sys
+          sys.path.append(os.getcwd())
+          import json
+          try: a = json.loads(r'''{{inputs.parameters.a}}''')
+          except: a = r'''{{inputs.parameters.a}}'''
+          try: b = json.loads(r'''{{inputs.parameters.b}}''')
+          except: b = r'''{{inputs.parameters.b}}'''
 
-<details>
-<summary>See the logs from this run</summary>
+          print("Do we add or concatenate the values?")
+          print(a + b)
+        command:
+        - python
+    ```
 
-Note the different node IDs (the number after `add-values`) in the logs, as the logs do not show the container names
-"first" and "second".
+> At runtime, `a` and `b` could be ints, or strings, or any other JSON types! Be careful relying on types in inline
+> scripts!
 
-```console
-add-values-xw7k9-add-values-242584704: Adding values
-add-values-xw7k9-add-values-242584704: 3
-add-values-xw7k9-add-values-242584704: time="2023-05-26T11:57:13.805Z" level=info msg="sub-process exited" argo=true error="<nil>"
-add-values-xw7k9-add-values-838832153: Adding values
-add-values-xw7k9-add-values-838832153: 3
-add-values-xw7k9-add-values-838832153: time="2023-05-26T11:57:24.101Z" level=info msg="sub-process exited" argo=true error="<nil>"
-```
-</details>
+### Enforcing Types Using the Hera Runner
 
-## Dictionaries
+To enforce types at runtime, you will need to build an image and use Hera's
+[Script Runner](../user-guides/script-basics.md#runnerscriptconstructor). Then, the types will be validated at runtime
+by Pydantic, and you can rely on the types being correct.
 
-If we have a function that takes a dict such as below:
+=== "Hera"
 
-```py
-@script()
-def echo_a_dict(my_dict: Dict[str, str]):
-    for k, v in my_dict.items():
-        print(f"{k}={v}")
-```
+    ```py
+    from hera.workflows import Steps, Workflow, script
 
-Then in the snippet below, during the compilation of the workflow, `arguments` will serialize the `dict` value of
-`my_dict` via `json.dumps`. Then during the script execution on Argo, `json.loads` will load the `dict` and the function
-will run as expected.
 
-```py
-with Workflow(
-    generate_name="echo-dict-",
-    entrypoint="steps",
-) as w:
-    with Steps(name="steps"):
-        echo_a_dict(
-            arguments={
-                "my_dict": {
-                    "my_key": "my_value",
-                    "my_second_key": "my_second_value",
-                }
-            }
-        )
+    @script(constructor="runner", image="my-image:v1")
+    def add_values(a: int, b: int):
+        print("I know these are integers!")
+        print(a + b)
 
-w.create()
-```
 
-The logs for the workflow will show
+    with Workflow(
+        generate_name="validate-types-",
+        entrypoint="steps",
+    ) as w:
+        with Steps(name="steps"):
+            add_values(
+                arguments={
+                    "a": 1,
+                    "b": 2,
+                },
+            )
+    ```
 
-```console
-my_key=my_value
-my_second_key=my_second_value
-```
+=== "YAML"
 
-## Custom Types
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: validate-types-
+    spec:
+      entrypoint: steps
+      templates:
+      - name: steps
+        steps:
+        - - name: add-values
+            template: add-values
+            arguments:
+              parameters:
+              - name: a
+                value: '1'
+              - name: b
+                value: '2'
+      - name: add-values
+        inputs:
+          parameters:
+          - name: a
+          - name: b
+        script:
+          image: my-image:v1
+          source: '{{inputs.parameters}}'
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.misc.hello_world:add_values
+          command:
+          - python
+    ```
 
-Currently, custom types are only supported in the "script runner" experimental feature. See an example usage
-[here](../examples/workflows/scripts/callable_script.md). Please note this is an experimental feature so support is
-limited for now.
+### Custom Types
 
-## Passing Parameters
+Hera uses Pydantic to allow any JSON-serialisable class to be used. You will need to build an image and use Hera's
+[Script Runner](../user-guides/script-basics.md#runnerscriptconstructor). See an example usage
+[here](../examples/workflows/scripts/callable_script.md).
+
+## Output Parameters
 
 ### The `result` Output Parameter
 
-For the previous examples, we've been printing output to stdout, which allows subsequent steps to access the value from
-the
+The
 [`result` output parameter](https://argoproj.github.io/argo-workflows/walk-through/output-parameters/#result-output-parameter)
-(that is, the `result` value *is* the stdout). In Hera, if we use a function under a `Steps` context, it returns a `Step`
-object, which has a `result` property that we can access. For example, if we have the following functions:
+captures the `stdout` of a template (that is, the `result` value is the *whole* stdout, including any log lines!) for
+subsequent steps to use. In Hera, if we use a function under a `Steps` context, it returns a `Step` object, which has a
+`result` property that we can access. For example, given the following functions:
 
 ```py
 @script()
@@ -136,9 +179,8 @@ def repeat_back(message: str):
     print(f"You just said: '{message}'")
 ```
 
-Let's say we want to get the stdout from running the `hello` Script template. We have to assign the `Step` object
-returned from the function call to a variable, then we can access its `result` member, passing it to the `repeat_back`
-template.
+If we want to get the stdout from running the `hello` Script template, function call returns a `Step` object that we
+assign to a variable, and then we pass its `result` to the `repeat_back` template:
 
 ```py
 with Workflow(
@@ -159,14 +201,12 @@ hello-world-ltpjt-hello-2151859747: Hello world!
 hello-world-ltpjt-repeat-back-4012331575: You just said: 'Hello world!'
 ```
 
+### Output Parameters for Inline Scripts
 
-### Output Parameters
-
-#### Creating Output Parameters
-
-In general, output parameters are given values from a generated file rather than `stdout` like the `result` parameter.
-You can do this in Hera by telling the script decorator to export the output from a file through a `value_from`. Ensure
-you add the imports given below!
+Normally in Argo Workflows, if you want an output parameter from a template, you will need to specify a file to export
+the value from, and write to that file within the business logic of the template. Even in Hera, this can be quite
+tedious and error-prone for inline scripts, with the `path` being in two separate places (or exposed as a global
+variable):
 
 ```py
 from hera.workflows import Parameter, script
@@ -194,45 +234,137 @@ The output parameter will also show up in the UI under the node's INPUTS/OUTPUTS
 | ------------ | ------------ |
 | hello-output | Hello World! |
 
-#### Passing Output Parameters
+### Output Parameters for Runner Scripts
 
-Now that we have a `hello_to_file` function, let's use its output in our `repeat_back` function. Under a `Steps`
-context, we can assign the `Step` object returned from the `hello_to_file` function, and use its `get_parameter`
-function, and get the `Parameter`'s `value`.
-
-```py
-with Workflow(
-    generate_name="hello-world-parameter-passing-",
-    entrypoint="steps",
-) as w:
-    with Steps(name="steps"):
-        hello_world_step = hello_to_file()
-        repeat_back(
-            arguments={"message": hello_world_step.get_parameter("hello-output").value}
-        )
-```
-
-If you prefer, `arguments` can accept a single `Parameter`, and we can use the `with_name` function for convenience to
-specify the right name for `repeat_back`:
+Output parameters are greatly simplified when using the Runner Scripts. You specify output parameters through the return
+type annotation and return the value directly from the function (making testing much easier!), and the Hera runner will
+handle the file saving for you:
 
 ```py
-with Workflow(
-    generate_name="hello-world-parameter-passing-",
-    entrypoint="steps",
-) as w:
-    with Steps(name="steps"):
-        hello_world_step = hello_to_file()
-        repeat_back(
-            arguments=hello_world_step.get_parameter("hello-output").with_name("message")
-        )
+from typing import Annotated
+from hera.workflows import Parameter, script
+
+@script(constructor="runner", image="my-image:v1")
+def hello() -> Annotated[str, Parameter(name="hello-output")]:
+    return "Hello World!"
 ```
 
+> Note: you will need to build an image from your code and dependencies to use the Hera Runner.
 
-Both of these Workflows will produce logs like
+You can return multiple output parameters by using a `Tuple`:
 
-```console
-hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="sub-process exited" argo=true error="<nil>"
-hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/parameters//tmp/hello_world.txt" argo=true
-hello-world-parameter-passing-vq7pm-repeat-back-3418430710: You just said: 'Hello World!'
-hello-world-parameter-passing-vq7pm-repeat-back-3418430710: time="2023-05-26T12:12:24.106Z" level=info msg="sub-process exited" argo=true error="<nil>"
+```py
+from typing import Annotated
+from hera.workflows import Parameter, script
+
+@script(constructor="runner", image="my-image:v1")
+def hello() -> Tuple[
+    Annotated[str, Parameter(name="hello-output-1")],
+    Annotated[str, Parameter(name="hello-output-2")],
+]:
+    return "Hello World!", "Goodbye World!"
 ```
+
+If you have many outputs, consider using [the Runner IO feature](../user-guides/script-runner-io.md) to avoid a
+sprawling Tuple.
+
+### Passing Output Parameters to Another Step
+
+Under a `Steps` context, we can assign the `Step` object returned from the `hello_to_file` function, and use
+`get_parameter`:
+
+=== "Hera"
+
+    ```py
+    from hera.workflows import Parameter, Steps, Workflow, script
+    from hera.workflows.models import ValueFrom
+
+
+    @script(
+        outputs=[
+            Parameter(name="hello-output", value_from=ValueFrom(path="/tmp/hello_world.txt")),
+        ]
+    )
+    def hello_to_file():
+        with open("/tmp/hello_world.txt", "w") as f:
+            f.write("Hello World!")
+
+
+    @script()
+    def repeat_back(message: str):
+        print(f"You just said: '{message}'")
+
+
+    with Workflow(
+        generate_name="hello-world-parameter-passing-",
+        entrypoint="steps",
+    ) as w:
+        with Steps(name="steps"):
+            hello_world_step = hello_to_file()
+            repeat_back(arguments={"message": hello_world_step.get_parameter("hello-output")})
+
+    ```
+
+=== "YAML"
+
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+    generateName: hello-world-parameter-passing-
+    spec:
+    entrypoint: steps
+    templates:
+    - name: steps
+        steps:
+        - - name: hello-to-file
+            template: hello-to-file
+        - - name: repeat-back
+            template: repeat-back
+            arguments:
+            parameters:
+            - name: message
+                value: '{{steps.hello-to-file.outputs.parameters.hello-output}}'
+    - name: hello-to-file
+        outputs:
+        parameters:
+        - name: hello-output
+            valueFrom:
+            path: /tmp/hello_world.txt
+        script:
+        image: python:3.9
+        source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            with open('/tmp/hello_world.txt', 'w') as f:
+                f.write('Hello World!')
+        command:
+        - python
+    - name: repeat-back
+        inputs:
+        parameters:
+        - name: message
+        script:
+        image: python:3.9
+        source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
+
+            print(f"You just said: '{message}'")
+        command:
+        - python
+    ```
+
+=== "Logs"
+
+    ```console
+    hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="sub-process exited" argo=true error="<nil>"
+    hello-world-parameter-passing-vq7pm-hello-to-file-3540104653: time="2023-05-26T12:12:13.803Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/parameters//tmp/hello_world.txt" argo=true
+    hello-world-parameter-passing-vq7pm-repeat-back-3418430710: You just said: 'Hello World!'
+    hello-world-parameter-passing-vq7pm-repeat-back-3418430710: time="2023-05-26T12:12:24.106Z" level=info msg="sub-process exited" argo=true error="<nil>"
+    ```
