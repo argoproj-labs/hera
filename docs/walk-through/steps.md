@@ -10,7 +10,7 @@ the context. When using a `@script` function multiple times under a single `Step
 === "Hera"
 
     ```py
-    from hera.workflows import Steps, Workflow, WorkflowsService, script
+    from hera.workflows import Steps, Workflow, script
 
 
     @script()
@@ -25,8 +25,6 @@ the context. When using a `@script` function multiple times under a single `Step
         with Steps(name="steps"):
             echo(name="hello", arguments={"message": "Hello world!"})
             echo(name="goodbye", arguments={"message": "Goodbye world!"})
-
-    w.create()
     ```
 
 === "YAML"
@@ -35,41 +33,41 @@ the context. When using a `@script` function multiple times under a single `Step
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-    generateName: hello-world-steps-
+      generateName: hello-world-steps-
     spec:
-    entrypoint: steps
-    templates:
-    - name: steps
+      entrypoint: steps
+      templates:
+      - name: steps
         steps:
         - - name: hello
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: Hello world!
         - - name: goodbye
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: Goodbye world!
-    - name: echo
+      - name: echo
         inputs:
-        parameters:
-        - name: message
+          parameters:
+          - name: message
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             import json
             try: message = json.loads(r'''{{inputs.parameters.message}}''')
-            except: message = r'''{{inputs.parameters.message}}'''
+            except: message = r'''{{inputs.parameters.message}}'''  
 
             print(message)
-        command:
-        - python
+          command:
+          - python
     ```
 
 ## Parallel Steps
@@ -103,8 +101,6 @@ this example:
                 echo(name="parallel-3", arguments={"message": "I'm parallel-3!"})
 
             echo(name="post-parallel", arguments={"message": "Goodbye world!"})
-
-    w.create()
     ```
 
 === "YAML"
@@ -113,49 +109,49 @@ this example:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-    generateName: hello-world-
+      generateName: hello-world-
     spec:
-    entrypoint: steps
-    templates:
-    - name: steps
+      entrypoint: steps
+      templates:
+      - name: steps
         steps:
         - - name: pre-parallel
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: Hello world!
         - - name: parallel-1
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: I'm parallel-1!
-        - name: parallel-2
+          - name: parallel-2
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: I'm parallel-2!
-        - name: parallel-3
+          - name: parallel-3
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: I'm parallel-3!
         - - name: post-parallel
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: Goodbye world!
-    - name: echo
+      - name: echo
         inputs:
-        parameters:
-        - name: message
+          parameters:
+          - name: message
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
@@ -164,8 +160,8 @@ this example:
             except: message = r'''{{inputs.parameters.message}}'''
 
             print(message)
-        command:
-        - python
+          command:
+          - python
     ```
 
 Remember any parallel steps will run indeterminately within the context, so `parallel-1`, `parallel-2` and `parallel-3`
@@ -213,11 +209,11 @@ sugar functions, which makes for more readable and maintainable code!
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-    generateName: coinflip-
+      generateName: coinflip-
     spec:
-    entrypoint: steps
-    templates:
-    - name: steps
+      entrypoint: steps
+      templates:
+      - name: steps
         steps:
         - - name: flip
             template: flip
@@ -225,35 +221,35 @@ sugar functions, which makes for more readable and maintainable code!
             template: it-was
             when: '{{steps.flip.outputs.result}} == "heads"'
             arguments:
-            parameters:
-            - name: coin_result
+              parameters:
+              - name: coin_result
                 value: heads
-        - name: tails
+          - name: tails
             template: it-was
             when: '{{steps.flip.outputs.result}} == "tails"'
             arguments:
-            parameters:
-            - name: coin_result
+              parameters:
+              - name: coin_result
                 value: tails
-    - name: flip
+      - name: flip
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             import random
             result = 'heads' if random.randint(0, 1) == 0 else 'tails'
             print(result)
-        command:
-        - python
-    - name: it-was
+          command:
+          - python
+      - name: it-was
         inputs:
-        parameters:
-        - name: coin_result
+          parameters:
+          - name: coin_result
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
@@ -262,8 +258,9 @@ sugar functions, which makes for more readable and maintainable code!
             except: coin_result = r'''{{inputs.parameters.coin_result}}'''
 
             print(f'it was {coin_result}')
-        command:
-        - python
+          command:
+          - python
+
     ```
 
 <details><summary>Click to see an example Workflow log</summary>

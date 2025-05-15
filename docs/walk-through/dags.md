@@ -37,47 +37,47 @@ The classic example for the `DAG` is the "diamond":
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-    generateName: dag-diamond-
+      generateName: dag-diamond-
     spec:
-    entrypoint: diamond
-    templates:
-    - name: diamond
+      entrypoint: diamond
+      templates:
+      - name: diamond
         dag:
-        tasks:
-        - name: A
+          tasks:
+          - name: A
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: A
-        - name: B
+          - name: B
             depends: A
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: B
-        - name: C
+          - name: C
             depends: A
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: C
-        - name: D
+          - name: D
             depends: B && C
             template: echo
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: D
-    - name: echo
+      - name: echo
         inputs:
-        parameters:
-        - name: message
+          parameters:
+          - name: message
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
@@ -86,8 +86,9 @@ The classic example for the `DAG` is the "diamond":
             except: message = r'''{{inputs.parameters.message}}'''
 
             print(message)
-        command:
-        - python
+          command:
+          - python
+
     ```
 
 The rshift syntax (`>>`) is used with the returned objects from the `echo` calls; it specifies the left-hand-side of the

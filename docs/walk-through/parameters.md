@@ -208,19 +208,69 @@ the value from, and write to that file within the business logic of the template
 tedious and error-prone for inline scripts, with the `path` being in two separate places (or exposed as a global
 variable):
 
-```py
-from hera.workflows import Parameter, script
-from hera.workflows.models import ValueFrom
 
-@script(
-    outputs=[
-        Parameter(name="hello-output", value_from=ValueFrom(path="/tmp/hello_world.txt")),
-    ]
-)
-def hello_to_file():
-    with open("/tmp/hello_world.txt", "w") as f:
-        f.write("Hello World!")
-```
+=== "Hera"
+
+    ```py
+    from hera.workflows import Parameter, Steps, Workflow, script
+    from hera.workflows.models import ValueFrom
+
+
+    @script(
+        outputs=[
+            Parameter(name="hello-output", value_from=ValueFrom(path="/tmp/hello_world.txt")),
+        ]
+    )
+    def hello_to_file():
+        with open("/tmp/hello_world.txt", "w") as f:
+            f.write("Hello World!")
+
+
+    with Workflow(
+        generate_name="hello-to-file-",
+        entrypoint="steps",
+        namespace="argo",
+    ) as w:
+        with Steps(name="steps"):
+            hello_to_file(arguments={"message": "Hello world!"})
+    ```
+
+=== "YAML"
+
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: hello-to-file-
+      namespace: argo
+    spec:
+      entrypoint: steps
+      templates:
+      - name: steps
+        steps:
+        - - name: hello-to-file
+            template: hello-to-file
+            arguments:
+              parameters:
+              - name: message
+                value: Hello world!
+      - name: hello-to-file
+        outputs:
+          parameters:
+          - name: hello-output
+            valueFrom:
+              path: /tmp/hello_world.txt
+        script:
+          image: python:3.9
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            with open('/tmp/hello_world.txt', 'w') as f:
+                f.write('Hello World!')
+          command:
+          - python
+    ```
 
 The container logs for this `hello_to_file` step will show the artifact being exported as an output parameter.
 
@@ -302,7 +352,6 @@ Under a `Steps` context, we can assign the `Step` object returned from the `hell
         with Steps(name="steps"):
             hello_world_step = hello_to_file()
             repeat_back(arguments={"message": hello_world_step.get_parameter("hello-output")})
-
     ```
 
 === "YAML"
@@ -311,43 +360,43 @@ Under a `Steps` context, we can assign the `Step` object returned from the `hell
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-    generateName: hello-world-parameter-passing-
+      generateName: hello-world-parameter-passing-
     spec:
-    entrypoint: steps
-    templates:
-    - name: steps
+      entrypoint: steps
+      templates:
+      - name: steps
         steps:
         - - name: hello-to-file
             template: hello-to-file
         - - name: repeat-back
             template: repeat-back
             arguments:
-            parameters:
-            - name: message
+              parameters:
+              - name: message
                 value: '{{steps.hello-to-file.outputs.parameters.hello-output}}'
-    - name: hello-to-file
+      - name: hello-to-file
         outputs:
-        parameters:
-        - name: hello-output
+          parameters:
+          - name: hello-output
             valueFrom:
-            path: /tmp/hello_world.txt
+              path: /tmp/hello_world.txt
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
             with open('/tmp/hello_world.txt', 'w') as f:
                 f.write('Hello World!')
-        command:
-        - python
-    - name: repeat-back
+          command:
+          - python
+      - name: repeat-back
         inputs:
-        parameters:
-        - name: message
+          parameters:
+          - name: message
         script:
-        image: python:3.9
-        source: |-
+          image: python:3.9
+          source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
@@ -356,8 +405,8 @@ Under a `Steps` context, we can assign the `Step` object returned from the `hell
             except: message = r'''{{inputs.parameters.message}}'''
 
             print(f"You just said: '{message}'")
-        command:
-        - python
+          command:
+          - python
     ```
 
 === "Logs"
