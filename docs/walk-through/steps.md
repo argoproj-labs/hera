@@ -1,6 +1,6 @@
 # Steps
 
-Steps are simple way to sequentially run a series of templates. They can also be run in parallel, and conditionally by
+Steps are a simple way to sequentially run a series of templates. They can also be run in parallel, and conditionally by
 using `when` clauses.
 
 Basic `Steps` usage involves creating a `Steps` object as a context manager, and referencing template functions within
@@ -72,9 +72,8 @@ the context. When using a `@script` function multiple times under a single `Step
 
 ## Parallel Steps
 
-You can run multiple Steps in parallel by creating a sub-context under a `Steps` context manager by using the Steps's
-`parallel()` function. We can create a set of parallel steps within a sequence of sequential steps, which we can see in
-this example:
+You can run multiple Steps in parallel by creating a sub-context under a `Steps` context manager using its `parallel()`
+function. We can create a set of parallel steps within a sequence of sequential steps, which we can see in this example:
 
 
 ===  "Hera"
@@ -272,4 +271,4 @@ coinflip-gfrws-it-was-2809981541: it was heads
 
 </details>
 
-For more about `when` clauses, see the [Conditionals](conditionals.md) walkthrough page!
+For more about `when` clauses, see the [Conditionals](conditionals.md) walkthrough page.

@@ -73,7 +73,8 @@ Hera offers a more powerful script template through the "Hera Runner", creating 
 the code is built into an OCI image, and Hera runs the module/entrypoint for you. Using the Hera Runner allows more
 streamlined use of Parameters and Artifacts, which will be discussed next in the walkthrough.
 
-We can adapt the Hello World example to use the Hera Runner, we simply add the `constructor` and `image` fields to the script decorator.
+We can adapt the Hello World example to use the Hera Runner: we simply add the `constructor` and `image` fields to the
+script decorator.
 
 ```py
 from hera.workflows import Workflow, script

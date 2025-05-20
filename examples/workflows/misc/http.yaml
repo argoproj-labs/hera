@@ -1,50 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: hello-world-parameter-passing-
+  generateName: http-
 spec:
-  entrypoint: steps
+  entrypoint: http
   templates:
-  - name: steps
-    steps:
-    - - name: hello-to-file
-        template: hello-to-file
-    - - name: repeat-back
-        template: repeat-back
-        arguments:
-          parameters:
-          - name: message
-            value: '{{steps.hello-to-file.outputs.parameters.hello-output}}'
-  - name: hello-to-file
-    outputs:
-      parameters:
-      - name: hello-output
-        valueFrom:
-          path: /tmp/hello_world.txt
-    script:
-      image: python:3.9
-      source: |-
-        import os
-        import sys
-        sys.path.append(os.getcwd())
-        with open('/tmp/hello_world.txt', 'w') as f:
-            f.write('Hello World!')
-      command:
-      - python
-  - name: repeat-back
+  - name: http
+    http:
+      body: test body
+      method: GET
+      successCondition: response.body contains 'google'
+      timeoutSeconds: 20
+      url: '{{inputs.parameters.url}}'
+      headers:
+      - name: x-header-name
+        value: test-value
     inputs:
       parameters:
-      - name: message
-    script:
-      image: python:3.9
-      source: |-
-        import os
-        import sys
-        sys.path.append(os.getcwd())
-        import json
-        try: message = json.loads(r'''{{inputs.parameters.message}}''')
-        except: message = r'''{{inputs.parameters.message}}'''
-
-        print(f"You just said: '{message}'")
-      command:
-      - python
+      - name: url
+        value: https://example.com

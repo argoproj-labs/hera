@@ -18,9 +18,7 @@ classes. This allows you to, as mentioned above, write everything in Hera, witho
 
 You can check out the extensive ["upstream" examples](../examples/workflows/upstream/dag_diamond.md) that contain
 side-by-side Python and YAML definitions for Workflows in
-[the Argo examples folder on GitHub](https://github.com/argoproj/argo-workflows/tree/master/examples). Our CI/CD runs
-through the Argo examples folder to check that we are able to reproduce them by comparing to Workflows written with Hera
-by hand.
+[the Argo examples folder on GitHub](https://github.com/argoproj/argo-workflows/tree/master/examples).
 
 ## Hera Roadmap
 

@@ -82,17 +82,17 @@ with Workflow(
 ) as w:
 ```
 
-* `generate_name` is used by Argo to create a name using a random 5 character suffix, so you may see this
+* `generate_name` is used by Argo to create a name by appending a random 5 character suffix, so you may see this
   Workflow run with a name like `hello-world-vmsz5`.
 * `entrypoint` tells Argo which template to run upon submission.
-* `namespace` refers to the Kubernetes namespace you want to run the Workflow in.
+* `namespace` is the Kubernetes namespace you want to run the Workflow in.
 * `workflows_service` is Hera's REST API submission service.
 
 ## The Steps Context Manager
 
-A `Steps` template is the second template type of this example. The `Steps` template is known as a "template invocator"
-which is used to arrange other templates, mainly Containers and Scripts, to do the actual work. In Hera, the `Steps`
-class is a context manager as it automatically arranges your templates in the order that you add them, with each
+A `Steps` template is the second template type of this example. The `Steps` template is known as a "template invocator",
+which is used to coordinate other templates, mainly Containers and Scripts, to do the actual work. In Hera, the `Steps`
+class is a context manager; it automatically arranges your templates in the order that you add them, with each
 template invocation known as a `Step`.
 
 ```py

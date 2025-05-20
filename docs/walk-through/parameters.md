@@ -7,7 +7,7 @@ the use of Parameters through integrations with native functions.
 ## Default Values
 
 Python functions allow default values in the function definition. When you decorate a function with Hera's `script`
-decorator, any Python default values become default Parameter values for the template. For example, the Hera code below,
+decorator, any Python default values become default Parameter values for the template. For example, the Hera code below:
 
 ```py
 @script()
@@ -179,8 +179,8 @@ def repeat_back(message: str):
     print(f"You just said: '{message}'")
 ```
 
-If we want to get the stdout from running the `hello` Script template, function call returns a `Step` object that we
-assign to a variable, and then we pass its `result` to the `repeat_back` template:
+To get the stdout from running the `hello` Script template, we can assign the `Step` object returned from the function
+call to a variable, and then we pass its `result` to the `repeat_back` template:
 
 ```py
 with Workflow(

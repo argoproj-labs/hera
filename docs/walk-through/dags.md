@@ -1,9 +1,9 @@
 # DAGs
 
-DAGs (Directed Acyclic Graphs) are similar to `Steps`, and the syntax to use DAGs is exactly the same. DAGs are formed
+DAGs (Directed Acyclic Graphs) are similar to `Steps`, and also use a context manager in the same way. DAGs are formed
 of `Tasks`, and offer more flexibility in Workflow construction, with the key difference being that you can specify the
-dependencies of each `Task`, i.e. which other `Tasks` must run to completion before running this one, and Argo will
-construct the graph and run the Tasks in the desired order.
+dependencies of each `Task` using the right-shift (`>>`) syntax. This specifies which other `Tasks` must run to
+completion before running this one. Argo will then construct the graph and run the Tasks in the desired order.
 
 ## Specifying Dependencies
 
@@ -95,7 +95,7 @@ The rshift syntax (`>>`) is used with the returned objects from the `echo` calls
 operator is a dependency of the right-hand-side, i.e. `A >> B` means "B depends on A". This is syntactic sugar for
 `A.next(B)`, see the [Task dependencies explained](#task-dependencies-explained) section for more examples. A list acts
 as a boolean `and` of all the elements of the list, and it is important to note that a list cannot appear first in the
-chain or on both sides of a `>>`.
+chain or on both sides of a `>>` (due to Python language limitations).
 
 ```py
         A >> [B, C] >> D
