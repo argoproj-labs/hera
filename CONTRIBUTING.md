@@ -83,7 +83,7 @@ workflows-service              Generate the Workflows service option of Hera
 
 You can install Argo and try running Hera code in GitHub Codespaces. First, open the Hera repository in Codespaces using the link below:
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/argoproj-labs/hera)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/argoproj-labs/hera)
 
 Then, you can run the `make` commands to install k3d (a lightweight Kubernetes CLI), and then install the Argo Workflows controller on the cluster:
 
@@ -97,7 +97,7 @@ You can [take a look at `test_submission.py`](https://github.com/argoproj-labs/h
 make test-on-cluster
 ```
 
-See the [Viewing the Argo UI from a Codespace](../CONTRIBUTING.md#viewing-the-argo-ui-from-a-codespace) guide to see the Workflow in the UI.
+See the [Viewing the Argo UI from a Codespace](#viewing-the-argo-ui-from-a-codespace) guide to see the Workflow in the UI.
 
 Otherwise you can install the Argo CLI with
 
