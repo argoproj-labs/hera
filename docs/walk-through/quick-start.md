@@ -5,7 +5,8 @@
 [![Pypi](https://img.shields.io/pypi/v/hera.svg)](https://pypi.python.org/pypi/hera)
 
 Hera is available on PyPi as the `hera` package. Add this dependency to your project with your favourite package
-manager, e.g. [pip](https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages) or [poetry](https://python-poetry.org/), or install directly with
+manager, e.g. [poetry](https://python-poetry.org/), or install directly with
+[pip](https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages):
 
 ```
 pip install hera
@@ -19,7 +20,8 @@ can go straight to [Running Workflows from Hera](#running-workflows-from-hera) b
 
 ### Install Locally
 
-If you want to run on a local Kubernetes cluster (e.g. Docker Desktop), follow the Argo Workflows [Quick Start guide](https://argoproj.github.io/argo-workflows/quick-start/).
+If you want to run on a local Kubernetes cluster (e.g. Docker Desktop), follow the
+[Argo Workflows Quick Start guide](https://argoproj.github.io/argo-workflows/quick-start/).
 
 Ensure you are able to submit a workflow to Argo as in the example:
 
@@ -27,7 +29,8 @@ Ensure you are able to submit a workflow to Argo as in the example:
 argo submit -n argo --watch https://raw.githubusercontent.com/argoproj/argo-workflows/master/examples/hello-world.yaml
 ```
 
-Use the following command to port-forward the Argo Server to access the UI and so you can submit Workflows from Hera:
+Use the following command to port-forward the Argo Server; this allows you to access the UI and submit Workflows from
+Hera:
 
 ```console
 kubectl -n argo port-forward service/argo-server 2746:2746
