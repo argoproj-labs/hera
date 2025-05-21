@@ -11,9 +11,9 @@ nav:
     - walk-through/quick-start.md
     - walk-through/about-hera.md
     - walk-through/hello-world.md
+    - walk-through/script-templates.md
     - walk-through/steps.md
     - walk-through/dags.md
-    - walk-through/script-template-types.md
     - walk-through/parameters.md
     - walk-through/artifacts.md
     - walk-through/loops.md

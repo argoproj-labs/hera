@@ -1,8 +1,8 @@
 # Parameters
 
-In Argo Workflows, [Parameters](https://argoproj.github.io/argo-workflows/fields/#parameter) are used to specify inputs
-and outputs of templates, as well as the arguments for template inputs when using the template. Hera aims to simplify
-the use of Parameters through integrations with native functions.
+In Argo Workflows, [Parameters](https://argo-workflows.readthedocs.io/en/latest/fields/#parameter) are used to specify
+inputs and outputs of templates, as well as the arguments for template inputs when using the template. Hera aims to
+simplify the use of Parameters through integrations with native functions.
 
 ## Default Values
 

@@ -1,12 +1,16 @@
-# Types of Script Templates
+# Script Templates
+
+Hera offers two versions of the `script` decorator which transforms regular Python functions into Script templates for
+Argo Workflows.
 
 ## Inline Script Templates
 
-The example Workflows seen so far have shown the `source` field containing some boilerplate and the function body
-itself. This is the default setting for Hera, called "inline" script templates. They work the same as running a file
-directly through Python on your local command line, like `python hello_world.py`. They should only be used for basic use
-cases and trying out Hera. As the function is dumped directly in the `source` field, you cannot use external functions
-and imports, which must instead be contained within the function body. Here's the Hello World example for a reminder:
+The example Workflow seen in [Hello World](./hello-world.md) showed the `source` field containing some boilerplate and
+the function body itself. This is the default setting for Hera, called "inline" script templates. They work the same as
+running a file directly through Python on your local command line, like `python hello_world.py`. They should only be
+used for basic use cases and trying out Hera. As the function is dumped directly in the `source` field, you cannot use
+external functions and imports, which must instead be contained within the function body. Here's the Hello World example
+for a reminder:
 
 === "Hera"
 
@@ -67,6 +71,10 @@ and imports, which must instead be contained within the function body. Here's th
           - python
     ```
 
+
+To learn more about Inline Scripts, see the
+[Script Basics user guide](../user-guides/script-basics.md#inlinescriptconstructor).
+
 ## Runner Script Templates
 
 Hera offers a more powerful script template through the "Hera Runner", creating "runner script templates". This is where
@@ -94,7 +102,9 @@ with Workflow(
 
 We would then need to build `my-image:v1` using a tool like Docker, and then we will be able to run this workflow on Argo.
 
-The YAML for the Workflow shows the changes under `script` - the `args` field in particular shows we are running the `hera.workflows.runner` module, and passing an entrypoint via `-e`. The `source` contains the input parameters, which are loaded and passed to the entrypoint:
+The YAML for the Workflow shows the changes under `script` - the `args` field in particular shows we are running the
+`hera.workflows.runner` module, and passing an entrypoint via `-e`. The `source` contains the input parameters, which
+are loaded and passed to the entrypoint:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -126,3 +136,6 @@ container running through Argo, and the filename is then passed as the final arg
 The value of `{{inputs.parameters}}` is the list of parameters in JSON form. You can see how Hera loads it in
 [the source code](https://github.com/argoproj-labs/hera/blob/86e25e/src/hera/workflows/_runner/util.py#L274-L295) of the
 runner util functions.
+
+To learn more about Runner Scripts, see the
+[Script Basics user guide](../user-guides/script-basics.md#runnerscriptconstructor).
