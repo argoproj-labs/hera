@@ -1,12 +1,14 @@
-"""Enablement of https://argoproj.github.io/argo-workflows/variables/
-This example creates two tasks, one of the Tasks is a deamond task and its IP address is shared with the second task
-The daemoned task operates as server, serving an example payload, with the second task operating as a client, making
-http requests to the server."""
+"""Demonstrates usage of [daemon container IP](https://argoproj.github.io/argo-workflows/variables/).
+
+This example creates two tasks, one of the Tasks is a daemon task and its IP address is shared with the second task. The
+daemon task operates as server, serving an example payload, with the second task operating as a client, making http
+requests to the server."""
 
 from hera.workflows import DAG, Workflow, script
+from hera.workflows.models import HTTPGetAction, Probe
 
 
-@script(daemon=True)
+@script(daemon=True, readiness_probe=Probe(http_get=HTTPGetAction(path="/", port=8080)))
 def server():
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
