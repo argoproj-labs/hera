@@ -38,6 +38,10 @@ spec:
         webServer.serve_forever()
       command:
       - python
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 8080
   - name: consumer
     inputs:
       parameters:
