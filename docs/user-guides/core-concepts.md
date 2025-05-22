@@ -264,4 +264,4 @@ with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
 
 ```
 
-Read more about `DAG`s in the [walk-through](../walk-through/dag.md)!
+Read more about `DAG`s in the [walk-through](../walk-through/dags.md)!

@@ -1,9 +1,9 @@
-# Hera Tour-torial
+# Hera Tutorial
+
+This tutorial is a written, in-depth version of the ArgoCon EU 2024 talk - "Orchestrating Python Functions Natively
+with Hera", [watch it here](https://www.youtube.com/watch?v=4G3Q6VMBvfI&list=PLj6h78yzYM2NA4NbSC6_mQNza2r3WV87h&index=4)!
 
 ## Building the DAG diamond from scratch
-
-> This tutorial is a written, in-depth version of the ArgoCon EU 2024 talk - "Orchestrating Python Functions Natively
-> with Hera", [watch it here](https://www.youtube.com/watch?v=4G3Q6VMBvfI&list=PLj6h78yzYM2NA4NbSC6_mQNza2r3WV87h&index=4)!
 
 Let's go through some features of Hera by building a Workflow that will initially implement the DAG diamond example.
 
