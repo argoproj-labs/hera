@@ -6,7 +6,7 @@
 
 Hera is available on PyPi as the `hera` package. Add this dependency to your project with your favourite package
 manager, e.g. [poetry](https://python-poetry.org/), or install directly with
-[pip](https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages)
+[pip](https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages):
 
 ```
 pip install hera
