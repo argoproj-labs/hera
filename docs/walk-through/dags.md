@@ -1,9 +1,10 @@
 # DAGs
 
-DAGs (Directed Acyclic Graphs) are similar to `Steps`, and also use a context manager in the same way. DAGs are formed
-of `Tasks`, and offer more flexibility in Workflow construction, with the key difference being that you can specify the
-dependencies of each `Task` using the right-shift (`>>`) syntax. This specifies which other `Tasks` must run to
-completion before running this one. Argo will then construct the graph and run the Tasks in the desired order.
+DAGs (Directed Acyclic Graphs) are formed of `Tasks`. They are similar to `Steps`, using a context manager in the same
+way, but offer more flexibility in Workflow construction, with the key difference being that you must specify any
+dependencies of each `Task` using the right-shift (`>>`) syntax. This tells Argo which other `Tasks` must run to
+completion before running this one. When the Workflow is submitted, Argo will construct the graph and run the Tasks in
+the desired order.
 
 ## Specifying Dependencies
 
