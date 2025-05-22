@@ -79,6 +79,38 @@ workflows-models               Generate the Workflows models portion of Argo Wor
 workflows-service              Generate the Workflows service option of Hera
 ```
 
+#### Installing Argo Workflows in GitHub Codespaces
+
+You can install Argo and try running Hera code in GitHub Codespaces. First, open the Hera repository in Codespaces using the link below:
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/argoproj-labs/hera)
+
+Then, you can run the `make` commands to install k3d (a lightweight Kubernetes CLI), and then install the Argo Workflows controller on the cluster:
+
+```
+make install-k3d run-argo
+```
+
+You can [take a look at `test_submission.py`](https://github.com/argoproj-labs/hera/blob/ec06876f1abc0d3309b000f3cd2e0eca64891da9/tests/test_submission.py) to see how to submit a Workflow using Hera and write your own. You can run the test Workflow using:
+
+```
+make test-on-cluster
+```
+
+See the [Viewing the Argo UI from a Codespace](#viewing-the-argo-ui-from-a-codespace) guide to see the Workflow in the UI.
+
+Otherwise you can install the Argo CLI with
+
+```
+make install-argo
+```
+
+which will then let you do things like listing the Workflows in the `argo` namespace with
+
+```
+argo list --namespace argo
+```
+
 #### Working in VSCode
 
 If your preferred IDE is VSCode, you may have an issue using the integrated Testing extension where breakpoints are not
