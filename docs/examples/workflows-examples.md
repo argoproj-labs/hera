@@ -37,6 +37,7 @@ Explore the examples through the side bar!
 | [dag-coinflip](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-coinflip.yaml) |
 | [dag-conditional-artifacts](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-conditional-artifacts.yaml) |
 | [dag-continue-on-fail](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-continue-on-fail.yaml) |
+| [dag-daemon-retry-strategy](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-daemon-retry-strategy.yaml) |
 | [dag-daemon-task](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-daemon-task.yaml) |
 | [dag-diamond-steps](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-diamond-steps.yaml) |
 | [dag-disable-failFast](https://github.com/argoproj/argo-workflows/blob/main/examples/dag-disable-failFast.yaml) |
@@ -101,10 +102,14 @@ Explore the examples through the side bar!
 | [retry-with-steps](https://github.com/argoproj/argo-workflows/blob/main/examples/retry-with-steps.yaml) |
 | [scripts-bash](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-bash.yaml) |
 | [scripts-javascript](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-javascript.yaml) |
-| [scripts-python](https://github.com/argoproj/argo-workflows/blob/main/examples/scripts-python.yaml) |
 | [secrets](https://github.com/argoproj/argo-workflows/blob/main/examples/secrets.yaml) |
 | [status-reference](https://github.com/argoproj/argo-workflows/blob/main/examples/status-reference.yaml) |
 | [step-level-timeout](https://github.com/argoproj/argo-workflows/blob/main/examples/step-level-timeout.yaml) |
+| [steps-daemon-retry-strategy](https://github.com/argoproj/argo-workflows/blob/main/examples/steps-daemon-retry-strategy.yaml) |
+| [synchronization-db-mutex-tmpl-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-db-mutex-tmpl-level.yaml) |
+| [synchronization-db-mutex-wf-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-db-mutex-wf-level.yaml) |
+| [synchronization-db-tmpl-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-db-tmpl-level.yaml) |
+| [synchronization-db-wf-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-db-wf-level.yaml) |
 | [synchronization-mutex-tmpl-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-mutex-tmpl-level.yaml) |
 | [synchronization-mutex-wf-level](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-mutex-wf-level.yaml) |
 | [synchronization-mutex-wf-level-legacy](https://github.com/argoproj/argo-workflows/blob/main/examples/synchronization-mutex-wf-level-legacy.yaml) |
