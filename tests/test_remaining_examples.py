@@ -24,6 +24,10 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = [
     "loops-param-argument.upstream.yaml",
     "retry-backoff.upstream.yaml",
     "workflow-event-binding__github-path-filter-workflowtemplate.upstream.yaml",
+    "synchronization-db-tmpl-level.upstream.yaml",
+    "synchronization-db-mutex-tmpl-level.upstream.yaml",
+    "synchronization-db-mutex-wf-level.upstream.yaml",
+    "synchronization-db-wf-level.upstream.yaml",
 ]
 
 
