@@ -18,7 +18,6 @@ nav:
     - walk-through/artifacts.md
     - walk-through/loops.md
     - walk-through/conditionals.md
-    - walk-through/suspending.md
     - walk-through/hera-developer-features.md
     - walk-through/authentication.md
     - walk-through/experimental-hera-features.md
@@ -28,6 +27,7 @@ nav:
   - User Guides:
     - Intro Tutorial: user-guides/hera-tutorial.md
     - Core Concepts: user-guides/core-concepts.md
+    - Suspending Workflows: user-guides/suspending.md
     - Scripts:
       - Script Basics: user-guides/script-basics.md
       - Script Annotations: user-guides/script-annotations.md
