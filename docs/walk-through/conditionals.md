@@ -1,49 +1,58 @@
-# Conditionals
+# Conditional Execution
 
 Conditional execution of steps and tasks is available through the [basic `when` clause](#basic-when-clauses), along with
 more complex [expressions](#complex-when-clauses) and [`Task` functions](#improved-task-conditionals).
 
 ## Basic `when` Clauses
 
-Argo uses [`govaluate`](https://github.com/Knetic/govaluate) in its `when` expressions - Hera is compatible with these
+Argo uses [`govaluate`](https://github.com/Knetic/govaluate) in its `when` expressions. Hera is compatible with these
 `when` expression if you write them in literal strings, however, without prior Argo knowledge, you may not know the
-chain of keys to access steps and their parameters.
+chain of keys to access steps and their parameters. Hera offers some convenience functions you can use to create `when`
+expressions using f-strings.
 
-You can instead use `Parameters` and the special `result` parameter in an f-string to make your code more readable:
+The following compares an output parameter with a value:
 
-```py
-run_script(
-    ...,
-    when=f'{previous_step.get_parameter("some-parameter")} == "some-value"'
-)
-```
+=== "Shorthand"
 
-is equivalent to
+    ```py
+    previous_step = script_func(...)
+    another_script(
+        ...,
+        when=f'{previous_step.get_parameter("some-parameter")} == "some-value"'
+    )
+    ```
 
-```py
-run_script(
-    ...,
-    when='{{steps.previous-step.outputs.parameter.some-parameter}} == "some-value"'
-)
-```
+=== "Full"
 
-And
+    ```py
+    script_func(...)
+    another_script(
+        ...,
+        when='{{steps.script-func.outputs.parameter.some-parameter}} == "some-value"'
+    )
+    ```
 
-```py
-run_script(
-    ...,
-    when=f'{previous_step.result} == "some-value"'
-)
-```
+This compares the special `result` output with a value:
 
-is equivalent to
+=== "Shorthand"
 
-```py
-run_script(
-    ...,
-    when='{{steps.previous-step.outputs.result}} == "some-value"'
-)
-```
+    ```py
+    previous_step = script_func(...)
+    run_script(
+        ...,
+        when=f'{previous_step.result} == "some-value"'
+    )
+    ```
+
+=== "Full"
+
+    ```py
+    script_func(...)
+    run_script(
+        ...,
+        when='{{steps.script-func.outputs.result}} == "some-value"'
+    )
+    ```
 
 ## Complex `when` Clauses
 

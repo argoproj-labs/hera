@@ -68,21 +68,18 @@ Hera's `Workflow` classes offer a collection of `to` and `from` functions for `d
 means you can load YAML files and manipulate them as Hera objects!
 
 ```py
-    with Workflow.from_file("./workflow.yaml") as w:
-        w.entrypoint = "my-new-dag-entrypoint"
+with Workflow.from_file("./workflow.yaml") as w:
+    w.entrypoint = "my-new-dag-entrypoint"
 
-        with DAG(name="my-new-dag-entrypoint"):
-            ...  # Add some tasks!
+    with DAG(name="my-new-dag-entrypoint"):
+        ...  # Add some tasks!
 
-    w.create()  # And submit to Argo directly from Hera!
+w.create()  # And submit to Argo directly from Hera!
 ```
 
 The following are all valid assertions:
 
 ```py
-with Workflow(name="w") as w:
-    pass
-
 assert w == Workflow.from_dict(w.to_dict())
 assert w == Workflow.from_yaml(w.to_yaml())
 assert w == Workflow.from_file(w.to_file())
@@ -90,12 +87,10 @@ assert w == Workflow.from_file(w.to_file())
 
 ## Submit WorkflowTemplates and ClusterWorkflowTemplates as Workflows
 
-This feature is available for `WorkflowTemplates` and `ClusterWorkflowTemplates`, and helps you, as a dev, iterate on
-your `WorkflowTemplate` until it's ready to be deployed. Calling `create_as_workflow` on a `WorkflowTemplate` will
-create a `Workflow` on the fly which is submitted to the Argo cluster directly and given a generated name, meaning you
-don't need to first submit the `WorkflowTemplate` itself! What this means is you don't need to keep deleting your
-`WorkflowTemplate` and submitting it again, to then run `argo submit --from WorkflowTemplate/my-wt` while iterating
-on your `WorkflowTemplate`.
+This feature is available for `WorkflowTemplates` and `ClusterWorkflowTemplates`, and helps you iterate on your
+`WorkflowTemplate` until it's ready to be deployed. Calling `create_as_workflow` on a `WorkflowTemplate` will create a
+`Workflow` on the fly which is submitted to the Argo cluster directly and given a generated name, meaning you don't need
+to submit the `WorkflowTemplate` itself!
 
 ```py
 with WorkflowTemplate(
