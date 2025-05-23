@@ -6,11 +6,15 @@ Argo Workflows.
 ## Inline Script Templates
 
 The example Workflow seen in [Hello World](./hello-world.md) showed the `source` field containing some boilerplate and
-the function body itself. This is the default setting for Hera, called "inline" script templates. They work the same as
-running a file directly through Python on your local command line, like `python hello_world.py`. They should only be
-used for basic use cases and trying out Hera. As the function is dumped directly in the `source` field, you cannot use
-external functions and imports, which must instead be contained within the function body. Here's the Hello World example
-for a reminder:
+the function body itself. This is the default setting for Hera, called "inline" script templates. Here are the key
+points to remember:
+
+* They work the same as running a file directly through Python on your local command line, like `python hello_world.py`.
+* They should only be used for basic use cases and trying out Hera.
+* As the function is dumped directly in the `source` field, you **cannot use external functions and imports**, which
+  must instead be contained within the function body.
+  
+Here's the Hello World example which uses an inline script:
 
 === "Hera"
 
