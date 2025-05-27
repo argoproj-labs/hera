@@ -16,7 +16,7 @@ Using the Hera Runner is highly recommended for Artifacts, as the Runner handles
 you, letting you concentrate on the business logic instead of writing files to the correct locations! For Runner
 scripts, the only difference between Parameters and Artifacts is the annotation.
 
-### Artifacts as Output
+### Runner Artifact Outputs
 
 For Output Artifacts, you simply need to annotate the return type using `Annotated` (and remember to give your
 `Artifact` a name):
@@ -41,7 +41,7 @@ def whalesay() -> Tuple[
 If you have many outputs, consider using the [Runner IO feature](../user-guides/script-runner-io.md) to avoid a long
 tuple return, instead using named arguments in the return.
 
-### Artifacts as Input
+### Runner Artifact Inputs
 
 Input Artifacts require a similar annotation:
 
@@ -51,7 +51,7 @@ def whalesay(message: Annotated[str, Artifact(name="hello-art")]):
     print(message)
 ```
 
-Multiple input Artifacts are as easy as adding multiple function arguments:
+Using multiple input Artifacts is as easy as adding multiple function arguments:
 
 ```py
 @script(constructor="runner", image="my-image:v1")
@@ -98,7 +98,7 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
 </details>
 
 
-### Artifacts as Output
+### Inline Artifact Outputs
 
 Artifact outputs work by exporting a file from the container. In this case, we will output the file
 `/tmp/hello_world.txt`. First we need to specify this path in the script decorator:
@@ -168,7 +168,7 @@ We can then call the function in a Steps context. Compare to the YAML workflow a
     artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="Taring /tmp/hello_world.txt"
     ```
 
-### Artifacts as Input
+### Inline Artifact Inputs
 
 When we have one step generating an Artifact, we'd usually like to consume it in a downstream task. We do this with the
 `get_artifact` function that exists for `Steps` and `Tasks`.
