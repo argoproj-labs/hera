@@ -1,19 +1,19 @@
 # Script Basics
 
-The `Script` class is an essential part of Hera's extension on top of Argo. As Hera is a Python library,
-[Script templates](https://argoproj.github.io/argo-workflows/fields/#scripttemplate) running Python become the standard
-template, which is reflected by the greater feature set provided for writing them.
+The `script` decorator is an essential part of Hera's extension on top of Argo, enabling you to run any Python function
+as a Kubernetes container.
+[Script templates](https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/) can run other
+scripting languages, but in Hera, running Python becomes the standard.
 
 ## Script Decorator
 
-The `script` decorator function is a key offering of Hera to achieve near-native Python function orchestration. It
-allows you to call the function under a Hera context manager such as a `Workflow` or `Steps` context, and it will be
-treated as the intended sub-object, which would be a `template` when under a `Workflow`, or a `Step` when under a
-`Steps`. The function will still behave as normal outside of any Hera contexts, meaning you can write unit tests on the
-given function.
+The `script` decorator can turn any user-defined function into a template for Argo. Call the function under a Hera
+context manager such as a `Workflow` or `Steps`/`DAG` context to create templates or an individual `Step`/`Task`. The
+function will still behave as normal outside of Hera contexts, meaning you can write unit tests on the given function.
 
 When decorating a function, you should pass `Script` parameters to the `script` decorator. This includes values such as
-the `image` to use, and `resources` to request.
+the `image` to use, and `resources` to request. Your function's input arguments will automatically become input
+parameters to the script template.
 
 ```py
 from hera.workflows import Resources, script
@@ -24,200 +24,176 @@ def echo(message: str):
 ```
 
 When calling the function under a `Steps` or `DAG` context, you should pass `Step` or `Task` kwargs, such as the `name`
-of the `Step`/`Task`, a `when` clause, a `with_param` list to loop over a given template, or `arguments` for the
-function.
+of the `Step`/`Task`, a `when` clause, `arguments` for the function, or a `with_param` list to loop over a given
+template.
 
-```py
-with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
-    with DAG(name="diamond"):
-        A = echo(name="A", arguments={"message": "A"})
-        B = echo(name="B", arguments={"message": "B"}, when=f"{A.result == 'A'}")
-        C = echo(name="C", arguments={"message": "C"}, when=f"{A.result != 'A'}")
-        D = echo(name="D", arguments={"message": "D"})
-        A >> [B, C] >> D
-```
+=== "Hera"
 
-> **How it works**: the exact mechanism of the `script` decorator is to prepare a `Script` object within the decorator,
-> so that when your function is invoked under a Hera context, the call is redirected to the `Script.__call__` function.
-> This takes the kwargs of a `Step` or `Task` depending on whether the context manager is a `Steps` or a `DAG`. Under a
-> Workflow itself, your function is not expected to take arguments, so the call will add the function as a template.
+    ```py
+    with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
+        with DAG(name="diamond"):
+            A = echo(name="A", arguments={"message": "A"})
+            B = echo(name="B", arguments={"message": "B"}, when=f"{A.result} == 'A'")
+            C = echo(name="C", arguments={"message": "C"}, when=f"{A.result} != 'A'")
+            D = echo(name="D", arguments={"message": "D"})
+            A >> [B, C] >> D
+    ```
 
-This works as syntactic sugar for the alternative of using `Script` and `Task` directly to construct the Workflow and
+=== "YAML"
+
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: dag-diamond-
+    spec:
+      entrypoint: diamond
+      templates:
+      - name: diamond
+        dag:
+          tasks:
+          - name: A
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: A
+          - name: B
+            depends: A
+            template: echo
+            when: '{{tasks.A.outputs.result}} == ''A'''
+            arguments:
+              parameters:
+              - name: message
+                value: B
+          - name: C
+            depends: A
+            template: echo
+            when: '{{tasks.A.outputs.result}} != ''A'''
+            arguments:
+              parameters:
+              - name: message
+                value: C
+          - name: D
+            depends: B && C
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: D
+      - name: echo
+        inputs:
+          parameters:
+          - name: message
+        script:
+          image: python:3.12
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
+
+            print(message)
+          command:
+          - python
+    ```
+
+<details><summary><i>How it works</i></summary>
+
+The <code>script</code> decorator function prepares a <code>Script</code> object so that, when your function is invoked
+under a Hera context, the call is redirected to the <code>Script.__call__</code> function. This takes the kwargs of a
+<code>Step</code> or <code>Task</code> depending on whether the context manager is a <code>Steps</code> or a
+<code>DAG</code>. Under a Workflow itself, your function is not expected to take arguments, so the call will add the
+function as a template.
+
+</details>
+
+This acts as syntactic sugar for the alternative of using `Script` and `Task` directly to construct the Workflow and
 DAG:
 
-```py
-with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
-   echo_template = Script(name="echo", source=echo, image="python:3.11", resources=Resources(memory_request="5Gi"))
-    with DAG(name="diamond"):
-        A = Task(name="A", source=echo_template, arguments={"message": "A"})
-        B = Task(name="B", source=echo_template, arguments={"message": "B"}, when=f"{A.result == 'A'}")
-        C = Task(name="C", source=echo_template, arguments={"message": "C"}, when=f"{A.result != 'A'}")
-        D = Task(name="D", source=echo_template, arguments={"message": "D"})
-        A >> [B, C] >> D
-```
+=== "Hera"
+
+    ```py
+    def echo(message):
+        print(message)
+
+    with Workflow(generate_name="dag-diamond-", entrypoint="diamond") as w:
+        echo_template = Script(name="echo", source=echo, image="python:3.11", resources=Resources(memory_request="5Gi"))
+        with DAG(name="diamond"):
+            A = Task(name="A", template=echo_template, arguments={"message": "A"})
+            B = Task(name="B", template=echo_template, arguments={"message": "B"}, when=f"{A.result} == 'A'")
+            C = Task(name="C", template=echo_template, arguments={"message": "C"}, when=f"{A.result} != 'A'")
+            D = Task(name="D", template=echo_template, arguments={"message": "D"})
+            A >> [B, C] >> D
+    ```
+
+=== "YAML"
+
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: dag-diamond-
+    spec:
+      entrypoint: diamond
+      templates:
+      - name: echo
+        inputs:
+          parameters:
+          - name: message
+        script:
+          image: python:3.11
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            import json
+            try: message = json.loads(r'''{{inputs.parameters.message}}''')
+            except: message = r'''{{inputs.parameters.message}}'''
+
+            print(message)
+          command:
+          - python
+          resources:
+            requests:
+              memory: 5Gi
+      - name: diamond
+        dag:
+          tasks:
+          - name: A
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: A
+          - name: B
+            depends: A
+            template: echo
+            when: '{{tasks.A.outputs.result}} == ''A'''
+            arguments:
+              parameters:
+              - name: message
+                value: B
+          - name: C
+            depends: A
+            template: echo
+            when: '{{tasks.A.outputs.result}} != ''A'''
+            arguments:
+              parameters:
+              - name: message
+                value: C
+          - name: D
+            depends: B && C
+            template: echo
+            arguments:
+              parameters:
+              - name: message
+                value: D
+    ```
 
 ## Script Constructors
 
-### InlineScriptConstructor
-
-Script templates submitted to Argo typically run the given Python function in a Python image. By default, the Python
-function itself is dumped to the YAML, and the Argo cluster will run that code. For the code below, we will see it
-directly in the output YAML.
-
-```py
-from hera.workflows import Workflow, script
-
-@script(add_cwd_to_sys_path=False)
-def hello(s: str):
-    print("Hello, {s}!".format(s=s))
-
-
-with Workflow(
-    generate_name="hello-world-",
-    entrypoint="hello",
-    arguments={"s": "world"},
-) as w:
-    hello()
-```
-
-We added `add_cwd_to_sys_path=False` to remove some boilerplate from the `source` below. You will see Hera adds a
-`json.loads` to bridge the YAML input to a Python variable:
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: hello-world-
-spec:
-  arguments:
-    parameters:
-    - name: s
-      value: world
-  entrypoint: hello
-  templates:
-  - inputs:
-      parameters:
-      - name: s
-    name: hello
-    script:
-      command:
-      - python
-      image: python:3.9
-      source: 'import json
-
-        try: s = json.loads(r''''''{{inputs.parameters.s}}'''''')
-
-        except: s = r''''''{{inputs.parameters.s}}''''''
-
-
-        print(''Hello, {s}!''.format(s=s))'
-```
-
-This method of running the function is handled by the `InlineScriptConstructor`, called such because it constructs the
-`Script` template with the function appearing "inline" in the YAML in the `source` value.
-
-#### Importing modules
-
-A caveat of the `InlineScriptConstructor` is that it is quite limited - as the `InlineScriptConstructor` dumps your code
-to the `source` field as-is, you must also `import` (within the function itself) any modules you use in the function:
-
-```py
-@script(image="python:3.10")
-def my_matcher(string: str):
-    import re
-
-    print(bool(re.match("test", string)))
-```
-
-> **Note** This also applies to other functions in your code - you will not be able to call functions defined outside of
-> the scope of the script-decorated function!
-
-If your function uses standard library imports from Python, you will be able to run your function with any standard
-Python image, specified by the `image` argument of the decorator. Therefore, if you use non-standard imports, such as
-`numpy`, you will need to use an image that includes `numpy`, or build your own (e.g. as a Docker image on DockerHub).
-
-### RunnerScriptConstructor
-
-The `RunnerScriptConstructor` is an alternative `ScriptConstructor` that uses the "Hera Runner" (think of this as being
-like the PyTest Runner) to run your function on Argo. This avoids dumping the function to the `source` of a template,
-keeping the YAML manageable and small, and allows you to arrange your code in natural Python fashion: imports can be
-anywhere in the package, the script-decorated function can call other functions in the package, and the function itself
-can take Pydantic objects as arguments. The use of the `RunnerScriptConstructor` necessitates building your own image,
-as the Hera Runner runs the function by referencing it as an entrypoint of your module. The image used by the script
-should be built from the source code package itself and its dependencies, so that the source code's functions,
-dependencies, and Hera itself are available to run.
-
-A function can set its `constructor` to `"runner"` to use a default `RunnerScriptConstructor`, or use the
-`global_config.set_class_defaults` function to set it once for all script-decorated functions. We can write a script
-template function using Pydantic objects such as:
-
-```py
-global_config.set_class_defaults(Script, constructor="runner")
-
-class Input(BaseModel):
-    a: int
-    b: str = "foo"
-
-class Output(BaseModel):
-    output: List[Input]
-
-@script()
-def my_function(input: Input) -> Output:
-    return Output(output=[input])
-```
-
-This creates a template in YAML that looks like:
-
-```yaml
-- name: my-function
-  inputs:
-    parameters:
-    - name: input
-  script:
-    command:
-    - python
-    args:
-    - -m
-    - hera.workflows.runner
-    - -e
-    - examples.workflows.callable_script:my_function
-    image: my-image-with-python-source-code-and-dependencies
-    source: '{{inputs.parameters}}'
-```
-
-You will notice some pecularities of this template. Firstly, it is running the `hera.workflows.runner` module, rather
-than a user-module such as `examples.workflows.callable_script`. Instead, the `-e` arg specifies the `--entrypoint` to
-be called by the runner, in this case the `my_function` of the `examples.workflows.callable_script` module. We do not
-give a real `image` here, but we assume it exists in this example. Finally, the `source` parameter is passed the
-`inputs.parameters` of the template. This is because the Hera Runner relies on a mechanism in Argo where the value
-passed to `source` is dumped to a file, and then the filename is passed as the final `arg` to the `command`. Therefore,
-the `source` will actually contain a list of parameters as dictionaries, which are dumped to a file which is passed to
-`hera.workflows.runner`. Of course, this is all handled for you!
-
-#### Integrated Pydantic Support
-
-As Argo deals with a limited set of YAML objects (YAML is generally a superset of JSON), Pydantic support is practically
-built-in to Hera through Pydantic's serialization to, and from, JSON. Using Pydantic objects (instead of dictionaries)
-in Runner Script templates makes them less error-prone, and easier to write! Using Pydantic classes in function inputs
-is as simple as inheriting from Pydantic's `BaseModel`.
-[Read more about Pydantic models here](https://docs.pydantic.dev/latest/usage/models/).
-
-```py
-from pydantic import BaseModel
-from hera.workflows import script
-
-class MyModel(BaseModel):
-    my_int: int
-    my_string: str
-
-@script(constructor="runner")
-def my_pydantic_function(my_pydantic_input: MyModel):
-    print(my_pydantic_input.my_string, my_pydantic_input.my_int)
-```
-
-Your functions can also return objects that are serialized, passed to another `Step` as a string argument, and then
-de-serialized in another function. This flow can be seen in
-[the callable scripts example](../examples/workflows/scripts/callable_script.md).
-
-Read on to [Script Annotations](script-annotations.md) to learn how to write Script template functions even more
-effectively!
+Script constructors transform a script function into the template seen in YAML. Hera offers two built-in constructors
+for you to use and extend. Read about them in [Script Constructors](script-constructors.md).
