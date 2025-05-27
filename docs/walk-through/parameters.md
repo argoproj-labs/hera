@@ -165,9 +165,9 @@ Hera uses Pydantic to allow any JSON-serialisable class to be used. You will nee
 
 The
 [`result` output parameter](https://argoproj.github.io/argo-workflows/walk-through/output-parameters/#result-output-parameter)
-captures the `stdout` of a template (that is, the `result` value is the *whole* stdout, including any log lines!) for
-subsequent steps to use. In Hera, if we use a function under a `Steps` context, it returns a `Step` object, which has a
-`result` property that we can access. For example, given the following functions:
+captures the `stdout` of a template for subsequent steps to use. In Hera, if we use a function under a `Steps` context,
+it returns a `Step` object, which has a `result` property that we can access. For example, given the following
+functions:
 
 ```py
 @script()
@@ -200,6 +200,9 @@ If you select "All" logs for the workflow you will see the stdout coming from ea
 hello-world-ltpjt-hello-2151859747: Hello world!
 hello-world-ltpjt-repeat-back-4012331575: You just said: 'Hello world!'
 ```
+
+> **Note:** the `result` value is the *whole* stdout, including any log lines! Therefore it is recommended to use a
+> named output parameter (below) for consistency and to avoid unexpected surprises.
 
 ### Output Parameters for Inline Scripts
 
