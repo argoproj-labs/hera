@@ -6,7 +6,7 @@ more complex [expressions](#complex-when-clauses) and [`Task` functions](#improv
 ## Basic `when` Clauses
 
 Argo uses [`govaluate`](https://github.com/Knetic/govaluate) in its `when` expressions. Hera is compatible with these
-`when` expression if you write them in literal strings, however, without prior Argo knowledge, you may not know the
+`when` expression if you write them in literal strings. However, without prior Argo knowledge, you may not know the
 chain of keys to access steps and their parameters. Hera offers some convenience functions you can use to create `when`
 expressions using f-strings.
 

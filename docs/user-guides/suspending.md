@@ -1,7 +1,7 @@
 # Suspending Workflows
 
 A user can pause execution of a Workflow at any time through the Argo UI, or the Argo CLI using `argo suspend`, and
-resume the Workflow in the UI or by `argo resume`.
+resume the Workflow in the UI or with `argo resume`.
 
 You can suspend a Workflow at specific points using `Suspend` templates in Hera.
 

@@ -4,8 +4,8 @@ A template can loop over a list of values using a Task or Step within a `DAG` or
 looping constructs:
 
 * `with_items` loops over a hard-coded list of values
-* `with_param` loops over a parameter (dynamically)
-* `with_sequence` loops over a list of numbers (similar to Python's `range` function)
+* `with_param` loops over a dynamic list from a parameter
+* `with_sequence` loops over a simple list of numbers (similar to Python's `range` function)
 
 The values in a list for `with_item` or `with_param` can be plain single values, referenced as `{{item}}`, or a
 dictionary of values, where the elements in the dictionary can be addressed by its key as `{{item.key}}`.
@@ -17,7 +17,7 @@ running times may overlap. If you do not want to loop over the items in parallel
 
 ## Basic `with_items` Usage
 
-We can demonstrate basic `with_items` usage on the Hello World example:
+We can demonstrate basic `with_items` usage by adapting the Hello World example:
 
 ```py
 @script()
