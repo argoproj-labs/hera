@@ -57,10 +57,15 @@ form of the Workflow to the YAML:
           value: world
     ```
 
-### Importing modules
+### Limitations of inline scripts
 
-A caveat of the `InlineScriptConstructor` is that it is quite limited - as the `InlineScriptConstructor` dumps your code
-to the `source` field as-is, you must also `import` (within the function itself) any modules you use in the function:
+A caveat of the `InlineScriptConstructor` is that it is quite limited - as your code is dumped to the `source` field
+as-is, there are multiple limitations, described below. These limitations are all solved by
+[runner scripts](#runner-scripts).
+
+#### Importing modules
+
+You must `import` any modules you use in the function, within the function itself:
 
 === "Hera"
 
@@ -124,6 +129,17 @@ If your function uses standard library imports from Python, you will be able to 
 Python image, specified by the `image` argument of the decorator. Therefore, if you use non-standard imports, such as
 `numpy`, you will need to use an image that includes `numpy`, or build your own (e.g. as a Docker image).
 
+#### Input types
+
+Only JSON types are currently allowed for inline scripts inputs, including strings, numbers, booleans, lists and
+dictionaries. Dictionaries offer the most flexibility for large inputs but will have no type validation. Also note that
+the runtime type given by `json.loads` may not match the type specified on the function.
+
+#### Output types
+
+No output types are currently allowed in inline scripts (due to the plain `return` when the function body is dumped),
+you must print to stdout to use the `result` parameter, or write to a file to create output parameters.
+
 ## Runner Scripts
 
 The `RunnerScriptConstructor` uses the Hera Runner to run your function on Argo. This allows you to arrange your code in
@@ -133,6 +149,8 @@ usual Python fashion:
 * the script-decorated function can call other functions in the package
 * the function itself can take any serialisable class as inputs; it automatically handles basic types and Pydantic
   classes.
+
+### Setting Up
 
 You'll need to build your own image to use a "runner" constructor, from the source code package itself and its
 dependencies, including Hera itself to run the `hera.workflows.runner` module.
@@ -221,7 +239,8 @@ Workflow.
 ### Integrated Pydantic Support
 
 [Pydantic](https://docs.pydantic.dev/latest/) can serialise to, and deserialise from, JSON, which allows Hera to easily
-pass Pydantic objects between scripts (via the YAML form of the Workflow).
+pass Pydantic objects between scripts. As a Workflow is a live object on Kubernetes, it must be able to represent all
+its fields in YAML, so only string-serialisable values are possible.
 
 Using Pydantic objects in Runner Script templates makes them less error-prone, and easier to write. Using Pydantic
 classes in function inputs is as simple as inheriting from Pydantic's `BaseModel`.
@@ -244,5 +263,5 @@ Your functions can also return objects that are serialised, passed to another `S
 then de-serialised in another function. This flow can be seen in
 [the callable scripts example](../examples/workflows/scripts/callable_script.md).
 
-Read on to [Script Annotations](script-annotations.md) to learn how to write Script template functions even more
-effectively!
+If you need custom serialisation, read on to [Script Annotations](script-annotations.md) to learn more and how to write
+script templates effectively!
