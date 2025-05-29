@@ -1,3 +1,9 @@
+"""This example shows how to use the custom serialisation features for Parameters and Artifacts.
+
+`pickle` is used to dump `CustomClass` as a binary blob for an Artifact, whereas for a Parameter, we use the provided
+serialisation functions in the class.
+"""
+
 import pickle
 from typing import Annotated, Tuple
 
@@ -24,20 +30,23 @@ class CustomClass:
         split = custom.split()
         return cls(a=split[0], b=" custom " + split[1])
 
+    def to_string(self) -> str:
+        return f"{self.a} {self.b}"
+
 
 @script(constructor="runner", image="my-image:v1")
 def create_outputs() -> Tuple[
     Annotated[
-        str,
+        CustomClass,
         Artifact(
             name="binary-output",
             dumpb=pickle.dumps,
             archive=NoneArchiveStrategy(),
         ),
     ],
-    Annotated[str, Parameter(name="param-output", dumps=lambda x: x + "!")],
+    Annotated[CustomClass, Parameter(name="param-output", dumps=lambda x: x.to_string())],
 ]:
-    return "some bytes", "hello world"
+    return CustomClass(a="artifact", b="test"), CustomClass(a="parameter", b="test")
 
 
 @script(constructor="runner", image="my-image:v1")
@@ -47,7 +56,7 @@ def consume_outputs(
         Parameter(name="my-parameter", loads=CustomClass.from_custom),
     ],
     an_artifact: Annotated[
-        bytes,
+        CustomClass,
         Artifact(
             name="binary-artifact",
             loadb=lambda b: pickle.loads(b),

@@ -4,8 +4,8 @@ Hera provides the `Input` and `Output` Pydantic classes to help combat sprawling
 outputs when using script annotations for runner scripts. It has the added bonus of letting you return values by
 referencing their name, instead of setting outputs by position in a `Tuple`.
 
-It lets you go from a function declaration and a tuple `return` to a single input and output. Compare the equivalent
-workflows below:
+It lets you go from a multiple-argument function declaration and a tuple `return` to a single input and output. Compare
+the equivalent workflows below:
 
 === "Standard IO"
 

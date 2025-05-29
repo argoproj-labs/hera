@@ -9,7 +9,7 @@ The [Workflow](../api/workflows/hera.md#hera.workflows.Workflow) holds a collect
 entrypoint template, usually a DAG or Steps template. In Hera, the `Workflow` is a context manager, so it loosely
 mirrors the YAML dictionary structure, and adds any templates created or referenced under it.
 
-See the `hello_world.py` example below:
+Here is a simple "Hello World" example:
 
 ```py
 from hera.workflows import Steps, Workflow, WorkflowsService, script
@@ -91,7 +91,7 @@ Container(
 
 ### Script
 
-Script templates are a conveninece wrapper for Containers. Hera lets you write Python functions directly as Script
+Script templates are a convenience wrapper for Containers. Hera lets you write Python functions directly as Script
 templates, using the `@script` decorator:
 
 ```py
@@ -179,8 +179,10 @@ recursively call themselves (ensure you have a stopping condition!).
 
 #### Steps
 
-In Hera, Steps consist of a series of `Step` objects, each specifying a template to run. Run in parallel by creating a
-sub-context with `parallel()`. The following is the `steps` example from the upstream examples collection.
+Steps are created by first creating a `Steps` context, and then creating `Step` objects within it, each specifying a
+template to run. By default, they run in sequence, but can run in parallel by creating a sub-context with `parallel()`.
+
+The following is the `steps` example from the upstream examples collection:
 
 ```py
 from hera.workflows import Container, Parameter, Step, Steps, Workflow

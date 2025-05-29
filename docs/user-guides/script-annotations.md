@@ -22,19 +22,19 @@ def echo(
     print(an_int)
 ```
 
-The fields allowed in the `Parameter` annotations are: `name`, `enum`, `description`, `loads` and `dumps`.
+The fields allowed in the `Parameter` annotations are: `name`, `enum`, `description`, `loads` and `dumps`. All of them
+are optional. A couple of things to note are:
 
-* `name` is optional – it will be set to the variable name if not provided, otherwise the YAML and Argo UI will show the
-  given `name`.
+* `name` is the name used in YAML and the Argo UI; it will default to the variable name if not provided.
 * A `default` value must be set using standard Python syntax, i.e. `x: int = 42`.
 
 > **Note:** `Annotated` can be used on both inline scripts and runner scripts!
 
-#### Custom Serialisation
+#### Custom Deserialisation
 
 If you are using a type that is not a built in (`int`, `str`, `dict` etc) or a Pydantic `BaseModel`, you can provide
-functions to the Parameter's `loads` and `dumps` attributes, which will be used by the Hera Runner (and so requires the
-use of "runner" templates). These will then be used to deserialise from, and serialise to, strings. See the
+functions to the Parameter's `loads` (and `dumps`) attributes, which will be used by the Hera Runner (and so requires
+the use of "runner" templates). These will then be used to deserialise from, and serialise to, strings. See the
 [custom serialisation example](../examples/workflows/scripts/custom_serialiser.md).
 
 #### Function parameter name aliasing
@@ -59,27 +59,66 @@ def read_artifact():
         print(a_file.read())
 ```
 
-By using annotations, Hera can automatically infer the Artifact's name and create a path for us! (We can still set a custom
-name and path if needed.) The function can then use the variable directly as a `Path` object:
+By using annotations, Hera can automatically infer the Artifact's name and create a path for us! The name will be the
+function variable name, and the path will be `/tmp/hera-inputs/artifacts/var_name`. The function can then use the
+variable directly as a `Path` object. The snippets below show how this helps to keep your code clean, the only
+difference will be the name and path shown in the YAML:
 
-```python
-@script(constructor="runner")
-def read_artifact(
-    an_artifact: Annotated[Path, Artifact(name="my-artifact-name")]
-):
-    print(an_artifact.read_text())
-```
+=== "Hera Inferred"
+
+    ```python
+    @script(constructor="runner")
+    def read_artifact(
+        an_artifact: Annotated[Path, Artifact()]
+    ):
+        print(an_artifact.read_text())
+    ```
+
+=== "YAML Inferred"
+
+    ```yaml
+      - name: read-artifact
+        inputs:
+          artifacts:
+          - name: an_artifact
+            path: /tmp/hera-inputs/artifacts/an_artifact
+        ...
+    ```
+
+=== "Hera Custom"
+
+    ```python
+    @script(constructor="runner")
+    def read_artifact(
+        an_artifact: Annotated[Path, Artifact(name="my-artifact-name", path="/tmp/an-artifact")]
+    ):
+        print(an_artifact.read_text())
+    ```
+
+=== "YAML Custom"
+
+    ```yaml
+      - name: read-artifact
+        inputs:
+          artifacts:
+          - name: my-artifact-name
+            path: /tmp/an-artifact
+        ...
+    ```
 
 See [the `Artifact` class](../api/workflows/hera.md#hera.workflows.Artifact) for all the fields allowed in the
 `Artifact` annotations. You are also able to use artifact repository types such as `S3Artifact` to first fetch the
-artifact from storage and mount it to the container at the inferred path (or your custom path).
+artifact from storage and mount it to the container.
 
-#### Custom Serialisation
+#### Custom Deserialisation
 
 If you are using a type that is not a built in (`int`, `str`, `dict` etc) or a Pydantic `BaseModel`, you can provide
 functions to the Artifact's `loads` and `dumps` attributes or the `loadb` and `dumpb` attributes, which will be used by
-the Hera Runner (and so requires the use of "runner" templates). `loads` and `dumps` are used to deserialise from, and
-serialise to, strings, while `loadb` and `dump` are used to deserialise from, and serialise to, a Python `bytes` object.
+the Hera Runner (and so requires the use of "runner" templates).
+
+* `loads` and `dumps` are used to deserialise from, and serialise to, strings.
+* `loadb` and `dump` are used to deserialise from, and serialise to, a Python `bytes` object.
+
 See the [custom serialisation example](../examples/workflows/scripts/custom_serialiser.md).
 
 For simple use cases, you can set `loader` to an `ArtifactLoader` enum.
@@ -134,7 +173,7 @@ def read_dict_artifact(
 
 A dictionary artifact would have no validation on its contents, so having safe code relies on you knowing or manually
 validating the keys that exist in it. Instead, by specifying a Pydantic type, the input string can be automatically
-deserialised and validated to that type, just like what happens automatically for `Parameter` inputs:
+deserialised and validated to that type, just as happens automatically for `Parameter` inputs:
 
 ```python
 from pydantic import BaseModel
@@ -170,7 +209,7 @@ Function return annotations specify the output type information for output Artif
 should return a single value or tuple. An example can be seen
 [here](../examples/workflows/scripts/script_annotations_outputs.md).
 
-For a simple hello world output artifact example we currently have:
+For a simple hello world output artifact example using an inline script we have:
 
 ```python
 @script(outputs=Artifact(name="hello-artifact", path="/tmp/hello_world.txt"))
@@ -203,9 +242,9 @@ You will see the returned values automatically saved in files within the Argo co
 
 These outputs are also exposed in the `outputs` section of the template in YAML.
 
-The object returned from the function can be of any serialisable Pydantic type (or basic Python type) and must be
-`Annotated` as an `Artifact` or `Parameter`. The `Parameter`/`Artifact`'s `name` will be used for the path of the
-output. You generally won't need to use a custom path, but can set one according to the following:
+The object returned from the function can be of any basic or Pydantic type and must be `Annotated` as an `Artifact` or
+`Parameter`. The `Parameter`/`Artifact`'s `name` will be used for the path of the output. You generally won't need to
+use a custom path, but can set one according to the following:
 
 * if the annotation is an `Artifact` with a `path`, we use that `path`
 * if the annotation is a `Parameter`, with a `value_from` that contains a `path`, we use that `path`
@@ -238,6 +277,13 @@ def func(...) -> Tuple[
 
 You may prefer to use the [Script Runner IO](script-runner-io.md#script-outputs-using-output) classes instead to avoid
 long return Tuples, as return values can be set by name, rather than position.
+
+#### Custom Serialisation
+
+As seen in the [Parameter Custom Deserialisation](#custom-deserialisation) and
+[Artifact Custom Deserialisation](#custom-deserialisation-1) sections, Parameters and Artifacts can be any type, as long
+as you provide a serialisation function. For `Parameter` this is `dumps`, for `Artifact` this is `dumps` or `dumpb`. See
+the [custom serialisation example](../examples/workflows/scripts/custom_serialiser.md) for more details.
 
 ### Input-Output function parameters
 

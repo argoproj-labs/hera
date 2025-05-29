@@ -126,7 +126,7 @@ You must `import` any modules you use in the function, within the function itsel
 > the scope of the script-decorated function!
 
 If your function uses standard library imports from Python, you will be able to run your function with any standard
-Python image, specified by the `image` argument of the decorator. Therefore, if you use non-standard imports, such as
+Python image, specified by the `image` argument of the decorator. However, if you use third-party imports, such as
 `numpy`, you will need to use an image that includes `numpy`, or build your own (e.g. as a Docker image).
 
 #### Input types
@@ -137,8 +137,8 @@ the runtime type given by `json.loads` may not match the type specified on the f
 
 #### Output types
 
-No output types are currently allowed in inline scripts (due to the plain `return` when the function body is dumped),
-you must print to stdout to use the `result` parameter, or write to a file to create output parameters.
+No output types are currently allowed in inline scripts (due to the plain `return` when the function body is dumped).
+You must print to stdout to use the `result` parameter, or write to a file to create output parameters.
 
 ## Runner Scripts
 
@@ -233,8 +233,8 @@ By not dumping the function to the `source` of a template, we can keep the YAML 
 `source` field actually contains the input parameters which are loaded from a file and passed to the `runner` when
 running the template.
 
-Note that you must build the image `my-code-image:v1` (and it must be accessible from Argo) **before** you submit the
-Workflow.
+Note that you must build the image (in this case `my-code-image:v1`), and it must be accessible from Argo **before** you
+submit the Workflow.
 
 ### Integrated Pydantic Support
 
