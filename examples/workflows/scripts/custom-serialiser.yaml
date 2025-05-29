@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: param-passing-
+spec:
+  entrypoint: d
+  serviceAccountName: argo
+  templates:
+  - name: d
+    dag:
+      tasks:
+      - name: create-outputs
+        template: create-outputs
+      - name: consume-outputs
+        depends: create-outputs
+        template: consume-outputs
+        arguments:
+          artifacts:
+          - name: binary-artifact
+            from: '{{tasks.create-outputs.outputs.artifacts.binary-output}}'
+          parameters:
+          - name: my-parameter
+            value: '{{tasks.create-outputs.outputs.parameters.param-output}}'
+  - name: create-outputs
+    outputs:
+      artifacts:
+      - name: binary-output
+        path: /tmp/hera-outputs/artifacts/binary-output
+        archive:
+          none: {}
+      parameters:
+      - name: param-output
+        valueFrom:
+          path: /tmp/hera-outputs/parameters/param-output
+    script:
+      image: my-image:v1
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.custom_serialiser:create_outputs
+      command:
+      - python
+      env:
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+  - name: consume-outputs
+    inputs:
+      artifacts:
+      - name: binary-artifact
+        path: /tmp/hera-inputs/artifacts/binary-artifact
+      parameters:
+      - name: my-parameter
+    script:
+      image: my-image:v1
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.scripts.custom_serialiser:consume_outputs
+      command:
+      - python

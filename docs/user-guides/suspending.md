@@ -3,19 +3,17 @@
 A user can pause execution of a Workflow at any time through the Argo UI, or the Argo CLI using `argo suspend`, and
 resume the Workflow in the UI or with `argo resume`.
 
-You can suspend a Workflow at specific points using `Suspend` templates in Hera.
+In Hera, you can suspend a Workflow at specific points using `Suspend` templates, making it easy to set up
+human-in-the-loop workflows.
 
 ## Basic `Suspend` Usage
 
-Use a `Suspend` template to pause the Workflow at any point in a `Steps` or `DAG` context. The only import you need on
-top of the Hello World example is `hera.workflows.Suspend`:
+Use a `Suspend` template to pause the Workflow at any point in a `Steps` or `DAG` context. This Workflow will wait until
+a user manually resumes the Workflow (in the UI or CLI):
 
 === "Hera"
 
     ```py
-    from hera.workflows import Steps, Suspend, Workflow, script
-
-
     @script()
     def echo(message: str):
         print(message)
@@ -83,14 +81,12 @@ top of the Hello World example is `hera.workflows.Suspend`:
 
 ## Timed `Suspend` Usage
 
-To pause the Workflow for a specific length of time, pass a value to the `Suspend` template's `duration` variable:
+To pause the Workflow for a specific length of time, pass a value to the `Suspend` template's `duration` variable. A
+user can still manually resume the Workflow before the time is up:
 
 === "Hera"
 
     ```py
-    from hera.workflows import Steps, Suspend, Workflow, script
-
-
     @script()
     def echo(message: str):
         print(message)
@@ -160,7 +156,7 @@ To pause the Workflow for a specific length of time, pass a value to the `Suspen
 ## Intermediate Parameters
 
 [Intermediate Parameters](https://argoproj.github.io/argo-workflows/intermediate-inputs/) are an Argo UI feature that
-pause a Workflow to wait for user inputs.
+pause a Workflow to wait for user input values.
 
 This Workflow suspends indefinitely, waiting for user input, and echoes the user's input in the next `Step`:
 
@@ -237,8 +233,10 @@ This Workflow suspends indefinitely, waiting for user input, and echoes the user
           - python
     ```
 
-We can also restrict user input options to a list of values passed to `enum`, set a pre-selected default, and set a
-duration to effectively time-out on the user input:
+We can also
+* restrict input options using a list of values passed to `enum`
+* set a pre-selected default
+* and set a duration to effectively time-out on the user input (using a suitable `when` expression):
 
 === "Hera"
 

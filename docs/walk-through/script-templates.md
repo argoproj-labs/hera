@@ -6,11 +6,15 @@ Argo Workflows.
 ## Inline Script Templates
 
 The example Workflow seen in [Hello World](./hello-world.md) showed the `source` field containing some boilerplate and
-the function body itself. This is the default setting for Hera, called "inline" script templates. They work the same as
-running a file directly through Python on your local command line, like `python hello_world.py`. They should only be
-used for basic use cases and trying out Hera. As the function is dumped directly in the `source` field, you cannot use
-external functions and imports, which must instead be contained within the function body. Here's the Hello World example
-for a reminder:
+the function body itself. This is the default setting for Hera, called "inline" script templates. Here are the key
+points to remember:
+
+* They work the same as running a file directly through Python on your local command line, like `python hello_world.py`.
+* They should only be used for basic use cases and trying out Hera.
+* As the function is dumped directly in the `source` field, you **cannot use external functions or module-level
+  imports**; they must instead be contained within the function body.
+  
+Here's an example using an inline script:
 
 === "Hera"
 
@@ -20,7 +24,10 @@ for a reminder:
 
     @script()
     def echo(message: str):
+        import random
+
         print(message)
+        print("I'm rolling a die:", random.randint(1, 6))
 
 
     with Workflow(
@@ -66,7 +73,9 @@ for a reminder:
             try: message = json.loads(r'''{{inputs.parameters.message}}''')
             except: message = r'''{{inputs.parameters.message}}'''
 
+            import random
             print(message)
+            print("I'm rolling a die:", random.randint(1, 6))
           command:
           - python
     ```
@@ -81,16 +90,18 @@ Hera offers a more powerful script template through the "Hera Runner", creating 
 the code is built into an OCI image, and Hera runs the module/entrypoint for you. Using the Hera Runner allows more
 streamlined use of Parameters and Artifacts, which will be discussed next in the walkthrough.
 
-We can adapt the Hello World example to use the Hera Runner: we simply add the `constructor` and `image` fields to the
-script decorator.
+We can adapt the example above to use the Hera Runner: we simply add the `constructor` and `image` fields to the
+script decorator. We can now also move the `import random` out of the function:
 
 ```py
 from hera.workflows import Workflow, script
+import random
 
 
 @script(constructor="runner", image="my-image:v1")
 def echo(message: str = "Hello world!"):
     print(message)
+    print("I'm rolling a die:", random.randint(1, 6))
 
 
 with Workflow(
