@@ -73,24 +73,21 @@ throughout the docs, when we refer to "WorkflowTemplates" we are also referring 
 In Hera, you will usually be writing Workflows, unless you find a common pattern or template usage, which can then be
 extracted into a WorkflowTemplate.
 
-### Python Function Libraries vs WorkflowTemplates
+### Distributing Python Libraries vs WorkflowTemplates
 
-In Hera, WorkflowTemplates seem redundant when we can build and distribute Python libaries, meaning we can distribute
-script-decorated functions in versioned packages. Therefore there is not much difference to a Python end user between a
-versioned WorkflowTemplates approach, and using plain old Python packages:
+In Hera, WorkflowTemplates may seem redundant when we can build and distribute Python libaries of script-decorated
+functions in versioned packages. Therefore there is not much difference to a Python end user between a versioned
+WorkflowTemplates approach, and using plain old Python packages. The table below summarises the differences and final
+recommendation:
 
-* For WorkflowTemplates:
-    * end users will need to use `TemplateRef`
-    * they only tell what the inputs should be from documentation or by looking at the YAML on the cluster (or on their
-      chosen code versioning tool, e.g. GitHub)
-    * you will need a custom mechanism to notify users of and distribute a new WorkflowTemplate version
-
-* For Python packages:
-    * end users should import the function and call it under a `Workflow` context
-    * they can see the inputs in their IDE
-    * new versions can be upgraded through common dependency auto-updaters, or manually through `pip` or `poetry`
-
-However, if you do not create WorkflowTemplates, anyone not using Python will not be able to use your functions!
+| | WorkflowTemplates | Script Functions only (Python Packages) |
+| --- | --- | --- |
+| End User Usage | End users must use `TemplateRef`. | End users import the function and use it like a normal script. |
+| Inputs / Outputs (Documentation) | Must be documented separately. Alternatively, viewable directly in the YAML (on cluster or GitHub). | Viewable in IDE from function code. |
+| Versioning | Authors must name WorkflowTemplates with version numbers. Not supported natively in Argo Workflows. | New versions released through common Python versioning/release tools. Read more in [Versioning](#versioning) below. |
+| Distribution | Can use GitOps tools (e.g. [Argo CD](https://argo-cd.readthedocs.io/en/stable/)). Requires a custom mechanism to notify users of, and update to a new WorkflowTemplate version in their (YAML) Workflow code. | Users can upgrade to new versions common dependency auto-updaters, or manually through `pip` or `poetry`, then build a new image using the new version. Read more in [CICD](#cicd) below. |
+| Caveats | Argo Workflows is lacking in native versioning features, so you may need to build custom solutions. | Non-Python users cannot use your script functions, so you may also need to release WorkflowTemplates (as YAML), which requires more maintenance. |
+| Recommendation | Use for small, common pieces of functionality. Use existing tools where possible for versioning and distribution. | Not generally recommended – use script functions (from Python packages) if your organisation _only_ uses Python (and you don't expect that to change). |
 
 ### Versioning
 
