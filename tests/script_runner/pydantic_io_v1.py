@@ -19,7 +19,7 @@ global_config.experimental_features["script_pydantic_io"] = True
 class ParamOnlyInput(Input):
     my_required_int: int
     my_int: int = 1
-    my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
+    my_annotated_int: Annotated[int, Parameter(description="my desc")] = 42
     my_ints: Annotated[List[int], Parameter(name="multiple-ints")] = []
 
 

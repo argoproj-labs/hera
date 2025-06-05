@@ -637,7 +637,7 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
             [
                 {"name": "my_required_int", "value": "4"},
                 {"name": "my_int", "value": "3"},
-                {"name": "another-int", "value": "2"},
+                {"name": "my_annotated_int", "value": "2"},
                 {"name": "multiple-ints", "value": "[1, 2, 3]"},
             ],
             "42",
