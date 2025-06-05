@@ -141,7 +141,7 @@ def test_get_annotated_artifact_value_inputs_with_loaders(
     file_path = tmp_path / "contents.txt"
     file_path.write_text(file_contents)
     artifact.path = file_path
-    assert get_annotated_artifact_value(artifact) == expected_return
+    assert get_annotated_artifact_value("param_name", artifact) == expected_return
 
 
 @pytest.mark.parametrize(
@@ -158,7 +158,7 @@ def test_get_annotated_artifact_value_path_inputs(
     file_path = tmp_path / "contents.txt"
     file_path.write_text(file_contents)
     artifact.path = file_path
-    assert get_annotated_artifact_value(artifact) == file_path
+    assert get_annotated_artifact_value("param_name", artifact) == file_path
 
 
 @pytest.mark.parametrize(
@@ -176,7 +176,7 @@ def test_get_annotated_artifact_value_path_outputs(
     artifact: Artifact,
     expected_path: str,
 ):
-    assert get_annotated_artifact_value(artifact) == Path(expected_path)
+    assert get_annotated_artifact_value("param_name", artifact) == Path(expected_path)
 
 
 def test_map_runner_input():

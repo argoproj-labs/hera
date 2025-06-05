@@ -14,6 +14,7 @@ class ParamOnlyInput(Input):
 class ParamOnlyOutput(Output):
     my_output_str: str = "my-default-str"
     another_output: Annotated[Path, Parameter(name="second-output")]
+    annotated_output: Annotated[str, Parameter(description="use the field name directly")]
 
 
 @script(constructor="runner")

@@ -19,13 +19,14 @@ global_config.experimental_features["script_pydantic_io"] = True
 class ParamOnlyInput(Input):
     my_required_int: int
     my_int: int = 1
-    my_annotated_int: Annotated[int, Parameter(name="another-int", description="my desc")] = 42
+    my_annotated_int: Annotated[int, Parameter(description="my desc")] = 42
     my_ints: Annotated[List[int], Parameter(name="multiple-ints")] = []
 
 
 class ParamOnlyOutput(Output):
     my_output_str: str = "my-default-str"
     annotated_str: Annotated[str, Parameter(name="second-output")]
+    annotated_output: Annotated[str, Parameter(description="use the field name directly")] = "test"
 
 
 @script(constructor="runner")
@@ -75,9 +76,7 @@ class MyArtifact(BaseModel):
 
 
 class ArtifactOnlyInput(Input):
-    json_artifact: Annotated[
-        MyArtifact, Artifact(name="json-artifact", path=ARTIFACT_PATH + "/json", loader=ArtifactLoader.json)
-    ]
+    json_artifact: Annotated[MyArtifact, Artifact(loader=ArtifactLoader.json)]
     path_artifact: Annotated[Path, Artifact(name="path-artifact", path=ARTIFACT_PATH + "/path", loader=None)]
     str_path_artifact: Annotated[
         str, Artifact(name="str-path-artifact", path=ARTIFACT_PATH + "/str-path", loader=None)
@@ -89,6 +88,7 @@ class ArtifactOnlyInput(Input):
 
 class ArtifactOnlyOutput(Output):
     an_artifact: Annotated[str, Artifact(name="artifact-str-output")]
+    another_artifact: Annotated[str, Artifact()]
 
 
 @script(constructor="runner")
@@ -100,4 +100,4 @@ def pydantic_input_artifact(
 
 @script(constructor="runner")
 def pydantic_output_artifact() -> ArtifactOnlyOutput:
-    return ArtifactOnlyOutput(an_artifact="test")
+    return ArtifactOnlyOutput(an_artifact="test", another_artifact="test2")

@@ -43,7 +43,7 @@ tuple return, instead using named arguments in the return.
 
 ### Runner Artifact Inputs
 
-Input Artifacts require a similar annotation:
+Input Artifacts require a similar annotation (name is optional):
 
 ```py
 @script(constructor="runner", image="my-image:v1")
