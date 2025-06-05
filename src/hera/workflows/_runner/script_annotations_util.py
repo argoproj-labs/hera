@@ -89,12 +89,10 @@ def get_annotated_output_param(param_annotation: Parameter) -> Path:
     return path
 
 
-def get_annotated_output_artifact(param_name: str, artifact_annotation: Artifact) -> Path:
+def get_annotated_output_artifact(artifact_annotation: Artifact) -> Path:
     if artifact_annotation.path:
         path = Path(artifact_annotation.path)
     else:
-        if not artifact_annotation.name:
-            artifact_annotation.name = param_name
         path = _get_outputs_path(artifact_annotation)
     # Automatically create the parent directory (if required)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,7 +109,7 @@ def get_annotated_artifact_value(param_name: str, artifact_annotation: Artifact)
     loaded value according to the predefined behaviour (json obj, path or string).
     """
     if artifact_annotation.output:
-        return get_annotated_output_artifact(param_name, artifact_annotation)
+        return get_annotated_output_artifact(artifact_annotation)
 
     if not artifact_annotation.name:
         artifact_annotation.name = param_name
