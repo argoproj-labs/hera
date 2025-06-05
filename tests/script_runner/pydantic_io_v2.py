@@ -87,6 +87,7 @@ class ArtifactOnlyInput(Input):
 
 class ArtifactOnlyOutput(Output):
     an_artifact: Annotated[str, Artifact(name="artifact-str-output")]
+    another_artifact: Annotated[str, Artifact()]
 
 
 @script(constructor="runner")
@@ -98,4 +99,4 @@ def pydantic_input_artifact(
 
 @script(constructor="runner")
 def pydantic_output_artifact() -> ArtifactOnlyOutput:
-    return ArtifactOnlyOutput(an_artifact="test")
+    return ArtifactOnlyOutput(an_artifact="test", another_artifact="test2")

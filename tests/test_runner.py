@@ -773,6 +773,7 @@ def test_runner_pydantic_input_artifacts(
             },
             [
                 {"subpath": "tmp/hera-outputs/artifacts/artifact-str-output", "value": "test"},
+                {"subpath": "tmp/hera-outputs/artifacts/another_artifact", "value": "test2"},
             ],
             id="pydantic io artifact output variations",
         ),

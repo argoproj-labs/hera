@@ -89,10 +89,12 @@ def get_annotated_output_param(param_annotation: Parameter) -> Path:
     return path
 
 
-def get_annotated_output_artifact(artifact_annotation: Artifact) -> Path:
+def get_annotated_output_artifact(param_name: str, artifact_annotation: Artifact) -> Path:
     if artifact_annotation.path:
         path = Path(artifact_annotation.path)
     else:
+        if not artifact_annotation.name:
+            artifact_annotation.name = param_name
         path = _get_outputs_path(artifact_annotation)
     # Automatically create the parent directory (if required)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -107,12 +109,9 @@ def get_annotated_artifact_value(param_name: str, artifact_annotation: Artifact)
     they are used directly to load the value.
     Otherwise, if it has an ArtifactLoader enum as its loader, return the
     loaded value according to the predefined behaviour (json obj, path or string).
-
-    As Artifacts are always Annotated in function parameters, we don't need to consider
-    the `kwargs` or the function parameter name.
     """
     if artifact_annotation.output:
-        return get_annotated_output_artifact(artifact_annotation)
+        return get_annotated_output_artifact(param_name, artifact_annotation)
 
     if not artifact_annotation.name:
         artifact_annotation.name = param_name
@@ -233,7 +232,11 @@ def _save_annotated_return_outputs(
                     continue
 
                 matching_output = output_value._get_output(field)
-                path = _get_outputs_path(matching_output)
+                if isinstance(matching_output, Artifact):
+                    # Adds a name to the Artifact if not present
+                    path = get_annotated_output_artifact(field, matching_output)
+                else:
+                    path = _get_outputs_path(matching_output)
                 _write_to_path(path, value, _get_dumper_function(matching_output))
         else:
             assert isinstance(dest, tuple)
