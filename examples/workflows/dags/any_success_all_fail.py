@@ -1,3 +1,5 @@
+"""This example shows how to run a task if "any succeed" or if "all fail" from a fan-out."""
+
 from hera.workflows import DAG, Workflow, script
 
 

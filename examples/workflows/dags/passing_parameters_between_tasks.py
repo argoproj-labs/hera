@@ -1,3 +1,5 @@
+"""This example shows how to pass parameters between tasks."""
+
 from hera.workflows import DAG, Container, Parameter, Task, Workflow
 
 with Workflow(generate_name="param-passing-", entrypoint="d") as w:
@@ -16,5 +18,5 @@ with Workflow(generate_name="param-passing-", entrypoint="d") as w:
     )
     with DAG(name="d"):
         t1 = Task(name="a", template=out)
-        t2 = Task(name="b", template=in_, arguments=t1.get_parameter("x").with_name("a"))
+        t2 = Task(name="b", template=in_, arguments={"a": t1.get_parameter("x")})
         t1 >> t2
