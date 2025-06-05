@@ -75,9 +75,7 @@ class MyArtifact(BaseModel):
 
 
 class ArtifactOnlyInput(Input):
-    json_artifact: Annotated[
-        MyArtifact, Artifact(name="json-artifact", path=ARTIFACT_PATH + "/json", loader=ArtifactLoader.json)
-    ]
+    json_artifact: Annotated[MyArtifact, Artifact(loader=ArtifactLoader.json)]
     path_artifact: Annotated[Path, Artifact(name="path-artifact", path=ARTIFACT_PATH + "/path", loader=None)]
     str_path_artifact: Annotated[
         str, Artifact(name="str-path-artifact", path=ARTIFACT_PATH + "/str-path", loader=None)

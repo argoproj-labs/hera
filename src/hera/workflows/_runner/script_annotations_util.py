@@ -99,7 +99,7 @@ def get_annotated_output_artifact(artifact_annotation: Artifact) -> Path:
     return path
 
 
-def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, Any]:
+def get_annotated_artifact_value(param_name: str, artifact_annotation: Artifact) -> Union[Path, Any]:
     """Get the value of the given Artifact annotation.
 
     If the artifact is an output, return the path it will write to.
@@ -113,6 +113,9 @@ def get_annotated_artifact_value(artifact_annotation: Artifact) -> Union[Path, A
     """
     if artifact_annotation.output:
         return get_annotated_output_artifact(artifact_annotation)
+
+    if not artifact_annotation.name:
+        artifact_annotation.name = param_name
 
     if not artifact_annotation.path:
         # Path is added to the spec automatically when built. As it isn't present in the annotation itself,
@@ -188,7 +191,7 @@ def map_runner_input(
                     param_or_artifact.loads,
                 )
             else:
-                return get_annotated_artifact_value(param_or_artifact)
+                return get_annotated_artifact_value(field, param_or_artifact)
         else:
             return load_parameter_value(kwargs[field], ann_type)
 

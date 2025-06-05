@@ -18,6 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+import hera.workflows.artifact as artifact_module
 import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
@@ -505,13 +506,13 @@ def test_script_annotations_artifact_inputs(
     [
         (
             "tests.script_runner.artifact_loaders:file_loader_default_path",
-            "my-artifact",
+            "an_artifact",
             "Hello there!",
             "Hello there!",
         ),
     ],
 )
-def test_script_annotations_artifacts_no_path(
+def test_script_annotations_artifacts_no_name_or_path(
     entrypoint,
     artifact_name,
     file_contents,
@@ -525,7 +526,7 @@ def test_script_annotations_artifacts_no_path(
     filepath.write_text(file_contents)
 
     # Trailing slash required
-    monkeypatch.setattr("hera.workflows.artifact._DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
+    monkeypatch.setattr(artifact_module, "_DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
 
     kwargs_list = []
 
@@ -717,7 +718,7 @@ def test_runner_pydantic_output_params(
         pytest.param(
             "tests.script_runner.pydantic_io_vX:pydantic_input_artifact",
             {
-                "json": '{"a": 3, "b": "bar"}',
+                "json_artifact": '{"a": 3, "b": "bar"}',
                 "path": "dummy",
                 "str-path": "dummy",
                 "file": "dummy",
@@ -742,6 +743,7 @@ def test_runner_pydantic_input_artifacts(
         filepath = tmp_path / file
         filepath.write_text(contents)
 
+    monkeypatch.setattr(artifact_module, "_DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
 
     module = importlib.import_module(entrypoint.split(":")[0])
@@ -791,6 +793,7 @@ def test_runner_pydantic_output_artifacts(
         filepath = tmp_path / file
         filepath.write_text(contents)
 
+    monkeypatch.setattr(artifact_module, "_DEFAULT_ARTIFACT_INPUT_DIRECTORY", f"{tmp_path}/")
     monkeypatch.setattr(test_module, "ARTIFACT_PATH", str(tmp_path))
     monkeypatch.setenv("hera__pydantic_mode", str(pydantic_mode))
     monkeypatch.setenv("hera__script_pydantic_io", "")
