@@ -1,13 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: script-with-resources-
+  generateName: script-with-kwargs-
 spec:
-  entrypoint: task-with-memory-request
+  entrypoint: script-with-kwargs
   templates:
-  - name: task-with-memory-request
+  - name: script-with-kwargs
+    metadata:
+      annotations:
+        my-annotation: my-value
+      labels:
+        my-label: my-value
     script:
       image: python:3.9
+      imagePullPolicy: Always
       source: |-
         import os
         import sys

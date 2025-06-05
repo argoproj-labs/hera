@@ -131,7 +131,7 @@ serialisation functions in the class.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.scripts.custom_serialiser:create_outputs
+          - examples.workflows.hera_runner.custom_serialiser:create_outputs
           command:
           - python
           env:
@@ -151,7 +151,7 @@ serialisation functions in the class.
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.scripts.custom_serialiser:consume_outputs
+          - examples.workflows.hera_runner.custom_serialiser:consume_outputs
           command:
           - python
     ```

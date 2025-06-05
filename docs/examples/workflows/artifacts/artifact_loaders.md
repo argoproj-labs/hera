@@ -1,4 +1,4 @@
-# Script Annotations Artifact Loaders
+# Artifact Loaders
 
 
 
@@ -18,7 +18,7 @@
     @script(constructor="runner")
     def output_dict_artifact(
         a_number: Annotated[int, Parameter(name="a_number")],
-    ) -> Annotated[Dict[str, int], Artifact(name="a_dict")]:
+    ) -> Annotated[Dict[str, int], Artifact(name="an-artifact")]:
         return {"your-value": a_number}
 
 
@@ -35,15 +35,15 @@
         print(a_file_as_json)
 
 
-    with Workflow(generate_name="test-input-annotations-", entrypoint="my-steps") as w:
+    with Workflow(generate_name="artifact-loaders-", entrypoint="my-steps") as w:
         with Steps(name="my-steps") as s:
             out = output_dict_artifact(arguments={"a_number": 3})
             artifact_loaders(
-                arguments=[
-                    out.get_artifact("a_dict").with_name("my-artifact-path"),
-                    out.get_artifact("a_dict").with_name("my-artifact-as-str"),
-                    out.get_artifact("a_dict").with_name("my-artifact-as-json"),
-                ]
+                arguments={
+                    "my-artifact-path": out.get_artifact("an-artifact"),
+                    "my-artifact-as-str": out.get_artifact("an-artifact"),
+                    "my-artifact-as-json": out.get_artifact("an-artifact"),
+                }
             )
     ```
 
@@ -53,7 +53,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: test-input-annotations-
+      generateName: artifact-loaders-
     spec:
       entrypoint: my-steps
       templates:
@@ -70,19 +70,19 @@
             arguments:
               artifacts:
               - name: my-artifact-path
-                from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+                from: '{{steps.output-dict-artifact.outputs.artifacts.an-artifact}}'
               - name: my-artifact-as-str
-                from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+                from: '{{steps.output-dict-artifact.outputs.artifacts.an-artifact}}'
               - name: my-artifact-as-json
-                from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+                from: '{{steps.output-dict-artifact.outputs.artifacts.an-artifact}}'
       - name: output-dict-artifact
         inputs:
           parameters:
           - name: a_number
         outputs:
           artifacts:
-          - name: a_dict
-            path: /tmp/hera-outputs/artifacts/a_dict
+          - name: an-artifact
+            path: /tmp/hera-outputs/artifacts/an-artifact
         script:
           image: python:3.9
           source: '{{inputs.parameters}}'
@@ -90,7 +90,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.scripts.script_annotations_artifact_loaders:output_dict_artifact
+          - examples.workflows.artifacts.artifact_loaders:output_dict_artifact
           command:
           - python
           env:
@@ -112,7 +112,7 @@
           - -m
           - hera.workflows.runner
           - -e
-          - examples.workflows.scripts.script_annotations_artifact_loaders:artifact_loaders
+          - examples.workflows.artifacts.artifact_loaders:artifact_loaders
           command:
           - python
     ```

@@ -10,10 +10,10 @@ spec:
       tasks:
       - name: generator
         template: generator
-      - name: consumer-default
+      - name: consume-default
         depends: generator
         template: consumer
-      - name: consumer-param
+      - name: consume-argument
         depends: generator
         template: consumer
         arguments:
@@ -35,6 +35,8 @@ spec:
       parameters:
       - name: message
         default: Hello, world!
+      - name: foo
+        default: '42'
     script:
       image: python:3.9
       source: |-
@@ -42,9 +44,12 @@ spec:
         import sys
         sys.path.append(os.getcwd())
         import json
+        try: foo = json.loads(r'''{{inputs.parameters.foo}}''')
+        except: foo = r'''{{inputs.parameters.foo}}'''
         try: message = json.loads(r'''{{inputs.parameters.message}}''')
         except: message = r'''{{inputs.parameters.message}}'''
 
         print(message)
+        print(foo)
       command:
       - python

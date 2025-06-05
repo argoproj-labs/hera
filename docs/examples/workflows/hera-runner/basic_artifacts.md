@@ -1,34 +1,44 @@
-# Artifact
+# Basic Artifacts
 
 
 
-This example showcases a simple artifact passing mechanism between two tasks.
-The first task, writer, creates a file located at `/file` containing a message. The second
-task, consumer, takes this artifact, places it at its own `/file` path, and print out the content.
+Compare this example to [Basic Artifacts](../artifacts/basic-artifacts.md) to see how the Hera runner simplifies your Artifact code.
 
 
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Workflow, script
+    from typing import Annotated
+
+    from hera.workflows import (
+        DAG,
+        Artifact,
+        NoneArchiveStrategy,
+        Workflow,
+        script,
+    )
+    from hera.workflows.artifact import ArtifactLoader
 
 
-    @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
-    def writer():
-        with open("/tmp/file", "w+") as f:
-            f.write("Hello, world!")
+    @script()
+    def writer() -> Annotated[str, Artifact(name="out-art", archive=NoneArchiveStrategy())]:
+        return "Hello, world!"
 
 
-    @script(inputs=Artifact(name="in-art", path="/tmp/file"))
-    def consumer():
-        with open("/tmp/file", "r") as f:
-            print(f.readlines())  # prints `Hello, world!` to `stdout`
+    @script()
+    def consumer(
+        in_art: Annotated[
+            str,
+            Artifact(loader=ArtifactLoader.json),
+        ],
+    ):
+        print(in_art)  # prints `Hello, world!` to `stdout`
 
 
     with Workflow(generate_name="artifact-", entrypoint="d") as w:
         with DAG(name="d"):
             w_ = writer()
-            c = consumer(arguments=w_.get_artifact("out-art").with_name("in-art"))
+            c = consumer(arguments={"in_art": w_.get_artifact("out-art")})
             w_ >> c
     ```
 
@@ -52,13 +62,12 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             template: consumer
             arguments:
               artifacts:
-              - name: in-art
+              - name: in_art
                 from: '{{tasks.writer.outputs.artifacts.out-art}}'
       - name: writer
         outputs:
           artifacts:
           - name: out-art
-            path: /tmp/file
             archive:
               none: {}
         script:
@@ -67,23 +76,21 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/file', 'w+') as f:
-                f.write('Hello, world!')
+            return 'Hello, world!'
           command:
           - python
       - name: consumer
         inputs:
           artifacts:
-          - name: in-art
-            path: /tmp/file
+          - name: in_art
+            path: /tmp/hera-inputs/artifacts/in_art
         script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/file', 'r') as f:
-                print(f.readlines())
+            print(in_art)
           command:
           - python
     ```

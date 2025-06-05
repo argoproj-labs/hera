@@ -157,7 +157,7 @@ by Pydantic, and you can rely on the types being correct.
 
 Hera uses Pydantic to allow any JSON-serialisable class to be used. You will need to build an image and use Hera's
 [Script Runner](../user-guides/script-basics.md#runnerscriptconstructor). See an example usage
-[here](../examples/workflows/scripts/callable_script.md).
+[here](../examples/workflows/hera-runner/typed_script_io.md).
 
 ## Output Parameters
 
