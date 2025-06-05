@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: test-input-annotations-
+  generateName: artifact-loaders-
 spec:
   entrypoint: my-steps
   templates:
@@ -18,19 +18,19 @@ spec:
         arguments:
           artifacts:
           - name: my-artifact-path
-            from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+            from: '{{steps.output-dict-artifact.outputs.artifacts.an-artifact}}'
           - name: my-artifact-as-str
-            from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+            from: '{{steps.output-dict-artifact.outputs.artifacts.an-artifact}}'
           - name: my-artifact-as-json
-            from: '{{steps.output-dict-artifact.outputs.artifacts.a_dict}}'
+            from: '{{steps.output-dict-artifact.outputs.artifacts.an-artifact}}'
   - name: output-dict-artifact
     inputs:
       parameters:
       - name: a_number
     outputs:
       artifacts:
-      - name: a_dict
-        path: /tmp/hera-outputs/artifacts/a_dict
+      - name: an-artifact
+        path: /tmp/hera-outputs/artifacts/an-artifact
     script:
       image: python:3.9
       source: '{{inputs.parameters}}'
@@ -38,7 +38,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.script_annotations_artifact_loaders:output_dict_artifact
+      - examples.workflows.artifacts.artifact_loaders:output_dict_artifact
       command:
       - python
       env:
@@ -60,6 +60,6 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.script_annotations_artifact_loaders:artifact_loaders
+      - examples.workflows.artifacts.artifact_loaders:artifact_loaders
       command:
       - python

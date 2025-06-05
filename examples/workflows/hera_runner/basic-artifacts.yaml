@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: artifact-
+spec:
+  entrypoint: d
+  templates:
+  - name: d
+    dag:
+      tasks:
+      - name: writer
+        template: writer
+      - name: consumer
+        depends: writer
+        template: consumer
+        arguments:
+          artifacts:
+          - name: in_art
+            from: '{{tasks.writer.outputs.artifacts.out-art}}'
+  - name: writer
+    outputs:
+      artifacts:
+      - name: out-art
+        archive:
+          none: {}
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        return 'Hello, world!'
+      command:
+      - python
+  - name: consumer
+    inputs:
+      artifacts:
+      - name: in_art
+        path: /tmp/hera-inputs/artifacts/in_art
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        print(in_art)
+      command:
+      - python

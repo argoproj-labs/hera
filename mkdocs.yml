@@ -39,8 +39,10 @@ nav:
   - Examples:
     - About: examples/workflows-examples.md
     - Idiomatic Hera Examples:
-      - Scripts:
+      - Inline Scripts:
         - ... | flat | examples/workflows/scripts/*.md
+      - Runner Scripts:
+        - ... | flat | examples/workflows/hera-runner/*.md
       - DAGs:
         - ... | flat | examples/workflows/dags/*.md
       - Steps:

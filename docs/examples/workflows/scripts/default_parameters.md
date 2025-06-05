@@ -1,9 +1,14 @@
-# Default Param Overwrite
+# Default Parameters
 
 
 
-This example showcases how a Python source can be scheduled with default parameters as kwargs but overwritten
-conditionally.
+This example shows script function default parameters.
+
+Script functions parameters mirror Python's behaviour:
+
+* use the caller argument value if provided
+* otherwise use the default if provided
+* otherwise error as no value provided (and a value is always required in Argo Workflows)
 
 
 === "Hera"
@@ -18,16 +23,17 @@ conditionally.
 
 
     @script()
-    def consumer(message: str = "Hello, world!"):
+    def consumer(message: str = "Hello, world!", foo: int = 42):
         print(message)
+        print(foo)
 
 
     with Workflow(generate_name="default-param-overwrite-", entrypoint="d") as w:
         with DAG(name="d"):
             g = generator()
-            c_default = consumer(name="consumer-default")
-            c_param = consumer(name="consumer-param", arguments=g.get_result_as("message"))
-            g >> [c_default, c_param]
+            c_default = consumer(name="consume-default")
+            c_arg = consumer(name="consume-argument", arguments={"message": g.result})
+            g >> [c_default, c_arg]
     ```
 
 === "YAML"
@@ -45,10 +51,10 @@ conditionally.
           tasks:
           - name: generator
             template: generator
-          - name: consumer-default
+          - name: consume-default
             depends: generator
             template: consumer
-          - name: consumer-param
+          - name: consume-argument
             depends: generator
             template: consumer
             arguments:
@@ -70,6 +76,8 @@ conditionally.
           parameters:
           - name: message
             default: Hello, world!
+          - name: foo
+            default: '42'
         script:
           image: python:3.9
           source: |-
@@ -77,10 +85,13 @@ conditionally.
             import sys
             sys.path.append(os.getcwd())
             import json
+            try: foo = json.loads(r'''{{inputs.parameters.foo}}''')
+            except: foo = r'''{{inputs.parameters.foo}}'''
             try: message = json.loads(r'''{{inputs.parameters.message}}''')
             except: message = r'''{{inputs.parameters.message}}'''
 
             print(message)
+            print(foo)
           command:
           - python
     ```

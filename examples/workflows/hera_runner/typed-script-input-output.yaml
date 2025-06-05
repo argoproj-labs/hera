@@ -50,7 +50,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.callable_script:my_function
+      - examples.workflows.hera_runner.typed_script_input_output:my_function
       command:
       - python
   - name: str-function
@@ -64,7 +64,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.callable_script:str_function
+      - examples.workflows.hera_runner.typed_script_input_output:str_function
       command:
       - python
   - name: another-function
@@ -78,7 +78,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.callable_script:another_function
+      - examples.workflows.hera_runner.typed_script_input_output:another_function
       command:
       - python
   - name: function-kebab
@@ -97,7 +97,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.callable_script:function_kebab
+      - examples.workflows.hera_runner.typed_script_input_output:function_kebab
       command:
       - python
   - name: function-kebab-object
@@ -111,6 +111,6 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.scripts.callable_script:function_kebab_object
+      - examples.workflows.hera_runner.typed_script_input_output:function_kebab_object
       command:
       - python

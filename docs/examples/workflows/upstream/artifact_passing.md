@@ -34,7 +34,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             Step(
                 name="consume-artifact",
                 template=print_message_from_file,
-                arguments=gen_step.get_artifact("hello-art").with_name("message"),
+                arguments={"message": gen_step.get_artifact("hello-art")},
             )
     ```
 
