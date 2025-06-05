@@ -1,8 +1,8 @@
-# Dag With Param Passing
+# Passing Parameters Between Tasks
 
 
 
-
+This example shows how to pass parameters between tasks.
 
 
 === "Hera"
@@ -26,7 +26,7 @@
         )
         with DAG(name="d"):
             t1 = Task(name="a", template=out)
-            t2 = Task(name="b", template=in_, arguments=t1.get_parameter("x").with_name("a"))
+            t2 = Task(name="b", template=in_, arguments={"a": t1.get_parameter("x")})
             t1 >> t2
     ```
 

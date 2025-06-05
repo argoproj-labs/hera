@@ -1,8 +1,8 @@
-# Dag Conditional Parameters
+# Conditional Dag Parameter Output
 
 
 
-
+This example shows how a DAG can output a value from an expression (using the `hera.expr` module).
 
 
 === "Hera"
@@ -12,17 +12,17 @@
     from hera.workflows import DAG, Parameter, Workflow, script
 
 
-    @script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+    @script()
     def heads():
         print("heads")
 
 
-    @script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+    @script()
     def tails():
         print("tails")
 
 
-    @script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+    @script()
     def flip_coin():
         import random
 
@@ -74,22 +74,33 @@
                 : tasks.tails.outputs.result'
       - name: flip-coin
         script:
-          image: python:alpine3.6
+          image: python:3.9
           source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
             import random
             print('heads' if random.randint(0, 1) == 0 else 'tails')
           command:
           - python
       - name: heads
         script:
-          image: python:alpine3.6
-          source: print('heads')
+          image: python:3.9
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            print('heads')
           command:
           - python
       - name: tails
         script:
-          image: python:alpine3.6
-          source: print('tails')
+          image: python:3.9
+          source: |-
+            import os
+            import sys
+            sys.path.append(os.getcwd())
+            print('tails')
           command:
           - python
     ```

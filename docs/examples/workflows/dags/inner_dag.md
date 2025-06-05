@@ -1,8 +1,8 @@
-# Callable Dag
+# Inner Dag
 
 
 
-
+This example shows how to use a DAG within another DAG.
 
 
 === "Hera"
@@ -17,7 +17,7 @@
 
 
     with Workflow(
-        generate_name="callable-dag-",
+        generate_name="callable-inner-dag-",
         entrypoint="calling-dag",
     ) as w:
         with DAG(name="my-dag", inputs=Parameter(name="my-dag-input")) as my_dag:
@@ -36,7 +36,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: callable-dag-
+      generateName: callable-inner-dag-
     spec:
       entrypoint: calling-dag
       templates:

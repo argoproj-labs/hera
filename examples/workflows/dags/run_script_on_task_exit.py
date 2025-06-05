@@ -2,6 +2,7 @@
 
 You will need to use the `Script` class directly, instead of a `script`-decorated function.
 """
+
 from hera.workflows import DAG, Script, Workflow, script
 
 

@@ -9,7 +9,7 @@ def hello(name: str):
 
 
 with Workflow(
-    generate_name="callable-dag-",
+    generate_name="callable-inner-dag-",
     entrypoint="calling-dag",
 ) as w:
     with DAG(name="my-dag", inputs=Parameter(name="my-dag-input")) as my_dag:
