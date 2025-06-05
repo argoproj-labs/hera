@@ -8,7 +8,7 @@ from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow,
 @script(constructor="runner")
 def output_dict_artifact(
     a_number: Annotated[int, Parameter(name="a_number")],
-) -> Annotated[Dict[str, int], Artifact(name="a_dict")]:
+) -> Annotated[Dict[str, int], Artifact(name="an-artifact")]:
     return {"your-value": a_number}
 
 
@@ -25,13 +25,13 @@ def artifact_loaders(
     print(a_file_as_json)
 
 
-with Workflow(generate_name="test-input-annotations-", entrypoint="my-steps") as w:
+with Workflow(generate_name="artifact-loaders-", entrypoint="my-steps") as w:
     with Steps(name="my-steps") as s:
         out = output_dict_artifact(arguments={"a_number": 3})
         artifact_loaders(
-            arguments=[
-                out.get_artifact("a_dict").with_name("my-artifact-path"),
-                out.get_artifact("a_dict").with_name("my-artifact-as-str"),
-                out.get_artifact("a_dict").with_name("my-artifact-as-json"),
-            ]
+            arguments={
+                "my-artifact-path": out.get_artifact("an-artifact"),
+                "my-artifact-as-str": out.get_artifact("an-artifact"),
+                "my-artifact-as-json": out.get_artifact("an-artifact"),
+            }
         )
