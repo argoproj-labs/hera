@@ -225,6 +225,11 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
                     {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                    {
+                        "name": "annotated_output",
+                        "valueFrom": {"path": "/tmp/hera-outputs/parameters/annotated_output"},
+                        "description": "use the field name directly",
+                    },
                 ],
             },
             id="param-only-io",
@@ -277,6 +282,11 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
                     {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                    {
+                        "name": "annotated_output",
+                        "valueFrom": {"path": "/tmp/hera-outputs/parameters/annotated_output"},
+                        "description": "use the field name directly",
+                    },
                 ],
             },
             id="runnerinput-change-default",
@@ -295,6 +305,11 @@ def test_configmap(global_config_fixture):
                 "parameters": [
                     {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
                     {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                    {
+                        "name": "annotated_output",
+                        "valueFrom": {"path": "/tmp/hera-outputs/parameters/annotated_output"},
+                        "description": "use the field name directly",
+                    },
                 ],
             },
             id="runnerinput-within-generic",

@@ -681,6 +681,7 @@ def test_runner_pydantic_inputs_params(
             [
                 {"subpath": "tmp/hera-outputs/parameters/my_output_str", "value": "a string!"},
                 {"subpath": "tmp/hera-outputs/parameters/second-output", "value": "my-val"},
+                {"subpath": "tmp/hera-outputs/parameters/annotated_output", "value": "test"},
             ],
             id="pydantic output parameter variations",
         ),
