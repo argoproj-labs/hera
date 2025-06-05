@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: fv-test-
+  generateName: masked-parameter-
 spec:
   entrypoint: d
   templates:
@@ -16,11 +16,11 @@ spec:
         arguments:
           artifacts:
           - name: i
-            from: '{{tasks.produce.outputs.artifacts.result}}'
+            from: '{{tasks.produce.outputs.artifacts.result-art}}'
   - name: produce
     outputs:
       artifacts:
-      - name: result
+      - name: result-art
         path: /tmp/result
     script:
       image: python:3.9

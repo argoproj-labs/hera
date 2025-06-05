@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: default-param-overwrite-
+spec:
+  entrypoint: d
+  templates:
+  - name: d
+    dag:
+      tasks:
+      - name: generator
+        template: generator
+      - name: consume-default
+        depends: generator
+        template: consumer
+      - name: consume-argument
+        depends: generator
+        template: consumer
+        arguments:
+          parameters:
+          - name: message
+            value: '{{tasks.generator.outputs.result}}'
+  - name: generator
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        print('Another message for the world!')
+      command:
+      - python
+  - name: consumer
+    inputs:
+      parameters:
+      - name: message
+        default: Hello, world!
+      - name: foo
+        default: '42'
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: foo = json.loads(r'''{{inputs.parameters.foo}}''')
+        except: foo = r'''{{inputs.parameters.foo}}'''
+        try: message = json.loads(r'''{{inputs.parameters.message}}''')
+        except: message = r'''{{inputs.parameters.message}}'''
+
+        print(message)
+        print(foo)
+      command:
+      - python
