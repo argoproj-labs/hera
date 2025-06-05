@@ -1,3 +1,5 @@
+"""This example shows how to use a DAG within another DAG."""
+
 from hera.workflows import DAG, Parameter, Workflow, script
 
 

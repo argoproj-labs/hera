@@ -1,3 +1,5 @@
+"""This is the canonical "diamond" example, but using a `Container`."""
+
 from hera.workflows import (
     DAG,
     Container,
