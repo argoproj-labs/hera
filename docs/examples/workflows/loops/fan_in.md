@@ -1,8 +1,10 @@
-# Dynamic Fanout Fanin
+# Fan In
 
 
 
+This example shows how to collect values in a "fan-in" task after the fan-out.
 
+This also works for the `result` output parameter (as long as nothing else is in stdout!).
 
 
 === "Hera"
@@ -20,11 +22,18 @@
         json.dump([{"value": i} for i in range(10)], sys.stdout)
 
 
-    @script(outputs=[Parameter(name="value", value_from=ValueFrom(path="/tmp/value"))])
-    def fanout(object: dict):
-        print("Received object: {object}!".format(object=object))
-        # Output the content of the "value" key in the object
-        value = object["value"]
+    @script(
+        outputs=[
+            Parameter(
+                name="value",
+                value_from=ValueFrom(path="/tmp/value"),
+            )
+        ]
+    )
+    def fanout(my_dict: dict):
+        print("Received object: {my_dict}!".format(my_dict=my_dict))
+        # Output the content of the "value" key in the dict
+        value = my_dict["value"]
         with open("/tmp/value", "w") as f:
             f.write(str(value))
 
@@ -34,12 +43,11 @@
         print("Received values: {values}!".format(values=values))
 
 
-    # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-    with Workflow(generate_name="dynamic-fanout-fanin", entrypoint="d") as w:
+    with Workflow(generate_name="fan-in-", entrypoint="d") as w:
         with DAG(name="d"):
             g = generate()
             fout = fanout(with_param=g.result)
-            fin = fanin(arguments=fout.get_parameter("value").with_name("values"))
+            fin = fanin(arguments={"values": fout.get_parameter("value")})
             g >> fout >> fin
     ```
 
@@ -49,7 +57,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: dynamic-fanout-fanin
+      generateName: fan-in-
     spec:
       entrypoint: d
       templates:
@@ -64,7 +72,7 @@
             withParam: '{{tasks.generate.outputs.result}}'
             arguments:
               parameters:
-              - name: object
+              - name: my_dict
                 value: '{{item}}'
           - name: fanin
             depends: fanout
@@ -88,7 +96,7 @@
       - name: fanout
         inputs:
           parameters:
-          - name: object
+          - name: my_dict
         outputs:
           parameters:
           - name: value
@@ -101,11 +109,11 @@
             import sys
             sys.path.append(os.getcwd())
             import json
-            try: object = json.loads(r'''{{inputs.parameters.object}}''')
-            except: object = r'''{{inputs.parameters.object}}'''
+            try: my_dict = json.loads(r'''{{inputs.parameters.my_dict}}''')
+            except: my_dict = r'''{{inputs.parameters.my_dict}}'''
 
-            print('Received object: {object}!'.format(object=object))
-            value = object['value']
+            print('Received object: {my_dict}!'.format(my_dict=my_dict))
+            value = my_dict['value']
             with open('/tmp/value', 'w') as f:
                 f.write(str(value))
           command:

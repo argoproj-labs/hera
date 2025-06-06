@@ -17,13 +17,12 @@ spec:
         arguments:
           parameters:
           - name: value
-            value: '{{item.value}}'
+            value: '{{item}}'
   - name: generate
     container:
       image: alpine:latest
       command:
-      - echo
-      - '[{"value": "a"}, {"value": "b"}, {"value": "c"}]'
+      - len=$((8 + RANDOM % 4)); json=$(seq 1 "$len" | paste -sd, -); echo "[$json]"
   - name: fanout
     container:
       image: alpine:latest
