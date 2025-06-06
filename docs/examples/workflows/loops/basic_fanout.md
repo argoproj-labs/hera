@@ -1,8 +1,8 @@
-# Script Basic Loop
+# Basic Fanout
 
 
 
-
+This examples shows some basic hard-coded fan-outs.
 
 
 === "Hera"
@@ -40,7 +40,13 @@
             print_message(
                 name="print-message-loop-with-items-list-of-dicts",
                 arguments={"message": "{{item}}"},
-                with_items=[serialize(item) for item in [{"my-key": "hello world"}, {"my-other-key": "goodbye world"}]],
+                with_items=[
+                    serialize(item)
+                    for item in [
+                        {"my-key": "hello world"},
+                        {"my-other-key": "goodbye world"},
+                    ]
+                ],
             )
     ```
 

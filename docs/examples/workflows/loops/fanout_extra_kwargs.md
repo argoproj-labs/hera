@@ -1,11 +1,8 @@
-# Dynamic Fanout Extra Kwargs
+# Fanout Extra Kwargs
 
 
 
-This example showcases how clients can use Hera to dynamically generate tasks that process outputs from one task in
-parallel. This is useful for batch jobs and instances where clients do not know ahead of time how many tasks/entities
-they may need to process. In addition to the fanout, this example showcases how one can set up extra parameters for
-the job to dictate what the fanout should execute over.
+This example shows how to use a fan-out over one argument, while keeping the others the same.
 
 
 === "Hera"
@@ -19,8 +16,8 @@ the job to dictate what the fanout should execute over.
         import json
         import sys
 
-        # this can be anything! e.g fetch from some API, then in parallel process all entities; chunk database records
-        # and process them in parallel, etc.
+        # this can be anything! e.g fetch from some API, then in parallel process
+        # all entities; chunk database records and process them in parallel, etc.
         json.dump([i for i in range(10)], sys.stdout)
 
 
@@ -35,23 +32,34 @@ the job to dictate what the fanout should execute over.
         )
 
 
-    # assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
     with Workflow(generate_name="dynamic-fanout-", entrypoint="d") as w:
         with DAG(name="d"):
             g = generate()
-            # the following fanout will occur over the items in the list that is returned from the generate script
-            # the `extra_param1` will take the `hello world` value while `extra_param2` will hold the default value of 42
-            c1 = consume(name="c1", with_param=g.result, arguments={"value": "{{item}}", "extra_param1": "hello world"})
 
-            # the following fanout will occur over the items in the list that is returned from the generate script
-            # the `extra_param1` will take the `hello world` value while `extra_param2` will hold the default value of 123
+            # We use `value` to fan-out over the values from `generate`, while the
+            # other arguments remain the same for all fan-out tasks.
+            # `extra_param1` is set here, while `extra_param1` has a default
+            # value of 42 in the script
+            c1 = consume(
+                name="c1",
+                with_param=g.result,
+                arguments={
+                    "value": "{{item}}",
+                    "extra_param1": "hello world",
+                },
+            )
+
+            # Here is the same fan-out, except we are also setting `extra_param2`
             c2 = consume(
                 name="c2",
                 with_param=g.result,
-                arguments={"value": "{{item}}", "extra_param1": "hello world", "extra_param2": "123"},
+                arguments={
+                    "value": "{{item}}",
+                    "extra_param1": "hello world",
+                    "extra_param2": "123",
+                },
             )
-            g >> c1
-            g >> c2
+            g >> [c1, c2]
     ```
 
 === "YAML"

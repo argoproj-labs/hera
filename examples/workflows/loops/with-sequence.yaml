@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: with-sequence-example
+  generateName: with-sequence-
 spec:
   entrypoint: d
   templates:
@@ -28,7 +28,7 @@ spec:
           - name: message
             value: '{{item}}'
         withSequence:
-          end: '5'
+          end: '1'
           format: 2020-05-%02X
           start: '{{tasks.t1.outputs.result}}'
   - name: gen-num
@@ -38,7 +38,8 @@ spec:
         import os
         import sys
         sys.path.append(os.getcwd())
-        print(3)
+        import random
+        print(random.randint(4, 6))
       command:
       - python
   - name: say

@@ -26,8 +26,9 @@ spec:
         import sys
         sys.path.append(os.getcwd())
         import json
+        import random
         import sys
-        json.dump([i for i in range(10)], sys.stdout)
+        json.dump([i for i in range(random.randint(8, 12))], sys.stdout)
       command:
       - python
   - name: consume
