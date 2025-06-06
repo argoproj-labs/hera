@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: my-workflow-
+  generateName: parameters-workflow-
 spec:
   entrypoint: worker
   templates:
@@ -12,6 +12,7 @@ spec:
         valueFrom:
           path: /tmp/hera-outputs/parameters/environment_parameter
       - name: an_annotated_parameter
+        description: infer name from field
         valueFrom:
           path: /tmp/hera-outputs/parameters/an_annotated_parameter
       - name: setup-config
@@ -110,3 +111,7 @@ spec:
       - name: another_value
         valueFrom:
           parameter: '{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
+  arguments:
+    parameters:
+    - name: value_b
+      value: a value for b!

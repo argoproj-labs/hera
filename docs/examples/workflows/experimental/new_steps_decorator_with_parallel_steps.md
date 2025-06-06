@@ -2,7 +2,7 @@
 
 
 
-
+This example shows the use of the new `steps` decorator, including parallel steps.
 
 
 === "Hera"
@@ -16,7 +16,10 @@
     global_config.experimental_features["decorator_syntax"] = True
 
 
-    w = Workflow(generate_name="my-workflow-")
+    w = Workflow(
+        generate_name="steps-",
+        arguments={"value_b": "a value for b!"},
+    )
 
 
     class SetupOutput(Output):
@@ -73,7 +76,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: my-workflow-
+      generateName: steps-
     spec:
       entrypoint: worker
       templates:
@@ -162,5 +165,9 @@
           - name: value
             valueFrom:
               parameter: '{{steps.final-step.outputs.result}}'
+      arguments:
+        parameters:
+        - name: value_b
+          value: a value for b!
     ```
 

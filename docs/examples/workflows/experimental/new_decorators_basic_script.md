@@ -2,37 +2,33 @@
 
 
 
+This example shows a simple "hello world" script using the new decorators.
 
+It uses a single input argument, which is passed through the `Workflow`. It also
+uses a plain `Output` - by setting the `result` value, it will be printed to stdout
+and be available to subsequent tasks (if it were in a DAG).
 
 
 === "Hera"
 
     ```python linenums="1"
     from hera.shared import global_config
-    from hera.workflows import Input, Output, WorkflowTemplate
+    from hera.workflows import Input, Output, Workflow
 
     global_config.experimental_features["decorator_syntax"] = True
 
-    w = WorkflowTemplate(name="my-template")
+    w = Workflow(name="hello-world-", arguments={"user": "me"})
 
 
     class MyInput(Input):
         user: str
 
 
+    @w.set_entrypoint
     @w.script()
     def hello_world(my_input: MyInput) -> Output:
         output = Output()
         output.result = f"Hello Hera User: {my_input.user}!"
-        return output
-
-
-    # Pass script kwargs (including an alternative public template name) in the decorator
-    @w.set_entrypoint
-    @w.script(name="goodbye-world", labels={"my-label": "my-value"})
-    def goodbye(my_input: MyInput) -> Output:
-        output = Output()
-        output.result = f"Goodbye Hera User: {my_input.user}!"
         return output
     ```
 
@@ -40,11 +36,11 @@
 
     ```yaml linenums="1"
     apiVersion: argoproj.io/v1alpha1
-    kind: WorkflowTemplate
+    kind: Workflow
     metadata:
-      name: my-template
+      name: hello-world-
     spec:
-      entrypoint: goodbye-world
+      entrypoint: hello-world
       templates:
       - name: hello-world
         inputs:
@@ -65,27 +61,9 @@
             value: /tmp/hera-outputs
           - name: hera__script_pydantic_io
             value: ''
-      - name: goodbye-world
-        inputs:
-          parameters:
-          - name: user
-        metadata:
-          labels:
-            my-label: my-value
-        script:
-          image: python:3.9
-          source: '{{inputs.parameters}}'
-          args:
-          - -m
-          - hera.workflows.runner
-          - -e
-          - examples.workflows.experimental.new_decorators_basic_script:goodbye
-          command:
-          - python
-          env:
-          - name: hera__outputs_directory
-            value: /tmp/hera-outputs
-          - name: hera__script_pydantic_io
-            value: ''
+      arguments:
+        parameters:
+        - name: user
+          value: me
     ```
 
