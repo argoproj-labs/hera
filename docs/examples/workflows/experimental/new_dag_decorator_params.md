@@ -2,7 +2,7 @@
 
 
 
-
+This example shows how parameters can be passed into, within and out of a DAG.
 
 
 === "Hera"
@@ -17,7 +17,12 @@
     global_config.experimental_features["decorator_syntax"] = True
 
 
-    w = Workflow(generate_name="my-workflow-")
+    # Create a Workflow - we pass arguments here for the
+    # entrypoint (designated by the `set_entrypoint` decorator)
+    w = Workflow(
+        generate_name="parameters-workflow-",
+        arguments={"value_b": "a value for b!"},
+    )
 
 
     class SetupConfig(BaseModel):
@@ -26,8 +31,12 @@
 
     class SetupOutput(Output):
         environment_parameter: str
-        an_annotated_parameter: Annotated[int, Parameter()]  # use an annotated non-str, infer name from field
-        setup_config: Annotated[SetupConfig, Parameter(name="setup-config")]  # use a pydantic BaseModel
+        an_annotated_parameter: Annotated[
+            int, Parameter(name="an_annotated_parameter", description="infer name from field")
+        ]
+        setup_config: Annotated[
+            SetupConfig, Parameter(name="setup-config")
+        ]  # a Pydantic BaseModel can be a single input Parameter
 
 
     @w.script()
@@ -53,7 +62,7 @@
     @w.script()
     def concat(concat_input: ConcatInput) -> Output:
         res = f"{concat_input.word_a} {concat_input.word_b}"
-        if concat_input.reverse:
+        if concat_input.concat_config.reverse:
             res = res[::-1]
         return Output(result=res)
 
@@ -88,7 +97,10 @@
         task_b = concat(ConcatInput(word_a=worker_input.value_b, word_b=setup_task.result))
         final_task = concat(ConcatInput(word_a=task_a.result, word_b=task_b.result))
 
-        return WorkerOutput(result_value=final_task.result, another_value=setup_task.an_annotated_parameter)
+        return WorkerOutput(
+            result_value=final_task.result,
+            another_value=setup_task.an_annotated_parameter,
+        )
     ```
 
 === "YAML"
@@ -97,7 +109,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: my-workflow-
+      generateName: parameters-workflow-
     spec:
       entrypoint: worker
       templates:
@@ -108,6 +120,7 @@
             valueFrom:
               path: /tmp/hera-outputs/parameters/environment_parameter
           - name: an_annotated_parameter
+            description: infer name from field
             valueFrom:
               path: /tmp/hera-outputs/parameters/an_annotated_parameter
           - name: setup-config
@@ -206,5 +219,9 @@
           - name: another_value
             valueFrom:
               parameter: '{{tasks.setup-task.outputs.parameters.an_annotated_parameter}}'
+      arguments:
+        parameters:
+        - name: value_b
+          value: a value for b!
     ```
 

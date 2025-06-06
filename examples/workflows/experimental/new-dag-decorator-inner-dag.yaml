@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: my-workflow-
+  generateName: inner-dag-workflow-
 spec:
   entrypoint: outer-dag
   templates:
@@ -95,17 +95,17 @@ spec:
         arguments:
           parameters:
           - name: value_a
-            value: dag_a
+            value: dag_a1
           - name: value_b
-            value: '{{inputs.parameters.value_a}}'
+            value: dag_a2
       - name: sub-dag-b
         template: worker
         arguments:
           parameters:
           - name: value_a
-            value: dag_b
+            value: dag_b1
           - name: value_b
-            value: '{{inputs.parameters.value_b}}'
+            value: dag_b2
       - name: sub-dag-c
         depends: sub-dag-a && sub-dag-b
         template: worker
@@ -115,10 +115,6 @@ spec:
             value: '{{tasks.sub-dag-a.outputs.parameters.value}}'
           - name: value_b
             value: '{{tasks.sub-dag-b.outputs.parameters.value}}'
-    inputs:
-      parameters:
-      - name: value_a
-      - name: value_b
     outputs:
       parameters:
       - name: value

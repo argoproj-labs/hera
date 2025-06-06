@@ -2,7 +2,11 @@
 
 
 
+This example shows how to use the Hera concept of TemplateSet.
 
+A TemplateSet lets you write templates that are not attached to a particular Workflow. You can then add the TemplateSet
+to a Workflow at submission time. This can be useful if you just want to distribute Python packages. Read more in the
+[Best Practices guide](../../../user-guides/best-practices.md)!
 
 
 === "Hera"
@@ -13,7 +17,7 @@
 
     global_config.experimental_features["decorator_syntax"] = True
 
-    w = Workflow(name="my-workflow")
+    w = Workflow(name="workflow-using-template-sets")
     templates = TemplateSet()
 
 
@@ -29,6 +33,7 @@
 
 
     w.add_template_set(templates)
+    w.set_entrypoint(my_dag)
     ```
 
 === "YAML"
@@ -37,8 +42,9 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      name: my-workflow
+      name: workflow-using-template-sets
     spec:
+      entrypoint: my-dag
       templates:
       - name: setup
         script:
