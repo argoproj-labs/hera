@@ -1,8 +1,9 @@
-"""
-This example showcases how clients can use Hera to dynamically generate tasks that process outputs from one task in
-parallel. Differ from dynamic_fanout.py, this example uses a container to generate the tasks and the dynamically
-created tasks are also container only.
-More details can be found here: https://github.com/argoproj-labs/hera-workflows/issues/250
+"""This examples shows how to dynamically fan out over a list of values using `Container` templates.
+
+The command `len=$((8 + RANDOM % 4)); json=$(seq 1 "$len" | paste -sd, -); echo "[$json]"` produces a list of random
+length (between 8 and 12), which is then echoed in json format. This matches the [dynamic fanout](dynamic-fanout.md)
+example that uses Python. In this example, we must specify the arguments as `Container` does not automatically match
+them for us.
 """
 
 from hera.workflows import DAG, Container, Parameter, Workflow
@@ -10,7 +11,7 @@ from hera.workflows import DAG, Container, Parameter, Workflow
 generate = Container(
     name="generate",
     image="alpine:latest",
-    command=["echo", '[{"value": "a"}, {"value": "b"}, {"value": "c"}]'],
+    command=['len=$((8 + RANDOM % 4)); json=$(seq 1 "$len" | paste -sd, -); echo "[$json]"'],
 )
 
 fanout = Container(
@@ -20,13 +21,11 @@ fanout = Container(
     command=["echo", "{{inputs.parameters.value}}"],
 )
 
-# assumes you used `hera.set_global_token` and `hera.set_global_host` so that the workflow can be submitted
-with Workflow(generate_name="dynamic-fanout-container-", entrypoint="d") as w:
+with Workflow(
+    generate_name="dynamic-fanout-container-",
+    entrypoint="d",
+) as w:
     with DAG(name="d"):
-        # this can be anything! e.g. fetch from some API, then in parallel process all entities; chunk database records
-        # and process them in parallel, etc.
         g = generate()
-        f = fanout(
-            arguments={"value": "{{item.value}}"}, with_param=g.result
-        )  # this make the task fan out over the `with_param`
+        f = fanout(arguments={"value": "{{item}}"}, with_param=g.result)
         g >> f
