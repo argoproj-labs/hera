@@ -2,7 +2,7 @@
 
 
 
-
+This example shows the use of Pydantic Input/Output to create the input and output parameters and artifacts for a script template.
 
 
 === "Hera"
@@ -16,11 +16,13 @@
         from pydantic import BaseModel
 
     from hera.shared import global_config
-    from hera.workflows import Artifact, ArtifactLoader, Parameter, Steps, Workflow, script
+    from hera.workflows import Artifact, ArtifactLoader, Parameter, Script, Steps, Workflow, script
     from hera.workflows.archive import NoneArchiveStrategy
     from hera.workflows.io import Input, Output
 
     global_config.experimental_features["script_pydantic_io"] = True
+    global_config.set_class_defaults(Script, constructor="runner")
+    global_config.set_class_defaults(Script, image="my-image-with-deps")
 
 
     class MyObject(BaseModel):
@@ -41,19 +43,19 @@
         artifact_int: Annotated[int, Artifact(name="artifact-output")]
 
 
-    @script(constructor="runner", image="python-image-built-with-my-package")
+    @script()
     def writer() -> Annotated[int, Artifact(name="int-artifact", archive=NoneArchiveStrategy())]:
         return 100
 
 
-    @script(constructor="runner", image="python-image-built-with-my-package")
+    @script()
     def pydantic_io(
         my_input: MyInput,
     ) -> MyOutput:
         return MyOutput(exit_code=1, result="Test!", param_int=42, artifact_int=my_input.param_int)
 
 
-    with Workflow(generate_name="pydantic-io-") as w:
+    with Workflow(generate_name="pydantic-io-", entrypoint="use-pydantic-io") as w:
         with Steps(name="use-pydantic-io"):
             write_step = writer()
             pydantic_io(
@@ -75,6 +77,7 @@
     metadata:
       generateName: pydantic-io-
     spec:
+      entrypoint: use-pydantic-io
       templates:
       - name: use-pydantic-io
         steps:
@@ -100,7 +103,7 @@
             archive:
               none: {}
         script:
-          image: python-image-built-with-my-package
+          image: my-image-with-deps
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -133,7 +136,7 @@
             valueFrom:
               path: /tmp/hera-outputs/parameters/param-output
         script:
-          image: python-image-built-with-my-package
+          image: my-image-with-deps
           source: '{{inputs.parameters}}'
           args:
           - -m

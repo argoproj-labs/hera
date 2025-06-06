@@ -2,7 +2,9 @@
 
 
 
+This example shows how a Workflow can reference WorkflowTemplates.
 
+Note this example will not run unless you create the WorkflowTemplates first.
 
 
 === "Hera"

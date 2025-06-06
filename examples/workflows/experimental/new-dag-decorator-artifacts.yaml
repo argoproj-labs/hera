@@ -1,10 +1,32 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: my-workflow-
+  generateName: artifact-workflow-
 spec:
   entrypoint: worker
   templates:
+  - name: create-artifact
+    outputs:
+      artifacts:
+      - name: an-artifact
+        path: /tmp/hera-outputs/artifacts/an-artifact
+        archive:
+          none: {}
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.experimental.new_dag_decorator_artifacts:create_artifact
+      command:
+      - python
+      env:
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+      - name: hera__script_pydantic_io
+        value: ''
   - name: concat
     inputs:
       artifacts:
@@ -16,6 +38,8 @@ spec:
       artifacts:
       - name: an-artifact
         path: /tmp/hera-outputs/artifacts/an-artifact
+        archive:
+          none: {}
     script:
       image: python:3.9
       source: '{{inputs.parameters}}'
@@ -34,14 +58,17 @@ spec:
   - name: worker
     dag:
       tasks:
+      - name: create
+        template: create-artifact
       - name: concat-1
+        depends: create
         template: concat
         arguments:
           artifacts:
           - name: word_a
-            from: '{{inputs.artifacts.artifact_a}}'
+            from: '{{tasks.create.outputs.artifacts.an-artifact}}'
           - name: word_b
-            from: '{{inputs.artifacts.artifact_b}}'
+            from: '{{tasks.create.outputs.artifacts.an-artifact}}'
       - name: concat-2-custom-name
         depends: concat-1
         template: concat
@@ -51,11 +78,9 @@ spec:
             from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
           - name: word_b
             from: '{{tasks.concat-1.outputs.artifacts.an-artifact}}'
-    inputs:
-      artifacts:
-      - name: artifact_a
-      - name: artifact_b
     outputs:
       artifacts:
       - name: an-artifact
         from: '{{tasks.concat-2-custom-name.outputs.artifacts.an-artifact}}'
+        archive:
+          none: {}

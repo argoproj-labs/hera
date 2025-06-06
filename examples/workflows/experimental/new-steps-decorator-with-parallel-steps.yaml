@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: my-workflow-
+  generateName: steps-
 spec:
   entrypoint: worker
   templates:
@@ -90,3 +90,7 @@ spec:
       - name: value
         valueFrom:
           parameter: '{{steps.final-step.outputs.result}}'
+  arguments:
+    parameters:
+    - name: value_b
+      value: a value for b!
