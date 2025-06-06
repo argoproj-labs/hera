@@ -2,7 +2,7 @@
 
 
 
-
+This example shows how you can (carefully!) recurse on a DAG template.
 
 
 === "Hera"

@@ -1,3 +1,5 @@
+"""This example shows how you can (carefully!) recurse on a DAG template."""
+
 from hera.workflows import DAG, Task, Workflow, script
 
 

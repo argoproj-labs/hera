@@ -1,8 +1,8 @@
-# Dag Conditional On Task Status
+# Conditional On Task Status
 
 
 
-
+This example showcases conditional execution on success, failure, and error
 
 
 === "Hera"
@@ -12,29 +12,30 @@
 
 
     @script()
-    def fail_or_succeed():
+    def random():
         import random
 
-        if random.randint(0, 1) == 0:
-            raise ValueError
+        p = random.random()
+        if p <= 0.5:
+            raise Exception("failure")
 
 
     @script()
-    def when_succeeded():
-        print("It was a success")
+    def success():
+        print("succeeded!")
 
 
     @script()
-    def when_failed():
-        print("It was a failure")
+    def failure():
+        print("failed!")
 
 
     with Workflow(generate_name="dag-conditional-on-task-status-", entrypoint="d") as w:
-        with DAG(name="d") as s:
-            t1 = fail_or_succeed()
+        with DAG(name="d"):
+            r = random()
 
-            t1.on_failure(when_failed())
-            t1.on_success(when_succeeded())
+            r.on_success(success())
+            r.on_failure(failure())
     ```
 
 === "YAML"
@@ -50,15 +51,15 @@
       - name: d
         dag:
           tasks:
-          - name: fail-or-succeed
-            template: fail-or-succeed
-          - name: when-failed
-            depends: fail-or-succeed.Failed
-            template: when-failed
-          - name: when-succeeded
-            depends: fail-or-succeed.Succeeded
-            template: when-succeeded
-      - name: fail-or-succeed
+          - name: random
+            template: random
+          - name: success
+            depends: random.Succeeded
+            template: success
+          - name: failure
+            depends: random.Failed
+            template: failure
+      - name: random
         script:
           image: python:3.9
           source: |-
@@ -66,28 +67,29 @@
             import sys
             sys.path.append(os.getcwd())
             import random
-            if random.randint(0, 1) == 0:
-                raise ValueError
+            p = random.random()
+            if p <= 0.5:
+                raise Exception('failure')
           command:
           - python
-      - name: when-failed
+      - name: success
         script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
-            print('It was a failure')
+            print('succeeded!')
           command:
           - python
-      - name: when-succeeded
+      - name: failure
         script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
-            print('It was a success')
+            print('failed!')
           command:
           - python
     ```

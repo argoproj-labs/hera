@@ -1,8 +1,8 @@
-# Dag Diamond With Callable Container
+# Dag Diamond With Container
 
 
 
-
+This is the canonical "diamond" example, but using a `Container`.
 
 
 === "Hera"

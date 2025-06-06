@@ -10,24 +10,21 @@ def random():
     p = random.random()
     if p <= 0.5:
         raise Exception("failure")
-    print("success")
 
 
 @script()
 def success():
-    print("success")
+    print("succeeded!")
 
 
 @script()
 def failure():
-    print("failure")
+    print("failed!")
 
 
-with Workflow(generate_name="conditional-", entrypoint="d") as w:
+with Workflow(generate_name="dag-conditional-on-task-status-", entrypoint="d") as w:
     with DAG(name="d"):
         r = random()
-        s = success()
-        f = failure()
 
-        r.on_success(s)
-        r.on_failure(f)
+        r.on_success(success())
+        r.on_failure(failure())

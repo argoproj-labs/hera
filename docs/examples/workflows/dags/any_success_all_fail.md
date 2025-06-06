@@ -2,7 +2,7 @@
 
 
 
-
+This example shows how to run a task if "any succeed" or if "all fail" from a fan-out.
 
 
 === "Hera"
