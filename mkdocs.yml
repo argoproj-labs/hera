@@ -38,23 +38,22 @@ nav:
     - Experimental Features: user-guides/experimental-features.md
   - Examples:
     - About: examples/workflows-examples.md
-    - Idiomatic Hera Examples:
-      - Inline Scripts:
-        - ... | flat | examples/workflows/scripts/*.md
-      - Runner Scripts:
-        - ... | flat | examples/workflows/hera-runner/*.md
-      - DAGs:
-        - ... | flat | examples/workflows/dags/*.md
-      - Steps:
-        - ... | flat | examples/workflows/steps/*.md
-      - Loops:
-        - ... | flat | examples/workflows/loops/*.md
-      - Artifacts:
-        - ... | flat | examples/workflows/artifacts/*.md
-      - Experimental Features:
-        - ... | flat | examples/workflows/experimental/*.md
-      - Miscellaneous Examples:
-        - ... | flat | examples/workflows/misc/*.md
+    - Inline Scripts:
+      - ... | flat | examples/workflows/scripts/*.md
+    - Runner Scripts:
+      - ... | flat | examples/workflows/hera-runner/*.md
+    - DAGs:
+      - ... | flat | examples/workflows/dags/*.md
+    - Steps:
+      - ... | flat | examples/workflows/steps/*.md
+    - Loops:
+      - ... | flat | examples/workflows/loops/*.md
+    - Artifacts:
+      - ... | flat | examples/workflows/artifacts/*.md
+    - Experimental Features:
+      - ... | flat | examples/workflows/experimental/*.md
+    - Miscellaneous Examples:
+      - ... | flat | examples/workflows/misc/*.md
     - Use-Cases and Integrations:
       - About: examples/about-use-cases.md
       - ... | flat | examples/workflows/use-cases/*.md
