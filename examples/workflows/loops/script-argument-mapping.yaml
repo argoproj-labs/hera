@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: loops-maps-
+  generateName: script-argument-mapping-
 spec:
-  entrypoint: loop-map-example
+  entrypoint: steps
   templates:
-  - name: loop-map-example
+  - name: steps
     steps:
     - - name: test-key-mapping
         template: test-key-mapping

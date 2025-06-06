@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: dynamic-fanout-
+  generateName: json-payload-fanout-
 spec:
   entrypoint: d
   templates:
