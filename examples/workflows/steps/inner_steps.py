@@ -1,3 +1,9 @@
+"""This example shows how to use a Steps template within another Steps template.
+
+Note, this is different from parallel steps, as parallel steps are a collection of substeps to run in parallel, whereas
+this inner steps example shows the use of a whole `Steps` template (which will run sequentially in this example).
+"""
+
 from hera.workflows import Parameter, Steps, Workflow, script
 
 
@@ -7,7 +13,7 @@ def hello(name: str):
 
 
 with Workflow(
-    generate_name="callable-steps-",
+    generate_name="callable-inner-steps-",
     entrypoint="calling-steps",
 ) as w:
     with Steps(name="my-steps", inputs=Parameter(name="my-step-input")) as my_steps:
