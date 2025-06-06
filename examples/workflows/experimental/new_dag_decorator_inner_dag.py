@@ -1,10 +1,12 @@
+"""This example shows how to run an inner DAG within another DAG."""
+
 from hera.shared import global_config
 from hera.workflows import Input, Output, Workflow
 
 global_config.experimental_features["decorator_syntax"] = True
 
 
-w = Workflow(generate_name="my-workflow-")
+w = Workflow(generate_name="inner-dag-workflow-")
 
 
 class SetupOutput(Output):
@@ -47,9 +49,9 @@ def worker(worker_input: WorkerInput) -> WorkerOutput:
 
 @w.set_entrypoint
 @w.dag()
-def outer_dag(worker_input: WorkerInput) -> WorkerOutput:
-    sub_dag_a = worker(WorkerInput(value_a="dag_a", value_b=worker_input.value_a))
-    sub_dag_b = worker(WorkerInput(value_a="dag_b", value_b=worker_input.value_b))
+def outer_dag() -> WorkerOutput:
+    sub_dag_a = worker(WorkerInput(value_a="dag_a1", value_b="dag_a2"))
+    sub_dag_b = worker(WorkerInput(value_a="dag_b1", value_b="dag_b2"))
 
     sub_dag_c = worker(WorkerInput(value_a=sub_dag_a.value, value_b=sub_dag_b.value))
 
