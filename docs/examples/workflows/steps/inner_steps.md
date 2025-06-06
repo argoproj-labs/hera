@@ -23,9 +23,22 @@ this inner steps example shows the use of a whole `Steps` template (which will r
         generate_name="callable-inner-steps-",
         entrypoint="calling-steps",
     ) as w:
-        with Steps(name="my-steps", inputs=Parameter(name="my-step-input")) as my_steps:
-            hello(name="hello-1", arguments={"name": "hello-1-{{inputs.parameters.my-step-input}}"})
-            hello(name="hello-2", arguments={"name": "hello-2-{{inputs.parameters.my-step-input}}"})
+        with Steps(
+            name="my-steps",
+            inputs=Parameter(name="my-step-input"),
+        ) as my_steps:
+            hello(
+                name="hello-1",
+                arguments={
+                    "name": f"hello-1-{my_steps.get_parameter('my-step-input')}",
+                },
+            )
+            hello(
+                name="hello-2",
+                arguments={
+                    "name": f"hello-2-{my_steps.get_parameter('my-step-input')}",
+                },
+            )
 
         with Steps(name="calling-steps") as s:
             my_steps(name="call-1", arguments={"my-step-input": "call-1"})
