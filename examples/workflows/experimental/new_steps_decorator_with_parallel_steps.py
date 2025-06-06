@@ -1,3 +1,5 @@
+"""This example shows the use of the new `steps` decorator, including parallel steps."""
+
 from typing_extensions import Annotated
 
 from hera.shared import global_config
@@ -6,7 +8,10 @@ from hera.workflows import Input, Output, Parameter, Workflow, parallel
 global_config.experimental_features["decorator_syntax"] = True
 
 
-w = Workflow(generate_name="my-workflow-")
+w = Workflow(
+    generate_name="steps-",
+    arguments={"value_b": "a value for b!"},
+)
 
 
 class SetupOutput(Output):

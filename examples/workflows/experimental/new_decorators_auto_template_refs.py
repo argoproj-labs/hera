@@ -1,3 +1,8 @@
+"""This example shows how a Workflow can reference WorkflowTemplates.
+
+Note this example will not run unless you create the WorkflowTemplates first.
+"""
+
 from pydantic import BaseModel
 from typing_extensions import Annotated
 
