@@ -2,7 +2,7 @@
 
 
 
-
+This example shows how to use a `Container` template within a `Steps` and `parallel` context.
 
 
 === "Hera"
@@ -25,17 +25,17 @@
         with Steps(name="hello-hello-hello") as s:
             whalesay(
                 name="hello1",
-                arguments=[Parameter(name="message", value="hello1")],
+                arguments={"message": "hello1"},
             )
 
             with s.parallel():
                 whalesay(
                     name="hello2a",
-                    arguments=[Parameter(name="message", value="hello2a")],
+                    arguments={"message": "hello2a"},
                 )
                 whalesay(
                     name="hello2b",
-                    arguments=[Parameter(name="message", value="hello2b")],
+                    arguments={"message": "hello2b"},
                 )
     ```
 
