@@ -59,12 +59,12 @@ set. We list graduated features here so you can keep up to date.
 ### `RunnerScriptConstructor` (since 5.10)
 
 The `RunnerScriptConstructor` found in `hera.workflows.script` and seen in the
-[typed script IO example](../examples/workflows/hera-runner/typed_script_io.md) is a robust way to run Python functions
+[typed script IO example](../examples/workflows/hera-runner/typed_script_input_output.md) is a robust way to run Python functions
 on Argo. The image used by the script should be built from the source code package itself and its dependencies, so that
 the source code's functions, dependencies, and Hera itself are available to run. The `RunnerScriptConstructor` is also
 compatible with Pydantic so supports deserializing inputs to Python objects and serializing outputs to json strings.
 
-Read [the Script Guide](../user-guides/script-basics.md#runnerscriptconstructor) to learn more!
+Read [the Runner Script Guide](script-constructors.md#runner-scripts) to learn more!
 
 ### Script Annotations (since 5.19)
 

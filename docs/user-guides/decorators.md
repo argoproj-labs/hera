@@ -131,7 +131,7 @@ class MyOutput(Output):
 
 Here, we're setting up the `MyInput` class which will be converted to a set of template inputs; here, that only consists
 of the `user` parameter, which is of type `str` - Hera will do the type checking for you when running with the
-[Hera Runner](./script-basics.md#runnerscriptconstructor)!. We also have the template outputs contained in `MyOutput`. The `Output` class also contains the
+[Hera Runner](script-constructors.md#runner-scripts)!. We also have the template outputs contained in `MyOutput`. The `Output` class also contains the
 `exit_code` and `result` fields, which are used by the Hera Runner to exit a script with the given exit code, and to
 print a value to stdout to act as a step or task's
 [special "result" output parameter](https://argo-workflows.readthedocs.io/en/stable/walk-through/output-parameters/#result-output-parameter).
