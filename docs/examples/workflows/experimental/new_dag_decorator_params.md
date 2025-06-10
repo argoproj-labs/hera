@@ -31,9 +31,7 @@ This example shows how parameters can be passed into, within and out of a DAG.
 
     class SetupOutput(Output):
         environment_parameter: str
-        an_annotated_parameter: Annotated[
-            int, Parameter(name="an_annotated_parameter", description="infer name from field")
-        ]
+        an_annotated_parameter: Annotated[int, Parameter(description="infer name from field")]
         setup_config: Annotated[
             SetupConfig, Parameter(name="setup-config")
         ]  # a Pydantic BaseModel can be a single input Parameter
