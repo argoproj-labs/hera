@@ -64,7 +64,7 @@ def whalesay(
 
 ## Artifacts for Inline Scripts
 
-Here, we are looking at the [Script Artifact Passing](../examples/workflows/scripts/script_artifact_passing.md) example.
+Here, we are looking at the [Basic Artifacts](../examples/workflows/artifacts/basic_artifacts.md) example.
 
 > **Note:** Artifacts are more verbose and harder to use in Inline scripts, we highly recommend using
 > [Runner Scripts](#artifacts-for-runner-scripts) if possible!
@@ -73,49 +73,47 @@ Here, we are looking at the [Script Artifact Passing](../examples/workflows/scri
 </summary>
 
 ```py
-from hera.workflows import Artifact, Steps, Workflow, script
+from hera.workflows import Artifact, NoneArchiveStrategy, Steps, Workflow, script
 
 
-@script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
-def whalesay():
-    with open("/tmp/hello_world.txt", "w") as f:
-        f.write("hello world")
+@script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
+def writer():
+    with open("/tmp/file", "w+") as f:
+        f.write("Hello, world!")
 
 
-@script(inputs=Artifact(name="message", path="/tmp/message"))
-def print_message():
-    with open("/tmp/message", "r") as f:
-        message = f.readline()
-    print(message)
+@script(inputs=Artifact(name="in-art", path="/tmp/file"))
+def consumer():
+    with open("/tmp/file", "r") as f:
+        print(f.readlines())  # prints `Hello, world!` to `stdout`
 
 
-with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
-    with Steps(name="artifact-example") as s:
-        ga = whalesay(name="generate-artifact")
-        print_message(name="consume-artifact", arguments=ga.get_artifact("hello-art").as_name("message"))
+with Workflow(generate_name="artifact-", entrypoint="steps") as w:
+    with Steps(name="steps"):
+        w_ = writer()
+        c = consumer(arguments={"in-art": w_.get_artifact("out-art")})
 ```
-
 </details>
 
 
 ### Inline Artifact Outputs
 
 Artifact outputs work by exporting a file from the container. In this case, we will output the file
-`/tmp/hello_world.txt`. First we need to specify this path in the script decorator:
+`/tmp/file`. First we need to specify this path in the script decorator:
 
 ```py
-@script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
-def whalesay():
+@script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
+def writer():
     ...
 ```
 
 We then write to the specified path within the function:
 
 ```py
-@script(outputs=Artifact(name="hello-art", path="/tmp/hello_world.txt"))
-def whalesay():
-    with open("/tmp/hello_world.txt", "w") as f:
-        f.write("hello world")
+@script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
+def writer():
+    with open("/tmp/file", "w+") as f:
+        f.write("Hello, world!")
 ```
 
 We can then call the function in a Steps context. Compare to the YAML workflow and see the logs below:
@@ -123,9 +121,9 @@ We can then call the function in a Steps context. Compare to the YAML workflow a
 === "Hera"
 
     ```py
-    with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
-        with Steps(name="artifact-example") as s:
-            ga = whalesay(name="generate-artifact")
+    with Workflow(generate_name="artifact-", entrypoint="steps") as w:
+        with Steps(name="steps"):
+            w_ = writer()
     ```
 
 === "YAML"
@@ -134,27 +132,35 @@ We can then call the function in a Steps context. Compare to the YAML workflow a
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: artifact-passing-
+      generateName: artifact-
     spec:
-      entrypoint: artifact-example
+      entrypoint: steps
       templates:
-      - name: artifact-example
+      - name: steps
         steps:
-        - - name: generate-artifact
-            template: whalesay
-      - name: whalesay
+        - - name: writer
+            template: writer
+        - - name: consumer
+            template: consumer
+            arguments:
+              artifacts:
+              - name: in-art
+                from: '{{steps.writer.outputs.artifacts.out-art}}'
+      - name: writer
         outputs:
           artifacts:
-          - name: hello-art
-            path: /tmp/hello_world.txt
+          - name: out-art
+            path: /tmp/file
+            archive:
+              none: {}
         script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/hello_world.txt', 'w') as f:
-                f.write('hello world')
+            with open('/tmp/file', 'w+') as f:
+                f.write('Hello, world!')
           command:
           - python
     ```
@@ -162,10 +168,10 @@ We can then call the function in a Steps context. Compare to the YAML workflow a
 === "Logs"
 
     ```console
-    artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="sub-process exited" argo=true error="<nil>"
-    artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/artifacts/tmp/hello_world.txt.tgz" ar
-    go=true
-    artifact-passing-jkrwh-whalesay-8621968: time="2023-05-31T09:11:30.307Z" level=info msg="Taring /tmp/hello_world.txt"
+    artifact-bj4zh-writer-3078707681: time="2025-06-10T14:58:08 UTC" level=info msg="capturing logs" argo=true
+    artifact-bj4zh-writer-3078707681: time="2025-06-10T14:58:09 UTC" level=info msg="sub-process exited" argo=true error="<nil>"
+    artifact-bj4zh-writer-3078707681: time="2025-06-10T14:58:09 UTC" level=info msg="/tmp/file -> /var/run/argo/outputs/artifacts/tmp/file.tgz" argo=true
+    artifact-bj4zh-writer-3078707681: time="2025-06-10T14:58:09 UTC" level=info msg="Taring /tmp/file"
     ```
 
 ### Inline Artifact Inputs
@@ -176,35 +182,31 @@ When we have one step generating an Artifact, we'd usually like to consume it in
 First, let's create a function that takes in an Artifact:
 
 ```py
-@script(inputs=Artifact(name="message", path="/tmp/message"))
-def print_message():
-    ...
+@script(inputs=Artifact(name="in-art", path="/tmp/file"))
+def consumer():
 ```
 
 Argo Workflows will mount any input artifact to the specified path. In this case, whatever artifact is passed in through
-the `message` argument is mounted to the path `/tmp/message`. Here, we just want to echo what was in the artifact:
+the `in-art` Artifact is mounted to the path `/tmp/file`. Here, we just want to echo what was in the artifact:
 
 ```py
-@script(inputs=Artifact(name="message", path="/tmp/message"))
-def print_message():
-    with open("/tmp/message", "r") as f:
-        message = f.readline()
-    print(message)
+@script(inputs=Artifact(name="in-art", path="/tmp/file"))
+def consumer():
+    with open("/tmp/file", "r") as f:
+        print(f.readlines())  # prints `Hello, world!` to `stdout`
+
 ```
 
-Now, we can call this function as a `Step` or `Task`, expanding on our Workflow started earlier. We pass the `hello-art`
-output artifact as the `message` input artifact:
+Now, we can call this function as a `Step` or `Task`, expanding on our Workflow started earlier. We pass the `out-art`
+output artifact to the `in-art` input artifact:
 
 === "Hera"
 
     ```py
-    with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") as w:
-        with Steps(name="artifact-example") as s:
-            ga = whalesay(name="generate-artifact")
-            print_message(
-                name="consume-artifact",
-                arguments={"message": ga.get_artifact("hello-art")},
-            )
+    with Workflow(generate_name="artifact-", entrypoint="steps") as w:
+        with Steps(name="d"):
+            w_ = writer()
+            c = consumer(arguments={"in-art": w_.get_artifact("out-art")})
     ```
 
 === "YAML"
@@ -213,49 +215,50 @@ output artifact as the `message` input artifact:
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: artifact-passing-
+      generateName: artifact-
     spec:
-      entrypoint: artifact-example
+      entrypoint: steps
       templates:
-      - name: artifact-example
+      - name: steps
         steps:
-        - - name: generate-artifact
-            template: whalesay
-        - - name: consume-artifact
-            template: print-message
+        - - name: writer
+            template: writer
+        - - name: consumer
+            template: consumer
             arguments:
               artifacts:
-              - name: message
-                from: '{{steps.generate-artifact.outputs.artifacts.hello-art}}'
-      - name: whalesay
+              - name: in-art
+                from: '{{steps.writer.outputs.artifacts.out-art}}'
+      - name: writer
         outputs:
           artifacts:
-          - name: hello-art
-            path: /tmp/hello_world.txt
+          - name: out-art
+            path: /tmp/file
+            archive:
+              none: {}
         script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/hello_world.txt', 'w') as f:
-                f.write('hello world')
+            with open('/tmp/file', 'w+') as f:
+                f.write('Hello, world!')
           command:
           - python
-      - name: print-message
+      - name: consumer
         inputs:
           artifacts:
-          - name: message
-            path: /tmp/message
+          - name: in-art
+            path: /tmp/file
         script:
           image: python:3.9
           source: |-
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/message', 'r') as f:
-                message = f.readline()
-            print(message)
+            with open('/tmp/file', 'r') as f:
+                print(f.readlines())
           command:
           - python
     ```
@@ -263,10 +266,11 @@ output artifact as the `message` input artifact:
 === "Logs"
 
     ```console
-    artifact-passing-s7xrb-whalesay-751687878: time="2023-05-31T09:22:50.999Z" level=info msg="sub-process exited" argo=true error="<nil>"
-    artifact-passing-s7xrb-whalesay-751687878: time="2023-05-31T09:22:50.999Z" level=info msg="/tmp/hello_world.txt -> /var/run/argo/outputs/artifacts/tmp/hello_world.txt.tgz"
-    argo=true
-    artifact-passing-s7xrb-whalesay-751687878: time="2023-05-31T09:22:50.999Z" level=info msg="Taring /tmp/hello_world.txt"
-    artifact-passing-s7xrb-print-message-154872134: hello world
-    artifact-passing-s7xrb-print-message-154872134: time="2023-05-31T09:23:01.204Z" level=info msg="sub-process exited" argo=true error="<nil>"
+    artifact-bghf5-writer-3091035417: time="2025-06-10T15:14:24 UTC" level=info msg="capturing logs" argo=true
+    artifact-bghf5-writer-3091035417: time="2025-06-10T15:14:25 UTC" level=info msg="sub-process exited" argo=true error="<nil>"
+    artifact-bghf5-writer-3091035417: time="2025-06-10T15:14:25 UTC" level=info msg="/tmp/file -> /var/run/argo/outputs/artifacts/tmp/file.tgz" argo=true
+    artifact-bghf5-writer-3091035417: time="2025-06-10T15:14:25 UTC" level=info msg="Taring /tmp/file"
+    artifact-bghf5-consumer-1167317153: time="2025-06-10T15:14:34 UTC" level=info msg="capturing logs" argo=true
+    artifact-bghf5-consumer-1167317153: ['Hello, world!']
+    artifact-bghf5-consumer-1167317153: time="2025-06-10T15:14:35 UTC" level=info msg="sub-process exited" argo=true error="<nil>"
     ```
