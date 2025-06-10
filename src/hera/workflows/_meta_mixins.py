@@ -54,7 +54,10 @@ except ImportError:
 
 if TYPE_CHECKING:
     from hera.workflows._mixins import TemplateMixin
-    from hera.workflows.steps import Step
+    from hera.workflows.container import Container
+    from hera.workflows.dag import DAG
+    from hera.workflows.script import Script
+    from hera.workflows.steps import Step, Steps
     from hera.workflows.task import Task
 
 _yaml: Optional[ModuleType] = None
@@ -571,11 +574,6 @@ class HeraBuildObj:
 
 
 class TemplateDecoratorFuncsMixin(ContextMixin):
-    from hera.workflows.container import Container
-    from hera.workflows.dag import DAG
-    from hera.workflows.script import Script
-    from hera.workflows.steps import Steps
-
     @staticmethod
     def _check_if_enabled(decorator_name: str):
         if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):

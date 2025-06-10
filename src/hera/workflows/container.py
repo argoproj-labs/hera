@@ -1,7 +1,7 @@
-"""The container module provides the Container class.
+"""The `hera.workflows.container` module provides the Container class.
 
-See https://argoproj.github.io/argo-workflows/workflow-concepts/#container
-for more on containers.
+See <https://argoproj.github.io/argo-workflows/workflow-concepts/#container>
+for more on containers in Argo Workflows.
 """
 
 from __future__ import annotations
@@ -32,11 +32,16 @@ class Container(
     VolumeMountMixin,
     CallableTemplateMixin,
 ):
-    """The Container template type defines a container to run on Argo.
+    """The Container defines a container to run on Argo.
 
-    The container generally consists of running a Docker container remotely, which is configured via fields such as
-    `command` (the command to run to start the container), `args` (arguments for the container), `working_dir` (for
-    setting the active working directory relative to container execution), etc.
+    A container generally consists of running a Docker container remotely, which is configured via fields such as
+    `image`, `command` and `args`.
+
+    ```py
+    Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+    ```
+
+    See how to use it in the [Container example](../../../examples/workflows/misc/container.md).
     """
 
     args: Optional[List[str]] = None

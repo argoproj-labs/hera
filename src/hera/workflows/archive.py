@@ -1,4 +1,4 @@
-"""The archive module provides archival behavior strategies for artifacts."""
+"""The `hera.workflows.archive` module provides archival behavior strategies for artifacts."""
 
 from typing import Optional
 

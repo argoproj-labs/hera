@@ -1,6 +1,6 @@
 """The artifact module provides the base Artifact class, along with the various types of artifacts as subclasses.
 
-See https://argoproj.github.io/argo-workflows/walk-through/artifacts/ for a tutorial on Artifacts.
+See <https://argoproj.github.io/argo-workflows/walk-through/artifacts> for a tutorial on Artifacts.
 """
 
 from __future__ import annotations
@@ -29,8 +29,8 @@ from hera.workflows.models import (
     SecretKeySelector,
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.WARNING)
 
 _DEFAULT_ARTIFACT_INPUT_DIRECTORY = "/tmp/hera-inputs/artifacts/"
 
@@ -149,11 +149,12 @@ class Artifact(BaseModel):
         return _ModelArtifactPaths(**artifact.dict())
 
     def as_name(self, name: str) -> _ModelArtifact:
-        """DEPRECATED, use with_name.
-
-        Returns a 'built' copy of the current artifact, renamed using the specified `name`.
+        """Returns a 'built' copy of the current artifact, renamed using the specified `name`.
+        
+        Warning: DEPRECATED
+            use [with_name][hera.workflows.artifact.Artifact.as_name].
         """
-        logger.warning("'as_name' is deprecated, use 'with_name'")
+        _logger.warning("'as_name' is deprecated, use 'with_name'")
         artifact = self._build_artifact()
         artifact.name = name
         return artifact
