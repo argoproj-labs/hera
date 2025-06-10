@@ -106,7 +106,7 @@ difference will be the name and path shown in the YAML:
         ...
     ```
 
-See [the `Artifact` class](../api/workflows/hera.md#hera.workflows.Artifact) for all the fields allowed in the
+See [the `Artifact` class][hera.workflows.Artifact] for all the fields allowed in the
 `Artifact` annotations. You are also able to use artifact repository types such as `S3Artifact` to first fetch the
 artifact from storage and mount it to the container.
 

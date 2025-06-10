@@ -67,8 +67,37 @@ nav:
   - API Reference:
     - Shared: api/shared.md
     - Workflows:
-      - Hera: api/workflows/hera.md
-      - Models: api/workflows/models.md
+      - Workflow Classes:
+        - api/workflows/workflow_classes/workflow.md
+        - api/workflows/workflow_classes/workflow_template.md
+        - api/workflows/workflow_classes/cluster_workflow_template.md
+        - api/workflows/workflow_classes/cron_workflow.md
+      - Template Classes:
+        - api/workflows/template_classes/script.md
+        - api/workflows/template_classes/container.md
+        - api/workflows/template_classes/dag.md
+        - api/workflows/template_classes/steps.md
+        - api/workflows/template_classes/http.md
+        - api/workflows/template_classes/container_set.md
+        - api/workflows/template_classes/data.md
+        - api/workflows/template_classes/resource.md
+        - api/workflows/template_classes/suspend.md
+      - Supporting Hera Classes:
+        - api/workflows/supporting_classes/archive.md
+        - api/workflows/supporting_classes/artifact.md
+        - api/workflows/supporting_classes/env_from.md
+        - api/workflows/supporting_classes/env.md
+        - api/workflows/supporting_classes/metrics.md
+        - api/workflows/supporting_classes/parameter.md
+        - api/workflows/supporting_classes/resources.md
+        - api/workflows/supporting_classes/retry_strategy.md
+        - api/workflows/supporting_classes/task.md
+        - api/workflows/supporting_classes/template_set.md
+        - api/workflows/supporting_classes/user_container.md
+        - api/workflows/supporting_classes/volume.md
+        - api/workflows/supporting_classes/workflow_status.md
+      - Rest API: api/workflows/supporting_classes/service.md
+      - Generated Models: api/workflows/models.md
     - Events:
       - Models: api/events/models.md
 theme:
@@ -115,7 +144,6 @@ extra:
     provider: mike
 
 markdown_extensions:
-  - admonition
   - smarty
   - attr_list
   - mkdocs-click
@@ -123,7 +151,7 @@ markdown_extensions:
   - footnotes
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -144,14 +172,20 @@ plugins:
       handlers:
         python:
           options:
-            # show_category_heading: true
-            show_if_no_docstring: true
+            docstring_style: google
             inherited_members: true
-            filters: ["!^_.*$"]
+            filters: ["!^_.*$", "!Config"] # no private members or members named "Config" (which is the Pydantic BaseModel config)
+            show_if_no_docstring: true
             show_bases: false
             separate_signature: true
-            docstring_style: google
+            signature_crossrefs: true
+            unwrap_annotated: true
+            show_signature_annotations: true
             show_source: true
+            show_labels: false
+            show_root_toc_entry: false
+            extensions:
+            - griffe_fieldz
           paths: [src]
           import:
             - https://docs.python.org/3/objects.inv
