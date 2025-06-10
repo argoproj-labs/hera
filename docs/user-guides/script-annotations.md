@@ -30,12 +30,12 @@ are optional. A couple of things to note are:
 
 > **Note:** `Annotated` can be used on both inline scripts and runner scripts!
 
-#### Custom Deserialisation
+<h4 id="parameters-custom-deserialisation">Custom Deserialisation</h4>
 
 If you are using a type that is not a built in (`int`, `str`, `dict` etc) or a Pydantic `BaseModel`, you can provide
 functions to the Parameter's `loads` (and `dumps`) attributes, which will be used by the Hera Runner (and so requires
 the use of "runner" templates). These will then be used to deserialise from, and serialise to, strings. See the
-[custom serialisation example](../examples/workflows/scripts/custom_serialiser.md).
+[custom serialisation example](../examples/workflows/hera-runner/custom_serialiser.md).
 
 #### Function parameter name aliasing
 
@@ -110,7 +110,7 @@ See [the `Artifact` class](../api/workflows/hera.md#hera.workflows.Artifact) for
 `Artifact` annotations. You are also able to use artifact repository types such as `S3Artifact` to first fetch the
 artifact from storage and mount it to the container.
 
-#### Custom Deserialisation
+<h4 id="artifacts-custom-deserialisation">Custom Deserialisation</h4>
 
 If you are using a type that is not a built in (`int`, `str`, `dict` etc) or a Pydantic `BaseModel`, you can provide
 functions to the Artifact's `loads` and `dumps` attributes or the `loadb` and `dumpb` attributes, which will be used by
@@ -119,7 +119,7 @@ the Hera Runner (and so requires the use of "runner" templates).
 * `loads` and `dumps` are used to deserialise from, and serialise to, strings.
 * `loadb` and `dump` are used to deserialise from, and serialise to, a Python `bytes` object.
 
-See the [custom serialisation example](../examples/workflows/scripts/custom_serialiser.md).
+See the [custom serialisation example](../examples/workflows/hera-runner/custom_serialiser.md).
 
 For simple use cases, you can set `loader` to an `ArtifactLoader` enum.
 
@@ -207,7 +207,7 @@ are two ways to specify them as outputs.
 
 Function return annotations specify the output type information for output Artifacts and Parameters, and the function
 should return a single value or tuple. An example can be seen
-[here](../examples/workflows/scripts/script_annotations_outputs.md).
+[here](../examples/workflows/hera-runner/typed_script_input_output.md).
 
 For a simple hello world output artifact example using an inline script we have:
 
@@ -280,10 +280,11 @@ long return Tuples, as return values can be set by name, rather than position.
 
 #### Custom Serialisation
 
-As seen in the [Parameter Custom Deserialisation](#custom-deserialisation) and
-[Artifact Custom Deserialisation](#custom-deserialisation-1) sections, Parameters and Artifacts can be any type, as long
-as you provide a serialisation function. For `Parameter` this is `dumps`, for `Artifact` this is `dumps` or `dumpb`. See
-the [custom serialisation example](../examples/workflows/scripts/custom_serialiser.md) for more details.
+As seen in the [Parameter Custom Deserialisation](#parameters-custom-deserialisation) and
+[Artifact Custom Deserialisation](#artifacts-custom-deserialisation) sections, Parameters and Artifacts can be any type,
+as long as you provide a serialisation function. For `Parameter` this is `dumps`, for `Artifact` this is `dumps` or
+`dumpb`. See the [custom serialisation example](../examples/workflows/hera-runner/custom_serialiser.md) for more
+details.
 
 ### Input-Output function parameters
 
