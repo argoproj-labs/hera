@@ -1,11 +1,49 @@
-# Script Auto Infer
+# Masked Parameter Anti Pattern
 
 
 
 This example shows an anti-pattern.
 
-It is not recommended to use a parameter name that is the same as an input Artifact. This will generally cause confusion
-but can be useful for testing the function directly. Instead, it is recommended to use the Hera Runner,
+The example uses a parameter name that is the same as an input Artifact. This approach in inline scripts will generally
+cause confusion, but it can be useful for testing the function, as you can pass a value for the Artifact directly to the
+function (but you still cannot `return` a value). The Hera Runner is the more complete and recommended solution.
+
+## Anti-Pattern Explanation
+
+Firstly, the name of the Artifact is not programatically linked to the function parameter name. One is a string, while
+the other is a variable symbol, changing one (through an IDE refactor) will not affect the other:
+
+```py
+@script(inputs=Artifact(name="i", path="/tmp/i"))
+def consume(i):
+```
+
+At runtime on Argo Workflows, the function parameter has no value.
+
+```py
+@script(inputs=Artifact(name="i", path="/tmp/i"))
+def consume(i):
+    print(i) # -> `None`
+```
+
+You must load from a file:
+
+```py
+    with open("/tmp/i", "rb") as f:
+```
+
+And use `None`-checking code in the function to allow usage on Argo and locally:
+
+```py
+    with open("/tmp/i", "rb") as f:
+        i = i or pickle.load(f)
+    print(i)
+```
+
+Plus, for local testing, you cannot actually `return` a value due to Argo Workflows limitations, so can only print or
+write to a file.
+
+Instead, it is recommended to use the Hera Runner,
 [see the Artifact example using the Hera Runner](../hera-runner/basic_artifacts.md).
 
 
@@ -29,7 +67,7 @@ but can be useful for testing the function directly. Instead, it is recommended 
         import pickle
 
         with open("/tmp/i", "rb") as f:
-            i = pickle.load(f)
+            i = i or pickle.load(f)
         print(i)
 
 
@@ -92,7 +130,7 @@ but can be useful for testing the function directly. Instead, it is recommended 
             sys.path.append(os.getcwd())
             import pickle
             with open('/tmp/i', 'rb') as f:
-                i = pickle.load(f)
+                i = i or pickle.load(f)
             print(i)
           command:
           - python
