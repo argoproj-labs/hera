@@ -2,7 +2,7 @@
 
 
 
-Compare this example to [Basic Artifacts](../artifacts/basic-artifacts.md) to see how the Hera runner simplifies your Artifact code.
+Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to see how the Hera runner simplifies your Artifact code.
 
 
 === "Hera"
@@ -11,9 +11,9 @@ Compare this example to [Basic Artifacts](../artifacts/basic-artifacts.md) to se
     from typing import Annotated
 
     from hera.workflows import (
-        DAG,
         Artifact,
         NoneArchiveStrategy,
+        Steps,
         Workflow,
         script,
     )
@@ -35,11 +35,10 @@ Compare this example to [Basic Artifacts](../artifacts/basic-artifacts.md) to se
         print(in_art)  # prints `Hello, world!` to `stdout`
 
 
-    with Workflow(generate_name="artifact-", entrypoint="d") as w:
-        with DAG(name="d"):
+    with Workflow(generate_name="artifact-", entrypoint="steps") as w:
+        with Steps(name="steps"):
             w_ = writer()
             c = consumer(arguments={"in_art": w_.get_artifact("out-art")})
-            w_ >> c
     ```
 
 === "YAML"
@@ -50,20 +49,18 @@ Compare this example to [Basic Artifacts](../artifacts/basic-artifacts.md) to se
     metadata:
       generateName: artifact-
     spec:
-      entrypoint: d
+      entrypoint: steps
       templates:
-      - name: d
-        dag:
-          tasks:
-          - name: writer
+      - name: steps
+        steps:
+        - - name: writer
             template: writer
-          - name: consumer
-            depends: writer
+        - - name: consumer
             template: consumer
             arguments:
               artifacts:
               - name: in_art
-                from: '{{tasks.writer.outputs.artifacts.out-art}}'
+                from: '{{steps.writer.outputs.artifacts.out-art}}'
       - name: writer
         outputs:
           artifacts:

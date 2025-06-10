@@ -10,7 +10,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
 === "Hera"
 
     ```python linenums="1"
-    from hera.workflows import DAG, Artifact, NoneArchiveStrategy, Workflow, script
+    from hera.workflows import Artifact, NoneArchiveStrategy, Steps, Workflow, script
 
 
     @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
@@ -25,11 +25,10 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             print(f.readlines())  # prints `Hello, world!` to `stdout`
 
 
-    with Workflow(generate_name="artifact-", entrypoint="d") as w:
-        with DAG(name="d"):
+    with Workflow(generate_name="artifact-", entrypoint="steps") as w:
+        with Steps(name="steps"):
             w_ = writer()
             c = consumer(arguments={"in-art": w_.get_artifact("out-art")})
-            w_ >> c
     ```
 
 === "YAML"
@@ -40,20 +39,18 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
     metadata:
       generateName: artifact-
     spec:
-      entrypoint: d
+      entrypoint: steps
       templates:
-      - name: d
-        dag:
-          tasks:
-          - name: writer
+      - name: steps
+        steps:
+        - - name: writer
             template: writer
-          - name: consumer
-            depends: writer
+        - - name: consumer
             template: consumer
             arguments:
               artifacts:
               - name: in-art
-                from: '{{tasks.writer.outputs.artifacts.out-art}}'
+                from: '{{steps.writer.outputs.artifacts.out-art}}'
       - name: writer
         outputs:
           artifacts:
