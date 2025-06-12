@@ -2,7 +2,7 @@
 
 The `TemplateSet` class lets you create a collection of templates unattached to a [Workflow][hera.workflows.workflow.Workflow].
 
-Note:
+Warning:
     This class is only for use with experimental Workflow decorators. [Read the guide here](../../../user-guides/decorators.md).
 """
 

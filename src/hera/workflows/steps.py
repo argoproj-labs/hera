@@ -1,6 +1,6 @@
-"""The steps module provides the Steps, Step and Parallel classes.
+"""The `hera.workflows.steps` module provides the Steps, Step and Parallel classes.
 
-See https://argoproj.github.io/argo-workflows/walk-through/steps/
+See <https://argoproj.github.io/argo-workflows/walk-through/steps>
 for more on Steps.
 """
 
@@ -36,7 +36,7 @@ class DummyContext:
 
 
 def parallel():
-    """Open a parallel context within a steps-decorator function.
+    """Open a parallel context within a [steps-decorator function][hera.workflows.workflow.Workflow.steps].
 
     When running locally, the context will be a no-op.
     """
@@ -53,9 +53,9 @@ class Step(
     ParameterMixin,
     ItemMixin,
 ):
-    """Step is used to run a given template.
+    """A step runs a given template.
 
-    Must be instantiated under a Steps or Parallel context, or outside a Workflow.
+    It must be instantiated under a Steps or Parallel context, or outside a Workflow.
     """
 
     @property
@@ -100,9 +100,9 @@ class Parallel(
     ContextMixin,
     SubNodeMixin,
 ):
-    """Parallel is used to add a list of steps which will run in parallel.
+    """Parallel is a context manager used to create a list of [steps][hera.workflows.steps.Step] to run in parallel.
 
-    Parallel implements the contextmanager interface so allows usage of `with`, under which any
+    Parallel implements the context manager interface so allows usage of `with`, under which any
     `hera.workflows.steps.Step` objects instantiated will be added to Parallel's list of sub_steps.
     """
 

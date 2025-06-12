@@ -1,10 +1,10 @@
-"""The suspend module provides the Suspend class.
+"""The `hera.workflows.suspend` module provides the Suspend class.
 
 The Suspend template in Hera provides a convenience wrapper around the "Intermediate Parameters" Argo feature.
 
-See https://argoproj.github.io/argo-workflows/walk-through/suspending/ for more on suspending.
-
-See https://argoproj.github.io/argo-workflows/intermediate-inputs/ for more on intermediate parameters.
+Note:
+    * See <https://argoproj.github.io/argo-workflows/walk-through/suspending> for more on suspending.
+    * See <https://argoproj.github.io/argo-workflows/intermediate-inputs> for more on intermediate parameters.
 """
 
 from typing import List, Optional, Union
