@@ -1,8 +1,10 @@
-# Script Loops Maps
+# Script Argument Mapping
 
 
 
+This example shows how Hera can automatically map the values in a `with_items` dictionary.
 
+See how to do this dynamically in the [JSON payload fanout](json_payload_fanout.md) example.
 
 
 === "Hera"
@@ -12,15 +14,15 @@
 
 
     @script()
-    def test_key_mapping(key_1: str, key_2: str):  # pragma: no cover
+    def test_key_mapping(key_1: str, key_2: str):
         print("{key_1}, {key_2}".format(key_1=key_1, key_2=key_2))
 
 
     with Workflow(
-        generate_name="loops-maps-",
-        entrypoint="loop-map-example",
+        generate_name="script-argument-mapping-",
+        entrypoint="steps",
     ) as w:
-        with Steps(name="loop-map-example") as loop_map_example:
+        with Steps(name="steps"):
             test_key_mapping(
                 with_items=[
                     {"key_1": "value:1-1", "key_2": "value:2-1"},
@@ -37,11 +39,11 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: loops-maps-
+      generateName: script-argument-mapping-
     spec:
-      entrypoint: loop-map-example
+      entrypoint: steps
       templates:
-      - name: loop-map-example
+      - name: steps
         steps:
         - - name: test-key-mapping
             template: test-key-mapping

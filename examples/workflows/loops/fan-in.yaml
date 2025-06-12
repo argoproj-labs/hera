@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: dynamic-fanout-fanin
+  generateName: fan-in-
 spec:
   entrypoint: d
   templates:
@@ -16,7 +16,7 @@ spec:
         withParam: '{{tasks.generate.outputs.result}}'
         arguments:
           parameters:
-          - name: object
+          - name: my_dict
             value: '{{item}}'
       - name: fanin
         depends: fanout
@@ -40,7 +40,7 @@ spec:
   - name: fanout
     inputs:
       parameters:
-      - name: object
+      - name: my_dict
     outputs:
       parameters:
       - name: value
@@ -53,11 +53,11 @@ spec:
         import sys
         sys.path.append(os.getcwd())
         import json
-        try: object = json.loads(r'''{{inputs.parameters.object}}''')
-        except: object = r'''{{inputs.parameters.object}}'''
+        try: my_dict = json.loads(r'''{{inputs.parameters.my_dict}}''')
+        except: my_dict = r'''{{inputs.parameters.my_dict}}'''
 
-        print('Received object: {object}!'.format(object=object))
-        value = object['value']
+        print('Received object: {my_dict}!'.format(my_dict=my_dict))
+        value = my_dict['value']
         with open('/tmp/value', 'w') as f:
             f.write(str(value))
       command:

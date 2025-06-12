@@ -1,19 +1,18 @@
 # Workflows Examples
 
-Hera has complete feature parity with YAML as a definition language for Argo Workflows. To demonstrate the equivalency
-(and improvements that Hera offers), we provide two collections of examples.
+Hera has complete feature parity with YAML as a definition language for Argo Workflows.
+
+The examples show off features and idiomatic usage of Hera such as the
+[Coinflip example](workflows/scripts/coinflip.md) recreated using the script decorator.
 
 The "Upstream" collection contains examples
 [directly from the Argo Workflows repository](https://github.com/argoproj/argo-workflows/tree/6e97c7d/examples), such as
 the [DAG Diamond example](workflows/upstream/dag_diamond.md), to demonstrate how the YAML spec maps to Hera classes.
-These examples are generated and compared in Hera's CI/CD pipeline to ensure that all the examples are possible to
-recreate in Hera.
+They may not be written as idiomatic Hera code (for example, using `Container` when a script decorator would be
+preferred).
 
 > If you'd like to contribute missing examples, please see the table below and follow the
 > [Contributing Guide](../CONTRIBUTING.md)!
-
-The "Hera" collection shows off features and idiomatic usage of Hera such as the
-[Coinflip example](workflows/scripts/coinflip.md) recreated using the script decorator.
 
 Explore the examples through the side bar!
 

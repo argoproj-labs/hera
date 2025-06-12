@@ -1,8 +1,8 @@
-# Script Basic Loop
+# Basic Fanout
 
 
 
-
+This examples shows some basic hard-coded fan-outs.
 
 
 === "Hera"
@@ -36,11 +36,18 @@
                 ],
             )
 
-            # We can still pass a list of dict values to `with_items`, but must serialize them
+            # We can still pass a list of dict values to `with_items`, but must
+            # serialize them using Hera's `serialize` function
             print_message(
                 name="print-message-loop-with-items-list-of-dicts",
                 arguments={"message": "{{item}}"},
-                with_items=[serialize(item) for item in [{"my-key": "hello world"}, {"my-other-key": "goodbye world"}]],
+                with_items=[
+                    serialize(item)
+                    for item in [
+                        {"my-key": "hello world"},
+                        {"my-other-key": "goodbye world"},
+                    ]
+                ],
             )
     ```
 
