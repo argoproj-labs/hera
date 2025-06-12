@@ -36,7 +36,7 @@ We can use Hera's `script` decorator to turn any user-defined function into a
 
 ### The `script` Decorator
 
-The `script` decorator can take the kwargs that a `Script` [can take][hera.workflows.Script], including `image`,
+The `script` decorator can take the kwargs that a `Script` [can take][hera.workflows.script.Script], including `image`,
 `volumes`, `env`, and many more. This is how we can specify a different `image` of Python to use instead of the default
 `python:3.9` for your script:
 

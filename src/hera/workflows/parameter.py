@@ -1,6 +1,6 @@
-"""The parameter module provides the Parameter class.
+"""The `hera.workflows.parameter` module provides the Parameter class.
 
-See https://argoproj.github.io/argo-workflows/walk-through/parameters/
+See <https://argoproj.github.io/argo-workflows/walk-through/parameters>
 for a tutorial on Parameters.
 """
 
@@ -21,6 +21,7 @@ class Parameter(_ModelParameter):
     """
 
     name: Optional[str] = None  # type: ignore
+    """the name of the Parameter in the template"""
 
     output: Optional[bool] = False
     """used to specify parameter as an output in function signature annotations"""

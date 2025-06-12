@@ -54,9 +54,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from hera.workflows._mixins import TemplateMixin
-    from hera.workflows.container import Container
     from hera.workflows.dag import DAG
-    from hera.workflows.script import Script
     from hera.workflows.steps import Step, Steps
     from hera.workflows.task import Task
 
@@ -574,6 +572,11 @@ class HeraBuildObj:
 
 
 class TemplateDecoratorFuncsMixin(ContextMixin):
+    from hera.workflows.container import Container
+    from hera.workflows.dag import DAG
+    from hera.workflows.script import Script
+    from hera.workflows.steps import Steps
+
     @staticmethod
     def _check_if_enabled(decorator_name: str):
         if not _flag_enabled(_DECORATOR_SYNTAX_FLAG):
@@ -665,16 +668,11 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         Note that invoking the function will result in the template associated with the script to be added to the
         workflow context, so users do not have to worry about that.
 
-        Parameters
-        ----------
-        **script_kwargs
-            Keyword arguments to be passed to the Script object.
+        Args:
+            **script_kwargs: Keyword arguments to be passed to the Script object.
 
         Returns:
-        -------
-        Callable
-            Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if
-            in a Steps or DAG context.
+            Function wrapper that holds a `Script` and allows the function to be called to create a Step or Task if in a Steps or DAG context.
         """
         self._check_if_enabled("script")
 

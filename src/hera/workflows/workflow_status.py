@@ -1,4 +1,7 @@
-"""Workflow status is a module that provides functionality for representing and interacting with workflow status."""
+"""The `hera.workflows.workflow_status` module provides lightweight functionality for representing and interacting with workflow statuses.
+
+See the [Workflow Status example](../../../examples/workflows/misc/workflow_on_exit.md) for usage.
+"""
 
 from enum import Enum
 

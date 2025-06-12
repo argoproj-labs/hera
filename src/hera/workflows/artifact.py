@@ -1,4 +1,4 @@
-"""The artifact module provides the base Artifact class, along with the various types of artifacts as subclasses.
+"""The `hera.workflows.artifact` module provides the base Artifact class, along with the various types of artifacts as subclasses.
 
 See <https://argoproj.github.io/argo-workflows/walk-through/artifacts> for a tutorial on Artifacts.
 """
@@ -150,7 +150,7 @@ class Artifact(BaseModel):
 
     def as_name(self, name: str) -> _ModelArtifact:
         """Returns a 'built' copy of the current artifact, renamed using the specified `name`.
-        
+
         Warning: DEPRECATED
             use [with_name][hera.workflows.artifact.Artifact.as_name].
         """

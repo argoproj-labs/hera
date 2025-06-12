@@ -139,7 +139,7 @@ class Script(
     VolumeMountMixin,
 ):
     """A Script in Argo Workflows acts as a wrapper around a [Container][hera.workflows.container.Container], where you can specify Python code to run through `source`.
-    
+
     In Hera, you should aim to use the [script decorator][hera.workflows.script.script], rather than the Script class directly.
     You will need to refer to the Script class for the kwargs that the decorator can take, but your IDE should give you code completion and type hints.
     """
@@ -672,14 +672,10 @@ def script(**script_kwargs) -> Callable:
     Note that invoking the function will result in the template associated with the script to be added to the
     workflow context, so users do not have to worry about that.
 
-    Parameters
-    ----------
-    **script_kwargs
-        Keyword arguments to be passed to the Script object.
+    Args:
+        **script_kwargs: Keyword arguments to be passed to the Script object.
 
     Returns:
-    -------
-    Callable
         Function that wraps a given function into a `Script`.
     """
 
