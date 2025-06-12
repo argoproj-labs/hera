@@ -230,10 +230,6 @@ def _save_annotated_return_outputs(
                     continue
 
                 matching_output = output_value._get_output(field)
-
-                if not matching_output.name:
-                    matching_output.name = field
-
                 path = _get_outputs_path(matching_output)
                 _write_to_path(path, value, _get_dumper_function(matching_output))
         else:
