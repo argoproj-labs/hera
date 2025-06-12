@@ -1,8 +1,11 @@
-# Callable Steps
+# Inner Steps
 
 
 
+This example shows how to use a Steps template within another Steps template.
 
+Note, this is different from parallel steps, as parallel steps are a collection of substeps to run in parallel, whereas
+this inner steps example shows the use of a whole `Steps` template (which will run sequentially in this example).
 
 
 === "Hera"
@@ -17,12 +20,25 @@
 
 
     with Workflow(
-        generate_name="callable-steps-",
+        generate_name="callable-inner-steps-",
         entrypoint="calling-steps",
     ) as w:
-        with Steps(name="my-steps", inputs=Parameter(name="my-step-input")) as my_steps:
-            hello(name="hello-1", arguments={"name": "hello-1-{{inputs.parameters.my-step-input}}"})
-            hello(name="hello-2", arguments={"name": "hello-2-{{inputs.parameters.my-step-input}}"})
+        with Steps(
+            name="my-steps",
+            inputs=Parameter(name="my-step-input"),
+        ) as my_steps:
+            hello(
+                name="hello-1",
+                arguments={
+                    "name": f"hello-1-{my_steps.get_parameter('my-step-input')}",
+                },
+            )
+            hello(
+                name="hello-2",
+                arguments={
+                    "name": f"hello-2-{my_steps.get_parameter('my-step-input')}",
+                },
+            )
 
         with Steps(name="calling-steps") as s:
             my_steps(name="call-1", arguments={"my-step-input": "call-1"})
@@ -35,7 +51,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: callable-steps-
+      generateName: callable-inner-steps-
     spec:
       entrypoint: calling-steps
       templates:

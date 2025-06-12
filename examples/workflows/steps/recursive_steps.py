@@ -1,3 +1,5 @@
+"""This example shows how you can (carefully!) recurse on a Steps template."""
+
 from hera.workflows import Step, Steps, WorkflowTemplate, script
 
 
