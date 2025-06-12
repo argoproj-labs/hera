@@ -1,3 +1,5 @@
+"""This is the canonical "diamond" example shown in the README."""
+
 from hera.workflows import DAG, Workflow, script
 
 

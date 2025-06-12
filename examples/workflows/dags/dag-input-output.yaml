@@ -21,7 +21,7 @@ spec:
       parameters:
       - name: my-dag-output
         valueFrom:
-          parameter: '{{hello.outputs.parameters.output-message}}'
+          parameter: '{{tasks.hello.outputs.parameters.output-message}}'
   - name: hello-with-output
     inputs:
       parameters:
@@ -38,7 +38,7 @@ spec:
       - -m
       - hera.workflows.runner
       - -e
-      - examples.workflows.dags.callable_dag_with_param_get:hello_with_output
+      - examples.workflows.dags.dag_input_output:hello_with_output
       command:
       - python
       env:

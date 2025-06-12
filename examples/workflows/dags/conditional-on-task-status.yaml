@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: conditional-
+  generateName: dag-conditional-on-task-status-
 spec:
   entrypoint: d
   templates:
@@ -27,7 +27,6 @@ spec:
         p = random.random()
         if p <= 0.5:
             raise Exception('failure')
-        print('success')
       command:
       - python
   - name: success
@@ -37,7 +36,7 @@ spec:
         import os
         import sys
         sys.path.append(os.getcwd())
-        print('success')
+        print('succeeded!')
       command:
       - python
   - name: failure
@@ -47,6 +46,6 @@ spec:
         import os
         import sys
         sys.path.append(os.getcwd())
-        print('failure')
+        print('failed!')
       command:
       - python

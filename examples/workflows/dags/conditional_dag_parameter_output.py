@@ -1,18 +1,20 @@
+"""This example shows how a DAG can output a value from an expression (using the `hera.expr` module)."""
+
 from hera.expr import g
 from hera.workflows import DAG, Parameter, Workflow, script
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+@script()
 def heads():
     print("heads")
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+@script()
 def tails():
     print("tails")
 
 
-@script(add_cwd_to_sys_path=False, image="python:alpine3.6")
+@script()
 def flip_coin():
     import random
 

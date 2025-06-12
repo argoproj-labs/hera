@@ -1,8 +1,8 @@
-# Dag Diamond With Callable Script
+# Dag Diamond With Script
 
 
 
-
+This is the canonical "diamond" example shown in the README.
 
 
 === "Hera"
