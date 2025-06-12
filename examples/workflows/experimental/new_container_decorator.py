@@ -1,13 +1,15 @@
+"""This example shows the use of the container decorator and special Input/Output classes."""
+
 from typing_extensions import Annotated
 
 from hera.shared import global_config
-from hera.workflows import Input, Output, Parameter, WorkflowTemplate
+from hera.workflows import Input, Output, Parameter, Workflow
 
 global_config.experimental_features["decorator_syntax"] = True
 
 
-# We start by defining our Workflow Template
-w = WorkflowTemplate(name="my-template")
+# We start by defining our Workflow
+w = Workflow(generate_name="container-workflow-")
 
 
 # This defines the template's inputs
@@ -15,6 +17,7 @@ class MyInput(Input):
     user: str = "Hera"
 
 
+# This defines the template's outputs
 class MyOutput(Output):
     container_greeting: Annotated[
         str,
@@ -25,6 +28,8 @@ class MyOutput(Output):
     ]
 
 
+# We then use the decorators of the `Workflow` object
+# to set the entrypoint and create a Container template
 @w.set_entrypoint
 @w.container(
     image="busybox",

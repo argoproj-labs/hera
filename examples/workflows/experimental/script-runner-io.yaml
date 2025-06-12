@@ -3,6 +3,7 @@ kind: Workflow
 metadata:
   generateName: pydantic-io-
 spec:
+  entrypoint: use-pydantic-io
   templates:
   - name: use-pydantic-io
     steps:
@@ -28,7 +29,7 @@ spec:
         archive:
           none: {}
     script:
-      image: python-image-built-with-my-package
+      image: my-image-with-deps
       source: '{{inputs.parameters}}'
       args:
       - -m
@@ -61,7 +62,7 @@ spec:
         valueFrom:
           path: /tmp/hera-outputs/parameters/param-output
     script:
-      image: python-image-built-with-my-package
+      image: my-image-with-deps
       source: '{{inputs.parameters}}'
       args:
       - -m

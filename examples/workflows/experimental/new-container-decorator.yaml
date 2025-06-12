@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
+kind: Workflow
 metadata:
-  name: my-template
+  generateName: container-workflow-
 spec:
   entrypoint: basic-hello-world
   templates:

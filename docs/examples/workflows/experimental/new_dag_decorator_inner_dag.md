@@ -2,7 +2,7 @@
 
 
 
-
+This example shows how to run an inner DAG within another DAG.
 
 
 === "Hera"
@@ -14,7 +14,7 @@
     global_config.experimental_features["decorator_syntax"] = True
 
 
-    w = Workflow(generate_name="my-workflow-")
+    w = Workflow(generate_name="inner-dag-workflow-")
 
 
     class SetupOutput(Output):
@@ -57,9 +57,9 @@
 
     @w.set_entrypoint
     @w.dag()
-    def outer_dag(worker_input: WorkerInput) -> WorkerOutput:
-        sub_dag_a = worker(WorkerInput(value_a="dag_a", value_b=worker_input.value_a))
-        sub_dag_b = worker(WorkerInput(value_a="dag_b", value_b=worker_input.value_b))
+    def outer_dag() -> WorkerOutput:
+        sub_dag_a = worker(WorkerInput(value_a="dag_a1", value_b="dag_a2"))
+        sub_dag_b = worker(WorkerInput(value_a="dag_b1", value_b="dag_b2"))
 
         sub_dag_c = worker(WorkerInput(value_a=sub_dag_a.value, value_b=sub_dag_b.value))
 
@@ -72,7 +72,7 @@
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: my-workflow-
+      generateName: inner-dag-workflow-
     spec:
       entrypoint: outer-dag
       templates:
@@ -166,17 +166,17 @@
             arguments:
               parameters:
               - name: value_a
-                value: dag_a
+                value: dag_a1
               - name: value_b
-                value: '{{inputs.parameters.value_a}}'
+                value: dag_a2
           - name: sub-dag-b
             template: worker
             arguments:
               parameters:
               - name: value_a
-                value: dag_b
+                value: dag_b1
               - name: value_b
-                value: '{{inputs.parameters.value_b}}'
+                value: dag_b2
           - name: sub-dag-c
             depends: sub-dag-a && sub-dag-b
             template: worker
@@ -186,10 +186,6 @@
                 value: '{{tasks.sub-dag-a.outputs.parameters.value}}'
               - name: value_b
                 value: '{{tasks.sub-dag-b.outputs.parameters.value}}'
-        inputs:
-          parameters:
-          - name: value_a
-          - name: value_b
         outputs:
           parameters:
           - name: value

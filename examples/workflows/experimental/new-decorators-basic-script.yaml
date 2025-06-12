@@ -1,9 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
-kind: WorkflowTemplate
+kind: Workflow
 metadata:
-  name: my-template
+  name: hello-world-
 spec:
-  entrypoint: goodbye-world
+  entrypoint: hello-world
   templates:
   - name: hello-world
     inputs:
@@ -24,25 +24,7 @@ spec:
         value: /tmp/hera-outputs
       - name: hera__script_pydantic_io
         value: ''
-  - name: goodbye-world
-    inputs:
-      parameters:
-      - name: user
-    metadata:
-      labels:
-        my-label: my-value
-    script:
-      image: python:3.9
-      source: '{{inputs.parameters}}'
-      args:
-      - -m
-      - hera.workflows.runner
-      - -e
-      - examples.workflows.experimental.new_decorators_basic_script:goodbye
-      command:
-      - python
-      env:
-      - name: hera__outputs_directory
-        value: /tmp/hera-outputs
-      - name: hera__script_pydantic_io
-        value: ''
+  arguments:
+    parameters:
+    - name: user
+      value: me
