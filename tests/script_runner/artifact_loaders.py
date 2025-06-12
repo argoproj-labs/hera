@@ -54,6 +54,6 @@ def file_loader(
 
 @script(constructor="runner")
 def file_loader_default_path(
-    an_artifact: Annotated[str, Artifact(name="my-artifact", loader=ArtifactLoader.file)],
+    an_artifact: Annotated[str, Artifact(loader=ArtifactLoader.file)],
 ) -> str:
     return an_artifact

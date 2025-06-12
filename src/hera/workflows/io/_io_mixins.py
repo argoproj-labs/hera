@@ -183,6 +183,8 @@ class OutputMixin(BaseModel):
         annotations = get_field_annotations(cls)
         annotation = annotations[field_name]
         if output := get_workflow_annotation(annotation):
+            if not output.name:
+                output.name = field_name
             return output
 
         # Create a Parameter from basic type annotations
