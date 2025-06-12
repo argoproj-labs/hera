@@ -6,3 +6,5 @@
     options:
         inherited_members: false
         show_source: false
+        extensions:
+        - griffe_fieldz

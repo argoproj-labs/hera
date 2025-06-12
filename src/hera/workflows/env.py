@@ -1,4 +1,8 @@
-"""The `env` module provides the implementations of independent env variable types that can be used with Argo."""
+"""The `hera.workflows.env` module provides implementations of environment variable types that can be used with Argo.
+
+`Env` classes differ from [EnvFrom](env_from.md) classes as `EnvFrom` uses a source to retrieve a variable
+from, and you can only prefix the name with something. The `Env` classes can create new independent variables.
+"""
 
 import hashlib
 import json

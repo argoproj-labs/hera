@@ -1,4 +1,10 @@
-"""The template_set module provides the TemplateSet class."""
+"""The `hera.workflows.template_set` module provides the TemplateSet class.
+
+The `TemplateSet` class lets you create a collection of templates unattached to a [Workflow][hera.workflows.workflow.Workflow].
+
+Note:
+    This class is only for use with experimental Workflow decorators. [Read the guide here](../../../user-guides/decorators.md).
+"""
 
 from typing import Any, List, Union
 

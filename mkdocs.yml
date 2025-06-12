@@ -94,7 +94,9 @@ nav:
         - api/workflows/supporting_classes/task.md
         - api/workflows/supporting_classes/template_set.md
         - api/workflows/supporting_classes/user_container.md
-        - api/workflows/supporting_classes/volume.md
+        - api/workflows/supporting_classes/volumes.md
+        - api/workflows/supporting_classes/first_party_volumes.md
+        - api/workflows/supporting_classes/third_party_volumes.md
         - api/workflows/supporting_classes/workflow_status.md
       - Rest API: api/workflows/supporting_classes/service.md
       - Generated Models: api/workflows/models.md
@@ -184,8 +186,6 @@ plugins:
             show_source: true
             show_labels: false
             show_root_toc_entry: false
-            extensions:
-            - griffe_fieldz
           paths: [src]
           import:
             - https://docs.python.org/3/objects.inv
