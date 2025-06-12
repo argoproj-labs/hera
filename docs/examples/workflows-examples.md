@@ -8,7 +8,8 @@ The examples show off features and idiomatic usage of Hera such as the
 The "Upstream" collection contains examples
 [directly from the Argo Workflows repository](https://github.com/argoproj/argo-workflows/tree/6e97c7d/examples), such as
 the [DAG Diamond example](workflows/upstream/dag_diamond.md), to demonstrate how the YAML spec maps to Hera classes.
-They may not be written as idiomatic Hera code because of the use of `Container` vs script decorators, for example.
+They may not be written as idiomatic Hera code (for example, using `Container` when a script decorator would be
+preferred).
 
 > If you'd like to contribute missing examples, please see the table below and follow the
 > [Contributing Guide](../CONTRIBUTING.md)!

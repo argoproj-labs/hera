@@ -1,4 +1,4 @@
-"""This example shows how you can fan-out over a JSON dict payload, and let Hera match the arguments for you."""
+"""This example shows how you can fan-out over a JSON payload (a JSON list of dicts), and let Hera match the arguments for you."""
 
 from hera.workflows import DAG, Workflow, script
 

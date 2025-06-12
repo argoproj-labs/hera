@@ -36,7 +36,8 @@ This examples shows some basic hard-coded fan-outs.
                 ],
             )
 
-            # We can still pass a list of dict values to `with_items`, but must serialize them
+            # We can still pass a list of dict values to `with_items`, but must
+            # serialize them using Hera's `serialize` function
             print_message(
                 name="print-message-loop-with-items-list-of-dicts",
                 arguments={"message": "{{item}}"},
