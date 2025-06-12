@@ -1,4 +1,4 @@
-"""The HTTP template module provides functionality and objects required for executing HTTP calls in workflows."""
+"""The `hera.workflows.http_template` module provides functionality and objects required for executing HTTP calls in workflows."""
 
 from typing import List, Optional
 

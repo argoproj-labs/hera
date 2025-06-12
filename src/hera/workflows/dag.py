@@ -1,4 +1,4 @@
-"""The dag module provides the DAG class.
+"""The `hera.workflows.dag` module provides the DAG class.
 
 See <https://argoproj.github.io/argo-workflows/walk-through/dag>
 for more on DAGs (Directed Acyclic Graphs) in Argo Workflows.

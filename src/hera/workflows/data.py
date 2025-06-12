@@ -1,4 +1,4 @@
-"""Data module provides Hera objects for Argo data functionality, such as sourcing data + applying transformations."""
+"""The `hera.workflows.data` module provides Argo data functionality, such as sourcing data + applying transformations."""
 
 from typing import List, Union
 

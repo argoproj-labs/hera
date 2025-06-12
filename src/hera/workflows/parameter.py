@@ -1,7 +1,7 @@
 """The `hera.workflows.parameter` module provides the Parameter class.
 
-See <https://argoproj.github.io/argo-workflows/walk-through/parameters>
-for a tutorial on Parameters.
+Tip:
+    [Read the Hera walk-through for Parameters.](../../../walk-through/parameters.md)
 """
 
 from __future__ import annotations
