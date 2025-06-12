@@ -1,4 +1,4 @@
-"""The metrics module implements independent and collections of Prometheus metrics that can be used in Argo."""
+"""The `hera.workflows.metrics` module implements independent and Prometheus metrics that can be used in Argo."""
 
 from typing import List, Optional, Union
 
@@ -38,7 +38,7 @@ class Counter(_BaseMetric):
     """Counter metric component used to count specific events based on the given value.
 
     Notes:
-        See [https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics](https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics)
+        See <https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics>
     """
 
     value: str
@@ -59,7 +59,7 @@ class Gauge(_BaseMetric, _ModelGauge):
     """Gauge metric component used to record intervals based on the given value.
 
     Notes:
-        See [https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics](https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics)
+        See <https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics>
     """
 
     realtime: bool
@@ -81,7 +81,7 @@ class Histogram(_BaseMetric):
     """Histogram metric that records the value at the specified bucket intervals.
 
     Notes:
-        See [https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics](https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics)
+        See <https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics>
     """
 
     buckets: List[Union[float, _ModelAmount]]  # type: ignore
@@ -109,7 +109,7 @@ class Metric(_BaseMetric):
     """Prometheus metric that can be used at the workflow or task/template level.
 
     Notes:
-        See [https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics](https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics)
+        See <https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics>
     """
 
     counter: Optional[Counter] = None
@@ -137,7 +137,7 @@ class Metrics(BaseMixin):
     """A collection of Prometheus metrics.
 
     Notes:
-        See [https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics](https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics)
+        See <https://argoproj.github.io/argo-workflows/metrics/#grafana-dashboard-for-argo-controller-metrics>
     """
 
     metrics: List[Metric]

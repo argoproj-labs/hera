@@ -1,6 +1,6 @@
-"""The task module provides the Task and TaskResult classes.
+"""The `hera.workflows.task` module provides the Task and TaskResult classes.
 
-See https://argoproj.github.io/argo-workflows/walk-through/dag/
+See <https://argoproj.github.io/argo-workflows/walk-through/dag>
 for more on using Tasks within a DAG.
 """
 

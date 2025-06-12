@@ -5,7 +5,7 @@ in the context of Hera.
 
 ## The `Workflow` class
 
-The [Workflow](../api/workflows/hera.md#hera.workflows.Workflow) holds a collection of templates, and runs the
+The [Workflow][hera.workflows.Workflow] holds a collection of templates, and runs the
 entrypoint template, usually a DAG or Steps template. In Hera, the `Workflow` is a context manager, so it loosely
 mirrors the YAML dictionary structure, and adds any templates created or referenced under it.
 

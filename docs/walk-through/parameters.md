@@ -88,8 +88,8 @@ if they are both strings:
 ### Enforcing Types Using the Hera Runner
 
 To enforce types at runtime, you will need to build an image and use Hera's
-[Script Runner](../user-guides/script-basics.md#runnerscriptconstructor). Then, the types will be validated at runtime
-by Pydantic, and you can rely on the types being correct.
+[Script Runner](../user-guides/script-constructors.md#runner-scripts). Then, the types will be validated at runtime by
+Pydantic, and you can rely on the types being correct.
 
 === "Hera"
 
@@ -156,8 +156,8 @@ by Pydantic, and you can rely on the types being correct.
 ### Custom Types
 
 Hera uses Pydantic to allow any JSON-serialisable class to be used. You will need to build an image and use Hera's
-[Script Runner](../user-guides/script-basics.md#runnerscriptconstructor). See an example usage
-[here](../examples/workflows/hera-runner/typed_script_io.md).
+[Script Runner](../user-guides/script-constructors.md#runner-scripts). See an example usage
+[here](../examples/workflows/hera-runner/typed_script_input_output.md).
 
 ## Output Parameters
 

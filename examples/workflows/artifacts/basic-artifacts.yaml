@@ -3,20 +3,18 @@ kind: Workflow
 metadata:
   generateName: artifact-
 spec:
-  entrypoint: d
+  entrypoint: steps
   templates:
-  - name: d
-    dag:
-      tasks:
-      - name: writer
+  - name: steps
+    steps:
+    - - name: writer
         template: writer
-      - name: consumer
-        depends: writer
+    - - name: consumer
         template: consumer
         arguments:
           artifacts:
           - name: in-art
-            from: '{{tasks.writer.outputs.artifacts.out-art}}'
+            from: '{{steps.writer.outputs.artifacts.out-art}}'
   - name: writer
     outputs:
       artifacts:

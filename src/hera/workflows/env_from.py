@@ -1,4 +1,8 @@
-"""A module that provides implementations of environment variables that can be created from K8s objects."""
+"""The `hera.workflows.env_from` module provides implementations of environment variable classes that can be created from K8s objects.
+
+`EnvFrom` classes differs from [Env](env.md) classes as `EnvFrom` uses a source to retrieve a variable from,
+and you can only prefix the name with something. The `Env` classes can create new independent variables.
+"""
 
 from typing import Optional
 

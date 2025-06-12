@@ -82,7 +82,7 @@ Here's an example using an inline script:
 
 
 To learn more about Inline Scripts, see the
-[Script Basics user guide](../user-guides/script-basics.md#inlinescriptconstructor).
+[Script Constructors user guide](../user-guides/script-constructors.md#inline-scripts).
 
 ## Runner Script Templates
 
@@ -149,4 +149,4 @@ The value of `{{inputs.parameters}}` is the list of parameters in JSON form. You
 runner util functions.
 
 To learn more about Runner Scripts, see the
-[Script Basics user guide](../user-guides/script-basics.md#runnerscriptconstructor).
+[Script Constructors user guide](../user-guides/script-constructors.md#runner-scripts).

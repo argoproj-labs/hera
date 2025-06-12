@@ -1,4 +1,4 @@
-"""Volume module provides all Argo volume types that can be used via Hera."""
+"""The `hera.workflows.volume` module provides all Argo volume types that can be used via Hera."""
 
 import uuid
 from enum import Enum
@@ -375,7 +375,7 @@ class NFSVolume(_BaseVolume, _ModelNFSVolumeSource):
 
 
 class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSource):
-    """A Photon Persisten Disk representation."""
+    """A Photon Persistent Disk representation."""
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name

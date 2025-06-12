@@ -1,4 +1,4 @@
-"""A module that provides retry strategy functionality, along with necessary dependencies such as retry policy."""
+"""The `hera.workflows.retry_strategy` module provides retry strategy functionality, along with necessary dependencies such as retry policy."""
 
 from enum import Enum
 from typing import Optional, Union, cast
