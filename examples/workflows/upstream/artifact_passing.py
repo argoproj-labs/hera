@@ -21,5 +21,5 @@ with Workflow(generate_name="artifact-passing-", entrypoint="artifact-example") 
         Step(
             name="consume-artifact",
             template=print_message_from_file,
-            arguments=gen_step.get_artifact("hello-art").with_name("message"),
+            arguments={"message": gen_step.get_artifact("hello-art")},
         )

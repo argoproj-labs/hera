@@ -1,3 +1,5 @@
+"""This example shows a conditional DAG path based on a "coinflip" from the `flip` task."""
+
 from hera.workflows import DAG, Workflow, script
 
 

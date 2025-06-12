@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: masked-parameter-
+spec:
+  entrypoint: d
+  templates:
+  - name: d
+    dag:
+      tasks:
+      - name: produce
+        template: produce
+      - name: consume
+        depends: produce
+        template: consume
+        arguments:
+          artifacts:
+          - name: i
+            from: '{{tasks.produce.outputs.artifacts.result-art}}'
+  - name: produce
+    outputs:
+      artifacts:
+      - name: result-art
+        path: /tmp/result
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import pickle
+        result = 'foo testing'
+        with open('/tmp/result', 'wb') as f:
+            pickle.dump(result, f)
+      command:
+      - python
+  - name: consume
+    inputs:
+      artifacts:
+      - name: i
+        path: /tmp/i
+    script:
+      image: python:3.9
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import pickle
+        with open('/tmp/i', 'rb') as f:
+            i = i or pickle.load(f)
+        print(i)
+      command:
+      - python

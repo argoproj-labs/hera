@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: create-volume-for-workflow-
+spec:
+  entrypoint: my-steps
+  templates:
+  - name: my-steps
+    steps:
+    - - name: output-artifact-existing-vol
+        template: output-artifact-existing-vol
+        arguments:
+          parameters:
+          - name: a_number
+            value: '3'
+    - - name: use-artifact-existing-vol
+        template: use-artifact-existing-vol
+        arguments:
+          artifacts:
+          - name: successor_in
+            from: '{{steps.output-artifact-existing-vol.outputs.artifacts.successor_out}}'
+  - name: output-artifact-existing-vol
+    inputs:
+      parameters:
+      - name: a_number
+    outputs:
+      artifacts:
+      - name: successor_out
+        path: /mnt/here/artifacts/successor_out
+        archive:
+          none: {}
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.artifacts.create_volume_for_workflow:output_artifact_existing_vol
+      command:
+      - python
+      env:
+      - name: hera__outputs_directory
+        value: /mnt/here
+      volumeMounts:
+      - name: my-vol
+        mountPath: /mnt/here
+  - name: use-artifact-existing-vol
+    inputs:
+      artifacts:
+      - name: successor_in
+        path: /mnt/here/artifacts/successor_out
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.artifacts.create_volume_for_workflow:use_artifact_existing_vol
+      command:
+      - python
+      volumeMounts:
+      - name: my-vol
+        mountPath: /mnt/here
+  volumeClaimTemplates:
+  - metadata:
+      name: my-vol
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi

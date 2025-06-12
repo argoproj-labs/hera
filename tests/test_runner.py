@@ -130,22 +130,22 @@ def test_parameter_loading(
     "entrypoint,kwargs_list,expected_output",
     [
         (
-            "examples.workflows.scripts.callable_script:my_function",
+            "examples.workflows.hera_runner.typed_script_input_output:my_function",
             [{"name": "input", "value": '{"a": 2, "b": "bar", "c": 42}'}],
             '{"output": [{"a": 2, "b": "bar", "c": 42}]}',
         ),
         (
-            "examples.workflows.scripts.callable_script:another_function",
+            "examples.workflows.hera_runner.typed_script_input_output:another_function",
             [{"name": "inputs", "value": '[{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]'}],
             '{"output": [{"a": 2, "b": "bar", "c": 42}, {"a": 2, "b": "bar", "c": 42.0}]}',
         ),
         (
-            "examples.workflows.scripts.callable_script:str_function",
+            "examples.workflows.hera_runner.typed_script_input_output:str_function",
             [{"name": "input", "value": '{"a": 2, "b": "bar", "c": 42}'}],
             '{"output": [{"a": 2, "b": "bar", "c": 42}]}',
         ),
         (
-            "examples.workflows.scripts.callable_script:function_kebab",
+            "examples.workflows.hera_runner.typed_script_input_output:function_kebab",
             [
                 {"name": "a-but-kebab", "value": "3"},
                 {"name": "b-but-kebab", "value": "bar"},
@@ -154,7 +154,7 @@ def test_parameter_loading(
             '{"output": [{"a": 3, "b": "bar", "c": 42.0}]}',
         ),
         (
-            "examples.workflows.scripts.callable_script:function_kebab_object",
+            "examples.workflows.hera_runner.typed_script_input_output:function_kebab_object",
             [{"name": "input-value", "value": '{"a": 3, "b": "bar", "c": "abc"}'}],
             '{"output": [{"a": 3, "b": "bar", "c": "abc"}]}',
         ),

@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: script-with-kwargs-
+spec:
+  entrypoint: script-with-kwargs
+  templates:
+  - name: script-with-kwargs
+    metadata:
+      annotations:
+        my-annotation: my-value
+      labels:
+        my-label: my-value
+    script:
+      image: python:3.9
+      imagePullPolicy: Always
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        print('ok')
+      command:
+      - python
+      resources:
+        requests:
+          memory: 5Gi

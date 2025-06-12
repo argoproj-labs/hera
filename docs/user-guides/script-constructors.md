@@ -261,7 +261,7 @@ def my_pydantic_function(my_pydantic_input: MyModel):
 
 Your functions can also return objects that are serialised, passed to another `Step`/`Task` as a string argument, and
 then de-serialised in another function. This flow can be seen in
-[the callable scripts example](../examples/workflows/scripts/callable_script.md).
+[the typed script IO example](../examples/workflows/hera-runner/typed_script_io.md).
 
 If you need custom serialisation, read on to [Script Annotations](script-annotations.md) to learn more and how to write
 script templates effectively!

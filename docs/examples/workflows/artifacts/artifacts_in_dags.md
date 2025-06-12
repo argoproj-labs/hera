@@ -39,13 +39,13 @@ This example shows how to use artifacts as inputs and outputs of DAGs.
         # Second DAG takes an artifact input, and the task references it using `get_artifact`
         with DAG(name="consume-artifact-dag", inputs=[Artifact(name="hello-file-input")]) as d2:
             print_message_from_file(
-                arguments=d2.get_artifact("hello-file-input").with_name("message"),
+                arguments={"message": d2.get_artifact("hello-file-input")},
             )
 
         # Third DAG orchestrates the first two, by creating tasks by "calling" the objects
         with DAG(name="runner-dag"):
             generator_dag = d1()
-            consumer_dag = d2(arguments=generator_dag.get_artifact("hello-file").with_name("hello-file-input"))
+            consumer_dag = d2(arguments={"hello-file-input": generator_dag.get_artifact("hello-file")})
 
             generator_dag >> consumer_dag
     ```
