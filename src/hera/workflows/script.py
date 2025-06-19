@@ -138,9 +138,9 @@ class Script(
     ResourceMixin,
     VolumeMountMixin,
 ):
-    """A Script in Argo Workflows acts as a wrapper around a [Container][hera.workflows.container.Container], where you can specify Python code to run through `source`.
+    """A Script in Argo Workflows acts as a wrapper around a Container, where you can specify Python code to run through `source`.
 
-    In Hera, you should aim to use the [script decorator][hera.workflows.script.script], rather than the Script class directly.
+    In Hera, you should aim to use the script decorator, rather than the Script class directly.
     You will need to refer to the Script class for the kwargs that the decorator can take, but your IDE should give you code completion and type hints.
     """
 
@@ -665,7 +665,7 @@ def _add_type_hints(
 
 @_add_type_hints(Script)
 def script(**script_kwargs) -> Callable:
-    """A decorator that wraps a function into a [Script][hera.workflows.script.Script] object.
+    """A decorator that wraps a function into a Script object.
 
     Using this decorator users can define a function that will be executed as a script in a container. Once the
     `Script` is returned users can use it as they generally use a `Script` e.g. as a callable inside a DAG or Steps.

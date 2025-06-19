@@ -36,7 +36,7 @@ class DummyContext:
 
 
 def parallel():
-    """Open a parallel context within a [steps-decorator function][hera.workflows.workflow.Workflow.steps].
+    """Open a parallel context within a steps-decorator function.
 
     When running locally, the context will be a no-op.
     """
@@ -100,7 +100,7 @@ class Parallel(
     ContextMixin,
     SubNodeMixin,
 ):
-    """Parallel is a context manager used to create a list of [steps][hera.workflows.steps.Step] to run in parallel.
+    """Parallel is a context manager used to create a list of steps to run in parallel.
 
     Parallel implements the context manager interface so allows usage of `with`, under which any
     `hera.workflows.steps.Step` objects instantiated will be added to Parallel's list of sub_steps.

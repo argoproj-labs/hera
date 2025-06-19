@@ -153,7 +153,7 @@ class Artifact(BaseModel):
         """Returns a 'built' copy of the current artifact, renamed using the specified `name`.
 
         Warning: DEPRECATED
-            use [with_name][hera.workflows.artifact.Artifact.as_name].
+            use with_name.
         """
         _logger.warning("'as_name' is deprecated, use 'with_name'")
         artifact = self._build_artifact()
