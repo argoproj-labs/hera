@@ -15,7 +15,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
 
     @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
     def writer():
-        with open("/tmp/file", "w+") as f:
+        with open("/tmp/file", "w") as f:
             f.write("Hello, world!")
 
 
@@ -64,7 +64,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/file', 'w+') as f:
+            with open('/tmp/file', 'w') as f:
                 f.write('Hello, world!')
           command:
           - python

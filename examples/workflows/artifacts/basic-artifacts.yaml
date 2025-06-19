@@ -28,7 +28,7 @@ spec:
         import os
         import sys
         sys.path.append(os.getcwd())
-        with open('/tmp/file', 'w+') as f:
+        with open('/tmp/file', 'w') as f:
             f.write('Hello, world!')
       command:
       - python

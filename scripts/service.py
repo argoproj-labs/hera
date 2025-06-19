@@ -503,7 +503,7 @@ def make_service(service_def: str, endpoints: List[ServiceEndpoint], models_type
 
 def write_service(service: str, path: Path) -> None:
     """Writes the service code to the specified path."""
-    with open(str(path), "w+") as f:
+    with open(str(path), "w") as f:
         f.write(service)
 
 
