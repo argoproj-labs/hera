@@ -1,4 +1,4 @@
-"""Holds the resource specification."""
+"""The `hera.workflows.resources` module provides the [Resources][hera.workflows.resources.Resources] class for setting CPU, memory and other limits."""
 
 from typing import Dict, Optional, Union
 

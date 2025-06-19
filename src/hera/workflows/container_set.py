@@ -1,4 +1,4 @@
-"""Provides Hera implementations of Argo's container node for usage in Workflow tasks/steps."""
+"""The `hera.workflows.container_set` module provides Argo's container set and container node."""
 
 from __future__ import annotations
 

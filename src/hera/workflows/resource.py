@@ -1,4 +1,4 @@
-"""The resource module provides functionality for creating K8s resources via workflows inside task/steps."""
+"""The `hera.workflows.resource` module provides functionality for creating K8s resources via workflows inside task/steps."""
 
 from typing import List, Optional, Union
 

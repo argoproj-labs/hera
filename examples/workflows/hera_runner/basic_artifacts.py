@@ -1,11 +1,11 @@
-"""Compare this example to [Basic Artifacts](../artifacts/basic-artifacts.md) to see how the Hera runner simplifies your Artifact code."""
+"""Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to see how the Hera runner simplifies your Artifact code."""
 
 from typing import Annotated
 
 from hera.workflows import (
-    DAG,
     Artifact,
     NoneArchiveStrategy,
+    Steps,
     Workflow,
     script,
 )
@@ -27,8 +27,7 @@ def consumer(
     print(in_art)  # prints `Hello, world!` to `stdout`
 
 
-with Workflow(generate_name="artifact-", entrypoint="d") as w:
-    with DAG(name="d"):
+with Workflow(generate_name="artifact-", entrypoint="steps") as w:
+    with Steps(name="steps"):
         w_ = writer()
         c = consumer(arguments={"in_art": w_.get_artifact("out-art")})
-        w_ >> c

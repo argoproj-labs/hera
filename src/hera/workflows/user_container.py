@@ -1,4 +1,8 @@
-"""The user container module provides user container functionality and objects."""
+"""The `hera.workflows.user_container` module provides user container functionality and objects.
+
+[UserContainers][hera.workflows.user_container.UserContainer] are used as side containers, so they can run background
+processes required for the main container.
+"""
 
 from typing import List, Optional, Union, cast
 

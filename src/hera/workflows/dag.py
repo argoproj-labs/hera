@@ -1,7 +1,7 @@
-"""The dag module provides the DAG class.
+"""The `hera.workflows.dag` module provides the DAG class.
 
-See https://argoproj.github.io/argo-workflows/walk-through/dag/
-for more on DAGs (Directed Acyclic Graphs).
+See <https://argoproj.github.io/argo-workflows/walk-through/dag>
+for more on DAGs (Directed Acyclic Graphs) in Argo Workflows.
 """
 
 from __future__ import annotations
@@ -28,16 +28,10 @@ class DAG(
 ):
     """A DAG template invocator is used to define Task dependencies as an acyclic graph.
 
-    DAG implements the contextmanager interface so allows usage of `with`, under which any
-    `hera.workflows.task.Task` objects instantiated will be added to the DAG's list of Tasks.
+    DAG implements the contextmanager interface so allows usage of `with`, under which any [Task][hera.workflows.Task]
+    objects instantiated will be added to the DAG's list of Tasks.
 
-    Examples:
-        >>> @script()
-        >>> def foo() -> None:
-        >>>     print(42)
-        >>>
-        >>> with DAG(...) as dag:
-        >>>     foo()
+    See the [DAG examples](../../../examples/workflows/dags/dag_diamond_with_script.md) for usage.
     """
 
     fail_fast: Optional[bool] = None
