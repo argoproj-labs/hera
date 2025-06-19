@@ -165,5 +165,5 @@ spec["definitions"] = ordered_defs
 
 # finally, we write the spec to the output file that is passed to use assuming the client wants to perform
 # something with this file
-with open(output_file, "w+") as f:
+with open(output_file, "w") as f:
     json.dump(spec, f, indent=2)

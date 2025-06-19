@@ -15,7 +15,7 @@
     def writer():
         import json
 
-        with open("/tmp/file", "w+") as f:
+        with open("/tmp/file", "w") as f:
             for i in range(10):
                 f.write(json.dumps(i) + "\n")
 
@@ -89,7 +89,7 @@
             import sys
             sys.path.append(os.getcwd())
             import json
-            with open('/tmp/file', 'w+') as f:
+            with open('/tmp/file', 'w') as f:
                 for i in range(10):
                     f.write(json.dumps(i) + '\n')
           command:

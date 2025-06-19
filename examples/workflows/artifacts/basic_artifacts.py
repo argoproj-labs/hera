@@ -8,7 +8,7 @@ from hera.workflows import Artifact, NoneArchiveStrategy, Steps, Workflow, scrip
 
 @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
 def writer():
-    with open("/tmp/file", "w+") as f:
+    with open("/tmp/file", "w") as f:
         f.write("Hello, world!")
 
 

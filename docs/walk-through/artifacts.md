@@ -78,7 +78,7 @@ from hera.workflows import Artifact, NoneArchiveStrategy, Steps, Workflow, scrip
 
 @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
 def writer():
-    with open("/tmp/file", "w+") as f:
+    with open("/tmp/file", "w") as f:
         f.write("Hello, world!")
 
 
@@ -112,7 +112,7 @@ We then write to the specified path within the function:
 ```py
 @script(outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()))
 def writer():
-    with open("/tmp/file", "w+") as f:
+    with open("/tmp/file", "w") as f:
         f.write("Hello, world!")
 ```
 
@@ -159,7 +159,7 @@ We can then call the function in a Steps context. Compare to the YAML workflow a
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/file', 'w+') as f:
+            with open('/tmp/file', 'w') as f:
                 f.write('Hello, world!')
           command:
           - python
@@ -242,7 +242,7 @@ output artifact to the `in-art` input artifact:
             import os
             import sys
             sys.path.append(os.getcwd())
-            with open('/tmp/file', 'w+') as f:
+            with open('/tmp/file', 'w') as f:
                 f.write('Hello, world!')
           command:
           - python
