@@ -28,7 +28,7 @@ class DAG(
 ):
     """A DAG template invocator is used to define Task dependencies as an acyclic graph.
 
-    DAG implements the contextmanager interface so allows usage of `with`, under which any [Task][hera.workflows.Task]
+    DAG implements the contextmanager interface so allows usage of `with`, under which any Task
     objects instantiated will be added to the DAG's list of Tasks.
 
     See the [DAG examples](../../../examples/workflows/dags/dag_diamond_with_script.md) for usage.
