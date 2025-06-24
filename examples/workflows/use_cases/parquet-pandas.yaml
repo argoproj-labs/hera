@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pandas-example-
+spec:
+  entrypoint: d
+  serviceAccountName: argo
+  templates:
+  - name: d
+    dag:
+      tasks:
+      - name: create-dataframe
+        template: create-dataframe
+      - name: loadb-dataframe
+        depends: create-dataframe
+        template: loadb-dataframe
+        arguments:
+          artifacts:
+          - name: dataset
+            from: '{{tasks.create-dataframe.outputs.artifacts.dataset}}'
+      - name: load-dataframe-from-path
+        depends: create-dataframe
+        template: load-dataframe-from-path
+        arguments:
+          artifacts:
+          - name: dataset
+            from: '{{tasks.create-dataframe.outputs.artifacts.dataset}}'
+  - name: create-dataframe
+    outputs:
+      artifacts:
+      - name: dataset
+        path: /tmp/hera-outputs/artifacts/dataset
+        archive:
+          none: {}
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.use_cases.parquet_pandas:create_dataframe
+      command:
+      - python
+      env:
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
+  - name: loadb-dataframe
+    inputs:
+      artifacts:
+      - name: dataset
+        path: /tmp/hera-inputs/artifacts/dataset
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.use_cases.parquet_pandas:loadb_dataframe
+      command:
+      - python
+  - name: load-dataframe-from-path
+    inputs:
+      artifacts:
+      - name: dataset
+        path: /tmp/hera-inputs/artifacts/dataset
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.use_cases.parquet_pandas:load_dataframe_from_path
+      command:
+      - python
