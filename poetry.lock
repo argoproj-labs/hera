@@ -1511,19 +1511,20 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "varname"
-version = "0.14.0"
+version = "0.15.0"
 description = "Dark magics about variable names in python."
 optional = true
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
 markers = "extra == \"experimental\""
 files = [
-    {file = "varname-0.14.0-py3-none-any.whl", hash = "sha256:2d7a968ec7cdf8026a54cce808ace2c46718df652189a024eab8da94a4fde928"},
-    {file = "varname-0.14.0.tar.gz", hash = "sha256:35384677e083202a60a8ed18ff336020e5d017cf8dc1691d09485539c45aa38b"},
+    {file = "varname-0.15.0-py3-none-any.whl", hash = "sha256:9ce9d5a4435930b426ebbbc992ef31b10d4350392a28a91fa3c1c1eb02a081a1"},
+    {file = "varname-0.15.0.tar.gz", hash = "sha256:86e66d59adf97ed301169ab0cb9b33a2f08f3184cd9c3b14901a09d1972dbfee"},
 ]
 
 [package.dependencies]
 executing = ">=2.1,<3.0"
+typing_extensions = {version = ">=4.13,<5.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
 all = ["asttokens (==3.*)", "pure_eval (==0.*)"]
@@ -1557,4 +1558,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "ab4f43208ac81aa4a3e3e4d5c1264ba06078b4515e4e59ee89397bbfe4857c89"
+content-hash = "149767466bfb874a18314f16fc73140ee8f6743a2376d4f4b0dd1fe9e983de9d"
