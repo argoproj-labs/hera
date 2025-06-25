@@ -21,19 +21,15 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 
 if _PYDANTIC_VERSION == 2:
-    from pydantic import BaseModel as V2BaseModel
-    from pydantic.v1 import BaseModel as V1BaseModel
     from pydantic_core import PydanticUndefined
 else:
-    from pydantic import BaseModel as V1BaseModel  # type: ignore[assignment]
-
-    V2BaseModel = V1BaseModel  # type: ignore
     PydanticUndefined = None  # type: ignore[assignment]
+
 
 if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it
     # to be used with either a V1 BaseModel or a V2 BaseModel
-    from pydantic import BaseModel
+    from hera.shared._pydantic import PydanticBaseModel as BaseModel
 else:
     # Subclassing `object` when using the real code (i.e. not type-checking) is basically a no-op
     BaseModel = object  # type: ignore
@@ -119,11 +115,7 @@ class InputMixin(BaseModel):
         params = []
         artifacts = []
 
-        if isinstance(self, V1BaseModel):
-            self_dict = self.dict()
-        elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
-            self_dict = self.model_dump(warnings="none")
-
+        self_dict = self.model_dump(warnings="none") if _PYDANTIC_VERSION == 2 else self.dict()  # type: ignore[attr-defined]
         for field, _, annotation in _construct_io_from_fields(type(self)):
             # The value may be a static value (of any time) if it has a default value, so we need to serialize it
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
@@ -200,10 +192,7 @@ class OutputMixin(BaseModel):
         """
         outputs: List[Union[Artifact, Parameter]] = []
 
-        if isinstance(self, V1BaseModel):
-            self_dict = self.dict()
-        elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
-            self_dict = self.model_dump(warnings="none")
+        self_dict = self.model_dump(warnings="none") if _PYDANTIC_VERSION == 2 else self.dict()  # type: ignore[attr-defined]
 
         for field, _, annotation in _construct_io_from_fields(type(self)):
             if field in {"exit_code", "result"}:
