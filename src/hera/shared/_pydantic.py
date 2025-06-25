@@ -16,35 +16,41 @@ _PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 # users across both versions.
 
 if _PYDANTIC_VERSION == 2:
-    from pydantic.v1 import (  # type: ignore
+    from pydantic.v1 import (
+        BaseModel as PydanticBaseModel,
         Field,
         PrivateAttr,
         ValidationError,
         root_validator,
         validator,
     )
+    from pydantic.v1.fields import FieldInfo
 else:
     from pydantic import (  # type: ignore[assignment,no-redef]
+        BaseModel as PydanticBaseModel,
         Field,
         PrivateAttr,
         ValidationError,
         root_validator,
         validator,
     )
+    from pydantic.fields import FieldInfo  # type: ignore[assignment,no-redef]
 
-# TYPE_CHECKING-guarding specifically the `BaseModel` import helps the type checkers
-# provide proper type checking to models. Without this, both mypy and pyright lose
-# native pydantic hinting for `__init__` arguments.
+
+# TYPE_CHECKING-guarding specifically the `BaseModel` import helps the type
+# checkers provide proper type checking to models. Without this, both mypy and
+# pyright lose native pydantic hinting for `__init__` arguments.
+#
+# Now there can be 2 versions of `BaseModel` at runtime, but here we must choose
+# one for the type checker, otherwise external type checkers as well as editors
+# won't be able to do much. vscode for example would always give 2
+# options when jumping to source instead of just picking one. Pydantic/Pylance
+# wouldn't be able to do much.
+#
+# Since Hera's models are still using v1 API, that's the reasonable choice.
 if TYPE_CHECKING:
-    from pydantic import BaseModel as PydanticBaseModel
-    from pydantic.fields import FieldInfo
-else:
-    if _PYDANTIC_VERSION == 2:
-        from pydantic.v1 import BaseModel as PydanticBaseModel  # type: ignore
-        from pydantic.v1.fields import FieldInfo
-    else:
-        from pydantic import BaseModel as PydanticBaseModel  # type: ignore[assignment,no-redef]
-        from pydantic.fields import FieldInfo
+    from pydantic.v1 import BaseModel as PydanticBaseModel
+    from pydantic.v1.fields import FieldInfo
 
 
 def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, FieldInfo]:
