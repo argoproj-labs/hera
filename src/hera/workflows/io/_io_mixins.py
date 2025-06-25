@@ -33,7 +33,7 @@ else:
 if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it
     # to be used with either a V1 BaseModel or a V2 BaseModel
-    from pydantic import BaseModel
+    from hera.shared._pydantic import PydanticBaseModel as BaseModel
 else:
     # Subclassing `object` when using the real code (i.e. not type-checking) is basically a no-op
     BaseModel = object  # type: ignore
