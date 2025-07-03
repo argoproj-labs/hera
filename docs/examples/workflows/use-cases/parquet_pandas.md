@@ -6,7 +6,8 @@ This example shows how to use the custom serialisation features for third party 
 how we can easily use big file formats like parquet through Hera Artifact annotations.
 
 !!! note
-    You will require a "runner" image for this example, which requires the dependencies `pandas` and `pyarrow` to run.
+    This example requires `pandas`, `pyarrow` and `hera` itself to run. You will need to provide an image containing
+    these dependencies.
 
 
 === "Hera"
@@ -16,16 +17,7 @@ how we can easily use big file formats like parquet through Hera Artifact annota
     from pathlib import Path
     from typing import Annotated
 
-    try:
-        from pandas import DataFrame, read_parquet
-    except ImportError:
-        # Workaround for generating YAML - we do not require `pandas` for Hera
-        # so the import will not work (and the imported values will not exist)
-        DataFrame = object
-
-        def read_parquet(x):
-            pass
-
+    from pandas import DataFrame, read_parquet
 
     from hera.workflows import (
         DAG,
