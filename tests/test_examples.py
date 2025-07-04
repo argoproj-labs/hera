@@ -1,7 +1,9 @@
 import importlib
 import os
 import pkgutil
+import subprocess
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
@@ -29,6 +31,8 @@ REPORT_DIFFS = os.environ.get("REPORT_DIFFS")
 CI_MODE = os.environ.get("CI")
 
 LOWEST_SUPPORTED_PY_VERSION = (3, 9)
+
+EXTRA_MODULES = defaultdict(list, {"parquet_pandas": ["pandas"]})
 
 
 def _generate_yaml(path: Path) -> bool:
@@ -101,19 +105,36 @@ def _get_examples() -> List:
 
 
 @pytest.mark.parametrize(
-    "path,module_name,filename",
+    "path,module_name,filename,extra_modules_required",
     [
         pytest.param(
             path,
             module_name,
             filename,
+            EXTRA_MODULES[filename],
+            marks=pytest.mark.skipif(
+                bool(CI_MODE and EXTRA_MODULES[filename]), reason="Installing extra modules only for local development"
+            ),
             id=filename,
         )
         for path, module_name, filename in _get_examples()
     ],
 )
-def test_hera_output(path, module_name, filename, global_config_fixture):
+def test_hera_output(
+    path,
+    module_name,
+    filename,
+    extra_modules_required,
+    global_config_fixture,
+):
     # GIVEN
+    if extra_modules_required:
+        subprocess.run(
+            ["pip", "install"] + extra_modules_required,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
+
     global_config_fixture.host = "http://hera.testing"
     workflow = importlib.import_module(module_name).w
     generated_yaml_path = Path(path) / f"{filename.replace('_', '-')}.yaml"
@@ -137,6 +158,13 @@ def test_hera_output(path, module_name, filename, global_config_fixture):
     elif isinstance(workflow, HeraWorkflow):
         assert workflow == HeraWorkflow.from_dict(workflow.to_dict())
         assert workflow == HeraWorkflow.from_yaml(workflow.to_yaml())
+
+    if extra_modules_required:
+        subprocess.run(
+            ["pip", "uninstall"] + extra_modules_required,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
 
 
 @pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
