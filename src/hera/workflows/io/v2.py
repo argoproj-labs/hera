@@ -11,7 +11,7 @@ from hera.workflows.io._io_mixins import InputMixin, OutputMixin
 if _PYDANTIC_VERSION == 2:
     from pydantic import BaseModel
 
-    class Input(InputMixin, BaseModel):
+    class Input(InputMixin, BaseModel):  # type: ignore[misc]
         """Input model usable by the Hera Runner.
 
         Input is a Pydantic model which users can create a subclass of. When a subclass
@@ -20,7 +20,7 @@ if _PYDANTIC_VERSION == 2:
         for the script_pydantic_io experimental feature.
         """
 
-    class Output(OutputMixin, BaseModel):
+    class Output(OutputMixin, BaseModel):  # type: ignore[misc]
         """Output model usable by the Hera Runner.
 
         Output is a Pydantic model which users can create a subclass of. When a subclass

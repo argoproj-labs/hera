@@ -151,6 +151,24 @@ def test_get_as_arguments_unannotated():
     )
 
 
+def test_get_as_arguments_unannotated_v1():
+    from hera.workflows.io.v1 import Input as InputV1
+
+    class Foo(InputV1):
+        foo: int
+        bar: str = "a default"
+
+    foo = Foo(foo=1)
+    parameters = foo._get_as_arguments()
+
+    assert parameters == ModelArguments(
+        parameters=[
+            ModelParameter(name="foo", value=1),
+            ModelParameter(name="bar", value="a default"),
+        ],
+    )
+
+
 def test_get_as_arguments_with_pydantic_annotations():
     class Foo(Input):
         foo: Annotated[int, Field(gt=0)]
