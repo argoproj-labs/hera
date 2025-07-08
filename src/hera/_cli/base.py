@@ -16,7 +16,7 @@ class Hera:
 @command(help="Subcommands for generating yaml, code, and docs from Hera Workflows.")
 @dataclass
 class Generate:
-    subcommand: Subcommands[GenerateYaml]
+    subcommand: Subcommands[GenerateYaml | GeneratePython]
 
 
 @command(
@@ -43,6 +43,61 @@ class GenerateYaml:
             long=True,
             help=(
                 "Optional destination for the produced yaml. If 'from' is a "
+                "file this is assumed to be a file. If 'from' is a folder, "
+                "this is assumed to be a folder, and individual file names "
+                "will match the source file."
+            ),
+        ),
+    ] = None
+    recursive: Annotated[bool, Arg(help="Enables recursive traversal of an input folder")] = False
+    include: Annotated[
+        List[str],
+        Arg(
+            short=True,
+            long=True,
+            help=(
+                "Filter the set of input files by including only files matching the `--include`. "
+                "Note this also accepts glob specifiers like 'folder/*'. "
+            ),
+        ),
+    ] = field(default_factory=list)
+    exclude: Annotated[
+        List[str],
+        Arg(
+            short=True,
+            long=True,
+            help=(
+                "Filter the set of input files by excluding files matching the `--exclude`. "
+                "Note this also accepts glob specifiers like 'folder/*'. "
+            ),
+        ),
+    ] = field(default_factory=list)
+
+
+@command(
+    name="python",
+    help="Generate python from yaml Workflow definitions.",
+    invoke="hera._cli.generate.hera.generate_workflow",
+)
+@dataclass
+class GeneratePython:
+    from_: Annotated[
+        Path,
+        Arg(
+            value_name="from",
+            help=(
+                "The path from which the Python is generated. This can be a file "
+                "or a folder. When a folder is provided, all YAML files in the "
+                "folder will be generated."
+            ),
+        ),
+    ]
+    to: Annotated[
+        Union[Path, None],
+        Arg(
+            long=True,
+            help=(
+                "Optional destination for the produced Python. If 'from' is a "
                 "file this is assumed to be a file. If 'from' is a folder, "
                 "this is assumed to be a folder, and individual file names "
                 "will match the source file."
