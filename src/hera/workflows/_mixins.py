@@ -449,7 +449,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
-    http: Optional[HTTP] = None
+    http: Optional[HTTP] = None  # THIS SHOULD NOT BE HERE
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
     priority: Optional[int] = None
