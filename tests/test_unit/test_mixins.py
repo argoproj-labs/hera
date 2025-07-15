@@ -1,15 +1,25 @@
 import pytest
 
 from hera.workflows import Env, Parameter, Workflow
-from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin
+from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin, VolumeMixin, VolumeMountMixin
 from hera.workflows.models import (
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
+    EmptyDirVolumeSource,
     ImagePullPolicy,
     Inputs as ModelInputs,
+    ObjectMeta,
     Outputs as ModelOutputs,
     Parameter as ModelParameter,
+    PersistentVolumeClaim as ModelPersistentVolumeClaim,
+    PersistentVolumeClaimSpec,
+    PersistentVolumeClaimVolumeSource,
+    Quantity,
+    Volume as ModelVolume,
+    VolumeMount,
+    VolumeResourceRequirements,
 )
+from hera.workflows.volume import ExistingVolume, Volume
 
 
 class TestContainerMixin:
@@ -161,3 +171,77 @@ class TestEnvMixin:
         env_mixin = EnvMixin(env=None)
 
         assert env_mixin.env is None
+
+
+class TestVolumeMixin:
+    def test_volume_creates_pvc(self):
+        # Hera `Volume` is used to create PVCs more easily, ignoring the volume itself (in _build_volumes).
+        volume_mixin = VolumeMixin(
+            volumes=[
+                Volume(name="test-auto-PVC", mount_path="/here", size="1Mi"),
+            ]
+        )
+        assert volume_mixin._build_volumes() is None
+
+        assert volume_mixin._build_persistent_volume_claims() == [
+            ModelPersistentVolumeClaim(
+                metadata=ObjectMeta(name="test-auto-PVC"),
+                spec=PersistentVolumeClaimSpec(
+                    access_modes=["ReadWriteOnce"],
+                    resources=VolumeResourceRequirements(requests={"storage": Quantity(__root__="1Mi")}),
+                ),
+            )
+        ]
+
+    def test_existing_volume(self):
+        # ExistingVolume is converted into a ModelVolume by _build_volumes, and has no PVC generated
+        volume_mixin = VolumeMixin(
+            volumes=[
+                ExistingVolume(name="test-existing", mount_path="/here", claim_name="some-existing-vol"),
+            ]
+        )
+        assert volume_mixin._build_volumes() == [
+            ModelVolume(
+                name="test-existing",
+                persistent_volume_claim=PersistentVolumeClaimVolumeSource(claim_name="some-existing-vol"),
+            )
+        ]
+
+        assert volume_mixin._build_persistent_volume_claims() is None
+
+
+class TestVolumeMountMixin:
+    def test_volume_generates_mount(self):
+        # _build_volume_mounts is a member of VolumeMountMixin (not VolumeMixin), so that Workflows can
+        # use VolumeMixin to create PVCs or specify volume sources (but never mount volumes). Containers/scripts
+        # use VolumeMountMixin to create PVCs, mount volumes to the container, or specify volume sources.
+        volume_mixin = VolumeMountMixin(
+            volumes=[
+                Volume(name="test-auto-mount", mount_path="/here", size="1Mi"),
+            ]
+        )
+
+        assert volume_mixin._build_volumes() is None
+        assert volume_mixin._build_persistent_volume_claims() == [
+            ModelPersistentVolumeClaim(
+                metadata=ObjectMeta(name="test-auto-mount"),
+                spec=PersistentVolumeClaimSpec(
+                    access_modes=["ReadWriteOnce"],
+                    resources=VolumeResourceRequirements(requests={"storage": Quantity(__root__="1Mi")}),
+                ),
+            )
+        ]
+
+        # Ensure it generates a mount automatically
+        assert volume_mixin._build_volume_mounts() == [VolumeMount(name="test-auto-mount", mount_path="/here")]
+
+    def test_model_volume_and_volume_mount(self):
+        # Use model classes to skip Hera's preprocessing magic
+        volume_mixin = VolumeMountMixin(
+            volume_mounts=[VolumeMount(name="v1", mount_path="/mnt/vol")],
+            volumes=[ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())],
+        )
+
+        assert volume_mixin._build_volumes() == [ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())]
+        assert volume_mixin._build_persistent_volume_claims() is None
+        assert volume_mixin._build_volume_mounts() == [VolumeMount(name="v1", mount_path="/mnt/vol")]
