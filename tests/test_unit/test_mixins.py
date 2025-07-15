@@ -245,3 +245,9 @@ class TestVolumeMountMixin:
         assert volume_mixin._build_volumes() == [ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())]
         assert volume_mixin._build_persistent_volume_claims() is None
         assert volume_mixin._build_volume_mounts() == [VolumeMount(name="v1", mount_path="/mnt/vol")]
+
+    def test_volume_nothing_to_mount(self):
+        volume_mixin = VolumeMountMixin(volumes=[ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())])
+
+        assert volume_mixin._build_volumes() == [ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())]
+        assert volume_mixin._build_volume_mounts() is None
