@@ -6,7 +6,7 @@ from dataclasses import (
     field as dc_field,
 )
 from pathlib import Path
-from typing import Any, Generator, Iterable, List, Optional, Tuple, Type, Union, get_args
+from typing import Any, Generator, Iterable, List, Optional, Tuple, Type, Union, cast, get_args
 
 import yaml
 
@@ -25,6 +25,7 @@ from hera.workflows.http_template import HTTP
 from hera.workflows.models import (
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,
     CronWorkflow as _ModelCronWorkflow,
+    Metadata,
     Template,
     Workflow as _ModelWorkflow,
     WorkflowTemplate as _ModelWorkflowTemplate,
@@ -179,6 +180,18 @@ def convert_to_hera_template(
             hera_imports.extend(sub_hera_imports)
             model_imports.extend(sub_model_imports)
             hera_template_str.append(f"{field}={val},")
+
+        if field == "metadata" and getattr(template, field) is not None:
+            metadata = cast(Metadata, getattr(template, field))
+            if metadata.labels:
+                # these are simple str to str dicts, so nothing to import
+                labels, _, _ = python_obj_to_repr(metadata.labels)
+                hera_template_str.append(f"labels={labels},")
+
+            if metadata.annotations:
+                # these are simple str to str dicts, so nothing to import
+                annotations, _, _ = python_obj_to_repr(metadata.annotations)
+                hera_template_str.append(f"annotations={annotations},")
 
     for field in template_type_field.__fields__:
         if field in template_type_field_keys and getattr(template_type_field, field) is not None:

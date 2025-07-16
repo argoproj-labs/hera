@@ -31,8 +31,6 @@ SKIP_FILES = (
         "dag-inline-clusterworkflowtemplate.upstream.yaml",  # inline unsupported
         "data-transformations.upstream.yaml",  # data template transformation field unsupported
         "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
-        "pod-metadata.upstream.yaml",  # TODO: metadata (annotations/labels)
-        "pod-gc-strategy-with-label-selector.upstream.yaml",  # TODO: metadata (annotations/labels)
     ]
 )
 
