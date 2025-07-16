@@ -24,7 +24,12 @@ def _get_container(name: str, args: List[str]) -> Container:
 with Workflow(
     generate_name="volumes-existing-",
     entrypoint="volumes-existing-example",
-    volumes=[m.Volume(name="workdir", persistent_volume_claim={"claim_name": "my-existing-volume"})],
+    volumes=[
+        m.Volume(
+            name="workdir",
+            persistent_volume_claim=m.PersistentVolumeClaimVolumeSource(claim_name="my-existing-volume"),
+        )
+    ],
 ) as w:
     append_to_log = _get_container("append-to-accesslog", ["echo accessed at: $(date) | tee -a /mnt/vol/accesslog"])
     print_log = _get_container("print-accesslog", ["echo 'Volume access log:'; cat /mnt/vol/accesslog"])
