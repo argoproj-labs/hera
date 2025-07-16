@@ -62,7 +62,7 @@ class FileBuilder:
 
 
 def generate_workflow(options: GeneratePython):
-    """Generate python from yaml Workflow definitions.
+    """Generate Python (Hera) Workflow definitions from YAML definitions.
 
     If the provided path is a folder, generates python for all yaml files containing `Workflow`s
     in that folder
