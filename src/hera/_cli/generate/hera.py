@@ -1,6 +1,10 @@
 import os
 import sys
 from collections import ChainMap
+from dataclasses import (
+    dataclass,
+    field as dc_field,
+)
 from pathlib import Path
 from typing import Any, Generator, Iterable, List, Optional, Tuple, Type, Union, get_args
 
@@ -46,6 +50,14 @@ ModelWorkflow = Union[
     _ModelClusterWorkflowTemplate,
     _ModelCronWorkflow,
 ]
+
+
+@dataclass
+class FileBuilder:
+    hera_imports: list[str] = dc_field(default_factory=list)
+    model_imports: list[str] = dc_field(default_factory=list)
+    class_def: list[str] = dc_field(default_factory=list)
+    context_def: list[str] = dc_field(default_factory=list)
 
 
 def generate_workflow(options: GeneratePython):
@@ -184,7 +196,10 @@ def convert_to_hera_template(
     )
 
 
-def convert_to_hera_equivalent(model_class_obj: BaseModel, hera_class: Type[BaseModel]) -> Tuple[str, List[str], List[str]]:
+def convert_to_hera_equivalent(
+    model_class_obj: BaseModel,
+    hera_class: Type[BaseModel],
+) -> Tuple[str, List[str], List[str]]:
     hera_imports = [hera_class.__name__]
     model_imports = []
 
@@ -324,6 +339,58 @@ def model_to_python(model: BaseModel) -> Tuple[str, List[str], List[str]]:
     return "".join(class_def), hera_imports, model_imports
 
 
+def build_file(
+    file_builder: FileBuilder,
+    hera_workflow_class: Type[Workflow],
+    model_workflow: ModelWorkflow,
+) -> FileBuilder:
+    for attr, annotation in hera_workflow_class._get_all_annotations().items():
+        if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
+            if len(mappers) != 1:
+                raise ValueError("Expected only one model mapper")
+            if model_path := mappers[0].model_path:
+                try:
+                    if hera_workflow_class == CronWorkflow and attr == "suspend":
+                        # Special case for CronWorkflow which has `cron_suspend` and `suspend`,
+                        # which should go to the workflow_spec (but is also a valid attribute of
+                        # CronWorkflow and exists in the model at the same model_path)
+                        raise AttributeError()
+
+                    value = _get_model_attr(model_workflow, model_path)
+                except AttributeError:
+                    if hera_workflow_class == CronWorkflow:
+                        model_path = [model_path[0], "workflow_spec"] + model_path[1:]
+                        try:
+                            value = _get_model_attr(model_workflow, model_path)
+                        except AttributeError:
+                            continue
+                    else:
+                        continue
+
+                if value is None:
+                    continue
+
+                if attr == "templates":
+                    for template in value:
+                        t_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(
+                            template, get_args(unwrap_annotation(annotation))[0]
+                        )
+                        file_builder.hera_imports.extend(sub_hera_imports)
+                        file_builder.model_imports.extend(sub_model_imports)
+                        file_builder.context_def.append("    " + t_repr)
+                else:
+                    val_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(
+                        value, unwrap_annotation(annotation)
+                    )
+                    file_builder.hera_imports.extend(sub_hera_imports)
+                    file_builder.model_imports.extend(sub_model_imports)
+                    file_builder.class_def.append(f"{attr}={val_repr},")
+
+                    if attr == "workflow_template_ref":
+                        file_builder.context_def.append("    pass")
+    return file_builder
+
+
 def workflow_to_python(model: ModelWorkflow) -> str:
     model_workflow_class = model.__class__.__name__
     if model_workflow_class == "Workflow":
@@ -337,41 +404,16 @@ def workflow_to_python(model: ModelWorkflow) -> str:
     else:
         raise ValueError("Unrecognised model workflow class")
 
-    hera_imports = [hera_workflow_class.__name__]
-    model_imports = []
-    class_def = [f"with {hera_workflow_class.__name__}("]
-    context_def = []
+    file_builder = FileBuilder(
+        hera_imports=[hera_workflow_class.__name__],
+        class_def=[f"with {hera_workflow_class.__name__}("],
+    )
+    file_builder = build_file(file_builder, hera_workflow_class, model)
 
-    for attr, annotation in hera_workflow_class._get_all_annotations().items():
-        if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
-            if len(mappers) != 1:
-                raise ValueError("Expected only one model mapper")
-            if mappers[0].model_path:
-                value = _get_model_attr(model, mappers[0].model_path)
-                if value is not None:
-                    if attr == "templates":
-                        for template in value:
-                            t_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(
-                                template, get_args(unwrap_annotation(annotation))[0]
-                            )
-                            hera_imports.extend(sub_hera_imports)
-                            model_imports.extend(sub_model_imports)
-                            context_def.append("    " + t_repr)
-                    else:
-                        val_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(
-                            value, unwrap_annotation(annotation)
-                        )
-                        hera_imports.extend(sub_hera_imports)
-                        model_imports.extend(sub_model_imports)
-                        class_def.append(f"{attr}={val_repr},")
+    imports = list(map(lambda x: f"from hera.workflows import {x}", set(file_builder.hera_imports)))
+    imports.extend(map(lambda x: f"from hera.workflows.models import {x}", set(file_builder.model_imports)))
 
-                        if attr == "workflow_template_ref":
-                            context_def.append("    pass")
-
-    imports = list(map(lambda x: f"from hera.workflows import {x}", set(hera_imports)))
-    imports.extend(map(lambda x: f"from hera.workflows.models import {x}", set(model_imports)))
-
-    return "\n".join(imports + class_def + [") as w:"] + context_def)
+    return "\n".join(imports + file_builder.class_def + [") as w:"] + file_builder.context_def)
 
 
 def join_workflows(workflows: Iterable[str]) -> str:

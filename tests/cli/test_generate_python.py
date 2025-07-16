@@ -8,21 +8,33 @@ from cappa.testing import CommandRunner
 
 from hera._cli.base import Hera
 from hera._cli.generate.hera import python_obj_to_repr
+from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
+from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import Metadata
 from hera.workflows.workflow import Workflow
+from hera.workflows.workflow_template import WorkflowTemplate
 from tests.test_remaining_examples import UPSTREAM_EXAMPLE_XFAIL_FILES, UPSTREAM_EXAMPLES_FOLDER
 
 runner = CommandRunner(Hera, base_args=["generate", "python"])
-SKIP_FILES = UPSTREAM_EXAMPLE_XFAIL_FILES + [
-    "testvolume.upstream.yaml", # not a workflow
-    "dag-disable-failFast.upstream.yaml", # fail fast is duplicated by the Argo spec, but otherwise works
-    "steps-inline-workflow.upstream.yaml", # inline unsupported
-    "dag-inline-workflow.upstream.yaml", # inline unsupported
-    "configmaps__simple-parameters-configmap.upstream.yaml", # not a workflow
-    "pod-metadata.upstream.yaml", # TODO: metadata (annotations/labels)
-    "pod-gc-strategy-with-label-selector.upstream.yaml", # TODO: metadata (annotations/labels)
-    "workflow-event-binding__github-path-filter-workfloweventbinding.upstream.yaml", # not a workflow
-]
+SKIP_FILES = (
+    UPSTREAM_EXAMPLE_XFAIL_FILES
+    + [
+        "testvolume.upstream.yaml",  # not a workflow
+        "configmaps__simple-parameters-configmap.upstream.yaml",  # not a workflow
+        "workflow-event-binding__github-path-filter-workfloweventbinding.upstream.yaml",  # not a workflow
+        "workflow-event-binding__event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
+        "workflow-count-resourcequota.upstream.yaml",  # not a workflow
+        "steps-inline-workflow.upstream.yaml",  # inline unsupported
+        "dag-inline-workflow.upstream.yaml",  # inline unsupported
+        "dag-inline-cronworkflow.upstream.yaml",  # inline unsupported
+        "dag-inline-workflowtemplate.upstream.yaml",  # inline unsupported
+        "dag-inline-clusterworkflowtemplate.upstream.yaml",  # inline unsupported
+        "data-transformations.upstream.yaml",  # data template transformation field unsupported
+        "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
+        "pod-metadata.upstream.yaml",  # TODO: metadata (annotations/labels)
+        "pod-gc-strategy-with-label-selector.upstream.yaml",  # TODO: metadata (annotations/labels)
+    ]
+)
 
 
 @pytest.mark.parametrize(
@@ -49,11 +61,18 @@ def test_yaml_converter(file_name: str, tmp_path: Path):
     runner.invoke(str(yaml_file), "--to", str(output_path))
 
     workflow_module = SourceFileLoader("workflow_output", str(output_path)).load_module()
-
     assert hasattr(workflow_module, "w") and isinstance(workflow_module.w, Workflow)
     workflow = workflow_module.w
 
-    workflow_from_yaml = cast(Workflow, Workflow.from_file(yaml_file))
+    if isinstance(workflow, ClusterWorkflowTemplate):
+        workflow_from_yaml = cast(ClusterWorkflowTemplate, ClusterWorkflowTemplate.from_file(yaml_file))
+    elif isinstance(workflow, WorkflowTemplate):
+        workflow_from_yaml = cast(WorkflowTemplate, WorkflowTemplate.from_file(yaml_file))
+    elif isinstance(workflow, CronWorkflow):
+        workflow_from_yaml = cast(CronWorkflow, CronWorkflow.from_file(yaml_file))
+    else:
+        workflow_from_yaml = cast(Workflow, Workflow.from_file(yaml_file))
+
     assert workflow.to_dict() == workflow_from_yaml.to_dict()
 
 

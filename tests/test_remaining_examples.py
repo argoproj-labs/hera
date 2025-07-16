@@ -113,13 +113,13 @@ def test_upstream_examples_roundtrip(file_name):
         print(f"UNKNOWN KIND: {kind}")
         return
 
-    if kind == "Workflow":
-        kind_class = Workflow
-    elif kind == "WorkflowTemplate":
+    kind_class = Workflow
+
+    if kind == "WorkflowTemplate":
         kind_class = WorkflowTemplate
     elif kind == "ClusterWorkflowTemplate":
         kind_class = ClusterWorkflowTemplate
     elif kind == "CronWorkflow":
         kind_class = CronWorkflow
 
-    assert kind_class.from_dict(spec).to_dict() == spec
+    assert kind_class and kind_class.from_dict(spec).to_dict() == spec
