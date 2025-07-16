@@ -1,6 +1,7 @@
 import os
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
+from types import ModuleType
 from typing import cast
 
 import pytest
@@ -58,7 +59,9 @@ def test_yaml_converter(file_name: str, tmp_path: Path):
     output_path = tmp_path / "workflow_output.py"
     runner.invoke(str(yaml_file), "--to", str(output_path))
 
-    workflow_module = SourceFileLoader("workflow_output", str(output_path)).load_module()
+    loader = SourceFileLoader("workflow_output", str(output_path))
+    workflow_module = ModuleType(loader.name)
+    loader.exec_module(workflow_module)
     assert hasattr(workflow_module, "w") and isinstance(workflow_module.w, Workflow)
     workflow = workflow_module.w
 
