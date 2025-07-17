@@ -1,19 +1,20 @@
 import os
 import sys
-from collections import ChainMap
 from dataclasses import (
     dataclass,
     field as dc_field,
 )
 from pathlib import Path
-from typing import Any, Generator, Iterable, List, Optional, Tuple, Type, Union, cast, get_args
+from typing import Any, Generator, Iterable, List, Optional, Tuple, Type, Union, cast
 
 import yaml
 
 from hera._cli.base import GeneratePython
 from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths
 from hera.shared._pydantic import BaseModel
-from hera.shared._type_util import get_annotated_metadata, is_optionally_subtype, unwrap_annotation
+from hera.shared._type_util import (
+    get_annotated_metadata,
+)
 from hera.workflows._meta_mixins import ModelMapperMixin, _get_model_attr
 from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.container import Container
@@ -38,10 +39,10 @@ from hera.workflows.task import Task
 from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 
-try:
-    from inspect import get_annotations  # type: ignore
-except ImportError:
-    from hera.shared._inspect import get_annotations  # type: ignore
+if sys.version_info >= (3, 10):
+    from types import NoneType
+else:
+    NoneType = type(None)
 
 DEFAULT_EXTENSION = ".py"
 
@@ -121,19 +122,14 @@ def load_yaml_workflows(path: Path) -> Generator[ModelWorkflow, None, None]:
             raise ValueError(f"Invalid YAML workflow: {yaml_workflow}")
 
 
-def is_basic_type(annotation: type) -> bool:
-    """Check if the annotation is a basic JSON type."""
-    return is_optionally_subtype(annotation, (str, int, float, bool))
-
-
-def python_obj_to_repr(value: Any, annotation: Optional[type] = None) -> Tuple[str, List[str], List[str]]:
+def python_obj_to_repr(value: Any) -> Tuple[str, List[str], List[str]]:
     """Convert a JSON value to a Python string representation, without "None" values.
 
     This function also collects the assumed Hera/model imports and returns them.
     """
-    if annotation is not None and is_basic_type(annotation) or isinstance(value, (str, int, float, bool)):
+    if isinstance(value, (str, int, float, bool)):
         return repr(value), [], []
-    elif annotation is not None and is_optionally_subtype(annotation, list) or isinstance(value, list):
+    elif isinstance(value, list):
         python_repr = []
         model_imports = []
         hera_imports = []
@@ -143,7 +139,7 @@ def python_obj_to_repr(value: Any, annotation: Optional[type] = None) -> Tuple[s
             hera_imports.extend(sub_hera_imports)
             model_imports.extend(sub_imports)
         return "[" + ", ".join(python_repr) + "]", hera_imports, model_imports
-    elif annotation is not None and is_optionally_subtype(annotation, dict) or isinstance(value, dict):
+    elif isinstance(value, dict):
         python_repr = []
         model_imports = []
         hera_imports = []
@@ -153,10 +149,10 @@ def python_obj_to_repr(value: Any, annotation: Optional[type] = None) -> Tuple[s
             hera_imports.extend(sub_hera_imports)
             model_imports.extend(sub_imports)
         return "{" + ", ".join(python_repr) + "}", hera_imports, model_imports
-    elif annotation is not None and is_optionally_subtype(annotation, BaseModel) or isinstance(value, BaseModel):
+    elif isinstance(value, BaseModel):
         return model_to_python(value)
     else:
-        raise ValueError(f"Unsupported type: {annotation} for value {value}")
+        raise ValueError(f"Unsupported type: {type(value)} for value {value}")
 
 
 def convert_to_hera_template(
@@ -339,11 +335,11 @@ def model_to_python(model: BaseModel) -> Tuple[str, List[str], List[str]]:
     hera_imports = []
     model_imports = [model_name]
     class_def = [f"{model_name}("]
-    for attr in ChainMap(*(get_annotations(c) for c in model.__class__.__mro__)):
+    for attr in model.__fields__:
         if attr == "__slots__" or getattr(model, attr) is None:
             continue
         value = getattr(model, attr)
-        assign_value, sub_hera_imports, sub_model_imports = python_obj_to_repr(value, type(value))
+        assign_value, sub_hera_imports, sub_model_imports = python_obj_to_repr(value)
         hera_imports.extend(sub_hera_imports)
         model_imports.extend(sub_model_imports)
 
@@ -385,16 +381,12 @@ def build_file(
 
                 if attr == "templates":
                     for template in value:
-                        t_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(
-                            template, get_args(unwrap_annotation(annotation))[0]
-                        )
+                        t_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(template)
                         file_builder.hera_imports.extend(sub_hera_imports)
                         file_builder.model_imports.extend(sub_model_imports)
                         file_builder.context_def.append("    " + t_repr)
                 else:
-                    val_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(
-                        value, unwrap_annotation(annotation)
-                    )
+                    val_repr, sub_hera_imports, sub_model_imports = python_obj_to_repr(value)
                     file_builder.hera_imports.extend(sub_hera_imports)
                     file_builder.model_imports.extend(sub_model_imports)
                     file_builder.class_def.append(f"{attr}={val_repr},")

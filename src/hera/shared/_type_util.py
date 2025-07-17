@@ -19,11 +19,13 @@ from typing import (
 )
 
 if sys.version_info >= (3, 10):
-    from types import UnionType
+    from types import NoneType, UnionType
 else:
     UnionType = Union
+    NoneType = type(None)
 
 if TYPE_CHECKING:
+    # Avoid circular import
     from hera.workflows.artifact import Artifact
     from hera.workflows.parameter import Parameter
 
@@ -132,22 +134,6 @@ def get_unsubscripted_type(t: Any) -> Any:
     if origin_type := get_origin(t):
         return origin_type
     return t
-
-
-def is_optionally_subtype(annotation: Any, type_: Union[type, Tuple[type, ...]]) -> bool:
-    """Return True if annotation is a subtype of type_ or None.
-
-    This is useful for checking if an annotation is an Optional[type].
-    """
-    unwrapped_type = unwrap_annotation(annotation)
-    origin_type = get_unsubscripted_type(unwrapped_type)
-    if origin_type is Union or origin_type is UnionType:
-        if len(get_args(unwrapped_type)) == 2 and type(None) in get_args(unwrapped_type):
-            return any(origin_type_issubtype(arg, type_) for arg in get_args(unwrapped_type))
-    else:
-        return isinstance(origin_type, type) and issubclass(origin_type, type_)
-
-    return False
 
 
 def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]]) -> bool:
