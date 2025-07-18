@@ -2,6 +2,7 @@
 
 import sys
 from typing import (
+    TYPE_CHECKING,
     Annotated,
     Any,
     Iterable,
@@ -18,12 +19,15 @@ from typing import (
 )
 
 if sys.version_info >= (3, 10):
-    from types import UnionType
+    from types import NoneType, UnionType
 else:
     UnionType = Union
+    NoneType = type(None)
 
-from hera.workflows.artifact import Artifact
-from hera.workflows.parameter import Parameter
+if TYPE_CHECKING:
+    # Avoid circular import
+    from hera.workflows.artifact import Artifact
+    from hera.workflows.parameter import Parameter
 
 
 def is_annotated(annotation: Any):
@@ -70,11 +74,14 @@ def get_annotated_metadata(annotation, type_):
     return found
 
 
-def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Parameter]]:
+def get_workflow_annotation(annotation: Any) -> "Optional[Union[Artifact, Parameter]]":
     """If given annotation has Artifact or Parameter metadata, return it.
 
     Note that this function will raise the error when multiple Artifact or Parameter metadata are given.
     """
+    from hera.workflows.artifact import Artifact
+    from hera.workflows.parameter import Parameter
+
     metadata = get_annotated_metadata(annotation, (Artifact, Parameter))
     if not metadata:
         return None
@@ -83,7 +90,7 @@ def get_workflow_annotation(annotation: Any) -> Optional[Union[Artifact, Paramet
     return metadata[0]
 
 
-def set_enum_based_on_type(parameter: Parameter, annotation: Any) -> None:
+def set_enum_based_on_type(parameter: "Parameter", annotation: Any) -> None:
     """Sets the enum field of a Parameter based on its type annotation.
 
     Currently, only supports Literals.
@@ -95,7 +102,7 @@ def set_enum_based_on_type(parameter: Parameter, annotation: Any) -> None:
         parameter.enum = list(get_args(type_))
 
 
-def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Parameter, Artifact]:
+def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Parameter, Artifact]":
     """Constructs a Parameter or Artifact object based on annotations.
 
     If a field has a Parameter or Artifact annotation, a copy will be returned, with missing
@@ -104,6 +111,8 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> Union[Par
     For a function parameter, python_name should be the parameter name.
     For a Pydantic Input or Output class, python_name should be the field name.
     """
+    from hera.workflows.parameter import Parameter
+
     if workflow_annotation := get_workflow_annotation(annotation):
         # Copy so as to not modify the fields themselves
         io = workflow_annotation.copy()

@@ -19,7 +19,7 @@ install-3.9: ## Install and use Python 3.9 for generating test data
 .PHONY: ci
 ci: ## Run all the CI checks
 ci: CI=1
-ci: lint test test-type-hints check-codegen
+ci: lint test test-type-hints test-cli check-codegen
 
 .PHONY: codegen
 codegen: ## Generate all models, services, examples, and init files
@@ -44,11 +44,15 @@ lint:  ## Run a `lint` process on Hera and report problems
 
 .PHONY: test
 test:  ## Run tests for Hera
-	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster" -k "not typehints"
+	@poetry run python -m pytest --cov-report=term-missing -m "not on_cluster" -k "not typehints" -k "not cli"
 
 .PHONY: test-type-hints
 test-type-hints:  ## Run type hint tests for Hera
 	@poetry run python -m pytest --cov-append -k "typehints"
+
+.PHONY: test-cli
+test-cli:  ## Run cli tests for Hera
+	@poetry run python -m pytest --cov-append -k "cli"
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows

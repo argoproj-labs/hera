@@ -449,7 +449,9 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     name: Optional[str] = None
     node_selector: Optional[Dict[str, str]] = None
     parallelism: Optional[int] = None
-    http: Optional[HTTP] = None
+    http: Optional[HTTP] = (
+        None  # TODO: Deprecate and remove. This field is unused and `http` has its own Hera template class in http_template.py
+    )
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
     priority: Optional[int] = None
