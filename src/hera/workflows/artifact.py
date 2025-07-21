@@ -49,7 +49,7 @@ class ArtifactLoader(Enum):
 class Artifact(BaseModel):
     """Base artifact representation."""
 
-    name: Optional[str]
+    name: Optional[str] = None
     """name of the artifact"""
 
     archive: Optional[Union[_ModelArchiveStrategy, ArchiveStrategy]] = None
