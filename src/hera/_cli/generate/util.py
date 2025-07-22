@@ -87,7 +87,7 @@ def convert_code(
     join_delimiter: str,
 ) -> Dict[str, str]:
     """Convert inputs list of workflows into a dict of output paths to their output text."""
-    path_to_output = {}
+    path_to_output: dict[str, str] = {}
     for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
         outputs = []
         for workflow in loader_func(path):
