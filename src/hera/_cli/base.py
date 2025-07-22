@@ -49,7 +49,18 @@ class GenerateYaml:
             ),
         ),
     ] = None
-    recursive: Annotated[bool, Arg(help="Enables recursive traversal of an input folder")] = False
+    recursive: Annotated[
+        bool,
+        Arg(
+            help="Enables recursive traversal of an input folder. Output folder structure will match input folder structure unless '--flatten' is specified."
+        ),
+    ] = False
+    flatten: Annotated[
+        bool,
+        Arg(
+            help="If 'to' is a folder and you have specified '--recursive', then use 'flatten' to output to YAML files without matching the input directory structure. No effect if 'to' is a file (all Workflows will be output in one file)."
+        ),
+    ] = False
     include: Annotated[
         List[str],
         Arg(

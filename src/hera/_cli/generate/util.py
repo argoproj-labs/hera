@@ -16,8 +16,7 @@ def expand_paths(source: Path, suffixes: Set[str], recursive: bool = False) -> G
         suffixes: The set of suffixes to match against the files in the `source` path.
         recursive: If True, recursively traverse the `source` path.
     """
-    source_is_dir = source.is_dir()
-    if not source_is_dir:
+    if not source.is_dir():
         yield source
         return
 
@@ -51,29 +50,28 @@ def filter_paths(
 
 
 def write_output(
-    to: Optional[Path],
-    path_to_output: Dict[str, str],
+    output_path: Optional[Path],
+    input_paths_to_output: Dict[str, str],
     extensions: Set[str],
     default_extension: str,
-    join_delimiter: str = "\n",
-):
-    # When `to` write file(s) to disk, otherwise output everything to stdout.
-    if to:
-        dest_is_file = to.suffix.lower() in extensions
-
-        if dest_is_file:
-            to.parent.mkdir(exist_ok=True)
-
-            output = join_delimiter.join(o for o in path_to_output.values())
-            to.write_text(output)
-
-        else:
-            to.mkdir(exist_ok=True)
-
-            for dest_path, content in path_to_output.items():
-                dest = (to / dest_path).with_suffix(default_extension)
-                dest.write_text(content)
-
-    else:
-        output = join_delimiter.join(o for o in path_to_output.values())
+    join_delimiter: str,
+) -> None:
+    if not output_path:
+        output = join_delimiter.join(input_paths_to_output.values())
         sys.stdout.write(output)
+        return
+
+    dest_is_file = output_path.suffix.lower() in extensions or output_path.exists() and output_path.is_file()
+
+    if dest_is_file:
+        output_path.parent.mkdir(exist_ok=True)
+
+        output = join_delimiter.join(input_paths_to_output.values())
+        output_path.write_text(output)
+    else:
+        output_path.mkdir(exist_ok=True)
+
+        for dest_path, content in input_paths_to_output.items():
+            dest = (output_path / dest_path).with_suffix(default_extension)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(content)

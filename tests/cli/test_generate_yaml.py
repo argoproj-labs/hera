@@ -23,51 +23,43 @@ def patch_open():
     return patch("io.open", new=mock_open())
 
 
-single_workflow_output = dedent(
-    """\
-        apiVersion: argoproj.io/v1alpha1
-        kind: Workflow
-        metadata:
-          name: single
-        spec: {}
-        """
-)
+single_workflow_output = dedent("""\
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      name: single
+    spec: {}
+    """)
 
-workflow_template_output = dedent(
-    """\
-            apiVersion: argoproj.io/v1alpha1
-            kind: WorkflowTemplate
-            metadata:
-              name: workflow-template
-            spec: {}
-            """
-)
+workflow_template_output = dedent("""\
+    apiVersion: argoproj.io/v1alpha1
+    kind: WorkflowTemplate
+    metadata:
+      name: workflow-template
+    spec: {}
+    """)
 
-cluster_workflow_template_output = dedent(
-    """\
-            apiVersion: argoproj.io/v1alpha1
-            kind: ClusterWorkflowTemplate
-            metadata:
-              name: cluster-workflow-template
-            spec: {}
-            """
-)
+cluster_workflow_template_output = dedent("""\
+    apiVersion: argoproj.io/v1alpha1
+    kind: ClusterWorkflowTemplate
+    metadata:
+      name: cluster-workflow-template
+    spec: {}
+    """)
 
-multiple_workflow_output = dedent(
-    """\
-        apiVersion: argoproj.io/v1alpha1
-        kind: Workflow
-        metadata:
-          name: one
-        spec: {}
-        ---
-        apiVersion: argoproj.io/v1alpha1
-        kind: Workflow
-        metadata:
-          name: two
-        spec: {}
-        """
-)
+multiple_workflow_output = dedent("""\
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      name: one
+    spec: {}
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      name: two
+    spec: {}
+    """)
 
 whole_folder_output = join_output(
     cluster_workflow_template_output,
@@ -167,10 +159,15 @@ def test_source_file_to_output_folder(
 
 
 @pytest.mark.cli
+@pytest.mark.parametrize("recursive", [True, False])  # Should be the same in this case
 def test_source_folder_to_output_folder(
+    recursive: bool,
     tmp_path: Path,
 ):
-    runner.invoke("tests/cli/examples", "--to", str(tmp_path))
+    if recursive:
+        runner.invoke("tests/cli/examples", "--recursive", "--to", str(tmp_path))
+    else:
+        runner.invoke("tests/cli/examples", "--to", str(tmp_path))
 
     assert (tmp_path / "cluster_workflow_template.yaml").exists()
     assert (tmp_path / "cluster_workflow_template.yaml").read_text() == cluster_workflow_template_output
@@ -180,6 +177,64 @@ def test_source_folder_to_output_folder(
     assert (tmp_path / "single_workflow.yaml").read_text() == single_workflow_output
     assert (tmp_path / "workflow_template.yaml").exists()
     assert (tmp_path / "workflow_template.yaml").read_text() == workflow_template_output
+
+
+@pytest.mark.cli
+def test_recursive_source_folder_to_output_folder_preserves_structure(
+    tmp_path: Path,
+):
+    input_python = Path("tests/cli/examples/single_workflow.py").read_text()
+    input_folder = tmp_path / "inputs"
+    folder_1 = input_folder / "folder_1"
+    folder_2 = input_folder / "folder_2"
+    folder_3 = folder_2 / "folder_3"
+
+    folder_1.mkdir(parents=True)
+    folder_2.mkdir(parents=True)
+    folder_3.mkdir(parents=True)
+
+    for folder in [folder_1, folder_2, folder_3]:
+        with (folder / "single_workflow.py").open("w") as file:
+            file.write(input_python)
+
+    output_folder = tmp_path / "outputs"
+    runner.invoke(str(input_folder), "--recursive", "--to", str(output_folder))
+
+    assert (output_folder / "folder_1/single_workflow.yaml").exists()
+    assert (output_folder / "folder_1/single_workflow.yaml").read_text() == single_workflow_output
+    assert (output_folder / "folder_2/single_workflow.yaml").exists()
+    assert (output_folder / "folder_2/single_workflow.yaml").read_text() == single_workflow_output
+    assert (output_folder / "folder_2/folder_3/single_workflow.yaml").exists()
+    assert (output_folder / "folder_2/folder_3/single_workflow.yaml").read_text() == single_workflow_output
+
+
+@pytest.mark.cli
+def test_recursive_flatten_source_folder_to_output_folder_flattens_structure(
+    tmp_path: Path,
+):
+    input_python = Path("tests/cli/examples/single_workflow.py").read_text()
+    input_folder = tmp_path / "inputs"
+    folder_1 = input_folder / "folder_1"
+    folder_2 = input_folder / "folder_2"
+    folder_3 = folder_2 / "folder_3"
+
+    folder_1.mkdir(parents=True)
+    folder_2.mkdir(parents=True)
+    folder_3.mkdir(parents=True)
+
+    for i, folder in enumerate([folder_1, folder_2, folder_3], start=1):
+        with (folder / f"single_workflow_{i}.py").open("w") as file:
+            file.write(input_python)
+
+    output_folder = tmp_path / "outputs"
+    runner.invoke(str(input_folder), "--recursive", "--flatten", "--to", str(output_folder))
+
+    assert (output_folder / "single_workflow_1.yaml").exists()
+    assert (output_folder / "single_workflow_1.yaml").read_text() == single_workflow_output
+    assert (output_folder / "single_workflow_2.yaml").exists()
+    assert (output_folder / "single_workflow_2.yaml").read_text() == single_workflow_output
+    assert (output_folder / "single_workflow_3.yaml").exists()
+    assert (output_folder / "single_workflow_3.yaml").read_text() == single_workflow_output
 
 
 @pytest.mark.cli

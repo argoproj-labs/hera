@@ -79,13 +79,14 @@ def generate_python(options: GeneratePython):
         if not python_outputs:
             continue
 
-        path_to_output[path.name] = "\n".join(python_outputs)
+        path_to_output[path.relative_to(options.from_)] = "\n".join(python_outputs)
 
     write_output(
         options.to,
         path_to_output,
         {DEFAULT_EXTENSION},
         DEFAULT_EXTENSION,
+        "\n",
     )
 
 

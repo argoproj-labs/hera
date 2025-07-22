@@ -31,7 +31,13 @@ def generate_yaml(options: GenerateYaml):
         if not yaml_outputs:
             continue
 
-        path_to_output[path.name] = "---\n".join(yaml_outputs)
+        if options.recursive:
+            if options.flatten:
+                path_to_output[path.name] = "---\n".join(yaml_outputs)
+            else:
+                path_to_output[path.relative_to(options.from_)] = "---\n".join(yaml_outputs)
+        else:
+            path_to_output[path.name] = "---\n".join(yaml_outputs)
 
     write_output(
         options.to,
