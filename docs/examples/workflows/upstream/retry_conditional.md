@@ -55,7 +55,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             ),
             name="retry-script",
             retry_strategy=RetryStrategy(
-                expression="asInt(lastRetry.exitCode) > 1 && {{inputs.parameters.safe-to-retry}} == true",
+                expression="""\
+    asInt(lastRetry.exitCode) > 1 && \
+    lastRetry.status != "Error" && \
+    asInt(lastRetry.duration) < 120 && \
+    ({{inputs.parameters.safe-to-retry}} == true || lastRetry.message matches 'imminent node shutdown|pod deleted')""",
                 limit=IntOrString(
                     __root__="10",
                 ),
@@ -98,8 +102,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           parameters:
           - name: safe-to-retry
         retryStrategy:
-          expression: asInt(lastRetry.exitCode) > 1 && {{inputs.parameters.safe-to-retry}}
-            == true
+          expression: asInt(lastRetry.exitCode) > 1 && lastRetry.status != "Error" &&
+            asInt(lastRetry.duration) < 120 && ({{inputs.parameters.safe-to-retry}} ==
+            true || lastRetry.message matches 'imminent node shutdown|pod deleted')
           limit: '10'
         script:
           image: python:alpine3.6

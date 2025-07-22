@@ -42,7 +42,11 @@ with Workflow(
         ),
         name="retry-script",
         retry_strategy=RetryStrategy(
-            expression="asInt(lastRetry.exitCode) > 1 && {{inputs.parameters.safe-to-retry}} == true",
+            expression="""\
+asInt(lastRetry.exitCode) > 1 && \
+lastRetry.status != "Error" && \
+asInt(lastRetry.duration) < 120 && \
+({{inputs.parameters.safe-to-retry}} == true || lastRetry.message matches 'imminent node shutdown|pod deleted')""",
             limit=IntOrString(
                 __root__="10",
             ),

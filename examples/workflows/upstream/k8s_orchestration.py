@@ -74,7 +74,7 @@ with Workflow(
             " for i in `kubectl get pods -l controller-uid={{inputs.parameters.job-uid}} -o name`; do kubectl logs $i; done "
         ],
         command=["sh", "-c"],
-        image="argoproj/argoexec:latest",
+        image="quay.io/argoproj/argoexec:latest",
     )
     Resource(
         inputs=Inputs(

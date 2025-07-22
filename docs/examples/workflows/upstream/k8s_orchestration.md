@@ -87,7 +87,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 " for i in `kubectl get pods -l controller-uid={{inputs.parameters.job-uid}} -o name`; do kubectl logs $i; done "
             ],
             command=["sh", "-c"],
-            image="argoproj/argoexec:latest",
+            image="quay.io/argoproj/argoexec:latest",
         )
         Resource(
             inputs=Inputs(
@@ -161,7 +161,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           successCondition: status.succeeded > 9
       - name: print-generated-numbers
         container:
-          image: argoproj/argoexec:latest
+          image: quay.io/argoproj/argoexec:latest
           args:
           - ' for i in `kubectl get pods -l controller-uid={{inputs.parameters.job-uid}}
             -o name`; do kubectl logs $i; done '

@@ -27,8 +27,9 @@ spec:
       parameters:
       - name: safe-to-retry
     retryStrategy:
-      expression: asInt(lastRetry.exitCode) > 1 && {{inputs.parameters.safe-to-retry}}
-        == true
+      expression: asInt(lastRetry.exitCode) > 1 && lastRetry.status != "Error" &&
+        asInt(lastRetry.duration) < 120 && ({{inputs.parameters.safe-to-retry}} ==
+        true || lastRetry.message matches 'imminent node shutdown|pod deleted')
       limit: '10'
     script:
       image: python:alpine3.6
