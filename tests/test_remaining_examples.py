@@ -91,7 +91,7 @@ def test_for_missing_examples():
             f,
             marks=(
                 pytest.mark.xfail(
-                    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types."
+                    reason="Multiple workflows in one yaml file not yet supported by the test harness.\nYAML round trip issues for certain types."
                 )
                 if f in UPSTREAM_EXAMPLE_XFAIL_FILES
                 else ()
