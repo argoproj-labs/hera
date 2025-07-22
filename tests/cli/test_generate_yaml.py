@@ -238,6 +238,29 @@ def test_recursive_flatten_source_folder_to_output_folder_flattens_structure(
 
 
 @pytest.mark.cli
+def test_recursive_flatten_source_folder_to_output_folder_with_name_clash_appends_to_file(
+    tmp_path: Path,
+):
+    input_yaml = Path("tests/cli/examples/single_workflow.py").read_text()
+    input_folder = tmp_path / "inputs"
+    folder_1 = input_folder / "folder_1"
+    folder_2 = input_folder / "folder_2"
+
+    folder_1.mkdir(parents=True)
+    folder_2.mkdir(parents=True)
+
+    for i, folder in enumerate([folder_1, folder_2], start=1):
+        with (folder / "single_workflow.py").open("w") as file:
+            file.write(input_yaml)
+
+    output_folder = tmp_path / "outputs"
+    runner.invoke(str(input_folder), "--recursive", "--flatten", "--to", str(output_folder))
+
+    assert (output_folder / "single_workflow.yaml").exists()
+    assert (output_folder / "single_workflow.yaml").read_text() == "---\n".join([single_workflow_output] * 2)
+
+
+@pytest.mark.cli
 def test_relative_imports(capsys):
     runner.invoke("tests/cli/examples/relative_imports")
 

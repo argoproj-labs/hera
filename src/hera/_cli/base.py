@@ -42,7 +42,7 @@ class GenerateYaml:
         Arg(
             long=True,
             help=(
-                "Optional file or folder for the produced YAML. No value will output to stdout. "
+                "Optional file or folder for the produced YAML. Will output to stdout if not provided. "
                 "If the input 'from' is a file, 'to' is assumed to be a file. If 'from' is a folder, "
                 "'to' is assumed to be a folder, and the folder structure of 'from' will be preserved "
                 "in the 'to' output (when using '--recursive')."
@@ -109,7 +109,7 @@ class GeneratePython:
         Arg(
             long=True,
             help=(
-                "Optional file or folder for the produced YAML. No value will output to stdout. "
+                "Optional file or folder for the produced YAML. Will output to stdout if not provided. "
                 "If the input 'from' is a file, 'to' is assumed to be a file. If 'from' is a folder, "
                 "'to' is assumed to be a folder, and the folder structure of 'from' will be preserved "
                 "in the 'to' output (when using '--recursive')."

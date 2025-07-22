@@ -81,9 +81,9 @@ def write_output(
 
 def convert_code(
     paths: List[Path],
+    options: Union[GenerateYaml, GeneratePython],
     loader_func: Callable[[Path], Any],
     dumper_func: Callable[[Any], str],
-    options: Union[GenerateYaml, GeneratePython],
     join_delimiter: str,
 ) -> Dict[str, str]:
     """Convert inputs list of workflows into a dict of output paths to their output text."""
@@ -98,7 +98,10 @@ def convert_code(
 
         if options.recursive:
             if options.flatten:
-                path_to_output[path.name] = join_delimiter.join(outputs)
+                if path.name in path_to_output:
+                    path_to_output[path.name] = join_delimiter.join([path_to_output[path.name]] + outputs)
+                else:
+                    path_to_output[path.name] = join_delimiter.join(outputs)
             else:
                 path_to_output[str(path.relative_to(options.from_))] = join_delimiter.join(outputs)
         else:

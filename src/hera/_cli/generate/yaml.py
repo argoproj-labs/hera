@@ -21,14 +21,20 @@ def generate_yaml(options: GenerateYaml):
     """
     paths = sorted(expand_paths(options.from_, {".py"}, recursive=options.recursive))
 
-    path_to_output = convert_code(paths, load_workflows_from_module, lambda w: w.to_yaml(), options, "---\n")
+    path_to_output = convert_code(
+        paths,
+        options,
+        loader_func=load_workflows_from_module,
+        dumper_func=lambda w: w.to_yaml(),
+        join_delimiter="---\n",
+    )
 
     write_output(
         options.to,
         path_to_output,
-        YAML_EXTENSIONS,
-        DEFAULT_EXTENSION,
-        "---\n",
+        extensions=YAML_EXTENSIONS,
+        default_extension=DEFAULT_EXTENSION,
+        join_delimiter="---\n",
     )
 
 

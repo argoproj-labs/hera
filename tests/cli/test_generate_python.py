@@ -20,10 +20,10 @@ from tests.test_remaining_examples import UPSTREAM_EXAMPLES_FOLDER
 runner = CommandRunner(Hera, base_args=["generate", "python"])
 
 SKIP_FILES = [
-    "cluster-workflow-template__clustertemplates.upstream.yaml",  # multiple workflows in one file
-    "cron-backfill.upstream.yaml",  # multiple workflows in one file
+    "cluster-workflow-template__clustertemplates.upstream.yaml",  # multiple workflows in one file, generates correctly
+    "cron-backfill.upstream.yaml",  # multiple workflows in one file, generates correctly
+    "workflow-template__templates.upstream.yaml",  # multiple workflows in one file, generates correctly
     "memoize-simple.upstream.yaml",  # memoize not working
-    "workflow-template__templates.upstream.yaml",  # multiple workflows in one file
     "workflow-event-binding__github-path-filter-workflowtemplate.upstream.yaml",  # value is a list (invalid?)
     "testvolume.upstream.yaml",  # not a workflow
     "configmaps__simple-parameters-configmap.upstream.yaml",  # not a workflow
@@ -46,7 +46,7 @@ SKIP_FILES = [
             f,
             marks=(
                 pytest.mark.xfail(
-                    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types.",
+                    reason="Multiple workflows in one yaml file not yet supported by the test harness.\nYAML round trip issues for certain types.",
                     strict=True,
                 )
                 if f in SKIP_FILES
@@ -343,3 +343,26 @@ def test_recursive_flatten_source_folder_to_output_folder_flattens_structure(
     assert (output_folder / "single_workflow_2.py").read_text() == single_workflow_output
     assert (output_folder / "single_workflow_3.py").exists()
     assert (output_folder / "single_workflow_3.py").read_text() == single_workflow_output
+
+
+@pytest.mark.cli
+def test_recursive_flatten_source_folder_to_output_folder_with_name_clash_appends_to_file(
+    tmp_path: Path,
+):
+    input_yaml = Path("tests/cli/examples/single_workflow.yaml").read_text()
+    input_folder = tmp_path / "inputs"
+    folder_1 = input_folder / "folder_1"
+    folder_2 = input_folder / "folder_2"
+
+    folder_1.mkdir(parents=True)
+    folder_2.mkdir(parents=True)
+
+    for i, folder in enumerate([folder_1, folder_2], start=1):
+        with (folder / "single_workflow.yaml").open("w") as file:
+            file.write(input_yaml)
+
+    output_folder = tmp_path / "outputs"
+    runner.invoke(str(input_folder), "--recursive", "--flatten", "--to", str(output_folder))
+
+    assert (output_folder / "single_workflow.py").exists()
+    assert (output_folder / "single_workflow.py").read_text() == "\n".join([single_workflow_output] * 2)

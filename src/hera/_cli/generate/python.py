@@ -71,18 +71,18 @@ def generate_python(options: GeneratePython):
 
     path_to_output = convert_code(
         paths,
-        load_yaml_workflows,
-        workflow_to_python,
         options,
-        "\n",
+        loader_func=load_yaml_workflows,
+        dumper_func=workflow_to_python,
+        join_delimiter="\n",
     )
 
     write_output(
         options.to,
         path_to_output,
-        {DEFAULT_EXTENSION},
-        DEFAULT_EXTENSION,
-        "\n",
+        extensions={DEFAULT_EXTENSION},
+        default_extension=DEFAULT_EXTENSION,
+        join_delimiter="\n",
     )
 
 
