@@ -99,7 +99,7 @@ class GeneratePython:
             help=(
                 "The path of a YAML file or folder from which the Python code is generated. "
                 "When a folder is provided, all YAML files in the folder containing eligible "
-                "Workflow specs will be used. If a given file has multiple definitions in it, " \
+                "Workflow specs will be used. If a given file has multiple definitions in it, "
                 "all the Python definitions will also be in a single file."
             ),
         ),
