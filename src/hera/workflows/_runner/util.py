@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional, cast
 
 if sys.version_info >= (3, 10):
     from types import NoneType
@@ -244,13 +244,7 @@ def _runner(entrypoint: str, template_inputs_list: List) -> Any:
 
         function = validate_call(config=ConfigDict(arbitrary_types_allowed=True))(function)
     else:
-        if TYPE_CHECKING:
-            from pydantic.v1 import validate_arguments
-        else:
-            if _PYDANTIC_VERSION == 1:
-                from pydantic import validate_arguments
-            else:
-                from pydantic.v1 import validate_arguments
+        from pydantic.v1 import validate_arguments
 
         function = validate_arguments(config=dict(smart_union=True, arbitrary_types_allowed=True))(function)
 
