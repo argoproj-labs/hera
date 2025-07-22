@@ -153,6 +153,7 @@ regenerate-upstream-test-data: install-3.9
 .PHONY: fetch-upstream-examples
 fetch-upstream-examples:  ## Fetch the upstream examples, add missing examples report to docs, report diffs
 fetch-upstream-examples: install-3.9
+	find examples -a -name "*.upstream.yaml" -type f -delete
 	HERA_REGENERATE=1 poetry run python -m pytest "tests/test_remaining_examples.py::test_for_missing_examples" --runxfail
 
 .PHONY: regenerate-test-data
