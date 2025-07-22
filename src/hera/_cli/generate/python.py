@@ -1,16 +1,15 @@
-import os
 import sys
 from dataclasses import (
     dataclass,
     field as dc_field,
 )
 from pathlib import Path
-from typing import Any, Generator, Iterable, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Generator, List, Optional, Tuple, Type, Union, cast
 
 import yaml
 
 from hera._cli.base import GeneratePython
-from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths
+from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths, write_output
 from hera.shared._pydantic import BaseModel
 from hera.shared._type_util import (
     get_annotated_metadata,
@@ -44,14 +43,14 @@ if sys.version_info >= (3, 10):
 else:
     NoneType = type(None)
 
-DEFAULT_EXTENSION = ".py"
-
 ModelWorkflow = Union[
     _ModelWorkflow,
     _ModelWorkflowTemplate,
     _ModelClusterWorkflowTemplate,
     _ModelCronWorkflow,
 ]
+
+DEFAULT_EXTENSION = ".py"
 
 
 @dataclass
@@ -62,16 +61,16 @@ class FileBuilder:
     context_def: list[str] = dc_field(default_factory=list)
 
 
-def generate_workflow(options: GeneratePython):
+def generate_python(options: GeneratePython):
     """Generate Python (Hera) Workflow definitions from YAML definitions.
 
-    If the provided path is a folder, generates python for all yaml files containing `Workflow`s
-    in that folder
+    If the provided path is a folder, generates Python for all YAML files containing Workflows
+    in that folder.
     """
     paths = sorted(expand_paths(options.from_, YAML_EXTENSIONS, recursive=options.recursive))
 
     # Generate a collection of source file paths and their resultant python.
-    path_to_output: list[tuple[str, str]] = []
+    path_to_output = {}
     for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
         python_outputs = []
         for workflow in load_yaml_workflows(path):
@@ -80,28 +79,14 @@ def generate_workflow(options: GeneratePython):
         if not python_outputs:
             continue
 
-        path_to_output.append((path.name, join_workflows(python_outputs)))
+        path_to_output[path.name] = "\n".join(python_outputs)
 
-    # When `to` write file(s) to disk, otherwise output everything to stdout.
-    if options.to:
-        dest_is_file = options.to.suffix.lower() == ".py"
-
-        if dest_is_file:
-            os.makedirs(options.to.parent, exist_ok=True)
-
-            output = join_workflows(o for _, o in path_to_output)
-            options.to.write_text(output)
-
-        else:
-            os.makedirs(options.to, exist_ok=True)
-
-            for dest_path, content in path_to_output:
-                dest = (options.to / dest_path).with_suffix(DEFAULT_EXTENSION)
-                dest.write_text(content)
-
-    else:
-        output = join_workflows(o for _, o in path_to_output)
-        sys.stdout.write(output)
+    write_output(
+        options.to,
+        path_to_output,
+        {DEFAULT_EXTENSION},
+        DEFAULT_EXTENSION,
+    )
 
 
 def load_yaml_workflows(path: Path) -> Generator[ModelWorkflow, None, None]:
@@ -419,8 +404,3 @@ def workflow_to_python(model: ModelWorkflow) -> str:
     imports.extend(map(lambda x: f"from hera.workflows.models import {x}", set(file_builder.model_imports)))
 
     return "\n".join(imports + file_builder.class_def + [") as w:"] + file_builder.context_def)
-
-
-def join_workflows(workflows: Iterable[str]) -> str:
-    """Join a collection of workflows into a single string."""
-    return "\n".join(workflows)

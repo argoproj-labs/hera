@@ -8,32 +8,33 @@ import pytest
 from cappa.testing import CommandRunner
 
 from hera._cli.base import Hera
-from hera._cli.generate.hera import python_obj_to_repr
+from hera._cli.generate.python import python_obj_to_repr
 from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import Metadata
 from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
-from tests.test_remaining_examples import UPSTREAM_EXAMPLE_XFAIL_FILES, UPSTREAM_EXAMPLES_FOLDER
+from tests.test_remaining_examples import UPSTREAM_EXAMPLES_FOLDER
 
 runner = CommandRunner(Hera, base_args=["generate", "python"])
-SKIP_FILES = (
-    UPSTREAM_EXAMPLE_XFAIL_FILES
-    + [
-        "testvolume.upstream.yaml",  # not a workflow
-        "configmaps__simple-parameters-configmap.upstream.yaml",  # not a workflow
-        "workflow-event-binding__github-path-filter-workfloweventbinding.upstream.yaml",  # not a workflow
-        "workflow-event-binding__event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
-        "workflow-count-resourcequota.upstream.yaml",  # not a workflow
-        "steps-inline-workflow.upstream.yaml",  # inline unsupported
-        "dag-inline-workflow.upstream.yaml",  # inline unsupported
-        "dag-inline-cronworkflow.upstream.yaml",  # inline unsupported
-        "dag-inline-workflowtemplate.upstream.yaml",  # inline unsupported
-        "dag-inline-clusterworkflowtemplate.upstream.yaml",  # inline unsupported
-        "data-transformations.upstream.yaml",  # data template transformation field unsupported
-        "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
-    ]
-)
+SKIP_FILES = [
+    "cluster-workflow-template__clustertemplates.upstream.yaml",  # multiple workflows in one file
+    "cron-backfill.upstream.yaml",  # multiple workflows in one file
+    "memoize-simple.upstream.yaml",  # memoize not working
+    "workflow-template__templates.upstream.yaml",  # multiple workflows in one file
+    "workflow-event-binding__github-path-filter-workflowtemplate.upstream.yaml",  # value is a list (invalid?)
+    "testvolume.upstream.yaml",  # not a workflow
+    "configmaps__simple-parameters-configmap.upstream.yaml",  # not a workflow
+    "workflow-event-binding__github-path-filter-workfloweventbinding.upstream.yaml",  # not a workflow
+    "workflow-event-binding__event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
+    "workflow-count-resourcequota.upstream.yaml",  # not a workflow
+    "steps-inline-workflow.upstream.yaml",  # inline unsupported
+    "dag-inline-workflow.upstream.yaml",  # inline unsupported
+    "dag-inline-workflowtemplate.upstream.yaml",  # inline unsupported
+    "dag-inline-clusterworkflowtemplate.upstream.yaml",  # inline unsupported
+    "data-transformations.upstream.yaml",  # data template transformation field unsupported
+    "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
+]
 
 
 @pytest.mark.parametrize(
@@ -43,7 +44,8 @@ SKIP_FILES = (
             f,
             marks=(
                 pytest.mark.xfail(
-                    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types."
+                    reason="Multiple workflows in one yaml file not yet supported.\nYAML round trip issues for certain types.",
+                    strict=True,
                 )
                 if f in SKIP_FILES
                 else ()

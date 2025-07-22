@@ -3,20 +3,14 @@
 from __future__ import annotations
 
 import importlib.util
-import os
 import sys
 from pathlib import Path
-from typing import Iterable
 
 from hera._cli.base import GenerateYaml
-from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths
+from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths, write_output
 from hera.workflows.workflow import Workflow
 
 DEFAULT_EXTENSION = ".yaml"
-
-
-def _write_workflow_to_yaml(target_file: Path, content: str):
-    target_file.write_text(content)
 
 
 def generate_yaml(options: GenerateYaml):
@@ -28,7 +22,7 @@ def generate_yaml(options: GenerateYaml):
     paths = sorted(expand_paths(options.from_, {".py"}, recursive=options.recursive))
 
     # Generate a collection of source file paths and their resultant yaml.
-    path_to_output: list[tuple[str, str]] = []
+    path_to_output = {}
     for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
         yaml_outputs = []
         for workflow in load_workflows_from_module(path):
@@ -37,35 +31,22 @@ def generate_yaml(options: GenerateYaml):
         if not yaml_outputs:
             continue
 
-        path_to_output.append((path.name, join_yaml_strings(yaml_outputs)))
+        path_to_output[path.name] = "---\n".join(yaml_outputs)
 
-    # When `to` write file(s) to disk, otherwise output everything to stdout.
-    if options.to and isinstance(options.to, Path):
-        dest_is_file = options.to.suffix.lower() in YAML_EXTENSIONS
-
-        if dest_is_file:
-            os.makedirs(options.to.parent, exist_ok=True)
-
-            output = join_yaml_strings(o for _, o in path_to_output)
-            _write_workflow_to_yaml(options.to, output)
-
-        else:
-            os.makedirs(options.to, exist_ok=True)
-
-            for dest_path, content in path_to_output:
-                dest = (options.to / dest_path).with_suffix(DEFAULT_EXTENSION)
-                _write_workflow_to_yaml(dest, content)
-
-    else:
-        output = join_yaml_strings(o for _, o in path_to_output)
-        sys.stdout.write(output)
+    write_output(
+        options.to,
+        path_to_output,
+        YAML_EXTENSIONS,
+        DEFAULT_EXTENSION,
+        "---\n",
+    )
 
 
 def load_workflows_from_module(path: Path) -> list[Workflow]:
     """Load the set of `Workflow` objects defined within a given module.
 
     Arguments:
-        path: The path to a given python module
+        path: The path to a given Python module
 
     Returns:
         A list containing all `Workflow` objects defined within that module.
@@ -86,7 +67,3 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
             result.append(item)
 
     return result
-
-
-def join_yaml_strings(strings: Iterable[str]) -> str:
-    return "\n---\n\n".join(strings)

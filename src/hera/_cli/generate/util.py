@@ -1,7 +1,8 @@
 import os
+import sys
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Generator, Iterable, List, Set
+from typing import Dict, Generator, Iterable, List, Optional, Set
 
 YAML_EXTENSIONS = {".yml", ".yaml"}
 
@@ -11,7 +12,7 @@ def expand_paths(source: Path, suffixes: Set[str], recursive: bool = False) -> G
 
     Arguments:
         source: The source path to expand. In the event `source` references a
-            folder, return all python files in that folder.
+            folder, return all files with any of the suffixes in that folder.
         suffixes: The set of suffixes to match against the files in the `source` path.
         recursive: If True, recursively traverse the `source` path.
     """
@@ -47,3 +48,32 @@ def filter_paths(
                 continue
 
         yield path
+
+
+def write_output(
+    to: Optional[Path],
+    path_to_output: Dict[str, str],
+    extensions: Set[str],
+    default_extension: str,
+    join_delimiter: str = "\n",
+):
+    # When `to` write file(s) to disk, otherwise output everything to stdout.
+    if to:
+        dest_is_file = to.suffix.lower() in extensions
+
+        if dest_is_file:
+            to.parent.mkdir(exist_ok=True)
+
+            output = join_delimiter.join(o for o in path_to_output.values())
+            to.write_text(output)
+
+        else:
+            to.mkdir(exist_ok=True)
+
+            for dest_path, content in path_to_output.items():
+                dest = (to / dest_path).with_suffix(default_extension)
+                dest.write_text(content)
+
+    else:
+        output = join_delimiter.join(o for o in path_to_output.values())
+        sys.stdout.write(output)
