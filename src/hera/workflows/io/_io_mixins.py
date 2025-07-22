@@ -1,5 +1,5 @@
 import sys
-from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union, cast
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -27,12 +27,9 @@ if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it
     # to be used with either a V1 BaseModel or a V2 BaseModel
     from hera.shared._pydantic import PydanticBaseModel as BaseModel
-else:
-    # Subclassing `object` when using the real code (i.e. not type-checking) is basically a no-op
-    BaseModel = object  # type: ignore
 
 
-def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
+def _construct_io_from_fields(cls: "Type[BaseModel]") -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
     """Constructs a Parameter or Artifact object for all Pydantic fields based on their annotations.
 
     If a field has a Parameter or Artifact annotation, a copy will be returned, with missing
@@ -48,7 +45,7 @@ class InputMixin:
     def _get_parameters(cls, object_override: Optional[Self] = None) -> List[Parameter]:
         parameters = []
 
-        for field, field_info, param in _construct_io_from_fields(cls):  # type: ignore
+        for field, field_info, param in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             if isinstance(param, Parameter):
                 if param.default is not None:
                     raise ValueError(
@@ -67,7 +64,7 @@ class InputMixin:
     def _get_artifacts(cls, add_missing_path: bool = False) -> List[Artifact]:
         artifacts = []
 
-        for _, _, artifact in _construct_io_from_fields(cls):  # type: ignore
+        for _, _, artifact in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             if isinstance(artifact, Artifact):
                 if add_missing_path and artifact.path is None:
                     artifact.path = artifact._get_default_inputs_path()
@@ -83,19 +80,19 @@ class InputMixin:
         """Returns the Input with templated values to propagate through a DAG/Steps function."""
         object_dict = {}
 
-        for field, _, annotation in _construct_io_from_fields(cls):  # type: ignore
+        for field, _, annotation in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             input_type = "parameters" if isinstance(annotation, Parameter) else "artifacts"
             object_dict[field] = "{{" + f"inputs.{input_type}.{annotation.name}" + "}}"
 
-        return cls.construct(None, **object_dict)  # type: ignore
+        return cast("Self", cast("Type[BaseModel]", cls).construct(None, **object_dict))
 
     def _get_as_arguments(self) -> ModelArguments:
         params = []
         artifacts = []
 
-        self_dict = model_dump(self)  # type: ignore
+        self_dict = model_dump(cast("BaseModel", self))
 
-        for field, _, annotation in _construct_io_from_fields(type(self)):  # type: ignore
+        for field, _, annotation in _construct_io_from_fields(cast("Type[BaseModel]", type(self))):
             # The value may be a static value (of any time) if it has a default value, so we need to serialize it
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
             templated_value = serialize(self_dict[field])
@@ -115,7 +112,7 @@ class OutputMixin:
     def _get_outputs(cls, add_missing_path: bool = False) -> List[Union[Artifact, Parameter]]:
         outputs: List[Union[Artifact, Parameter]] = []
 
-        for field, field_info, annotation in _construct_io_from_fields(cls):  # type: ignore
+        for field, field_info, annotation in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             if field in {"exit_code", "result"}:
                 continue
             if isinstance(annotation, Parameter):
@@ -134,7 +131,7 @@ class OutputMixin:
 
     @classmethod
     def _get_output(cls, field_name: str) -> Union[Artifact, Parameter]:
-        annotations = get_field_annotations(cls)  # type: ignore
+        annotations = get_field_annotations(cast("Type[BaseModel]", cls))
         annotation = annotations[field_name]
         if output := get_workflow_annotation(annotation):
             if not output.name:
@@ -142,7 +139,7 @@ class OutputMixin:
             return output
 
         # Create a Parameter from basic type annotations
-        default = get_fields(cls)[field_name].default  # type: ignore
+        default = get_fields(cast("Type[BaseModel]", cls))[field_name].default
         if default is None or default == PydanticUndefined:
             default = MISSING
         return Parameter(name=field_name, default=default)  # type: ignore
@@ -154,9 +151,9 @@ class OutputMixin:
         """
         outputs: List[Union[Artifact, Parameter]] = []
 
-        self_dict = model_dump(self)  # type: ignore
+        self_dict = model_dump(cast("BaseModel", self))
 
-        for field, _, annotation in _construct_io_from_fields(type(self)):  # type: ignore
+        for field, _, annotation in _construct_io_from_fields(cast("Type[BaseModel]", type(self))):
             if field in {"exit_code", "result"}:
                 continue
 
