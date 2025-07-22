@@ -9,7 +9,7 @@ from typing import Any, Generator, List, Optional, Tuple, Type, Union, cast
 import yaml
 
 from hera._cli.base import GeneratePython
-from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths, write_output
+from hera._cli.generate.util import YAML_EXTENSIONS, convert_code, expand_paths, write_output
 from hera.shared._pydantic import BaseModel
 from hera.shared._type_util import (
     get_annotated_metadata,
@@ -69,17 +69,13 @@ def generate_python(options: GeneratePython):
     """
     paths = sorted(expand_paths(options.from_, YAML_EXTENSIONS, recursive=options.recursive))
 
-    # Generate a collection of source file paths and their resultant python.
-    path_to_output = {}
-    for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
-        python_outputs = []
-        for workflow in load_yaml_workflows(path):
-            python_outputs.append(workflow_to_python(workflow))
-
-        if not python_outputs:
-            continue
-
-        path_to_output[path.relative_to(options.from_)] = "\n".join(python_outputs)
+    path_to_output = convert_code(
+        paths,
+        load_yaml_workflows,
+        workflow_to_python,
+        options,
+        "\n",
+    )
 
     write_output(
         options.to,
@@ -378,7 +374,7 @@ def build_file(
                     file_builder.class_def.append(f"{attr}={val_repr},")
 
                     if attr == "workflow_template_ref":
-                        file_builder.context_def.append("    pass")
+                        file_builder.context_def.append("    pass\n")
     return file_builder
 
 
@@ -403,5 +399,8 @@ def workflow_to_python(model: ModelWorkflow) -> str:
 
     imports = list(map(lambda x: f"from hera.workflows import {x}", set(file_builder.hera_imports)))
     imports.extend(map(lambda x: f"from hera.workflows.models import {x}", set(file_builder.model_imports)))
+
+    if not file_builder.context_def:
+        file_builder.context_def.append("    pass\n")
 
     return "\n".join(imports + file_builder.class_def + [") as w:"] + file_builder.context_def)

@@ -2,7 +2,9 @@ import os
 import sys
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List, Optional, Set
+from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Union
+
+from hera._cli.base import GeneratePython, GenerateYaml
 
 YAML_EXTENSIONS = {".yml", ".yaml"}
 
@@ -75,3 +77,30 @@ def write_output(
             dest = (output_path / dest_path).with_suffix(default_extension)
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_text(content)
+
+
+def convert_code(
+    paths: List[Path],
+    loader_func: Callable[[Path], Any],
+    dumper_func: Callable[[Any], str],
+    options: Union[GenerateYaml, GeneratePython],
+    join_delimiter: str,
+) -> Dict[str, str]:
+    """Convert inputs list of workflows into a dict of output paths to their output text."""
+    path_to_output = {}
+    for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
+        outputs = []
+        for workflow in loader_func(path):
+            outputs.append(dumper_func(workflow))
+
+        if not outputs:
+            continue
+
+        if options.recursive:
+            if options.flatten:
+                path_to_output[path.name] = join_delimiter.join(outputs)
+            else:
+                path_to_output[str(path.relative_to(options.from_))] = join_delimiter.join(outputs)
+        else:
+            path_to_output[path.name] = join_delimiter.join(outputs)
+    return path_to_output

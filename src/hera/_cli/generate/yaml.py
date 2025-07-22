@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from hera._cli.base import GenerateYaml
-from hera._cli.generate.util import YAML_EXTENSIONS, expand_paths, filter_paths, write_output
+from hera._cli.generate.util import YAML_EXTENSIONS, convert_code, expand_paths, write_output
 from hera.workflows.workflow import Workflow
 
 DEFAULT_EXTENSION = ".yaml"
@@ -21,23 +21,7 @@ def generate_yaml(options: GenerateYaml):
     """
     paths = sorted(expand_paths(options.from_, {".py"}, recursive=options.recursive))
 
-    # Generate a collection of source file paths and their resultant yaml.
-    path_to_output = {}
-    for path in filter_paths(paths, includes=options.include, excludes=options.exclude):
-        yaml_outputs = []
-        for workflow in load_workflows_from_module(path):
-            yaml_outputs.append(workflow.to_yaml())
-
-        if not yaml_outputs:
-            continue
-
-        if options.recursive:
-            if options.flatten:
-                path_to_output[path.name] = "---\n".join(yaml_outputs)
-            else:
-                path_to_output[path.relative_to(options.from_)] = "---\n".join(yaml_outputs)
-        else:
-            path_to_output[path.name] = "---\n".join(yaml_outputs)
+    path_to_output = convert_code(paths, load_workflows_from_module, lambda w: w.to_yaml(), options, "---\n")
 
     write_output(
         options.to,

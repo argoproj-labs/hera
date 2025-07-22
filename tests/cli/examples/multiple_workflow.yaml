@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+    name: one
+spec: {}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+    name: two
+spec: {}
