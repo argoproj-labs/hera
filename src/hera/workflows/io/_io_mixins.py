@@ -1,16 +1,14 @@
 import sys
-from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union, cast
 
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
 
-
-from hera.shared._pydantic import _PYDANTIC_VERSION, FieldInfo, get_field_annotations, get_fields
+from hera.shared._pydantic import _PYDANTIC_VERSION, FieldInfo, get_field_annotations, get_fields, model_dump
 from hera.shared._type_util import construct_io_from_annotation, get_workflow_annotation
 from hera.shared.serialization import MISSING, serialize
-from hera.workflows._context import _context
 from hera.workflows.artifact import Artifact
 from hera.workflows.models import (
     Arguments as ModelArguments,
@@ -21,25 +19,17 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 
 if _PYDANTIC_VERSION == 2:
-    from pydantic import BaseModel as V2BaseModel
-    from pydantic.v1 import BaseModel as V1BaseModel
     from pydantic_core import PydanticUndefined
 else:
-    from pydantic import BaseModel as V1BaseModel  # type: ignore[assignment]
-
-    V2BaseModel = V1BaseModel  # type: ignore
     PydanticUndefined = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     # We add BaseModel as a parent class of the mixins only when type checking which allows it
     # to be used with either a V1 BaseModel or a V2 BaseModel
     from hera.shared._pydantic import PydanticBaseModel as BaseModel
-else:
-    # Subclassing `object` when using the real code (i.e. not type-checking) is basically a no-op
-    BaseModel = object  # type: ignore
 
 
-def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
+def _construct_io_from_fields(cls: "Type[BaseModel]") -> Iterator[Tuple[str, FieldInfo, Union[Parameter, Artifact]]]:
     """Constructs a Parameter or Artifact object for all Pydantic fields based on their annotations.
 
     If a field has a Parameter or Artifact annotation, a copy will be returned, with missing
@@ -50,31 +40,12 @@ def _construct_io_from_fields(cls: Type[BaseModel]) -> Iterator[Tuple[str, Field
         yield field, field_info, construct_io_from_annotation(field, annotations[field])
 
 
-class InputMixin(BaseModel):
-    def __new__(cls, **kwargs):
-        if _context.declaring:
-            # Intercept the declaration to avoid validation on the templated strings
-            # We must then turn off declaring mode to be able to "construct" an instance
-            # of the InputMixin subclass.
-            _context.declaring = False
-            instance = cls.construct(**kwargs)
-            _context.declaring = True
-            return instance
-        else:
-            return super(InputMixin, cls).__new__(cls)
-
-    def __init__(self, /, **kwargs):
-        if _context.declaring:
-            # Return in order to skip validation of `construct`ed instance
-            return
-
-        super().__init__(**kwargs)
-
+class InputMixin:
     @classmethod
     def _get_parameters(cls, object_override: Optional[Self] = None) -> List[Parameter]:
         parameters = []
 
-        for field, field_info, param in _construct_io_from_fields(cls):
+        for field, field_info, param in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             if isinstance(param, Parameter):
                 if param.default is not None:
                     raise ValueError(
@@ -93,7 +64,7 @@ class InputMixin(BaseModel):
     def _get_artifacts(cls, add_missing_path: bool = False) -> List[Artifact]:
         artifacts = []
 
-        for _, _, artifact in _construct_io_from_fields(cls):
+        for _, _, artifact in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             if isinstance(artifact, Artifact):
                 if add_missing_path and artifact.path is None:
                     artifact.path = artifact._get_default_inputs_path()
@@ -109,22 +80,19 @@ class InputMixin(BaseModel):
         """Returns the Input with templated values to propagate through a DAG/Steps function."""
         object_dict = {}
 
-        for field, _, annotation in _construct_io_from_fields(cls):
+        for field, _, annotation in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             input_type = "parameters" if isinstance(annotation, Parameter) else "artifacts"
             object_dict[field] = "{{" + f"inputs.{input_type}.{annotation.name}" + "}}"
 
-        return cls.construct(None, **object_dict)
+        return cast("Self", cast("Type[BaseModel]", cls).construct(None, **object_dict))
 
     def _get_as_arguments(self) -> ModelArguments:
         params = []
         artifacts = []
 
-        if isinstance(self, V1BaseModel):
-            self_dict = self.dict()
-        elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
-            self_dict = self.model_dump(warnings="none")
+        self_dict = model_dump(cast("BaseModel", self))
 
-        for field, _, annotation in _construct_io_from_fields(type(self)):
+        for field, _, annotation in _construct_io_from_fields(cast("Type[BaseModel]", type(self))):
             # The value may be a static value (of any time) if it has a default value, so we need to serialize it
             # If it is a templated string, it will be unaffected as `"{{mystr}}" == serialize("{{mystr}}")``
             templated_value = serialize(self_dict[field])
@@ -139,29 +107,12 @@ class InputMixin(BaseModel):
         return ModelArguments(parameters=params or None, artifacts=artifacts or None)
 
 
-class OutputMixin(BaseModel):
-    def __new__(cls, **kwargs):
-        if _context.declaring:
-            # Intercept the declaration to avoid validation on the templated strings
-            _context.declaring = False
-            instance = cls.construct(**kwargs)
-            _context.declaring = True
-            return instance
-        else:
-            return super(OutputMixin, cls).__new__(cls)
-
-    def __init__(self, /, **kwargs):
-        if _context.declaring:
-            # Return in order to skip validation of `construct`ed instance
-            return
-
-        super().__init__(**kwargs)
-
+class OutputMixin:
     @classmethod
     def _get_outputs(cls, add_missing_path: bool = False) -> List[Union[Artifact, Parameter]]:
         outputs: List[Union[Artifact, Parameter]] = []
 
-        for field, field_info, annotation in _construct_io_from_fields(cls):
+        for field, field_info, annotation in _construct_io_from_fields(cast("Type[BaseModel]", cls)):
             if field in {"exit_code", "result"}:
                 continue
             if isinstance(annotation, Parameter):
@@ -180,7 +131,7 @@ class OutputMixin(BaseModel):
 
     @classmethod
     def _get_output(cls, field_name: str) -> Union[Artifact, Parameter]:
-        annotations = get_field_annotations(cls)
+        annotations = get_field_annotations(cast("Type[BaseModel]", cls))
         annotation = annotations[field_name]
         if output := get_workflow_annotation(annotation):
             if not output.name:
@@ -188,7 +139,7 @@ class OutputMixin(BaseModel):
             return output
 
         # Create a Parameter from basic type annotations
-        default = get_fields(cls)[field_name].default
+        default = get_fields(cast("Type[BaseModel]", cls))[field_name].default
         if default is None or default == PydanticUndefined:
             default = MISSING
         return Parameter(name=field_name, default=default)  # type: ignore
@@ -200,12 +151,9 @@ class OutputMixin(BaseModel):
         """
         outputs: List[Union[Artifact, Parameter]] = []
 
-        if isinstance(self, V1BaseModel):
-            self_dict = self.dict()
-        elif _PYDANTIC_VERSION == 2 and isinstance(self, V2BaseModel):
-            self_dict = self.model_dump(warnings="none")
+        self_dict = model_dump(cast("BaseModel", self))
 
-        for field, _, annotation in _construct_io_from_fields(type(self)):
+        for field, _, annotation in _construct_io_from_fields(cast("Type[BaseModel]", type(self))):
             if field in {"exit_code", "result"}:
                 continue
 
