@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-world-
+  annotations:
+    workflows.argoproj.io/description: |
+      This is a simple hello world example.
+  labels:
+    workflows.argoproj.io/archive-strategy: 'false'
+spec:
+  entrypoint: hello-world
+  templates:
+  - name: hello-world
+    container:
+      image: busybox
+      args:
+      - hello world
+      command:
+      - echo

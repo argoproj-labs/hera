@@ -28,6 +28,8 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = [
     "synchronization-db-mutex-tmpl-level.upstream.yaml",
     "synchronization-db-mutex-wf-level.upstream.yaml",
     "synchronization-db-wf-level.upstream.yaml",
+    "workflow-template--templates.upstream.yaml",
+    "cluster-workflow-template--clustertemplates.upstream.yaml",
 ]
 
 

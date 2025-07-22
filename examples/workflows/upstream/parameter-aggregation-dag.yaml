@@ -1,0 +1,99 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: parameter-aggregation-dag-
+spec:
+  entrypoint: parameter-aggregation
+  templates:
+  - name: parameter-aggregation
+    dag:
+      tasks:
+      - name: odd-or-even
+        template: odd-or-even
+        withItems:
+        - 1
+        - 2
+        - 3
+        - 4
+        arguments:
+          parameters:
+          - name: num
+            value: '{{item}}'
+      - name: print-nums
+        depends: odd-or-even
+        template: print-message
+        arguments:
+          parameters:
+          - name: message
+            value: '{{tasks.odd-or-even.outputs.parameters.num}}'
+      - name: print-evenness
+        depends: odd-or-even
+        template: print-message
+        arguments:
+          parameters:
+          - name: message
+            value: '{{tasks.odd-or-even.outputs.parameters.evenness}}'
+      - name: divide-by-2
+        depends: odd-or-even
+        template: divide-by-2
+        when: '{{item.evenness}} == even'
+        withParam: '{{tasks.odd-or-even.outputs.parameters}}'
+        arguments:
+          parameters:
+          - name: num
+            value: '{{item.num}}'
+      - name: print
+        depends: divide-by-2
+        template: print-message
+        withParam: '{{tasks.divide-by-2.outputs.result}}'
+        arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'
+  - name: odd-or-even
+    container:
+      image: alpine:latest
+      args:
+      - |
+        sleep 1 &&
+        echo {{inputs.parameters.num}} > /tmp/num &&
+        if [ $(({{inputs.parameters.num}}%2)) -eq 0 ]; then
+          echo "even" > /tmp/even;
+        else
+          echo "odd" > /tmp/even;
+        fi
+      command:
+      - sh
+      - -c
+    inputs:
+      parameters:
+      - name: num
+    outputs:
+      parameters:
+      - name: num
+        valueFrom:
+          path: /tmp/num
+      - name: evenness
+        valueFrom:
+          path: /tmp/even
+  - name: divide-by-2
+    container:
+      image: alpine:latest
+      args:
+      - echo $(({{inputs.parameters.num}}/2))
+      command:
+      - sh
+      - -c
+    inputs:
+      parameters:
+      - name: num
+  - name: print-message
+    container:
+      image: busybox
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - echo
+    inputs:
+      parameters:
+      - name: message

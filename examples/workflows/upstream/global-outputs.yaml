@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: global-outputs-
+spec:
+  entrypoint: generate-globals
+  onExit: consume-globals
+  templates:
+  - name: generate-globals
+    steps:
+    - - name: generate
+        template: global-output
+    - - name: consume-globals
+        template: consume-globals
+  - name: global-output
+    container:
+      image: alpine:3.7
+      args:
+      - sleep 1; echo -n hello world > /tmp/hello_world.txt
+      command:
+      - sh
+      - -c
+    outputs:
+      artifacts:
+      - name: hello-art
+        globalName: my-global-art
+        path: /tmp/hello_world.txt
+      parameters:
+      - name: hello-param
+        globalName: my-global-param
+        valueFrom:
+          path: /tmp/hello_world.txt
+  - name: consume-globals
+    steps:
+    - - name: consume-global-param
+        template: consume-global-param
+      - name: consume-global-art
+        template: consume-global-art
+        arguments:
+          artifacts:
+          - name: art
+            from: '{{workflow.outputs.artifacts.my-global-art}}'
+  - name: consume-global-param
+    container:
+      image: alpine:3.7
+      args:
+      - echo {{inputs.parameters.param}}
+      command:
+      - sh
+      - -c
+    inputs:
+      parameters:
+      - name: param
+        value: '{{workflow.outputs.parameters.my-global-param}}'
+  - name: consume-global-art
+    container:
+      image: alpine:3.7
+      args:
+      - cat /art
+      command:
+      - sh
+      - -c
+    inputs:
+      artifacts:
+      - name: art
+        path: /art

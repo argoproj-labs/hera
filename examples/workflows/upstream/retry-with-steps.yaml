@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: retry-with-steps-
+spec:
+  entrypoint: retry-with-steps
+  templates:
+  - name: retry-with-steps
+    steps:
+    - - name: hello1
+        template: random-fail
+    - - name: hello2a
+        template: random-fail
+      - name: hello2b
+        template: random-fail
+  - name: random-fail
+    container:
+      image: python:alpine3.6
+      args:
+      - 'import random; import sys; print(''retries: {{retries}}''); exit_code = random.choice([0,
+        1, 1]); sys.exit(exit_code)'
+      command:
+      - python
+      - -c
+    retryStrategy:
+      limit: '10'

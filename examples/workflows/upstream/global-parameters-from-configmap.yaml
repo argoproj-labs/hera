@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: global-parameter-values-from-configmap-
+  annotations:
+    workflows.argoproj.io/description: |
+      This example demonstrates loading global parameter values from a ConfigMap.
+      Note that the "simple-parameters" ConfigMap (defined in `examples/configmaps/simple-parameters-configmap.yaml`) needs to be created first before submitting this workflow.
+  labels:
+    workflows.argoproj.io/test: 'true'
+spec:
+  entrypoint: print-message
+  templates:
+  - name: print-message
+    container:
+      image: busybox
+      args:
+      - '{{workflow.parameters.message}}'
+      command:
+      - echo
+  arguments:
+    parameters:
+    - name: message
+      valueFrom:
+        configMapKeyRef:
+          name: simple-parameters
+          key: msg

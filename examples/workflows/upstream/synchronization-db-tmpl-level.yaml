@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: synchronization-db-tmpl-level-
+spec:
+  entrypoint: synchronization-db-tmpl-level-example
+  templates:
+  - name: synchronization-db-tmpl-level-example
+    steps:
+    - - name: synchronization-acquire-lock
+        template: acquire-lock
+        withParam: '["1","2","3","4","5"]'
+        arguments:
+          parameters:
+          - name: seconds
+            value: '{{item}}'
+  - name: acquire-lock
+    container:
+      image: alpine:latest
+      args:
+      - sleep 10; echo acquired lock
+      command:
+      - sh
+      - -c
+    synchronization:
+      semaphores:
+      - {}

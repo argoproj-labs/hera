@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: handle-large-output-results-
+spec:
+  entrypoint: handle-large-output-results
+  templates:
+  - name: handle-large-output-results
+    steps:
+    - - name: get-items
+        template: get-items
+    - - name: sequence-param
+        template: echo
+        arguments:
+          artifacts:
+          - name: items
+            from: '{{steps.get-items.outputs.artifacts.items}}'
+          parameters:
+          - name: index
+            value: '{{item}}'
+        withSequence:
+          count: '{{steps.get-items.outputs.parameters.count}}'
+  - name: get-items
+    container:
+      image: alpine:latest
+      args:
+      - echo '["a", "b", "c"]' > /tmp/items && echo '3' > /tmp/count
+      command:
+      - /bin/sh
+      - -c
+    outputs:
+      artifacts:
+      - name: items
+        path: /tmp/items
+      parameters:
+      - name: count
+        valueFrom:
+          path: /tmp/count
+  - name: echo
+    container:
+      image: stedolan/jq:latest
+      args:
+      - cat /tmp/items | jq '.[{{inputs.parameters.index}}]'
+      command:
+      - sh
+      - -c
+    inputs:
+      artifacts:
+      - name: items
+        path: /tmp/items
+      parameters:
+      - name: index

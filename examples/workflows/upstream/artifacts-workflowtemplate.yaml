@@ -1,0 +1,109 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: artifacts
+  annotations:
+    workflows.argoproj.io/description: |
+      This example shows how to produce different types of artifact.
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    volumes:
+    - name: in
+      emptyDir: {}
+    - name: out
+      emptyDir: {}
+    containerSet:
+      containers:
+      - name: setup
+        image: argoproj/argosay:v2
+        args:
+        - |
+          mkdir -p /out/assets
+        command:
+        - sh
+        - -c
+      - name: gnuplot
+        image: remuslazar/gnuplot
+        args:
+        - -e
+        - |
+          set xlabel 'Year'; set ylabel 'Mean';
+          set grid;
+          set datafile separator ',';
+          set term png size 600,400;
+          set output '/out/assets/global-temp.png';
+          plot '/in/annual.csv' every 2::0 skip 1 using 2:3 title 'Global Temperature' with lines linewidth 2;
+        dependencies:
+        - setup
+      - name: main
+        image: argoproj/argosay:v2
+        args:
+        - "cowsay \"hello world\" > /out/hello.txt\n\ncat > /out/hello.json <<EOF\n\
+          {\"hello\": {\"world\": true}} \nEOF\n\necho '* {font-family: sans-serif}'\
+          \ > /out/assets/styles.css\n\ncat > /out/index.html <<EOF\n<html>\n  <head>\n\
+          \    <link rel='stylesheet' href='assets/styles.css' type='text/css'/>\n\
+          \  </head>\n  <body>\n    <h1>Global Temperature</h1>\n    <img src='assets/global-temp.png'/>\n\
+          \  </body>\n</html>\nEOF\n\ncat > /out/malicious.html <<EOF\n<html>\n  <body>\n\
+          \    <script>alert(1)</script>\n    <p>This page attempts to run a script\
+          \ that shows an alert, but the Argo Server UI Content-Security-Policy will\
+          \ prevent that.</p>\n    <p>To check, open your Web Console and see that\
+          \ \"Blocked script execution ... because the document's frame is sandboxed.\"\
+          \ (or similar) is printed.</p>\n  </body>\n</html>\nEOF\n"
+        command:
+        - sh
+        - -c
+        dependencies:
+        - setup
+      volumeMounts:
+      - name: in
+        mountPath: /in
+      - name: out
+        mountPath: /out
+    inputs:
+      artifacts:
+      - name: temps
+        path: /in/annual.csv
+        http:
+          url: https://datahub.io/core/global-temp/r/annual.csv
+    outputs:
+      artifacts:
+      - name: text-file
+        path: /out/hello.txt
+        archive:
+          none: {}
+        s3:
+          key: hello.txt
+      - name: json-file
+        path: /out/hello.json
+        archive:
+          none: {}
+        s3:
+          key: hello.json
+      - name: css-file
+        path: /out/assets/styles.css
+        archive:
+          none: {}
+        s3:
+          key: styles.css
+      - name: malicious-file
+        path: /out/malicious.html
+        archive:
+          none: {}
+        s3:
+          key: malicious.html
+      - name: report
+        path: /out
+        archive:
+          none: {}
+        s3:
+          key: report/
+      - name: tgz-file
+        path: /out/hello.txt
+        s3:
+          key: file.tgz
+      - name: tgz-dir
+        path: /out
+        s3:
+          key: dir.tgz

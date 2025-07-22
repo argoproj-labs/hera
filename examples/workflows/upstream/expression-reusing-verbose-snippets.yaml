@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: expression-reusing-verbose-snippets-
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    inputs:
+      parameters:
+      - name: week-temps
+        value: |-
+          {{=
+            map([
+                jsonpath(sprig.b64dec(jsonpath(workflow.parameters.weather, '$.weekWeather')), '$.temps')
+              ], {
+                toJson({
+                  avg: sprig.add(#[0], #[1], #[2], #[3], #[4]) / 5,
+                  min: sprig.min(#[0], #[1], #[2], #[3], #[4]),
+                  max: sprig.max(#[0], #[1], #[2], #[3], #[4])
+                })
+            })[0]
+          }}
+    script:
+      image: debian:9.4
+      source: |
+        echo "The week's average temperature was $AVG with a minimum of $MIN and a maximum of $MAX."
+      command:
+      - bash
+      env:
+      - name: AVG
+        value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.avg'')}}'
+      - name: MIN
+        value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.min'')}}'
+      - name: MAX
+        value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.max'')}}'
+  arguments:
+    parameters:
+    - name: weather
+      value: '{"weekWeather": "eyJ0ZW1wcyI6IFszNCwgMjcsIDE1LCA1NywgNDZdfQo="}'

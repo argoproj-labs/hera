@@ -1,0 +1,95 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: parameter-aggregation-
+spec:
+  entrypoint: parameter-aggregation
+  templates:
+  - name: parameter-aggregation
+    steps:
+    - - name: odd-or-even
+        template: odd-or-even
+        withItems:
+        - 1
+        - 2
+        - 3
+        - 4
+        arguments:
+          parameters:
+          - name: num
+            value: '{{item}}'
+    - - name: print-nums
+        template: print-message
+        arguments:
+          parameters:
+          - name: message
+            value: '{{steps.odd-or-even.outputs.parameters.num}}'
+    - - name: print-evenness
+        template: print-message
+        arguments:
+          parameters:
+          - name: message
+            value: '{{steps.odd-or-even.outputs.parameters.evenness}}'
+    - - name: divide-by-2
+        template: divide-by-2
+        when: '{{item.evenness}} == even'
+        withParam: '{{steps.odd-or-even.outputs.parameters}}'
+        arguments:
+          parameters:
+          - name: num
+            value: '{{item.num}}'
+    - - name: print
+        template: print-message
+        withParam: '{{steps.divide-by-2.outputs.result}}'
+        arguments:
+          parameters:
+          - name: message
+            value: '{{item}}'
+  - name: odd-or-even
+    container:
+      image: alpine:latest
+      args:
+      - |
+        sleep 1 &&
+        echo {{inputs.parameters.num}} > /tmp/num &&
+        if [ $(({{inputs.parameters.num}}%2)) -eq 0 ]; then
+          echo "even" > /tmp/even;
+        else
+          echo "odd" > /tmp/even;
+        fi
+      command:
+      - sh
+      - -xc
+    inputs:
+      parameters:
+      - name: num
+    outputs:
+      parameters:
+      - name: num
+        valueFrom:
+          path: /tmp/num
+      - name: evenness
+        valueFrom:
+          path: /tmp/even
+  - name: divide-by-2
+    inputs:
+      parameters:
+      - name: num
+    script:
+      image: alpine:latest
+      source: |
+        #!/bin/sh
+        echo $(({{inputs.parameters.num}}/2))
+      command:
+      - sh
+      - -x
+  - name: print-message
+    container:
+      image: busybox
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - echo
+    inputs:
+      parameters:
+      - name: message

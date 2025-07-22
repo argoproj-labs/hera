@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pod-gc-strategy-with-label-selector-
+spec:
+  entrypoint: pod-gc-strategy-with-label-selector
+  templates:
+  - name: pod-gc-strategy-with-label-selector
+    steps:
+    - - name: fail
+        template: fail
+      - name: succeed-deleted
+        template: succeed-deleted
+      - name: succeed-not-deleted
+        template: succeed-not-deleted
+  - name: fail
+    container:
+      image: alpine:3.7
+      args:
+      - exit 1
+      command:
+      - sh
+      - -c
+    metadata:
+      labels:
+        should-be-deleted: 'true'
+  - name: succeed-deleted
+    container:
+      image: alpine:3.7
+      args:
+      - exit 0
+      command:
+      - sh
+      - -c
+    metadata:
+      labels:
+        should-be-deleted: 'true'
+  - name: succeed-not-deleted
+    container:
+      image: alpine:3.7
+      args:
+      - exit 0
+      command:
+      - sh
+      - -c
+    metadata:
+      labels:
+        should-be-deleted: 'false'
+  podGC:
+    deleteDelayDuration: 30s
+    strategy: OnPodSuccess
+    labelSelector:
+      matchLabels:
+        should-be-deleted: 'true'

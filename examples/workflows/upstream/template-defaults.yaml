@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: template-defaults-
+  annotations:
+    workflows.argoproj.io/description: |
+      Template defaults will provide the fixability to configure the defaults values for all templates in workflow.
+      Individual template can be overide default values.
+    workflows.argoproj.io/version: '>= 3.1.0'
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    steps:
+    - - name: retry-backoff
+        template: retry-backoff
+    - - name: hello-world
+        template: hello-world
+  - name: hello-world
+    container:
+      image: busybox
+      args:
+      - hello world
+      command:
+      - echo
+  - name: retry-backoff
+    container:
+      image: python:alpine3.6
+      args:
+      - import random; import sys; exit_code = random.choice([0, 1, 1]); sys.exit(exit_code)
+      command:
+      - python
+      - -c
+  templateDefaults:
+    timeout: 30s
+    retryStrategy:
+      limit: '2'

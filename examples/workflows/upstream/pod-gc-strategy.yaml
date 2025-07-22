@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pod-gc-strategy-
+spec:
+  entrypoint: pod-gc-strategy
+  templates:
+  - name: pod-gc-strategy
+    steps:
+    - - name: fail
+        template: fail
+      - name: succeed
+        template: succeed
+  - name: fail
+    container:
+      image: alpine:3.7
+      args:
+      - exit 1
+      command:
+      - sh
+      - -c
+  - name: succeed
+    container:
+      image: alpine:3.7
+      args:
+      - exit 0
+      command:
+      - sh
+      - -c
+  podGC:
+    deleteDelayDuration: 30s
+    strategy: OnPodSuccess

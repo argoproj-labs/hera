@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-param-arg-
+spec:
+  entrypoint: loop-param-arg-example
+  templates:
+  - name: loop-param-arg-example
+    steps:
+    - - name: test-linux
+        template: cat-os-release
+        withParam: '{{inputs.parameters.os-list}}'
+        arguments:
+          parameters:
+          - name: image
+            value: '{{item.image}}'
+          - name: tag
+            value: '{{item.tag}}'
+    inputs:
+      parameters:
+      - name: os-list
+  - name: cat-os-release
+    container:
+      image: '{{inputs.parameters.image}}:{{inputs.parameters.tag}}'
+      args:
+      - /etc/os-release
+      command:
+      - cat
+    inputs:
+      parameters:
+      - name: image
+      - name: tag
+  arguments:
+    parameters:
+    - name: os-list
+      value: |
+        [
+          { "image": "debian", "tag": "9.1" },
+          { "image": "debian", "tag": "8.9" },
+          { "image": "alpine", "tag": "3.6" },
+          { "image": "ubuntu", "tag": "17.10" }
+        ]

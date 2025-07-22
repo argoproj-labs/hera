@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: exit-hanlder-dag-level-
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    dag:
+      tasks:
+      - name: A
+        onExit: exit
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: A
+      - name: B
+        depends: A
+        onExit: exit
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: B
+      - name: C
+        depends: A
+        onExit: exit
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: C
+      - name: D
+        depends: B && C
+        onExit: exit
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: D
+  - name: echo
+    container:
+      image: busybox
+      args:
+      - '{{inputs.parameters.message}}'
+      command:
+      - echo
+    inputs:
+      parameters:
+      - name: message
+  - name: exit
+    container:
+      image: busybox
+      args:
+      - task cleanup
+      command:
+      - echo

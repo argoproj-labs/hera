@@ -1,0 +1,103 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: work-avoidance-
+spec:
+  entrypoint: main
+  onExit: save-markers
+  templates:
+  - name: main
+    steps:
+    - - name: load-markers
+        template: load-markers
+    - - name: echo
+        template: echo
+        arguments:
+          parameters:
+          - name: num
+            value: '{{item}}'
+        withSequence:
+          count: '3'
+  - name: load-markers
+    container:
+      image: busybox
+      command:
+      - mkdir
+      - -p
+      - /work/markers
+      volumeMounts:
+      - name: work
+        mountPath: /work
+    inputs:
+      artifacts:
+      - name: markers
+        optional: true
+        path: /work/markers
+        s3:
+          bucket: my-bucket
+          endpoint: minio:9000
+          insecure: true
+          key: work-avoidance-markers
+          accessKeySecret:
+            name: my-minio-cred
+            key: accesskey
+          secretKeySecret:
+            name: my-minio-cred
+            key: secretkey
+  - name: echo
+    inputs:
+      parameters:
+      - name: num
+    script:
+      image: busybox
+      source: |
+        marker=/work/markers/$(date +%Y-%m-%d)-echo-{{inputs.parameters.num}}
+        if [ -e  ${marker} ]; then
+          echo "work already done"
+          exit 0
+        fi
+        echo "working very hard"
+        # toss a virtual coin and exit 1 if 1
+        if [ $(($(($RANDOM%10))%2)) -eq 1 ]; then
+          echo "oh no!"
+          exit 1
+        fi
+        touch ${marker}
+      command:
+      - sh
+      - -eux
+      volumeMounts:
+      - name: work
+        mountPath: /work
+  - name: save-markers
+    container:
+      image: busybox
+      command:
+      - 'true'
+      volumeMounts:
+      - name: work
+        mountPath: /work
+    outputs:
+      artifacts:
+      - name: markers
+        path: /work/markers
+        s3:
+          bucket: my-bucket
+          endpoint: minio:9000
+          insecure: true
+          key: work-avoidance-markers
+          accessKeySecret:
+            name: my-minio-cred
+            key: accesskey
+          secretKeySecret:
+            name: my-minio-cred
+            key: secretkey
+  volumeClaimTemplates:
+  - metadata:
+      name: work
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Mi
