@@ -7,7 +7,6 @@ for more on scripts in Argo Workflows.
 import ast
 import copy
 import inspect
-import os
 import sys
 import textwrap
 from abc import abstractmethod
@@ -858,12 +857,9 @@ class RunnerScriptConstructor(ScriptConstructor):
         module = values["source"].__module__
 
         if module == "__main__":
-            file_path = (
-                str(Path(values["source"].__globals__["__file__"]).relative_to(Path(os.getcwd())))
-                .replace(".py", "")
-                .split("/")
-            )
-            module = ".".join(file_path)
+            from hera.workflows._runner.util import create_module_string
+
+            module = create_module_string(Path(values["source"].__globals__["__file__"]))
 
         values["args"] = [
             "-m",

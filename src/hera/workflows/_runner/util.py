@@ -297,3 +297,12 @@ def _run() -> None:
         exit(result.exit_code)
 
     print(serialize(result))
+
+
+def create_module_string(path: Path) -> str:
+    """Create a Python module path from the relative path to the file from the current working directory.
+
+    e.g. if cwd is "/project" and the file is "/project/workflows/wf_a.py", then module_path will be
+    ["workflows", "wf_a"]
+    """
+    return ".".join(str(path.resolve().relative_to(Path(os.getcwd()))).replace(".py", "").split("/"))
