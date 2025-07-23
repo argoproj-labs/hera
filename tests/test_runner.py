@@ -1096,4 +1096,9 @@ def test_script_runner_generation_from_main():
     ) as w:
         Script(name="hello", source=hello, constructor="runner")
 
-    assert w.to_dict()["spec"]["templates"][0]["script"]["args"][3] == "tests.test_runner:hello"
+    assert w.to_dict()["spec"]["templates"][0]["script"]["args"] == [
+        "-m",
+        "hera.workflows.runner",
+        "-e",
+        "tests.test_runner:hello",
+    ]

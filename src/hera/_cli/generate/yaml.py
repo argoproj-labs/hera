@@ -1,5 +1,3 @@
-"""The main entrypoint for hera CLI."""
-
 from __future__ import annotations
 
 import importlib.util

@@ -86,6 +86,7 @@ spec: {}
 whole_folder_output = join_output(
     cluster_workflow_template_output,
     multiple_workflow_output,
+    runner_workflow_output,
     single_workflow_output,
     workflow_template_output,
 )
@@ -338,7 +339,11 @@ def test_exclude_one(capsys):
     runner.invoke("tests/cli/examples", "--exclude=*/examples/*template*")
 
     output = get_stdout(capsys)
-    assert output == join_output(multiple_workflow_output, single_workflow_output)
+    assert output == join_output(
+        multiple_workflow_output,
+        runner_workflow_output,
+        single_workflow_output,
+    )
 
 
 @pytest.mark.cli
@@ -350,7 +355,7 @@ def test_exclude_two(capsys):
     )
 
     output = get_stdout(capsys)
-    assert output == multiple_workflow_output
+    assert output == join_output(multiple_workflow_output, runner_workflow_output)
 
 
 @pytest.mark.cli
