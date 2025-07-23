@@ -16,7 +16,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     with CronWorkflow(
         name="sleep-when",
         entrypoint="sleep-busybox",
-        schedule="* * * * *",
+        schedules=["* * * * *"],
         concurrency_policy="Allow",
         when="{{= cronworkflow.lastScheduledTime == nil || (now() - cronworkflow.lastScheduledTime).Seconds() > 360 }}",
     ) as w:
@@ -37,9 +37,10 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       name: sleep-when
     spec:
       concurrencyPolicy: Allow
-      schedule: '* * * * *'
       when: '{{= cronworkflow.lastScheduledTime == nil || (now() - cronworkflow.lastScheduledTime).Seconds()
         > 360 }}'
+      schedules:
+      - '* * * * *'
       workflowSpec:
         entrypoint: sleep-busybox
         templates:

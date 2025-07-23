@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: status-reference-
+spec:
+  entrypoint: status-reference
+  templates:
+  - name: status-reference
+    steps:
+    - - name: flakey-container
+        template: flakey-container
+        continueOn:
+          failed: true
+    - - name: failed
+        template: failed
+        when: '{{steps.flakey-container.status}} == Failed'
+      - name: succeeded
+        template: succeeded
+        when: '{{steps.flakey-container.status}} == Succeeded'
+  - name: flakey-container
+    container:
+      image: alpine:3.6
+      args:
+      - exit 1
+      command:
+      - sh
+      - -c
+  - name: failed
+    container:
+      image: alpine:3.6
+      args:
+      - echo "the flakey container failed"
+      command:
+      - sh
+      - -c
+  - name: succeeded
+    container:
+      image: alpine:3.6
+      args:
+      - echo "the flakey container passed"
+      command:
+      - sh
+      - -c

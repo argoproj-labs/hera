@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-diamond-steps-
+spec:
+  entrypoint: diamond
+  templates:
+  - name: echo
+    container:
+      image: alpine:3.7
+      command:
+      - echo
+      - '{{inputs.parameters.message}}'
+    inputs:
+      parameters:
+      - name: message
+  - name: echo-thrice
+    steps:
+    - - name: echo
+        template: echo
+        withItems:
+        - 1
+        - 2
+        - 3
+        arguments:
+          parameters:
+          - name: message
+            value: '{{inputs.parameters.message}}{{item}}'
+    inputs:
+      parameters:
+      - name: message
+  - name: diamond
+    dag:
+      tasks:
+      - name: A
+        template: echo-thrice
+        arguments:
+          parameters:
+          - name: message
+            value: A
+      - name: B
+        depends: A
+        template: echo-thrice
+        arguments:
+          parameters:
+          - name: message
+            value: B
+      - name: C
+        depends: A
+        template: echo-thrice
+        arguments:
+          parameters:
+          - name: message
+            value: C
+      - name: D
+        depends: B && C
+        template: echo-thrice
+        arguments:
+          parameters:
+          - name: message
+            value: D

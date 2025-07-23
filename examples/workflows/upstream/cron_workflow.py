@@ -3,7 +3,7 @@ from hera.workflows import Container, CronWorkflow
 with CronWorkflow(
     name="hello-world",
     entrypoint="hello-world-with-time",
-    schedule="* * * * *",
+    schedules=["* * * * *"],
     timezone="America/Los_Angeles",
     starting_deadline_seconds=0,
     concurrency_policy="Replace",

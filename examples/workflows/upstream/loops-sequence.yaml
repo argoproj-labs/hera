@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-sequence-
+spec:
+  entrypoint: loops-sequence
+  templates:
+  - name: loops-sequence
+    steps:
+    - - name: sequence-count
+        template: echo
+        arguments:
+          parameters:
+          - name: msg
+            value: '{{item}}'
+        withSequence:
+          count: '5'
+      - name: sequence-start-end
+        template: echo
+        arguments:
+          parameters:
+          - name: msg
+            value: '{{item}}'
+        withSequence:
+          end: '105'
+          start: '100'
+      - name: sequence-param
+        template: echo
+        arguments:
+          parameters:
+          - name: msg
+            value: '{{item}}'
+        withSequence:
+          count: '{{workflow.parameters.count}}'
+          start: '200'
+      - name: sequence-negative
+        template: echo
+        arguments:
+          parameters:
+          - name: msg
+            value: '{{item}}'
+        withSequence:
+          end: '0'
+          start: '5'
+      - name: sequence-format
+        template: echo
+        arguments:
+          parameters:
+          - name: msg
+            value: '{{item}}'
+        withSequence:
+          count: '5'
+          format: testuser%02X
+  - name: echo
+    container:
+      image: alpine:latest
+      command:
+      - echo
+      - '{{inputs.parameters.msg}}'
+    inputs:
+      parameters:
+      - name: msg
+  arguments:
+    parameters:
+    - name: count
+      value: '3'

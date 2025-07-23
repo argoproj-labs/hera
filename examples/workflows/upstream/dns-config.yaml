@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test-dns-config-
+spec:
+  entrypoint: hello-world
+  templates:
+  - name: hello-world
+    container:
+      image: busybox
+      args:
+      - hello world
+      command:
+      - echo
+      resources:
+        limits:
+          cpu: 100m
+          memory: 32Mi
+  dnsConfig:
+    nameservers:
+    - 1.2.3.4
+    options:
+    - name: ndots
+      value: '2'

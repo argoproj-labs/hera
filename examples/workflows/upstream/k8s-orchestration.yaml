@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: k8s-orchestrate-
+spec:
+  entrypoint: k8s-orchestrate
+  templates:
+  - name: k8s-orchestrate
+    steps:
+    - - name: random-number-job
+        template: random-number-job
+    - - name: print-generated-numbers
+        template: print-generated-numbers
+        arguments:
+          parameters:
+          - name: job-uid
+            value: '{{steps.random-number-job.outputs.parameters.job-uid}}'
+    - - name: delete-job
+        template: delete-job
+        arguments:
+          parameters:
+          - name: job-name
+            value: '{{steps.random-number-job.outputs.parameters.job-name}}'
+  - name: random-number-job
+    outputs:
+      parameters:
+      - name: job-name
+        valueFrom:
+          jsonPath: '{.metadata.name}'
+      - name: job-uid
+        valueFrom:
+          jsonPath: '{.metadata.uid}'
+    resource:
+      action: create
+      failureCondition: status.failed > 0
+      manifest: |
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          generateName: rand-num-
+        spec:
+          completions: 10
+          parallelism: 10
+          template:
+            metadata:
+              name: rand
+            spec:
+              containers:
+              - name: rand
+                image: python:alpine3.6
+                command: ["python", "-c", "import random; import time; print(random.randint(1, 1000)); time.sleep(10)"]
+              restartPolicy: Never
+      successCondition: status.succeeded > 9
+  - name: print-generated-numbers
+    container:
+      image: quay.io/argoproj/argoexec:latest
+      args:
+      - ' for i in `kubectl get pods -l controller-uid={{inputs.parameters.job-uid}}
+        -o name`; do kubectl logs $i; done '
+      command:
+      - sh
+      - -c
+    inputs:
+      parameters:
+      - name: job-uid
+  - name: delete-job
+    inputs:
+      parameters:
+      - name: job-name
+    resource:
+      action: delete
+      manifest: |
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: {{inputs.parameters.job-name}}

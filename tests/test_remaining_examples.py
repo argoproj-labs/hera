@@ -17,23 +17,25 @@ UPSTREAM_EXAMPLES_FOLDER = Path("examples/workflows/upstream")
 # A subset of the upstream examples are known to fail, but a majority pass. We'll
 # selectively xfail these examples rather than all until they can be fixed.
 UPSTREAM_EXAMPLE_XFAIL_FILES = [
-    "cluster-workflow-template__clustertemplates.upstream.yaml",
+    "cluster-workflow-template--clustertemplates.upstream.yaml",
     "cron-backfill.upstream.yaml",
     "memoize-simple.upstream.yaml",
-    "workflow-template__templates.upstream.yaml",
+    "workflow-template--templates.upstream.yaml",
     "loops-param-argument.upstream.yaml",
     "retry-backoff.upstream.yaml",
-    "workflow-event-binding__github-path-filter-workflowtemplate.upstream.yaml",
+    "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",
     "synchronization-db-tmpl-level.upstream.yaml",
     "synchronization-db-mutex-tmpl-level.upstream.yaml",
     "synchronization-db-mutex-wf-level.upstream.yaml",
     "synchronization-db-wf-level.upstream.yaml",
+    "workflow-template--templates.upstream.yaml",
+    "cluster-workflow-template--clustertemplates.upstream.yaml",
 ]
 
 
 def _save_upstream_examples(argo_examples: List[str]) -> None:
     for example in argo_examples:
-        output_file = example.replace("/", "__") + ".upstream.yaml"
+        output_file = example.replace("/", "--") + ".upstream.yaml"
         output_path = Path(f"examples/workflows/upstream/{output_file}")
 
         if HERA_REGENERATE or not output_path.exists():

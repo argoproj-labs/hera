@@ -1,0 +1,87 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: nested-workflow-
+spec:
+  entrypoint: nested-workflow-example
+  templates:
+  - name: nested-workflow-example
+    steps:
+    - - name: generate
+        template: generate
+    - - name: nested-wf
+        template: nested-wf
+        arguments:
+          artifacts:
+          - name: nested-in-artifact
+            from: '{{steps.generate.outputs.artifacts.out-artifact}}'
+          parameters:
+          - name: nested-in-parameter
+            value: '{{steps.generate.outputs.parameters.out-parameter}}'
+    - - name: consume
+        template: consume
+        arguments:
+          artifacts:
+          - name: in-artifact
+            from: '{{steps.nested-wf.outputs.artifacts.nested-out-artifact}}'
+          parameters:
+          - name: in-parameter
+            value: '{{steps.nested-wf.outputs.parameters.nested-out-parameter}}'
+  - name: generate
+    container:
+      image: busybox
+      args:
+      - ' echo hello world | tee /tmp/my-output-artifact.txt && echo ''my-output-parameter''
+        > /tmp/my-output-parameter.txt '
+      command:
+      - sh
+      - -c
+    outputs:
+      artifacts:
+      - name: out-artifact
+        path: /tmp/my-output-artifact.txt
+      parameters:
+      - name: out-parameter
+        valueFrom:
+          path: /tmp/my-output-parameter.txt
+  - name: nested-wf
+    steps:
+    - - name: consume
+        template: consume
+        arguments:
+          artifacts:
+          - name: in-artifact
+            from: '{{inputs.artifacts.nested-in-artifact}}'
+          parameters:
+          - name: in-parameter
+            value: '{{inputs.parameters.nested-in-parameter}}'
+      - name: generate
+        template: generate
+    inputs:
+      artifacts:
+      - name: nested-in-artifact
+      parameters:
+      - name: nested-in-parameter
+    outputs:
+      artifacts:
+      - name: nested-out-artifact
+        from: '{{steps.generate.outputs.artifacts.out-artifact}}'
+      parameters:
+      - name: nested-out-parameter
+        valueFrom:
+          parameter: '{{steps.generate.outputs.parameters.out-parameter}}'
+  - name: consume
+    container:
+      image: alpine:3.7
+      args:
+      - ' echo ''input parameter value: {{inputs.parameters.in-parameter}}'' && echo
+        ''input artifact contents:'' && cat /tmp/art '
+      command:
+      - sh
+      - -c
+    inputs:
+      artifacts:
+      - name: in-artifact
+        path: /tmp/art
+      parameters:
+      - name: in-parameter

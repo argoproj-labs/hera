@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-contiue-on-fail-
+spec:
+  entrypoint: workflow
+  templates:
+  - name: workflow
+    dag:
+      tasks:
+      - name: A
+        template: hello-world
+      - name: B
+        depends: A
+        template: intentional-fail
+      - name: C
+        depends: A
+        template: hello-world
+      - name: D
+        depends: B.Failed && C
+        template: hello-world
+      - name: E
+        depends: A
+        template: intentional-fail
+      - name: F
+        depends: A
+        template: hello-world
+      - name: G
+        depends: E && F
+        template: hello-world
+  - name: hello-world
+    container:
+      image: busybox
+      args:
+      - hello world
+      command:
+      - echo
+  - name: intentional-fail
+    container:
+      image: alpine:latest
+      args:
+      - echo intentional failure; exit 1
+      command:
+      - sh
+      - -c

@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pod-spec-from-previous-step-
+spec:
+  entrypoint: workflow
+  templates:
+  - name: workflow
+    dag:
+      tasks:
+      - name: parse-resources
+        template: parse-resources-tmpl
+      - name: setup-resources
+        depends: parse-resources
+        template: setup-resources-tmpl
+        arguments:
+          parameters:
+          - name: resources
+            value: '{{tasks.parse-resources.outputs.parameters.resources}}'
+  - name: parse-resources-tmpl
+    outputs:
+      parameters:
+      - name: resources
+        valueFrom:
+          path: /tmp/resources.json
+    script:
+      image: alpine:latest
+      source: |
+        echo '{"memory": "10Gi", "cpu": "2000m"}' > /tmp/resources.json && cat /tmp/resources.json
+      command:
+      - sh
+  - name: setup-resources-tmpl
+    podSpecPatch: '{"containers":[{"name":"main", "resources":{"limits": {{inputs.parameters.resources}},
+      "requests": {{inputs.parameters.resources}} }}]}'
+    inputs:
+      parameters:
+      - name: resources
+    script:
+      image: alpine:latest
+      source: |
+        echo {{inputs.parameters.resources}}
+      command:
+      - sh

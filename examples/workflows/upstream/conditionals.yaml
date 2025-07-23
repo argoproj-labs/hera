@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: conditional-
+spec:
+  entrypoint: conditional-example
+  templates:
+  - name: conditional-example
+    steps:
+    - - name: print-hello-govaluate
+        template: argosay
+        when: '{{inputs.parameters.should-print}} == true'
+      - name: print-hello-expr
+        template: argosay
+        when: '{{= inputs.parameters["should-print"] == ''true''}}'
+      - name: print-hello-expr-json
+        template: argosay
+        when: '{{=jsonpath(workflow.parameters.json, ''$[0].value'') == ''true''}}'
+    inputs:
+      parameters:
+      - name: should-print
+  - name: argosay
+    container:
+      image: argoproj/argosay:v1
+      args:
+      - cowsay hello
+      command:
+      - sh
+      - -c
+  arguments:
+    parameters:
+    - name: should-print
+      value: 'true'

@@ -16,7 +16,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     with CronWorkflow(
         name="hello-world",
         entrypoint="hello-world-with-time",
-        schedule="* * * * *",
+        schedules=["* * * * *"],
         timezone="America/Los_Angeles",
         starting_deadline_seconds=0,
         concurrency_policy="Replace",
@@ -42,11 +42,12 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     spec:
       concurrencyPolicy: Replace
       failedJobsHistoryLimit: 4
-      schedule: '* * * * *'
       startingDeadlineSeconds: 0
       successfulJobsHistoryLimit: 4
       suspend: false
       timezone: America/Los_Angeles
+      schedules:
+      - '* * * * *'
       workflowSpec:
         entrypoint: hello-world-with-time
         templates:

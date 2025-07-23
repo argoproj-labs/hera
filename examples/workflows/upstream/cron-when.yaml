@@ -4,9 +4,10 @@ metadata:
   name: sleep-when
 spec:
   concurrencyPolicy: Allow
-  schedule: '* * * * *'
   when: '{{= cronworkflow.lastScheduledTime == nil || (now() - cronworkflow.lastScheduledTime).Seconds()
     > 360 }}'
+  schedules:
+  - '* * * * *'
   workflowSpec:
     entrypoint: sleep-busybox
     templates:

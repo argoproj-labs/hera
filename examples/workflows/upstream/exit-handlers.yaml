@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: exit-handlers-
+spec:
+  entrypoint: intentional-fail
+  onExit: exit-handler
+  templates:
+  - name: intentional-fail
+    container:
+      image: alpine:latest
+      args:
+      - echo intentional failure; exit 1
+      command:
+      - sh
+      - -c
+  - name: exit-handler
+    steps:
+    - - name: notify
+        template: send-email
+      - name: celebrate
+        template: celebrate
+        when: '{{workflow.status}} == Succeeded'
+      - name: cry
+        template: cry
+        when: '{{workflow.status}} != Succeeded'
+  - name: send-email
+    container:
+      image: alpine:latest
+      args:
+      - 'echo send e-mail: {{workflow.name}} {{workflow.status}} {{workflow.duration}}.
+        Failed steps {{workflow.failures}}'
+      command:
+      - sh
+      - -c
+  - name: celebrate
+    container:
+      image: alpine:latest
+      args:
+      - echo hooray!
+      command:
+      - sh
+      - -c
+  - name: cry
+    container:
+      image: alpine:latest
+      args:
+      - echo boohoo!
+      command:
+      - sh
+      - -c

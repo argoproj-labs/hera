@@ -20,15 +20,15 @@ from tests.test_remaining_examples import UPSTREAM_EXAMPLES_FOLDER
 runner = CommandRunner(Hera, base_args=["generate", "python"])
 
 SKIP_FILES = [
-    "cluster-workflow-template__clustertemplates.upstream.yaml",  # multiple workflows in one file, generates correctly
+    "cluster-workflow-template--clustertemplates.upstream.yaml",  # multiple workflows in one file, generates correctly
     "cron-backfill.upstream.yaml",  # multiple workflows in one file, generates correctly
-    "workflow-template__templates.upstream.yaml",  # multiple workflows in one file, generates correctly
+    "workflow-template--templates.upstream.yaml",  # multiple workflows in one file, generates correctly
     "memoize-simple.upstream.yaml",  # memoize not working
-    "workflow-event-binding__github-path-filter-workflowtemplate.upstream.yaml",  # value is a list (invalid?)
+    "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",  # value is a list (invalid?)
     "testvolume.upstream.yaml",  # not a workflow
-    "configmaps__simple-parameters-configmap.upstream.yaml",  # not a workflow
-    "workflow-event-binding__github-path-filter-workfloweventbinding.upstream.yaml",  # not a workflow
-    "workflow-event-binding__event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
+    "configmaps--simple-parameters-configmap.upstream.yaml",  # not a workflow
+    "workflow-event-binding--github-path-filter-workfloweventbinding.upstream.yaml",  # not a workflow
+    "workflow-event-binding--event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
     "workflow-count-resourcequota.upstream.yaml",  # not a workflow
     "steps-inline-workflow.upstream.yaml",  # inline unsupported
     "dag-inline-workflow.upstream.yaml",  # inline unsupported

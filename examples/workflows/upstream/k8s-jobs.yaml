@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: k8s-jobs
+spec:
+  entrypoint: rand-num
+  templates:
+  - name: rand-num
+    outputs:
+      parameters:
+      - name: job-name
+        valueFrom:
+          jsonPath: '{.metadata.name}'
+      - name: job-obj
+        valueFrom:
+          jqFilter: .
+    resource:
+      action: create
+      failureCondition: status.failed > 1
+      manifest: |
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          generateName: rand-num-
+        spec:
+          completions: 3
+          parallelism: 3
+          template:
+            metadata:
+              name: rand
+            spec:
+              containers:
+              - name: rand
+                image: python:alpine3.6
+                command: ["python", "-c", "import random; import time; print(random.randint(1, 1000)); time.sleep(10)"]
+              restartPolicy: Never
+      setOwnerReference: true
+      successCondition: status.succeeded > 2
