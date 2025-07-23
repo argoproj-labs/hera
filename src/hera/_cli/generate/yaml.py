@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 from pathlib import Path
 
@@ -47,8 +48,13 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
     Returns:
         A list containing all `Workflow` objects defined within that module.
     """
-    module_name = path.stem
-    spec = importlib.util.spec_from_file_location(module_name, path, submodule_search_locations=[str(path.parent)])
+    try:
+        module_name = ".".join(str(path.resolve().relative_to(Path(os.getcwd()))).replace(".py", "").split("/"))
+        spec = importlib.util.spec_from_file_location(module_name, path)
+    except ValueError:
+        module_name = path.stem
+        spec = importlib.util.spec_from_file_location(module_name, path, submodule_search_locations=[str(path.parent)])
+
     assert spec
 
     module = importlib.util.module_from_spec(spec)

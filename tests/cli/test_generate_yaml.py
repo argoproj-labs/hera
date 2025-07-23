@@ -23,43 +23,65 @@ def patch_open():
     return patch("io.open", new=mock_open())
 
 
-single_workflow_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: single
-    spec: {}
-    """)
+single_workflow_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: single
+spec: {}
+"""
 
-workflow_template_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: WorkflowTemplate
-    metadata:
-      name: workflow-template
-    spec: {}
-    """)
+runner_workflow_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: runner-workflow-
+spec:
+  entrypoint: hello
+  templates:
+  - name: hello
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - tests.cli.examples.runner_workflow:hello
+      command:
+      - python
+"""
 
-cluster_workflow_template_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: ClusterWorkflowTemplate
-    metadata:
-      name: cluster-workflow-template
-    spec: {}
-    """)
 
-multiple_workflow_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: one
-    spec: {}
-    ---
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: two
-    spec: {}
-    """)
+workflow_template_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: workflow-template
+spec: {}
+"""
+
+cluster_workflow_template_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: cluster-workflow-template
+spec: {}
+"""
+
+multiple_workflow_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: one
+spec: {}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: two
+spec: {}
+"""
 
 whole_folder_output = join_output(
     cluster_workflow_template_output,
@@ -87,6 +109,14 @@ def test_single_workflow(capsys):
 
     output = get_stdout(capsys)
     assert output == single_workflow_output
+
+
+@pytest.mark.cli
+def test_runner_workflow(capsys):
+    runner.invoke("tests/cli/examples/runner_workflow.py")
+
+    output = get_stdout(capsys)
+    assert output == runner_workflow_output
 
 
 @pytest.mark.cli
