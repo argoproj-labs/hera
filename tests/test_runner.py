@@ -1079,3 +1079,21 @@ def test_script_partially_annotated_tuple_should_raise_an_error():
         ),
     ):
         _runner(entrypoint, kwargs_list)
+
+
+def test_script_runner_generation_from_main():
+    from hera.workflows import Script, Workflow
+
+    def hello(s: str):
+        print("Hello, {s}!".format(s=s))
+
+    hello.__module__ = "__main__"
+
+    with Workflow(
+        generate_name="hello-world-",
+        entrypoint="hello",
+        arguments={"s": "world"},
+    ) as w:
+        Script(name="hello", source=hello, constructor="runner")
+
+    assert w.to_dict()["spec"]["templates"][0]["script"]["args"][3] == "tests.test_runner:hello"

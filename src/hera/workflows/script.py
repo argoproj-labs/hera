@@ -7,10 +7,12 @@ for more on scripts in Argo Workflows.
 import ast
 import copy
 import inspect
+import os
 import sys
 import textwrap
 from abc import abstractmethod
 from functools import wraps
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -852,11 +854,22 @@ class RunnerScriptConstructor(ScriptConstructor):
 
         if values.get("args") is not None:
             raise ValueError("Cannot specify args when callable is True")
+
+        module = values["source"].__module__
+
+        if module == "__main__":
+            file_path = (
+                str(Path(values["source"].__globals__["__file__"]).relative_to(Path(os.getcwd())))
+                .replace(".py", "")
+                .split("/")
+            )
+            module = ".".join(file_path)
+
         values["args"] = [
             "-m",
             "hera.workflows.runner",
             "-e",
-            f"{values['source'].__module__}:{values['source'].__name__}",
+            f"{module}:{values['source'].__name__}",
         ]
 
         return values
