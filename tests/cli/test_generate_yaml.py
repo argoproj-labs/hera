@@ -1,3 +1,4 @@
+import shutil
 import sys
 from pathlib import Path
 from textwrap import dedent
@@ -118,6 +119,16 @@ def test_runner_workflow(capsys):
 
     output = get_stdout(capsys)
     assert output == runner_workflow_output
+
+
+@pytest.mark.cli
+def test_runner_workflow_not_in_cwd(capsys, tmp_path):
+    shutil.copy("tests/cli/examples/runner_workflow.py", tmp_path)
+    runner.invoke(str(tmp_path / "runner_workflow.py"))
+
+    output = get_stdout(capsys)
+    # The module is not in sys.path so we just use the stem of the workflow (i.e. best guess)
+    assert output == runner_workflow_output.replace("tests.cli.examples.runner_workflow", "runner_workflow")
 
 
 @pytest.mark.cli

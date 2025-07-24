@@ -22,7 +22,7 @@ import hera.workflows.artifact as artifact_module
 import tests.helper as test_module
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared.serialization import serialize
-from hera.workflows._runner.util import _run, _runner
+from hera.workflows._runner.util import _run, _runner, create_module_string
 from hera.workflows.io.v1 import Output as OutputV1
 
 try:
@@ -1081,24 +1081,61 @@ def test_script_partially_annotated_tuple_should_raise_an_error():
         _runner(entrypoint, kwargs_list)
 
 
-def test_script_runner_generation_from_main():
-    from hera.workflows import Script, Workflow
+@pytest.mark.parametrize(
+    "sys_path_relatives,file_rel_path,expected",
+    [
+        pytest.param(["project"], "project/wf_a.py", "wf_a", id="Exact direct match in sys.path"),
+        pytest.param(["project"], "project/workflows/wf_a.py", "workflows.wf_a", id="Submodule match in sys.path"),
+        pytest.param(
+            ["project"],
+            "project/workflows/subpackage/another/wf_a.py",
+            "workflows.subpackage.another.wf_a",
+            id="Deep submodule match in sys.path",
+        ),
+        pytest.param(
+            ["project", "project/src"],
+            "project/src/workflows/wf_b.py",
+            "workflows.wf_b",
+            id="More specific match (src dir) in sys.path",
+        ),
+        pytest.param([], "project/workflows/wf_c.py", "wf_c", id="No match, fallback to stem"),
+        pytest.param(
+            [""],
+            "project/workflows/wf_d.py",
+            "project.workflows.wf_d",
+            id="sys.path contains root, nested module path is full path",
+        ),
+    ],
+)
+def test_create_module_string(
+    tmp_path,
+    monkeypatch,
+    sys_path_relatives: list[str],
+    file_rel_path: str,
+    expected: str,
+):
+    # GIVEN
+    # Create file structure
+    file_path = tmp_path / file_rel_path
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def hello(s: str):
-        print("Hello, {s}!".format(s=s))
+    # Set up sys.path using tmp_path as root
+    mock_sys_path = [str(tmp_path / rel) for rel in sys_path_relatives]
+    monkeypatch.setattr(sys, "path", mock_sys_path)
 
-    hello.__module__ = "__main__"
+    # THEN
+    assert create_module_string(file_path) == expected
 
-    with Workflow(
-        generate_name="hello-world-",
-        entrypoint="hello",
-        arguments={"s": "world"},
-    ) as w:
-        Script(name="hello", source=hello, constructor="runner")
 
-    assert w.to_dict()["spec"]["templates"][0]["script"]["args"] == [
-        "-m",
-        "hera.workflows.runner",
-        "-e",
-        "tests.test_runner:hello",
-    ]
+def test_symlinked_sys_path(tmp_path, monkeypatch):
+    real_dir = tmp_path / "real_project"
+    real_dir.mkdir()
+    file_path = real_dir / "wf.py"
+
+    # Create a symlink pointing to real_project
+    symlink_path = tmp_path / "link_project"
+    symlink_path.symlink_to(real_dir)
+
+    monkeypatch.setattr(sys, "path", [str(symlink_path)])
+
+    assert create_module_string(file_path) == "wf"

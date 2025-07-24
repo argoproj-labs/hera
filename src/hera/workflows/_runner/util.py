@@ -300,11 +300,27 @@ def _run() -> None:
 
 
 def create_module_string(path: Path) -> str:
-    """Create a Python module path from the relative path to the file from the current working directory.
+    """Create a Python module path from the given path.
 
-    e.g. if cwd is "/project" and the file is "/project/workflows/wf_a.py", then the returned string will be
+    We find the most specific sys.path to create a valid, importable module path to the given path.
+
+    e.g. if sys.path contains "/project" and the file is "/project/workflows/wf_a.py", then the returned string will be
     "workflows.wf_a"
 
-    Raises a ValueError if the path is not a subpath of cwd
+    If we cannot find a valid sys.path, we simply use the file stem, e.g. for the
+    file "/project/workflows/wf_a.py", return `wf_a`.
     """
-    return ".".join(str(path.resolve().relative_to(Path(os.getcwd()))).replace(".py", "").split("/"))
+    path = path.resolve()
+
+    # find the most specific sys.path that contains the given path
+    candidates = []
+    for base in map(lambda p: Path(p).resolve(), sys.path + [os.getcwd()]):
+        if path.is_relative_to(base):
+            candidates.append(base)
+
+    if not candidates:
+        return path.stem
+
+    # use the most specific sys.path to construct a valid module path to import
+    base_path = max(candidates, key=lambda p: len(str(p)))
+    return ".".join(str(path.resolve().relative_to(base_path)).replace(".py", "").split("/"))
