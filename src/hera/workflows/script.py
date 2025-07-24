@@ -11,6 +11,7 @@ import sys
 import textwrap
 from abc import abstractmethod
 from functools import wraps
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -852,11 +853,19 @@ class RunnerScriptConstructor(ScriptConstructor):
 
         if values.get("args") is not None:
             raise ValueError("Cannot specify args when callable is True")
+
+        module = values["source"].__module__
+
+        if module == "__main__":
+            from hera.workflows._runner.util import create_module_string
+
+            module = create_module_string(Path(values["source"].__globals__["__file__"]))
+
         values["args"] = [
             "-m",
             "hera.workflows.runner",
             "-e",
-            f"{values['source'].__module__}:{values['source'].__name__}",
+            f"{module}:{values['source'].__name__}",
         ]
 
         return values

@@ -1,3 +1,4 @@
+import shutil
 import sys
 from pathlib import Path
 from textwrap import dedent
@@ -23,47 +24,70 @@ def patch_open():
     return patch("io.open", new=mock_open())
 
 
-single_workflow_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: single
-    spec: {}
-    """)
+single_workflow_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: single
+spec: {}
+"""
 
-workflow_template_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: WorkflowTemplate
-    metadata:
-      name: workflow-template
-    spec: {}
-    """)
+runner_workflow_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: runner-workflow-
+spec:
+  entrypoint: hello
+  templates:
+  - name: hello
+    script:
+      image: python:3.9
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - tests.cli.examples.runner_workflow:hello
+      command:
+      - python
+"""
 
-cluster_workflow_template_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: ClusterWorkflowTemplate
-    metadata:
-      name: cluster-workflow-template
-    spec: {}
-    """)
 
-multiple_workflow_output = dedent("""\
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: one
-    spec: {}
-    ---
-    apiVersion: argoproj.io/v1alpha1
-    kind: Workflow
-    metadata:
-      name: two
-    spec: {}
-    """)
+workflow_template_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: workflow-template
+spec: {}
+"""
+
+cluster_workflow_template_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: ClusterWorkflowTemplate
+metadata:
+  name: cluster-workflow-template
+spec: {}
+"""
+
+multiple_workflow_output = """\
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: one
+spec: {}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: two
+spec: {}
+"""
 
 whole_folder_output = join_output(
     cluster_workflow_template_output,
     multiple_workflow_output,
+    runner_workflow_output,
     single_workflow_output,
     workflow_template_output,
 )
@@ -87,6 +111,24 @@ def test_single_workflow(capsys):
 
     output = get_stdout(capsys)
     assert output == single_workflow_output
+
+
+@pytest.mark.cli
+def test_runner_workflow(capsys):
+    runner.invoke("tests/cli/examples/runner_workflow.py")
+
+    output = get_stdout(capsys)
+    assert output == runner_workflow_output
+
+
+@pytest.mark.cli
+def test_runner_workflow_not_in_cwd(capsys, tmp_path):
+    shutil.copy("tests/cli/examples/runner_workflow.py", tmp_path)
+    runner.invoke(str(tmp_path / "runner_workflow.py"))
+
+    output = get_stdout(capsys)
+    # The module is not in sys.path so we just use the stem of the workflow (i.e. best guess)
+    assert output == runner_workflow_output.replace("tests.cli.examples.runner_workflow", "runner_workflow")
 
 
 @pytest.mark.cli
@@ -308,7 +350,11 @@ def test_exclude_one(capsys):
     runner.invoke("tests/cli/examples", "--exclude=*/examples/*template*")
 
     output = get_stdout(capsys)
-    assert output == join_output(multiple_workflow_output, single_workflow_output)
+    assert output == join_output(
+        multiple_workflow_output,
+        runner_workflow_output,
+        single_workflow_output,
+    )
 
 
 @pytest.mark.cli
@@ -320,7 +366,7 @@ def test_exclude_two(capsys):
     )
 
     output = get_stdout(capsys)
-    assert output == multiple_workflow_output
+    assert output == join_output(multiple_workflow_output, runner_workflow_output)
 
 
 @pytest.mark.cli

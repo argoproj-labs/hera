@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Annotated, Dict, List, Optional, Union, cast
 
@@ -16,6 +17,7 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.script import (
     RunnerScriptConstructor,
+    Script,
     _get_inputs_from_callable,
     _get_outputs_from_return_annotation,
     script,
@@ -270,6 +272,73 @@ def test_invalid_script_when_multiple_output_workflow_annotations_are_given():
 
     with pytest.raises(ValueError, match="Annotation metadata cannot contain more than one Artifact/Parameter."):
         _get_outputs_from_return_annotation(invalid_script, None)
+
+
+@pytest.mark.parametrize(
+    "sys_path_relatives,file_rel_path,expected_module",
+    [
+        pytest.param(
+            ["project"],
+            "project/workflows/wf_a.py",
+            "workflows.wf_a",
+            id="Exact match in sys.path",
+        ),
+        pytest.param(
+            ["project", "project/src"],
+            "project/src/workflows/wf_b.py",
+            "workflows.wf_b",
+            id="More specific match (src dir)",
+        ),
+        pytest.param(
+            [],
+            "project/workflows/wf_c.py",
+            "wf_c",
+            id="No match, fallback to stem",
+        ),
+        pytest.param(
+            [""],
+            "project/workflows/wf_d.py",
+            "project.workflows.wf_d",
+            id="sys.path is root dir",
+        ),
+    ],
+)
+def test_script_runner_constructor_generation_from_main_uses_module_path(
+    tmp_path,
+    monkeypatch,
+    sys_path_relatives: list[str],
+    file_rel_path: str,
+    expected_module: str,
+):
+    # GIVEN
+    def hello(s: str):
+        print("Hello, {s}!".format(s=s))
+
+    # Create file structure
+    full_path = tmp_path / file_rel_path
+    full_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # `transform_values` does a simple check of the `__module__` of the function,
+    # and uses the function's __globals__["__file__"], so we can spoof it like so:
+    hello.__module__ = "__main__"
+    hello.__globals__["__file__"] = str(full_path)
+
+    # Set up sys.path using tmp_path as root
+    mock_sys_path = [str(tmp_path / rel) for rel in sys_path_relatives]
+    monkeypatch.setattr(sys, "path", mock_sys_path)
+
+    # WHEN
+    # `transform_values` is called by validation functions when initialising the Script
+    # which will set the value of `args`
+    hello_script = Script(name="hello", source=hello, constructor="runner")
+
+    # THEN
+    assert hello_script.args and hello_script.args == [
+        "-m",
+        "hera.workflows.runner",
+        "-e",
+        f"{expected_module}:hello",
+    ]
 
 
 class TestRunnerScriptEnv:

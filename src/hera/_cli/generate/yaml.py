@@ -1,5 +1,3 @@
-"""The main entrypoint for hera CLI."""
-
 from __future__ import annotations
 
 import importlib.util
@@ -8,6 +6,7 @@ from pathlib import Path
 
 from hera._cli.base import GenerateYaml
 from hera._cli.generate.util import YAML_EXTENSIONS, convert_code, expand_paths, write_output
+from hera.workflows._runner.util import create_module_string
 from hera.workflows.workflow import Workflow
 
 DEFAULT_EXTENSION = ".yaml"
@@ -47,8 +46,8 @@ def load_workflows_from_module(path: Path) -> list[Workflow]:
     Returns:
         A list containing all `Workflow` objects defined within that module.
     """
-    module_name = path.stem
-    spec = importlib.util.spec_from_file_location(module_name, path, submodule_search_locations=[str(path.parent)])
+    module_name = create_module_string(path)
+    spec = importlib.util.spec_from_file_location(module_name, path)
     assert spec
 
     module = importlib.util.module_from_spec(spec)
