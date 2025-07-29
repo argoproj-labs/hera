@@ -56,7 +56,10 @@ https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing
                 Env(name="MAX", value=f"{week_temps_jsonpath('$.max'):=}"),
                 Env(name="AVG", value=f"{week_temps_jsonpath('$.avg'):=}"),
             ],
-            command=["echo", "The week's average temperature was $AVG with a minimum of $MIN and a maximum of $MAX."],
+            command=[
+                "echo",
+                "The week's average temperature was $(AVG) with a minimum of $(MIN) and a maximum of $(MAX).",
+            ],
             image="alpine:3.7",
         )
     ```
@@ -76,8 +79,8 @@ https://github.com/argoproj/argo-workflows/blob/main/examples/expression-reusing
           image: alpine:3.7
           command:
           - echo
-          - The week's average temperature was $AVG with a minimum of $MIN and a maximum
-            of $MAX.
+          - The week's average temperature was $(AVG) with a minimum of $(MIN) and a maximum
+            of $(MAX).
           env:
           - name: MIN
             value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.min'')}}'
