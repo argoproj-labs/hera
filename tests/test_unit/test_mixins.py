@@ -10,9 +10,11 @@ from hera.workflows._mixins import (
     VolumeMixin,
     VolumeMountMixin,
 )
+from hera.workflows.container import Container
 from hera.workflows.models import (
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
+    Container as ModelContainer,
     EmptyDirVolumeSource,
     ImagePullPolicy,
     Inputs as ModelInputs,
@@ -25,11 +27,13 @@ from hera.workflows.models import (
     PersistentVolumeClaimVolumeSource,
     Quantity,
     RetryStrategy as ModelRetryStrategy,
+    Template as ModelTemplate,
     Volume as ModelVolume,
     VolumeMount,
     VolumeResourceRequirements,
 )
 from hera.workflows.retry_strategy import RetryStrategy
+from hera.workflows.task import Task
 from hera.workflows.volume import ExistingVolume, Volume
 
 
@@ -295,3 +299,27 @@ class TestVolumeMountMixin:
 
         assert volume_mixin._build_volumes() == [ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())]
         assert volume_mixin._build_volume_mounts() is None
+
+
+class TestTemplateInvocatorSubNodeMixin:
+    def test_get_outputs_str_template(self):
+        task = Task(name="test", template="dummy")
+
+        with pytest.raises(
+            ValueError, match="Cannot get output parameters when the template was set via a name: dummy"
+        ):
+            task.get_outputs()
+
+    def test_get_outputs_no_outputs(self):
+        container = Container(name="c")
+        task = Task(name="test", template=container)
+
+        with pytest.raises(ValueError, match="Cannot get output parameters. Template 'c' has no outputs"):
+            task.get_outputs()
+
+    def test_get_outputs_no_outputs_model_template(self):
+        model_template = ModelTemplate(name="c", container=ModelContainer(image="test-image"))
+        task = Task(name="test", template=model_template)
+
+        with pytest.raises(ValueError, match="Cannot get output parameters. Template 'c' has no outputs"):
+            task.get_outputs()

@@ -929,11 +929,14 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
             template = self.template
 
         # at this point, we know that the template is a `Template` object
-        if template.outputs is None:  # type: ignore
-            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
-        if template.outputs.parameters is None:  # type: ignore
-            raise ValueError(f"Cannot get output parameters when the template has no output parameters: {template}")
-        parameters = template.outputs.parameters  # type: ignore
+        assert isinstance(template, Template)
+
+        if template.outputs is None:
+            raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no outputs")
+        if template.outputs.parameters is None:
+            raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no output parameters")
+
+        parameters = template.outputs.parameters
 
         obj = next((output for output in parameters if output.name == name), None)
         if obj is not None:
@@ -981,10 +984,13 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
             template = cast(Template, self.template)
 
         # at this point, we know that the template is a `Template` object
-        if template.outputs is None:  # type: ignore
-            raise ValueError(f"Cannot get output artifacts when the template has no outputs: {template}")
-        elif template.outputs.artifacts is None:  # type: ignore
-            raise ValueError(f"Cannot get output artifacts when the template has no output artifacts: {template}")
+        assert isinstance(template, Template)
+
+        if template.outputs is None:
+            raise ValueError(f"Cannot get output artifacts. Template '{template.name}' has no outputs")
+        if template.outputs.artifacts is None:
+            raise ValueError(f"Cannot get output artifacts. Template '{template.name}' has no output artifacts")
+
         artifacts = cast(List[ModelArtifact], template.outputs.artifacts)
 
         obj = next((output for output in artifacts if output.name == name), None)
@@ -1035,7 +1041,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         assert isinstance(template, Template)
 
         if template.outputs is None:
-            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
+            raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no outputs")
 
         parameters = [self.get_parameter(p.name) for p in template.outputs.parameters or []]
         artifacts = [self.get_artifact(art.name) for art in template.outputs.artifacts or []]
