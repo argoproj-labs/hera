@@ -224,7 +224,7 @@ class Steps(
             priority=self.priority,
             priority_class_name=self.priority_class_name,
             resource=None,
-            retry_strategy=self.retry_strategy,
+            retry_strategy=self._build_retry_strategy(),
             scheduler_name=self.scheduler_name,
             script=None,
             security_context=self.pod_security_context,

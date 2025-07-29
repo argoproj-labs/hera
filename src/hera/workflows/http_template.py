@@ -58,7 +58,7 @@ class HTTP(TemplateMixin, IOMixin, CallableTemplateMixin):
             plugin=self.plugin,
             priority=self.priority,
             priority_class_name=self.priority_class_name,
-            retry_strategy=self.retry_strategy,
+            retry_strategy=self._build_retry_strategy(),
             scheduler_name=self.scheduler_name,
             security_context=self.pod_security_context,
             service_account_name=self.service_account_name,
