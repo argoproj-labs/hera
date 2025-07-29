@@ -975,7 +975,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
             When something else other than an `Artifact` is found for the specified name.
         """
         if isinstance(self.template, str):
-            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+            raise ValueError(f"Cannot get output artifacts when the template was set via a name: {self.template}")
 
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
@@ -1021,8 +1021,8 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         """Gets a parameter from the outputs of this subnode."""
         return self._get_parameter(name=name, subtype=self._subtype)
 
-    def get_outputs(self) -> Optional[List[Union[Parameter, Artifact]]]:
-        """Get all output parameters and artifacts (as an optional list) from this task/step.
+    def get_outputs_as_arguments(self) -> Optional[List[Union[Parameter, Artifact]]]:
+        """Get all output parameters and artifacts (as an optional list) from this task/step for use as arguments.
 
         This is useful for when all the inputs of another template match all the outputs of this template. It
         is also possible to combine the outputs of multiple templates if they collectively match the inputs of

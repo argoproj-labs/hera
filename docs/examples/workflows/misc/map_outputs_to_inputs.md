@@ -58,10 +58,10 @@
     with Workflow(generate_name="map-outputs-to-inputs-", entrypoint="dag") as w:
         with DAG(name="dag"):
             t1: Task = create_some_outputs()
-            t2 = use_some_inputs(arguments=t1.get_outputs())
+            t2 = use_some_inputs(arguments=t1.get_outputs_as_arguments())
 
             t3: Task = create_more_outputs()
-            t4 = use_more_inputs(arguments=t1.get_outputs() + t3.get_outputs())
+            t4 = use_more_inputs(arguments=t1.get_outputs_as_arguments() + t3.get_outputs_as_arguments())
 
             t1 >> t2
             [t1, t3] >> t4
