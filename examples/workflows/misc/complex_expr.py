@@ -49,6 +49,9 @@ with Workflow(
             Env(name="MAX", value=f"{week_temps_jsonpath('$.max'):=}"),
             Env(name="AVG", value=f"{week_temps_jsonpath('$.avg'):=}"),
         ],
-        command=["echo", "The week's average temperature was $AVG with a minimum of $MIN and a maximum of $MAX."],
+        command=[
+            "echo",
+            "The week's average temperature was $(AVG) with a minimum of $(MIN) and a maximum of $(MAX).",
+        ],
         image="alpine:3.7",
     )

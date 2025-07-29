@@ -10,8 +10,8 @@ spec:
       image: alpine:3.7
       command:
       - echo
-      - The week's average temperature was $AVG with a minimum of $MIN and a maximum
-        of $MAX.
+      - The week's average temperature was $(AVG) with a minimum of $(MIN) and a maximum
+        of $(MAX).
       env:
       - name: MIN
         value: '{{=jsonpath(inputs.parameters[''week-temps''], ''$.min'')}}'
