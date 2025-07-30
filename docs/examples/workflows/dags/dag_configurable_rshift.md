@@ -36,6 +36,8 @@ C.depends = "A.Succeeded"
 D.depends = "B.Succeeded || C.Succeeded"
 ```
 
+> `set_next_defaults` also accepts lists or multiple values using the `|` operator!
+
 
 === "Hera"
 
