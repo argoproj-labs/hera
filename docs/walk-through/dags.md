@@ -233,3 +233,42 @@ A   B
 | X |
 C   D
 ```
+
+## Configuring the Default "Next" Behaviour for `>>`
+
+Hera v5.24 added the `Task.set_next_defaults` function, allowing you to set the default `operator` and `on` values
+within a scoped context, which by extension allows you to configure the rshift (`>>`) behaviour.
+
+This is useful if you want `A >> B` to mean "run B _only if_ A succeeded", otherwise the
+[default depends logic](https://argo-workflows.readthedocs.io/en/latest/enhanced-depends-logic/) means `A >> B` is
+equivalent to "B depends on `A.Succeeded || A.Skipped || A.Daemoned`".
+
+By setting the values in `Task.set_next_defaults`, we can configure the rshift behaviour to use a different operator
+and TaskResult. Then, the following
+
+```py
+with Task.set_next_defaults(operator=Operator.or_, on=TaskResult.succeeded):
+    A >> [B, C] >> D
+```
+
+is equivalent to
+
+```py
+A.next(B, on=TaskResult.succeeded)
+A.next(C, on=TaskResult.succeeded)
+B.next(D, on=TaskResult.succeeded)
+C.next(D, operator=Operator.or_, on=TaskResult.succeeded)
+```
+
+> Note the `Operator.or_` for D's `depends` is set when calling `C.next` which can also be confusing! This is because we
+> use `next` to describe the forward relationships, while the Argo field is `depends` which describes the backward
+> relationships.
+
+Or, described using the backward relationship of `depends` (which only accepts strings):
+```py
+B.depends = "A.Succeeded"
+C.depends = "A.Succeeded"
+D.depends = "B.Succeeded || C.Succeeded"
+```
+
+See the [DAG Configurable rshift example](../examples/workflows/dags/dag_configurable_rshift.md) for the full code!
