@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-configurable-rshift-
+spec:
+  entrypoint: diamond
+  templates:
+  - name: diamond
+    dag:
+      tasks:
+      - name: A
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: A
+      - name: B
+        depends: A.Succeeded
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: B
+      - name: C
+        depends: A.Succeeded
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: C
+      - name: D
+        depends: B.Succeeded || C.Succeeded
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: D
+  - name: echo
+    inputs:
+      parameters:
+      - name: message
+    script:
+      image: python:3.12
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: message = json.loads(r'''{{inputs.parameters.message}}''')
+        except: message = r'''{{inputs.parameters.message}}'''
+
+        print(message)
+      command:
+      - python
