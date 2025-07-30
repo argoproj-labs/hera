@@ -1,13 +1,22 @@
 import pytest
 
 from hera.workflows import Env, Parameter, Workflow
-from hera.workflows._mixins import ArgumentsMixin, ContainerMixin, EnvMixin, IOMixin, VolumeMixin, VolumeMountMixin
+from hera.workflows._mixins import (
+    ArgumentsMixin,
+    ContainerMixin,
+    EnvMixin,
+    IOMixin,
+    TemplateMixin,
+    VolumeMixin,
+    VolumeMountMixin,
+)
 from hera.workflows.models import (
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
     EmptyDirVolumeSource,
     ImagePullPolicy,
     Inputs as ModelInputs,
+    IntOrString,
     ObjectMeta,
     Outputs as ModelOutputs,
     Parameter as ModelParameter,
@@ -15,10 +24,12 @@ from hera.workflows.models import (
     PersistentVolumeClaimSpec,
     PersistentVolumeClaimVolumeSource,
     Quantity,
+    RetryStrategy as ModelRetryStrategy,
     Volume as ModelVolume,
     VolumeMount,
     VolumeResourceRequirements,
 )
+from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.volume import ExistingVolume, Volume
 
 
@@ -30,6 +41,22 @@ class TestContainerMixin:
             == ImagePullPolicy.always.value
         )
         assert ContainerMixin()._build_image_pull_policy() is None
+
+
+class TestTemplateMixin:
+    def test_build_retry_strategy(self):
+        # None
+        assert TemplateMixin(retry_strategy=None)._build_retry_strategy() is None
+
+        # Model class
+        assert TemplateMixin(
+            retry_strategy=ModelRetryStrategy(limit=IntOrString(__root__=2))
+        )._build_retry_strategy() == ModelRetryStrategy(limit=IntOrString(__root__=2))
+
+        # Hera class
+        assert TemplateMixin(retry_strategy=RetryStrategy(limit=2))._build_retry_strategy() == ModelRetryStrategy(
+            limit=IntOrString(__root__=2)
+        )
 
 
 class TestIOMixin:

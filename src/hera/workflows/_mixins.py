@@ -54,7 +54,7 @@ from hera.workflows.models import (
     Probe,
     Prometheus as ModelPrometheus,
     ResourceRequirements,
-    RetryStrategy,
+    RetryStrategy as ModelRetryStrategy,
     Sequence,
     Synchronization,
     Template,
@@ -68,6 +68,7 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 from hera.workflows.protocol import Templatable
 from hera.workflows.resources import Resources
+from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
 
@@ -456,7 +457,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     pod_spec_patch: Optional[str] = None
     priority: Optional[int] = None
     priority_class_name: Optional[str] = None
-    retry_strategy: Optional[RetryStrategy] = None
+    retry_strategy: Optional[Union[RetryStrategy, ModelRetryStrategy]] = None
     scheduler_name: Optional[str] = None
     pod_security_context: Optional[PodSecurityContext] = None
     service_account_name: Optional[str] = None
@@ -497,6 +498,15 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
             annotations=self.annotations,
             labels=self.labels,
         )
+
+    def _build_retry_strategy(self) -> Optional[ModelRetryStrategy]:
+        if self.retry_strategy is None:
+            return None
+
+        if isinstance(self.retry_strategy, RetryStrategy):
+            return self.retry_strategy.build()
+
+        return self.retry_strategy
 
 
 class ResourceMixin(BaseMixin):
