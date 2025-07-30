@@ -6,8 +6,9 @@ for more on using Tasks within a DAG.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from enum import Enum
-from typing import List, Optional, Union
+from typing import ClassVar, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -55,6 +56,9 @@ class Task(
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
 
+    _default_next_operator: ClassVar[Operator] = Operator.and_
+    _default_next_on: ClassVar[Optional[TaskResult]] = None
+
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
             return []
@@ -71,9 +75,12 @@ class Task(
     def _subtype(self) -> str:
         return "tasks"
 
-    def next(self, other: Task, operator: Operator = Operator.and_, on: Optional[TaskResult] = None) -> Task:
+    def next(self, other: Task, operator: Optional[Operator] = None, on: Optional[TaskResult] = None) -> Task:
         """Set self as a dependency of `other`."""
         assert issubclass(other.__class__, Task)
+
+        operator = operator or self.__class__._default_next_operator
+        on = on or self.__class__._default_next_on
 
         condition = f".{on.value}" if on else ""
 
@@ -86,6 +93,20 @@ class Task(
             # Add follow-up dependency
             other.depends += f" {operator} {self.name + condition}"
         return other
+
+    @classmethod
+    @contextmanager
+    def set_next_defaults(cls, operator: Operator = Operator.and_, on: Optional[TaskResult] = None):
+        """Temporarily set the defaults used by Task.next."""
+        old_operator_default = cls._default_next_operator
+        old_on_default = cls._default_next_on
+        cls._default_next_operator = operator
+        cls._default_next_on = on
+        try:
+            yield
+        finally:
+            cls._default_next_operator = old_operator_default
+            cls._default_next_on = old_on_default
 
     def __rrshift__(self, other: List[Union[Task, str]]) -> Task:
         """Set `other` as a dependency self."""
