@@ -271,4 +271,13 @@ C.depends = "A.Succeeded"
 D.depends = "B.Succeeded || C.Succeeded"
 ```
 
+The `set_next_defaults` function also accepts lists or values applying the `|` operator for the `on` value, meaning you can also specify conditions like `B.depends = "A.Succeeded || A.Daemoned"`, without affecting the `operator` used. E.g:
+
+```py
+with Task.set_next_defaults(operator=Operator.and_, on=TaskResult.succeeded | TaskResult.skipped):
+    [task_a, task_b] >> task_c
+
+assert task_c.depends == "(task-a.Skipped || task-a.Succeeded) && (task-b.Skipped || task-b.Succeeded)"
+```
+
 See the [DAG Configurable rshift example](../examples/workflows/dags/dag_configurable_rshift.md) for the full code!

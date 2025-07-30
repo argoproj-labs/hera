@@ -21,6 +21,16 @@ def test_override_task_next_success_only():
     assert task_b.depends == "task-a.Succeeded"
 
 
+def test_task_rshift_or():
+    task_a = Task(name="task-a", template="dummy")
+    task_b = Task(name="task-b", template="dummy")
+    task_c = Task(name="task-c", template="dummy")
+
+    task_c.depends = task_a | task_b
+
+    assert task_c.depends == "(task-a || task-b)"
+
+
 def test_override_task_next_operator_or():
     task_a = Task(name="task-a", template="dummy")
     task_b = Task(name="task-b", template="dummy")
@@ -41,3 +51,36 @@ def test_override_task_next_operator_or_success_only():
         [task_a, task_b] >> task_c
 
     assert task_c.depends == "task-a.Succeeded || task-b.Succeeded"
+
+
+def test_override_task_next_on_success_or_skipped_list():
+    task_a = Task(name="task-a", template="dummy")
+    task_b = Task(name="task-b", template="dummy")
+    task_c = Task(name="task-c", template="dummy")
+
+    with Task.set_next_defaults(on=[TaskResult.succeeded, TaskResult.skipped]):
+        [task_a, task_b] >> task_c
+
+    assert task_c.depends == "(task-a.Succeeded || task-a.Skipped) && (task-b.Succeeded || task-b.Skipped)"
+
+
+def test_override_task_next_on_success_or_skipped_or_operator():
+    task_a = Task(name="task-a", template="dummy")
+    task_b = Task(name="task-b", template="dummy")
+    task_c = Task(name="task-c", template="dummy")
+
+    with Task.set_next_defaults(on=TaskResult.succeeded | TaskResult.skipped):
+        [task_a, task_b] >> task_c
+
+    assert task_c.depends == "(task-a.Skipped || task-a.Succeeded) && (task-b.Skipped || task-b.Succeeded)"
+
+
+def test_override_task_next_or_operator_and_on_success_or_skipped():
+    task_a = Task(name="task-a", template="dummy")
+    task_b = Task(name="task-b", template="dummy")
+    task_c = Task(name="task-c", template="dummy")
+
+    with Task.set_next_defaults(operator=Operator.or_, on=TaskResult.succeeded | TaskResult.skipped):
+        [task_a, task_b] >> task_c
+
+    assert task_c.depends == "(task-a.Skipped || task-a.Succeeded) || (task-b.Skipped || task-b.Succeeded)"

@@ -31,6 +31,8 @@ B.depends = "A.Succeeded"
 C.depends = "A.Succeeded"
 D.depends = "B.Succeeded || C.Succeeded"
 ```
+
+> `set_next_defaults` also accepts lists or multiple values using the `|` operator!
 """
 
 from hera.workflows import DAG, Task, TaskResult, Workflow, script

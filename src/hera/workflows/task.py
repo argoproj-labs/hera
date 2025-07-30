@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from enum import Enum
-from typing import ClassVar, List, Optional, Union
+from typing import ClassVar, Iterable, Iterator, List, Optional, Set, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -43,6 +43,47 @@ class TaskResult(Enum):
     any_succeeded = "AnySucceeded"
     all_failed = "AllFailed"
 
+    def __or__(self, other: TaskResult) -> Iterable[TaskResult]:
+        """Create an "or" condition over multiple TaskResults."""
+        return _TaskResultGroup({self, other})
+
+
+class _TaskResultGroup(Iterable[TaskResult]):
+    """Private, implementation detail: an iterable of TaskResult with | support."""
+
+    __slots__ = ("_results",)
+
+    def __init__(self, results: Iterable[TaskResult]):
+        # use set for idempotence
+        self._results: Set[TaskResult] = set(results)
+
+    def __or__(self, other: Union[Iterable[TaskResult], TaskResult]):
+        if isinstance(other, TaskResult):
+            return _TaskResultGroup(self._results | {other})
+        # If user chained with another group or any iterable, merge
+        return _TaskResultGroup(self._results | set(other))
+
+    def __iter__(self) -> Iterator[TaskResult]:
+        return iter(self._results)
+
+
+def _normalize_on(
+    on: Union[TaskResult, Iterable[TaskResult], None],
+    default: Optional[List[TaskResult]],
+) -> Optional[List[TaskResult]]:
+    """Turn `on` into a list[TaskResult] or None.
+
+    Accepts:
+      - None -> return default
+      - TaskResult -> [TaskResult]
+      - Iterable[TaskResult] (including private group, sets, tuples, generators) -> list(...)
+    """
+    if on is None:
+        return default
+    if isinstance(on, TaskResult):
+        return [on]
+    return list(on)
+
 
 class Task(
     TemplateInvocatorSubNodeMixin,
@@ -57,7 +98,7 @@ class Task(
     depends: Optional[str] = None
 
     _default_next_operator: ClassVar[Operator] = Operator.and_
-    _default_next_on: ClassVar[Optional[TaskResult]] = None
+    _default_next_on: ClassVar[Optional[List[TaskResult]]] = None
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
@@ -75,38 +116,58 @@ class Task(
     def _subtype(self) -> str:
         return "tasks"
 
-    def next(self, other: Task, operator: Optional[Operator] = None, on: Optional[TaskResult] = None) -> Task:
+    def next(
+        self,
+        other: Task,
+        operator: Optional[Operator] = None,
+        on: Union[TaskResult, Iterable[TaskResult], None] = None,
+    ) -> Task:
         """Set self as a dependency of `other`."""
-        assert issubclass(other.__class__, Task)
+        operator = operator if operator is not None else self.__class__._default_next_operator
+        on_list = _normalize_on(on, self.__class__._default_next_on)
 
-        operator = operator or self.__class__._default_next_operator
-        on = on or self.__class__._default_next_on
-
-        condition = f".{on.value}" if on else ""
+        # Build condition string:
+        # - If multiple on-conditions: OR them and wrap in parens
+        # - If single on-condition: A.succeeded
+        # - If none: just "A"
+        if on_list and len(on_list) > 1:
+            condition_str = " || ".join(f"{self.name}.{c.value}" for c in on_list)
+            condition_str = f"({condition_str})"
+        elif on_list and len(on_list) == 1:
+            condition_str = f"{self.name}.{on_list[0].value}"
+        else:
+            condition_str = self.name
 
         if other.depends is None:
             # First dependency
-            other.depends = self.name + condition
+            other.depends = condition_str
         elif self.name in other._get_dependency_tasks():
             raise ValueError(f"{self.name} already in {other.name}'s depends: {other.depends}")
         else:
             # Add follow-up dependency
-            other.depends += f" {operator} {self.name + condition}"
+            other.depends += f" {operator} {condition_str}"
+
         return other
 
     @classmethod
     @contextmanager
-    def set_next_defaults(cls, operator: Operator = Operator.and_, on: Optional[TaskResult] = None):
-        """Temporarily set the defaults used by Task.next."""
-        old_operator_default = cls._default_next_operator
-        old_on_default = cls._default_next_on
+    def set_next_defaults(
+        cls,
+        operator: Operator = Operator.and_,
+        on: Union[TaskResult, Iterable[TaskResult], None] = None,
+    ):
+        """Temporarily override the default operator and on."""
+        on_list = _normalize_on(on, None)
+
+        old_operator = cls._default_next_operator
+        old_on = cls._default_next_on
         cls._default_next_operator = operator
-        cls._default_next_on = on
+        cls._default_next_on = on_list
         try:
             yield
         finally:
-            cls._default_next_operator = old_operator_default
-            cls._default_next_on = old_on_default
+            cls._default_next_operator = old_operator
+            cls._default_next_on = old_on
 
     def __rrshift__(self, other: List[Union[Task, str]]) -> Task:
         """Set `other` as a dependency self."""
@@ -138,7 +199,7 @@ class Task(
         raise ValueError(f"Unknown type {type(other)} provided to `__rshift__`")
 
     def __or__(self, other: Union[Task, str]) -> str:
-        """Adds a condition of."""
+        """Return a condition of `self || other`."""
         if isinstance(other, Task):
             return f"({self.name} || {other.name})"
         assert isinstance(other, str), f"Unknown type {type(other)} specified using `|` operator"
