@@ -306,23 +306,21 @@ class TestTemplateInvocatorSubNodeMixin:
     def test_get_outputs_str_template(self):
         task = Task(name="test", template="dummy")
 
-        with pytest.raises(
-            ValueError, match="Cannot get output parameters when the template was set via a name: dummy"
-        ):
+        with pytest.raises(ValueError, match="Cannot get outputs when the template was set via a name: dummy"):
             task.get_outputs_as_arguments()
 
     def test_get_outputs_no_outputs(self):
         container = Container(name="c")
         task = Task(name="test", template=container)
 
-        with pytest.raises(ValueError, match="Cannot get output parameters. Template 'c' has no outputs"):
+        with pytest.raises(ValueError, match="Template 'c' has no outputs"):
             task.get_outputs_as_arguments()
 
     def test_get_outputs_no_outputs_model_template(self):
         model_template = ModelTemplate(name="c", container=ModelContainer(image="test-image"))
         task = Task(name="test", template=model_template)
 
-        with pytest.raises(ValueError, match="Cannot get output parameters. Template 'c' has no outputs"):
+        with pytest.raises(ValueError, match="Template 'c' has no outputs"):
             task.get_outputs_as_arguments()
 
     def test_get_outputs_containing_parameter(self):
