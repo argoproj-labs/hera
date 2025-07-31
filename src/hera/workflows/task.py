@@ -130,7 +130,7 @@ class Task(
         on: OnType = None,
     ) -> Task:
         """Set self as a dependency of `other`."""
-        operator = operator if operator is not None else self.__class__._default_next_operator
+        operator = operator or self.__class__._default_next_operator
         on_list = _normalise_on(on, self.__class__._default_next_on)
 
         # Build condition string:
