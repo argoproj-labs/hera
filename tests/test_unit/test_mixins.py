@@ -10,9 +10,12 @@ from hera.workflows._mixins import (
     VolumeMixin,
     VolumeMountMixin,
 )
+from hera.workflows.artifact import Artifact
+from hera.workflows.container import Container
 from hera.workflows.models import (
     Arguments as ModelArguments,
     Artifact as ModelArtifact,
+    Container as ModelContainer,
     EmptyDirVolumeSource,
     ImagePullPolicy,
     Inputs as ModelInputs,
@@ -25,11 +28,13 @@ from hera.workflows.models import (
     PersistentVolumeClaimVolumeSource,
     Quantity,
     RetryStrategy as ModelRetryStrategy,
+    Template as ModelTemplate,
     Volume as ModelVolume,
     VolumeMount,
     VolumeResourceRequirements,
 )
 from hera.workflows.retry_strategy import RetryStrategy
+from hera.workflows.task import Task
 from hera.workflows.volume import ExistingVolume, Volume
 
 
@@ -295,3 +300,106 @@ class TestVolumeMountMixin:
 
         assert volume_mixin._build_volumes() == [ModelVolume(name="v1", empty_dir=EmptyDirVolumeSource())]
         assert volume_mixin._build_volume_mounts() is None
+
+
+class TestTemplateInvocatorSubNodeMixin:
+    def test_get_outputs_str_template(self):
+        task = Task(name="test", template="dummy")
+
+        with pytest.raises(ValueError, match="Cannot get outputs when the template was set via a name: dummy"):
+            task.get_outputs_as_arguments()
+
+    def test_get_outputs_no_outputs(self):
+        container = Container(name="c")
+        task = Task(name="test", template=container)
+
+        with pytest.raises(ValueError, match="Template 'c' has no outputs"):
+            task.get_outputs_as_arguments()
+
+    def test_get_outputs_no_outputs_model_template(self):
+        model_template = ModelTemplate(name="c", container=ModelContainer(image="test-image"))
+        task = Task(name="test", template=model_template)
+
+        with pytest.raises(ValueError, match="Template 'c' has no outputs"):
+            task.get_outputs_as_arguments()
+
+    def test_get_outputs_model_template_outputs_not_none(self):
+        """Edge case of using a model template with a non-none `outputs`, but contains `None` for parameters and artifacts."""
+        model_template = ModelTemplate(name="c", container=ModelContainer(image="test-image"), outputs=ModelOutputs())
+        task = Task(name="test", template=model_template)
+
+        with pytest.raises(ValueError, match="Template 'c' has no outputs"):
+            task.get_outputs_as_arguments()
+
+    def test_get_outputs_containing_parameter(self):
+        container = Container(name="c", outputs=[ModelParameter(name="p", value="42")])
+        task = Task(name="test", template=container)
+
+        assert task.get_outputs_as_arguments() == [Parameter(name="p", value="{{tasks.test.outputs.parameters.p}}")]
+
+    def test_get_outputs_containing_artifact(self):
+        container = Container(name="c", outputs=[ModelArtifact(name="art", from_="somewhere")])
+        task = Task(name="test", template=container)
+
+        assert task.get_outputs_as_arguments() == [Artifact(name="art", from_="{{tasks.test.outputs.artifacts.art}}")]
+
+    def test_get_outputs_containing_both(self):
+        container = Container(
+            name="c",
+            outputs=[ModelParameter(name="p", value="42"), ModelArtifact(name="art", from_="somewhere")],
+        )
+        task = Task(name="test", template=container)
+
+        assert task.get_outputs_as_arguments() == [
+            Parameter(name="p", value="{{tasks.test.outputs.parameters.p}}"),
+            Artifact(name="art", from_="{{tasks.test.outputs.artifacts.art}}"),
+        ]
+
+    def test_get_parameter_str_template(self):
+        task = Task(name="test", template="dummy")
+
+        with pytest.raises(
+            ValueError, match="Cannot get output parameters when the template was set via a name: dummy"
+        ):
+            task.get_parameter("a-param")
+
+    def test_get_parameter_no_outputs(self):
+        container = Container(name="c")
+        task = Task(name="test", template=container)
+
+        with pytest.raises(ValueError, match="Cannot get output parameters. Template 'c' has no outputs"):
+            task.get_parameter("a-param")
+
+    def test_get_parameter_no_parameters(self):
+        container = Container(name="c", outputs=ModelArtifact(name="art", from_="somewhere"))
+        task = Task(name="test", template=container)
+
+        with pytest.raises(ValueError, match="Cannot get output parameters. Template 'c' has no output parameters"):
+            task.get_parameter("a-param")
+
+    def test_get_artifact_str_template(self):
+        task = Task(name="test", template="dummy")
+
+        with pytest.raises(
+            ValueError, match="Cannot get output artifacts when the template was set via a name: dummy"
+        ):
+            task.get_artifact("an-artifact")
+
+    def test_get_artifact_no_outputs(self):
+        container = Container(name="c")
+        task = Task(name="test", template=container)
+
+        with pytest.raises(ValueError, match="Cannot get output artifacts. Template 'c' has no outputs"):
+            task.get_artifact("an-artifact")
+
+    def test_get_artifact_no_artifacts(self):
+        container = Container(
+            name="c",
+            outputs=[
+                ModelParameter(name="p", value="42"),
+            ],
+        )
+        task = Task(name="test", template=container)
+
+        with pytest.raises(ValueError, match="Cannot get output artifacts. Template 'c' has no output artifacts"):
+            task.get_artifact("an-artifact")

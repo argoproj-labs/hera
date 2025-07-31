@@ -137,6 +137,7 @@ ArgumentsT = Optional[
     Union[
         ModelArguments,
         OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+        ModelOutputs,
     ]
 ]
 """`ArgumentsT` is the main type associated with arguments that can be used on DAG tasks, steps, etc.
@@ -928,11 +929,14 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
             template = self.template
 
         # at this point, we know that the template is a `Template` object
-        if template.outputs is None:  # type: ignore
-            raise ValueError(f"Cannot get output parameters when the template has no outputs: {template}")
-        if template.outputs.parameters is None:  # type: ignore
-            raise ValueError(f"Cannot get output parameters when the template has no output parameters: {template}")
-        parameters = template.outputs.parameters  # type: ignore
+        assert isinstance(template, Template)
+
+        if template.outputs is None:
+            raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no outputs")
+        if template.outputs.parameters is None:
+            raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no output parameters")
+
+        parameters = template.outputs.parameters
 
         obj = next((output for output in parameters if output.name == name), None)
         if obj is not None:
@@ -971,7 +975,7 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
             When something else other than an `Artifact` is found for the specified name.
         """
         if isinstance(self.template, str):
-            raise ValueError(f"Cannot get output parameters when the template was set via a name: {self.template}")
+            raise ValueError(f"Cannot get output artifacts when the template was set via a name: {self.template}")
 
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
@@ -980,10 +984,13 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
             template = cast(Template, self.template)
 
         # at this point, we know that the template is a `Template` object
-        if template.outputs is None:  # type: ignore
-            raise ValueError(f"Cannot get output artifacts when the template has no outputs: {template}")
-        elif template.outputs.artifacts is None:  # type: ignore
-            raise ValueError(f"Cannot get output artifacts when the template has no output artifacts: {template}")
+        assert isinstance(template, Template)
+
+        if template.outputs is None:
+            raise ValueError(f"Cannot get output artifacts. Template '{template.name}' has no outputs")
+        if template.outputs.artifacts is None:
+            raise ValueError(f"Cannot get output artifacts. Template '{template.name}' has no output artifacts")
+
         artifacts = cast(List[ModelArtifact], template.outputs.artifacts)
 
         obj = next((output for output in artifacts if output.name == name), None)
@@ -1013,3 +1020,34 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     def get_parameter(self, name: str) -> Parameter:
         """Gets a parameter from the outputs of this subnode."""
         return self._get_parameter(name=name, subtype=self._subtype)
+
+    def get_outputs_as_arguments(self) -> List[Union[Parameter, Artifact]]:
+        """Get all output parameters and artifacts as a combined list from this task/step for use as arguments.
+
+        This is useful for when all the inputs of another template match all the outputs of this template. It
+        is also possible to combine the outputs of multiple templates if they collectively match the inputs of
+        another template.
+        """
+        if isinstance(self.template, str):
+            raise ValueError(f"Cannot get outputs when the template was set via a name: {self.template}")
+
+        # here, we build the template early to verify that we can get the outputs
+        if isinstance(self.template, Templatable):
+            template = self.template._build_template()
+        else:
+            template = self.template
+
+        # at this point, we know that the template is a `Template` object
+        assert isinstance(template, Template)
+
+        if template.outputs is None:
+            raise ValueError(f"Template '{template.name}' has no outputs")
+
+        parameters = [self.get_parameter(p.name) for p in template.outputs.parameters or []]
+        artifacts = [self.get_artifact(art.name) for art in template.outputs.artifacts or []]
+
+        result = parameters + artifacts
+        if not result:
+            raise ValueError(f"Template '{template.name}' has no outputs")
+
+        return result
