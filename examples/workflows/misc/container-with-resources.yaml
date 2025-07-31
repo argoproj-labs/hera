@@ -16,5 +16,5 @@ spec:
       resources:
         requests:
           cpu: '1'
-          ephemeral-storage: 5Gi
-          memory: 5Gi
+          ephemeral-storage: 10Ki
+          memory: 10Ki
