@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from enum import Enum
-from typing import ClassVar, Iterable, Iterator, List, Optional, Set, Union
+from typing import ClassVar, Iterable, Iterator, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -45,44 +45,51 @@ class TaskResult(Enum):
 
     def __or__(self, other: TaskResult) -> Iterable[TaskResult]:
         """Create an "or" condition over multiple TaskResults."""
-        return _TaskResultGroup({self, other})
+        return _TaskResultGroup([self, other])
 
 
 class _TaskResultGroup(Iterable[TaskResult]):
-    """Private, implementation detail: an iterable of TaskResult with | support."""
+    """Private, implementation detail: an iterable of TaskResult with | support that maintains order and deduplicates."""
 
     __slots__ = ("_results",)
 
     def __init__(self, results: Iterable[TaskResult]):
-        # use set for idempotence
-        self._results: Set[TaskResult] = set(results)
+        self._results: List[TaskResult] = []
+        for r in results:
+            if r not in self._results:
+                self._results.append(r)
 
     def __or__(self, other: Union[Iterable[TaskResult], TaskResult]):
         if isinstance(other, TaskResult):
-            return _TaskResultGroup(self._results | {other})
-        # If user chained with another group or any iterable, merge
-        return _TaskResultGroup(self._results | set(other))
+            return _TaskResultGroup(self._results + [other])
+        return _TaskResultGroup(self._results + list(other))
 
     def __iter__(self) -> Iterator[TaskResult]:
         return iter(self._results)
 
 
-def _normalize_on(
-    on: Union[TaskResult, Iterable[TaskResult], None],
-    default: Optional[List[TaskResult]],
+OnType = Optional[Union[TaskResult, Iterable[TaskResult]]]
+
+
+def _normalise_on(
+    on: OnType,
+    default: OnType = None,
 ) -> Optional[List[TaskResult]]:
     """Turn `on` into a list[TaskResult] or None.
 
     Accepts:
-      - None -> return default
+      - None -> return normalised default (which may also be None)
       - TaskResult -> [TaskResult]
-      - Iterable[TaskResult] (including private group, sets, tuples, generators) -> list(...)
+      - Iterable[TaskResult] -> list(...)
     """
     if on is None:
-        return default
+        if default is None:
+            return None
+
+        return _normalise_on(default)
     if isinstance(on, TaskResult):
         return [on]
-    return list(on)
+    return list(_TaskResultGroup(on))
 
 
 class Task(
@@ -98,7 +105,7 @@ class Task(
     depends: Optional[str] = None
 
     _default_next_operator: ClassVar[Operator] = Operator.and_
-    _default_next_on: ClassVar[Optional[List[TaskResult]]] = None
+    _default_next_on: ClassVar[OnType] = None
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
@@ -120,11 +127,11 @@ class Task(
         self,
         other: Task,
         operator: Optional[Operator] = None,
-        on: Union[TaskResult, Iterable[TaskResult], None] = None,
+        on: OnType = None,
     ) -> Task:
         """Set self as a dependency of `other`."""
         operator = operator if operator is not None else self.__class__._default_next_operator
-        on_list = _normalize_on(on, self.__class__._default_next_on)
+        on_list = _normalise_on(on, self.__class__._default_next_on)
 
         # Build condition string:
         # - If multiple on-conditions: OR them and wrap in parens
@@ -157,7 +164,7 @@ class Task(
         on: Union[TaskResult, Iterable[TaskResult], None] = None,
     ):
         """Temporarily override the default operator and on."""
-        on_list = _normalize_on(on, None)
+        on_list = _normalise_on(on)
 
         old_operator = cls._default_next_operator
         old_on = cls._default_next_on
