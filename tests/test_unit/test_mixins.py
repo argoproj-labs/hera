@@ -323,6 +323,14 @@ class TestTemplateInvocatorSubNodeMixin:
         with pytest.raises(ValueError, match="Template 'c' has no outputs"):
             task.get_outputs_as_arguments()
 
+    def test_get_outputs_model_template_outputs_not_none(self):
+        """Edge case of using a model template with a non-none `outputs`, but contains `None` for parameters and artifacts."""
+        model_template = ModelTemplate(name="c", container=ModelContainer(image="test-image"), outputs=ModelOutputs())
+        task = Task(name="test", template=model_template)
+
+        with pytest.raises(ValueError, match="Template 'c' has no outputs"):
+            task.get_outputs_as_arguments()
+
     def test_get_outputs_containing_parameter(self):
         container = Container(name="c", outputs=[ModelParameter(name="p", value="42")])
         task = Task(name="test", template=container)

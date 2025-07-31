@@ -1045,4 +1045,9 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
 
         parameters = [self.get_parameter(p.name) for p in template.outputs.parameters or []]
         artifacts = [self.get_artifact(art.name) for art in template.outputs.artifacts or []]
-        return parameters + artifacts
+
+        result = parameters + artifacts
+        if not result:
+            raise ValueError(f"Template '{template.name}' has no outputs")
+
+        return result
