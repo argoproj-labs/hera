@@ -5,7 +5,9 @@ from typing import Optional
 
 
 def validate_name(name: str, max_length: Optional[int] = None, generate_name: bool = False) -> str:
-    """Validates a name according to standard argo/kubernetes limitations.
+    """DEPRECATED: Validates a name according to standard argo/kubernetes limitations.
+
+    Unused throughout the Hera codebase. To be removed in a future version of Hera.
 
     Parameters
     ----------
