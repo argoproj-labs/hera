@@ -28,11 +28,9 @@ spec:
           parameters:
           - name: cpu
             value: '{{item.cpu}}'
-          - name: mem
-            value: '{{item.mem}}'
   - name: compute-resources
     script:
-      image: python:3.10
+      image: python:3.9
       source: |-
         import os
         import sys
@@ -42,7 +40,7 @@ spec:
         import sys
         resources = []
         for i in range(1, 4):
-            resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})
+            resources.append({'cpu': i, 'mem': '{v}Ki'.format(v=i * 10)})
         json.dump(resources, sys.stdout)
       command:
       - python
@@ -55,7 +53,7 @@ spec:
       - name: cpu
       - name: mem
     script:
-      image: python:3.10
+      image: python:3.9
       source: |-
         import os
         import sys
@@ -79,9 +77,9 @@ spec:
       - name: cpu
         default: '1'
       - name: mem
-        default: 100Mi
+        default: 100Ki
     script:
-      image: python:3.10
+      image: python:3.9
       source: |-
         import os
         import sys

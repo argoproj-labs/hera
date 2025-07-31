@@ -8,6 +8,10 @@ This is useful when you write workflows in a business context that requires proc
 example, if you have a step that performs QC checks on some data, and only a subset of the data passes the checks, then
 you can compute the resources dynamically based on the amount of data you need to process in follow up steps.
 
+!!! Warning
+    You cannot use `resources` in the script decorator to set dynamic resources using string-templated input
+    parameters, as Argo validates the value so it will fail linting.
+
 
 === "Hera"
 
@@ -17,7 +21,7 @@ you can compute the resources dynamically based on the amount of data you need t
     from hera.workflows import DAG, Workflow, script
 
 
-    @script(image="python:3.10")
+    @script()
     def compute_resources() -> None:
         """Computes the resources necessary by the following job, which could be anything."""
         import json
@@ -25,21 +29,26 @@ you can compute the resources dynamically based on the amount of data you need t
 
         resources = []
         for i in range(1, 4):
-            resources.append({"cpu": i, "mem": "{v}Mi".format(v=i * 100)})
+            resources.append({"cpu": i, "mem": "{v}Ki".format(v=i * 10)})
 
         json.dump(resources, sys.stdout)
 
 
     @script(
-        image="python:3.10",
         pod_spec_patch=json.dumps(
             {
                 "containers": [
                     {
                         "name": "main",
                         "resources": {
-                            "limits": {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"},
-                            "requests": {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"},
+                            "limits": {
+                                "cpu": "{{inputs.parameters.cpu}}",
+                                "memory": "{{inputs.parameters.mem}}",
+                            },
+                            "requests": {
+                                "cpu": "{{inputs.parameters.cpu}}",
+                                "memory": "{{inputs.parameters.mem}}",
+                            },
                         },
                     }
                 ]
@@ -52,22 +61,27 @@ you can compute the resources dynamically based on the amount of data you need t
 
 
     @script(
-        image="python:3.10",
         pod_spec_patch=json.dumps(
             {
                 "containers": [
                     {
                         "name": "main",
                         "resources": {
-                            "limits": {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"},
-                            "requests": {"cpu": "{{inputs.parameters.cpu}}", "memory": "{{inputs.parameters.mem}}"},
+                            "limits": {
+                                "cpu": "{{inputs.parameters.cpu}}",
+                                "memory": "{{inputs.parameters.mem}}",
+                            },
+                            "requests": {
+                                "cpu": "{{inputs.parameters.cpu}}",
+                                "memory": "{{inputs.parameters.mem}}",
+                            },
                         },
                     }
                 ]
             }
         ),
     )
-    def another_resource_consumer(cpu: int = 1, mem: str = "100Mi") -> None:
+    def another_resource_consumer(cpu: int = 1, mem: str = "100Ki") -> None:
         """Perform some computation."""
         print("received cpu {cpu} and mem {mem}".format(cpu=cpu, mem=mem))
 
@@ -86,7 +100,10 @@ you can compute the resources dynamically based on the amount of data you need t
             # the output of `generate_resources` to the inputs. Instead, it creates the kwargs for you, and lets you take
             # control of the mapping! This is because Hera cannot know whether you intend to map only 1 param, or all of
             # them, so it empowers you to set it!
-            c >> another_resource_consumer(with_param=c.result, arguments={"cpu": "{{item.cpu}}", "mem": "{{item.mem}}"})
+            c >> another_resource_consumer(
+                with_param=c.result,
+                arguments={"cpu": "{{item.cpu}}"},
+            )
     ```
 
 === "YAML"
@@ -122,11 +139,9 @@ you can compute the resources dynamically based on the amount of data you need t
               parameters:
               - name: cpu
                 value: '{{item.cpu}}'
-              - name: mem
-                value: '{{item.mem}}'
       - name: compute-resources
         script:
-          image: python:3.10
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -136,7 +151,7 @@ you can compute the resources dynamically based on the amount of data you need t
             import sys
             resources = []
             for i in range(1, 4):
-                resources.append({'cpu': i, 'mem': '{v}Mi'.format(v=i * 100)})
+                resources.append({'cpu': i, 'mem': '{v}Ki'.format(v=i * 10)})
             json.dump(resources, sys.stdout)
           command:
           - python
@@ -149,7 +164,7 @@ you can compute the resources dynamically based on the amount of data you need t
           - name: cpu
           - name: mem
         script:
-          image: python:3.10
+          image: python:3.9
           source: |-
             import os
             import sys
@@ -173,9 +188,9 @@ you can compute the resources dynamically based on the amount of data you need t
           - name: cpu
             default: '1'
           - name: mem
-            default: 100Mi
+            default: 100Ki
         script:
-          image: python:3.10
+          image: python:3.9
           source: |-
             import os
             import sys
