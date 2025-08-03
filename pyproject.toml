@@ -31,10 +31,11 @@ requests = "*"
 pydantic = { extras = ["email"], version = ">=1.10.15,<3.0" }
 cappa = {version = ">=0.22.1,<0.29.0", optional = true}
 varname = {version = ">=0.13.1,<0.16.0", optional = true}
+black = {version = ">=24.1.0", optional = true}
 
 [tool.poetry.extras]
 yaml = ["PyYAML"]
-cli = ["cappa", "PyYAML"]
+cli = ["cappa", "PyYAML", "black"]
 experimental = ["varname"]
 
 [tool.poetry.group.dev.dependencies]

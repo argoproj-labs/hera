@@ -8,10 +8,8 @@ import pytest
 from cappa.testing import CommandRunner
 
 from hera._cli.base import Hera
-from hera._cli.generate.python import python_obj_to_repr
 from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.cron_workflow import CronWorkflow
-from hera.workflows.models import Metadata
 from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
 from tests.cli.test_generate_yaml import get_stdout
@@ -30,11 +28,6 @@ SKIP_FILES = [
     "workflow-event-binding--github-path-filter-workfloweventbinding.upstream.yaml",  # not a workflow
     "workflow-event-binding--event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
     "workflow-count-resourcequota.upstream.yaml",  # not a workflow
-    "steps-inline-workflow.upstream.yaml",  # inline unsupported
-    "dag-inline-workflow.upstream.yaml",  # inline unsupported
-    "dag-inline-workflowtemplate.upstream.yaml",  # inline unsupported
-    "dag-inline-clusterworkflowtemplate.upstream.yaml",  # inline unsupported
-    "data-transformations.upstream.yaml",  # data template transformation field unsupported
     "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
 ]
 
@@ -81,101 +74,44 @@ def test_yaml_converter(file_name: str, tmp_path: Path):
     assert workflow.to_dict() == workflow_from_yaml.to_dict()
 
 
-@pytest.mark.parametrize(
-    "val,python_repr",
-    [
-        (
-            1,
-            "1",
-        ),
-        (1.01, "1.01"),
-        (
-            "Hello",
-            "'Hello'",
-        ),
-        (
-            True,
-            "True",
-        ),
-        (
-            [1, 2, 3],
-            "[1, 2, 3]",
-        ),
-        (
-            ["Hello", "world"],
-            "['Hello', 'world']",
-        ),
-        (
-            {"key": "value", "key2": 42},
-            "{'key': 'value', 'key2': 42}",
-        ),
-    ],
-)
-def test_python_obj_to_repr(val: str, python_repr: str):
-    """Basic types and lists/dicts should match the `repr` built-in."""
-    assert python_obj_to_repr(val) == (python_repr, [], [])
-    assert python_obj_to_repr(val) == (repr(val), [], [])
-
-
-@pytest.mark.parametrize(
-    "val,python_repr,expected_imports",
-    [
-        (
-            Metadata(labels={"a-label": "value"}),
-            "Metadata(labels={'a-label': 'value'},)",
-            ["Metadata"],
-        )
-    ],
-)
-def test_python_obj_to_repr_with_models(val: str, python_repr: str, expected_imports: list[str]):
-    assert python_obj_to_repr(val) == (python_repr, [], expected_imports)
-
-
 single_workflow_output = """\
 from hera.workflows import Workflow
-with Workflow(
-api_version='argoproj.io/v1alpha1',
-kind='Workflow',
-name='single',
-) as w:
+
+with Workflow(api_version="argoproj.io/v1alpha1", kind="Workflow", name="single") as w:
     pass
 """
 
 workflow_template_output = """\
 from hera.workflows import WorkflowTemplate
+
 with WorkflowTemplate(
-api_version='argoproj.io/v1alpha1',
-kind='WorkflowTemplate',
-name='workflow-template',
+    api_version="argoproj.io/v1alpha1",
+    kind="WorkflowTemplate",
+    name="workflow-template",
 ) as w:
     pass
 """
 
 cluster_workflow_template_output = """\
 from hera.workflows import ClusterWorkflowTemplate
+
 with ClusterWorkflowTemplate(
-api_version='argoproj.io/v1alpha1',
-kind='ClusterWorkflowTemplate',
-name='cluster-workflow-template',
+    api_version="argoproj.io/v1alpha1",
+    kind="ClusterWorkflowTemplate",
+    name="cluster-workflow-template",
 ) as w:
     pass
 """
 
 multiple_workflow_output = """\
 from hera.workflows import Workflow
-with Workflow(
-api_version='argoproj.io/v1alpha1',
-kind='Workflow',
-name='one',
-) as w:
+
+with Workflow(api_version="argoproj.io/v1alpha1", kind="Workflow", name="one") as w:
     pass
 
 from hera.workflows import Workflow
-with Workflow(
-api_version='argoproj.io/v1alpha1',
-kind='Workflow',
-name='two',
-) as w:
+
+with Workflow(api_version="argoproj.io/v1alpha1", kind="Workflow", name="two") as w:
     pass
 """
 
