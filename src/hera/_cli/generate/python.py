@@ -42,14 +42,13 @@ if sys.version_info >= (3, 10):
 else:
     NoneType = type(None)
 
+black_imported = False
 try:
     import black
 
     black_imported = True
 except ImportError:
-    black = None  # type: ignore
-
-    black_imported = False
+    pass
 
 ModelWorkflow = Union[
     _ModelWorkflow,
@@ -110,18 +109,21 @@ def workflow_to_python(model: ModelWorkflow) -> str:
 
 
 class WorkflowPythonBuilder:
+    """This class traverses a given model workflow and generates corresponding Python code using the Hera SDK."""
+
     def __init__(self, model: ModelWorkflow):
         self.model = model
         self.import_map: Dict[str, Set[str]] = defaultdict(set)
 
     def build(self) -> str:
+        # Build the AST for the workflow
         hera_workflow_class = self._get_workflow_class(self.model)
 
-        root_model_def = self._traverse_root_model(hera_workflow_class)
+        workflow_def = self._build_workflow_ast(hera_workflow_class)
         self._add_import("hera.workflows", hera_workflow_class.__name__)
 
         body = list(self._get_import_lines())
-        body.append(root_model_def)
+        body.append(workflow_def)
 
         module = ast.Module(body=body, type_ignores=[])
         module = ast.fix_missing_locations(module)
@@ -132,6 +134,7 @@ class WorkflowPythonBuilder:
         except SyntaxError as e:
             raise SyntaxError("Generated Python code contains syntax errors") from e
 
+        # Format the generated code using Black if available
         module_code = ast.unparse(module)
         if not black_imported:
             warnings.warn(
@@ -145,15 +148,12 @@ class WorkflowPythonBuilder:
             module_code,
             mode=black.FileMode(line_length=88, is_pyi=False),
         )
-
         return module_code
 
     def _add_import(self, module: str, name: str):
-        """Add an import to the builder."""
         self.import_map[module].add(name)
 
     def _get_import_lines(self) -> Iterator[ast.stmt]:
-        """Get the import lines for the module."""
         for module, names in self.import_map.items():
             if not names:
                 continue
@@ -173,7 +173,7 @@ class WorkflowPythonBuilder:
 
         raise ValueError("Unrecognised model workflow class")
 
-    def _traverse_root_model(
+    def _build_workflow_ast(
         self,
         hera_workflow_class: Type[Workflow],
     ) -> ast.stmt:
@@ -208,12 +208,12 @@ class WorkflowPythonBuilder:
 
                     if attr == "templates":
                         for template in value:
-                            if not isinstance(template, BaseModel):
-                                raise ValueError(f"Expected template to be a BaseModel, got {type(template)}")
+                            if not isinstance(template, Template):
+                                raise ValueError(f"Expected template to be a Template, got {type(template)}")
 
-                            body.append(self._traverse_line(template))
+                            body.append(self._build_statement(template))
                     else:
-                        value = self._traverse_value(value)
+                        value = self._build_expression(value)
                         keywords.append(
                             ast.keyword(
                                 arg=attr,
@@ -238,14 +238,10 @@ class WorkflowPythonBuilder:
         )
         return ast.With(items=[with_item], body=body)
 
-    def _traverse_line(self, value: Any) -> ast.stmt:
-        return self._traverse_template(value)
-
-    def _traverse_value(
+    def _build_expression(
         self,
         value: Any,
     ) -> ast.expr:
-        """Traverse a value and convert it to a libcst expression."""
         # Primitive types
         if isinstance(value, (str, bool, int, float, NoneType)):
             return ast.Constant(value=value)
@@ -253,15 +249,15 @@ class WorkflowPythonBuilder:
         # Collections
         if isinstance(value, list):
             return ast.List(
-                elts=[self._traverse_value(v) for v in value],
+                elts=[self._build_expression(v) for v in value],
                 ctx=ast.Load(),
             )
         if isinstance(value, dict):
             keys: List[ast.expr | None] = []
             values = []
             for k, v in value.items():
-                keys.append(self._traverse_value(k))
-                values.append(self._traverse_value(v))
+                keys.append(self._build_expression(k))
+                values.append(self._build_expression(v))
             return ast.Dict(
                 keys=keys,
                 values=values,
@@ -279,7 +275,7 @@ class WorkflowPythonBuilder:
                 keywords.append(
                     ast.keyword(
                         arg=attr,
-                        value=self._traverse_value(attribute_value),
+                        value=self._build_expression(attribute_value),
                     )
                 )
 
@@ -291,31 +287,30 @@ class WorkflowPythonBuilder:
 
         raise ValueError(f"Unsupported type: {type(value)} for value {value}")
 
-    def _traverse_template(self, template: Template) -> ast.stmt:
-        """Traverse a Template and convert it to a libcst expression."""
+    def _build_statement(self, template: Template) -> ast.stmt:
         if template.container is not None:
-            return self._convert_to_hera_template(template, template.container, Container)
+            return self._build_hera_template_statement(template, template.container, Container)
         if template.script is not None:
-            return self._convert_to_hera_template(template, template.script, Script)
+            return self._build_hera_template_statement(template, template.script, Script)
         if template.http is not None:
-            return self._convert_to_hera_template(template, template.http, HTTP)
+            return self._build_hera_template_statement(template, template.http, HTTP)
         if template.data is not None:
-            return self._convert_to_hera_template(template, template.data, Data)
+            return self._build_hera_template_statement(template, template.data, Data)
         if template.resource is not None:
-            return self._convert_to_hera_template(template, template.resource, Resource)
+            return self._build_hera_template_statement(template, template.resource, Resource)
         if template.suspend is not None:
-            return self._convert_to_hera_template(template, template.suspend, Suspend)
+            return self._build_hera_template_statement(template, template.suspend, Suspend)
         if template.dag is not None:
-            return self._convert_to_hera_invocator_template(template, DAG, template.dag)
+            return self._build_hera_invocator_template_statement(template, DAG, template.dag)
         if template.steps is not None:
-            return self._convert_to_hera_invocator_template(template, Steps)
+            return self._build_hera_invocator_template_statement(template, Steps)
         if template.container_set is not None:
-            return self._convert_to_hera_invocator_template(template, ContainerSet, template.container_set)
+            return self._build_hera_invocator_template_statement(template, ContainerSet, template.container_set)
 
         # No-op (convert Template to itself) and rearrange imports
-        return self._convert_to_hera_equivalent(template, Template)
+        return self._build_template_call_expression(template, Template)
 
-    def _convert_to_hera_template(
+    def _build_hera_template_statement(
         self,
         template: Template,
         template_type_field: BaseModel,
@@ -332,7 +327,7 @@ class WorkflowPythonBuilder:
         for field in template.__fields__:
             # Special case for http which shouldn't be a field in template_keys (but is)
             if field in template_keys and getattr(template, field) is not None and field != "http":
-                val = self._traverse_value(getattr(template, field))
+                val = self._build_expression(getattr(template, field))
                 keywords.append(
                     ast.keyword(
                         arg=field,
@@ -343,7 +338,7 @@ class WorkflowPythonBuilder:
             if field == "metadata" and getattr(template, field) is not None:
                 metadata = cast(Metadata, getattr(template, field))
                 if metadata.labels:
-                    labels = self._traverse_value(metadata.labels)
+                    labels = self._build_expression(metadata.labels)
                     keywords.append(
                         ast.keyword(
                             arg="labels",
@@ -352,7 +347,7 @@ class WorkflowPythonBuilder:
                     )
 
                 if metadata.annotations:
-                    annotations = self._traverse_value(metadata.annotations)
+                    annotations = self._build_expression(metadata.annotations)
                     keywords.append(
                         ast.keyword(
                             arg="annotations",
@@ -362,7 +357,7 @@ class WorkflowPythonBuilder:
 
         for field in template_type_field.__fields__:
             if field in template_type_field_keys and getattr(template_type_field, field) is not None:
-                val = self._traverse_value(getattr(template_type_field, field))
+                val = self._build_expression(getattr(template_type_field, field))
                 keywords.append(
                     ast.keyword(
                         arg=field,
@@ -393,7 +388,7 @@ class WorkflowPythonBuilder:
             )
         )
 
-    def _convert_to_hera_invocator_template(
+    def _build_hera_invocator_template_statement(
         self,
         template: Template,
         hera_template_class: Type[BaseModel],
@@ -407,7 +402,7 @@ class WorkflowPythonBuilder:
 
         for field in template.__fields__:
             if field in template_keys and getattr(template, field) is not None:
-                val = self._traverse_value(getattr(template, field))
+                val = self._build_expression(getattr(template, field))
                 keywords.append(ast.keyword(arg=field, value=val))
 
         if template_type:
@@ -423,7 +418,7 @@ class WorkflowPythonBuilder:
                     continue
 
                 if field in template_field_keys and getattr(template_type, field) is not None:
-                    val = self._traverse_value(getattr(template_type, field))
+                    val = self._build_expression(getattr(template_type, field))
                     keywords.append(ast.keyword(arg=field, value=val))
 
         if hera_template_class == Steps and template.steps:
@@ -446,18 +441,20 @@ class WorkflowPythonBuilder:
                                     ),
                                 )
                             ],
-                            body=[self._convert_to_hera_equivalent(step, Step) for step in parallel_steps.__root__],
+                            body=[
+                                self._build_template_call_expression(step, Step) for step in parallel_steps.__root__
+                            ],
                         )
                     )
                 else:
                     step = parallel_steps_list[0]
-                    body.append(self._convert_to_hera_equivalent(step, Step))
+                    body.append(self._build_template_call_expression(step, Step))
         elif hera_template_class == DAG and template.dag:
             for task in template.dag.tasks:
-                body.append(self._convert_to_hera_equivalent(task, Task))
+                body.append(self._build_template_call_expression(task, Task))
         elif hera_template_class == ContainerSet and template.container_set:
             for container in template.container_set.containers:
-                body.append(self._convert_to_hera_equivalent(container, ContainerNode))
+                body.append(self._build_template_call_expression(container, ContainerNode))
         else:
             raise ValueError(
                 f"Unsupported hera_template_class: {hera_template_class.__name__} for template: {template}"
@@ -477,7 +474,7 @@ class WorkflowPythonBuilder:
             body=body,
         )
 
-    def _convert_to_hera_equivalent(
+    def _build_template_call_expression(
         self,
         model_class_obj: BaseModel,
         hera_class: Type[BaseModel],
@@ -489,7 +486,7 @@ class WorkflowPythonBuilder:
         keywords: List[ast.keyword] = []
         for field in hera_class.__fields__:
             if field in template_keys and getattr(model_class_obj, field) is not None:
-                val = self._traverse_value(getattr(model_class_obj, field))
+                val = self._build_expression(getattr(model_class_obj, field))
                 keywords.append(
                     ast.keyword(
                         arg=field,
