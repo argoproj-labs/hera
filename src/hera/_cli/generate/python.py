@@ -1,10 +1,10 @@
 import ast
 import sys
-import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, Generator, Iterator, List, Optional, Set, Type, Union, cast
 
+import black
 import yaml
 
 from hera._cli.base import GeneratePython
@@ -41,14 +41,6 @@ if sys.version_info >= (3, 10):
     from types import NoneType
 else:
     NoneType = type(None)
-
-black_imported = False
-try:
-    import black
-
-    black_imported = True
-except ImportError:
-    pass
 
 ModelWorkflow = Union[
     _ModelWorkflow,
@@ -136,14 +128,6 @@ class WorkflowPythonBuilder:
 
         # Format the generated code using Black if available
         module_code = ast.unparse(module)
-        if not black_imported:
-            warnings.warn(
-                "Black is not installed. The generated Python code will not be formatted. "
-                "Please install Black to format the code.",
-                ImportWarning,
-            )
-            return module_code
-
         module_code = black.format_str(
             module_code,
             mode=black.FileMode(line_length=88, is_pyi=False),
@@ -422,6 +406,7 @@ class WorkflowPythonBuilder:
                     keywords.append(ast.keyword(arg=field, value=val))
 
         if hera_template_class == Steps and template.steps:
+            invocator_type = "steps"
             for parallel_steps in template.steps:
                 parallel_steps_list = parallel_steps.__root__
 
@@ -432,7 +417,7 @@ class WorkflowPythonBuilder:
                                 ast.withitem(
                                     context_expr=ast.Call(
                                         func=ast.Attribute(
-                                            value=ast.Name(id="invocator", ctx=ast.Load()),
+                                            value=ast.Name(id=invocator_type, ctx=ast.Load()),
                                             attr="parallel",
                                             ctx=ast.Load(),
                                         ),
@@ -450,9 +435,11 @@ class WorkflowPythonBuilder:
                     step = parallel_steps_list[0]
                     body.append(self._build_template_call_expression(step, Step))
         elif hera_template_class == DAG and template.dag:
+            invocator_type = "dag"
             for task in template.dag.tasks:
                 body.append(self._build_template_call_expression(task, Task))
         elif hera_template_class == ContainerSet and template.container_set:
+            invocator_type = "container_set"
             for container in template.container_set.containers:
                 body.append(self._build_template_call_expression(container, ContainerNode))
         else:
@@ -468,7 +455,7 @@ class WorkflowPythonBuilder:
                         args=[],
                         keywords=keywords,
                     ),
-                    optional_vars=ast.Name(id="invocator", ctx=ast.Store()),
+                    optional_vars=ast.Name(id=invocator_type, ctx=ast.Store()),
                 )
             ],
             body=body,
