@@ -16,7 +16,7 @@
             image="alpine:3.7",
             command=["sh", "-c"],
             args=["echo Hello, world!"],
-            resources=Resources(cpu_request=1, memory_request="10Ki", ephemeral_request="10Ki"),
+            resources=Resources(cpu_request=1, memory_request="5Gi", ephemeral_request="5Gi"),
         )
     ```
 
@@ -41,7 +41,7 @@
           resources:
             requests:
               cpu: '1'
-              ephemeral-storage: 10Ki
-              memory: 10Ki
+              ephemeral-storage: 5Gi
+              memory: 5Gi
     ```
 

@@ -34,10 +34,10 @@ spec:
       - python
       resources:
         requests:
-          memory: 10Ki
+          memory: 2Gi
   - name: consumer
     podSpecPatch: '{"initContainers": [{"name": "init", "resources": {"requests":
-      {"memory": "10Ki"}}}]}'
+      {"memory": "2Gi"}}}]}'
     inputs:
       artifacts:
       - name: in-art
@@ -54,4 +54,4 @@ spec:
       - python
       resources:
         requests:
-          memory: 10Ki
+          memory: 2Gi

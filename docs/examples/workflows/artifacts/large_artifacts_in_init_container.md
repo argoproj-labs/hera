@@ -29,7 +29,7 @@ to set the init container resources.
 
     @script(
         outputs=Artifact(name="out-art", path="/tmp/file", archive=NoneArchiveStrategy()),
-        resources=Resources(memory_request="10Ki"),
+        resources=Resources(memory_request="2Gi"),
     )
     def writer():
         with open("/tmp/file", "w") as f:
@@ -38,8 +38,8 @@ to set the init container resources.
 
     @script(
         inputs=Artifact(name="in-art", path="/tmp/file"),
-        resources=Resources(memory_request="10Ki"),
-        pod_spec_patch=json.dumps({"initContainers": [{"name": "init", "resources": {"requests": {"memory": "10Ki"}}}]}),
+        resources=Resources(memory_request="2Gi"),
+        pod_spec_patch=json.dumps({"initContainers": [{"name": "init", "resources": {"requests": {"memory": "2Gi"}}}]}),
     )
     def consumer():
         with open("/tmp/file", "r") as f:
@@ -91,10 +91,10 @@ to set the init container resources.
           - python
           resources:
             requests:
-              memory: 10Ki
+              memory: 2Gi
       - name: consumer
         podSpecPatch: '{"initContainers": [{"name": "init", "resources": {"requests":
-          {"memory": "10Ki"}}}]}'
+          {"memory": "2Gi"}}}]}'
         inputs:
           artifacts:
           - name: in-art
@@ -111,6 +111,6 @@ to set the init container resources.
           - python
           resources:
             requests:
-              memory: 10Ki
+              memory: 2Gi
     ```
 

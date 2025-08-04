@@ -22,7 +22,7 @@ def compute_resources() -> None:
 
     resources = []
     for i in range(1, 4):
-        resources.append({"cpu": i, "mem": "{v}Ki".format(v=i * 10)})
+        resources.append({"cpu": i, "mem": "{v}Mi".format(v=i * 100)})
 
     json.dump(resources, sys.stdout)
 
@@ -74,7 +74,7 @@ def resource_consumer(cpu: int, mem: str) -> None:
         }
     ),
 )
-def another_resource_consumer(cpu: int = 1, mem: str = "100Ki") -> None:
+def another_resource_consumer(cpu: int = 1, mem: str = "100Mi") -> None:
     """Perform some computation."""
     print("received cpu {cpu} and mem {mem}".format(cpu=cpu, mem=mem))
 
@@ -90,9 +90,8 @@ with Workflow(
         # This relies on the `with_param` field, as Hera needs to know there's some dynamic input to `resource_consumer`
         c >> resource_consumer(with_param=c.result)
         # by comparison, `another_resource_consumer` has kwargs set, so Hera will not infer that you want to map
-        # the output of `generate_resources` to the inputs. Instead, it creates the kwargs for you, and lets you take
-        # control of the mapping! This is because Hera cannot know whether you intend to map only 1 param, or all of
-        # them, so it empowers you to set it!
+        # all of the outputs of `generate_resources` to the inputs. Instead, you are able to map the values you want,
+        # and use the default value of for `mem` in the `another_resource_consumer` script template.
         c >> another_resource_consumer(
             with_param=c.result,
             arguments={"cpu": "{{item.cpu}}"},
