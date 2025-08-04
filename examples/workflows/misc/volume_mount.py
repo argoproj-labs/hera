@@ -4,7 +4,7 @@ from hera.workflows import Container, SecretVolume, Steps, Volume, Workflow
 from hera.workflows.models import VolumeMount
 
 with Workflow(
-    generate_name="test-",
+    generate_name="volume-mount-",
     volumes=[SecretVolume(name="service-account-credential", secret_name="service-account-credential")],
     entrypoint="test",
 ) as w:

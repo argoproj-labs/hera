@@ -10,7 +10,7 @@ from hera.workflows import Input, Output, Workflow
 
 global_config.experimental_features["decorator_syntax"] = True
 
-w = Workflow(name="hello-world-", arguments={"user": "me"})
+w = Workflow(name="hello-world", arguments={"user": "me"})
 
 
 class MyInput(Input):

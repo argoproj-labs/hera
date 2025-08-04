@@ -16,7 +16,7 @@
     ) as sub_workflow_1:
         Container(
             name="echo",
-            image="docker/whalesay:latest",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             args=["I'm workflow 1"],
         )
@@ -27,7 +27,7 @@
     ) as sub_workflow_2:
         Container(
             name="echo",
-            image="docker/whalesay:latest",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             args=["I'm workflow 2"],
         )
@@ -78,7 +78,7 @@
               templates:
               - name: echo
                 container:
-                  image: docker/whalesay:latest
+                  image: argoproj/argosay:v2
                   args:
                   - I'm workflow 1
                   command:
@@ -98,7 +98,7 @@
               templates:
               - name: echo
                 container:
-                  image: docker/whalesay:latest
+                  image: argoproj/argosay:v2
                   args:
                   - I'm workflow 2
                   command:

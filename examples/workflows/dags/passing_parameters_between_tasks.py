@@ -5,13 +5,13 @@ from hera.workflows import DAG, Container, Parameter, Task, Workflow
 with Workflow(generate_name="param-passing-", entrypoint="d") as w:
     out = Container(
         name="out",
-        image="docker/whalesay:latest",
+        image="argoproj/argosay:v2",
         command=["cowsay"],
         outputs=Parameter(name="x", value=42),
     )
     in_ = Container(
         name="in",
-        image="docker/whalesay:latest",
+        image="argoproj/argosay:v2",
         command=["cowsay"],
         args=["{{inputs.parameters.a}}"],
         inputs=Parameter(name="a"),

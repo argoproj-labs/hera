@@ -13,7 +13,7 @@
     with Workflow(generate_name="secret-env-from-", entrypoint="whalesay") as w:
         whalesay = Container(
             name="whalesay",
-            image="docker/whalesay:latest",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             env_from=[
                 SecretEnvFrom(prefix="abc", name="secret", optional=False),
@@ -34,7 +34,7 @@
       templates:
       - name: whalesay
         container:
-          image: docker/whalesay:latest
+          image: argoproj/argosay:v2
           command:
           - cowsay
           envFrom:

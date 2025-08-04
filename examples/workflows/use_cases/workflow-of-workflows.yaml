@@ -19,7 +19,7 @@ spec:
           templates:
           - name: echo
             container:
-              image: docker/whalesay:latest
+              image: argoproj/argosay:v2
               args:
               - I'm workflow 1
               command:
@@ -39,7 +39,7 @@ spec:
           templates:
           - name: echo
             container:
-              image: docker/whalesay:latest
+              image: argoproj/argosay:v2
               args:
               - I'm workflow 2
               command:

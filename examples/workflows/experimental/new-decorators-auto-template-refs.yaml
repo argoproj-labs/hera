@@ -62,6 +62,7 @@ spec:
       - name: value_a
         default: my default
       - name: value_b
+        default: another default
       - name: an_int_value
         default: '42'
       - name: a_basemodel

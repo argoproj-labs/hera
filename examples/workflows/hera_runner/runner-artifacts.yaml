@@ -19,6 +19,7 @@ spec:
     outputs:
       artifacts:
       - name: out-art
+        path: /tmp/hera-outputs/out-art
         archive:
           none: {}
     script:

@@ -67,7 +67,7 @@ Instead, it is recommended to use the Hera Runner,
         import pickle
 
         with open("/tmp/i", "rb") as f:
-            i = i or pickle.load(f)
+            i = pickle.load(f)
         print(i)
 
 
@@ -130,7 +130,7 @@ Instead, it is recommended to use the Hera Runner,
             sys.path.append(os.getcwd())
             import pickle
             with open('/tmp/i', 'rb') as f:
-                i = i or pickle.load(f)
+                i = pickle.load(f)
             print(i)
           command:
           - python

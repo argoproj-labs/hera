@@ -11,7 +11,7 @@ This example showcases how to run a container, rather than a Python, function, a
     from hera.workflows import Container, Workflow
 
     with Workflow(generate_name="container-", entrypoint="cowsay") as w:
-        Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+        Container(name="cowsay", image="argoproj/argosay:v2", command=["cowsay", "foo"])
     ```
 
 === "YAML"
@@ -26,7 +26,7 @@ This example showcases how to run a container, rather than a Python, function, a
       templates:
       - name: cowsay
         container:
-          image: docker/whalesay
+          image: argoproj/argosay:v2
           command:
           - cowsay
           - foo

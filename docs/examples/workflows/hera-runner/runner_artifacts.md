@@ -1,4 +1,4 @@
-# Basic Artifacts
+# Runner Artifacts
 
 
 
@@ -21,7 +21,9 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
 
 
     @script()
-    def writer() -> Annotated[str, Artifact(name="out-art", archive=NoneArchiveStrategy())]:
+    def writer() -> Annotated[
+        str, Artifact(name="out-art", path="/tmp/hera-outputs/out-art", archive=NoneArchiveStrategy())
+    ]:
         return "Hello, world!"
 
 
@@ -65,6 +67,7 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
         outputs:
           artifacts:
           - name: out-art
+            path: /tmp/hera-outputs/out-art
             archive:
               none: {}
         script:

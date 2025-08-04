@@ -47,7 +47,7 @@ spec:
         sys.path.append(os.getcwd())
         import pickle
         with open('/tmp/i', 'rb') as f:
-            i = i or pickle.load(f)
+            i = pickle.load(f)
         print(i)
       command:
       - python

@@ -20,7 +20,7 @@ the Workflow itself, it will apply by default to *all* templates in the Workflow
     )
 
     with Workflow(
-        generate_name="retry-backoff-",
+        generate_name="retry-workflow-",
         entrypoint="retry-backoff",
         retry_strategy=RetryStrategy(
             limit="10",
@@ -45,7 +45,7 @@ the Workflow itself, it will apply by default to *all* templates in the Workflow
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: retry-backoff-
+      generateName: retry-workflow-
     spec:
       entrypoint: retry-backoff
       templates:

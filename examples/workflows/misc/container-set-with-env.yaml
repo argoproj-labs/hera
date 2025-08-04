@@ -9,7 +9,7 @@ spec:
     containerSet:
       containers:
       - name: node
-        image: docker/whalesay:latest
+        image: argoproj/argosay:v2
         command:
         - cowsay
         env:

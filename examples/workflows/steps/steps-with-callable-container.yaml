@@ -7,7 +7,7 @@ spec:
   templates:
   - name: whalesay
     container:
-      image: docker/whalesay
+      image: argoproj/argosay:v2
       args:
       - '{{inputs.parameters.message}}'
       command:

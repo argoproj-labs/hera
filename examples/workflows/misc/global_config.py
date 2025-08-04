@@ -15,5 +15,5 @@ def say():
 
 
 with Workflow(generate_name="global-config-", entrypoint="whalesay") as w:
-    whalesay = Container(name="whalesay", image="docker/whalesay:latest")
+    whalesay = Container(name="whalesay", image="argoproj/argosay:v2")
     say()

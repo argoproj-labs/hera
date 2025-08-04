@@ -22,7 +22,7 @@ spec:
             name: my-secret
             key: password
     container:
-      image: docker/whalesay
+      image: argoproj/argosay:v2
       command:
       - cowsay
       - foo

@@ -5,7 +5,7 @@ from hera.workflows import Container, Env, SecretEnv, UserContainer, Workflow
 with Workflow(generate_name="container-", entrypoint="cowsay") as w:
     Container(
         name="cowsay",
-        image="docker/whalesay",
+        image="argoproj/argosay:v2",
         command=["cowsay", "foo"],
         init_containers=[
             UserContainer(

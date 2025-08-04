@@ -13,7 +13,9 @@ from hera.workflows.artifact import ArtifactLoader
 
 
 @script()
-def writer() -> Annotated[str, Artifact(name="out-art", archive=NoneArchiveStrategy())]:
+def writer() -> Annotated[
+    str, Artifact(name="out-art", path="/tmp/hera-outputs/out-art", archive=NoneArchiveStrategy())
+]:
     return "Hello, world!"
 
 
