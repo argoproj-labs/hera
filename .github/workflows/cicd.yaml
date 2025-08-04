@@ -122,7 +122,7 @@ jobs:
         run: make install-k3d set-up-cluster set-up-argo set-up-artifacts
 
       - name: run workflow tests
-        run: make test-on-cluster
+        run: CI=1 make test-on-cluster lint-on-cluster
 
       - name: stop argo cluster
         run: make stop-cluster
