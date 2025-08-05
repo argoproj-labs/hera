@@ -73,20 +73,17 @@ OnType = Optional[Union[TaskResult, Iterable[TaskResult]]]
 
 def _normalise_on(
     on: OnType,
-    default: OnType = None,
+    default: Optional[List[TaskResult]] = None,
 ) -> Optional[List[TaskResult]]:
     """Turn `on` into a list[TaskResult] or None.
 
     Accepts:
-      - None -> return normalised default (which may also be None)
+      - None -> return default (which may also be None)
       - TaskResult -> [TaskResult]
       - Iterable[TaskResult] -> list(...)
     """
     if on is None:
-        if default is None:
-            return None
-
-        return _normalise_on(default)
+        return default
     if isinstance(on, TaskResult):
         return [on]
     return list(_TaskResultGroup(on))
@@ -105,7 +102,7 @@ class Task(
     depends: Optional[str] = None
 
     _default_next_operator: ClassVar[Operator] = Operator.and_
-    _default_next_on: ClassVar[OnType] = None
+    _default_next_on: ClassVar[Optional[List[TaskResult]]] = None
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
