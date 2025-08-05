@@ -7,8 +7,9 @@ for more on using Tasks within a DAG.
 from __future__ import annotations
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 from enum import Enum
-from typing import ClassVar, Iterable, Iterator, List, Optional, Union
+from typing import Iterable, Iterator, List, Optional, Union
 
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -89,6 +90,10 @@ def _normalise_on(
     return list(_TaskResultGroup(on))
 
 
+_default_next_operator: ContextVar[Operator] = ContextVar("_default_next_operator", default=Operator.and_)
+_default_next_on: ContextVar[Optional[List[TaskResult]]] = ContextVar("_default_on_operator", default=None)
+
+
 class Task(
     TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
@@ -100,9 +105,6 @@ class Task(
 
     dependencies: Optional[List[str]] = None
     depends: Optional[str] = None
-
-    _default_next_operator: ClassVar[Operator] = Operator.and_
-    _default_next_on: ClassVar[Optional[List[TaskResult]]] = None
 
     def _get_dependency_tasks(self) -> List[str]:
         if self.depends is None:
@@ -127,8 +129,8 @@ class Task(
         on: OnType = None,
     ) -> Task:
         """Set self as a dependency of `other`."""
-        operator = operator or self.__class__._default_next_operator
-        on_list = _normalise_on(on, self.__class__._default_next_on)
+        operator = operator or _default_next_operator.get()
+        on_list = _normalise_on(on, _default_next_on.get())
 
         # Build condition string:
         # - If multiple on-conditions: OR them and wrap in parens
@@ -163,15 +165,15 @@ class Task(
         """Temporarily modify the default behaviour of `next` and `>>`."""
         on_list = _normalise_on(on)
 
-        old_operator = cls._default_next_operator
-        old_on = cls._default_next_on
-        cls._default_next_operator = operator or cls._default_next_operator
-        cls._default_next_on = on_list
+        old_operator = _default_next_operator.get()
+        old_on = _default_next_on.get()
+        _default_next_operator.set(operator or _default_next_operator.get())
+        _default_next_on.set(on_list)
         try:
             yield
         finally:
-            cls._default_next_operator = old_operator
-            cls._default_next_on = old_on
+            _default_next_operator.set(old_operator)
+            _default_next_on.set(old_on)
 
     def __rrshift__(self, other: List[Union[Task, str]]) -> Task:
         """Set `other` as a dependency self."""
