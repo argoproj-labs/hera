@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hello-world-
+spec:
+  entrypoint: hello-inferred
+  templates:
+  - name: hello-inferred
+    inputs:
+      parameters:
+      - name: s
+    script:
+      image: my-image-with-pandas
+      source: |-
+        import pandas as pd
+        df = pd.DataFrame({s: 1, "b": 2})
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: s = json.loads(r'''{{inputs.parameters.s}}''')
+        except: s = r'''{{inputs.parameters.s}}'''
+
+        df = pd.DataFrame({s: 1, 'b': 2})
+        print(df)
+      command:
+      - python
+  - name: hello-install-at-runtime
+    inputs:
+      parameters:
+      - name: s
+    script:
+      image: python:3.12
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: s = json.loads(r'''{{inputs.parameters.s}}''')
+        except: s = r'''{{inputs.parameters.s}}'''
+
+        import pandas as pd
+        df = pd.DataFrame({s: 1, 'b': 2})
+        print(df)
+      command:
+      - python
+  arguments:
+    parameters:
+    - name: s
+      value: world

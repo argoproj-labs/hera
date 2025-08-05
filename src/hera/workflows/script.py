@@ -726,6 +726,82 @@ def script(**script_kwargs) -> Callable:
     return script_wrapper
 
 
+def _get_required_imports_and_globals(fn: Callable) -> Tuple[List[str], Dict[str, str]]:
+    module = inspect.getmodule(fn)
+    if not module:
+        return [], {}
+
+    source = inspect.getsource(module)
+    tree = ast.parse(source)
+
+    # 1. Collect top-level imports
+    class ImportCollector(ast.NodeVisitor):
+        def __init__(self):
+            self.imports: Dict[str, Optional[str]] = {}
+
+        def visit_Import(self, node):
+            for alias in node.names:
+                name = alias.asname or alias.name
+                self.imports[name.split(".")[0]] = ast.get_source_segment(source, node)
+
+        def visit_ImportFrom(self, node):
+            for alias in node.names:
+                name = alias.asname or alias.name
+                self.imports[name.split(".")[0]] = ast.get_source_segment(source, node)
+
+    # 2. Collect top-level assignments
+    class GlobalAssignmentCollector(ast.NodeVisitor):
+        def __init__(self):
+            self.assignments = {}  # name -> full source line
+
+        def visit_Assign(self, node):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self.assignments[target.id] = ast.get_source_segment(source, node)
+
+        def visit_AnnAssign(self, node):
+            if isinstance(node.target, ast.Name):
+                self.assignments[node.target.id] = ast.get_source_segment(source, node)
+
+    # 3. Find the function node
+    fn_node = next((n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == fn.__name__), None)
+    if not fn_node:
+        return [], {}
+
+    # 4. Collect used names in function body
+    class UsedNameCollector(ast.NodeVisitor):
+        def __init__(self):
+            self.names = set()
+
+        def visit_Name(self, node):
+            self.names.add(node.id)
+
+        def visit_Attribute(self, node):
+            if isinstance(node.value, ast.Name):
+                self.names.add(node.value.id)
+            self.generic_visit(node)
+
+    import_collector = ImportCollector()
+    import_collector.visit(tree)
+
+    assignment_collector = GlobalAssignmentCollector()
+    assignment_collector.visit(tree)
+
+    usage = UsedNameCollector()
+    for stmt in fn_node.body:
+        usage.visit(stmt)
+
+    # 5. Filter imports and assignments by usage
+    used_imports = [
+        import_line
+        for name, import_line in import_collector.imports.items()
+        if name in usage.names and import_line is not None
+    ]
+    used_globals = {name for name in usage.names if name in assignment_collector.assignments}
+
+    return used_imports, {name: assignment_collector.assignments[name] for name in used_globals}
+
+
 class InlineScriptConstructor(ScriptConstructor):
     """`InlineScriptConstructor` is a script constructor that submits a script as a `source` to Argo.
 
@@ -737,12 +813,11 @@ class InlineScriptConstructor(ScriptConstructor):
     """
 
     add_cwd_to_sys_path: Optional[bool] = None
+    infer_imports: bool = False
 
     @staticmethod
     def _roundtrip(source):
         tree = ast.parse(source)
-        if hasattr(ast, "unparse"):
-            return ast.unparse(tree)
         return ast.unparse(tree)
 
     def _get_param_script_portion(self, instance: Script) -> str:
@@ -812,7 +887,15 @@ class InlineScriptConstructor(ScriptConstructor):
 
         s = "\n".join(content[i + 1 :])
         script += textwrap.dedent(s)
-        return textwrap.dedent(script)
+        script = textwrap.dedent(script)
+
+        if self.infer_imports:
+            imports, globals_ = _get_required_imports_and_globals(instance.source)
+            script_body = "\n".join(imports) + "\n"
+            script_body += "\n".join(globals_.values()) + "\n"
+            script = script_body + script
+
+        return script
 
 
 class RunnerScriptConstructor(ScriptConstructor):
