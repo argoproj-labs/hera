@@ -237,7 +237,7 @@ class WorkflowPythonBuilder:
                 ctx=ast.Load(),
             )
         if isinstance(value, dict):
-            keys: List[ast.expr | None] = []
+            keys: List[Optional[ast.expr]] = []
             values = []
             for k, v in value.items():
                 keys.append(self._build_expression(k))
