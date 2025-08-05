@@ -123,27 +123,27 @@ virtualenv = ["virtualenv (>=20.11) ; python_version < \"3.10\"", "virtualenv (>
 
 [[package]]
 name = "cappa"
-version = "0.28.1"
+version = "0.29.1"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = "<4,>=3.8"
 groups = ["main"]
 markers = "extra == \"cli\""
 files = [
-    {file = "cappa-0.28.1-py3-none-any.whl", hash = "sha256:f160422eca8cc6606cb25ff1ec1489772473c9df97f78e131b05ace34d98ae9d"},
-    {file = "cappa-0.28.1.tar.gz", hash = "sha256:9f13bea7f4af7c8380b441b1706d84e00a176aeca969cafa096bbfd0e193faaf"},
+    {file = "cappa-0.29.1-py3-none-any.whl", hash = "sha256:db0ed5140c173684c8530417c2fc26eb7bdf26fb06e0ab561b83fe781ed21b0e"},
+    {file = "cappa-0.29.1.tar.gz", hash = "sha256:2f6e1cf53619e99d8b2ae431ed7ac5b81e7728f1aa42c3fc86d7bfb1f03de347"},
 ]
 
 [package.dependencies]
-rich = ">=10.2.0"
-type-lens = ">=0.2.3"
+rich = ">=12.1.0"
+type-lens = ">=0.2.4"
 typing-extensions = [
     {version = ">=4.12.0", markers = "python_version >= \"3.13\""},
     {version = ">=4.8.0", markers = "python_version < \"3.13\""},
 ]
 
 [package.extras]
-docstring = ["docstring-parser (>=0.15)"]
+docstring = ["docstring-parser (>=0.15)", "docstring-parser (>=0.17) ; python_version >= \"3.14\""]
 
 [[package]]
 name = "certifi"
@@ -1424,15 +1424,15 @@ markers = {main = "extra == \"cli\" and python_version <= \"3.10\"", dev = "pyth
 
 [[package]]
 name = "type-lens"
-version = "0.2.3"
+version = "0.2.4"
 description = "type-lens is a Python template project designed to simplify the setup of a new project."
 optional = true
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
 markers = "extra == \"cli\""
 files = [
-    {file = "type_lens-0.2.3-py3-none-any.whl", hash = "sha256:3c1850545de595a5d5df4e24f8ea8c0f6d9aff42317ca9941d5069b9ad5c1e2e"},
-    {file = "type_lens-0.2.3.tar.gz", hash = "sha256:8720176565c8129bf196fdbdb8c15fdabe150d779bbed101e6b2f418c54ed9bc"},
+    {file = "type_lens-0.2.4-py3-none-any.whl", hash = "sha256:e43b9892f7f4c634932f8d8004da6b3213c065f9c71215e7cc41c1211a24d059"},
+    {file = "type_lens-0.2.4.tar.gz", hash = "sha256:1301f1c97c6cdb71b5465287375e78f66f6e1116c0d9d31bac50bf61cea7dfd6"},
 ]
 
 [package.dependencies]
@@ -1560,4 +1560,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "272a78c210a09f4b9765bb1302e03a0dc98a03269e7cad94daa44ac22186086b"
+content-hash = "c4bb8177b830bd53bd3d46dcbd7ee741a588297a6e08ffcde93b3fcadf9a4893"
