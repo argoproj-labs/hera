@@ -43,7 +43,7 @@ class TaskResult(Enum):
     any_succeeded = "AnySucceeded"
     all_failed = "AllFailed"
 
-    def __or__(self, other: TaskResult) -> Iterable[TaskResult]:
+    def __or__(self, other: TaskResult) -> _TaskResultGroup:
         """Create an "or" condition over multiple TaskResults."""
         return _TaskResultGroup([self, other])
 
@@ -59,7 +59,7 @@ class _TaskResultGroup(Iterable[TaskResult]):
             if r not in self._results:
                 self._results.append(r)
 
-    def __or__(self, other: Union[Iterable[TaskResult], TaskResult]):
+    def __or__(self, other: Union[Iterable[TaskResult], TaskResult]) -> _TaskResultGroup:
         if isinstance(other, TaskResult):
             return _TaskResultGroup(self._results + [other])
         return _TaskResultGroup(self._results + list(other))
