@@ -160,15 +160,15 @@ class Task(
     @contextmanager
     def set_next_defaults(
         cls,
-        operator: Operator = Operator.and_,
+        operator: Optional[Operator] = None,
         on: Union[TaskResult, Iterable[TaskResult], None] = None,
     ):
-        """Temporarily override the default operator and on."""
+        """Temporarily modify the default behaviour of `next` and `>>`."""
         on_list = _normalise_on(on)
 
         old_operator = cls._default_next_operator
         old_on = cls._default_next_on
-        cls._default_next_operator = operator
+        cls._default_next_operator = operator or cls._default_next_operator
         cls._default_next_on = on_list
         try:
             yield

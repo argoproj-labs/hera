@@ -41,6 +41,16 @@ def test_override_task_next_success_or_skipped():
     assert task_b.depends == "(task-a.Succeeded || task-a.Skipped)"
 
 
+def test_override_task_next_success_or_skipped_or_daemoned():
+    task_a = Task(name="task-a", template="dummy")
+    task_b = Task(name="task-b", template="dummy")
+
+    with Task.set_next_defaults(on=TaskResult.succeeded | TaskResult.skipped | TaskResult.daemoned):
+        task_a >> task_b
+
+    assert task_b.depends == "(task-a.Succeeded || task-a.Skipped || task-a.Daemoned)"
+
+
 def test_override_task_next_success_or_skipped_list():
     task_a = Task(name="task-a", template="dummy")
     task_b = Task(name="task-b", template="dummy")
