@@ -28,11 +28,9 @@ spec:
           parameters:
           - name: cpu
             value: '{{item.cpu}}'
-          - name: mem
-            value: '{{item.mem}}'
   - name: compute-resources
     script:
-      image: python:3.10
+      image: python:3.9
       source: |-
         import os
         import sys
@@ -55,7 +53,7 @@ spec:
       - name: cpu
       - name: mem
     script:
-      image: python:3.10
+      image: python:3.9
       source: |-
         import os
         import sys
@@ -81,7 +79,7 @@ spec:
       - name: mem
         default: 100Mi
     script:
-      image: python:3.10
+      image: python:3.9
       source: |-
         import os
         import sys
