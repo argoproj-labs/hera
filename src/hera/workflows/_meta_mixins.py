@@ -38,7 +38,7 @@ from hera.workflows.models import (
     TemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import TWorkflow
+from hera.workflows.protocol import Templatable, TWorkflow
 
 try:
     from hera.workflows.io.v2 import (  # type: ignore
@@ -53,13 +53,13 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    from hera.workflows._mixins import TemplateMixin
     from hera.workflows.dag import DAG
     from hera.workflows.steps import Step, Steps
     from hera.workflows.task import Task
 
 _yaml: Optional[ModuleType] = None
 try:
+    # user must install `hera[yaml]`
     import yaml
 
     _yaml = yaml
@@ -175,8 +175,6 @@ class ModelMapperMixin(BaseMixin):
         def build_model(
             cls, hera_class: Type[ModelMapperMixin], hera_obj: ModelMapperMixin, model: TWorkflow
         ) -> TWorkflow:
-            assert isinstance(hera_obj, ModelMapperMixin)
-
             for attr, annotation in hera_class._get_all_annotations().items():
                 if mappers := get_annotated_metadata(annotation, ModelMapperMixin.ModelMapper):
                     if len(mappers) != 1:
@@ -427,10 +425,10 @@ class CallableTemplateMixin(BaseMixin):
                     f"Callable Template '{self.name}' is not callable under a Workflow"  # type: ignore
                 )
             if isinstance(_context.pieces[-1], (Steps, Parallel)):
-                return Step(template=self, **kwargs)
+                return Step(template=cast(Templatable, self), **kwargs)
 
             if isinstance(_context.pieces[-1], DAG):
-                return Task(template=self, **kwargs)
+                return Task(template=cast(Templatable, self), **kwargs)
 
         raise InvalidTemplateCall(
             f"Callable Template '{self.name}' is not under a Workflow, Steps, Parallel, or DAG context"  # type: ignore
@@ -597,7 +595,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         self,
         subnode_name: str,
         func: Callable,
-        template: TemplateMixin,
+        template: Templatable,
         *args,
         **kwargs,
     ) -> Union[Step, Task]:

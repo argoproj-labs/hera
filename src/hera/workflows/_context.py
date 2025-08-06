@@ -5,14 +5,12 @@ clauses for workflows and DAGs.
 """
 
 from contextvars import ContextVar
-from typing import List, Optional, TypeVar, Union
+from typing import List, Optional
 
 from hera.shared import BaseMixin
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
 from hera.workflows.exceptions import InvalidType
-from hera.workflows.protocol import Subbable, TTemplate
-
-TNode = TypeVar("TNode", bound="SubNodeMixin")
+from hera.workflows.protocol import Subbable
 
 _pieces = ContextVar("_pieces", default=None)
 _declaring = ContextVar("_declaring", default=False)
@@ -22,14 +20,12 @@ class SubNodeMixin(BaseMixin):
     """SubNodeMixin ensures that the class gets added to the Hera context on initialization.
 
     The mixin implements the core Hera `__hera_init__`, which is invoked post Hera object initialization. Anything
-    that inherits from this mixin has the capacity to manage a context via either being added to a context (like being
-    added to a Workflow/DAG) or managing a context itself (like holding Container, Script, etc).
+    that inherits from this mixin will add itself to the managed context (e.g. added to a Workflow/DAG).
     """
 
-    def __hera_init__(self: TNode) -> TNode:
+    def __hera_init__(self: "SubNodeMixin"):
         """The Hera init that is invoked post object initialization."""
         _context.add_sub_node(self)
-        return self
 
 
 class _HeraContext:
@@ -80,7 +76,7 @@ class _HeraContext:
         """Tells whether there's an active context."""
         return bool(self.pieces)
 
-    def add_sub_node(self, node: Union[SubNodeMixin, TTemplate]) -> None:
+    def add_sub_node(self, node: SubNodeMixin) -> None:
         """Adds the given node to the active context."""
         pieces = self.pieces
         if not pieces:
@@ -106,6 +102,7 @@ class _HeraContext:
                 if not isinstance(pieces[0], Workflow):
                     raise SyntaxError("Not under a Workflow context")
 
+            # Add template to the workflow
             found = False
             for t in pieces[0].templates:
                 if t.name == node.template.name:
@@ -114,6 +111,7 @@ class _HeraContext:
             if not found:
                 pieces[0]._add_sub(node.template)
 
+        # Add template to the current context (steps/parallel/dag/etc)
         pieces[-1]._add_sub(node)
 
 
