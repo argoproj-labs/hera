@@ -925,10 +925,10 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
             template = self.template._build_template()
-        elif not self.template:
-            raise ValueError("Only `template` is supported (not inline or template_ref)")
-        else:
+        elif isinstance(self.template, Template):
             template = self.template
+        else:
+            raise ValueError("Only 'template' is supported (not inline or template_ref)")
 
         if template.outputs is None:
             raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no outputs")
@@ -979,10 +979,10 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
             template = self.template._build_template()
-        elif not self.template:
-            raise ValueError("Only `template` is supported (not inline or template_ref)")
-        else:
+        elif isinstance(self.template, Template):
             template = self.template
+        else:
+            raise ValueError("Only 'template' is supported (not inline or template_ref)")
 
         if template.outputs is None:
             raise ValueError(f"Cannot get output artifacts. Template '{template.name}' has no outputs")
@@ -1032,10 +1032,10 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
             template = self.template._build_template()
-        elif not self.template:
-            raise ValueError("Only `template` is supported (not inline or template_ref)")
-        else:
+        elif isinstance(self.template, Template):
             template = self.template
+        else:
+            raise ValueError("Only 'template' is supported (not inline or template_ref)")
 
         if template.outputs is None:
             raise ValueError(f"Template '{template.name}' has no outputs")
