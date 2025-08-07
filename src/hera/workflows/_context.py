@@ -23,7 +23,7 @@ class SubNodeMixin(BaseMixin):
     that inherits from this mixin will add itself to the managed context (e.g. added to a Workflow/DAG).
     """
 
-    def __hera_init__(self: "SubNodeMixin"):
+    def __hera_init__(self) -> None:
         """The Hera init that is invoked post object initialization."""
         _context.add_sub_node(self)
 
