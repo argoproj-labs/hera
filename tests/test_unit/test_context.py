@@ -1,7 +1,11 @@
 import pytest
 
 from hera.workflows import DAG, Step, Steps, WorkflowTemplate, script
+from hera.workflows.container import Container
 from hera.workflows.exceptions import NodeNameConflict
+from hera.workflows.steps import Parallel
+from hera.workflows.task import Task
+from hera.workflows.workflow import Workflow
 
 
 class TestContextNameConflicts:
@@ -143,3 +147,94 @@ def test_error_outside_of_workflow_context_decorator_flag(global_config_fixture)
     with pytest.raises(SyntaxError, match="Not under a TemplateSet/Workflow context"):
         with Steps(name="test"):
             hello()
+
+
+def test_initialise_container_within_steps_context_is_allowed():
+    # The Container created under the `Steps` context will be grabbed by `Steps._add_sub`,
+    # which will add it to the Workflow templates. The `Step` itself will be added by `Steps._add_sub`, so
+    # the Container will be added as a template in the Workflow
+    with Workflow(generate_name="test-") as w:
+        with Steps(name="test"):
+            Step(name="test-step", template=Container())
+
+    assert len(w.templates) == 2
+    assert isinstance(w.templates[0], Steps)
+    assert isinstance(w.templates[1], Container)
+
+
+def test_initialise_container_not_referenced_directly_within_steps_context_is_allowed():
+    # This test covers an edge case where the Step references the container template
+    # by name, not the through the object itself. The Workflow should still have the container
+    # as a template, and the `Steps` template should only have 1 sub-step.
+    with Workflow(generate_name="test-") as w:
+        with Steps(name="test"):
+            Container(name="container")
+            Step(name="step", template="container")
+
+    assert len(w.templates) == 2
+    assert isinstance(w.templates[0], Steps)
+    assert len(w.templates[0].sub_steps) == 1
+
+    assert isinstance(w.templates[1], Container)
+
+
+def test_initialise_container_within_parallel_steps_context_is_allowed():
+    # The Container created under the `Steps` context will be grabbed by `Steps._add_sub`,
+    # which will add it to the Workflow templates. The `Step` itself will be added by `Steps._add_sub`, so
+    # the Container will be added as a template in the Workflow
+    with Workflow(generate_name="test-") as w:
+        with Steps(name="test") as s:
+            with s.parallel():
+                Step(name="test-step", template=Container())
+
+    assert len(w.templates) == 2
+    assert isinstance(w.templates[0], Steps)
+    assert isinstance(w.templates[0].sub_steps[0], Parallel)
+    assert isinstance(w.templates[1], Container)
+
+
+def test_initialise_container_not_referenced_directly_within_parallel_steps_context_is_allowed():
+    # This test covers an edge case where the Step references the container template
+    # by name, not the through the object itself. The Workflow should still have the container
+    # as a template, and the `Steps` template should only have 1 sub-step.
+    with Workflow(generate_name="test-") as w:
+        with Steps(name="test") as s:
+            with s.parallel():
+                Container(name="container")
+                Step(name="step", template="container")
+
+    assert len(w.templates) == 2
+    assert isinstance(w.templates[0], Steps)
+    assert isinstance(w.templates[0].sub_steps[0], Parallel)
+    assert len(w.templates[0].sub_steps[0].sub_steps) == 1
+
+    assert isinstance(w.templates[1], Container)
+
+
+def test_initialise_container_within_dag_context_is_allowed():
+    # The Container created under the `DAG` context will be grabbed by `DAG._add_sub`,
+    # which will add it to the Workflow templates. The `Task` itself will be added by `DAG._add_sub`, so
+    # the Container will be added as a template in the Workflow
+    with Workflow(generate_name="test-") as w:
+        with DAG(name="test"):
+            Task(name="task", template=Container())
+
+    assert len(w.templates) == 2
+    assert isinstance(w.templates[0], DAG)
+    assert isinstance(w.templates[1], Container)
+
+
+def test_initialise_container_not_referenced_directly_within_dag_context_is_allowed():
+    # This test covers an edge case where the Task references the container template
+    # by name, not the through the object itself. The Workflow should still have the container
+    # as a template, and the `DAG` template should only have 1 sub-step.
+    with Workflow(generate_name="test-") as w:
+        with DAG(name="test"):
+            Container(name="container")
+            Task(name="task", template="container")
+
+    assert len(w.templates) == 2
+    assert isinstance(w.templates[0], DAG)
+    assert len(w.templates[0].tasks) == 1
+
+    assert isinstance(w.templates[1], Container)
