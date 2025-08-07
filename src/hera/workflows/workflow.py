@@ -7,7 +7,7 @@ for more on Workflows.
 import logging
 import time
 from pathlib import Path
-from typing import Annotated, Any, Callable, Dict, List, Optional, Type, TypeVar, Union, get_args
+from typing import Annotated, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 from typing_extensions import ParamSpec
 
@@ -57,7 +57,7 @@ from hera.workflows.models import (
     WorkflowTemplateRef,
 )
 from hera.workflows.parameter import Parameter
-from hera.workflows.protocol import Templatable, TTemplate, TWorkflow, VolumeClaimable
+from hera.workflows.protocol import Templatable, TWorkflow, VolumeClaimable
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.service import WorkflowsService
 from hera.workflows.template_set import TemplateSet
@@ -113,22 +113,22 @@ class Workflow(
 
         return self.retry_strategy
 
-    def _build_templates(self) -> Optional[List[TTemplate]]:
+    def _build_templates(self) -> Optional[List[_ModelTemplate]]:
         """Builds the templates into an Argo schema."""
-        templates = []
+        templates: List[_ModelTemplate] = []
         for template in self.templates:
             if isinstance(template, HookMixin):
                 template = template._dispatch_hooks()
 
             if isinstance(template, Templatable):
                 templates.append(template._build_template())
-            elif isinstance(template, get_args(TTemplate)):
+            elif isinstance(template, _ModelTemplate):
                 templates.append(template)
             else:
                 raise InvalidType(f"{type(template)} is not a valid template type")
 
             if isinstance(template, VolumeClaimable):
-                claims = template._build_persistent_volume_claims()  # type: ignore
+                claims = template._build_persistent_volume_claims()
                 # If there are no claims, continue, nothing to add
                 if not claims:
                     continue

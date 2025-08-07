@@ -4,7 +4,7 @@ See <https://argoproj.github.io/argo-workflows/walk-through/steps>
 for more on Steps.
 """
 
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Set, Union
 
 from hera.shared._pydantic import PrivateAttr
 from hera.workflows._context import _context
@@ -49,7 +49,6 @@ def parallel():
 class Step(
     TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
-    SubNodeMixin,
     ParameterMixin,
     ItemMixin,
 ):
@@ -146,7 +145,7 @@ class Steps(
     * All Step objects initialised within a Parallel context will run in parallel.
     """
 
-    _node_names = PrivateAttr(default_factory=set)
+    _node_names: Set[str] = PrivateAttr(default_factory=set)
 
     sub_steps: List[
         Union[

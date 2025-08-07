@@ -26,7 +26,8 @@ TTemplate = Union[
     SuspendTemplate,
     Template,
 ]
-"""`TTemplate` is a union type collection of all the Hera objects that implement the `Templatable` protocol"""
+"""`TTemplate` is a union type collection of all the model Template classes"""
+# Unused in codebase, TBD if deprecated
 
 TWorkflow = Union[
     CronWorkflow,
@@ -34,14 +35,16 @@ TWorkflow = Union[
     Workflow,
     WorkflowTemplate,
 ]
-"""`TWorkflow` is a union type collection of all the Hera workflow type objects that can manage contexts"""
+"""`TWorkflow` is a union type collection of all the model workflow classes"""
 
 
 @runtime_checkable
 class Templatable(Protocol):
     """This runtime protocol indicates that an object can build its own template representation."""
 
-    def _build_template(self) -> TTemplate: ...
+    name: Optional[str]
+
+    def _build_template(self) -> Template: ...
 
 
 @runtime_checkable

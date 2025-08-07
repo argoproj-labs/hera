@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from hera.workflows import Env, Parameter, Workflow
@@ -309,6 +311,12 @@ class TestTemplateInvocatorSubNodeMixin:
         with pytest.raises(ValueError, match="Cannot get outputs when the template was set via a name: dummy"):
             task.get_outputs_as_arguments()
 
+    def test_get_outputs_inline_template(self):
+        task = Task(name="test", inline=Container(name="c"))
+
+        with pytest.raises(ValueError, match=re.escape("Only 'template' is supported (not inline or template_ref)")):
+            task.get_outputs_as_arguments()
+
     def test_get_outputs_no_outputs(self):
         container = Container(name="c")
         task = Task(name="test", template=container)
@@ -363,6 +371,12 @@ class TestTemplateInvocatorSubNodeMixin:
         ):
             task.get_parameter("a-param")
 
+    def test_get_parameter_inline_template(self):
+        task = Task(name="test", inline=Container(name="c"))
+
+        with pytest.raises(ValueError, match=re.escape("Only 'template' is supported (not inline or template_ref)")):
+            task.get_parameter("a-param")
+
     def test_get_parameter_no_outputs(self):
         container = Container(name="c")
         task = Task(name="test", template=container)
@@ -384,6 +398,12 @@ class TestTemplateInvocatorSubNodeMixin:
             ValueError, match="Cannot get output artifacts when the template was set via a name: dummy"
         ):
             task.get_artifact("an-artifact")
+
+    def test_get_artifact_inline_template(self):
+        task = Task(name="test", inline=Container(name="c"))
+
+        with pytest.raises(ValueError, match=re.escape("Only 'template' is supported (not inline or template_ref)")):
+            task.get_artifact("a-param")
 
     def test_get_artifact_no_outputs(self):
         container = Container(name="c")

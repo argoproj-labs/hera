@@ -180,7 +180,7 @@ class BaseMixin(BaseModel):
         super()._init_private_attributes()  # type: ignore
         self.__hera_init__()
 
-    def __hera_init__(self):
+    def __hera_init__(self) -> None:
         """A method that is optionally implemented and invoked by `BaseMixin` subclasses to perform some post init."""
         ...
 

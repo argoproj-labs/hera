@@ -15,7 +15,6 @@ from hera.workflows._mixins import (
     ArgumentsMixin,
     ItemMixin,
     ParameterMixin,
-    SubNodeMixin,
     TemplateInvocatorSubNodeMixin,
     TemplateMixin,
 )
@@ -97,7 +96,6 @@ _default_next_on: ContextVar[Optional[List[TaskResult]]] = ContextVar("_default_
 class Task(
     TemplateInvocatorSubNodeMixin,
     ArgumentsMixin,
-    SubNodeMixin,
     ParameterMixin,
     ItemMixin,
 ):
