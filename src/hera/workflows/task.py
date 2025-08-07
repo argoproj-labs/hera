@@ -165,15 +165,13 @@ class Task(
         """Temporarily modify the default behaviour of `next` and `>>`."""
         on_list = _normalise_on(on)
 
-        old_operator = _default_next_operator.get()
-        old_on = _default_next_on.get()
-        _default_next_operator.set(operator or _default_next_operator.get())
-        _default_next_on.set(on_list)
+        operator_token = _default_next_operator.set(operator or _default_next_operator.get())
+        on_token = _default_next_on.set(on_list)
         try:
             yield
         finally:
-            _default_next_operator.set(old_operator)
-            _default_next_on.set(old_on)
+            _default_next_operator.reset(operator_token)
+            _default_next_on.reset(on_token)
 
     def __rrshift__(self, other: List[Union[Task, str]]) -> Task:
         """Set `other` as a dependency self."""
