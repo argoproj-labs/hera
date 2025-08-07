@@ -12,7 +12,7 @@ This example showcases how to create a volume at a workflow level and use it in 
     from hera.workflows.models import VolumeMount
 
     with Workflow(
-        generate_name="test-",
+        generate_name="volume-mount-",
         volumes=[SecretVolume(name="service-account-credential", secret_name="service-account-credential")],
         entrypoint="test",
     ) as w:
@@ -36,7 +36,7 @@ This example showcases how to create a volume at a workflow level and use it in 
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      generateName: test-
+      generateName: volume-mount-
     spec:
       entrypoint: test
       templates:

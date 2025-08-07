@@ -18,7 +18,7 @@ with CronWorkflow(
 ) as w:
     Container(
         name="whalesay",
-        image="docker/whalesay:latest",
+        image="argoproj/argosay:v2",
         command=["cowsay"],
         args=["🕓 hello world. Scheduled on: {{workflow.scheduledTime}}"],
     )

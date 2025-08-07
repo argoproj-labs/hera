@@ -50,6 +50,7 @@ datamodel-code-generator = { extras = ["http"], version = "^0.25" }
 types-requests = "^2.32.0.20240914"
 pytest-clarity = "^1.0.1"
 pytest-sugar = ">=0.9.6,<1.1.0"
+pytest-xdist = "^3.8.0"
 
 [tool.poetry.scripts]
 hera = "hera.__main__:main"

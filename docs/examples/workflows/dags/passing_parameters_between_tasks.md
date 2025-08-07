@@ -13,13 +13,13 @@ This example shows how to pass parameters between tasks.
     with Workflow(generate_name="param-passing-", entrypoint="d") as w:
         out = Container(
             name="out",
-            image="docker/whalesay:latest",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             outputs=Parameter(name="x", value=42),
         )
         in_ = Container(
             name="in",
-            image="docker/whalesay:latest",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             args=["{{inputs.parameters.a}}"],
             inputs=Parameter(name="a"),
@@ -42,7 +42,7 @@ This example shows how to pass parameters between tasks.
       templates:
       - name: out
         container:
-          image: docker/whalesay:latest
+          image: argoproj/argosay:v2
           command:
           - cowsay
         outputs:
@@ -51,7 +51,7 @@ This example shows how to pass parameters between tasks.
             value: '42'
       - name: in
         container:
-          image: docker/whalesay:latest
+          image: argoproj/argosay:v2
           args:
           - '{{inputs.parameters.a}}'
           command:

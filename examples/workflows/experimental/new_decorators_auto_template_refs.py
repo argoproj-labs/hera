@@ -66,7 +66,7 @@ class WorkerConfig(BaseModel):
 
 class WorkerInput(Input):
     value_a: str = "my default"
-    value_b: str
+    value_b: str = "another default"
     an_int_value: int = 42
     a_basemodel: WorkerConfig = WorkerConfig(param_1="Hello", param_2="world")
 

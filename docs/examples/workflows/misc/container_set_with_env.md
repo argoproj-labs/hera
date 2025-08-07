@@ -24,7 +24,7 @@
         with ContainerSet(name="whalesay"):
             ContainerNode(
                 name="node",
-                image="docker/whalesay:latest",
+                image="argoproj/argosay:v2",
                 command=["cowsay"],
                 env_from=[
                     SecretEnvFrom(prefix="abc", name="secret", optional=False),
@@ -53,7 +53,7 @@
         containerSet:
           containers:
           - name: node
-            image: docker/whalesay:latest
+            image: argoproj/argosay:v2
             command:
             - cowsay
             env:

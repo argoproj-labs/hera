@@ -50,7 +50,6 @@ def get_workflow() -> Workflow:
     return w
 
 
-@pytest.mark.xfail(reason="Bucket not created correctly by Minio setup script")
 @pytest.mark.on_cluster
 def test_dag_artifacts():
     model_workflow = get_workflow().create(wait=True)

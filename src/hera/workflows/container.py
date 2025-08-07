@@ -38,7 +38,7 @@ class Container(
     `image`, `command` and `args`.
 
     ```py
-    Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+    Container(name="cowsay", image="argoproj/argosay:v2", command=["cowsay", "foo"])
     ```
 
     See how to use it in the [Container example](../../../examples/workflows/misc/container.md).

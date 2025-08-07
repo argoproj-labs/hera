@@ -64,7 +64,7 @@ def test_workflow_template_create_as_workflow():
             namespace="my-namespace",
             workflows_service=ws,
         ) as wt:
-            cowsay = Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+            cowsay = Container(name="cowsay", image="argoproj/argosay:v2", command=["cowsay", "foo"])
             with Steps(name="steps"):
                 cowsay()
 

@@ -9,7 +9,7 @@ with Workflow(
     whalesay = Container(
         name="whalesay",
         inputs=[Parameter(name="message")],
-        image="docker/whalesay",
+        image="argoproj/argosay:v2",
         command=["cowsay"],
         args=["{{inputs.parameters.message}}"],
     )

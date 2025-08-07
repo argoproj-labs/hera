@@ -13,7 +13,7 @@ from hera.workflows import (
 )
 
 with Workflow(
-    generate_name="retry-backoff-",
+    generate_name="retry-workflow-",
     entrypoint="retry-backoff",
     retry_strategy=RetryStrategy(
         limit="10",

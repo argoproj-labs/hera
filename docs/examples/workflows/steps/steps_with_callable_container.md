@@ -17,7 +17,7 @@ This example shows how to use a `Container` template within a `Steps` and `paral
         whalesay = Container(
             name="whalesay",
             inputs=[Parameter(name="message")],
-            image="docker/whalesay",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             args=["{{inputs.parameters.message}}"],
         )
@@ -51,7 +51,7 @@ This example shows how to use a `Container` template within a `Steps` and `paral
       templates:
       - name: whalesay
         container:
-          image: docker/whalesay
+          image: argoproj/argosay:v2
           args:
           - '{{inputs.parameters.message}}'
           command:

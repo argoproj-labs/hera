@@ -10,7 +10,7 @@ spec:
   - name: whalesay
     activeDeadlineSeconds: 100
     container:
-      image: docker/whalesay:latest
+      image: argoproj/argosay:v2
       command:
       - cowsay
   - name: say

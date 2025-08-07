@@ -13,7 +13,7 @@ This example showcases how to run a init_containers with env
     with Workflow(generate_name="container-", entrypoint="cowsay") as w:
         Container(
             name="cowsay",
-            image="docker/whalesay",
+            image="argoproj/argosay:v2",
             command=["cowsay", "foo"],
             init_containers=[
                 UserContainer(
@@ -60,7 +60,7 @@ This example showcases how to run a init_containers with env
                 name: my-secret
                 key: password
         container:
-          image: docker/whalesay
+          image: argoproj/argosay:v2
           command:
           - cowsay
           - foo

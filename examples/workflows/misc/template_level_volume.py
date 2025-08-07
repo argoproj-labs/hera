@@ -37,7 +37,7 @@ spec:
         name="whalesay",
         inputs=[Parameter(name="pvc-name")],
         volumes=[ExistingVolume(name="workdir", claim_name="{{inputs.parameters.pvc-name}}", mount_path="/mnt/vol")],
-        image="docker/whalesay:latest",
+        image="argoproj/argosay:v2",
         command=["sh", "-c"],
         args=["echo generating message in volume; cowsay hello world | tee /mnt/vol/hello_world.txt"],
     )

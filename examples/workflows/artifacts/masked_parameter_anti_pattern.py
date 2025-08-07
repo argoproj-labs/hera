@@ -60,7 +60,7 @@ def consume(i):  # Note that the parameter name is the same as the input Artifac
     import pickle
 
     with open("/tmp/i", "rb") as f:
-        i = i or pickle.load(f)
+        i = pickle.load(f)
     print(i)
 
 

@@ -142,7 +142,7 @@ host-docs: ## Host and open the documentation locally (and rebuild automatically
 .PHONY: regenerate-example
 regenerate-example:  ## Regenerates the yaml for a single example, using EXAMPLE_FILENAME envvar
 regenerate-example: install
-	@HERA_REGENERATE=1 poetry run python -m pytest -k $(EXAMPLE_FILENAME)
+	@HERA_REGENERATE=1 poetry run python -m pytest -k $(EXAMPLE_FILENAME) -m "not on_cluster"
 
 .PHONY: regenerate-upstream-test-data
 regenerate-upstream-test-data:  ## Regenerates test data and docs for upstream examples
@@ -188,10 +188,10 @@ install-argo:  ## Install argo CLI client
 set-up-cluster: ## Create the cluster and argo namespace
 	k3d cluster list | grep test-cluster || k3d cluster create test-cluster
 	k3d kubeconfig merge test-cluster --kubeconfig-switch-context
-	kubectl get namespace argo || kubectl create namespace argo
 
 .PHONY: set-up-argo
 set-up-argo: ## Start the argo service
+	kubectl get namespace argo || kubectl create namespace argo
 	kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v$(ARGO_WORKFLOWS_VERSION)/install.yaml
 	kubectl patch deployment argo-server --namespace argo --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["server", "--auth-mode=server"]}]'
 	kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=argo:default --namespace=argo
@@ -210,4 +210,9 @@ stop-cluster:  ## Stop the cluster
 .PHONY: test-on-cluster
 test-on-cluster: ## Run workflow tests (requires local argo cluster)
 	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
-	@poetry run python -m pytest tests/submissions -m on_cluster
+	@poetry run python -m pytest -n 6 tests/submissions -m on_cluster -k "not lint"
+
+.PHONY: lint-on-cluster
+lint-on-cluster: ## Lint workflows (requires local argo cluster)
+	@(kubectl -n argo port-forward deployment/argo-server 2746:2746 &)
+	@poetry run python -m pytest -n 6 tests/submissions -m on_cluster -k "lint"

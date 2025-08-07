@@ -17,7 +17,7 @@ and be available to subsequent tasks (if it were in a DAG).
 
     global_config.experimental_features["decorator_syntax"] = True
 
-    w = Workflow(name="hello-world-", arguments={"user": "me"})
+    w = Workflow(name="hello-world", arguments={"user": "me"})
 
 
     class MyInput(Input):
@@ -38,7 +38,7 @@ and be available to subsequent tasks (if it were in a DAG).
     apiVersion: argoproj.io/v1alpha1
     kind: Workflow
     metadata:
-      name: hello-world-
+      name: hello-world
     spec:
       entrypoint: hello-world
       templates:

@@ -14,7 +14,7 @@ def test_container_set_callable_container_raises_error():
             whalesay = Container(
                 name="whalesay",
                 inputs=[Parameter(name="message")],
-                image="docker/whalesay",
+                image="argoproj/argosay:v2",
                 command=["cowsay"],
                 args=["{{inputs.parameters.message}}"],
             )

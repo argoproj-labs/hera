@@ -7,7 +7,7 @@ spec:
   templates:
   - name: out
     container:
-      image: docker/whalesay:latest
+      image: argoproj/argosay:v2
       command:
       - cowsay
     outputs:
@@ -16,7 +16,7 @@ spec:
         value: '42'
   - name: in
     container:
-      image: docker/whalesay:latest
+      image: argoproj/argosay:v2
       args:
       - '{{inputs.parameters.a}}'
       command:

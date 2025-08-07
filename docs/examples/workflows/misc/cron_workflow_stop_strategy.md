@@ -28,7 +28,7 @@
     ) as w:
         Container(
             name="whalesay",
-            image="docker/whalesay:latest",
+            image="argoproj/argosay:v2",
             command=["cowsay"],
             args=["🕓 hello world. Scheduled on: {{workflow.scheduledTime}}"],
         )
@@ -58,7 +58,7 @@
         templates:
         - name: whalesay
           container:
-            image: docker/whalesay:latest
+            image: argoproj/argosay:v2
             args:
             - "\U0001F553 hello world. Scheduled on: {{workflow.scheduledTime}}"
             command:

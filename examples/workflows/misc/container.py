@@ -3,4 +3,4 @@
 from hera.workflows import Container, Workflow
 
 with Workflow(generate_name="container-", entrypoint="cowsay") as w:
-    Container(name="cowsay", image="docker/whalesay", command=["cowsay", "foo"])
+    Container(name="cowsay", image="argoproj/argosay:v2", command=["cowsay", "foo"])
