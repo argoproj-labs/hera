@@ -20,7 +20,7 @@ from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields
 from hera.shared._type_util import construct_io_from_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
-from hera.workflows._meta_mixins import CallableTemplateMixin, HeraBuildObj, HookMixin
+from hera.workflows._meta_mixins import HeraBuildObj, HookMixin
 from hera.workflows.artifact import Artifact
 from hera.workflows.env import Env, _BaseEnv
 from hera.workflows.env_from import _BaseEnvFrom
@@ -716,7 +716,7 @@ class ItemMixin(BaseMixin):
 
 
 class EnvIOMixin(EnvMixin, IOMixin):
-    """`EnvIOMixin` provides the capacity to use environment variables."""
+    """`EnvIOMixin` provides the capacity to create environment variables from inputs."""
 
     def _build_params_from_env(self) -> Optional[List[ModelParameter]]:
         """Assemble a list of any environment variables that are set to obtain values from `Parameter`s."""
@@ -762,7 +762,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
         return inputs
 
 
-class TemplateInvocatorSubNodeMixin(BaseMixin):
+class TemplateInvocatorSubNodeMixin(SubNodeMixin):
     """Used for classes that form sub nodes of Template invocators - `Steps` and `DAG`.
 
     See Also:
@@ -774,9 +774,9 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
     continue_on: Optional[ContinueOn] = None
     hooks: Optional[Dict[str, LifecycleHook]] = None
     on_exit: Optional[Union[str, Templatable]] = None
-    template: Optional[Union[str, Template, TemplateMixin, CallableTemplateMixin]] = None
+    template: Optional[Union[str, Template, Templatable]] = None
     template_ref: Optional[TemplateRef] = None
-    inline: Optional[Union[Template, TemplateMixin]] = None
+    inline: Optional[Union[Template, Templatable]] = None
     when: Optional[str] = None
     with_sequence: Optional[Sequence] = None
 
@@ -925,11 +925,10 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
             template = self.template._build_template()
-        else:
+        elif isinstance(self.template, Template):
             template = self.template
-
-        # at this point, we know that the template is a `Template` object
-        assert isinstance(template, Template)
+        else:
+            raise ValueError("Only 'template' is supported (not inline or template_ref)")
 
         if template.outputs is None:
             raise ValueError(f"Cannot get output parameters. Template '{template.name}' has no outputs")
@@ -980,11 +979,10 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
             template = self.template._build_template()
+        elif isinstance(self.template, Template):
+            template = self.template
         else:
-            template = cast(Template, self.template)
-
-        # at this point, we know that the template is a `Template` object
-        assert isinstance(template, Template)
+            raise ValueError("Only 'template' is supported (not inline or template_ref)")
 
         if template.outputs is None:
             raise ValueError(f"Cannot get output artifacts. Template '{template.name}' has no outputs")
@@ -1034,11 +1032,10 @@ class TemplateInvocatorSubNodeMixin(BaseMixin):
         # here, we build the template early to verify that we can get the outputs
         if isinstance(self.template, Templatable):
             template = self.template._build_template()
-        else:
+        elif isinstance(self.template, Template):
             template = self.template
-
-        # at this point, we know that the template is a `Template` object
-        assert isinstance(template, Template)
+        else:
+            raise ValueError("Only 'template' is supported (not inline or template_ref)")
 
         if template.outputs is None:
             raise ValueError(f"Template '{template.name}' has no outputs")
