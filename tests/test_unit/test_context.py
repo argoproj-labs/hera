@@ -2,7 +2,7 @@ import pytest
 
 from hera.workflows import DAG, Step, Steps, WorkflowTemplate, script
 from hera.workflows.container import Container
-from hera.workflows.exceptions import NodeNameConflict
+from hera.workflows.exceptions import InvalidType, NodeNameConflict
 from hera.workflows.steps import Parallel
 from hera.workflows.task import Task
 from hera.workflows.workflow import Workflow
@@ -238,3 +238,17 @@ def test_initialise_container_not_referenced_directly_within_dag_context_is_allo
     assert len(w.templates[0].tasks) == 1
 
     assert isinstance(w.templates[1], Container)
+
+
+def test_wrong_subtype_under_dag_context():
+    with pytest.raises(InvalidType):
+        with Workflow(generate_name="test-"):
+            with DAG(name="test"):
+                Step(name="step", template=Container(name="container"))
+
+
+def test_wrong_subtype_under_steps_context():
+    with pytest.raises(InvalidType):
+        with Workflow(generate_name="test-"):
+            with Steps(name="test"):
+                Task(name="task", template=Container(name="container"))
