@@ -108,7 +108,7 @@ class _BaseVolume(_ModelVolumeMount):
         )
 
 
-class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
+class AWSElasticBlockStoreVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
     """Representation of AWS elastic block store volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -121,7 +121,7 @@ class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVo
         )
 
 
-class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
+class AzureDiskVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
     """Representation of an Azure disk volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -139,7 +139,7 @@ class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
         )
 
 
-class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
+class AzureFileVolume(_BaseVolume, _ModelAzureFileVolumeSource):
     """Representation of an Azure file that can be mounted as a volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -152,7 +152,7 @@ class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
         )
 
 
-class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
+class CephFSVolume(_BaseVolume, _ModelCephFSVolumeSource):
     """Representation of a Ceph file system volume."""
 
     def _build_volume(self) -> _ModelVolume:
