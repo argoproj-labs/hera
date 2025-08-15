@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, List, Optional, Set, Union
 
 from hera.shared._pydantic import PrivateAttr
+from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin, ContextMixin
 from hera.workflows._mixins import IOMixin, TemplateMixin
 from hera.workflows.exceptions import InvalidType, NodeNameConflict
@@ -17,6 +18,7 @@ from hera.workflows.models import (
     DAGTemplate as _ModelDAGTemplate,
     Template as _ModelTemplate,
 )
+from hera.workflows.protocol import Templatable
 from hera.workflows.task import Task
 
 
@@ -42,6 +44,14 @@ class DAG(
     _current_task_depends: Set[str] = PrivateAttr(set())
 
     def _add_sub(self, node: Any):
+        if isinstance(node, Templatable):
+            from hera.workflows.workflow import Workflow
+
+            # We must be under a workflow context due to checks in _HeraContext.add_sub_node
+            assert _context.pieces and isinstance(_context.pieces[0], Workflow)
+            _context.pieces[0]._add_sub(node)
+            return
+
         if not isinstance(node, Task):
             raise InvalidType(type(node))
         if node.name in self._node_names:

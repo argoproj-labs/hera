@@ -110,6 +110,14 @@ class Parallel(
     _node_names = PrivateAttr(default_factory=set)
 
     def _add_sub(self, node: Any):
+        if isinstance(node, Templatable):
+            from hera.workflows.workflow import Workflow
+
+            # We must be under a workflow context due to checks in _HeraContext.add_sub_node
+            assert _context.pieces and isinstance(_context.pieces[0], Workflow)
+            _context.pieces[0]._add_sub(node)
+            return
+
         if not isinstance(node, Step):
             raise InvalidType(type(node))
         if node.name in self._node_names:
@@ -180,6 +188,14 @@ class Steps(
         return steps or None
 
     def _add_sub(self, node: Any):
+        if isinstance(node, Templatable):
+            from hera.workflows.workflow import Workflow
+
+            # We must be under a workflow context due to checks in _HeraContext.add_sub_node
+            assert _context.pieces and isinstance(_context.pieces[0], Workflow)
+            _context.pieces[0]._add_sub(node)
+            return
+
         if not isinstance(node, (Step, Parallel)):
             raise InvalidType(type(node))
         if isinstance(node, Step):
