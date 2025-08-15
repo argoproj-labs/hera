@@ -52,10 +52,10 @@ from hera.workflows.template_set import TemplateSet
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import (
     AccessMode,
-    AWSElasticBlockStoreVolumeVolume,
-    AzureDiskVolumeVolume,
-    AzureFileVolumeVolume,
-    CephFSVolumeVolume,
+    AWSElasticBlockStoreVolume,
+    AzureDiskVolume,
+    AzureFileVolume,
+    CephFSVolume,
     CinderVolume,
     ConfigMapVolume,
     CSIVolume,
@@ -88,17 +88,17 @@ from hera.workflows.workflow_status import WorkflowStatus
 from hera.workflows.workflow_template import WorkflowTemplate
 
 __all__ = [
-    "AWSElasticBlockStoreVolumeVolume",
+    "AWSElasticBlockStoreVolume",
     "AccessMode",
     "ArchiveStrategy",
     "Artifact",
     "ArtifactLoader",
     "ArtifactoryArtifact",
     "AzureArtifact",
-    "AzureDiskVolumeVolume",
-    "AzureFileVolumeVolume",
+    "AzureDiskVolume",
+    "AzureFileVolume",
     "CSIVolume",
-    "CephFSVolumeVolume",
+    "CephFSVolume",
     "CinderVolume",
     "ClusterWorkflowTemplate",
     "ConfigMapEnv",

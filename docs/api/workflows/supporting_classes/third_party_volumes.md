@@ -5,9 +5,13 @@
         head_level: 3
         show_root_heading: False
         members:
+        - AWSElasticBlockStoreVolume
         - AWSElasticBlockStoreVolumeVolume
+        - AzureDiskVolume
         - AzureDiskVolumeVolume
+        - AzureFileVolume
         - AzureFileVolumeVolume
+        - CephFSVolume
         - CephFSVolumeVolume
         - CinderVolume
         - CSIVolume
