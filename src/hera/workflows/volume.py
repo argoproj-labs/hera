@@ -1,6 +1,7 @@
 """The `hera.workflows.volume` module provides all Argo volume types that can be used via Hera."""
 
 import uuid
+import warnings
 from enum import Enum
 from typing import List, Optional, Union, cast
 
@@ -108,7 +109,7 @@ class _BaseVolume(_ModelVolumeMount):
         )
 
 
-class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
+class AWSElasticBlockStoreVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
     """Representation of AWS elastic block store volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -121,7 +122,19 @@ class AWSElasticBlockStoreVolumeVolume(_BaseVolume, _ModelAWSElasticBlockStoreVo
         )
 
 
-class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
+class AWSElasticBlockStoreVolumeVolume(AWSElasticBlockStoreVolume):
+    """Deprecated: use `AWSElasticBlockStoreVolume`."""
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "`AWSElasticBlockStoreVolumeVolume` is deprecated; use `AWSElasticBlockStoreVolume`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
+
+class AzureDiskVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
     """Representation of an Azure disk volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -139,7 +152,19 @@ class AzureDiskVolumeVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
         )
 
 
-class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
+class AzureDiskVolumeVolume(AzureDiskVolume):
+    """Deprecated: use `AzureDiskVolume`."""
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "`AzureDiskVolumeVolume` is deprecated; use `AzureDiskVolume`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
+
+class AzureFileVolume(_BaseVolume, _ModelAzureFileVolumeSource):
     """Representation of an Azure file that can be mounted as a volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -152,7 +177,19 @@ class AzureFileVolumeVolume(_BaseVolume, _ModelAzureFileVolumeSource):
         )
 
 
-class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
+class AzureFileVolumeVolume(AzureFileVolume):
+    """Deprecated: use `AzureFileVolume`."""
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "`AzureFileVolumeVolume` is deprecated; use `AzureFileVolume`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
+
+
+class CephFSVolume(_BaseVolume, _ModelCephFSVolumeSource):
     """Representation of a Ceph file system volume."""
 
     def _build_volume(self) -> _ModelVolume:
@@ -168,6 +205,18 @@ class CephFSVolumeVolume(_BaseVolume, _ModelCephFSVolumeSource):
                 user=self.user,
             ),
         )
+
+
+class CephFSVolumeVolume(CephFSVolume):
+    """Deprecated: use `CephFSVolume`."""
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "`CephFSVolumeVolume` is deprecated; use `CephFSVolume`.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
