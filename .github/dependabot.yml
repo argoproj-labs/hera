@@ -9,17 +9,15 @@ updates:
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
-      day: "monday"
-      time: "10:00"
-      timezone: "America/New_York"
+      interval: monthly
     labels:
       - "python"
       - "semver:patch"
       - "type:dependency-upgrade"
     groups:
-      patches:  # groups all patches into 1 PR
+      minors|patches:  # groups all minors and patches into 1 PR
         update-types:
+          - "minor"
           - "patch"
   - package-ecosystem: github-actions
     directory: /
