@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: hello-world-cron
+spec:
+  schedules:
+  - '*/2 * * * *'
+  workflowSpec:
+    entrypoint: hello
+    templates:
+    - name: hello
+      inputs:
+        parameters:
+        - name: s
+      script:
+        image: python:3.9
+        source: |-
+          import os
+          import sys
+          sys.path.append(os.getcwd())
+          import json
+          try: s = json.loads(r'''{{inputs.parameters.s}}''')
+          except: s = r'''{{inputs.parameters.s}}'''
+
+          print('Hello, {s}!'.format(s=s))
+        command:
+        - python
+    arguments:
+      parameters:
+      - name: s
+        value: world
