@@ -23,6 +23,18 @@ with Workflow(
 w.create()
 ```
 
+## Wait, What's a Workflow?
+
+If you're new to Argo Workflows, it helps to first understand that it runs on Kubernetes. In Kubernetes, a Custom
+Resource Definition (CRD) is how you define a new type of object. Argo Workflows adds its own CRD for `Workflow`, which
+lets you create Workflow objects in the same way you create Pods, Deployments, or other Kubernetes resources.
+
+The Workflow Controller is a Kubernetes application that watches for new or updated Workflow objects. When it sees one,
+it schedules and manages the steps of that Workflow by updating its status on the cluster. A `Workflow` is therefore a
+live object on the cluster that represents an individual (past or present) run – it contains the templates that are
+running or have run, their statuses and outputs, the amount of resources used, and more – all stored within its YAML
+specification.
+
 ## Hera Classes
 
 Hera provides many specialised classes in `hera.workflows`. You will see the Argo Workflows spec has been transformed

@@ -1,3 +1,5 @@
+"""This example shows a minimal "Hello World" example."""
+
 from hera.workflows import Workflow, script
 
 

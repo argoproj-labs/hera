@@ -2,7 +2,7 @@
 
 
 
-
+This example shows a minimal "Hello World" example.
 
 
 === "Hera"

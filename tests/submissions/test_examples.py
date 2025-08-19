@@ -18,6 +18,7 @@ from tests.test_examples import CI_MODE, _get_examples
 TIME_LIMIT_SECONDS = 120
 SKIP_LINT_EXAMPLES = {
     "new_decorators_auto_template_refs",  # Uses TemplateRefs to non-existent WorkflowTemplates
+    "template_refs",  # Also uses TemplateRefs - the WorkflowTemplates are in the file though
     "parquet_pandas",
 }
 SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(

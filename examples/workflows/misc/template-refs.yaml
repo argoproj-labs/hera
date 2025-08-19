@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: use-workflow-templates-
+  namespace: argo
+spec:
+  entrypoint: steps
+  templates:
+  - name: steps
+    steps:
+    - - name: hello-template-ref
+        arguments:
+          parameters:
+          - name: s
+            value: this is using a WorkflowTemplate
+        templateRef:
+          name: hello-world-workflow-template
+          clusterScope: false
+          template: hello
+    - - name: hello-cluster-template-ref
+        arguments:
+          parameters:
+          - name: s
+            value: this is using a ClusterWorkflowTemplate
+        templateRef:
+          name: hello-world-cluster-workflow-template
+          clusterScope: true
+          template: hello

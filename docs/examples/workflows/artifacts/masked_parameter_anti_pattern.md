@@ -44,7 +44,7 @@ Plus, for local testing, you cannot actually `return` a value due to Argo Workfl
 write to a file.
 
 Instead, it is recommended to use the Hera Runner,
-[see the Artifact example using the Hera Runner](../hera-runner/basic_artifacts.md).
+[see the Artifact example using the Hera Runner](../hera-runner/runner_artifacts.md).
 
 
 === "Hera"

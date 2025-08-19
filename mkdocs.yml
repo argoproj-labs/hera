@@ -18,6 +18,7 @@ nav:
     - walk-through/artifacts.md
     - walk-through/loops.md
     - walk-through/conditionals.md
+    - walk-through/types-of-workflows.md
     - walk-through/hera-developer-features.md
     - walk-through/authentication.md
     - walk-through/experimental-hera-features.md
