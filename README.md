@@ -56,7 +56,8 @@ with Workflow(
 w.create()
 ```
 
-Check out the [examples](./examples/workflows-examples.md) to see how to construct and submit Argo Workflows with Hera!
+Check out the [Walkthrough](https://hera.readthedocs.io/en/latest/walk-through/hello-world/) to learn how to construct
+and submit Argo Workflows with Hera!
 
 ## Requirements
 
