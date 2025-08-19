@@ -168,5 +168,44 @@ def my_steps() -> None:
 
 We can simply call the script templates, passing the input objects in.
 
-For more complex examples, including use of a dag, see
+
+## Passing extra `kwargs`
+
+In order to access normal `Step` and `Task` functionality, such as loops through `with_items`, you can pass extra kwargs
+when calling the function in the steps or dag function:
+
+```py
+w = Workflow(
+    generate_name="fanout-workflow-",
+    entrypoint="loop-example",
+)
+
+
+class PrintMessageInput(Input):
+    message: str
+
+
+@w.script()
+def print_message(inputs: PrintMessageInput):
+    print(inputs.message)
+
+
+@w.steps()
+def loop_example():
+    print_message(
+        PrintMessageInput(message="{{item}}"),
+        name="print-message-loop-with-items",
+        with_items=["hello world", "goodbye world"],
+    )
+```
+
+!!! warning
+
+    Your IDE/linter may complain about this function call, as it will not recognise the magic that Hera does at compile
+    time. For that reason, until we can improve on this user experience and confirm it is the right way forward,
+    decorators will remain experimental for the foreseeable future. Your input is appreciated in the
+    [Hera Slack channel](https://cloud-native.slack.com/archives/C03NRMD9KPY) and
+    [GitHub discussions](https://github.com/argoproj-labs/hera/discussions)!
+
+For more examples, including use of a dag, see
 [the "experimental" examples](../examples/workflows/experimental/new_dag_decorator_params.md).
