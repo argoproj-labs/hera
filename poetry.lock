@@ -123,20 +123,20 @@ virtualenv = ["virtualenv (>=20.11) ; python_version < \"3.10\"", "virtualenv (>
 
 [[package]]
 name = "cappa"
-version = "0.29.1"
+version = "0.30.0"
 description = "Declarative CLI argument parser."
 optional = true
 python-versions = "<4,>=3.8"
 groups = ["main"]
 markers = "extra == \"cli\""
 files = [
-    {file = "cappa-0.29.1-py3-none-any.whl", hash = "sha256:db0ed5140c173684c8530417c2fc26eb7bdf26fb06e0ab561b83fe781ed21b0e"},
-    {file = "cappa-0.29.1.tar.gz", hash = "sha256:2f6e1cf53619e99d8b2ae431ed7ac5b81e7728f1aa42c3fc86d7bfb1f03de347"},
+    {file = "cappa-0.30.0-py3-none-any.whl", hash = "sha256:11ab9e7113f5fd048d274c84c6c88713eb9b6a4878848c2a46f7815581d10068"},
+    {file = "cappa-0.30.0.tar.gz", hash = "sha256:083b02ce0866fc4ee892e4e5a8b4ac3a02a435aef824ebc7041589d037e6aa7e"},
 ]
 
 [package.dependencies]
 rich = ">=12.1.0"
-type-lens = ">=0.2.4"
+type-lens = ">=0.2.5"
 typing-extensions = [
     {version = ">=4.12.0", markers = "python_version >= \"3.13\""},
     {version = ">=4.8.0", markers = "python_version < \"3.13\""},
@@ -1460,15 +1460,15 @@ markers = {main = "extra == \"cli\" and python_version <= \"3.10\"", dev = "pyth
 
 [[package]]
 name = "type-lens"
-version = "0.2.4"
+version = "0.2.5"
 description = "type-lens is a Python template project designed to simplify the setup of a new project."
 optional = true
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
 markers = "extra == \"cli\""
 files = [
-    {file = "type_lens-0.2.4-py3-none-any.whl", hash = "sha256:e43b9892f7f4c634932f8d8004da6b3213c065f9c71215e7cc41c1211a24d059"},
-    {file = "type_lens-0.2.4.tar.gz", hash = "sha256:1301f1c97c6cdb71b5465287375e78f66f6e1116c0d9d31bac50bf61cea7dfd6"},
+    {file = "type_lens-0.2.5-py3-none-any.whl", hash = "sha256:b0c307428c0f899d1b9bad381ff1c377e543d6227d8c16f48d1a8c47ff7e541b"},
+    {file = "type_lens-0.2.5.tar.gz", hash = "sha256:6cd32d38845c574d244c979c89c955da6e13c4aad0dc5cd08d318ba31b9cabf1"},
 ]
 
 [package.dependencies]
@@ -1596,4 +1596,4 @@ yaml = ["pyyaml"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "c07fe39b9187cd56f516625ec7685f61781200c2d49500773c9d012f0add7ee4"
+content-hash = "f8dd1131c6ea7079c5792184976b816865c3d5c0fe002e3b69e4fe2997e12440"
