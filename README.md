@@ -90,9 +90,9 @@ w.create()
 
 ## Installation
 
-| Source                                               | Command                                                                                                 |
-|------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| [PyPI](https://pypi.org/project/hera/)               | `pip install hera`                                                                                      |
+| Source                                               | Command                                                                              |
+|------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [PyPI](https://pypi.org/project/hera/)               | `pip install hera`                                                                   |
 | [GitHub repo](https://github.com/argoproj-labs/hera) | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed` |
 
 
@@ -114,7 +114,8 @@ w.create()
   from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information.
 
 #### `experimental`
- - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features that have not yet graduated into stable features.
+ - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features
+   that have not yet graduated into stable features.
 
 ## Presentations
 
