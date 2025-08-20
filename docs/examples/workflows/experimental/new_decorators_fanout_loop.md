@@ -22,7 +22,8 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
 
 
     class PrintMessageInput(Input):
-        message: str
+        message: str = ""
+        an_int: int = 42
 
 
     @w.script()
@@ -30,13 +31,25 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
         print(inputs.message)
 
 
+    @w.script()
+    def print_int(inputs: PrintMessageInput):
+        print(inputs.an_int)
+
+
     @w.set_entrypoint
     @w.steps()
     def loop_example():
         print_message(
             PrintMessageInput(message="{{item}}"),
-            name="print-message-loop-with-items",
+            name="print-str-message-loop-with-items",
             with_items=["hello world", "goodbye world"],
+        )
+        # For general use of loops in decorator functions, you will need to
+        # use `.construct` to pass the `"{{item}}"` string.
+        print_int(
+            PrintMessageInput.construct(an_int="{{item}}"),
+            name="print-int-loop-with-items",
+            with_items=[42, 123, 321],
         )
     ```
 
@@ -54,6 +67,9 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
         inputs:
           parameters:
           - name: message
+            default: ''
+          - name: an_int
+            default: '42'
         script:
           image: python:3.9
           source: '{{inputs.parameters}}'
@@ -67,9 +83,29 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
           env:
           - name: hera__script_pydantic_io
             value: ''
+      - name: print-int
+        inputs:
+          parameters:
+          - name: message
+            default: ''
+          - name: an_int
+            default: '42'
+        script:
+          image: python:3.9
+          source: '{{inputs.parameters}}'
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.experimental.new_decorators_fanout_loop:print_int
+          command:
+          - python
+          env:
+          - name: hera__script_pydantic_io
+            value: ''
       - name: loop-example
         steps:
-        - - name: print-message-loop-with-items
+        - - name: print-str-message-loop-with-items
             template: print-message
             withItems:
             - hello world
@@ -77,6 +113,20 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
             arguments:
               parameters:
               - name: message
+                value: '{{item}}'
+              - name: an_int
+                value: '42'
+        - - name: print-int-loop-with-items
+            template: print-int
+            withItems:
+            - 42
+            - 123
+            - 321
+            arguments:
+              parameters:
+              - name: message
+                value: ''
+              - name: an_int
                 value: '{{item}}'
     ```
 

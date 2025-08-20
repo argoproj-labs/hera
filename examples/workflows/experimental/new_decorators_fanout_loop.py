@@ -15,7 +15,8 @@ w = Workflow(
 
 
 class PrintMessageInput(Input):
-    message: str
+    message: str = ""
+    an_int: int = 42
 
 
 @w.script()
@@ -23,11 +24,23 @@ def print_message(inputs: PrintMessageInput):
     print(inputs.message)
 
 
+@w.script()
+def print_int(inputs: PrintMessageInput):
+    print(inputs.an_int)
+
+
 @w.set_entrypoint
 @w.steps()
 def loop_example():
     print_message(
         PrintMessageInput(message="{{item}}"),
-        name="print-message-loop-with-items",
+        name="print-str-message-loop-with-items",
         with_items=["hello world", "goodbye world"],
+    )
+    # For general use of loops in decorator functions, you will need to
+    # use `.construct` to pass the `"{{item}}"` string.
+    print_int(
+        PrintMessageInput.construct(an_int="{{item}}"),
+        name="print-int-loop-with-items",
+        with_items=[42, 123, 321],
     )
