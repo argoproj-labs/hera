@@ -1,6 +1,11 @@
 """This example shows how to pass extra Step/Task kwargs when calling a function.
 
 This lets you perform fanouts using `with_items`, set conditions using `when` and more.
+
+!!! warning
+
+    These features are not compatible with local-running of dags and steps, please see
+    <https://github.com/argoproj-labs/hera/issues/1492>.
 """
 
 from hera.shared import global_config
