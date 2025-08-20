@@ -56,7 +56,8 @@ with Workflow(
 w.create()
 ```
 
-Check out the [examples](./examples/workflows-examples.md) to see how to construct and submit Argo Workflows with Hera!
+Check out the [Walkthrough](https://hera.readthedocs.io/en/latest/walk-through/hello-world/) to learn how to construct
+and submit Argo Workflows with Hera!
 
 ## Requirements
 
@@ -89,9 +90,9 @@ w.create()
 
 ## Installation
 
-| Source                                               | Command                                                                                                 |
-|------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| [PyPI](https://pypi.org/project/hera/)               | `pip install hera`                                                                                      |
+| Source                                               | Command                                                                              |
+|------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [PyPI](https://pypi.org/project/hera/)               | `pip install hera`                                                                   |
 | [GitHub repo](https://github.com/argoproj-labs/hera) | `python -m pip install git+https://github.com/argoproj-labs/hera --ignore-installed` |
 
 
@@ -113,7 +114,8 @@ w.create()
   from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information.
 
 #### `experimental`
- - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features that have not yet graduated into stable features.
+ - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features
+   that have not yet graduated into stable features.
 
 ## Presentations
 
