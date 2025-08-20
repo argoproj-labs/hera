@@ -11,7 +11,6 @@ global_config.experimental_features["decorator_syntax"] = True
 
 w = Workflow(
     generate_name="fanout-workflow-",
-    entrypoint="loop-example",
 )
 
 
@@ -24,6 +23,7 @@ def print_message(inputs: PrintMessageInput):
     print(inputs.message)
 
 
+@w.set_entrypoint
 @w.steps()
 def loop_example():
     print_message(

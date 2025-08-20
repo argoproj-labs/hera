@@ -177,7 +177,6 @@ when calling the function in the steps or dag function:
 ```py
 w = Workflow(
     generate_name="fanout-workflow-",
-    entrypoint="loop-example",
 )
 
 
@@ -190,6 +189,7 @@ def print_message(inputs: PrintMessageInput):
     print(inputs.message)
 
 
+@w.set_entrypoint
 @w.steps()
 def loop_example():
     print_message(

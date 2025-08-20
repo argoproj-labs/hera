@@ -18,7 +18,6 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
 
     w = Workflow(
         generate_name="fanout-workflow-",
-        entrypoint="loop-example",
     )
 
 
@@ -31,6 +30,7 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
         print(inputs.message)
 
 
+    @w.set_entrypoint
     @w.steps()
     def loop_example():
         print_message(
