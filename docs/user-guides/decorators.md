@@ -36,7 +36,8 @@ tasks. It does this by tracking the parameters and artifacts passed between task
 must be written in a natural running order (which is also why it can be run locally). Note that only a basic "depends"
 relationship is deduced, more complex dependencies are not yet supported.
 
-The `steps` decorator allows you to use the `parallel` function from `hera.workflows`, which is used to open a context under which all the steps will run in parallel.
+The `steps` decorator allows you to use the `parallel` function from `hera.workflows`, which is used to open a context
+under which all the steps will run in parallel.
 
 The choice between `dag` and `steps` to arrange your templates mostly comes down to personal preference. If you want to
 run as many _dependent_ templates in parallel as possible then use a DAG, which will figure out which tasks can run
@@ -168,5 +169,52 @@ def my_steps() -> None:
 
 We can simply call the script templates, passing the input objects in.
 
-For more complex examples, including use of a dag, see
+
+## Passing extra `kwargs`
+
+In order to access normal `Step` and `Task` functionality, such as loops through `with_items`, you can pass extra kwargs
+when calling the function in the steps or dag function.
+
+!!! warning
+
+    Running this particular `steps` function locally will not loop over the items in `with_items`. In general, the extra
+    kwargs will not work with local-running `dag` and `steps` functions in the way you might expect, as there is no
+    local-runtime for interpreting these values. Please see issue
+    [#1492](https://github.com/argoproj-labs/hera/issues/1492) for updates on Hera's local runtime feature for
+    decorators.
+
+```py
+w = Workflow(
+    generate_name="fanout-workflow-",
+)
+
+
+class PrintMessageInput(Input):
+    message: str
+
+
+@w.script()
+def print_message(inputs: PrintMessageInput):
+    print(inputs.message)
+
+
+@w.set_entrypoint
+@w.steps()
+def loop_example():
+    print_message(
+        PrintMessageInput(message="{{item}}"),
+        name="print-message-loop-with-items",
+        with_items=["hello world", "goodbye world"],
+    )
+```
+
+!!! warning
+
+    Your IDE/linter may complain about this function call, as it will not recognise the magic that Hera does at compile
+    time. For that reason, until we can improve on this user experience and confirm it is the right way forward,
+    decorators will remain experimental for the foreseeable future. Your input is appreciated in the
+    [Hera Slack channel](https://cloud-native.slack.com/archives/C03NRMD9KPY) and
+    [GitHub discussions](https://github.com/argoproj-labs/hera/discussions)!
+
+For more examples, including use of a dag, see
 [the "experimental" examples](../examples/workflows/experimental/new_dag_decorator_params.md).
