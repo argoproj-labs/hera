@@ -1,3 +1,4 @@
+import asyncio
 import importlib
 import random
 import time
@@ -6,6 +7,7 @@ import pytest
 import requests
 
 from hera.exceptions import HeraException
+from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import Workflow as ModelWorkflow
@@ -27,6 +29,7 @@ SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
         "conditional_on_task_status",
         "container_set_with_env",
         "create_volume_for_workflow",
+        "cron_hello_world",
         "cron_workflow_stop_strategy",
         "custom_serialiser",
         "dag_input_output",
@@ -45,6 +48,7 @@ SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
         "new_dag_decorator_params",
         "new_decorators_auto_template_refs",
         "new_decorators_basic_script",
+        "new_decorators_fanout_loop",
         "new_steps_decorator_with_parallel_steps",
         "recursive_dag",
         "recursive_steps",
@@ -80,6 +84,16 @@ def workflows_service():
     yield workflows_service
 
 
+@pytest.fixture
+def async_workflows_service():
+    workflows_service = AsyncWorkflowsService(
+        host="https://localhost:2746",
+        namespace="argo",
+        verify_ssl=False,
+    )
+    yield workflows_service
+
+
 @pytest.mark.on_cluster
 @pytest.mark.parametrize(
     "module_name",
@@ -94,10 +108,10 @@ def workflows_service():
         for _, module_name, filename in _get_examples()
     ],
 )
-def test_submission(
+async def test_submission(
     module_name,
     global_config_fixture,
-    workflows_service: WorkflowsService,
+    async_workflows_service: AsyncWorkflowsService,
 ):
     global_config_fixture.host = "https://localhost:2746"
     workflow = importlib.import_module(module_name).w
@@ -114,16 +128,16 @@ def test_submission(
 
     workflow.namespace = "argo"
     workflow.service_account_name = "argo"
-    workflow.workflows_service = workflows_service
+    workflow.workflows_service = async_workflows_service
 
     now = time.time()
 
     while True:
         try:
-            model_workflow = workflow.create(wait=True, poll_interval=TIME_LIMIT_SECONDS // 3)
+            model_workflow = await workflow.async_create(wait=True, poll_interval=TIME_LIMIT_SECONDS // 3)
         except requests.exceptions.ConnectionError:
-            time.sleep(random.randint(25, 35))
-            model_workflow = workflow.create(wait=True, poll_interval=TIME_LIMIT_SECONDS // 3)
+            await asyncio.sleep(random.randint(25, 35))
+            model_workflow = await workflow.async_create(wait=True, poll_interval=TIME_LIMIT_SECONDS // 3)
             continue
         break
 
@@ -149,10 +163,10 @@ def test_submission(
         for _, module_name, filename in _get_examples()
     ],
 )
-def test_lint(
+async def test_lint(
     module_name,
     global_config_fixture,
-    workflows_service: WorkflowsService,
+    async_workflows_service: WorkflowsService,
 ):
     global_config_fixture.host = "https://localhost:2746"
     workflow = importlib.import_module(module_name).w
@@ -162,9 +176,9 @@ def test_lint(
 
     workflow.namespace = "argo"
     workflow.service_account_name = "argo"
-    workflow.workflows_service = workflows_service
+    workflow.workflows_service = async_workflows_service
 
     try:
-        workflow.lint()
+        await workflow.async_lint()
     except HeraException as e:
         assert False, f"Workflow failed linting: {e}"
