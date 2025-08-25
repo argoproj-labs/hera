@@ -100,7 +100,9 @@ nav:
         - api/workflows/supporting_classes/first_party_volumes.md
         - api/workflows/supporting_classes/third_party_volumes.md
         - api/workflows/supporting_classes/workflow_status.md
-      - Rest API: api/workflows/supporting_classes/service.md
+      - Rest API:
+        - Service: api/workflows/supporting_classes/service.md
+        - Async Service: api/workflows/supporting_classes/async_service.md
       - Generated Models: api/workflows/models.md
     - Events:
       - Models: api/events/models.md

@@ -20,6 +20,7 @@ from hera.workflows.artifact import (
     RawArtifact,
     S3Artifact,
 )
+from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.container import Container
 from hera.workflows.container_set import ContainerNode, ContainerSet
@@ -94,6 +95,7 @@ __all__ = [
     "Artifact",
     "ArtifactLoader",
     "ArtifactoryArtifact",
+    "AsyncWorkflowsService",
     "AzureArtifact",
     "AzureDiskVolume",
     "AzureFileVolume",
