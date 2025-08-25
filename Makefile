@@ -113,6 +113,7 @@ workflows-service:  ## Generate the Workflows service option of Hera
 .PHONY: events-service
 events-service:  ## Generate the events service option of Hera
 	@poetry run python scripts/service.py $(OPENAPI_SPEC_URL) events
+	@poetry run python scripts/async_service.py $(OPENAPI_SPEC_URL) events
 	$(MAKE) format
 
 .PHONY: services
