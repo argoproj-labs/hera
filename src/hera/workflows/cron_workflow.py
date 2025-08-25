@@ -15,6 +15,7 @@ from hera.workflows._meta_mixins import (
     _get_model_attr,
     _set_model_attr,
 )
+from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
     CreateCronWorkflowRequest,
     CronWorkflow as _ModelCronWorkflow,
@@ -26,6 +27,7 @@ from hera.workflows.models import (
     Workflow as _ModelWorkflow,
 )
 from hera.workflows.protocol import TWorkflow
+from hera.workflows.service import WorkflowsService
 from hera.workflows.workflow import Workflow, _WorkflowModelMapper
 
 
@@ -93,7 +95,7 @@ class CronWorkflow(Workflow):
 
     def create(self) -> TWorkflow:  # type: ignore
         """Creates the CronWorkflow on the Argo cluster."""
-        assert self.workflows_service, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace, "workflow namespace not defined"
 
         wf = self.workflows_service.create_cron_workflow(
@@ -106,7 +108,7 @@ class CronWorkflow(Workflow):
 
     def get(self) -> TWorkflow:
         """Attempts to get a cron workflow based on the parameters of this template e.g. name + namespace."""
-        assert self.workflows_service, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         return self.workflows_service.get_cron_workflow(name=self.name, namespace=self.namespace)
@@ -118,7 +120,7 @@ class CronWorkflow(Workflow):
         a get prior to updating to get the resource version to update in the first place. If you know the template
         does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
         """
-        assert self.workflows_service, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace, "workflow namespace not defined"
         assert self.name, "workflow name not defined"
         # we always need to do a get prior to updating to get the resource version to update in the first place
@@ -138,9 +140,63 @@ class CronWorkflow(Workflow):
 
     def lint(self) -> TWorkflow:
         """Lints the CronWorkflow using the Argo cluster."""
-        assert self.workflows_service, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_cron_workflow(
+            LintCronWorkflowRequest(cron_workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
+        )
+
+    async def async_create(self) -> TWorkflow:  # type: ignore
+        """Creates the CronWorkflow on the Argo cluster."""
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+
+        wf = await self.workflows_service.create_cron_workflow(
+            CreateCronWorkflowRequest(cron_workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
+        )
+        # set the name on the object so that we can do a get/update later
+        self.name = wf.metadata.name
+        return wf
+
+    async def async_get(self) -> TWorkflow:
+        """Attempts to get a cron workflow based on the parameters of this template e.g. name + namespace."""
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        assert self.name, "workflow name not defined"
+        return await self.workflows_service.get_cron_workflow(name=self.name, namespace=self.namespace)
+
+    async def async_update(self) -> TWorkflow:
+        """Attempts to perform a workflow template update based on the parameters of this template.
+
+        Note that this creates the template if it does not exist. In addition, this performs
+        a get prior to updating to get the resource version to update in the first place. If you know the template
+        does not exist ahead of time, it is more efficient to use `create()` directly to avoid one round trip.
+        """
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        assert self.name, "workflow name not defined"
+        # we always need to do a get prior to updating to get the resource version to update in the first place
+        # https://github.com/argoproj/argo-workflows/pull/5465#discussion_r597797052
+
+        template = self.build()
+        try:
+            curr = await self.async_get()
+            template.metadata.resource_version = curr.metadata.resource_version
+        except NotFound:
+            return await self.async_create()
+        return await self.workflows_service.update_cron_workflow(
+            self.name,
+            UpdateCronWorkflowRequest(cron_workflow=template),  # type: ignore
+            namespace=self.namespace,
+        )
+
+    async def async_lint(self) -> TWorkflow:
+        """Lints the CronWorkflow using the Argo cluster."""
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        return await self.workflows_service.lint_cron_workflow(
             LintCronWorkflowRequest(cron_workflow=self.build()),  # type: ignore
             namespace=self.namespace,
         )
