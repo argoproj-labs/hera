@@ -111,6 +111,7 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Pa
     For a function parameter, python_name should be the parameter name.
     For a Pydantic Input or Output class, python_name should be the field name.
     """
+    from hera.workflows.artifact import Artifact
     from hera.workflows.parameter import Parameter
 
     if workflow_annotation := get_workflow_annotation(annotation):
@@ -122,6 +123,17 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Pa
     io.name = io.name or python_name
     if isinstance(io, Parameter):
         set_enum_based_on_type(io, annotation)
+    elif isinstance(io, Artifact):
+        is_optional_annotation = is_optional(annotation)
+        if io.optional is True and not is_optional_annotation:
+            # Assume user wants optional
+            raise ValueError("Artifact annotation must be `Optional` for optional Artifacts.")
+
+        if is_optional_annotation and io.optional is False:
+            raise ValueError("Artifact annotation does not match Artifact.optional.")
+
+        if is_optional_annotation:
+            io.optional = True
 
     return io
 
@@ -134,6 +146,12 @@ def get_unsubscripted_type(t: Any) -> Any:
     if origin_type := get_origin(t):
         return origin_type
     return t
+
+
+def is_optional(annotation: Any) -> bool:
+    unwrapped_type = unwrap_annotation(annotation)
+    origin_type = get_unsubscripted_type(unwrapped_type)
+    return (origin_type is Union or origin_type is UnionType) and NoneType in get_args(unwrapped_type)
 
 
 def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]]) -> bool:

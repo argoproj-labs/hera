@@ -12,14 +12,11 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
 
 if sys.version_info >= (3, 10):
     from inspect import get_annotations
-    from types import NoneType
     from typing import Concatenate, ParamSpec
 else:
     from typing_extensions import Concatenate, ParamSpec
 
     from hera.shared._inspect import get_annotations
-
-    NoneType = type(None)
 
 
 from hera.shared import BaseMixin, global_config

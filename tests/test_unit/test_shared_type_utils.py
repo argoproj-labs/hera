@@ -105,12 +105,31 @@ def test_get_workflow_annotation_should_raise_error(annotation):
         [Annotated[str, Artifact(name="a_str")], Artifact(name="a_str")],
         [Annotated[int, Gt(10), Artifact(name="a_int")], Artifact(name="a_int")],
         [Annotated[int, Artifact(name="a_int"), Gt(30)], Artifact(name="a_int")],
+        [
+            Annotated[Optional[int], Artifact(name="an_optional_int"), Gt(30)],
+            Artifact(name="an_optional_int", optional=True),  # Hera will add `optional=True` based on the annotation
+        ],
         # this can happen when user uses already annotated types.
         [Annotated[Annotated[int, Gt(10)], Artifact(name="a_int")], Artifact(name="a_int")],
     ],
 )
 def test_construct_io_from_annotation(annotation, expected):
     assert construct_io_from_annotation("python_name", annotation) == expected
+
+
+@pytest.mark.parametrize(
+    "type_,optional,expected_error",
+    (
+        [Optional[int], False, "Artifact annotation does not match Artifact.optional."],
+        [int, True, "Artifact annotation must be `Optional` for optional Artifacts."],
+    ),
+)
+def test_construct_io_from_annotation_invalid_artifact(type_, optional, expected_error):
+    with pytest.raises(
+        ValueError,
+        match=expected_error,
+    ):
+        construct_io_from_annotation("python_name", Annotated[type_, Artifact(name="bad_optional", optional=optional)])
 
 
 @pytest.mark.parametrize(
