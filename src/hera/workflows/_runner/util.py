@@ -199,8 +199,10 @@ def _map_function_annotations(function: Callable, template_inputs: Dict[str, str
         elif not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
             # We collect all relevant kwargs for the single `Input` function parameter
             function_kwargs[func_param_name] = map_runner_input(func_param.annotation, template_inputs)
-        elif is_annotated(func_param.annotation) and issubclass(
-            unwrap_annotation(func_param.annotation), (InputV1, InputV2)
+        elif (
+            is_annotated(func_param.annotation)
+            and inspect.isclass(unwrap_annotation(func_param.annotation))
+            and issubclass(unwrap_annotation(func_param.annotation), (InputV1, InputV2))
         ):
             function_kwargs[func_param_name] = map_runner_input(
                 unwrap_annotation(func_param.annotation), template_inputs

@@ -107,6 +107,12 @@ except ImportError:
             id="annotated-str-literal",
         ),
         pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_str_literal_unrelated",
+            [{"name": "my_literal", "value": "1"}],
+            "type given: str",
+            id="annotated-str-literal-unrelated-metadata",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_str_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},

@@ -446,8 +446,16 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if (not is_subscripted(func_param.annotation) or is_annotated(func_param.annotation)) and issubclass(
-            unwrap_annotation(func_param.annotation), (InputV1, InputV2)
+        # If the annotation is not subscripted, then we can directly check if it is an Input type annotation.
+        # Otherwise, we check if it is of the form `Annotated[...]`, and subsequently check whether the unwrapped
+        # annotation is a class which we can then check if it is a subclass. Otherwise, an annotation of the form
+        # `Annotated[Literal[...]]` will raise an exception as `typing.Literal` is not a class (but an object).
+        if (
+            not is_subscripted(func_param.annotation)
+            and issubclass(func_param.annotation, (InputV1, InputV2))
+            or is_annotated(func_param.annotation)
+            and inspect.isclass(unwrap_annotation(func_param.annotation))
+            and issubclass(unwrap_annotation(func_param.annotation), (InputV1, InputV2))
         ):
             if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
                 raise ValueError(
