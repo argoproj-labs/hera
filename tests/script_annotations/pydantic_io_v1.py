@@ -24,6 +24,13 @@ def pydantic_io_params(
     pass
 
 
+@script(constructor="runner")
+def pydantic_io_params_unrelated_annotation(
+    my_input: Annotated[ParamOnlyInput, "some other metadata"],
+) -> ParamOnlyOutput:
+    pass
+
+
 class ArtifactOnlyInput(Input):
     my_file_artifact: Annotated[Path, Artifact(name="file-artifact")]
     my_int_artifact: Annotated[
@@ -78,6 +85,7 @@ def pydantic_io_within_generic(
 
 with Workflow(generate_name="pydantic-io-") as w:
     pydantic_io_params()
+    pydantic_io_params_unrelated_annotation()
     pydantic_io_artifacts()
     pydantic_io()
     pydantic_io_with_defaults()

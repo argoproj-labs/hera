@@ -48,8 +48,10 @@ from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
 from hera.shared._type_util import (
     construct_io_from_annotation,
     get_workflow_annotation,
+    is_annotated,
     is_subscripted,
     origin_type_issupertype,
+    unwrap_annotation,
 )
 from hera.shared.serialization import serialize
 from hera.workflows._context import _context
@@ -444,7 +446,9 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
     artifacts = []
 
     for func_param in inspect.signature(source).parameters.values():
-        if not is_subscripted(func_param.annotation) and issubclass(func_param.annotation, (InputV1, InputV2)):
+        if (not is_subscripted(func_param.annotation) or is_annotated(func_param.annotation)) and issubclass(
+            unwrap_annotation(func_param.annotation), (InputV1, InputV2)
+        ):
             if not _flag_enabled(_SCRIPT_PYDANTIC_IO_FLAG):
                 raise ValueError(
                     (

@@ -37,6 +37,13 @@ def pydantic_input_parameters(
 
 
 @script(constructor="runner")
+def pydantic_input_parameters_unrelated_annotation(
+    my_input: Annotated[ParamOnlyInput, "some other metadata"],
+) -> int:
+    return 42
+
+
+@script(constructor="runner")
 def pydantic_io_in_generic(
     my_inputs: List[ParamOnlyInput],
 ) -> str:

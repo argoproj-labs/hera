@@ -644,6 +644,17 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
             id="test parameter only input variations",
         ),
         pytest.param(
+            "tests.script_runner.pydantic_io_vX:pydantic_input_parameters_unrelated_annotation",
+            [
+                {"name": "my_required_int", "value": "4"},
+                {"name": "my_int", "value": "3"},
+                {"name": "my_annotated_int", "value": "2"},
+                {"name": "multiple-ints", "value": "[1, 2, 3]"},
+            ],
+            "42",
+            id="test with unrelated annotation",
+        ),
+        pytest.param(
             "tests.script_runner.pydantic_io_vX:pydantic_io_in_generic",
             [
                 {"name": "my_inputs", "value": '[{"my_required_int": 2, "my_annotated_int": 3}]'},

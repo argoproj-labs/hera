@@ -235,6 +235,28 @@ def test_configmap(global_config_fixture):
             id="param-only-io",
         ),
         pytest.param(
+            "pydantic_io_params_unrelated_annotation",
+            {
+                "parameters": [
+                    {"name": "my_int", "default": "1"},
+                    {"name": "another-int", "default": "42", "description": "my desc"},
+                    {"name": "no_default_param"},
+                ]
+            },
+            {
+                "parameters": [
+                    {"name": "my_output_str", "valueFrom": {"path": "/tmp/hera-outputs/parameters/my_output_str"}},
+                    {"name": "second-output", "valueFrom": {"path": "/tmp/hera-outputs/parameters/second-output"}},
+                    {
+                        "name": "annotated_output",
+                        "valueFrom": {"path": "/tmp/hera-outputs/parameters/annotated_output"},
+                        "description": "use the field name directly",
+                    },
+                ],
+            },
+            id="param-only-io-unrelated-annotation",
+        ),
+        pytest.param(
             "pydantic_io_artifacts",
             {
                 "artifacts": [
