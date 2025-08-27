@@ -111,7 +111,6 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Pa
     For a function parameter, python_name should be the parameter name.
     For a Pydantic Input or Output class, python_name should be the field name.
     """
-    from hera.workflows.artifact import Artifact
     from hera.workflows.parameter import Parameter
 
     if workflow_annotation := get_workflow_annotation(annotation):
@@ -123,7 +122,7 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Pa
     io.name = io.name or python_name
     if isinstance(io, Parameter):
         set_enum_based_on_type(io, annotation)
-    elif isinstance(io, Artifact):
+    else:  # isinstance(io, Artifact)
         is_optional_annotation = is_optional(annotation)
         if io.optional is True and not is_optional_annotation:
             # Assume user wants optional
