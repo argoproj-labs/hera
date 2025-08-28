@@ -107,6 +107,12 @@ except ImportError:
             id="annotated-str-literal",
         ),
         pytest.param(
+            "tests.script_runner.parameter_inputs:annotated_str_literal_unrelated",
+            [{"name": "my_literal", "value": "1"}],
+            "type given: str",
+            id="annotated-str-literal-unrelated-metadata",
+        ),
+        pytest.param(
             "tests.script_runner.parameter_inputs:annotated_str_parameter_expects_jsonstr_dict",
             [{"name": "my_json_str", "value": json.dumps({"my": "dict"})}],
             {"my": "dict"},
@@ -642,6 +648,17 @@ def test_run_null_string(mock_parse_args, mock_runner, tmp_path: Path):
             ],
             "42",
             id="test parameter only input variations",
+        ),
+        pytest.param(
+            "tests.script_runner.pydantic_io_vX:pydantic_input_parameters_unrelated_annotation",
+            [
+                {"name": "my_required_int", "value": "4"},
+                {"name": "my_int", "value": "3"},
+                {"name": "my_annotated_int", "value": "2"},
+                {"name": "multiple-ints", "value": "[1, 2, 3]"},
+            ],
+            "42",
+            id="test with unrelated annotation",
         ),
         pytest.param(
             "tests.script_runner.pydantic_io_vX:pydantic_io_in_generic",

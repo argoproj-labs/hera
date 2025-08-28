@@ -59,6 +59,11 @@ def annotated_str_literal(my_literal: Annotated[Literal["1", "2"], Parameter(nam
 
 
 @script()
+def annotated_str_literal_unrelated(my_literal: Annotated[Literal["1", "2"], "some metadata"]) -> str:
+    return f"type given: {type(my_literal).__name__}"
+
+
+@script()
 def annotated_object(annotated_input_value: Annotated[Input, Parameter(name="input-value")]) -> Output:
     return Output(output=[annotated_input_value])
 
