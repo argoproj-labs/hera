@@ -6,8 +6,9 @@ encountered when communication with the Argo server.
 
 import json
 from http import HTTPStatus
-from typing import Dict, Type
+from typing import Dict, Type, Union
 
+import httpx
 from requests import Response
 
 
@@ -75,9 +76,10 @@ def exception_from_status_code(status_code: int, msg: str) -> HeraException:
     return status_code_to_exception_map.get(status_code, HeraException)(msg)
 
 
-def exception_from_server_response(resp: Response) -> HeraException:
+def exception_from_server_response(resp: Union[Response, httpx.Response]) -> HeraException:
     """Return a `HeraException` mapped from the given `Response`."""
-    assert not resp.ok, "This function should only be called with non-2xx responses"
+    is_success = resp.ok if isinstance(resp, Response) else resp.is_success
+    assert not is_success, "This function should only be called with non-2xx responses"
     try:
         return exception_from_status_code(
             resp.status_code,

@@ -4,6 +4,7 @@ See <https://argoproj.github.io/argo-workflows/workflow-concepts/#the-workflow>
 for more on Workflows.
 """
 
+import asyncio
 import logging
 import time
 from pathlib import Path
@@ -23,6 +24,7 @@ from hera.workflows._mixins import (
     VolumeMixin,
     VolumesT,
 )
+from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.exceptions import InvalidType
 from hera.workflows.models import (
     Affinity,
@@ -254,7 +256,7 @@ class Workflow(
     volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)] = None
 
     # Hera-specific fields
-    workflows_service: Optional[WorkflowsService] = None
+    workflows_service: Optional[Union[WorkflowsService, AsyncWorkflowsService]] = None
 
     @validator("name", pre=True, always=True)
     def _set_name(cls, v):
@@ -401,12 +403,13 @@ class Workflow(
         Parameters
         ----------
         wait: bool = False
-            If false then the workflow is created asynchronously and the function returns immediately.
+            If false then the workflow is created and the function returns immediately after the server
+            creates the Workflow.
             If true then the workflow is created and the function blocks until the workflow is done executing.
         poll_interval: int = 5
             The interval in seconds to poll the workflow status if wait is true. Ignored when wait is false.
         """
-        assert self.workflows_service, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace, "workflow namespace not defined"
 
         wf = self.workflows_service.create_workflow(
@@ -429,7 +432,7 @@ class Workflow(
         poll_interval: int = 5
             The interval in seconds to poll the workflow status.
         """
-        assert self.workflows_service is not None, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace is not None, "workflow namespace not defined"
         assert self.name is not None, "workflow name not defined"
 
@@ -451,6 +454,7 @@ class Workflow(
         while status == WorkflowStatus.running:
             time.sleep(poll_interval)
             wf = self.workflows_service.get_workflow(wf.metadata.name, namespace=self.namespace)
+            assert wf.metadata.name is not None
             assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
             assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
             status = WorkflowStatus.from_argo_status(wf.status.phase)
@@ -458,9 +462,80 @@ class Workflow(
 
     def lint(self) -> TWorkflow:
         """Lints the Workflow using the Argo cluster."""
-        assert self.workflows_service, "workflow service not initialized"
+        assert isinstance(self.workflows_service, WorkflowsService), "workflows service not initialized"
         assert self.namespace, "workflow namespace not defined"
         return self.workflows_service.lint_workflow(
+            WorkflowLintRequest(workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
+        )
+
+    async def async_create(self, wait: bool = True, poll_interval: int = 5) -> TWorkflow:
+        """Creates the Workflow on the Argo cluster. Note that `wait` is `True` by default as this is an async function.
+
+        Parameters
+        ----------
+        wait: bool = True
+            If false then the workflow is created and the function returns immediately.
+            If true then the workflow is created and the function blocks until the workflow is done executing.
+        poll_interval: int = 5
+            The interval in seconds to poll the workflow status if wait is true. Ignored when wait is false.
+        """
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+
+        wf = await self.workflows_service.create_workflow(
+            WorkflowCreateRequest(workflow=self.build()),  # type: ignore
+            namespace=self.namespace,
+        )
+        # set the workflow name to the name returned by the API, which helps cover the case of users relying on
+        # `generate_name=True`
+        self.name = wf.metadata.name
+
+        if wait:
+            return await self.async_wait(poll_interval=poll_interval)
+        return wf
+
+    async def async_wait(self, poll_interval: int = 5) -> TWorkflow:
+        """Waits for the Workflow to complete execution.
+
+        Parameters
+        ----------
+        poll_interval: int = 5
+            The interval in seconds to poll the workflow status.
+        """
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace is not None, "workflow namespace not defined"
+        assert self.name is not None, "workflow name not defined"
+
+        # here we use the sleep interval to wait for the workflow post creation. This is to address a potential
+        # race conditions such as:
+        # 1. Argo server says "workflow was accepted" but the workflow is not yet created
+        # 2. Hera wants to verify the status of the workflow, but it's not yet defined because it's not created
+        # 3. Argo finally creates the workflow
+        # 4. Hera throws an `AssertionError` because the phase assertion fails
+        await asyncio.sleep(poll_interval)
+        wf = await self.workflows_service.get_workflow(self.name, namespace=self.namespace)
+        assert wf.metadata.name is not None, f"workflow name not defined for workflow {self.name}"
+
+        assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
+        assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
+        status = WorkflowStatus.from_argo_status(wf.status.phase)
+
+        # keep polling for workflow status until completed, at the interval dictated by the user
+        while status == WorkflowStatus.running:
+            await asyncio.sleep(poll_interval)
+            wf = await self.workflows_service.get_workflow(wf.metadata.name, namespace=self.namespace)
+            assert wf.metadata.name is not None
+            assert wf.status is not None, f"workflow status not defined for workflow {wf.metadata.name}"
+            assert wf.status.phase is not None, f"workflow phase not defined for workflow status {wf.status}"
+            status = WorkflowStatus.from_argo_status(wf.status.phase)
+        return wf
+
+    async def async_lint(self) -> TWorkflow:
+        """Lints the Workflow using the Argo cluster."""
+        assert isinstance(self.workflows_service, AsyncWorkflowsService), "workflows service not initialized"
+        assert self.namespace, "workflow namespace not defined"
+        return await self.workflows_service.lint_workflow(
             WorkflowLintRequest(workflow=self.build()),  # type: ignore
             namespace=self.namespace,
         )

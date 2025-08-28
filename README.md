@@ -114,8 +114,12 @@ w.create()
   from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information.
 
 #### `experimental`
- - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features
-   that have not yet graduated into stable features.
+- Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features
+  that have not yet graduated into stable features.
+
+#### `async-client`
+- Install via `hera[async-client]`. The `[async-client]` option installs `httpx` to allow the use of the `async_*`
+  Workflow functions through the `AsyncWorkflowsService`.
 
 ## Presentations
 
