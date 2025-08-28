@@ -53,6 +53,9 @@ spec:
         path: /tmp/hera-inputs/artifacts/my-artifact-as-str
       - name: my-artifact-as-json
         path: /tmp/hera-inputs/artifacts/my-artifact-as-json
+      - name: my-optional-artifact
+        optional: true
+        path: /tmp/hera-inputs/artifacts/my-optional-artifact
     script:
       image: python:3.9
       source: '{{inputs.parameters}}'

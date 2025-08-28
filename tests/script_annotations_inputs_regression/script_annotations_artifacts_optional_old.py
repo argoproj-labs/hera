@@ -6,8 +6,8 @@ from hera.workflows.steps import Steps
 
 
 @script(inputs=[Artifact(name="my_artifact", path="/tmp/file", optional=True)])
-def read_artifact(my_artifact) -> str:
-    return my_artifact
+def read_artifact(my_artifact):
+    pass
 
 
 with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:

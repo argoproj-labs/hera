@@ -129,6 +129,12 @@ def test_get_annotated_input_param_error_param_name():
     "file_contents,artifact,expected_return",
     [
         pytest.param('{"json": "object"}', Artifact(loader=ArtifactLoader.json), {"json": "object"}, id="json-load"),
+        pytest.param(
+            '{"json": "object"}',
+            Artifact(optional=True, loader=ArtifactLoader.json),
+            {"json": "object"},
+            id="json-load-optional",
+        ),
         pytest.param('{"json": "object"}', Artifact(loader=ArtifactLoader.file), '{"json": "object"}', id="file-load"),
     ],
 )
@@ -140,8 +146,15 @@ def test_get_annotated_artifact_value_inputs_with_loaders(
 ):
     file_path = tmp_path / "contents.txt"
     file_path.write_text(file_contents)
-    artifact.path = file_path
+    artifact.path = str(file_path)
     assert get_annotated_artifact_value("param_name", artifact) == expected_return
+
+
+def test_get_annotated_artifact_value_optional_artifact_missing(tmp_path: Path):
+    artifact = Artifact(optional=True, loader=ArtifactLoader.json)
+    file_path = tmp_path / "contents.txt"
+    artifact.path = str(file_path)
+    assert get_annotated_artifact_value("param_name", artifact) is None
 
 
 @pytest.mark.parametrize(
