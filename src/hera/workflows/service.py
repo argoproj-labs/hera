@@ -725,12 +725,14 @@ class WorkflowsService:
         send_initial_events: Optional[bool] = None,
     ) -> WorkflowTemplateList:
         """API documentation."""
+        namespace = namespace if namespace is not None else self.namespace
+
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
+        assert namespace, "Namespace is a required parameter for list_workflow_templates API"
+
         resp = self._request(
             method="get",
-            url=urljoin(self.host, "api/v1/workflow-templates/{namespace}").format(
-                namespace=namespace if namespace is not None else self.namespace
-            ),
+            url=urljoin(self.host, f"api/v1/workflow-templates/{namespace}"),
             params={
                 "namePattern": name_pattern,
                 "listOptions.labelSelector": label_selector,
