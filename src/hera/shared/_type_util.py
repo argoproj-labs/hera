@@ -122,6 +122,17 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Pa
     io.name = io.name or python_name
     if isinstance(io, Parameter):
         set_enum_based_on_type(io, annotation)
+    else:  # isinstance(io, Artifact)
+        is_optional_annotation = origin_type_issupertype(annotation, NoneType)
+        if io.optional is True and not is_optional_annotation:
+            # Assume user wants optional
+            raise ValueError("Artifact annotation must be `Optional` for optional Artifacts.")
+
+        if is_optional_annotation and io.optional is False:
+            raise ValueError("Artifact annotation does not match Artifact.optional.")
+
+        if is_optional_annotation:
+            io.optional = True
 
     return io
 
@@ -152,7 +163,13 @@ def origin_type_issubtype(annotation: Any, type_: Union[type, Tuple[type, ...]])
 
 
 def origin_type_issupertype(annotation: Any, type_: type) -> bool:
-    """Return True if annotation is a supertype of type_."""
+    """Return True if annotation is a supertype of type_.
+
+    Useful for checking if annotation is an optional type:
+
+    >>> origin_type_issupertype(Optional[str], NoneType)
+    True
+    """
     unwrapped_type = unwrap_annotation(annotation)
     origin_type = get_unsubscripted_type(unwrapped_type)
     if origin_type is Union or origin_type is UnionType:

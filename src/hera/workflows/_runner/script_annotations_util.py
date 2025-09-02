@@ -120,6 +120,9 @@ def get_annotated_artifact_value(param_name: str, artifact_annotation: Artifact)
         artifact_annotation.path = artifact_annotation._get_default_inputs_path()
 
     path = Path(artifact_annotation.path)
+    if artifact_annotation.optional and not path.exists():
+        return None
+
     if artifact_annotation.loads is not None:
         return artifact_annotation.loads(path.read_text())
 

@@ -1,6 +1,6 @@
 """Regression test: compare the new Annotated style inputs declaration with the old version."""
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from hera.shared import global_config
 from hera.workflows import Workflow, script
@@ -11,8 +11,8 @@ global_config.experimental_features["script_annotations"] = True
 
 
 @script()
-def read_artifact(my_artifact: Annotated[str, Artifact(name="my_artifact", path="/tmp/file", optional=True)]) -> str:
-    return my_artifact
+def read_artifact(my_artifact: Annotated[Optional[str], Artifact(name="my_artifact", path="/tmp/file")]):
+    pass
 
 
 with Workflow(generate_name="test-artifacts-", entrypoint="my-steps") as w:
