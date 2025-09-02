@@ -9,6 +9,7 @@ spec:
     inputs:
       parameters:
       - name: pvc_size
+        default: '10'
     outputs:
       parameters:
       - name: pvc-name

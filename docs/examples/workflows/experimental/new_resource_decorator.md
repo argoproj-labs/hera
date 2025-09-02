@@ -22,7 +22,7 @@ This example shows the use of the resource decorator and special Input/Output cl
 
     # This defines the template's inputs
     class MyInput(Input):
-        pvc_size: int
+        pvc_size: int = 10
 
 
     class MyOutput(Output):
@@ -69,6 +69,7 @@ This example shows the use of the resource decorator and special Input/Output cl
         inputs:
           parameters:
           - name: pvc_size
+            default: '10'
         outputs:
           parameters:
           - name: pvc-name
