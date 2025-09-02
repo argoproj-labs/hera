@@ -658,7 +658,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
         _context.declaring = True
         return subnode
 
-    @_add_type_hints(Script)  # type: ignore
+    @_add_type_hints(Script)
     def script(self, **script_kwargs) -> Callable:
         """A decorator that wraps a function into a Script object.
 
@@ -818,35 +818,35 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
         return _inner
 
-    @_add_type_hints(Container)  # type: ignore
+    @_add_type_hints(Container)
     def container(self, **container_kwargs) -> Callable:
         self._check_if_enabled("container")
         from hera.workflows.container import Container
 
         return self._template_call_decorator_impl(Container, container_kwargs)
 
-    @_add_type_hints(Data)  # type: ignore
+    @_add_type_hints(Data)
     def data(self, **container_kwargs) -> Callable:
         self._check_if_enabled("data")
         from hera.workflows.data import Data
 
         return self._template_call_decorator_impl(Data, container_kwargs)
 
-    @_add_type_hints(HTTP)  # type: ignore
+    @_add_type_hints(HTTP)
     def http(self, **container_kwargs) -> Callable:
         self._check_if_enabled("http")
         from hera.workflows.http_template import HTTP
 
         return self._template_call_decorator_impl(HTTP, container_kwargs)
 
-    @_add_type_hints(Resource)  # type: ignore
+    @_add_type_hints(Resource)
     def resource(self, **container_kwargs) -> Callable:
         self._check_if_enabled("resource")
         from hera.workflows.resource import Resource
 
         return self._template_call_decorator_impl(Resource, container_kwargs)
 
-    @_add_type_hints(Suspend)  # type: ignore
+    @_add_type_hints(Suspend)
     def suspend_template(self, **container_kwargs) -> Callable:
         # NOTE: Due to `suspend` being a attribute on the child class, `suspend_template` is used as the decorator name.
         self._check_if_enabled("suspend")
@@ -993,7 +993,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
         return decorator
 
-    @_add_type_hints(DAG)  # type: ignore
+    @_add_type_hints(DAG)
     def dag(self, **dag_kwargs) -> Callable:
         self._check_if_enabled("dag")
 
@@ -1001,7 +1001,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
         return self._construct_invocator_decorator(DAG, **dag_kwargs)
 
-    @_add_type_hints(Steps)  # type: ignore
+    @_add_type_hints(Steps)
     def steps(self, **steps_kwargs) -> Callable:
         self._check_if_enabled("steps")
 
