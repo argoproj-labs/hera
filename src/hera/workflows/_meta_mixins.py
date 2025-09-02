@@ -569,8 +569,12 @@ class HeraBuildObj:
 class TemplateDecoratorFuncsMixin(ContextMixin):
     from hera.workflows.container import Container
     from hera.workflows.dag import DAG
+    from hera.workflows.data import Data
+    from hera.workflows.http_template import HTTP
+    from hera.workflows.resource import Resource
     from hera.workflows.script import Script
     from hera.workflows.steps import Steps
+    from hera.workflows.suspend import Suspend
 
     @staticmethod
     def _check_if_enabled(decorator_name: str):
@@ -753,13 +757,13 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
         return script_decorator
 
-    @_add_type_hints(Container)  # type: ignore
-    def container(self, **container_kwargs) -> Callable:
-        self._check_if_enabled("container")
-        from hera.workflows.container import Container
-
-        def container_decorator(func: Callable[FuncIns, FuncR]) -> Callable:
-            name = container_kwargs.pop("name", func.__name__.replace("_", "-"))
+    def _template_call_decorator_impl(
+        self,
+        template_cls: Type[Union[Container, Resource, HTTP, Data, Suspend]],
+        kwargs: Dict[str, Any],
+    ) -> Callable[[Callable[FuncIns, FuncR]], Callable]:
+        def _inner(func: Callable[FuncIns, FuncR]) -> Callable:
+            name = kwargs.pop("name", func.__name__.replace("_", "-"))
 
             signature = inspect.signature(func)
             func_inputs = signature.parameters
@@ -776,15 +780,15 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
             # Open context to add `Container` object automatically
             with self:
-                container_template = Container(
+                template_call = template_cls(
                     name=name,
                     inputs=inputs,
                     outputs=outputs,
-                    **container_kwargs,
+                    **kwargs,
                 )
 
             @functools.wraps(func)
-            def container_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
+            def template_call_wrapper(*args, **kwargs) -> Union[FuncR, Step, Task, None]:
                 """Invokes a CallableTemplateMixin's `__call__` method using the given SubNode (Step or Task) args/kwargs."""
                 if _context.declaring:
                     subnode_name = kwargs.pop("name", None)
@@ -794,25 +798,61 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
                             subnode_name = varname()
                         except ImproperUseError:
                             # Template is being used without variable assignment (so use function name or provided name)
-                            subnode_name = container_template.name  # type: ignore
+                            subnode_name = template_call.name  # type: ignore
 
                         assert isinstance(subnode_name, str)
                         subnode_name = subnode_name.replace("_", "-")
 
-                    return self._create_subnode(subnode_name, func, container_template, *args, **kwargs)
+                    return self._create_subnode(subnode_name, func, template_call, *args, **kwargs)
 
                 if _context.pieces:
-                    return container_template.__call__(*args, **kwargs)
+                    return template_call.__call__(*args, **kwargs)
 
                 # Do not allow kwargs
                 return func(*args)  # type: ignore
 
             # Set the template name to the inferred name
-            container_call_wrapper.template_name = name  # type: ignore
+            template_call_wrapper.template_name = name  # type: ignore
 
-            return container_call_wrapper
+            return template_call_wrapper
 
-        return container_decorator
+        return _inner
+
+    @_add_type_hints(Container)  # type: ignore
+    def container(self, **container_kwargs) -> Callable:
+        self._check_if_enabled("container")
+        from hera.workflows.container import Container
+
+        return self._template_call_decorator_impl(Container, container_kwargs)
+
+    @_add_type_hints(Data)  # type: ignore
+    def data(self, **container_kwargs) -> Callable:
+        self._check_if_enabled("data")
+        from hera.workflows.data import Data
+
+        return self._template_call_decorator_impl(Data, container_kwargs)
+
+    @_add_type_hints(HTTP)  # type: ignore
+    def http(self, **container_kwargs) -> Callable:
+        self._check_if_enabled("http")
+        from hera.workflows.http_template import HTTP
+
+        return self._template_call_decorator_impl(HTTP, container_kwargs)
+
+    @_add_type_hints(Resource)  # type: ignore
+    def resource(self, **container_kwargs) -> Callable:
+        self._check_if_enabled("resource")
+        from hera.workflows.resource import Resource
+
+        return self._template_call_decorator_impl(Resource, container_kwargs)
+
+    @_add_type_hints(Suspend)  # type: ignore
+    def suspend_template(self, **container_kwargs) -> Callable:
+        # NOTE: Due to `suspend` being a attribute on the child class, `suspend_template` is used as the decorator name.
+        self._check_if_enabled("suspend")
+        from hera.workflows.suspend import Suspend
+
+        return self._template_call_decorator_impl(Suspend, container_kwargs)
 
     def _construct_invocator_decorator(
         self,

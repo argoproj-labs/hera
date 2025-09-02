@@ -121,7 +121,7 @@ class OutputMixin:
                     if default is not None and default != PydanticUndefined:
                         annotation.default = serialize(default)
 
-                if add_missing_path and (annotation.value_from is None or annotation.value_from.path is None):
+                if add_missing_path and annotation.value_from is None:
                     annotation.value_from = ValueFrom(path=f"/tmp/hera-outputs/parameters/{annotation.name}")
             else:
                 if add_missing_path and annotation.path is None:

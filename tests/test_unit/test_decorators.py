@@ -223,6 +223,35 @@ def test_dag_with_inner_dag():
     ]
 
 
+def test_dag_with_container():
+    w: Workflow = importlib.import_module("tests.workflow_decorators.container").w
+
+    model_workflow = cast(ModelWorkflow, w.build())
+
+    assert len(model_workflow.spec.templates) == 1
+
+    assert model_workflow.spec.entrypoint == "basic-hello-world"
+    assert model_workflow.spec.templates[0].container.command == ["sh", "-c"]
+    assert model_workflow.spec.templates[0].container.args == [
+        "echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"
+    ]
+
+
+def test_dag_with_resource():
+    w: Workflow = importlib.import_module("tests.workflow_decorators.resource").w
+
+    model_workflow = cast(ModelWorkflow, w.build())
+
+    assert len(model_workflow.spec.templates) == 1
+
+    assert model_workflow.spec.entrypoint == "create-my-pvc-resource"
+    assert model_workflow.spec.templates[0].resource.action == "create"
+    assert model_workflow.spec.templates[0].resource.set_owner_reference
+    assert len(model_workflow.spec.templates[0].outputs.parameters) == 1
+    assert model_workflow.spec.templates[0].outputs.parameters[0].name == "pvc-name"
+    assert model_workflow.spec.templates[0].outputs.parameters[0].value_from.json_path == "{.metadata.name}"
+
+
 def test_dag_is_runnable():
     """The dag function should be runnable as Python code."""
     from tests.workflow_decorators.dag import WorkerInput, WorkerOutput, worker
