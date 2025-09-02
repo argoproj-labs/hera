@@ -14,7 +14,10 @@ w = Workflow(generate_name="resource-workflow-")
 
 # This defines the template's inputs
 class MyInput(Input):
-    pvc_size: int = 10
+    pvc_size: Annotated[
+        int,
+        Parameter(name="pvc-size"),
+    ] = 10
 
 
 class MyOutput(Output):

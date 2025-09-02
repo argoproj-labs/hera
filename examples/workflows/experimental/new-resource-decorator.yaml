@@ -8,7 +8,7 @@ spec:
   - name: basic-hello-world
     inputs:
       parameters:
-      - name: pvc_size
+      - name: pvc-size
         default: '10'
     outputs:
       parameters:

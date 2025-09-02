@@ -22,7 +22,10 @@ This example shows the use of the resource decorator and special Input/Output cl
 
     # This defines the template's inputs
     class MyInput(Input):
-        pvc_size: int = 10
+        pvc_size: Annotated[
+            int,
+            Parameter(name="pvc-size"),
+        ] = 10
 
 
     class MyOutput(Output):
@@ -68,7 +71,7 @@ This example shows the use of the resource decorator and special Input/Output cl
       - name: basic-hello-world
         inputs:
           parameters:
-          - name: pvc_size
+          - name: pvc-size
             default: '10'
         outputs:
           parameters:

@@ -35,6 +35,17 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     set_owner_reference: Optional[bool] = None
     success_condition: Optional[str] = None
 
+    def __new__(cls, *args, **kwargs) -> "Resource":
+        """Importing here to avoid circular imports."""
+        from hera.workflows.cron_workflow import CronWorkflow
+        from hera.workflows.workflow import Workflow
+        from hera.workflows.workflow_template import WorkflowTemplate
+
+        cls.update_forward_refs(Workflow=Workflow, CronWorkflow=CronWorkflow, WorkflowTemplate=WorkflowTemplate)
+
+        instance = super().__new__(cls)
+        return instance
+
     def _build_manifest(self) -> Optional[str]:
         from hera.workflows.cron_workflow import CronWorkflow
         from hera.workflows.workflow import Workflow
@@ -45,15 +56,7 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
             return self.manifest.to_yaml().replace("'{{", "{{").replace("}}'", "}}")
         return self.manifest
 
-    def _ensure_forward_ref(self):
-        from hera.workflows.cron_workflow import CronWorkflow
-        from hera.workflows.workflow import Workflow
-        from hera.workflows.workflow_template import WorkflowTemplate
-
-        self.update_forward_refs(Workflow=Workflow, CronWorkflow=CronWorkflow, WorkflowTemplate=WorkflowTemplate)
-
     def _build_resource_template(self) -> _ModelResourceTemplate:
-        self._ensure_forward_ref()
         return _ModelResourceTemplate(
             action=self.action,
             failure_condition=self.failure_condition,
@@ -66,7 +69,6 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
         )
 
     def _build_template(self) -> _ModelTemplate:
-        self._ensure_forward_ref()
         return _ModelTemplate(
             active_deadline_seconds=self.active_deadline_seconds,
             affinity=self.affinity,
