@@ -45,7 +45,7 @@ This example shows the use of the suspend decorator and special Input/Output cla
 
 
     # We then use the decorators of the `Workflow` object
-    # to set the entrypoint and create a Resouruce template
+    # to set the entrypoint and create a Suspend template
     @w.set_entrypoint
     @w.suspend_template()
     def basic_hello_world(my_input: MyInput) -> MyOutput: ...
