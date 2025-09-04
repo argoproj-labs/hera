@@ -12,6 +12,10 @@ The decorators introduced in v5.16 are members of the `Workflow` class, meaning 
 * `steps`
 * `container`
 * `script`
+* `data`
+* `http`
+* `resource`
+* `suspend_template`
 * `set_entrypoint`
 
 If you want to declare inputs and outputs in your templates, you must use the special `Input` and `Output` Pydantic
@@ -60,6 +64,16 @@ decorator.
 
 Using this decorator will enforce usage of the `RunnerScriptConstructor`, so you must ensure you use an image built from
 your code.
+
+## `data`, `http`, `resource`, and `suspend_template`
+
+These decorators allow you to define additional Argo Workflow template types in a Pythonic way. For more information on
+how to use these templates, please refer to the relevant examples.
+
+- [`data` decorator example](../examples/workflows/experimental/new_data_decorator.md)
+- [`http` decorator example](../examples/workflows/experimental/new_http_decorator.md)
+- [`resource` decorator example](../examples/workflows/experimental/new_resource_decorator.md)
+- [`suspend_template` decorator example](../examples/workflows/experimental/new_suspend_decorator.md)
 
 ## `set_entrypoint`
 

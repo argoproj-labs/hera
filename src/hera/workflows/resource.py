@@ -1,17 +1,19 @@
 """The `hera.workflows.resource` module provides functionality for creating K8s resources via workflows inside task/steps."""
 
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import IOMixin, SubNodeMixin, TemplateMixin
-from hera.workflows.cron_workflow import CronWorkflow
 from hera.workflows.models import (
     ManifestFrom,
     ResourceTemplate as _ModelResourceTemplate,
     Template as _ModelTemplate,
 )
-from hera.workflows.workflow import Workflow
-from hera.workflows.workflow_template import WorkflowTemplate
+
+if TYPE_CHECKING:
+    from hera.workflows.cron_workflow import CronWorkflow
+    from hera.workflows.workflow import Workflow
+    from hera.workflows.workflow_template import WorkflowTemplate
 
 
 class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
@@ -27,13 +29,28 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
     action: str
     failure_condition: Optional[str] = None
     flags: Optional[List[str]] = None
-    manifest: Optional[Union[str, Workflow, CronWorkflow, WorkflowTemplate]] = None
+    manifest: Optional[Union[str, "Workflow", "CronWorkflow", "WorkflowTemplate"]] = None
     manifest_from: Optional[ManifestFrom] = None
     merge_strategy: Optional[str] = None
     set_owner_reference: Optional[bool] = None
     success_condition: Optional[str] = None
 
+    def __new__(cls, *args, **kwargs) -> "Resource":
+        """Importing here to avoid circular imports."""
+        from hera.workflows.cron_workflow import CronWorkflow
+        from hera.workflows.workflow import Workflow
+        from hera.workflows.workflow_template import WorkflowTemplate
+
+        cls.update_forward_refs(Workflow=Workflow, CronWorkflow=CronWorkflow, WorkflowTemplate=WorkflowTemplate)
+
+        instance = super().__new__(cls)
+        return instance
+
     def _build_manifest(self) -> Optional[str]:
+        from hera.workflows.cron_workflow import CronWorkflow
+        from hera.workflows.workflow import Workflow
+        from hera.workflows.workflow_template import WorkflowTemplate
+
         if isinstance(self.manifest, (Workflow, CronWorkflow, WorkflowTemplate)):
             # hack to appease raw yaml string comparison
             return self.manifest.to_yaml().replace("'{{", "{{").replace("}}'", "}}")
