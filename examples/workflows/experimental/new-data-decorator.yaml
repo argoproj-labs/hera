@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: data-workflow-
+spec:
+  entrypoint: basic-hello-world
+  templates:
+  - name: basic-hello-world
+    data:
+      transformation:
+      - expression: filter(data, {# endsWith 'main.log'})
+      source:
+        artifactPaths:
+          name: test-bucket
+          s3:
+            bucket: '{{inputs.parameters.bucket_name}}'
+    inputs:
+      parameters:
+      - name: bucket_name
+        default: my-bucket
+    outputs:
+      artifacts:
+      - name: file
+        path: /file
