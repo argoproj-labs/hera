@@ -778,7 +778,7 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
             if func_return and issubclass(func_return, (OutputV1, OutputV2)):
                 outputs = func_return._get_outputs(add_missing_path=True)
 
-            # Open context to add `Container` object automatically
+            # Open context to add template object automatically
             with self:
                 template_call = template_cls(
                     name=name,
