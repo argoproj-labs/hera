@@ -10,8 +10,8 @@ The decorators introduced in v5.16 are members of the `Workflow` class, meaning 
 
 * `dag`
 * `steps`
-* `container_template` (replacing the deprecated `container`)
 * `script`
+* `container_template` (replacing the deprecated `container`)
 * `data_template`
 * `http_template`
 * `resource_template`
