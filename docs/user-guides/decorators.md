@@ -10,11 +10,11 @@ The decorators introduced in v5.16 are members of the `Workflow` class, meaning 
 
 * `dag`
 * `steps`
-* `container`
+* `container_template` (replacing the deprecated `container`)
 * `script`
-* `data`
-* `http`
-* `resource`
+* `data_template`
+* `http_template`
+* `resource_template`
 * `suspend_template`
 * `set_entrypoint`
 
@@ -48,9 +48,9 @@ run as many _dependent_ templates in parallel as possible then use a DAG, which 
 first. If you want to run templates sequentially, and have more control over the running order and when to parallelise,
 use `steps`.
 
-## `container`
+## `container_template`
 
-The `container` decorator is a convenient way to declare your container templates in Python, though the feature set is
+The `container_template` decorator is a convenient way to declare your container templates in Python, though the feature set is
 limited. You can specify the `command` and `args` in the decorator arguments, and the inputs and outputs in the function
 signature. You can leave the function as a stub or add some code to be able to run the function locally - consider it as
 a "mockable" function.
@@ -65,14 +65,14 @@ decorator.
 Using this decorator will enforce usage of the `RunnerScriptConstructor`, so you must ensure you use an image built from
 your code.
 
-## `data`, `http`, `resource`, and `suspend_template`
+## `data_template`, `http_template`, `resource_template`, and `suspend_template`
 
 These decorators allow you to define additional Argo Workflow template types in a Pythonic way. For more information on
 how to use these templates, please refer to the relevant examples.
 
-- [`data` decorator example](../examples/workflows/experimental/new_data_decorator.md)
-- [`http` decorator example](../examples/workflows/experimental/new_http_decorator.md)
-- [`resource` decorator example](../examples/workflows/experimental/new_resource_decorator.md)
+- [`data_template` decorator example](../examples/workflows/experimental/new_data_decorator.md)
+- [`http_template` decorator example](../examples/workflows/experimental/new_http_decorator.md)
+- [`resource_template` decorator example](../examples/workflows/experimental/new_resource_decorator.md)
 - [`suspend_template` decorator example](../examples/workflows/experimental/new_suspend_decorator.md)
 
 ## `set_entrypoint`
