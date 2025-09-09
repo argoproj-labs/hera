@@ -31,7 +31,7 @@ class MyOutput(Output):
 # We then use the decorators of the `Workflow` object
 # to set the entrypoint and create a Data template
 @w.set_entrypoint
-@w.data(
+@w.data_template(
     source=S3Artifact(name="test-bucket", bucket=f"{g.inputs.parameters.bucket_name:$}"),
     transformations=[g.data.filter(it.ends_with("main.log"))],  # type: ignore
 )

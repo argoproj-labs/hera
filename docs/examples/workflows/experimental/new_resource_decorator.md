@@ -41,7 +41,7 @@ This example shows the use of the resource decorator and special Input/Output cl
     # We then use the decorators of the `Workflow` object
     # to set the entrypoint and create a Resouruce template
     @w.set_entrypoint
-    @w.resource(
+    @w.resource_template(
         action="create",
         set_owner_reference=True,
         manifest="""apiVersion: v1

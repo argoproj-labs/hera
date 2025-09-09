@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 import inspect
 import sys
+import warnings
 from collections import ChainMap
 from pathlib import Path
 from types import ModuleType
@@ -820,27 +821,32 @@ class TemplateDecoratorFuncsMixin(ContextMixin):
 
     @_add_type_hints(Container)
     def container(self, **container_kwargs) -> Callable:
+        warnings.warn("`container` is deprecated; use `container_template`.", DeprecationWarning)
+        return self.container_template(**container_kwargs)
+
+    @_add_type_hints(Container)
+    def container_template(self, **container_kwargs) -> Callable:
         self._check_if_enabled("container")
         from hera.workflows.container import Container
 
         return self._template_call_decorator_impl(Container, container_kwargs)
 
     @_add_type_hints(Data)
-    def data(self, **container_kwargs) -> Callable:
+    def data_template(self, **container_kwargs) -> Callable:
         self._check_if_enabled("data")
         from hera.workflows.data import Data
 
         return self._template_call_decorator_impl(Data, container_kwargs)
 
     @_add_type_hints(HTTP)
-    def http(self, **container_kwargs) -> Callable:
+    def http_template(self, **container_kwargs) -> Callable:
         self._check_if_enabled("http")
         from hera.workflows.http_template import HTTP
 
         return self._template_call_decorator_impl(HTTP, container_kwargs)
 
     @_add_type_hints(Resource)
-    def resource(self, **container_kwargs) -> Callable:
+    def resource_template(self, **container_kwargs) -> Callable:
         self._check_if_enabled("resource")
         from hera.workflows.resource import Resource
 

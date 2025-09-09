@@ -28,7 +28,7 @@ class MyResourceOutput(Output):
 
 
 @w.set_entrypoint
-@w.resource(
+@w.resource_template(
     action="create",
     set_owner_reference=True,
     manifest="""apiVersion: v1

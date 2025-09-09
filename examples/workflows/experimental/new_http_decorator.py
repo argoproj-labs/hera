@@ -34,7 +34,7 @@ class MyOutput(Output):
 # We then use the decorators of the `Workflow` object
 # to set the entrypoint and create a HTTP template
 @w.set_entrypoint
-@w.http(
+@w.http_template(
     timeout_seconds=20,
     url=f"{g.inputs.parameters.url:$}",
     method="GET",

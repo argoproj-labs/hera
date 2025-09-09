@@ -39,7 +39,7 @@ This example shows the use of the container decorator and special Input/Output c
     # We then use the decorators of the `Workflow` object
     # to set the entrypoint and create a Container template
     @w.set_entrypoint
-    @w.container(
+    @w.container_template(
         image="busybox",
         command=["sh", "-c"],
         args=["echo Hello {{inputs.parameters.user}} | tee /tmp/hello_world.txt"],
