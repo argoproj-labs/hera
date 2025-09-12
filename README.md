@@ -106,18 +106,21 @@ w.create()
 
 #### `cli`
 
-- Install via `hera[cli]`. The `[cli]` option installs the extra dependency [Cappa](https://github.com/DanCardin/cappa)
-  required for the CLI
-- The CLI aims to enable GitOps practices,
-  easier debugging, and a more seamless experience with Argo Workflows.
-- **_The CLI is an experimental feature and subject to change!_** At the moment it only supports generating YAML files
-  from workflows via `hera generate yaml`. See `hera generate yaml --help` for more information.
+- Install via `hera[cli]`. The `[cli]` option installs the extra dependencies including
+  [Cappa](https://github.com/DanCardin/cappa) which is required for the CLI
+- The CLI aims to enable GitOps practices, easier onboarding to Hera, and a more seamless experience with Argo
+  Workflows.
+- It currently supports converting workflows between YAML and Python source codes. See `hera generate yaml --help`,
+  and `hera generate python --help` for more information.
+- **_The CLI is an experimental feature and subject to change!_**
 
 #### `experimental`
+
 - Install via `hera[experimental]`. The `[experimental]` option adds dependencies required for experimental features
   that have not yet graduated into stable features.
 
 #### `async-client`
+
 - Install via `hera[async-client]`. The `[async-client]` option installs `httpx` to allow the use of the `async_*`
   Workflow functions through the `AsyncWorkflowsService`.
 
