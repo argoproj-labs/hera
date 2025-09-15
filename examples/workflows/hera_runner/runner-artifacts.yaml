@@ -19,18 +19,22 @@ spec:
     outputs:
       artifacts:
       - name: out-art
-        path: /tmp/hera-outputs/out-art
+        path: /tmp/hera-outputs/artifacts/out-art
         archive:
           none: {}
     script:
       image: python:3.9
-      source: |-
-        import os
-        import sys
-        sys.path.append(os.getcwd())
-        return 'Hello, world!'
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.hera_runner.runner_artifacts:writer
       command:
       - python
+      env:
+      - name: hera__outputs_directory
+        value: /tmp/hera-outputs
   - name: consumer
     inputs:
       artifacts:
@@ -38,10 +42,11 @@ spec:
         path: /tmp/hera-inputs/artifacts/in_art
     script:
       image: python:3.9
-      source: |-
-        import os
-        import sys
-        sys.path.append(os.getcwd())
-        print(in_art)
+      source: '{{inputs.parameters}}'
+      args:
+      - -m
+      - hera.workflows.runner
+      - -e
+      - examples.workflows.hera_runner.runner_artifacts:consumer
       command:
       - python

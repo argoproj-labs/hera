@@ -20,14 +20,12 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
     from hera.workflows.artifact import ArtifactLoader
 
 
-    @script()
-    def writer() -> Annotated[
-        str, Artifact(name="out-art", path="/tmp/hera-outputs/out-art", archive=NoneArchiveStrategy())
-    ]:
+    @script(constructor="runner")
+    def writer() -> Annotated[str, Artifact(name="out-art", archive=NoneArchiveStrategy())]:
         return "Hello, world!"
 
 
-    @script()
+    @script(constructor="runner")
     def consumer(
         in_art: Annotated[
             str,
@@ -67,18 +65,22 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
         outputs:
           artifacts:
           - name: out-art
-            path: /tmp/hera-outputs/out-art
+            path: /tmp/hera-outputs/artifacts/out-art
             archive:
               none: {}
         script:
           image: python:3.9
-          source: |-
-            import os
-            import sys
-            sys.path.append(os.getcwd())
-            return 'Hello, world!'
+          source: '{{inputs.parameters}}'
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.hera_runner.runner_artifacts:writer
           command:
           - python
+          env:
+          - name: hera__outputs_directory
+            value: /tmp/hera-outputs
       - name: consumer
         inputs:
           artifacts:
@@ -86,11 +88,12 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
             path: /tmp/hera-inputs/artifacts/in_art
         script:
           image: python:3.9
-          source: |-
-            import os
-            import sys
-            sys.path.append(os.getcwd())
-            print(in_art)
+          source: '{{inputs.parameters}}'
+          args:
+          - -m
+          - hera.workflows.runner
+          - -e
+          - examples.workflows.hera_runner.runner_artifacts:consumer
           command:
           - python
     ```
