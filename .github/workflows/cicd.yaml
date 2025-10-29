@@ -51,7 +51,7 @@ jobs:
           poetry build
 
       - name: upload wheel as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: wheel-v${{ matrix.python-version }}-${{ matrix.os }}
           path: dist/*.whl
