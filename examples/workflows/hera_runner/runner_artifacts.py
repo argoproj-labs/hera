@@ -21,7 +21,7 @@ def writer() -> Annotated[str, Artifact(name="out-art", archive=NoneArchiveStrat
 def consumer(
     in_art: Annotated[
         str,
-        Artifact(loader=ArtifactLoader.json),
+        Artifact(loader=ArtifactLoader.file),
     ],
 ):
     print(in_art)  # prints `Hello, world!` to `stdout`
