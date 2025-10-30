@@ -143,6 +143,11 @@ for obj_name, obj_spec in MANUAL_SPECIFICATIONS:
 topo_sorter = TopologicalSorter()
 prefix_len = len("#/definitions/")
 
+# Note for below: The dlqTrigger attribute of the Trigger class has a type `Trigger`, making it recursive.
+# Therefore we do not add it to the object references in order to _not_ create a cycle for the
+# TopologicalSorter. The Pydantic model still has the `dlqTrigger` attribute with the correct
+# type, as we just use the TopologicalSorter to order the definitions based on the references.
+
 # Create "nodes" for the sorter from definition names and any "properties" that reference other definitions
 for definition, metadata in spec["definitions"].items():
     if "properties" not in metadata:
@@ -152,6 +157,11 @@ for definition, metadata in spec["definitions"].items():
     object_references = []
     for prop, attrs in metadata["properties"].items():
         if "$ref" in attrs:
+            if (
+                prop == "dlqTrigger"
+                and attrs["$ref"][prefix_len:] == "github.com.argoproj.argo_events.pkg.apis.events.v1alpha1.Trigger"
+            ):
+                continue
             object_references.append(attrs["$ref"][prefix_len:])
     topo_sorter.add(definition, *object_references)
 
