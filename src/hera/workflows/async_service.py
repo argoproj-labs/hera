@@ -418,6 +418,7 @@ class AsyncWorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> ClusterWorkflowTemplateDeleteResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -433,6 +434,7 @@ class AsyncWorkflowsService:
                     "deleteOptions.orphanDependents": orphan_dependents,
                     "deleteOptions.propagationPolicy": propagation_policy,
                     "deleteOptions.dryRun": dry_run,
+                    "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                 }.items()
                 if v is not None
             },
@@ -579,6 +581,7 @@ class AsyncWorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> CronWorkflowDeletedResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -596,6 +599,7 @@ class AsyncWorkflowsService:
                     "deleteOptions.orphanDependents": orphan_dependents,
                     "deleteOptions.propagationPolicy": propagation_policy,
                     "deleteOptions.dryRun": dry_run,
+                    "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                 }.items()
                 if v is not None
             },
@@ -834,6 +838,7 @@ class AsyncWorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> WorkflowTemplateDeleteResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -851,6 +856,7 @@ class AsyncWorkflowsService:
                     "deleteOptions.orphanDependents": orphan_dependents,
                     "deleteOptions.propagationPolicy": propagation_policy,
                     "deleteOptions.dryRun": dry_run,
+                    "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                 }.items()
                 if v is not None
             },
@@ -878,6 +884,8 @@ class AsyncWorkflowsService:
         send_initial_events: Optional[bool] = None,
         fields: Optional[str] = None,
         name_filter: Optional[str] = None,
+        created_after: Optional[str] = None,
+        finished_before: Optional[str] = None,
     ) -> WorkflowList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -901,6 +909,8 @@ class AsyncWorkflowsService:
                     "listOptions.sendInitialEvents": send_initial_events,
                     "fields": fields,
                     "nameFilter": name_filter,
+                    "createdAfter": created_after,
+                    "finishedBefore": finished_before,
                 }.items()
                 if v is not None
             },
@@ -1005,6 +1015,7 @@ class AsyncWorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
         """API documentation."""
@@ -1023,6 +1034,7 @@ class AsyncWorkflowsService:
                     "deleteOptions.orphanDependents": orphan_dependents,
                     "deleteOptions.propagationPolicy": propagation_policy,
                     "deleteOptions.dryRun": dry_run,
+                    "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                     "force": force,
                 }.items()
                 if v is not None
@@ -1051,6 +1063,7 @@ class AsyncWorkflowsService:
         tail_lines: Optional[str] = None,
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
+        stream: Optional[str] = None,
         grep: Optional[str] = None,
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
@@ -1075,6 +1088,7 @@ class AsyncWorkflowsService:
                     "logOptions.tailLines": tail_lines,
                     "logOptions.limitBytes": limit_bytes,
                     "logOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
+                    "logOptions.stream": stream,
                     "grep": grep,
                     "selector": selector,
                 }.items()
@@ -1238,6 +1252,7 @@ class AsyncWorkflowsService:
         tail_lines: Optional[str] = None,
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
+        stream: Optional[str] = None,
         grep: Optional[str] = None,
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
@@ -1261,6 +1276,7 @@ class AsyncWorkflowsService:
                     "logOptions.tailLines": tail_lines,
                     "logOptions.limitBytes": limit_bytes,
                     "logOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
+                    "logOptions.stream": stream,
                     "grep": grep,
                     "selector": selector,
                 }.items()

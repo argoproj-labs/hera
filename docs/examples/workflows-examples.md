@@ -22,6 +22,7 @@ Explore the examples through the side bar!
 
 | Example |
 |---------|
+| [artifact-passing-explicit-plugin](https://github.com/argoproj/argo-workflows/blob/main/examples/artifact-passing-explicit-plugin.yaml) |
 | [cluster-workflow-template/clustertemplates](https://github.com/argoproj/argo-workflows/blob/main/examples/cluster-workflow-template/clustertemplates.yaml) |
 | [configmaps/simple-parameters-configmap](https://github.com/argoproj/argo-workflows/blob/main/examples/configmaps/simple-parameters-configmap.yaml) |
 | [cron-backfill](https://github.com/argoproj/argo-workflows/blob/main/examples/cron-backfill.yaml) |
