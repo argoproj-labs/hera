@@ -457,6 +457,8 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     plugin: Optional[Plugin] = None
     pod_spec_patch: Optional[str] = None
     priority: Optional[int] = None
+    """DEPRECATED: priority has been removed from ModelTemplate."""
+
     priority_class_name: Optional[str] = None
     retry_strategy: Optional[Union[RetryStrategy, ModelRetryStrategy]] = None
     scheduler_name: Optional[str] = None

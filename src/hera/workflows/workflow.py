@@ -259,7 +259,7 @@ class Workflow(
 
     pod_priority: Optional[int] = None
     """DEPRECATED: The spec.podPriority field was removed in 3.7, so does not map to
-       anything. It was also not used for anything in Argo itself."""
+       anything. Use pod_priority_class_name instead."""
 
     @validator("name", pre=True, always=True)
     def _set_name(cls, v):
