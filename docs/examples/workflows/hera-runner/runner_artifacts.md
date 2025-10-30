@@ -29,7 +29,7 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
     def consumer(
         in_art: Annotated[
             str,
-            Artifact(loader=ArtifactLoader.json),
+            Artifact(loader=ArtifactLoader.file),
         ],
     ):
         print(in_art)  # prints `Hello, world!` to `stdout`
