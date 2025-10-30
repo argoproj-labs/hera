@@ -421,6 +421,7 @@ class WorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> ClusterWorkflowTemplateDeleteResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -434,6 +435,7 @@ class WorkflowsService:
                 "deleteOptions.orphanDependents": orphan_dependents,
                 "deleteOptions.propagationPolicy": propagation_policy,
                 "deleteOptions.dryRun": dry_run,
+                "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -584,6 +586,7 @@ class WorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> CronWorkflowDeletedResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -599,6 +602,7 @@ class WorkflowsService:
                 "deleteOptions.orphanDependents": orphan_dependents,
                 "deleteOptions.propagationPolicy": propagation_policy,
                 "deleteOptions.dryRun": dry_run,
+                "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -853,6 +857,7 @@ class WorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> WorkflowTemplateDeleteResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -868,6 +873,7 @@ class WorkflowsService:
                 "deleteOptions.orphanDependents": orphan_dependents,
                 "deleteOptions.propagationPolicy": propagation_policy,
                 "deleteOptions.dryRun": dry_run,
+                "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
             },
             headers={"Authorization": self.token},
             data=None,
@@ -1024,6 +1030,7 @@ class WorkflowsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
         force: Optional[bool] = None,
     ) -> WorkflowDeleteResponse:
         """API documentation."""
@@ -1040,6 +1047,7 @@ class WorkflowsService:
                 "deleteOptions.orphanDependents": orphan_dependents,
                 "deleteOptions.propagationPolicy": propagation_policy,
                 "deleteOptions.dryRun": dry_run,
+                "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                 "force": force,
             },
             headers={"Authorization": self.token},
@@ -1068,6 +1076,7 @@ class WorkflowsService:
         tail_lines: Optional[str] = None,
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
+        stream: Optional[str] = None,
         grep: Optional[str] = None,
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
@@ -1090,6 +1099,7 @@ class WorkflowsService:
                 "logOptions.tailLines": tail_lines,
                 "logOptions.limitBytes": limit_bytes,
                 "logOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
+                "logOptions.stream": stream,
                 "grep": grep,
                 "selector": selector,
             },
@@ -1261,6 +1271,7 @@ class WorkflowsService:
         tail_lines: Optional[str] = None,
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
+        stream: Optional[str] = None,
         grep: Optional[str] = None,
         selector: Optional[str] = None,
     ) -> V1alpha1LogEntry:
@@ -1282,6 +1293,7 @@ class WorkflowsService:
                 "logOptions.tailLines": tail_lines,
                 "logOptions.limitBytes": limit_bytes,
                 "logOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
+                "logOptions.stream": stream,
                 "grep": grep,
                 "selector": selector,
             },
