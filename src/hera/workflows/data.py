@@ -54,7 +54,6 @@ class Data(TemplateMixin, IOMixin, CallableTemplateMixin):
             name=self.name,
             node_selector=self.node_selector,
             plugin=self.plugin,
-            priority=self.priority,
             priority_class_name=self.priority_class_name,
             retry_strategy=self._build_retry_strategy(),
             scheduler_name=self.scheduler_name,
