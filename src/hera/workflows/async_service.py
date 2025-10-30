@@ -884,6 +884,8 @@ class AsyncWorkflowsService:
         send_initial_events: Optional[bool] = None,
         fields: Optional[str] = None,
         name_filter: Optional[str] = None,
+        created_after: Optional[str] = None,
+        finished_before: Optional[str] = None,
     ) -> WorkflowList:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -907,6 +909,8 @@ class AsyncWorkflowsService:
                     "listOptions.sendInitialEvents": send_initial_events,
                     "fields": fields,
                     "nameFilter": name_filter,
+                    "createdAfter": created_after,
+                    "finishedBefore": finished_before,
                 }.items()
                 if v is not None
             },
