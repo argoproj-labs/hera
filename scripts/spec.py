@@ -29,7 +29,6 @@ spec = response.json()
 # Here, we maintain a map of objects specifications whose fields must be marked as optional i.e. removed from the
 # `required` list in the OpenAPI specification.
 DEFINITION_TO_OPTIONAL_FIELDS: Dict[str, List[str]] = {
-    "io.argoproj.workflow.v1alpha1.CronWorkflowStatus": ["active", "lastScheduledTime", "conditions"],
     "io.argoproj.workflow.v1alpha1.CronWorkflowList": ["items"],
     "io.argoproj.workflow.v1alpha1.ClusterWorkflowTemplateList": ["items"],
     "io.argoproj.workflow.v1alpha1.WorkflowList": ["items"],
