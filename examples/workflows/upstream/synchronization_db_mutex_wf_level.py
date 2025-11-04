@@ -10,6 +10,7 @@ with Workflow(
         mutexes=[
             Mutex(
                 name="test",
+                database=True,
             )
         ],
     ),

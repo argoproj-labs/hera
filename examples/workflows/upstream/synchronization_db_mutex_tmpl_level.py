@@ -43,6 +43,7 @@ with Workflow(
             mutexes=[
                 Mutex(
                     name="welcome",
+                    database=True,
                 )
             ],
         ),
@@ -56,6 +57,7 @@ with Workflow(
             mutexes=[
                 Mutex(
                     name="test",
+                    database=True,
                 )
             ],
         ),

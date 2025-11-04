@@ -43,6 +43,8 @@ with Workflow(
             template="cat-os-release",
         )
     Container(
+        name="cat-os-release",
+        annotations={"workflows.argoproj.io/display-name": "os-{{inputs.parameters.image}}-{{inputs.parameters.tag}}"},
         inputs=Inputs(
             parameters=[
                 Parameter(
@@ -53,7 +55,6 @@ with Workflow(
                 ),
             ],
         ),
-        name="cat-os-release",
         args=["/etc/os-release"],
         command=["cat"],
         image="{{inputs.parameters.image}}:{{inputs.parameters.tag}}",

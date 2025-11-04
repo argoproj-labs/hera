@@ -29,6 +29,7 @@ SKIP_FILES = [
     "workflow-event-binding--event-consumer-workfloweventbinding.upstream.yaml",  # not a workflow
     "workflow-count-resourcequota.upstream.yaml",  # not a workflow
     "dag-disable-failFast.upstream.yaml",  # fail fast is duplicated by the Argo spec itself, so we duplicate it in the roundtrip. This example otherwise generates correctly.
+    "loops-param-argument.upstream.yaml",  # This example added a "display-name" feature by adding another `annotations` field under Template, but it doesn't seem to be in the actual spec.
 ]
 
 
