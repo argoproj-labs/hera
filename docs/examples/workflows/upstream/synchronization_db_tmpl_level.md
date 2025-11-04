@@ -12,7 +12,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     ```python linenums="1"
     from hera.workflows import Container, Step, Steps, Workflow
-    from hera.workflows.models import Arguments, Parameter, SemaphoreRef, Synchronization
+    from hera.workflows.models import Arguments, Parameter, SemaphoreRef, SyncDatabaseRef, Synchronization
 
     with Workflow(
         api_version="argoproj.io/v1alpha1",
@@ -39,7 +39,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         Container(
             name="acquire-lock",
             synchronization=Synchronization(
-                semaphores=[SemaphoreRef()],
+                semaphores=[
+                    SemaphoreRef(
+                        database=SyncDatabaseRef(key="template"),
+                    )
+                ]
             ),
             args=["sleep 10; echo acquired lock"],
             command=["sh", "-c"],
@@ -76,6 +80,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - -c
         synchronization:
           semaphores:
-          - {}
+          - database:
+              key: template
     ```
 

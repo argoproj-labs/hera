@@ -23,6 +23,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
             mutexes=[
                 Mutex(
                     name="test",
+                    database=True,
                 )
             ],
         ),
@@ -55,5 +56,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
       synchronization:
         mutexes:
         - name: test
+          database: true
     ```
 

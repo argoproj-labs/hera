@@ -12,7 +12,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
 
     ```python linenums="1"
     from hera.workflows import Container, Workflow
-    from hera.workflows.models import SemaphoreRef, Synchronization
+    from hera.workflows.models import SemaphoreRef, SyncDatabaseRef, Synchronization
 
     with Workflow(
         api_version="argoproj.io/v1alpha1",
@@ -20,7 +20,11 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         generate_name="synchronization-db-wf-level-",
         entrypoint="hello-world",
         synchronization=Synchronization(
-            semaphores=[SemaphoreRef()],
+            semaphores=[
+                SemaphoreRef(
+                    database=SyncDatabaseRef(key="workflow"),
+                )
+            ]
         ),
     ) as w:
         Container(
@@ -50,6 +54,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           - echo
       synchronization:
         semaphores:
-        - {}
+        - database:
+            key: workflow
     ```
 
