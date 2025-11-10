@@ -56,9 +56,9 @@ test-cli:  ## Run cli tests for Hera
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
-	rm -rf src/hera/workflows/models
+	@rm -rf src/hera/workflows/models
 	@touch $(SPEC_PATH)
-	poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
+	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
@@ -80,7 +80,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 
 .PHONY: events-models
 events-models: ## Generate the Events models portion of Argo Workflows
-	rm -rf src/hera/events/models
+	@rm -rf src/hera/events/models
 	@touch $(SPEC_PATH)
 	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
