@@ -21,15 +21,9 @@ UPSTREAM_EXAMPLE_XFAIL_FILES = {
     "cron-backfill.upstream.yaml",
     "memoize-simple.upstream.yaml",
     "workflow-template--templates.upstream.yaml",
-    "loops-param-argument.upstream.yaml",
-    "retry-backoff.upstream.yaml",
     "workflow-event-binding--github-path-filter-workflowtemplate.upstream.yaml",
-    "synchronization-db-tmpl-level.upstream.yaml",
-    "synchronization-db-mutex-tmpl-level.upstream.yaml",
-    "synchronization-db-mutex-wf-level.upstream.yaml",
-    "synchronization-db-wf-level.upstream.yaml",
-    "workflow-template--templates.upstream.yaml",
     "cluster-workflow-template--clustertemplates.upstream.yaml",
+    "artifact-passing-explicit-plugin.upstream.yaml",
 }
 
 
@@ -93,7 +87,8 @@ def test_for_missing_examples():
             f,
             marks=(
                 pytest.mark.xfail(
-                    reason="Multiple workflows in one yaml file not yet supported by the test harness.\nYAML round trip issues for certain types."
+                    reason="Multiple workflows in one yaml file not yet supported by the test harness.\nYAML round trip issues for certain types.",
+                    strict=True,
                 )
                 if f in UPSTREAM_EXAMPLE_XFAIL_FILES
                 else ()

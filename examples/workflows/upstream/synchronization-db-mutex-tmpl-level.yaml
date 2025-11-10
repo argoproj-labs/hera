@@ -32,6 +32,7 @@ spec:
     synchronization:
       mutexes:
       - name: welcome
+        database: true
   - name: acquire-lock-1
     container:
       image: alpine:latest
@@ -43,3 +44,4 @@ spec:
     synchronization:
       mutexes:
       - name: test
+        database: true

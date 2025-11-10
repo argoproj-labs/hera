@@ -89,7 +89,6 @@ class Resource(CallableTemplateMixin, TemplateMixin, SubNodeMixin, IOMixin):
             parallelism=self.parallelism,
             plugin=self.plugin,
             pod_spec_patch=self.pod_spec_patch,
-            priority=self.priority,
             priority_class_name=self.priority_class_name,
             resource=self._build_resource_template(),
             retry_strategy=self._build_retry_strategy(),

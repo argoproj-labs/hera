@@ -1,5 +1,5 @@
 from hera.workflows import Container, Step, Steps, Workflow
-from hera.workflows.models import Arguments, Parameter, SemaphoreRef, Synchronization
+from hera.workflows.models import Arguments, Parameter, SemaphoreRef, SyncDatabaseRef, Synchronization
 
 with Workflow(
     api_version="argoproj.io/v1alpha1",
@@ -26,7 +26,11 @@ with Workflow(
     Container(
         name="acquire-lock",
         synchronization=Synchronization(
-            semaphores=[SemaphoreRef()],
+            semaphores=[
+                SemaphoreRef(
+                    database=SyncDatabaseRef(key="template"),
+                )
+            ]
         ),
         args=["sleep 10; echo acquired lock"],
         command=["sh", "-c"],

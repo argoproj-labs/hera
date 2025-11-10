@@ -1,4 +1,4 @@
-ARGO_WORKFLOWS_VERSION="3.6.2"
+ARGO_WORKFLOWS_VERSION=3.7.3
 OPENAPI_SPEC_URL="https://raw.githubusercontent.com/argoproj/argo-workflows/v$(ARGO_WORKFLOWS_VERSION)/api/openapi-spec/swagger.json"
 SPEC_PATH="$(shell pwd)/argo-workflows-$(ARGO_WORKFLOWS_VERSION).json"
 
@@ -56,6 +56,7 @@ test-cli:  ## Run cli tests for Hera
 
 .PHONY: workflows-models
 workflows-models: ## Generate the Workflows models portion of Argo Workflows
+	@rm -rf src/hera/workflows/models
 	@touch $(SPEC_PATH)
 	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
@@ -79,6 +80,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 
 .PHONY: events-models
 events-models: ## Generate the Events models portion of Argo Workflows
+	@rm -rf src/hera/events/models
 	@touch $(SPEC_PATH)
 	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \

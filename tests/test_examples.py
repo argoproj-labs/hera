@@ -33,6 +33,9 @@ CI_MODE = os.environ.get("CI")
 LOWEST_SUPPORTED_PY_VERSION = (3, 9)
 
 EXTRA_MODULES = defaultdict(list, {"parquet_pandas": ["pandas"]})
+UPSTREAM_EXAMPLE_XFAIL_MODULES = [
+    "loops_param_argument",  # https://github.com/argoproj/argo-workflows/issues/14918
+]
 
 
 def _generate_yaml(path: Path) -> bool:
@@ -112,8 +115,11 @@ def _get_examples() -> List:
             module_name,
             filename,
             EXTRA_MODULES[filename],
-            marks=pytest.mark.skipif(
-                bool(CI_MODE and EXTRA_MODULES[filename]), reason="Installing extra modules only for local development"
+            marks=(
+                pytest.mark.skipif(
+                    bool(CI_MODE and EXTRA_MODULES[filename]),
+                    reason="Installing extra modules only for local development",
+                ),
             ),
             id=filename,
         )
@@ -167,7 +173,16 @@ def test_hera_output(
         )
 
 
-@pytest.mark.parametrize("module_name", [name for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)])
+@pytest.mark.parametrize(
+    "module_name",
+    [
+        pytest.param(
+            name,
+            marks=(pytest.mark.xfail(strict=True) if name in UPSTREAM_EXAMPLE_XFAIL_MODULES else ()),
+        )
+        for _, name, _ in pkgutil.iter_modules(hera_upstream_examples.__path__)
+    ],
+)
 def test_hera_output_upstream(module_name, global_config_fixture):
     # GIVEN
     global_config_fixture.host = "http://hera.testing"

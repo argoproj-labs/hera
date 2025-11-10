@@ -56,6 +56,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 mutexes=[
                     Mutex(
                         name="welcome",
+                        database=True,
                     )
                 ],
             ),
@@ -69,6 +70,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 mutexes=[
                     Mutex(
                         name="test",
+                        database=True,
                     )
                 ],
             ),
@@ -115,6 +117,7 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         synchronization:
           mutexes:
           - name: welcome
+            database: true
       - name: acquire-lock-1
         container:
           image: alpine:latest
@@ -126,5 +129,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
         synchronization:
           mutexes:
           - name: test
+            database: true
     ```
 

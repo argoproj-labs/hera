@@ -24,4 +24,5 @@ spec:
       - -c
     synchronization:
       semaphores:
-      - {}
+      - database:
+          key: template

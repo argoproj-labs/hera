@@ -56,6 +56,8 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                 template="cat-os-release",
             )
         Container(
+            name="cat-os-release",
+            annotations={"workflows.argoproj.io/display-name": "os-{{inputs.parameters.image}}-{{inputs.parameters.tag}}"},
             inputs=Inputs(
                 parameters=[
                     Parameter(
@@ -66,7 +68,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
                     ),
                 ],
             ),
-            name="cat-os-release",
             args=["/etc/os-release"],
             command=["cat"],
             image="{{inputs.parameters.image}}:{{inputs.parameters.tag}}",
@@ -98,6 +99,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           parameters:
           - name: os-list
       - name: cat-os-release
+        metadata:
+          annotations:
+            workflows.argoproj.io/display-name: os-{{inputs.parameters.image}}-{{inputs.parameters.tag}}
         container:
           image: '{{inputs.parameters.image}}:{{inputs.parameters.tag}}'
           args:

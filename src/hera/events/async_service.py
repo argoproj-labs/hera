@@ -209,6 +209,7 @@ class AsyncEventsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> EventSourceDeletedResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -226,6 +227,7 @@ class AsyncEventsService:
                     "deleteOptions.orphanDependents": orphan_dependents,
                     "deleteOptions.propagationPolicy": propagation_policy,
                     "deleteOptions.dryRun": dry_run,
+                    "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                 }.items()
                 if v is not None
             },
@@ -384,6 +386,7 @@ class AsyncEventsService:
         orphan_dependents: Optional[bool] = None,
         propagation_policy: Optional[str] = None,
         dry_run: Optional[list] = None,
+        ignore_store_read_error_with_cluster_breaking_potential: Optional[bool] = None,
     ) -> DeleteSensorResponse:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -401,6 +404,7 @@ class AsyncEventsService:
                     "deleteOptions.orphanDependents": orphan_dependents,
                     "deleteOptions.propagationPolicy": propagation_policy,
                     "deleteOptions.dryRun": dry_run,
+                    "deleteOptions.ignoreStoreReadErrorWithClusterBreakingPotential": ignore_store_read_error_with_cluster_breaking_potential,
                 }.items()
                 if v is not None
             },
@@ -476,6 +480,7 @@ class AsyncEventsService:
         tail_lines: Optional[str] = None,
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
+        stream: Optional[str] = None,
     ) -> EventsourceLogEntry:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -501,6 +506,7 @@ class AsyncEventsService:
                     "podLogOptions.tailLines": tail_lines,
                     "podLogOptions.limitBytes": limit_bytes,
                     "podLogOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
+                    "podLogOptions.stream": stream,
                 }.items()
                 if v is not None
             },
@@ -621,6 +627,7 @@ class AsyncEventsService:
         tail_lines: Optional[str] = None,
         limit_bytes: Optional[str] = None,
         insecure_skip_tls_verify_backend: Optional[bool] = None,
+        stream: Optional[str] = None,
     ) -> SensorLogEntry:
         """API documentation."""
         assert valid_host_scheme(self.host), "The host scheme is required for service usage"
@@ -645,6 +652,7 @@ class AsyncEventsService:
                     "podLogOptions.tailLines": tail_lines,
                     "podLogOptions.limitBytes": limit_bytes,
                     "podLogOptions.insecureSkipTLSVerifyBackend": insecure_skip_tls_verify_backend,
+                    "podLogOptions.stream": stream,
                 }.items()
                 if v is not None
             },

@@ -29,7 +29,6 @@ spec = response.json()
 # Here, we maintain a map of objects specifications whose fields must be marked as optional i.e. removed from the
 # `required` list in the OpenAPI specification.
 DEFINITION_TO_OPTIONAL_FIELDS: Dict[str, List[str]] = {
-    "io.argoproj.workflow.v1alpha1.CronWorkflowStatus": ["active", "lastScheduledTime", "conditions"],
     "io.argoproj.workflow.v1alpha1.CronWorkflowList": ["items"],
     "io.argoproj.workflow.v1alpha1.ClusterWorkflowTemplateList": ["items"],
     "io.argoproj.workflow.v1alpha1.WorkflowList": ["items"],
@@ -144,6 +143,11 @@ for obj_name, obj_spec in MANUAL_SPECIFICATIONS:
 topo_sorter = TopologicalSorter()
 prefix_len = len("#/definitions/")
 
+# Note for below: The dlqTrigger attribute of the Trigger class has a type `Trigger`, making it recursive.
+# Therefore we do not add it to the object references in order to _not_ create a cycle for the
+# TopologicalSorter. The Pydantic model still has the `dlqTrigger` attribute with the correct
+# type, as we just use the TopologicalSorter to order the definitions based on the references.
+
 # Create "nodes" for the sorter from definition names and any "properties" that reference other definitions
 for definition, metadata in spec["definitions"].items():
     if "properties" not in metadata:
@@ -153,6 +157,10 @@ for definition, metadata in spec["definitions"].items():
     object_references = []
     for prop, attrs in metadata["properties"].items():
         if "$ref" in attrs:
+            # Skip cycle reference for topological sorter
+            reference = attrs["$ref"][prefix_len:]
+            if reference == definition:
+                continue
             object_references.append(attrs["$ref"][prefix_len:])
     topo_sorter.add(definition, *object_references)
 

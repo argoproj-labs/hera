@@ -15,3 +15,4 @@ spec:
   synchronization:
     mutexes:
     - name: test
+      database: true
