@@ -157,10 +157,9 @@ for definition, metadata in spec["definitions"].items():
     object_references = []
     for prop, attrs in metadata["properties"].items():
         if "$ref" in attrs:
-            if (
-                prop == "dlqTrigger"
-                and attrs["$ref"][prefix_len:] == "github.com.argoproj.argo_events.pkg.apis.events.v1alpha1.Trigger"
-            ):
+            # Skip cycle reference for topological sorter
+            reference = attrs["$ref"][prefix_len:]
+            if reference == definition:
                 continue
             object_references.append(attrs["$ref"][prefix_len:])
     topo_sorter.add(definition, *object_references)
