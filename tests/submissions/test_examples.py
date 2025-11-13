@@ -1,12 +1,16 @@
 import asyncio
 import importlib
+from pathlib import Path
 import random
+import shutil
+import subprocess
 import time
 
 import pytest
 import requests
 
 from hera.exceptions import HeraException
+from hera.shared._global_config import _GlobalConfig
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.cluster_workflow_template import ClusterWorkflowTemplate
 from hera.workflows.cron_workflow import CronWorkflow
@@ -25,7 +29,7 @@ SKIP_LINT_EXAMPLES = {
 }
 SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
     {
-        "artifact_loaders",
+        # "artifact_loaders",
         "conditional_on_task_status",
         "container_set_with_env",
         "create_volume_for_workflow",
@@ -149,6 +153,71 @@ async def test_submission(
     assert elapsed < TIME_LIMIT_SECONDS, (
         f"Workflow took longer than {TIME_LIMIT_SECONDS} (but succeeded), consider adding to 'SKIP_SUBMISSION_EXAMPLES' set"
     )
+
+
+@pytest.mark.on_cluster
+@pytest.mark.parametrize(
+    "example_path,filename,module_name",
+    [
+        pytest.param(
+            path,
+            filename,
+            module_name,
+            marks=pytest.mark.skipif(
+                bool(CI_MODE), reason="Runner examples only"
+            ),
+            id=filename,
+        )
+        for path, module_name, filename in _get_examples() if filename in ["artifact_loaders"]
+    ],
+)
+async def test_runner_submission(
+    example_path: str,
+    filename: str,
+    module_name: str,
+    global_config_fixture: _GlobalConfig,
+    async_workflows_service: AsyncWorkflowsService,
+    tmp_path: Path,
+):
+    global_config_fixture.host = "https://localhost:2746"
+    global_config_fixture.image = "hera-test:v1"
+
+    workflow = importlib.import_module(module_name).w
+
+    shutil.copy(Path(example_path, filename + ".py"), tmp_path/"workflow.py")
+    Path(tmp_path/"Dockerfile").write_text("""\
+FROM python:3.13-alpine
+
+WORKDIR /app
+
+RUN pip install --upgrade pip \
+  && pip install hera
+
+COPY . .
+""")
+    proc = subprocess.run(
+        f"cd {tmp_path} && docker build . -t hera-test:v1",
+        shell=True,
+    )
+
+    assert proc.returncode == 0
+
+    workflow.namespace = "argo"
+    workflow.service_account_name = "argo"
+    workflow.workflows_service = async_workflows_service
+
+    while True:
+        try:
+            model_workflow = await workflow.async_create(wait=True, poll_interval=TIME_LIMIT_SECONDS // 3)
+        except requests.exceptions.ConnectionError:
+            await asyncio.sleep(random.randint(25, 35))
+            model_workflow = await workflow.async_create(wait=True, poll_interval=TIME_LIMIT_SECONDS // 3)
+            continue
+        break
+
+    assert isinstance(model_workflow, ModelWorkflow)
+    assert model_workflow.status
+    assert model_workflow.status.phase == "Succeeded"
 
 
 @pytest.mark.on_cluster
