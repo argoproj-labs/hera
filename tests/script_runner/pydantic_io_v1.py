@@ -1,16 +1,12 @@
 from pathlib import Path
 from typing import Annotated, List
 
+from pydantic.v1 import BaseModel
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, ArtifactLoader, Parameter, script
 from hera.workflows.io.v1 import Input, Output
-
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
 
 global_config.experimental_features["script_annotations"] = True
 global_config.experimental_features["script_pydantic_io"] = True

@@ -3,15 +3,11 @@
 from pathlib import Path
 from typing import Annotated, Dict, List, Tuple
 
+from pydantic.v1 import BaseModel
 from tests.helper import ARTIFACT_PATH
 
 from hera.shared import global_config
 from hera.workflows import Artifact, Parameter, script
-
-try:
-    from pydantic.v1 import BaseModel
-except ImportError:
-    from pydantic import BaseModel
 
 global_config.experimental_features["script_annotations"] = True
 

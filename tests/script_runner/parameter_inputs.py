@@ -7,11 +7,7 @@ except ImportError:
     from typing_extensions import Annotated
 
 from pydantic import BaseModel
-
-try:
-    from pydantic.v1 import BaseModel as V1BaseModel
-except (ImportError, ModuleNotFoundError):
-    from pydantic import BaseModel as V1BaseModel
+from pydantic.v1 import BaseModel as V1BaseModel
 
 from hera.shared import global_config
 from hera.workflows import Parameter, RunnerScriptConstructor, script
