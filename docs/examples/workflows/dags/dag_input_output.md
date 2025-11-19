@@ -80,7 +80,7 @@ It also has the `my-dag-output` parameter, which "hoists" the task output to be 
             valueFrom:
               path: /tmp/hera-outputs/parameters/output-message
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

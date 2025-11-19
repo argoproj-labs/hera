@@ -47,7 +47,7 @@ class _GlobalConfig:
     ] = None
     """an optional client certificate and key that is used to authenticate with reverse proxies"""
 
-    _image: Union[str, Callable[[], str]] = "python:3.9"
+    _image: Union[str, Callable[[], str]] = "python:3.10"
     """an optional Docker image specification"""
 
     _pre_build_hooks: Optional[_HookMap] = None

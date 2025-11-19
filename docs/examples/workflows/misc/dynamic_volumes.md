@@ -40,7 +40,7 @@
             template: foo
       - name: foo
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

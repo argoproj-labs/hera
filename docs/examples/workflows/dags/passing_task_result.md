@@ -52,7 +52,7 @@ This example shows how to pass the `result` output parameter between tasks.
                 value: '{{tasks.out.outputs.result}}'
       - name: out
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -65,7 +65,7 @@ This example shows how to pass the `result` output parameter between tasks.
           parameters:
           - name: a
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

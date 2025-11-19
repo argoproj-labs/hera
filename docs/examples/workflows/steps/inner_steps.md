@@ -77,7 +77,7 @@ this inner steps example shows the use of a whole `Steps` template (which will r
           parameters:
           - name: name
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

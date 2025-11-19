@@ -47,7 +47,7 @@ and be available to subsequent tasks (if it were in a DAG).
           parameters:
           - name: user
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

@@ -61,7 +61,7 @@ This example shows a conditional DAG path based on a "coinflip" from the `flip` 
             when: '{{tasks.flip.outputs.result}} == tails'
       - name: flip
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -73,7 +73,7 @@ This example shows a conditional DAG path based on a "coinflip" from the `flip` 
           - python
       - name: heads
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -83,7 +83,7 @@ This example shows a conditional DAG path based on a "coinflip" from the `flip` 
           - python
       - name: tails
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

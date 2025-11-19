@@ -65,7 +65,7 @@ This example showcases the user of a user container with a volume mount.
           - name: something
             mountPath: /whatever
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

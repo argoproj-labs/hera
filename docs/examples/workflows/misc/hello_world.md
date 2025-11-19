@@ -39,7 +39,7 @@ This example shows a minimal "Hello World" example.
           parameters:
           - name: s
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

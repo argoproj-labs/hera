@@ -69,7 +69,7 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -87,7 +87,7 @@ Compare this example to [Basic Artifacts](../artifacts/basic_artifacts.md) to se
           - name: in_art
             path: /tmp/hera-inputs/artifacts/in_art
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

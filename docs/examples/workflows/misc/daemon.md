@@ -76,7 +76,7 @@ requests to the server.
       - name: server
         daemon: true
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -103,7 +103,7 @@ requests to the server.
           parameters:
           - name: ip
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

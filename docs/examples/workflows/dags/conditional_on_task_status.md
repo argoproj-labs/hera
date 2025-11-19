@@ -61,7 +61,7 @@ This example showcases conditional execution on success, failure, and error
             template: failure
       - name: random
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -74,7 +74,7 @@ This example showcases conditional execution on success, failure, and error
           - python
       - name: success
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -84,7 +84,7 @@ This example showcases conditional execution on success, failure, and error
           - python
       - name: failure
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

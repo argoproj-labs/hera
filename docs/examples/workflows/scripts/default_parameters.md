@@ -63,7 +63,7 @@ Script functions parameters mirror Python's behaviour:
                 value: '{{tasks.generator.outputs.result}}'
       - name: generator
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -79,7 +79,7 @@ Script functions parameters mirror Python's behaviour:
           - name: foo
             default: '42'
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

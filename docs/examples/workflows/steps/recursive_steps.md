@@ -55,7 +55,7 @@ This example shows how you can (carefully!) recurse on a Steps template.
                 value: '{{steps.random-roll.outputs.result}}'
       - name: random-roll
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

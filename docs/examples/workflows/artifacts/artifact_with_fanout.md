@@ -83,7 +83,7 @@
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -100,7 +100,7 @@
           - name: in-art
             path: /tmp/file
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -119,7 +119,7 @@
           parameters:
           - name: i
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

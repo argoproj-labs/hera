@@ -30,7 +30,7 @@ spec:
       - name: key_1
       - name: key_2
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

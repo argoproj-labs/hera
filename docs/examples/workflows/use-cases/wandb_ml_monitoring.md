@@ -166,7 +166,7 @@ wandb server!
           - name: dataset
           - name: epochs
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

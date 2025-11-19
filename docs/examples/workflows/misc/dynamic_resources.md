@@ -140,7 +140,7 @@ you can compute the resources dynamically based on the amount of data you need t
                 value: '{{item.cpu}}'
       - name: compute-resources
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -163,7 +163,7 @@ you can compute the resources dynamically based on the amount of data you need t
           - name: cpu
           - name: mem
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -189,7 +189,7 @@ you can compute the resources dynamically based on the amount of data you need t
           - name: mem
             default: 100Mi
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

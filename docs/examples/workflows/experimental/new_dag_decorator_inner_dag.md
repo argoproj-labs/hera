@@ -83,7 +83,7 @@ This example shows how to run an inner DAG within another DAG.
             valueFrom:
               path: /tmp/hera-outputs/parameters/environment_parameter
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -103,7 +103,7 @@ This example shows how to run an inner DAG within another DAG.
           - name: word_a
           - name: word_b
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

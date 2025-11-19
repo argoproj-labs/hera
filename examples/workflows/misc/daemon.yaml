@@ -20,7 +20,7 @@ spec:
   - name: server
     daemon: true
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -47,7 +47,7 @@ spec:
       parameters:
       - name: ip
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

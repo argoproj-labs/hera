@@ -18,7 +18,7 @@ spec:
         template: failure
   - name: random
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -31,7 +31,7 @@ spec:
       - python
   - name: success
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -41,7 +41,7 @@ spec:
       - python
   - name: failure
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

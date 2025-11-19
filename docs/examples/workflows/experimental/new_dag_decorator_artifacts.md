@@ -93,7 +93,7 @@ DAG itself by referencing it in an `Output` class.
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -121,7 +121,7 @@ DAG itself by referencing it in an `Output` class.
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

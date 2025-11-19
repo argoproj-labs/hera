@@ -24,7 +24,7 @@ spec:
             value: '{{item.p3}}'
   - name: generate
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -41,7 +41,7 @@ spec:
       - name: p2
       - name: p3
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

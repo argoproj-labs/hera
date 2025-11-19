@@ -42,7 +42,7 @@ This example showcases how to create a volume at a workflow level and use it in 
       templates:
       - name: git-sync
         container:
-          image: python:3.9
+          image: python:3.10
           volumeMounts:
           - name: service-account-credential
             mountPath: /secrets

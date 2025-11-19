@@ -106,7 +106,7 @@ Instead, it is recommended to use the Hera Runner,
           - name: result-art
             path: /tmp/result
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -123,7 +123,7 @@ Instead, it is recommended to use the Hera Runner,
           - name: i
             path: /tmp/i
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

@@ -13,7 +13,7 @@ spec:
       - name: an_int
         default: '42'
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m
@@ -33,7 +33,7 @@ spec:
       - name: an_int
         default: '42'
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m
