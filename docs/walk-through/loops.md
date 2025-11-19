@@ -76,7 +76,7 @@ We can loop over a list of values passed to `with_items`, and pass `"{{item}}"` 
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -165,7 +165,7 @@ that the keys must match across all the dictionaries.
           - name: message
           - name: times
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -250,7 +250,7 @@ Hera lets you omit the `arguments` passed to a Task or Step if all the keys matc
           - name: foo
           - name: bar
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -322,7 +322,7 @@ of random length and consume it in the subsequent task:
                 value: '{{item}}'
       - name: generate
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -337,7 +337,7 @@ of random length and consume it in the subsequent task:
           parameters:
           - name: value
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -425,7 +425,7 @@ pass the `arguments` from the `Workflow` into the `Steps` template:
           parameters:
           - name: value
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -513,7 +513,7 @@ a list:
                 value: '{{tasks.fanout.outputs.parameters.value}}'
       - name: generate
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -533,7 +533,7 @@ a list:
             valueFrom:
               path: /tmp/value
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -553,7 +553,7 @@ a list:
           parameters:
           - name: values
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -620,7 +620,7 @@ The use case for `with_sequence` is quite narrow, so you will probably not use i
               start: '0'
       - name: gen-num
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -633,7 +633,7 @@ The use case for `with_sequence` is quite narrow, so you will probably not use i
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

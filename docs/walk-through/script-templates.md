@@ -64,7 +64,7 @@ Here's an example using an inline script:
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

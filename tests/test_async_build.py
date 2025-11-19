@@ -3,7 +3,7 @@ import asyncio
 from hera.workflows import Steps, Workflow, script
 
 
-@script(image="python:3.9")
+@script(image="python:3.10")
 def echo(message: str):
     print(message)
 
@@ -59,7 +59,7 @@ def test_async_context():
     w0, w1 = rv
 
     assert [x.name for x in w0.templates] == ["steps", "echo"]
-    assert w0.templates[1].image == "python:3.9"
+    assert w0.templates[1].image == "python:3.10"
     assert [x.name for x in w1.templates] == ["steps", "hello"]
     assert w1.templates[1].image == "python:3.10"
 
@@ -81,6 +81,6 @@ def test_sync_context():
             hello(arguments={"message": "hello 1"})
 
     assert [x.name for x in w0.templates] == ["steps", "echo"]
-    assert w0.templates[1].image == "python:3.9"
+    assert w0.templates[1].image == "python:3.10"
     assert [x.name for x in w1.templates] == ["steps", "hello"]
     assert w1.templates[1].image == "python:3.10"

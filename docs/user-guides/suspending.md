@@ -65,7 +65,7 @@ a user manually resumes the Workflow (in the UI or CLI):
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -139,7 +139,7 @@ user can still manually resume the Workflow before the time is up:
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -219,7 +219,7 @@ This Workflow suspends indefinitely, waiting for user input, and echoes the user
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -296,7 +296,7 @@ We can also
             when: '{{steps.suspend.outputs.parameters.approve}} == "YES"'
       - name: deploy
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

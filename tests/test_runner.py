@@ -1004,16 +1004,9 @@ def test_runner_pydantic_with_invalid_annotations(
     [
         "tests.script_runner.parameter_with_complex_types:optional_str_parameter",
         "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_union",
-    ]
-    + (
-        # Union types using OR operator are allowed since python 3.10.
-        [
-            "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_or",
-            "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_multiple_or",
-        ]
-        if sys.version_info[0] >= 3 and sys.version_info[1] >= 10
-        else []
-    ),
+        "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_or",
+        "tests.script_runner.parameter_with_complex_types:optional_str_parameter_using_multiple_or",
+    ],
 )
 @pytest.mark.parametrize(
     "kwargs_list,expected_output",

@@ -56,7 +56,7 @@ the context. When using a `@script` function multiple times under a single `Step
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -149,7 +149,7 @@ function. We can create a set of parallel steps within a sequence of sequential 
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -232,7 +232,7 @@ sugar functions, which makes for more readable and maintainable code!
                 value: tails
       - name: flip
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -247,7 +247,7 @@ sugar functions, which makes for more readable and maintainable code!
           parameters:
           - name: coin_result
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
