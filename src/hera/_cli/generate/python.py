@@ -1,7 +1,7 @@
 import ast
-import sys
 from collections import defaultdict
 from pathlib import Path
+from types import NoneType
 from typing import Any, Dict, Generator, Iterator, List, Optional, Set, Type, Union, cast
 
 import black
@@ -36,11 +36,6 @@ from hera.workflows.suspend import Suspend
 from hera.workflows.task import Task
 from hera.workflows.workflow import Workflow
 from hera.workflows.workflow_template import WorkflowTemplate
-
-if sys.version_info >= (3, 10):
-    from types import NoneType
-else:
-    NoneType = type(None)
 
 ModelWorkflow = Union[
     _ModelWorkflow,

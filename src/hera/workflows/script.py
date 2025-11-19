@@ -7,11 +7,11 @@ for more on scripts in Argo Workflows.
 import ast
 import copy
 import inspect
-import sys
 import textwrap
 from abc import abstractmethod
 from functools import wraps
 from pathlib import Path
+from types import NoneType
 from typing import (
     Any,
     Callable,
@@ -29,12 +29,6 @@ from typing import (
     cast,
     overload,
 )
-
-if sys.version_info >= (3, 10):
-    from types import NoneType
-else:
-    NoneType = type(None)
-
 
 from typing_extensions import ParamSpec, get_args, get_origin
 

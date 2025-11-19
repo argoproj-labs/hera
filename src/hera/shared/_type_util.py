@@ -1,6 +1,6 @@
 """Module that handles types and annotations."""
 
-import sys
+from types import NoneType, UnionType
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -17,12 +17,6 @@ from typing import (
     get_origin,
     overload,
 )
-
-if sys.version_info >= (3, 10):
-    from types import NoneType, UnionType
-else:
-    UnionType = Union
-    NoneType = type(None)
 
 if TYPE_CHECKING:
     # Avoid circular import

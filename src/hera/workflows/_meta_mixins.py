@@ -4,21 +4,26 @@ from __future__ import annotations
 
 import functools
 import inspect
-import sys
 import warnings
 from collections import ChainMap
+from inspect import get_annotations
 from pathlib import Path
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
-
-if sys.version_info >= (3, 10):
-    from inspect import get_annotations
-    from typing import Concatenate, ParamSpec
-else:
-    from typing_extensions import Concatenate, ParamSpec
-
-    from hera.shared._inspect import get_annotations
-
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Concatenate,
+    Dict,
+    List,
+    Optional,
+    ParamSpec,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled

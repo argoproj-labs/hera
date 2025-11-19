@@ -1,13 +1,8 @@
 """Module that holds the underlying base Pydantic models for Hera objects."""
 
-import sys
 from collections import ChainMap
+from inspect import get_annotations
 from typing import TYPE_CHECKING, Any, Dict, Type
-
-if sys.version_info >= (3, 10):
-    from inspect import get_annotations
-else:
-    from hera.shared._inspect import get_annotations
 
 from pydantic import VERSION
 
