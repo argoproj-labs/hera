@@ -44,7 +44,7 @@ You will need to use the `Script` class directly, instead of a `script`-decorate
       templates:
       - name: bye
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -74,7 +74,7 @@ You will need to use the `Script` class directly, instead of a `script`-decorate
           parameters:
           - name: s
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

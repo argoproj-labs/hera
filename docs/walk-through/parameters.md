@@ -24,7 +24,7 @@ becomes:
     - name: message
       default: Hello world!
   script:
-    image: python:3.9
+    image: python:3.10
     source: |-
       import os
       import sys
@@ -65,7 +65,7 @@ if they are both strings:
         - name: a
         - name: b
       script:
-        image: python:3.9
+        image: python:3.10
         source: |-
           import os
           import sys
@@ -264,7 +264,7 @@ variable):
             valueFrom:
               path: /tmp/hello_world.txt
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -384,7 +384,7 @@ Under a `Steps` context, we can assign the `Step` object returned from the `hell
             valueFrom:
               path: /tmp/hello_world.txt
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -398,7 +398,7 @@ Under a `Steps` context, we can assign the `Step` object returned from the `hell
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

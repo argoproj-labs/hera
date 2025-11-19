@@ -20,7 +20,7 @@ spec:
         when: '{{tasks.flip.outputs.result}} == tails'
   - name: flip
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -32,7 +32,7 @@ spec:
       - python
   - name: heads
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -42,7 +42,7 @@ spec:
       - python
   - name: tails
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

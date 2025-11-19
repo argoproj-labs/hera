@@ -101,7 +101,7 @@ This example shows how to use a fan-out over one argument, while keeping the oth
                 value: '123'
       - name: generate
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -119,7 +119,7 @@ This example shows how to use a fan-out over one argument, while keeping the oth
           - name: extra_param2
             default: '42'
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

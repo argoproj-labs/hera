@@ -65,7 +65,7 @@
             valueFrom:
               path: /test
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -79,7 +79,7 @@
           parameters:
           - name: a
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

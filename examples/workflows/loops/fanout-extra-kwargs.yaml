@@ -34,7 +34,7 @@ spec:
             value: '123'
   - name: generate
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -52,7 +52,7 @@ spec:
       - name: extra_param2
         default: '42'
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

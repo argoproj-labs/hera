@@ -98,7 +98,7 @@ Settings a `Volume` on the `Workflow` automatically creates a `volumeClaimTempla
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -119,7 +119,7 @@ Settings a `Volume` on the `Workflow` automatically creates a `volumeClaimTempla
           - name: successor_in
             path: /mnt/here/artifacts/successor_out
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

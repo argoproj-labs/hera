@@ -30,7 +30,7 @@ spec:
             value: '{{item.cpu}}'
   - name: compute-resources
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -53,7 +53,7 @@ spec:
       - name: cpu
       - name: mem
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -79,7 +79,7 @@ spec:
       - name: mem
         default: 100Mi
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

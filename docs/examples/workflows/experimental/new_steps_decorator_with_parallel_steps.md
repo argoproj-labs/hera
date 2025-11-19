@@ -90,7 +90,7 @@ This example shows the use of the new `steps` decorator, including parallel step
             valueFrom:
               path: /tmp/hera-outputs/parameters/dummy-param
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -111,7 +111,7 @@ This example shows the use of the new `steps` decorator, including parallel step
             default: ''
           - name: word_b
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

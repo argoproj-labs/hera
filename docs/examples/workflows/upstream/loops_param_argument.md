@@ -99,9 +99,6 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           parameters:
           - name: os-list
       - name: cat-os-release
-        metadata:
-          annotations:
-            workflows.argoproj.io/display-name: os-{{inputs.parameters.image}}-{{inputs.parameters.tag}}
         container:
           image: '{{inputs.parameters.image}}:{{inputs.parameters.tag}}'
           args:
@@ -112,6 +109,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
           parameters:
           - name: image
           - name: tag
+        metadata:
+          annotations:
+            workflows.argoproj.io/display-name: os-{{inputs.parameters.image}}-{{inputs.parameters.tag}}
       arguments:
         parameters:
         - name: os-list

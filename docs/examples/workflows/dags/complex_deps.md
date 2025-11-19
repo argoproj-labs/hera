@@ -75,7 +75,7 @@ This example shows how to create more complex dependencies between tasks.
           parameters:
           - name: p
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

@@ -63,7 +63,7 @@ This example shows how to use a DAG within another DAG.
           parameters:
           - name: name
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

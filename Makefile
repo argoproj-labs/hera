@@ -11,9 +11,9 @@ install: ## Run poetry install with all extras for development
 	@poetry env use system
 	@poetry install --all-extras
 
-.PHONY: install-3.9
-install-3.9: ## Install and use Python 3.9 for generating test data
-	@poetry env use 3.9
+.PHONY: install-3.10
+install-3.10: ## Install and use Python 3.10 for generating test data
+	@poetry env use 3.10
 	@poetry install --all-extras
 
 .PHONY: ci
@@ -62,7 +62,7 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
-		--target-python-version 3.9 \
+		--target-python-version 3.10 \
 		--output src/hera/workflows/models \
 		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._pydantic.BaseModel \
@@ -86,7 +86,7 @@ events-models: ## Generate the Events models portion of Argo Workflows
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
 		--snake-case-field \
-		--target-python-version 3.9 \
+		--target-python-version 3.10 \
 		--output src/hera/events/models \
 		--output-model-type pydantic.BaseModel \
 		--base-class hera.shared._pydantic.BaseModel \
@@ -150,19 +150,19 @@ regenerate-example: install
 
 .PHONY: regenerate-upstream-test-data
 regenerate-upstream-test-data:  ## Regenerates test data and docs for upstream examples
-regenerate-upstream-test-data: install-3.9
+regenerate-upstream-test-data: install-3.10
 	HERA_REGENERATE=1 poetry run python -m pytest "tests/test_examples.py::test_hera_output_upstream"
 	make examples
 
 .PHONY: fetch-upstream-examples
 fetch-upstream-examples:  ## Fetch the upstream examples, add missing examples report to docs, report diffs
-fetch-upstream-examples: install-3.9
+fetch-upstream-examples: install-3.10
 	find examples -a -name "*.upstream.yaml" -type f -delete
 	HERA_REGENERATE=1 poetry run python -m pytest "tests/test_remaining_examples.py::test_for_missing_examples" --runxfail
 
 .PHONY: regenerate-test-data
 regenerate-test-data:  ## Regenerates test data and docs for non-upstream examples
-regenerate-test-data: install-3.9
+regenerate-test-data: install-3.10
 	find examples -not -path "*/upstream/*" -a -name "*.yaml" -type f -delete
 	HERA_REGENERATE=1 poetry run python -m pytest "tests/test_examples.py::test_hera_output"
 	make examples

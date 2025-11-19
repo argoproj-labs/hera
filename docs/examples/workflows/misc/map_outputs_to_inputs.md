@@ -123,7 +123,7 @@
             valueFrom:
               path: /c
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -141,7 +141,7 @@
           - name: b
           - name: c
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -167,7 +167,7 @@
             valueFrom:
               path: /e
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -187,7 +187,7 @@
           - name: d
           - name: e
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

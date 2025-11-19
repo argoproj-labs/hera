@@ -154,7 +154,7 @@ We can then call the function in a Steps context. Compare to the YAML workflow a
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -237,7 +237,7 @@ output artifact to the `in-art` input artifact:
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -252,7 +252,7 @@ output artifact to the `in-art` input artifact:
           - name: in-art
             path: /tmp/file
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

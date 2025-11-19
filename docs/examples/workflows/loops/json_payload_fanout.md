@@ -62,7 +62,7 @@ This example shows how you can fan-out over a JSON payload (a JSON list of dicts
                 value: '{{item.p3}}'
       - name: generate
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -79,7 +79,7 @@ This example shows how you can fan-out over a JSON payload (a JSON list of dicts
           - name: p2
           - name: p3
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

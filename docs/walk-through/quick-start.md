@@ -89,7 +89,7 @@ from hera.shared import global_config
 
 global_config.host = "https://<your-host-name>"
 global_config.token = ""  # Copy token value after "Bearer" from the CLI command `argo auth token`
-global_config.image = "<your-image-repository>/python:3.9"  # Set the image if you cannot access "python:3.9" via Docker Hub
+global_config.image = "<your-image-repository>/python:3.10"  # Set the image if you cannot access "python:3.10" via Docker Hub
 
 
 @script()

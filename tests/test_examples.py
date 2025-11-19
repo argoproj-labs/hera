@@ -30,7 +30,7 @@ HERA_REGENERATE = os.environ.get("HERA_REGENERATE")
 REPORT_DIFFS = os.environ.get("REPORT_DIFFS")
 CI_MODE = os.environ.get("CI")
 
-LOWEST_SUPPORTED_PY_VERSION = (3, 9)
+LOWEST_SUPPORTED_PY_VERSION = (3, 10)
 
 EXTRA_MODULES = defaultdict(list, {"parquet_pandas": ["pandas"]})
 UPSTREAM_EXAMPLE_XFAIL_MODULES = [
@@ -39,7 +39,7 @@ UPSTREAM_EXAMPLE_XFAIL_MODULES = [
 
 
 def _generate_yaml(path: Path) -> bool:
-    if sys.version_info[0] == LOWEST_SUPPORTED_PY_VERSION[0] and sys.version_info[1] > LOWEST_SUPPORTED_PY_VERSION[1]:
+    if sys.version_info[0] == LOWEST_SUPPORTED_PY_VERSION[0] and sys.version_info[1] != LOWEST_SUPPORTED_PY_VERSION[1]:
         # Generate yamls on lowest supported python version only
         return False
     if CI_MODE:

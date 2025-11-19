@@ -83,7 +83,7 @@ This also works for the `result` output parameter (as long as nothing else is in
                 value: '{{tasks.fanout.outputs.parameters.value}}'
       - name: generate
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -103,7 +103,7 @@ This also works for the `result` output parameter (as long as nothing else is in
             valueFrom:
               path: /tmp/value
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -123,7 +123,7 @@ This also works for the `result` output parameter (as long as nothing else is in
           parameters:
           - name: values
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

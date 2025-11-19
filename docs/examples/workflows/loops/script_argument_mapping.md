@@ -68,7 +68,7 @@ See how to do this dynamically in the [JSON payload fanout](json_payload_fanout.
           - name: key_1
           - name: key_2
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

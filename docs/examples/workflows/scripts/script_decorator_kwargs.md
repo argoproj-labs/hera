@@ -43,7 +43,7 @@ This example shows various kwarg parameters for the script decorator.
           labels:
             my-label: my-value
         script:
-          image: python:3.9
+          image: python:3.10
           imagePullPolicy: Always
           source: |-
             import os

@@ -91,7 +91,7 @@ This example shows how to generate and parallelize generated sequences.
               start: '{{tasks.t1.outputs.result}}'
       - name: gen-num
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -105,7 +105,7 @@ This example shows how to generate and parallelize generated sequences.
           parameters:
           - name: message
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

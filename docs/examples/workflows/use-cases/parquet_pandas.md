@@ -129,7 +129,7 @@ how we can easily use big file formats like parquet through Hera Artifact annota
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -147,7 +147,7 @@ how we can easily use big file formats like parquet through Hera Artifact annota
           - name: dataset
             path: /tmp/hera-inputs/artifacts/dataset
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -162,7 +162,7 @@ how we can easily use big file formats like parquet through Hera Artifact annota
           - name: dataset
             path: /tmp/hera-inputs/artifacts/dataset
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

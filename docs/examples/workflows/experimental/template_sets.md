@@ -48,7 +48,7 @@ to a Workflow at submission time. This can be useful if you just want to distrib
       templates:
       - name: setup
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

@@ -15,7 +15,7 @@ spec:
         valueFrom:
           path: /tmp/hera-outputs/parameters/dummy-param
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m
@@ -36,7 +36,7 @@ spec:
         default: ''
       - name: word_b
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m

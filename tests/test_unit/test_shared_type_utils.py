@@ -1,14 +1,5 @@
-import sys
-from typing import List, Literal, NoReturn, Optional, Union
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
-if sys.version_info >= (3, 10):
-    from types import NoneType
-else:
-    NoneType = type(None)
+from types import NoneType
+from typing import Annotated, List, Literal, NoReturn, Optional, Union
 
 import pytest
 from annotated_types import Gt

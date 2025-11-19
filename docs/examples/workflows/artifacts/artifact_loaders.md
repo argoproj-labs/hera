@@ -93,7 +93,7 @@ if it exists.
           - name: an-artifact
             path: /tmp/hera-outputs/artifacts/an-artifact
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -118,7 +118,7 @@ if it exists.
             optional: true
             path: /tmp/hera-inputs/artifacts/my-optional-artifact
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

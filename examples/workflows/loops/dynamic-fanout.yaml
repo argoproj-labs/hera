@@ -20,7 +20,7 @@ spec:
             value: '{{item}}'
   - name: generate
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -36,7 +36,7 @@ spec:
       parameters:
       - name: value
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

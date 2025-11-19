@@ -109,10 +109,10 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
 
-      - name: set up python 3.9
+      - name: set up python 3.10
         uses: actions/setup-python@v6
         with:
-          python-version: 3.9
+          python-version: "3.10"
           cache: "poetry"
 
       - name: Install dependencies

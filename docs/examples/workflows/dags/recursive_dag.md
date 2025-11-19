@@ -50,7 +50,7 @@ This example shows how you can (carefully!) recurse on a DAG template.
             when: '{{tasks.roll.outputs.result}} != 6'
       - name: random-roll
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

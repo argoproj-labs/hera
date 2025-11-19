@@ -81,7 +81,7 @@ This example shows how to run a task if "any succeed" or if "all fail" from a fa
           parameters:
           - name: a
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -101,7 +101,7 @@ This example shows how to run a task if "any succeed" or if "all fail" from a fa
           parameters:
           - name: a
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -118,7 +118,7 @@ This example shows how to run a task if "any succeed" or if "all fail" from a fa
           parameters:
           - name: a
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

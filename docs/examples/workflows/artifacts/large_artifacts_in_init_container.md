@@ -80,7 +80,7 @@ to set the init container resources.
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -100,7 +100,7 @@ to set the init container resources.
           - name: in-art
             path: /tmp/file
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

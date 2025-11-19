@@ -59,7 +59,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
             archive:
               none: {}
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -74,7 +74,7 @@ task, consumer, takes this artifact, places it at its own `/file` path, and prin
           - name: in-art
             path: /tmp/file
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

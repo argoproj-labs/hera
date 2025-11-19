@@ -65,7 +65,7 @@ they may need to process.
                 value: '{{item}}'
       - name: generate
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -81,7 +81,7 @@ they may need to process.
           parameters:
           - name: value
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

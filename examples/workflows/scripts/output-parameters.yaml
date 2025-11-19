@@ -24,7 +24,7 @@ spec:
         valueFrom:
           path: /test
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys
@@ -38,7 +38,7 @@ spec:
       parameters:
       - name: a
     script:
-      image: python:3.9
+      image: python:3.10
       source: |-
         import os
         import sys

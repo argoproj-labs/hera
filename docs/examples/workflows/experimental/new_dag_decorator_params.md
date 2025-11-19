@@ -125,7 +125,7 @@ This example shows how parameters can be passed into, within and out of a DAG.
             valueFrom:
               path: /tmp/hera-outputs/parameters/setup-config
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -148,7 +148,7 @@ This example shows how parameters can be passed into, within and out of a DAG.
           - name: concat_config
             default: '{"reverse": false}'
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

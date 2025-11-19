@@ -12,7 +12,7 @@ spec:
         valueFrom:
           path: /tmp/hera-outputs/parameters/environment_parameter
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m
@@ -32,7 +32,7 @@ spec:
       - name: word_a
       - name: word_b
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m

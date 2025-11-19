@@ -74,7 +74,7 @@ This example shows how a DAG can output a value from an expression (using the `h
                 : tasks.tails.outputs.result'
       - name: flip-coin
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -85,7 +85,7 @@ This example shows how a DAG can output a value from an expression (using the `h
           - python
       - name: heads
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -95,7 +95,7 @@ This example shows how a DAG can output a value from an expression (using the `h
           - python
       - name: tails
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys

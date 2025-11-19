@@ -8,12 +8,8 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import NoneType
 from typing import Any, Callable, Dict, List, Optional, cast
-
-if sys.version_info >= (3, 10):
-    from types import NoneType
-else:
-    NoneType = type(None)
 
 from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (

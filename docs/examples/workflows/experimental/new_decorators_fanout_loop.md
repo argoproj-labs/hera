@@ -76,7 +76,7 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
           - name: an_int
             default: '42'
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m
@@ -96,7 +96,7 @@ This lets you perform fanouts using `with_items`, set conditions using `when` an
           - name: an_int
             default: '42'
         script:
-          image: python:3.9
+          image: python:3.10
           source: '{{inputs.parameters}}'
           args:
           - -m

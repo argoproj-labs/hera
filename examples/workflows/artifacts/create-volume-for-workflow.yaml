@@ -30,7 +30,7 @@ spec:
         archive:
           none: {}
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m
@@ -51,7 +51,7 @@ spec:
       - name: successor_in
         path: /mnt/here/artifacts/successor_out
     script:
-      image: python:3.9
+      image: python:3.10
       source: '{{inputs.parameters}}'
       args:
       - -m

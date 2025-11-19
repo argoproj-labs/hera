@@ -39,7 +39,7 @@ form of the Workflow to the YAML:
           parameters:
           - name: s
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
@@ -103,7 +103,7 @@ You must `import` any modules you use in the function, within the function itsel
           parameters:
           - name: string
         script:
-          image: python:3.9
+          image: python:3.10
           source: |-
             import os
             import sys
