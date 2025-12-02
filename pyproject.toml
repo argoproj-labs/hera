@@ -41,7 +41,7 @@ experimental = ["varname"]
 async-client = ["httpx"]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "<9.0.0"
+pytest = "<10.0.0"
 pytest-cov = "*"
 mypy = "*"
 build = "*"
