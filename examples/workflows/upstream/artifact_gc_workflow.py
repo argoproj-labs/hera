@@ -6,7 +6,9 @@ from hera.workflows import (
 )
 
 with Workflow(
-    generate_name="artifact-gc-", entrypoint="main", artifact_gc=m.WorkflowLevelArtifactGC(strategy="OnWorkflowDeletion")
+    generate_name="artifact-gc-",
+    entrypoint="main",
+    artifact_gc=m.WorkflowLevelArtifactGC(strategy="OnWorkflowDeletion"),
 ) as w:
     main = Container(
         name="main",
