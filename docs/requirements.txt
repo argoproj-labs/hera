@@ -5,3 +5,4 @@ mkdocs-include-markdown-plugin
 mkdocs-click
 mkdocstrings[python]
 mkdocs-awesome-pages-plugin
+ruff

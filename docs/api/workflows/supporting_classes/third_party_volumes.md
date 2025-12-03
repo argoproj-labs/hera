@@ -2,7 +2,7 @@
 
 ::: hera.workflows.volume
     options:
-        head_level: 3
+        heading_level: 3
         show_root_heading: False
         members:
         - AWSElasticBlockStoreVolume
