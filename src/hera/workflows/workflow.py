@@ -52,6 +52,7 @@ from hera.workflows.models import (
     VolumeClaimGC,
     Workflow as _ModelWorkflow,
     WorkflowCreateRequest,
+    WorkflowLevelArtifactGC,
     WorkflowLintRequest,
     WorkflowMetadata,
     WorkflowSpec as _ModelWorkflowSpec,
@@ -191,7 +192,7 @@ class Workflow(
     active_deadline_seconds: Annotated[Optional[int], _WorkflowModelMapper("spec.active_deadline_seconds")] = None
     affinity: Annotated[Optional[Affinity], _WorkflowModelMapper("spec.affinity")] = None
     archive_logs: Annotated[Optional[bool], _WorkflowModelMapper("spec.archive_logs")] = None
-    artifact_gc: Annotated[Optional[ArtifactGC], _WorkflowModelMapper("spec.artifact_gc")] = None
+    artifact_gc: Annotated[Optional[ArtifactGC | WorkflowLevelArtifactGC], _WorkflowModelMapper("spec.artifact_gc")] = None
     artifact_repository_ref: Annotated[
         Optional[ArtifactRepositoryRef], _WorkflowModelMapper("spec.artifact_repository_ref")
     ] = None
