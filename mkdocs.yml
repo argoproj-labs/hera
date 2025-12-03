@@ -192,7 +192,7 @@ plugins:
             show_labels: false
             show_root_toc_entry: false
           paths: [src]
-          import:
+          inventories:
             - https://docs.python.org/3/objects.inv
   - search:
       lang: en
