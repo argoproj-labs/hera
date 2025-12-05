@@ -2,29 +2,24 @@
 
 from collections import ChainMap
 from inspect import get_annotations
-from typing import TYPE_CHECKING, Any, Dict, Type
+from typing import Any, Dict, Type
 
-from pydantic import VERSION
-
-# The pydantic v1 interface is used for both pydantic v1 and v2 in order to support
-# users across both versions.
-from pydantic.v1 import (
+from pydantic import (
+    VERSION,
     BaseModel as PydanticBaseModel,
     Field,
     PrivateAttr,
+    RootModel,
     ValidationError,
-    root_validator,
+    model_validator as root_validator,
     validator,
 )
-from pydantic.v1.fields import FieldInfo
-
-if TYPE_CHECKING:
-    from pydantic import BaseModel as V2BaseModel
+from pydantic.fields import FieldInfo
 
 _PYDANTIC_VERSION: int = int(VERSION.split(".")[0])
 
 
-def get_fields(cls: "Type[PydanticBaseModel] | Type[V2BaseModel]") -> Dict[str, FieldInfo]:
+def get_fields(cls: Type[PydanticBaseModel]) -> Dict[str, FieldInfo]:
     """Centralize access to __fields__."""
     try:
         return cls.model_fields  # type: ignore
@@ -32,7 +27,7 @@ def get_fields(cls: "Type[PydanticBaseModel] | Type[V2BaseModel]") -> Dict[str, 
         return cls.__fields__  # type: ignore
 
 
-def model_dump(obj: "PydanticBaseModel | V2BaseModel") -> Dict[str, Any]:
+def model_dump(obj: PydanticBaseModel) -> Dict[str, Any]:
     """Call model_dump, with V1 fallback."""
     if isinstance(obj, PydanticBaseModel):
         return obj.dict()
@@ -72,6 +67,7 @@ __all__ = [
     "FieldInfo",
     "PrivateAttr",
     "PydanticBaseModel",  # Export for serialization.py to cover user-defined models
+    "RootModel",
     "ValidationError",
     "root_validator",
     "validator",
