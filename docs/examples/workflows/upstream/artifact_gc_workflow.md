@@ -19,7 +19,9 @@ The upstream example can be [found here](https://github.com/argoproj/argo-workfl
     )
 
     with Workflow(
-        generate_name="artifact-gc-", entrypoint="main", artifact_gc=m.ArtifactGC(strategy="OnWorkflowDeletion")
+        generate_name="artifact-gc-",
+        entrypoint="main",
+        artifact_gc=m.WorkflowLevelArtifactGC(strategy="OnWorkflowDeletion"),
     ) as w:
         main = Container(
             name="main",
