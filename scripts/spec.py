@@ -19,7 +19,7 @@ output_file = sys.argv[2]
 assert output_file is not None, "Expected the output file to be passed as the second argument"
 
 # download the spec
-response = requests.get(open_api_spec_url)
+response = requests.get(open_api_spec_url, timeout=60)
 
 # get the spec into a dictionary
 spec = response.json()
