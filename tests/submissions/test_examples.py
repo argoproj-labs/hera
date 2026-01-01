@@ -22,6 +22,7 @@ SKIP_LINT_EXAMPLES = {
     "new_decorators_auto_template_refs",  # Uses TemplateRefs to non-existent WorkflowTemplates
     "template_refs",  # Also uses TemplateRefs - the WorkflowTemplates are in the file though
     "parquet_pandas",
+    "reusing_cli_app",
 }
 SKIP_SUBMISSION_EXAMPLES = SKIP_LINT_EXAMPLES.union(
     {

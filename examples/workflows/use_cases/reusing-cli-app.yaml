@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: cli-example-
+spec:
+  entrypoint: hello
+  templates:
+  - name: hello
+    inputs:
+      parameters:
+      - name: count
+      - name: name
+    script:
+      image: python:3.10
+      source: |-
+        import os
+        import sys
+        sys.path.append(os.getcwd())
+        import json
+        try: count = json.loads(r'''{{inputs.parameters.count}}''')
+        except: count = r'''{{inputs.parameters.count}}'''
+        try: name = json.loads(r'''{{inputs.parameters.name}}''')
+        except: name = r'''{{inputs.parameters.name}}'''
+
+        """Simple program that greets NAME for a total of COUNT times."""
+        for _ in range(count):
+            print(f'Hello {name}!')
+      command:
+      - python
+  arguments:
+    parameters:
+    - name: count
+      value: '3'
+    - name: name
+      value: Hera

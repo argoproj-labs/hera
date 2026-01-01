@@ -201,7 +201,7 @@ def get_openapi_spec_url() -> str:
 
 def fetch_openapi_spec(url: str) -> dict:
     """Fetches the OpenAPI specification at the given URI."""
-    response = requests.get(url)
+    response = requests.get(url, timeout=60)
     if response.ok:
         return response.json()
     raise ValueError(
