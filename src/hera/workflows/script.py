@@ -13,6 +13,7 @@ from functools import wraps
 from pathlib import Path
 from types import NoneType
 from typing import (
+    Annotated,
     Any,
     Callable,
     Dict,
@@ -30,6 +31,7 @@ from typing import (
     overload,
 )
 
+from pydantic import Field, field_validator, model_validator
 from typing_extensions import ParamSpec, get_args, get_origin
 
 from hera.expr import g
@@ -38,7 +40,7 @@ from hera.shared._global_config import (
     _SCRIPT_PYDANTIC_IO_FLAG,
     _flag_enabled,
 )
-from hera.shared._pydantic import _PYDANTIC_VERSION, root_validator, validator
+from hera.shared._pydantic import _PYDANTIC_VERSION
 from hera.shared._type_util import (
     construct_io_from_annotation,
     get_workflow_annotation,
@@ -143,17 +145,15 @@ class Script(
 
     container_name: Optional[str] = None
     args: Optional[List[str]] = None
-    command: Optional[List[str]] = None
+    command: Annotated[List[str] | None, Field(validate_default=True)] = None
     lifecycle: Optional[Lifecycle] = None
     security_context: Optional[SecurityContext] = None
     source: Optional[Union[Callable, str]] = None
     working_dir: Optional[str] = None
-    add_cwd_to_sys_path: Optional[bool] = None
-    constructor: Optional[Union[str, ScriptConstructor]] = None
+    add_cwd_to_sys_path: Annotated[bool | None, Field(validate_default=True)] = None
+    constructor: Annotated[str | ScriptConstructor | None, Field(validate_default=True)] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("constructor", always=True)
+    @field_validator("constructor")
     @classmethod
     def _set_constructor(cls, v):
         if v is None:
@@ -170,22 +170,18 @@ class Script(
             return RunnerScriptConstructor()
         raise ValueError(f"Unknown constructor {v}")
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("command", always=True)
+    @field_validator("command")
     @classmethod
     def _set_command(cls, v):
         return v or global_config.script_command
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("add_cwd_to_sys_path", always=True)
+    @field_validator("add_cwd_to_sys_path")
     @classmethod
     def _set_add_cwd_to_sys_path(cls, v):
         if v is None:
             return True
 
-    @root_validator
+    @model_validator(mode="after")
     @classmethod
     def _constructor_validate(cls, values):
         constructor = values.get("constructor")
@@ -846,14 +842,12 @@ class RunnerScriptConstructor(ScriptConstructor):
     DEFAULT_HERA_OUTPUTS_DIRECTORY: str = "/tmp/hera-outputs"
     """Used as the default value for when the outputs_directory is not set"""
 
-    pydantic_mode: Optional[Literal[1, 2]] = None
+    pydantic_mode: Annotated[Literal[1, 2] | None, Field(validate_default=True)] = None
     """Used for selecting the pydantic version used for BaseModels.
     Allows for using pydantic.v1 BaseModels with pydantic v2.
     Defaults to the installed version of Pydantic."""
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("pydantic_mode", always=True)
+    @field_validator("pydantic_mode")
     def _pydantic_mode(cls, value: Optional[Literal[1, 2]]) -> Optional[Literal[1, 2]]:
         if value and value > _PYDANTIC_VERSION:
             raise ValueError("v2 pydantic mode only available for pydantic>=2")

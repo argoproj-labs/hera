@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from typing import Annotated, Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
+from pydantic import Field, field_validator
 from typing_extensions import ParamSpec
 
 from hera import _yaml
@@ -161,8 +162,8 @@ class Workflow(
         return templates or None
 
     # Workflow fields - https://argoproj.github.io/argo-workflows/fields/#workflow
-    api_version: Annotated[Optional[str], _WorkflowModelMapper("api_version")] = None
-    kind: Annotated[Optional[str], _WorkflowModelMapper("kind")] = None
+    api_version: Annotated[str | None, _WorkflowModelMapper("api_version"), Field(validate_default=True)] = None
+    kind: Annotated[str | None, _WorkflowModelMapper("kind"), Field(validate_default=True)] = None
     status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowModelMapper("status")] = None
 
     # ObjectMeta fields - https://argoproj.github.io/argo-workflows/fields/#objectmeta
@@ -173,14 +174,14 @@ class Workflow(
     ] = None
     deletion_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.deletion_timestamp")] = None
     finalizers: Annotated[Optional[List[str]], _WorkflowModelMapper("metadata.finalizers")] = None
-    generate_name: Annotated[Optional[str], _WorkflowModelMapper("metadata.generate_name")] = None
+    generate_name: Annotated[str | None, _WorkflowModelMapper("metadata.generate_name"), Field(validate_default=True)] = None
     generation: Annotated[Optional[int], _WorkflowModelMapper("metadata.generation")] = None
     labels: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.labels")] = None
     managed_fields: Annotated[Optional[List[ManagedFieldsEntry]], _WorkflowModelMapper("metadata.managed_fields")] = (
         None
     )
-    name: Annotated[Optional[str], _WorkflowModelMapper("metadata.name")] = None
-    namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace")] = None
+    name: Annotated[str | None, _WorkflowModelMapper("metadata.name"), Field(validate_default=True)] = None
+    namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace"), Field(validate_default=True)] = None
     owner_references: Annotated[Optional[List[OwnerReference]], _WorkflowModelMapper("metadata.owner_references")] = (
         None
     )
@@ -208,7 +209,7 @@ class Workflow(
     hooks: Annotated[Optional[Dict[str, LifecycleHook]], _WorkflowModelMapper("spec.hooks")] = None
     host_aliases: Annotated[Optional[List[HostAlias]], _WorkflowModelMapper("spec.host_aliases")] = None
     host_network: Annotated[Optional[bool], _WorkflowModelMapper("spec.host_network")] = None
-    image_pull_secrets: Annotated[ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets")] = None
+    image_pull_secrets: Annotated[ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets"), Field(validate_default=True)] = None
     node_selector: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("spec.node_selector")] = None
     on_exit: Annotated[Optional[Union[str, Templatable]], _WorkflowModelMapper("spec.on_exit", _build_on_exit)] = None
     parallelism: Annotated[Optional[int], _WorkflowModelMapper("spec.parallelism")] = None
@@ -226,7 +227,7 @@ class Workflow(
     ] = None
     scheduler_name: Annotated[Optional[str], _WorkflowModelMapper("spec.scheduler_name")] = None
     security_context: Annotated[Optional[PodSecurityContext], _WorkflowModelMapper("spec.security_context")] = None
-    service_account_name: Annotated[Optional[str], _WorkflowModelMapper("spec.service_account_name")] = None
+    service_account_name: Annotated[str | None, _WorkflowModelMapper("spec.service_account_name"), Field(validate_default=True)] = None
     shutdown: Annotated[Optional[str], _WorkflowModelMapper("spec.shutdown")] = None
     suspend: Annotated[Optional[bool], _WorkflowModelMapper("spec.suspend")] = None
     synchronization: Annotated[Optional[Synchronization], _WorkflowModelMapper("spec.synchronization")] = None
@@ -258,71 +259,55 @@ class Workflow(
     volumes: Annotated[VolumesT, _WorkflowModelMapper("spec.volumes", VolumeMixin._build_volumes)] = None
 
     # Hera-specific fields
-    workflows_service: Optional[Union[WorkflowsService, AsyncWorkflowsService]] = None
+    workflows_service: Annotated[WorkflowsService | AsyncWorkflowsService | None, Field(validate_default=True)] = None
 
     pod_priority: Optional[int] = None
     """DEPRECATED: The spec.podPriority field was removed in 3.7, so does not map to
        anything. Use pod_priority_class_name instead."""
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("name", pre=True, always=True)
+    @field_validator("name", mode="before")
     def _set_name(cls, v):
         if v is not None and len(v) > NAME_LIMIT:
             raise ValueError(f"name must be no more than {NAME_LIMIT} characters: {v}")
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("generate_name", pre=True, always=True)
+    @field_validator("generate_name", mode="before")
     def _set_generate_name(cls, v):
         if v is not None and len(v) > NAME_LIMIT:
             raise ValueError(f"generate_name must be no more than {NAME_LIMIT} characters: {v}")
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("api_version", pre=True, always=True)
+    @field_validator("api_version", mode="before")
     def _set_api_version(cls, v):
         if v is None:
             return global_config.api_version
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("workflows_service", pre=True, always=True)
+    @field_validator("workflows_service", mode="before")
     def _set_workflows_service(cls, v):
         if v is None:
             return WorkflowsService()
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("kind", pre=True, always=True)
+    @field_validator("kind", mode="before")
     def _set_kind(cls, v):
         if v is None:
             return cls.__name__  # type: ignore
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("namespace", pre=True, always=True)
+    @field_validator("namespace", mode="before")
     def _set_namespace(cls, v):
         if v is None:
             return global_config.namespace
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("service_account_name", pre=True, always=True)
+    @field_validator("service_account_name", mode="before")
     def _set_service_account_name(cls, v):
         if v is None:
             return global_config.service_account_name
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("image_pull_secrets", pre=True, always=True)
+    @field_validator("image_pull_secrets", mode="before")
     def _set_image_pull_secrets(cls, v):
         if v is None:
             return None

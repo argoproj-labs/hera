@@ -7,8 +7,10 @@ for more on WorkflowTemplates.
 from pathlib import Path
 from typing import Annotated, Dict, Optional, Type, Union, cast
 
+from pydantic import Field, field_validator
+
 from hera.exceptions import NotFound
-from hera.shared._pydantic import BaseModel, validator
+from hera.shared._pydantic import BaseModel
 from hera.workflows._meta_mixins import ModelMapperMixin
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
@@ -47,13 +49,11 @@ class WorkflowTemplate(Workflow):
     """
 
     # Removes status mapping
-    status: Annotated[Optional[_ModelWorkflowStatus], _WorkflowTemplateModelMapper("")] = None
+    status: Annotated[_ModelWorkflowStatus | None, _WorkflowTemplateModelMapper(""), Field(validate_default=True)] = None
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("status", pre=True, always=True)
+    @field_validator("status", mode="before")
     def _set_status(cls, v):
         if v is not None:
             raise ValueError("status is not a valid field on a WorkflowTemplate")

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import (
+    Annotated,
     Any,
     Callable,
     Dict,
@@ -15,8 +16,10 @@ from typing import (
     cast,
 )
 
+from pydantic import Field, field_validator, model_validator
+
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, root_validator, validator
+from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, validator
 from hera.shared._type_util import construct_io_from_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
@@ -71,7 +74,6 @@ from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
-from pydantic import field_validator, model_validator
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
@@ -187,7 +189,7 @@ by Hera at specific mount paths in containers.
 class ContainerMixin(BaseMixin):
     """`ContainerMixin` provides a subset of the fields of a container such as image, probes, etc."""
 
-    image: Optional[str] = None
+    image: Annotated[str | None, Field(validate_default=True)] = None
     image_pull_policy: Optional[Union[str, ImagePullPolicy]] = None
 
     liveness_probe: Optional[Probe] = None
@@ -225,9 +227,7 @@ class ContainerMixin(BaseMixin):
                 "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("image", pre=True, always=True)
+    @field_validator("image", mode="before")
     def _set_image(cls, v):
         """Validator that sets the image field to the global image unless the image is specified on the container."""
         if v is None:

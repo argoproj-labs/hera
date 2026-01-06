@@ -1,7 +1,7 @@
 """Module that provides Hera objects for cluster workflow templates."""
 
 from hera.exceptions import NotFound
-from hera.shared._pydantic import validator
+from pydantic import field_validator
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,
@@ -20,9 +20,7 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
     Since cluster workflow templates are scoped at the cluster level, they are available globally in the cluster.
     """
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("namespace", pre=True, always=True)
+    @field_validator("namespace", mode="before")
     def _set_namespace(cls, v):
         if v is not None:
             raise ValueError("namespace is not a valid field on a ClusterWorkflowTemplate")

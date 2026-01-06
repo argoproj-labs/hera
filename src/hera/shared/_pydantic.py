@@ -12,8 +12,6 @@ from pydantic import (
     PrivateAttr,
     RootModel,
     ValidationError,
-    model_validator as root_validator,
-    validator,
 )
 from pydantic.fields import FieldInfo
 
@@ -40,14 +38,11 @@ def get_field_annotations(cls: Type[PydanticBaseModel]) -> Dict[str, Any]:
 
 
 class BaseModel(PydanticBaseModel):
-    # TODO[pydantic]: The following keys were removed: `allow_mutation`, `smart_union`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(
         populate_by_name=True,
-        allow_mutation=True,
+        frozen=False,
         use_enum_values=True,
         arbitrary_types_allowed=True,
-        smart_union=True,
     )
 
 
@@ -59,6 +54,4 @@ __all__ = [
     "PydanticBaseModel",  # Export for serialization.py to cover user-defined models
     "RootModel",
     "ValidationError",
-    "root_validator",
-    "validator",
 ]

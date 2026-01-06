@@ -3,11 +3,10 @@
 import uuid
 import warnings
 from enum import Enum
-from typing import List, Optional, Union, cast
+from typing import Annotated, List, Optional, Union, cast
 
-from pydantic import field_validator, model_validator
+from pydantic import field_validator, model_validator, Field
 
-from hera.shared._pydantic import validator
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
     AzureDiskVolumeSource as _ModelAzureDiskVolumeSource,
@@ -83,7 +82,7 @@ class AccessMode(Enum):
 class _BaseVolume(_ModelVolumeMount):
     """Base volume representation."""
 
-    name: Optional[str] = None  # type: ignore
+    name: Annotated[str | None, Field(validate_default=True)] = None  # type: ignore
     mount_path: Optional[str] = None  # type: ignore
 
     @field_validator("name", mode="before")
@@ -594,12 +593,10 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[Union[str, AccessMode]]] = [AccessMode.read_write_once]  # type: ignore
+    access_modes: Annotated[List[Union[str, AccessMode]] | None, Field(validate_default=True)] = [AccessMode.read_write_once]  # type: ignore
     storage_class_name: Optional[str] = None
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("access_modes", pre=True, always=True)
+    @field_validator("access_modes", mode="before")
     def _check_access_modes(cls, v):
         if not v:
             return [AccessMode.read_write_once]
@@ -612,9 +609,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
                 result.append(AccessMode(mode))
         return result
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("name", pre=True, always=True)
+    @field_validator("name", mode="before")
     def _check_name(cls, v):
         return v or str(uuid.uuid4())
 
