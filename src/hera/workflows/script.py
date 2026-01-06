@@ -151,6 +151,8 @@ class Script(
     add_cwd_to_sys_path: Optional[bool] = None
     constructor: Optional[Union[str, ScriptConstructor]] = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("constructor", always=True)
     @classmethod
     def _set_constructor(cls, v):
@@ -168,11 +170,15 @@ class Script(
             return RunnerScriptConstructor()
         raise ValueError(f"Unknown constructor {v}")
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("command", always=True)
     @classmethod
     def _set_command(cls, v):
         return v or global_config.script_command
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("add_cwd_to_sys_path", always=True)
     @classmethod
     def _set_add_cwd_to_sys_path(cls, v):
@@ -845,6 +851,8 @@ class RunnerScriptConstructor(ScriptConstructor):
     Allows for using pydantic.v1 BaseModels with pydantic v2.
     Defaults to the installed version of Pydantic."""
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("pydantic_mode", always=True)
     def _pydantic_mode(cls, value: Optional[Literal[1, 2]]) -> Optional[Literal[1, 2]]:
         if value and value > _PYDANTIC_VERSION:

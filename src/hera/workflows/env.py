@@ -10,11 +10,11 @@ import string
 from itertools import islice
 from typing import Any, Optional, Union
 
+from pydantic import field_validator, model_validator
+
 from hera.shared import global_config
 from hera.shared._pydantic import (
     BaseModel as _BaseModel,
-    root_validator,
-    validator,
 )
 from hera.workflows.models import (
     ConfigMapKeySelector as _ModelConfigMapKeySelector,
@@ -61,7 +61,8 @@ class Env(_BaseEnv):
         hash_suffix = hashlib.md5(v.encode("utf-8")).hexdigest()
         return f"{legit_prefix}-{hash_suffix}"
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     @classmethod
     def _check_values(cls, values):
         """Validates that only one of `value` or `value_from_input` is specified."""
@@ -158,7 +159,8 @@ class FieldEnv(_BaseEnv):
     api_version: Optional[str] = None
     """optionally, an API version specification. This defaults to the Hera global config `api_version`"""
 
-    @validator("api_version")
+    @field_validator("api_version")
+    @classmethod
     @classmethod
     def _check_api_version(cls, v):
         """Checks whether the `api_version` field is set and uses the global config `api_version` if not."""

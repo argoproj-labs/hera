@@ -264,48 +264,64 @@ class Workflow(
     """DEPRECATED: The spec.podPriority field was removed in 3.7, so does not map to
        anything. Use pod_priority_class_name instead."""
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("name", pre=True, always=True)
     def _set_name(cls, v):
         if v is not None and len(v) > NAME_LIMIT:
             raise ValueError(f"name must be no more than {NAME_LIMIT} characters: {v}")
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("generate_name", pre=True, always=True)
     def _set_generate_name(cls, v):
         if v is not None and len(v) > NAME_LIMIT:
             raise ValueError(f"generate_name must be no more than {NAME_LIMIT} characters: {v}")
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("api_version", pre=True, always=True)
     def _set_api_version(cls, v):
         if v is None:
             return global_config.api_version
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("workflows_service", pre=True, always=True)
     def _set_workflows_service(cls, v):
         if v is None:
             return WorkflowsService()
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("kind", pre=True, always=True)
     def _set_kind(cls, v):
         if v is None:
             return cls.__name__  # type: ignore
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("namespace", pre=True, always=True)
     def _set_namespace(cls, v):
         if v is None:
             return global_config.namespace
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("service_account_name", pre=True, always=True)
     def _set_service_account_name(cls, v):
         if v is None:
             return global_config.service_account_name
         return v
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("image_pull_secrets", pre=True, always=True)
     def _set_image_pull_secrets(cls, v):
         if v is None:

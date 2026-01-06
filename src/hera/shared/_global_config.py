@@ -8,8 +8,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
+from pydantic import model_validator
+
 from hera.auth import TokenGenerator
-from hera.shared._pydantic import BaseModel, get_fields, root_validator
+from hera.shared._pydantic import BaseModel, get_fields
 
 TBase = TypeVar("TBase", bound="BaseMixin")
 TypeTBase = Type[TBase]
@@ -184,7 +186,8 @@ class BaseMixin(BaseModel):
         """A method that is optionally implemented and invoked by `BaseMixin` subclasses to perform some post init."""
         ...
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _set_defaults(cls, values):
         """Sets the user-provided defaults of Hera objects."""
         # In a Pydantic validator function, the first parameter (cls) is the class itself, not an instance of it

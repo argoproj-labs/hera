@@ -51,6 +51,8 @@ class WorkflowTemplate(Workflow):
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("status", pre=True, always=True)
     def _set_status(cls, v):
         if v is not None:

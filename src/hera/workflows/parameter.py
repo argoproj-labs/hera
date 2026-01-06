@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional
 
-from hera.shared._pydantic import root_validator
+from pydantic import model_validator
+
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
 
@@ -44,7 +45,8 @@ class Parameter(_ModelParameter):
     value: Optional[Any] = MISSING
     default: Optional[Any] = MISSING
 
-    @root_validator(pre=True, allow_reuse=True)
+    @model_validator(mode="before")
+    @classmethod
     def _check_values(cls, values):
         if values.get("value") is not None and values.get("value_from") is not None:
             raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")

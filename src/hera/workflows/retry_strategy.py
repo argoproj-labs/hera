@@ -3,9 +3,10 @@
 from enum import Enum
 from typing import Optional, Union, cast
 
+from pydantic import field_validator
+
 from hera.shared._pydantic import (
     BaseModel as _BaseModel,
-    validator,
 )
 from hera.workflows.models import (
     Backoff,
@@ -56,7 +57,8 @@ class RetryStrategy(_BaseModel):
     retry_policy: Optional[Union[str, RetryPolicy]] = None
     """the policy dictates, at a high level, under what conditions should a job retry"""
 
-    @validator("retry_policy", pre=True)
+    @field_validator("retry_policy", mode="before")
+    @classmethod
     def _convert_retry_policy(cls, v):
         """Converts the `retry_policy` field into a pure `str` from either `str` already or an enum."""
         if v is None or isinstance(v, str):
@@ -65,7 +67,8 @@ class RetryStrategy(_BaseModel):
         v = cast(RetryPolicy, v)
         return v.value
 
-    @validator("limit", pre=True)
+    @field_validator("limit", mode="before")
+    @classmethod
     def _convert_limit(cls, v) -> Optional[IntOrString]:
         """Converts the `limit` field from the union specification into a `str`."""
         if v is None or isinstance(v, IntOrString):

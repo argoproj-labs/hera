@@ -2,9 +2,10 @@
 
 from typing import Dict, Optional, Union
 
+from pydantic import model_validator
+
 from hera.shared._pydantic import (
     BaseModel as _BaseModel,
-    root_validator,
 )
 from hera.workflows.converters import convert_cpu_units, convert_memory_units, convert_storage_units
 from hera.workflows.models import ResourceRequirements as _ModelResourceRequirements
@@ -62,7 +63,8 @@ class Resources(_BaseModel):
     gpu_flag: Optional[str] = "nvidia.com/gpu"
     custom_resources: Optional[Dict] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _check_specs(cls, values):
         cpu_request: Optional[Union[float, int, str]] = values.get("cpu_request")
         cpu_limit: Optional[Union[float, int, str]] = values.get("cpu_limit")

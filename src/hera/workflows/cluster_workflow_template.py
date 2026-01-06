@@ -20,6 +20,8 @@ class ClusterWorkflowTemplate(WorkflowTemplate):
     Since cluster workflow templates are scoped at the cluster level, they are available globally in the cluster.
     """
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("namespace", pre=True, always=True)
     def _set_namespace(cls, v):
         if v is not None:

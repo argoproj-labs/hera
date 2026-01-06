@@ -25,9 +25,11 @@ from typing import (
     cast,
 )
 
+from pydantic import model_validator
+
 from hera.shared import BaseMixin, global_config
 from hera.shared._global_config import _DECORATOR_SYNTAX_FLAG, _flag_enabled
-from hera.shared._pydantic import BaseModel, get_fields, root_validator
+from hera.shared._pydantic import BaseModel, get_fields
 from hera.shared._type_util import construct_io_from_annotation, get_annotated_metadata, unwrap_annotation
 from hera.workflows._context import _context
 from hera.workflows.exceptions import InvalidTemplateCall
@@ -118,7 +120,8 @@ class ExperimentalMixin(BaseMixin):
 
     _flag: str
 
-    @root_validator(allow_reuse=True)
+    @model_validator()
+    @classmethod
     def _check_enabled(cls, values):
         if not global_config.experimental_features[cls._flag]:
             raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))

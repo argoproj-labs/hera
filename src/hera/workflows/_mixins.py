@@ -71,6 +71,7 @@ from hera.workflows.resources import Resources
 from hera.workflows.retry_strategy import RetryStrategy
 from hera.workflows.user_container import UserContainer
 from hera.workflows.volume import Volume, _BaseVolume
+from pydantic import field_validator, model_validator
 
 T = TypeVar("T")
 OneOrMany = Union[T, SequenceType[T]]
@@ -224,6 +225,8 @@ class ContainerMixin(BaseMixin):
                 "Use one of {ImagePullPolicy.__members__}"
             ) from e
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("image", pre=True, always=True)
     def _set_image(cls, v):
         """Validator that sets the image field to the global image unless the image is specified on the container."""
@@ -469,7 +472,8 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     timeout: Optional[str] = None
     tolerations: Optional[List[Toleration]] = None
 
-    @validator("active_deadline_seconds")
+    @field_validator("active_deadline_seconds")
+    @classmethod
     def _convert_active_deadline_seconds(cls, v) -> Optional[IntOrString]:
         if v is None or isinstance(v, IntOrString):
             return v
@@ -864,7 +868,8 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
         """Returns a `Parameter` specification with the given name containing the `results` of `self`."""
         return Parameter(name=name, value=self.result)
 
-    @root_validator(pre=False)
+    @model_validator()
+    @classmethod
     def _check_values(cls, values):
         """Validates that a single field is set between `template`, `template_ref`, and `inline`."""
 

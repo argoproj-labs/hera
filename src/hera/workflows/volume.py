@@ -5,7 +5,9 @@ import warnings
 from enum import Enum
 from typing import List, Optional, Union, cast
 
-from hera.shared._pydantic import root_validator, validator
+from pydantic import field_validator, model_validator
+
+from hera.shared._pydantic import validator
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
     AzureDiskVolumeSource as _ModelAzureDiskVolumeSource,
@@ -84,7 +86,8 @@ class _BaseVolume(_ModelVolumeMount):
     name: Optional[str] = None  # type: ignore
     mount_path: Optional[str] = None  # type: ignore
 
-    @validator("name", pre=True)
+    @field_validator("name", mode="before")
+    @classmethod
     def _check_name(cls, v):
         if v is None:
             return str(uuid.uuid4())
@@ -594,6 +597,8 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     access_modes: Optional[List[Union[str, AccessMode]]] = [AccessMode.read_write_once]  # type: ignore
     storage_class_name: Optional[str] = None
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("access_modes", pre=True, always=True)
     def _check_access_modes(cls, v):
         if not v:
@@ -607,11 +612,14 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
                 result.append(AccessMode(mode))
         return result
 
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @validator("name", pre=True, always=True)
     def _check_name(cls, v):
         return v or str(uuid.uuid4())
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _merge_reqs(cls, values):
         if "size" in values and "resources" in values:
             resources: VolumeResourceRequirements = values.get("resources")
