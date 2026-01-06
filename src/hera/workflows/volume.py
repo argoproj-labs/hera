@@ -5,7 +5,7 @@ import warnings
 from enum import Enum
 from typing import Annotated, List, Optional, Union, cast
 
-from pydantic import field_validator, model_validator, Field
+from pydantic import Field, field_validator, model_validator
 
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
@@ -593,7 +593,9 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Annotated[List[Union[str, AccessMode]] | None, Field(validate_default=True)] = [AccessMode.read_write_once]  # type: ignore
+    access_modes: Annotated[List[Union[str, AccessMode]] | None, Field(validate_default=True)] = [
+        AccessMode.read_write_once
+    ]  # type: ignore
     storage_class_name: Optional[str] = None
 
     @field_validator("access_modes", mode="before")

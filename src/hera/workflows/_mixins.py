@@ -16,10 +16,10 @@ from typing import (
     cast,
 )
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator, validator
 
 from hera.shared import BaseMixin, global_config
-from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields, validator
+from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields
 from hera.shared._type_util import construct_io_from_annotation
 from hera.shared.serialization import serialize
 from hera.workflows._context import SubNodeMixin, _context
@@ -868,7 +868,7 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
         """Returns a `Parameter` specification with the given name containing the `results` of `self`."""
         return Parameter(name=name, value=self.result)
 
-    @model_validator()
+    @model_validator(mode="after")
     @classmethod
     def _check_values(cls, values):
         """Validates that a single field is set between `template`, `template_ref`, and `inline`."""

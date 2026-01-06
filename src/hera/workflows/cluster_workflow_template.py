@@ -1,7 +1,8 @@
 """Module that provides Hera objects for cluster workflow templates."""
 
-from hera.exceptions import NotFound
 from pydantic import field_validator
+
+from hera.exceptions import NotFound
 from hera.workflows.async_service import AsyncWorkflowsService
 from hera.workflows.models import (
     ClusterWorkflowTemplate as _ModelClusterWorkflowTemplate,

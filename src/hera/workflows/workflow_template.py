@@ -49,7 +49,9 @@ class WorkflowTemplate(Workflow):
     """
 
     # Removes status mapping
-    status: Annotated[_ModelWorkflowStatus | None, _WorkflowTemplateModelMapper(""), Field(validate_default=True)] = None
+    status: Annotated[_ModelWorkflowStatus | None, _WorkflowTemplateModelMapper(""), Field(validate_default=True)] = (
+        None
+    )
 
     # WorkflowTemplate fields match Workflow exactly except for `status`, which WorkflowTemplate
     # does not have - https://argoproj.github.io/argo-workflows/fields/#workflowtemplate

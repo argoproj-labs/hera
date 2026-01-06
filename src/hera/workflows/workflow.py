@@ -15,7 +15,7 @@ from typing_extensions import ParamSpec
 
 from hera import _yaml
 from hera.shared import global_config
-from hera.shared._pydantic import BaseModel, validator
+from hera.shared._pydantic import BaseModel
 from hera.workflows._meta_mixins import HookMixin, ModelMapperMixin, TemplateDecoratorFuncsMixin
 from hera.workflows._mixins import (
     ArgumentsMixin,
@@ -174,14 +174,18 @@ class Workflow(
     ] = None
     deletion_timestamp: Annotated[Optional[Time], _WorkflowModelMapper("metadata.deletion_timestamp")] = None
     finalizers: Annotated[Optional[List[str]], _WorkflowModelMapper("metadata.finalizers")] = None
-    generate_name: Annotated[str | None, _WorkflowModelMapper("metadata.generate_name"), Field(validate_default=True)] = None
+    generate_name: Annotated[
+        str | None, _WorkflowModelMapper("metadata.generate_name"), Field(validate_default=True)
+    ] = None
     generation: Annotated[Optional[int], _WorkflowModelMapper("metadata.generation")] = None
     labels: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("metadata.labels")] = None
     managed_fields: Annotated[Optional[List[ManagedFieldsEntry]], _WorkflowModelMapper("metadata.managed_fields")] = (
         None
     )
     name: Annotated[str | None, _WorkflowModelMapper("metadata.name"), Field(validate_default=True)] = None
-    namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace"), Field(validate_default=True)] = None
+    namespace: Annotated[Optional[str], _WorkflowModelMapper("metadata.namespace"), Field(validate_default=True)] = (
+        None
+    )
     owner_references: Annotated[Optional[List[OwnerReference]], _WorkflowModelMapper("metadata.owner_references")] = (
         None
     )
@@ -209,7 +213,9 @@ class Workflow(
     hooks: Annotated[Optional[Dict[str, LifecycleHook]], _WorkflowModelMapper("spec.hooks")] = None
     host_aliases: Annotated[Optional[List[HostAlias]], _WorkflowModelMapper("spec.host_aliases")] = None
     host_network: Annotated[Optional[bool], _WorkflowModelMapper("spec.host_network")] = None
-    image_pull_secrets: Annotated[ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets"), Field(validate_default=True)] = None
+    image_pull_secrets: Annotated[
+        ImagePullSecretsT, _WorkflowModelMapper("spec.image_pull_secrets"), Field(validate_default=True)
+    ] = None
     node_selector: Annotated[Optional[Dict[str, str]], _WorkflowModelMapper("spec.node_selector")] = None
     on_exit: Annotated[Optional[Union[str, Templatable]], _WorkflowModelMapper("spec.on_exit", _build_on_exit)] = None
     parallelism: Annotated[Optional[int], _WorkflowModelMapper("spec.parallelism")] = None
@@ -227,7 +233,9 @@ class Workflow(
     ] = None
     scheduler_name: Annotated[Optional[str], _WorkflowModelMapper("spec.scheduler_name")] = None
     security_context: Annotated[Optional[PodSecurityContext], _WorkflowModelMapper("spec.security_context")] = None
-    service_account_name: Annotated[str | None, _WorkflowModelMapper("spec.service_account_name"), Field(validate_default=True)] = None
+    service_account_name: Annotated[
+        str | None, _WorkflowModelMapper("spec.service_account_name"), Field(validate_default=True)
+    ] = None
     shutdown: Annotated[Optional[str], _WorkflowModelMapper("spec.shutdown")] = None
     suspend: Annotated[Optional[bool], _WorkflowModelMapper("spec.suspend")] = None
     synchronization: Annotated[Optional[Synchronization], _WorkflowModelMapper("spec.synchronization")] = None
