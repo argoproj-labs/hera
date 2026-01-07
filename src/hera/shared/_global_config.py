@@ -188,14 +188,13 @@ class BaseMixin(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _set_defaults(cls, values):
+    def _set_defaults(cls, values: Any) -> Any:
         """Sets the user-provided defaults of Hera objects."""
-        # In a Pydantic validator function, the first parameter (cls) is the class itself, not an instance of it
-        # but mypy/linting sees it as an instance
-        defaults = global_config._get_class_defaults(cls)  # type: ignore
-        for key, value in defaults.items():
-            if values.get(key) is None:
-                values[key] = value
+        if isinstance(values, dict):
+            defaults = global_config._get_class_defaults(cls)  # type: ignore
+            for key, value in defaults.items():
+                if values.get(key) is None:
+                    values[key] = value
         return values
 
 

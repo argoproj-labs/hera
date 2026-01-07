@@ -3,7 +3,7 @@
 import uuid
 import warnings
 from enum import Enum
-from typing import Annotated, List, Optional, Union, cast
+from typing import Annotated, Any, List, Optional, Union, cast
 
 from pydantic import Field, field_validator, model_validator
 
@@ -44,6 +44,7 @@ from hera.workflows.models import (
     VolumeResourceRequirements,
     VsphereVirtualDiskVolumeSource as _ModelVsphereVirtualDiskVolumeSource,
 )
+from hera.workflows.models.io.k8s.apimachinery.pkg.api.resource import Quantity
 from hera.workflows.validators import validate_storage_units
 
 
@@ -617,25 +618,27 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
 
     @model_validator(mode="before")
     @classmethod
-    def _merge_reqs(cls, values):
-        if "size" in values and "resources" in values:
-            resources: VolumeResourceRequirements = values.get("resources")
-            if resources.requests is not None:
-                if "storage" in resources.requests:
-                    pass  # take the storage specification in resources
-                else:
-                    resources.requests["storage"] = values.get("size")
-            values["resources"] = resources
-        elif "resources" not in values:
-            assert "size" in values, "at least one of `size` or `resources` must be specified"
-            validate_storage_units(cast(str, values.get("size")))
-            values["resources"] = VolumeResourceRequirements(requests={"storage": values.get("size")})
-        elif "resources" in values:
-            resources = cast(VolumeResourceRequirements, values.get("resources"))
-            assert resources.requests is not None, "Resource requests are required"
-            storage = resources.requests.get("storage")
-            assert storage is not None, "At least one of `size` or `resources.requests.storage` must be specified"
-            validate_storage_units(cast(str, storage))
+    def _merge_reqs(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if "size" in values and "resources" in values:
+                resources = cast(VolumeResourceRequirements, values.get("resources"))
+                if resources.requests is not None:
+                    if "storage" in resources.requests:
+                        pass  # take the storage specification in resources
+                    else:
+                        size = cast(str, values.get("size"))
+                        resources.requests["storage"] = Quantity(size)
+                values["resources"] = resources
+            elif "resources" not in values:
+                assert "size" in values, "at least one of `size` or `resources` must be specified"
+                validate_storage_units(cast(str, values.get("size")))
+                values["resources"] = VolumeResourceRequirements(requests={"storage": values.get("size")})
+            elif "resources" in values:
+                resources = cast(VolumeResourceRequirements, values.get("resources"))
+                assert resources.requests is not None, "Resource requests are required"
+                storage = resources.requests.get("storage")
+                assert storage is not None, "At least one of `size` or `resources.requests.storage` must be specified"
+                validate_storage_units(cast(str, storage))
         return values
 
     def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:

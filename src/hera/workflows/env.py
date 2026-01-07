@@ -61,15 +61,13 @@ class Env(_BaseEnv):
         hash_suffix = hashlib.md5(v.encode("utf-8")).hexdigest()
         return f"{legit_prefix}-{hash_suffix}"
 
-    @model_validator(mode="before")
-    @classmethod
-    @classmethod
-    def _check_values(cls, values):
+    @model_validator(mode="after")
+    def _check_only_one_value_source_specified(self):
         """Validates that only one of `value` or `value_from_input` is specified."""
-        if values.get("value") is not None and values.get("value_from_input") is not None:
+        if self.value is not None and self.value_from_input is not None:
             raise ValueError("cannot specify both `value` and `value_from_input`")
 
-        return values
+        return self
 
     @property
     def param_name(self) -> str:

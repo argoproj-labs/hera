@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from hera.shared._pydantic import BaseModel, Field
 
@@ -17,33 +17,30 @@ class DeleteSensorResponse(BaseModel):
 
 class LogEntry(BaseModel):
     dependency_name: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="dependencyName", title="optional - trigger dependency name"),
     ] = None
-    event_context: Annotated[
-        Optional[str],
-        Field(alias="eventContext", title="optional - Cloud Event context"),
-    ] = None
-    level: Optional[str] = None
-    msg: Optional[str] = None
-    namespace: Optional[str] = None
-    sensor_name: Annotated[Optional[str], Field(alias="sensorName")] = None
-    time: Optional[v1.Time] = None
-    trigger_name: Annotated[Optional[str], Field(alias="triggerName", title="optional - any trigger name")] = None
+    event_context: Annotated[str | None, Field(alias="eventContext", title="optional - Cloud Event context")] = None
+    level: str | None = None
+    msg: str | None = None
+    namespace: str | None = None
+    sensor_name: Annotated[str | None, Field(alias="sensorName")] = None
+    time: v1.Time | None = None
+    trigger_name: Annotated[str | None, Field(alias="triggerName", title="optional - any trigger name")] = None
 
 
 class CreateSensorRequest(BaseModel):
-    create_options: Annotated[Optional[v1.CreateOptions], Field(alias="createOptions")] = None
-    namespace: Optional[str] = None
-    sensor: Optional[v1alpha1.Sensor] = None
+    create_options: Annotated[v1.CreateOptions | None, Field(alias="createOptions")] = None
+    namespace: str | None = None
+    sensor: v1alpha1.Sensor | None = None
 
 
 class SensorWatchEvent(BaseModel):
-    object: Optional[v1alpha1.Sensor] = None
-    type: Optional[str] = None
+    object: v1alpha1.Sensor | None = None
+    type: str | None = None
 
 
 class UpdateSensorRequest(BaseModel):
-    name: Optional[str] = None
-    namespace: Optional[str] = None
-    sensor: Optional[v1alpha1.Sensor] = None
+    name: str | None = None
+    namespace: str | None = None
+    sensor: v1alpha1.Sensor | None = None

@@ -120,9 +120,9 @@ class ExperimentalMixin(BaseMixin):
 
     _flag: str
 
-    @model_validator(mode="after")
+    @model_validator(mode="before")
     @classmethod
-    def _check_enabled(cls, values):
+    def _check_enabled(cls, values: Any) -> Any:
         if not global_config.experimental_features[cls._flag]:
             raise ValueError(cls._experimental_warning_message.format(cls, cls._flag))
         return values

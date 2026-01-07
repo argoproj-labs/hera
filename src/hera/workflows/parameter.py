@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
@@ -47,16 +47,17 @@ class Parameter(_ModelParameter):
 
     @model_validator(mode="before")
     @classmethod
-    def _check_values(cls, values):
-        if values.get("value") is not None and values.get("value_from") is not None:
-            raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
+    def _check_value(cls, values: Any) -> Any:
+        if isinstance(values, dict):
+            if values.get("value") is not None and values.get("value_from") is not None:
+                raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
 
-        values["value"] = serialize(values.get("value", MISSING))
-        values["default"] = serialize(values.get("default", MISSING))
-        if values.get("enum", []):
-            # We don't need to set "enum" in values to "MISSING" if there are no values
-            # as it's a list of values. The values themselves should be serialized.
-            values["enum"] = [serialize(v) for v in values.get("enum")]
+            values["value"] = serialize(values.get("value", MISSING))
+            values["default"] = serialize(values.get("default", MISSING))
+            if enum_values := values.get("enum", []):
+                # We don't need to set "enum" in values to "MISSING" if there are no values
+                # as it's a list of values. The values themselves should be serialized.
+                values["enum"] = [serialize(v) for v in enum_values]
 
         return values
 
@@ -78,11 +79,11 @@ class Parameter(_ModelParameter):
     @classmethod
     def from_model(cls, model: _ModelParameter) -> Parameter:
         """Creates a `Parameter` from a `Parameter` model without running validation."""
-        return cls.construct(**model.dict())
+        return cls.model_construct(**model.dict())
 
     def with_name(self, name: str) -> Parameter:
         """Returns a copy of the parameter with the name set to the value."""
-        p = self.copy(deep=True)
+        p = self.model_copy(deep=True)
         p.name = name
         return p
 

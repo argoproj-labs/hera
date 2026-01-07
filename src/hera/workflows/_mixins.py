@@ -139,7 +139,7 @@ This type enables uses of Hera auto-generated models such as (`hera.workflows.mo
 ArgumentsT = Optional[
     Union[
         ModelArguments,
-        OneOrMany[Union[Parameter, ModelParameter, Artifact, ModelArtifact, Dict[str, Any]]],
+        OneOrMany[Union[Dict[str, Any], Parameter, ModelParameter, Artifact, ModelArtifact]],
         ModelOutputs,
     ]
 ]
@@ -240,7 +240,7 @@ class IOMixin(BaseMixin):
 
     inputs: InputsT = None
     outputs: OutputsT = None
-    _normalize_fields = validator("inputs", "outputs", allow_reuse=True)(
+    _normalize_fields = field_validator("inputs", "outputs")(
         normalize_to_list_or(ModelInputs, ModelOutputs)
     )
 
@@ -373,7 +373,7 @@ class EnvMixin(BaseMixin):
 
     env: EnvT = None
     env_from: EnvFromT = None
-    _normalize_fields = validator("env", "env_from", allow_reuse=True)(normalize_to_list)
+    _normalize_fields = field_validator("env", "env_from")(normalize_to_list)
 
     def _build_env(self) -> Optional[List[EnvVar]]:
         """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
@@ -415,7 +415,7 @@ class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
     metrics: Optional[MetricsT] = None
-    _normalize_metrics = validator("metrics", allow_reuse=True)(normalize_to_list_or(Metrics, ModelMetrics))
+    _normalize_metrics = field_validator("metrics")(normalize_to_list_or(Metrics, ModelMetrics))
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
@@ -541,7 +541,7 @@ class VolumeMixin(BaseMixin):
     """
 
     volumes: Optional[VolumesT] = None
-    _normalize_fields = validator("volumes", allow_reuse=True)(normalize_to_list)
+    _normalize_fields = field_validator("volumes")(normalize_to_list)
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
         """Processes the `volumes` and creates an optional list of generated model `Volume`s."""
@@ -600,7 +600,7 @@ class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object (only Tasks, Steps and Workflows use arguments)."""
 
     arguments: ArgumentsT = None
-    _normalize_arguments = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
+    _normalize_arguments = field_validator("arguments")(normalize_to_list_or(ModelArguments))
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
@@ -869,17 +869,16 @@ class TemplateInvocatorSubNodeMixin(SubNodeMixin):
         return Parameter(name=name, value=self.result)
 
     @model_validator(mode="after")
-    @classmethod
-    def _check_values(cls, values):
+    def _check_only_one_template_specified(self):
         """Validates that a single field is set between `template`, `template_ref`, and `inline`."""
 
         def one(xs: List):
             xs = list(map(bool, xs))
             return xs.count(True) == 1
 
-        if not one([values.get("template"), values.get("template_ref"), values.get("inline")]):
+        if not one([self.template, self.template_ref, self.inline]):
             raise ValueError("Exactly one of ['template', 'template_ref', 'inline'] must be present")
-        return values
+        return self
 
     def _get_parameters_as(self, name: str, subtype: str) -> Parameter:
         """Returns a `Parameter` that represents all the outputs of the specified subtype.

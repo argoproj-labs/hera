@@ -114,9 +114,9 @@ class ScriptConstructor(BaseMixin):
         """A function that can inspect the Script instance and generate the source field."""
         raise NotImplementedError
 
-    def transform_values(self, cls: Type["Script"], values: Any) -> Any:
+    def transform_values(self, script: "Script") -> "Script":
         """A function that will be invoked by the root validator of the Script class."""
-        return values
+        return script
 
     def transform_script_template_post_build(
         self, instance: "Script", script: _ModelScriptTemplate
@@ -182,11 +182,9 @@ class Script(
             return True
 
     @model_validator(mode="after")
-    @classmethod
-    def _constructor_validate(cls, values):
-        constructor = values.get("constructor")
-        assert isinstance(constructor, ScriptConstructor)
-        return constructor.transform_values(cls, values)
+    def _constructor_validate(self):
+        assert isinstance(self.constructor, ScriptConstructor)
+        return self.constructor.transform_values(self)
 
     def _build_template(self) -> _ModelTemplate:
         assert isinstance(self.constructor, ScriptConstructor)
@@ -853,29 +851,29 @@ class RunnerScriptConstructor(ScriptConstructor):
             raise ValueError("v2 pydantic mode only available for pydantic>=2")
         return value
 
-    def transform_values(self, cls: Type[Script], values: Any) -> Any:
+    def transform_values(self, script: Script) -> Script:
         """A function that can inspect the Script instance and generate the source field."""
-        if not callable(values.get("source")):
-            return values
+        if not callable(script.source):
+            return script
 
-        if values.get("args") is not None:
+        if script.args is not None:
             raise ValueError("Cannot specify args when callable is True")
 
-        module = values["source"].__module__
+        module = script.source.__module__
 
         if module == "__main__":
             from hera.workflows._runner.util import create_module_string
 
-            module = create_module_string(Path(values["source"].__globals__["__file__"]))
+            module = create_module_string(Path(script.source.__globals__["__file__"]))
 
-        values["args"] = [
+        script.args = [
             "-m",
             "hera.workflows.runner",
             "-e",
-            f"{module}:{values['source'].__name__}",
+            f"{module}:{script.source.__name__}",
         ]
 
-        return values
+        return script
 
     def generate_source(self, instance: Script) -> str:
         """A function that can inspect the Script instance and generate the source field."""

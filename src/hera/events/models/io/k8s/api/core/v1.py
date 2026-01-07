@@ -4,11 +4,11 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated
 
 from hera.shared._pydantic import BaseModel, Field
 
-from ...apimachinery.pkg.api import resource
+from ...apimachinery.pkg.api import resource as resource_1
 from ...apimachinery.pkg.apis.meta import v1
 from ...apimachinery.pkg.util import intstr
 
@@ -19,7 +19,7 @@ class SecretKeySelector(BaseModel):
         Field(description=("The key of the secret to select from.  Must be a valid secret key.")),
     ]
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -30,7 +30,7 @@ class SecretKeySelector(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description="Specify whether the Secret or its key must be defined"),
     ] = None
 
@@ -38,7 +38,7 @@ class SecretKeySelector(BaseModel):
 class ConfigMapKeySelector(BaseModel):
     key: Annotated[str, Field(description="The key to select.")]
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -49,14 +49,14 @@ class ConfigMapKeySelector(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description="Specify whether the ConfigMap or its key must be defined"),
     ] = None
 
 
 class AWSElasticBlockStoreVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -69,7 +69,7 @@ class AWSElasticBlockStoreVolumeSource(BaseModel):
         ),
     ] = None
     partition: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "partition is the partition in the volume that you want to mount. If"
@@ -80,7 +80,7 @@ class AWSElasticBlockStoreVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -105,7 +105,7 @@ class AWSElasticBlockStoreVolumeSource(BaseModel):
 
 class AppArmorProfile(BaseModel):
     localhost_profile: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="localhostProfile",
             description=(
@@ -131,7 +131,7 @@ class AppArmorProfile(BaseModel):
 
 class AzureDiskVolumeSource(BaseModel):
     caching_mode: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="cachingMode",
             description=("cachingMode is the Host Caching mode: None, Read Only, Read Write."),
@@ -152,7 +152,7 @@ class AzureDiskVolumeSource(BaseModel):
         ),
     ]
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -163,7 +163,7 @@ class AzureDiskVolumeSource(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "kind expected values are Shared: multiple blob disks per storage"
@@ -174,7 +174,7 @@ class AzureDiskVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -187,7 +187,7 @@ class AzureDiskVolumeSource(BaseModel):
 
 class AzureFileVolumeSource(BaseModel):
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -208,7 +208,7 @@ class AzureFileVolumeSource(BaseModel):
 
 class LocalObjectReference(BaseModel):
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -221,13 +221,13 @@ class LocalObjectReference(BaseModel):
 
 
 class Capabilities(BaseModel):
-    add: Annotated[Optional[List[str]], Field(description="Added capabilities")] = None
-    drop: Annotated[Optional[List[str]], Field(description="Removed capabilities")] = None
+    add: Annotated[list[str] | None, Field(description="Added capabilities")] = None
+    drop: Annotated[list[str] | None, Field(description="Removed capabilities")] = None
 
 
 class ConfigMapEnvSource(BaseModel):
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -237,10 +237,7 @@ class ConfigMapEnvSource(BaseModel):
             )
         ),
     ] = None
-    optional: Annotated[
-        Optional[bool],
-        Field(description="Specify whether the ConfigMap must be defined"),
-    ] = None
+    optional: Annotated[bool | None, Field(description="Specify whether the ConfigMap must be defined")] = None
 
 
 class ContainerPort(BaseModel):
@@ -254,11 +251,11 @@ class ContainerPort(BaseModel):
         ),
     ]
     host_ip: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="hostIP", description="What host IP to bind the external port to."),
     ] = None
     host_port: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="hostPort",
             description=(
@@ -269,7 +266,7 @@ class ContainerPort(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "If specified, this must be an IANA_SVC_NAME and unique within the pod."
@@ -279,7 +276,7 @@ class ContainerPort(BaseModel):
         ),
     ] = None
     protocol: Annotated[
-        Optional[str],
+        str | None,
         Field(description=('Protocol for port. Must be UDP, TCP, or SCTP. Defaults to "TCP".')),
     ] = None
 
@@ -308,7 +305,7 @@ class ContainerResizePolicy(BaseModel):
 
 class ObjectFieldSelector(BaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=('Version of the schema the FieldPath is written in terms of, defaults to "v1".'),
@@ -325,7 +322,7 @@ class ObjectFieldSelector(BaseModel):
 
 class SecretEnvSource(BaseModel):
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -335,16 +332,16 @@ class SecretEnvSource(BaseModel):
             )
         ),
     ] = None
-    optional: Annotated[Optional[bool], Field(description="Specify whether the Secret must be defined")] = None
+    optional: Annotated[bool | None, Field(description="Specify whether the Secret must be defined")] = None
 
 
 class ObjectReference(BaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(alias="apiVersion", description="API version of the referent."),
     ] = None
     field_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fieldPath",
             description=(
@@ -361,7 +358,7 @@ class ObjectReference(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind of the referent. More info:"
@@ -370,7 +367,7 @@ class ObjectReference(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. More info:"
@@ -379,7 +376,7 @@ class ObjectReference(BaseModel):
         ),
     ] = None
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Namespace of the referent. More info:"
@@ -388,7 +385,7 @@ class ObjectReference(BaseModel):
         ),
     ] = None
     resource_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="resourceVersion",
             description=(
@@ -399,7 +396,7 @@ class ObjectReference(BaseModel):
         ),
     ] = None
     uid: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "UID of the referent. More info:"
@@ -410,13 +407,13 @@ class ObjectReference(BaseModel):
 
 
 class EventSource(BaseModel):
-    component: Annotated[Optional[str], Field(description="Component from which the event is generated.")] = None
-    host: Annotated[Optional[str], Field(description="Node name on which the event is generated.")] = None
+    component: Annotated[str | None, Field(description="Component from which the event is generated.")] = None
+    host: Annotated[str | None, Field(description="Node name on which the event is generated.")] = None
 
 
 class ExecAction(BaseModel):
     command: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Command is the command line to execute inside the container, the"
@@ -432,7 +429,7 @@ class ExecAction(BaseModel):
 
 class FCVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -442,9 +439,9 @@ class FCVolumeSource(BaseModel):
             ),
         ),
     ] = None
-    lun: Annotated[Optional[int], Field(description="lun is Optional: FC target lun number")] = None
+    lun: Annotated[int | None, Field(description="lun is Optional: FC target lun number")] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -454,14 +451,14 @@ class FCVolumeSource(BaseModel):
         ),
     ] = None
     target_ww_ns: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="targetWWNs",
             description="targetWWNs is Optional: FC target worldwide names (WWNs)",
         ),
     ] = None
     wwids: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "wwids Optional: FC volume world wide identifiers (wwids) Either wwids"
@@ -474,7 +471,7 @@ class FCVolumeSource(BaseModel):
 
 class FlockerVolumeSource(BaseModel):
     dataset_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="datasetName",
             description=(
@@ -484,7 +481,7 @@ class FlockerVolumeSource(BaseModel):
         ),
     ] = None
     dataset_uuid: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="datasetUUID",
             description=("datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset"),
@@ -494,7 +491,7 @@ class FlockerVolumeSource(BaseModel):
 
 class GCEPersistentDiskVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -507,7 +504,7 @@ class GCEPersistentDiskVolumeSource(BaseModel):
         ),
     ] = None
     partition: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "partition is the partition in the volume that you want to mount. If"
@@ -531,7 +528,7 @@ class GCEPersistentDiskVolumeSource(BaseModel):
         ),
     ]
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -549,7 +546,7 @@ class GRPCAction(BaseModel):
         Field(description=("Port number of the gRPC service. Number must be in the range 1 to 65535.")),
     ]
     service: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Service is the name of the service to place in the gRPC"
@@ -563,7 +560,7 @@ class GRPCAction(BaseModel):
 
 class GitRepoVolumeSource(BaseModel):
     directory: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "directory is the target directory name. Must not contain or start with"
@@ -575,7 +572,7 @@ class GitRepoVolumeSource(BaseModel):
     ] = None
     repository: Annotated[str, Field(description="repository is the URL")]
     revision: Annotated[
-        Optional[str],
+        str | None,
         Field(description="revision is the commit hash for the specified revision."),
     ] = None
 
@@ -601,7 +598,7 @@ class GlusterfsVolumeSource(BaseModel):
         ),
     ]
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -627,7 +624,7 @@ class HTTPHeader(BaseModel):
 
 
 class HostAlias(BaseModel):
-    hostnames: Annotated[Optional[List[str]], Field(description="Hostnames for the above IP address.")] = None
+    hostnames: Annotated[list[str] | None, Field(description="Hostnames for the above IP address.")] = None
     ip: Annotated[str, Field(description="IP address of the host file entry.")]
 
 
@@ -643,7 +640,7 @@ class HostPathVolumeSource(BaseModel):
         ),
     ]
     type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 'type for HostPath Volume Defaults to "" More info:'
@@ -655,7 +652,7 @@ class HostPathVolumeSource(BaseModel):
 
 class ImageVolumeSource(BaseModel):
     pull_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="pullPolicy",
             description=(
@@ -672,7 +669,7 @@ class ImageVolumeSource(BaseModel):
         ),
     ] = None
     reference: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Required: Image or artifact reference to be used. Behaves in the same"
@@ -691,7 +688,7 @@ class ImageVolumeSource(BaseModel):
 class KeyToPath(BaseModel):
     key: Annotated[str, Field(description="key is the key to project.")]
     mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "mode is Optional: mode bits used to set permissions on this file. Must"
@@ -739,7 +736,7 @@ class ModifyVolumeStatus(BaseModel):
         ),
     ]
     target_volume_attributes_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="targetVolumeAttributesClassName",
             description=(
@@ -761,7 +758,7 @@ class NFSVolumeSource(BaseModel):
         ),
     ]
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -794,7 +791,7 @@ class NodeSelectorRequirement(BaseModel):
         ),
     ]
     values: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "An array of string values. If the operator is In or NotIn, the values"
@@ -809,14 +806,14 @@ class NodeSelectorRequirement(BaseModel):
 
 class NodeSelectorTerm(BaseModel):
     match_expressions: Annotated[
-        Optional[List[NodeSelectorRequirement]],
+        list[NodeSelectorRequirement] | None,
         Field(
             alias="matchExpressions",
             description="A list of node selector requirements by node's labels.",
         ),
     ] = None
     match_fields: Annotated[
-        Optional[List[NodeSelectorRequirement]],
+        list[NodeSelectorRequirement] | None,
         Field(
             alias="matchFields",
             description="A list of node selector requirements by node's fields.",
@@ -826,7 +823,7 @@ class NodeSelectorTerm(BaseModel):
 
 class TypedLocalObjectReference(BaseModel):
     api_group: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiGroup",
             description=(
@@ -842,7 +839,7 @@ class TypedLocalObjectReference(BaseModel):
 
 class TypedObjectReference(BaseModel):
     api_group: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiGroup",
             description=(
@@ -855,7 +852,7 @@ class TypedObjectReference(BaseModel):
     kind: Annotated[str, Field(description="Kind is the type of resource being referenced")]
     name: Annotated[str, Field(description="Name is the name of resource being referenced")]
     namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Namespace is the namespace of resource being referenced Note that when"
@@ -871,7 +868,7 @@ class TypedObjectReference(BaseModel):
 
 class VolumeResourceRequirements(BaseModel):
     limits: Annotated[
-        Optional[Dict[str, resource.Quantity]],
+        dict[str, resource_1.Quantity] | None,
         Field(
             description=(
                 "Limits describes the maximum amount of compute resources allowed. More"
@@ -881,7 +878,7 @@ class VolumeResourceRequirements(BaseModel):
         ),
     ] = None
     requests: Annotated[
-        Optional[Dict[str, resource.Quantity]],
+        dict[str, resource_1.Quantity] | None,
         Field(
             description=(
                 "Requests describes the minimum amount of compute resources required."
@@ -907,7 +904,7 @@ class PersistentVolumeClaimVolumeSource(BaseModel):
         ),
     ]
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=("readOnly Will force the ReadOnly setting in VolumeMounts. Default false."),
@@ -917,7 +914,7 @@ class PersistentVolumeClaimVolumeSource(BaseModel):
 
 class PhotonPersistentDiskVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -938,34 +935,34 @@ class PhotonPersistentDiskVolumeSource(BaseModel):
 
 class PodDNSConfigOption(BaseModel):
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Name is this DNS resolver option's name. Required."),
     ] = None
-    value: Annotated[Optional[str], Field(description="Value is this DNS resolver option's value.")] = None
+    value: Annotated[str | None, Field(description="Value is this DNS resolver option's value.")] = None
 
 
 class SELinuxOptions(BaseModel):
     level: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Level is SELinux level label that applies to the container."),
     ] = None
     role: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Role is a SELinux role label that applies to the container."),
     ] = None
     type: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Type is a SELinux type label that applies to the container."),
     ] = None
     user: Annotated[
-        Optional[str],
+        str | None,
         Field(description="User is a SELinux user label that applies to the container."),
     ] = None
 
 
 class SeccompProfile(BaseModel):
     localhost_profile: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="localhostProfile",
             description=(
@@ -992,7 +989,7 @@ class SeccompProfile(BaseModel):
 
 class WindowsSecurityContextOptions(BaseModel):
     gmsa_credential_spec: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="gmsaCredentialSpec",
             description=(
@@ -1004,14 +1001,14 @@ class WindowsSecurityContextOptions(BaseModel):
         ),
     ] = None
     gmsa_credential_spec_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="gmsaCredentialSpecName",
             description=("GMSACredentialSpecName is the name of the GMSA credential spec to use."),
         ),
     ] = None
     host_process: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="hostProcess",
             description=(
@@ -1024,7 +1021,7 @@ class WindowsSecurityContextOptions(BaseModel):
         ),
     ] = None
     run_as_user_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="runAsUserName",
             description=(
@@ -1040,7 +1037,7 @@ class WindowsSecurityContextOptions(BaseModel):
 
 class PortworxVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1051,7 +1048,7 @@ class PortworxVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1071,11 +1068,11 @@ class PortworxVolumeSource(BaseModel):
 
 class QuobyteVolumeSource(BaseModel):
     group: Annotated[
-        Optional[str],
+        str | None,
         Field(description="group to map volume access to Default is no group"),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1095,7 +1092,7 @@ class QuobyteVolumeSource(BaseModel):
         ),
     ]
     tenant: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "tenant owning the given Quobyte volume in the Backend Used with"
@@ -1104,7 +1101,7 @@ class QuobyteVolumeSource(BaseModel):
         ),
     ] = None
     user: Annotated[
-        Optional[str],
+        str | None,
         Field(description="user to map volume access to Defaults to serivceaccount user"),
     ] = None
     volume: Annotated[
@@ -1125,7 +1122,7 @@ class ResourceClaim(BaseModel):
         ),
     ]
     request: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Request is the name chosen for a request in the referenced claim. If"
@@ -1138,7 +1135,7 @@ class ResourceClaim(BaseModel):
 
 class SecretProjection(BaseModel):
     items: Annotated[
-        Optional[List[KeyToPath]],
+        list[KeyToPath] | None,
         Field(
             description=(
                 "items if unspecified, each key-value pair in the Data field of the"
@@ -1153,7 +1150,7 @@ class SecretProjection(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -1164,14 +1161,14 @@ class SecretProjection(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("optional field specify whether the Secret or its key must be defined")),
     ] = None
 
 
 class SecretVolumeSource(BaseModel):
     default_mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="defaultMode",
             description=(
@@ -1186,7 +1183,7 @@ class SecretVolumeSource(BaseModel):
         ),
     ] = None
     items: Annotated[
-        Optional[List[KeyToPath]],
+        list[KeyToPath] | None,
         Field(
             description=(
                 "items If unspecified, each key-value pair in the Data field of the"
@@ -1201,11 +1198,11 @@ class SecretVolumeSource(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("optional field specify whether the Secret or its keys must be defined")),
     ] = None
     secret_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="secretName",
             description=(
@@ -1218,7 +1215,7 @@ class SecretVolumeSource(BaseModel):
 
 class ServiceAccountTokenProjection(BaseModel):
     audience: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "audience is the intended audience of the token. A recipient of a token"
@@ -1229,7 +1226,7 @@ class ServiceAccountTokenProjection(BaseModel):
         ),
     ] = None
     expiration_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="expirationSeconds",
             description=(
@@ -1255,7 +1252,7 @@ class Sysctl(BaseModel):
 
 class Toleration(BaseModel):
     effect: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Effect indicates the taint effect to match. Empty means match all"
@@ -1265,7 +1262,7 @@ class Toleration(BaseModel):
         ),
     ] = None
     key: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Key is the taint key that the toleration applies to. Empty means match"
@@ -1275,7 +1272,7 @@ class Toleration(BaseModel):
         ),
     ] = None
     operator: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Operator represents a key's relationship to the value. Valid operators"
@@ -1286,7 +1283,7 @@ class Toleration(BaseModel):
         ),
     ] = None
     toleration_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="tolerationSeconds",
             description=(
@@ -1299,7 +1296,7 @@ class Toleration(BaseModel):
         ),
     ] = None
     value: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Value is the taint value the toleration matches to. If the operator is"
@@ -1311,7 +1308,7 @@ class Toleration(BaseModel):
 
 class VsphereVirtualDiskVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1322,7 +1319,7 @@ class VsphereVirtualDiskVolumeSource(BaseModel):
         ),
     ] = None
     storage_policy_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="storagePolicyID",
             description=(
@@ -1332,7 +1329,7 @@ class VsphereVirtualDiskVolumeSource(BaseModel):
         ),
     ] = None
     storage_policy_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="storagePolicyName",
             description=("storagePolicyName is the storage Policy Based Management (SPBM) profile name."),
@@ -1370,7 +1367,7 @@ class VolumeMount(BaseModel):
         ),
     ]
     mount_propagation: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="mountPropagation",
             description=(
@@ -1385,14 +1382,14 @@ class VolumeMount(BaseModel):
     ] = None
     name: Annotated[str, Field(description="This must match the Name of a Volume.")]
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=("Mounted read-only if true, read-write otherwise (false or unspecified). Defaults to false."),
         ),
     ] = None
     recursive_read_only: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="recursiveReadOnly",
             description=(
@@ -1412,7 +1409,7 @@ class VolumeMount(BaseModel):
         ),
     ] = None
     sub_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subPath",
             description=(
@@ -1422,7 +1419,7 @@ class VolumeMount(BaseModel):
         ),
     ] = None
     sub_path_expr: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="subPathExpr",
             description=(
@@ -1444,25 +1441,25 @@ class ImagePullPolicy(Enum):
 
 class PersistentVolumeClaimCondition(BaseModel):
     last_probe_time: Annotated[
-        Optional[v1.Time],
+        v1.Time | None,
         Field(
             alias="lastProbeTime",
             description="lastProbeTime is the time we probed the condition.",
         ),
     ] = None
     last_transition_time: Annotated[
-        Optional[v1.Time],
+        v1.Time | None,
         Field(
             alias="lastTransitionTime",
             description=("lastTransitionTime is the time the condition transitioned from one status to another."),
         ),
     ] = None
     message: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("message is the human-readable message indicating details about last transition.")),
     ] = None
     reason: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "reason is a unique, this should be a short, machine understandable"
@@ -1495,7 +1492,7 @@ class PersistentVolumeClaimCondition(BaseModel):
 
 class ServicePort(BaseModel):
     app_protocol: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="appProtocol",
             description=(
@@ -1518,7 +1515,7 @@ class ServicePort(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "The name of this port within the service. This must be a DNS_LABEL."
@@ -1530,7 +1527,7 @@ class ServicePort(BaseModel):
         ),
     ] = None
     node_port: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="nodePort",
             description=(
@@ -1548,11 +1545,11 @@ class ServicePort(BaseModel):
     ] = None
     port: Annotated[int, Field(description="The port that will be exposed by this service.")]
     protocol: Annotated[
-        Optional[str],
+        str | None,
         Field(description=('The IP protocol for this port. Supports "TCP", "UDP", and "SCTP". Default is TCP.')),
     ] = None
     target_port: Annotated[
-        Optional[intstr.IntOrString],
+        intstr.IntOrString | None,
         Field(
             alias="targetPort",
             description=(
@@ -1571,7 +1568,7 @@ class ServicePort(BaseModel):
 
 class TCPSocketAction(BaseModel):
     host: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Optional: Host name to connect to, defaults to the pod IP."),
     ] = None
     port: Annotated[
@@ -1596,7 +1593,7 @@ class CSIVolumeSource(BaseModel):
         ),
     ]
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1607,7 +1604,7 @@ class CSIVolumeSource(BaseModel):
         ),
     ] = None
     node_publish_secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="nodePublishSecretRef",
             description=(
@@ -1621,7 +1618,7 @@ class CSIVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1630,7 +1627,7 @@ class CSIVolumeSource(BaseModel):
         ),
     ] = None
     volume_attributes: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="volumeAttributes",
             description=(
@@ -1644,7 +1641,7 @@ class CSIVolumeSource(BaseModel):
 
 class CephFSVolumeSource(BaseModel):
     monitors: Annotated[
-        List[str],
+        list[str],
         Field(
             description=(
                 "monitors is Required: Monitors is a collection of Ceph monitors More"
@@ -1653,13 +1650,13 @@ class CephFSVolumeSource(BaseModel):
         ),
     ]
     path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=("path is Optional: Used as the mounted root, rather than the full Ceph tree, default is /")
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1670,7 +1667,7 @@ class CephFSVolumeSource(BaseModel):
         ),
     ] = None
     secret_file: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="secretFile",
             description=(
@@ -1681,7 +1678,7 @@ class CephFSVolumeSource(BaseModel):
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="secretRef",
             description=(
@@ -1692,7 +1689,7 @@ class CephFSVolumeSource(BaseModel):
         ),
     ] = None
     user: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "user is optional: User is the rados user name, default is admin More"
@@ -1704,7 +1701,7 @@ class CephFSVolumeSource(BaseModel):
 
 class CinderVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1716,7 +1713,7 @@ class CinderVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1727,7 +1724,7 @@ class CinderVolumeSource(BaseModel):
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="secretRef",
             description=(
@@ -1753,7 +1750,7 @@ class FlexVolumeSource(BaseModel):
         Field(description="driver is the name of the driver to use for this volume."),
     ]
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1764,11 +1761,11 @@ class FlexVolumeSource(BaseModel):
         ),
     ] = None
     options: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(description=("options is Optional: this field holds extra command options if any.")),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1778,7 +1775,7 @@ class FlexVolumeSource(BaseModel):
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="secretRef",
             description=(
@@ -1794,21 +1791,21 @@ class FlexVolumeSource(BaseModel):
 
 class ISCSIVolumeSource(BaseModel):
     chap_auth_discovery: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="chapAuthDiscovery",
             description=("chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication"),
         ),
     ] = None
     chap_auth_session: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="chapAuthSession",
             description=("chapAuthSession defines whether support iSCSI Session CHAP authentication"),
         ),
     ] = None
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1821,7 +1818,7 @@ class ISCSIVolumeSource(BaseModel):
         ),
     ] = None
     initiator_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="initiatorName",
             description=(
@@ -1833,7 +1830,7 @@ class ISCSIVolumeSource(BaseModel):
     ] = None
     iqn: Annotated[str, Field(description="iqn is the target iSCSI Qualified Name.")]
     iscsi_interface: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="iscsiInterface",
             description=(
@@ -1843,7 +1840,7 @@ class ISCSIVolumeSource(BaseModel):
     ] = None
     lun: Annotated[int, Field(description="lun represents iSCSI Target Lun number.")]
     portals: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "portals is the iSCSI Target Portal List. The portal is either an IP or"
@@ -1853,14 +1850,14 @@ class ISCSIVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=("readOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false."),
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="secretRef",
             description=("secretRef is the CHAP Secret for iSCSI target and initiator authentication"),
@@ -1881,7 +1878,7 @@ class ISCSIVolumeSource(BaseModel):
 
 class RBDVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1902,7 +1899,7 @@ class RBDVolumeSource(BaseModel):
         ),
     ]
     keyring: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "keyring is the path to key ring for RBDUser. Default is"
@@ -1912,7 +1909,7 @@ class RBDVolumeSource(BaseModel):
         ),
     ] = None
     monitors: Annotated[
-        List[str],
+        list[str],
         Field(
             description=(
                 "monitors is a collection of Ceph monitors. More info:"
@@ -1921,7 +1918,7 @@ class RBDVolumeSource(BaseModel):
         ),
     ]
     pool: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "pool is the rados pool name. Default is rbd. More info:"
@@ -1930,7 +1927,7 @@ class RBDVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -1941,7 +1938,7 @@ class RBDVolumeSource(BaseModel):
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="secretRef",
             description=(
@@ -1952,7 +1949,7 @@ class RBDVolumeSource(BaseModel):
         ),
     ] = None
     user: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "user is the rados user name. Default is admin. More info:"
@@ -1964,7 +1961,7 @@ class RBDVolumeSource(BaseModel):
 
 class ScaleIOVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -1979,14 +1976,14 @@ class ScaleIOVolumeSource(BaseModel):
         Field(description="gateway is the host address of the ScaleIO API Gateway."),
     ]
     protection_domain: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="protectionDomain",
             description=("protectionDomain is the name of the ScaleIO Protection Domain for the configured storage."),
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -2007,14 +2004,14 @@ class ScaleIOVolumeSource(BaseModel):
         ),
     ]
     ssl_enabled: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="sslEnabled",
             description=("sslEnabled Flag enable/disable SSL communication with Gateway, default false"),
         ),
     ] = None
     storage_mode: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="storageMode",
             description=(
@@ -2024,7 +2021,7 @@ class ScaleIOVolumeSource(BaseModel):
         ),
     ] = None
     storage_pool: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="storagePool",
             description=("storagePool is the ScaleIO Storage Pool associated with the protection domain."),
@@ -2035,7 +2032,7 @@ class ScaleIOVolumeSource(BaseModel):
         Field(description=("system is the name of the storage system as configured in ScaleIO.")),
     ]
     volume_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="volumeName",
             description=(
@@ -2048,7 +2045,7 @@ class ScaleIOVolumeSource(BaseModel):
 
 class StorageOSVolumeSource(BaseModel):
     fs_type: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsType",
             description=(
@@ -2059,7 +2056,7 @@ class StorageOSVolumeSource(BaseModel):
         ),
     ] = None
     read_only: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnly",
             description=(
@@ -2069,7 +2066,7 @@ class StorageOSVolumeSource(BaseModel):
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[LocalObjectReference],
+        LocalObjectReference | None,
         Field(
             alias="secretRef",
             description=(
@@ -2079,7 +2076,7 @@ class StorageOSVolumeSource(BaseModel):
         ),
     ] = None
     volume_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="volumeName",
             description=(
@@ -2089,7 +2086,7 @@ class StorageOSVolumeSource(BaseModel):
         ),
     ] = None
     volume_namespace: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="volumeNamespace",
             description=(
@@ -2107,7 +2104,7 @@ class StorageOSVolumeSource(BaseModel):
 
 class EmptyDirVolumeSource(BaseModel):
     medium: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "medium represents what type of storage medium should back this"
@@ -2118,7 +2115,7 @@ class EmptyDirVolumeSource(BaseModel):
         ),
     ] = None
     size_limit: Annotated[
-        Optional[resource.Quantity],
+        resource_1.Quantity | None,
         Field(
             alias="sizeLimit",
             description=(
@@ -2136,14 +2133,14 @@ class EmptyDirVolumeSource(BaseModel):
 
 class ResourceFieldSelector(BaseModel):
     container_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="containerName",
             description="Container name: required for volumes, optional for env vars",
         ),
     ] = None
     divisor: Annotated[
-        Optional[resource.Quantity],
+        resource_1.Quantity | None,
         Field(description=('Specifies the output format of the exposed resources, defaults to "1"')),
     ] = None
     resource: Annotated[str, Field(description="Required: resource to select")]
@@ -2151,35 +2148,35 @@ class ResourceFieldSelector(BaseModel):
 
 class EnvFromSource(BaseModel):
     config_map_ref: Annotated[
-        Optional[ConfigMapEnvSource],
+        ConfigMapEnvSource | None,
         Field(alias="configMapRef", description="The ConfigMap to select from"),
     ] = None
     prefix: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=("Optional text to prepend to the name of each environment variable. Must be a C_IDENTIFIER.")
         ),
     ] = None
     secret_ref: Annotated[
-        Optional[SecretEnvSource],
+        SecretEnvSource | None,
         Field(alias="secretRef", description="The Secret to select from"),
     ] = None
 
 
 class EventSeries(BaseModel):
     count: Annotated[
-        Optional[int],
+        int | None,
         Field(description=("Number of occurrences in this series up to the last heartbeat time")),
     ] = None
     last_observed_time: Annotated[
-        Optional[v1.MicroTime],
+        v1.MicroTime | None,
         Field(alias="lastObservedTime", description="Time of the last occurrence observed"),
     ] = None
 
 
 class PersistentVolumeClaimStatus(BaseModel):
     access_modes: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="accessModes",
             description=(
@@ -2190,7 +2187,7 @@ class PersistentVolumeClaimStatus(BaseModel):
         ),
     ] = None
     allocated_resource_statuses: Annotated[
-        Optional[Dict[str, str]],
+        dict[str, str] | None,
         Field(
             alias="allocatedResourceStatuses",
             description=(
@@ -2234,7 +2231,7 @@ class PersistentVolumeClaimStatus(BaseModel):
         ),
     ] = None
     allocated_resources: Annotated[
-        Optional[Dict[str, resource.Quantity]],
+        dict[str, resource_1.Quantity] | None,
         Field(
             alias="allocatedResources",
             description=(
@@ -2264,11 +2261,11 @@ class PersistentVolumeClaimStatus(BaseModel):
         ),
     ] = None
     capacity: Annotated[
-        Optional[Dict[str, resource.Quantity]],
+        dict[str, resource_1.Quantity] | None,
         Field(description=("capacity represents the actual resources of the underlying volume.")),
     ] = None
     conditions: Annotated[
-        Optional[List[PersistentVolumeClaimCondition]],
+        list[PersistentVolumeClaimCondition] | None,
         Field(
             description=(
                 "conditions is the current Condition of persistent volume claim. If"
@@ -2278,7 +2275,7 @@ class PersistentVolumeClaimStatus(BaseModel):
         ),
     ] = None
     current_volume_attributes_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="currentVolumeAttributesClassName",
             description=(
@@ -2291,7 +2288,7 @@ class PersistentVolumeClaimStatus(BaseModel):
         ),
     ] = None
     modify_volume_status: Annotated[
-        Optional[ModifyVolumeStatus],
+        ModifyVolumeStatus | None,
         Field(
             alias="modifyVolumeStatus",
             description=(
@@ -2303,7 +2300,7 @@ class PersistentVolumeClaimStatus(BaseModel):
         ),
     ] = None
     phase: Annotated[
-        Optional[str],
+        str | None,
         Field(description="phase represents the current phase of PersistentVolumeClaim."),
     ] = None
 
@@ -2321,7 +2318,7 @@ class PreferredSchedulingTerm(BaseModel):
 
 class PodSecurityContext(BaseModel):
     app_armor_profile: Annotated[
-        Optional[AppArmorProfile],
+        AppArmorProfile | None,
         Field(
             alias="appArmorProfile",
             description=(
@@ -2332,7 +2329,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     fs_group: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="fsGroup",
             description=(
@@ -2348,7 +2345,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     fs_group_change_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="fsGroupChangePolicy",
             description=(
@@ -2364,7 +2361,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     run_as_group: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="runAsGroup",
             description=(
@@ -2377,7 +2374,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     run_as_non_root: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="runAsNonRoot",
             description=(
@@ -2392,7 +2389,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     run_as_user: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="runAsUser",
             description=(
@@ -2406,7 +2403,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     se_linux_change_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="seLinuxChangePolicy",
             description=(
@@ -2439,7 +2436,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     se_linux_options: Annotated[
-        Optional[SELinuxOptions],
+        SELinuxOptions | None,
         Field(
             alias="seLinuxOptions",
             description=(
@@ -2453,7 +2450,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     seccomp_profile: Annotated[
-        Optional[SeccompProfile],
+        SeccompProfile | None,
         Field(
             alias="seccompProfile",
             description=(
@@ -2463,7 +2460,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     supplemental_groups: Annotated[
-        Optional[List[int]],
+        list[int] | None,
         Field(
             alias="supplementalGroups",
             description=(
@@ -2480,7 +2477,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     supplemental_groups_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="supplementalGroupsPolicy",
             description=(
@@ -2494,7 +2491,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     sysctls: Annotated[
-        Optional[List[Sysctl]],
+        list[Sysctl] | None,
         Field(
             description=(
                 "Sysctls hold a list of namespaced sysctls used for the pod. Pods with"
@@ -2504,7 +2501,7 @@ class PodSecurityContext(BaseModel):
         ),
     ] = None
     windows_options: Annotated[
-        Optional[WindowsSecurityContextOptions],
+        WindowsSecurityContextOptions | None,
         Field(
             alias="windowsOptions",
             description=(
@@ -2520,7 +2517,7 @@ class PodSecurityContext(BaseModel):
 
 class SecurityContext(BaseModel):
     allow_privilege_escalation: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="allowPrivilegeEscalation",
             description=(
@@ -2534,7 +2531,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     app_armor_profile: Annotated[
-        Optional[AppArmorProfile],
+        AppArmorProfile | None,
         Field(
             alias="appArmorProfile",
             description=(
@@ -2545,7 +2542,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     capabilities: Annotated[
-        Optional[Capabilities],
+        Capabilities | None,
         Field(
             description=(
                 "The capabilities to add/drop when running containers. Defaults to the"
@@ -2555,7 +2552,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     privileged: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Run container in privileged mode. Processes in privileged containers"
@@ -2565,7 +2562,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     proc_mount: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="procMount",
             description=(
@@ -2578,7 +2575,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     read_only_root_filesystem: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="readOnlyRootFilesystem",
             description=(
@@ -2589,7 +2586,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     run_as_group: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="runAsGroup",
             description=(
@@ -2602,7 +2599,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     run_as_non_root: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="runAsNonRoot",
             description=(
@@ -2617,7 +2614,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     run_as_user: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="runAsUser",
             description=(
@@ -2631,7 +2628,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     se_linux_options: Annotated[
-        Optional[SELinuxOptions],
+        SELinuxOptions | None,
         Field(
             alias="seLinuxOptions",
             description=(
@@ -2645,7 +2642,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     seccomp_profile: Annotated[
-        Optional[SeccompProfile],
+        SeccompProfile | None,
         Field(
             alias="seccompProfile",
             description=(
@@ -2657,7 +2654,7 @@ class SecurityContext(BaseModel):
         ),
     ] = None
     windows_options: Annotated[
-        Optional[WindowsSecurityContextOptions],
+        WindowsSecurityContextOptions | None,
         Field(
             alias="windowsOptions",
             description=(
@@ -2673,7 +2670,7 @@ class SecurityContext(BaseModel):
 
 class DownwardAPIVolumeFile(BaseModel):
     field_ref: Annotated[
-        Optional[ObjectFieldSelector],
+        ObjectFieldSelector | None,
         Field(
             alias="fieldRef",
             description=(
@@ -2683,7 +2680,7 @@ class DownwardAPIVolumeFile(BaseModel):
         ),
     ] = None
     mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description=(
                 "Optional: mode bits used to set permissions on this file, must be an"
@@ -2707,7 +2704,7 @@ class DownwardAPIVolumeFile(BaseModel):
         ),
     ]
     resource_field_ref: Annotated[
-        Optional[ResourceFieldSelector],
+        ResourceFieldSelector | None,
         Field(
             alias="resourceFieldRef",
             description=(
@@ -2721,11 +2718,11 @@ class DownwardAPIVolumeFile(BaseModel):
 
 class EnvVarSource(BaseModel):
     config_map_key_ref: Annotated[
-        Optional[ConfigMapKeySelector],
+        ConfigMapKeySelector | None,
         Field(alias="configMapKeyRef", description="Selects a key of a ConfigMap."),
     ] = None
     field_ref: Annotated[
-        Optional[ObjectFieldSelector],
+        ObjectFieldSelector | None,
         Field(
             alias="fieldRef",
             description=(
@@ -2737,7 +2734,7 @@ class EnvVarSource(BaseModel):
         ),
     ] = None
     resource_field_ref: Annotated[
-        Optional[ResourceFieldSelector],
+        ResourceFieldSelector | None,
         Field(
             alias="resourceFieldRef",
             description=(
@@ -2749,7 +2746,7 @@ class EnvVarSource(BaseModel):
         ),
     ] = None
     secret_key_ref: Annotated[
-        Optional[SecretKeySelector],
+        SecretKeySelector | None,
         Field(
             alias="secretKeyRef",
             description="Selects a key of a secret in the pod's namespace",
@@ -2763,7 +2760,7 @@ class EnvVar(BaseModel):
         Field(description="Name of the environment variable. Must be a C_IDENTIFIER."),
     ]
     value: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Variable references $(VAR_NAME) are expanded using the previously"
@@ -2778,7 +2775,7 @@ class EnvVar(BaseModel):
         ),
     ] = None
     value_from: Annotated[
-        Optional[EnvVarSource],
+        EnvVarSource | None,
         Field(
             alias="valueFrom",
             description=("Source for the environment variable's value. Cannot be used if value is not empty."),
@@ -2788,7 +2785,7 @@ class EnvVar(BaseModel):
 
 class ResourceRequirements(BaseModel):
     claims: Annotated[
-        Optional[List[ResourceClaim]],
+        list[ResourceClaim] | None,
         Field(
             description=(
                 "Claims lists the names of resources, defined in spec.resourceClaims,"
@@ -2799,7 +2796,7 @@ class ResourceRequirements(BaseModel):
         ),
     ] = None
     limits: Annotated[
-        Optional[Dict[str, resource.Quantity]],
+        dict[str, resource_1.Quantity] | None,
         Field(
             description=(
                 "Limits describes the maximum amount of compute resources allowed. More"
@@ -2809,7 +2806,7 @@ class ResourceRequirements(BaseModel):
         ),
     ] = None
     requests: Annotated[
-        Optional[Dict[str, resource.Quantity]],
+        dict[str, resource_1.Quantity] | None,
         Field(
             description=(
                 "Requests describes the minimum amount of compute resources required."
@@ -2824,7 +2821,7 @@ class ResourceRequirements(BaseModel):
 
 class PodDNSConfig(BaseModel):
     nameservers: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "A list of DNS name server IP addresses. This will be appended to the"
@@ -2834,7 +2831,7 @@ class PodDNSConfig(BaseModel):
         ),
     ] = None
     options: Annotated[
-        Optional[List[PodDNSConfigOption]],
+        list[PodDNSConfigOption] | None,
         Field(
             description=(
                 "A list of DNS resolver options. This will be merged with the base"
@@ -2845,7 +2842,7 @@ class PodDNSConfig(BaseModel):
         ),
     ] = None
     searches: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "A list of DNS search domains for host-name lookup. This will be"
@@ -2858,7 +2855,7 @@ class PodDNSConfig(BaseModel):
 
 class ConfigMapProjection(BaseModel):
     items: Annotated[
-        Optional[List[KeyToPath]],
+        list[KeyToPath] | None,
         Field(
             description=(
                 "items if unspecified, each key-value pair in the Data field of the"
@@ -2873,7 +2870,7 @@ class ConfigMapProjection(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -2884,14 +2881,14 @@ class ConfigMapProjection(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("optional specify whether the ConfigMap or its keys must be defined")),
     ] = None
 
 
 class ConfigMapVolumeSource(BaseModel):
     default_mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="defaultMode",
             description=(
@@ -2906,7 +2903,7 @@ class ConfigMapVolumeSource(BaseModel):
         ),
     ] = None
     items: Annotated[
-        Optional[List[KeyToPath]],
+        list[KeyToPath] | None,
         Field(
             description=(
                 "items if unspecified, each key-value pair in the Data field of the"
@@ -2921,7 +2918,7 @@ class ConfigMapVolumeSource(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the referent. This field is effectively required, but due to"
@@ -2932,21 +2929,21 @@ class ConfigMapVolumeSource(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(description=("optional specify whether the ConfigMap or its keys must be defined")),
     ] = None
 
 
 class DownwardAPIProjection(BaseModel):
     items: Annotated[
-        Optional[List[DownwardAPIVolumeFile]],
+        list[DownwardAPIVolumeFile] | None,
         Field(description="Items is a list of DownwardAPIVolume file"),
     ] = None
 
 
 class DownwardAPIVolumeSource(BaseModel):
     default_mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="defaultMode",
             description=(
@@ -2962,14 +2959,14 @@ class DownwardAPIVolumeSource(BaseModel):
         ),
     ] = None
     items: Annotated[
-        Optional[List[DownwardAPIVolumeFile]],
+        list[DownwardAPIVolumeFile] | None,
         Field(description="Items is a list of downward API volume file"),
     ] = None
 
 
 class HTTPGetAction(BaseModel):
     host: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Host name to connect to, defaults to the pod IP. You probably want to"
@@ -2978,13 +2975,13 @@ class HTTPGetAction(BaseModel):
         ),
     ] = None
     http_headers: Annotated[
-        Optional[List[HTTPHeader]],
+        list[HTTPHeader] | None,
         Field(
             alias="httpHeaders",
             description=("Custom headers to set in the request. HTTP allows repeated headers."),
         ),
     ] = None
-    path: Annotated[Optional[str], Field(description="Path to access on the HTTP server.")] = None
+    path: Annotated[str | None, Field(description="Path to access on the HTTP server.")] = None
     port: Annotated[
         int,
         Field(
@@ -2995,14 +2992,14 @@ class HTTPGetAction(BaseModel):
         ),
     ]
     scheme: Annotated[
-        Optional[str],
+        str | None,
         Field(description="Scheme to use for connecting to the host. Defaults to HTTP."),
     ] = None
 
 
 class NodeSelector(BaseModel):
     node_selector_terms: Annotated[
-        List[NodeSelectorTerm],
+        list[NodeSelectorTerm],
         Field(
             alias="nodeSelectorTerms",
             description="Required. A list of node selector terms. The terms are ORed.",
@@ -3012,7 +3009,7 @@ class NodeSelector(BaseModel):
 
 class ClusterTrustBundleProjection(BaseModel):
     label_selector: Annotated[
-        Optional[v1.LabelSelector],
+        v1.LabelSelector | None,
         Field(
             alias="labelSelector",
             description=(
@@ -3024,7 +3021,7 @@ class ClusterTrustBundleProjection(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Select a single ClusterTrustBundle by object name.  Mutually-exclusive"
@@ -3033,7 +3030,7 @@ class ClusterTrustBundleProjection(BaseModel):
         ),
     ] = None
     optional: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "If true, don't block pod startup if the referenced"
@@ -3049,7 +3046,7 @@ class ClusterTrustBundleProjection(BaseModel):
         Field(description="Relative path from the volume root to write the bundle."),
     ]
     signer_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="signerName",
             description=(
@@ -3063,7 +3060,7 @@ class ClusterTrustBundleProjection(BaseModel):
 
 class PodAffinityTerm(BaseModel):
     label_selector: Annotated[
-        Optional[v1.LabelSelector],
+        v1.LabelSelector | None,
         Field(
             alias="labelSelector",
             description=(
@@ -3073,7 +3070,7 @@ class PodAffinityTerm(BaseModel):
         ),
     ] = None
     match_label_keys: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="matchLabelKeys",
             description=(
@@ -3090,7 +3087,7 @@ class PodAffinityTerm(BaseModel):
         ),
     ] = None
     mismatch_label_keys: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="mismatchLabelKeys",
             description=(
@@ -3108,7 +3105,7 @@ class PodAffinityTerm(BaseModel):
         ),
     ] = None
     namespace_selector: Annotated[
-        Optional[v1.LabelSelector],
+        v1.LabelSelector | None,
         Field(
             alias="namespaceSelector",
             description=(
@@ -3121,7 +3118,7 @@ class PodAffinityTerm(BaseModel):
         ),
     ] = None
     namespaces: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "namespaces specifies a static list of namespace names that the term"
@@ -3150,7 +3147,7 @@ class PodAffinityTerm(BaseModel):
 
 class NodeAffinity(BaseModel):
     preferred_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[PreferredSchedulingTerm]],
+        list[PreferredSchedulingTerm] | None,
         Field(
             alias="preferredDuringSchedulingIgnoredDuringExecution",
             description=(
@@ -3168,7 +3165,7 @@ class NodeAffinity(BaseModel):
         ),
     ] = None
     required_during_scheduling_ignored_during_execution: Annotated[
-        Optional[NodeSelector],
+        NodeSelector | None,
         Field(
             alias="requiredDuringSchedulingIgnoredDuringExecution",
             description=(
@@ -3184,7 +3181,7 @@ class NodeAffinity(BaseModel):
 
 class PersistentVolumeClaimSpec(BaseModel):
     access_modes: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             alias="accessModes",
             description=(
@@ -3195,7 +3192,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     data_source: Annotated[
-        Optional[TypedLocalObjectReference],
+        TypedLocalObjectReference | None,
         Field(
             alias="dataSource",
             description=(
@@ -3213,7 +3210,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     data_source_ref: Annotated[
-        Optional[TypedObjectReference],
+        TypedObjectReference | None,
         Field(
             alias="dataSourceRef",
             description=(
@@ -3245,7 +3242,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     resources: Annotated[
-        Optional[VolumeResourceRequirements],
+        VolumeResourceRequirements | None,
         Field(
             description=(
                 "resources represents the minimum resources the volume should have. If"
@@ -3258,11 +3255,11 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     selector: Annotated[
-        Optional[v1.LabelSelector],
+        v1.LabelSelector | None,
         Field(description=("selector is a label query over volumes to consider for binding.")),
     ] = None
     storage_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="storageClassName",
             description=(
@@ -3273,7 +3270,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     volume_attributes_class_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="volumeAttributesClassName",
             description=(
@@ -3298,7 +3295,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     volume_mode: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="volumeMode",
             description=(
@@ -3308,7 +3305,7 @@ class PersistentVolumeClaimSpec(BaseModel):
         ),
     ] = None
     volume_name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="volumeName",
             description=("volumeName is the binding reference to the PersistentVolume backing this claim."),
@@ -3318,22 +3315,22 @@ class PersistentVolumeClaimSpec(BaseModel):
 
 class LifecycleHandler(BaseModel):
     exec: Annotated[
-        Optional[ExecAction],
+        ExecAction | None,
         Field(description="Exec specifies a command to execute in the container."),
     ] = None
     http_get: Annotated[
-        Optional[HTTPGetAction],
+        HTTPGetAction | None,
         Field(
             alias="httpGet",
             description="HTTPGet specifies an HTTP GET request to perform.",
         ),
     ] = None
     sleep: Annotated[
-        Optional[SleepAction],
+        SleepAction | None,
         Field(description="Sleep represents a duration that the container should sleep."),
     ] = None
     tcp_socket: Annotated[
-        Optional[TCPSocketAction],
+        TCPSocketAction | None,
         Field(
             alias="tcpSocket",
             description=(
@@ -3347,11 +3344,11 @@ class LifecycleHandler(BaseModel):
 
 class Probe(BaseModel):
     exec: Annotated[
-        Optional[ExecAction],
+        ExecAction | None,
         Field(description="Exec specifies a command to execute in the container."),
     ] = None
     failure_threshold: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="failureThreshold",
             description=(
@@ -3361,18 +3358,18 @@ class Probe(BaseModel):
         ),
     ] = None
     grpc: Annotated[
-        Optional[GRPCAction],
+        GRPCAction | None,
         Field(description="GRPC specifies a GRPC HealthCheckRequest."),
     ] = None
     http_get: Annotated[
-        Optional[HTTPGetAction],
+        HTTPGetAction | None,
         Field(
             alias="httpGet",
             description="HTTPGet specifies an HTTP GET request to perform.",
         ),
     ] = None
     initial_delay_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="initialDelaySeconds",
             description=(
@@ -3383,14 +3380,14 @@ class Probe(BaseModel):
         ),
     ] = None
     period_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="periodSeconds",
             description=("How often (in seconds) to perform the probe. Default to 10 seconds. Minimum value is 1."),
         ),
     ] = None
     success_threshold: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="successThreshold",
             description=(
@@ -3401,14 +3398,14 @@ class Probe(BaseModel):
         ),
     ] = None
     tcp_socket: Annotated[
-        Optional[TCPSocketAction],
+        TCPSocketAction | None,
         Field(
             alias="tcpSocket",
             description="TCPSocket specifies a connection to a TCP port.",
         ),
     ] = None
     termination_grace_period_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="terminationGracePeriodSeconds",
             description=(
@@ -3429,7 +3426,7 @@ class Probe(BaseModel):
         ),
     ] = None
     timeout_seconds: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="timeoutSeconds",
             description=(
@@ -3443,7 +3440,7 @@ class Probe(BaseModel):
 
 class VolumeProjection(BaseModel):
     cluster_trust_bundle: Annotated[
-        Optional[ClusterTrustBundleProjection],
+        ClusterTrustBundleProjection | None,
         Field(
             alias="clusterTrustBundle",
             description=(
@@ -3461,25 +3458,25 @@ class VolumeProjection(BaseModel):
         ),
     ] = None
     config_map: Annotated[
-        Optional[ConfigMapProjection],
+        ConfigMapProjection | None,
         Field(
             alias="configMap",
             description="configMap information about the configMap data to project",
         ),
     ] = None
     downward_api: Annotated[
-        Optional[DownwardAPIProjection],
+        DownwardAPIProjection | None,
         Field(
             alias="downwardAPI",
             description="downwardAPI information about the downwardAPI data to project",
         ),
     ] = None
     secret: Annotated[
-        Optional[SecretProjection],
+        SecretProjection | None,
         Field(description="secret information about the secret data to project"),
     ] = None
     service_account_token: Annotated[
-        Optional[ServiceAccountTokenProjection],
+        ServiceAccountTokenProjection | None,
         Field(
             alias="serviceAccountToken",
             description=("serviceAccountToken is information about the serviceAccountToken data to project"),
@@ -3503,11 +3500,11 @@ class WeightedPodAffinityTerm(BaseModel):
 
 class Event(BaseModel):
     action: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("What action was taken/failed regarding to the Regarding object.")),
     ] = None
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3518,13 +3515,13 @@ class Event(BaseModel):
             ),
         ),
     ] = None
-    count: Annotated[Optional[int], Field(description="The number of times this event has occurred.")] = None
+    count: Annotated[int | None, Field(description="The number of times this event has occurred.")] = None
     event_time: Annotated[
-        Optional[v1.MicroTime],
+        v1.MicroTime | None,
         Field(alias="eventTime", description="Time when this Event was first observed."),
     ] = None
     first_timestamp: Annotated[
-        Optional[v1.Time],
+        v1.Time | None,
         Field(
             alias="firstTimestamp",
             description=("The time at which the event was first recorded. (Time of server receipt is in TypeMeta.)"),
@@ -3535,7 +3532,7 @@ class Event(BaseModel):
         Field(alias="involvedObject", description="The object that this event is about."),
     ]
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3546,14 +3543,14 @@ class Event(BaseModel):
         ),
     ] = None
     last_timestamp: Annotated[
-        Optional[v1.Time],
+        v1.Time | None,
         Field(
             alias="lastTimestamp",
             description=("The time at which the most recent occurrence of this event was recorded."),
         ),
     ] = None
     message: Annotated[
-        Optional[str],
+        str | None,
         Field(description="A human-readable description of the status of this operation."),
     ] = None
     metadata: Annotated[
@@ -3566,7 +3563,7 @@ class Event(BaseModel):
         ),
     ]
     reason: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "This should be a short, machine understandable string that gives the"
@@ -3575,40 +3572,40 @@ class Event(BaseModel):
         ),
     ] = None
     related: Annotated[
-        Optional[ObjectReference],
+        ObjectReference | None,
         Field(description="Optional secondary object for more complex actions."),
     ] = None
     reporting_component: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="reportingComponent",
             description=("Name of the controller that emitted this Event, e.g. `kubernetes.io/kubelet`."),
         ),
     ] = None
     reporting_instance: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="reportingInstance",
             description="ID of the controller instance, e.g. `kubelet-xyzf`.",
         ),
     ] = None
     series: Annotated[
-        Optional[EventSeries],
+        EventSeries | None,
         Field(description=("Data about the Event series this event represents or nil if it's a singleton Event.")),
     ] = None
     source: Annotated[
-        Optional[EventSource],
+        EventSource | None,
         Field(description=("The component reporting this event. Should be a short machine understandable string.")),
     ] = None
     type: Annotated[
-        Optional[str],
+        str | None,
         Field(description=("Type of this event (Normal, Warning), new types could be added in the future")),
     ] = None
 
 
 class PersistentVolumeClaim(BaseModel):
     api_version: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="apiVersion",
             description=(
@@ -3620,7 +3617,7 @@ class PersistentVolumeClaim(BaseModel):
         ),
     ] = None
     kind: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Kind is a string value representing the REST resource this object"
@@ -3631,7 +3628,7 @@ class PersistentVolumeClaim(BaseModel):
         ),
     ] = None
     metadata: Annotated[
-        Optional[v1.ObjectMeta],
+        v1.ObjectMeta | None,
         Field(
             description=(
                 "Standard object's metadata. More info:"
@@ -3640,7 +3637,7 @@ class PersistentVolumeClaim(BaseModel):
         ),
     ] = None
     spec: Annotated[
-        Optional[PersistentVolumeClaimSpec],
+        PersistentVolumeClaimSpec | None,
         Field(
             description=(
                 "spec defines the desired characteristics of a volume requested by a"
@@ -3650,7 +3647,7 @@ class PersistentVolumeClaim(BaseModel):
         ),
     ] = None
     status: Annotated[
-        Optional[PersistentVolumeClaimStatus],
+        PersistentVolumeClaimStatus | None,
         Field(
             description=(
                 "status represents the current information/status of a persistent"
@@ -3663,7 +3660,7 @@ class PersistentVolumeClaim(BaseModel):
 
 class PersistentVolumeClaimTemplate(BaseModel):
     metadata: Annotated[
-        Optional[v1.ObjectMeta],
+        v1.ObjectMeta | None,
         Field(
             description=(
                 "May contain labels and annotations that will be copied into the PVC"
@@ -3686,7 +3683,7 @@ class PersistentVolumeClaimTemplate(BaseModel):
 
 class Lifecycle(BaseModel):
     post_start: Annotated[
-        Optional[LifecycleHandler],
+        LifecycleHandler | None,
         Field(
             alias="postStart",
             description=(
@@ -3699,7 +3696,7 @@ class Lifecycle(BaseModel):
         ),
     ] = None
     pre_stop: Annotated[
-        Optional[LifecycleHandler],
+        LifecycleHandler | None,
         Field(
             alias="preStop",
             description=(
@@ -3718,7 +3715,7 @@ class Lifecycle(BaseModel):
         ),
     ] = None
     stop_signal: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="stopSignal",
             description=(
@@ -3733,7 +3730,7 @@ class Lifecycle(BaseModel):
 
 class EphemeralVolumeSource(BaseModel):
     volume_claim_template: Annotated[
-        Optional[PersistentVolumeClaimTemplate],
+        PersistentVolumeClaimTemplate | None,
         Field(
             alias="volumeClaimTemplate",
             description=(
@@ -3760,7 +3757,7 @@ class EphemeralVolumeSource(BaseModel):
 
 class Container(BaseModel):
     args: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Arguments to the entrypoint. The container image's CMD is used if"
@@ -3776,7 +3773,7 @@ class Container(BaseModel):
         ),
     ] = None
     command: Annotated[
-        Optional[List[str]],
+        list[str] | None,
         Field(
             description=(
                 "Entrypoint array. Not executed within a shell. The container image's"
@@ -3793,11 +3790,11 @@ class Container(BaseModel):
         ),
     ] = None
     env: Annotated[
-        Optional[List[EnvVar]],
+        list[EnvVar] | None,
         Field(description=("List of environment variables to set in the container. Cannot be updated.")),
     ] = None
     env_from: Annotated[
-        Optional[List[EnvFromSource]],
+        list[EnvFromSource] | None,
         Field(
             alias="envFrom",
             description=(
@@ -3823,7 +3820,7 @@ class Container(BaseModel):
         ),
     ]
     image_pull_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="imagePullPolicy",
             description=(
@@ -3835,7 +3832,7 @@ class Container(BaseModel):
         ),
     ] = None
     lifecycle: Annotated[
-        Optional[Lifecycle],
+        Lifecycle | None,
         Field(
             description=(
                 "Actions that the management system should take in response to"
@@ -3844,7 +3841,7 @@ class Container(BaseModel):
         ),
     ] = None
     liveness_probe: Annotated[
-        Optional[Probe],
+        Probe | None,
         Field(
             alias="livenessProbe",
             description=(
@@ -3855,7 +3852,7 @@ class Container(BaseModel):
         ),
     ] = None
     name: Annotated[
-        Optional[str],
+        str | None,
         Field(
             description=(
                 "Name of the container specified as a DNS_LABEL. Each container in a"
@@ -3864,7 +3861,7 @@ class Container(BaseModel):
         ),
     ] = None
     ports: Annotated[
-        Optional[List[ContainerPort]],
+        list[ContainerPort] | None,
         Field(
             description=(
                 "List of ports to expose from the container. Not specifying a port here"
@@ -3878,7 +3875,7 @@ class Container(BaseModel):
         ),
     ] = None
     readiness_probe: Annotated[
-        Optional[Probe],
+        Probe | None,
         Field(
             alias="readinessProbe",
             description=(
@@ -3890,14 +3887,14 @@ class Container(BaseModel):
         ),
     ] = None
     resize_policy: Annotated[
-        Optional[List[ContainerResizePolicy]],
+        list[ContainerResizePolicy] | None,
         Field(
             alias="resizePolicy",
             description="Resources resize policy for the container.",
         ),
     ] = None
     resources: Annotated[
-        Optional[ResourceRequirements],
+        ResourceRequirements | None,
         Field(
             description=(
                 "Compute Resources required by this container. Cannot be updated. More"
@@ -3907,7 +3904,7 @@ class Container(BaseModel):
         ),
     ] = None
     restart_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="restartPolicy",
             description=(
@@ -3931,7 +3928,7 @@ class Container(BaseModel):
         ),
     ] = None
     security_context: Annotated[
-        Optional[SecurityContext],
+        SecurityContext | None,
         Field(
             alias="securityContext",
             description=(
@@ -3943,7 +3940,7 @@ class Container(BaseModel):
         ),
     ] = None
     startup_probe: Annotated[
-        Optional[Probe],
+        Probe | None,
         Field(
             alias="startupProbe",
             description=(
@@ -3959,7 +3956,7 @@ class Container(BaseModel):
         ),
     ] = None
     stdin: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a buffer for stdin in the"
@@ -3969,7 +3966,7 @@ class Container(BaseModel):
         ),
     ] = None
     stdin_once: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             alias="stdinOnce",
             description=(
@@ -3986,7 +3983,7 @@ class Container(BaseModel):
         ),
     ] = None
     termination_message_path: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePath",
             description=(
@@ -4001,7 +3998,7 @@ class Container(BaseModel):
         ),
     ] = None
     termination_message_policy: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="terminationMessagePolicy",
             description=(
@@ -4016,7 +4013,7 @@ class Container(BaseModel):
         ),
     ] = None
     tty: Annotated[
-        Optional[bool],
+        bool | None,
         Field(
             description=(
                 "Whether this container should allocate a TTY for itself, also requires"
@@ -4025,21 +4022,21 @@ class Container(BaseModel):
         ),
     ] = None
     volume_devices: Annotated[
-        Optional[List[VolumeDevice]],
+        list[VolumeDevice] | None,
         Field(
             alias="volumeDevices",
             description=("volumeDevices is the list of block devices to be used by the container."),
         ),
     ] = None
     volume_mounts: Annotated[
-        Optional[List[VolumeMount]],
+        list[VolumeMount] | None,
         Field(
             alias="volumeMounts",
             description=("Pod volumes to mount into the container's filesystem. Cannot be updated."),
         ),
     ] = None
     working_dir: Annotated[
-        Optional[str],
+        str | None,
         Field(
             alias="workingDir",
             description=(
@@ -4053,7 +4050,7 @@ class Container(BaseModel):
 
 class PodAffinity(BaseModel):
     preferred_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[WeightedPodAffinityTerm]],
+        list[WeightedPodAffinityTerm] | None,
         Field(
             alias="preferredDuringSchedulingIgnoredDuringExecution",
             description=(
@@ -4071,7 +4068,7 @@ class PodAffinity(BaseModel):
         ),
     ] = None
     required_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[PodAffinityTerm]],
+        list[PodAffinityTerm] | None,
         Field(
             alias="requiredDuringSchedulingIgnoredDuringExecution",
             description=(
@@ -4090,7 +4087,7 @@ class PodAffinity(BaseModel):
 
 class PodAntiAffinity(BaseModel):
     preferred_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[WeightedPodAffinityTerm]],
+        list[WeightedPodAffinityTerm] | None,
         Field(
             alias="preferredDuringSchedulingIgnoredDuringExecution",
             description=(
@@ -4108,7 +4105,7 @@ class PodAntiAffinity(BaseModel):
         ),
     ] = None
     required_during_scheduling_ignored_during_execution: Annotated[
-        Optional[List[PodAffinityTerm]],
+        list[PodAffinityTerm] | None,
         Field(
             alias="requiredDuringSchedulingIgnoredDuringExecution",
             description=(
@@ -4127,7 +4124,7 @@ class PodAntiAffinity(BaseModel):
 
 class ProjectedVolumeSource(BaseModel):
     default_mode: Annotated[
-        Optional[int],
+        int | None,
         Field(
             alias="defaultMode",
             description=(
@@ -4142,21 +4139,21 @@ class ProjectedVolumeSource(BaseModel):
         ),
     ] = None
     sources: Annotated[
-        Optional[List[VolumeProjection]],
+        list[VolumeProjection] | None,
         Field(description=("sources is the list of volume projections. Each entry in this list handles one source.")),
     ] = None
 
 
 class Affinity(BaseModel):
     node_affinity: Annotated[
-        Optional[NodeAffinity],
+        NodeAffinity | None,
         Field(
             alias="nodeAffinity",
             description="Describes node affinity scheduling rules for the pod.",
         ),
     ] = None
     pod_affinity: Annotated[
-        Optional[PodAffinity],
+        PodAffinity | None,
         Field(
             alias="podAffinity",
             description=(
@@ -4166,7 +4163,7 @@ class Affinity(BaseModel):
         ),
     ] = None
     pod_anti_affinity: Annotated[
-        Optional[PodAntiAffinity],
+        PodAntiAffinity | None,
         Field(
             alias="podAntiAffinity",
             description=(
@@ -4179,7 +4176,7 @@ class Affinity(BaseModel):
 
 class Volume(BaseModel):
     aws_elastic_block_store: Annotated[
-        Optional[AWSElasticBlockStoreVolumeSource],
+        AWSElasticBlockStoreVolumeSource | None,
         Field(
             alias="awsElasticBlockStore",
             description=(
@@ -4193,7 +4190,7 @@ class Volume(BaseModel):
         ),
     ] = None
     azure_disk: Annotated[
-        Optional[AzureDiskVolumeSource],
+        AzureDiskVolumeSource | None,
         Field(
             alias="azureDisk",
             description=(
@@ -4205,7 +4202,7 @@ class Volume(BaseModel):
         ),
     ] = None
     azure_file: Annotated[
-        Optional[AzureFileVolumeSource],
+        AzureFileVolumeSource | None,
         Field(
             alias="azureFile",
             description=(
@@ -4217,7 +4214,7 @@ class Volume(BaseModel):
         ),
     ] = None
     cephfs: Annotated[
-        Optional[CephFSVolumeSource],
+        CephFSVolumeSource | None,
         Field(
             description=(
                 "cephFS represents a Ceph FS mount on the host that shares a pod's"
@@ -4227,7 +4224,7 @@ class Volume(BaseModel):
         ),
     ] = None
     cinder: Annotated[
-        Optional[CinderVolumeSource],
+        CinderVolumeSource | None,
         Field(
             description=(
                 "cinder represents a cinder volume attached and mounted on kubelets"
@@ -4239,14 +4236,14 @@ class Volume(BaseModel):
         ),
     ] = None
     config_map: Annotated[
-        Optional[ConfigMapVolumeSource],
+        ConfigMapVolumeSource | None,
         Field(
             alias="configMap",
             description=("configMap represents a configMap that should populate this volume"),
         ),
     ] = None
     csi: Annotated[
-        Optional[CSIVolumeSource],
+        CSIVolumeSource | None,
         Field(
             description=(
                 "csi (Container Storage Interface) represents ephemeral storage that is"
@@ -4255,14 +4252,14 @@ class Volume(BaseModel):
         ),
     ] = None
     downward_api: Annotated[
-        Optional[DownwardAPIVolumeSource],
+        DownwardAPIVolumeSource | None,
         Field(
             alias="downwardAPI",
             description=("downwardAPI represents downward API about the pod that should populate this volume"),
         ),
     ] = None
     empty_dir: Annotated[
-        Optional[EmptyDirVolumeSource],
+        EmptyDirVolumeSource | None,
         Field(
             alias="emptyDir",
             description=(
@@ -4273,7 +4270,7 @@ class Volume(BaseModel):
         ),
     ] = None
     ephemeral: Annotated[
-        Optional[EphemeralVolumeSource],
+        EphemeralVolumeSource | None,
         Field(
             description=(
                 "ephemeral represents a volume that is handled by a cluster storage"
@@ -4296,7 +4293,7 @@ class Volume(BaseModel):
         ),
     ] = None
     fc: Annotated[
-        Optional[FCVolumeSource],
+        FCVolumeSource | None,
         Field(
             description=(
                 "fc represents a Fibre Channel resource that is attached to a kubelet's"
@@ -4305,7 +4302,7 @@ class Volume(BaseModel):
         ),
     ] = None
     flex_volume: Annotated[
-        Optional[FlexVolumeSource],
+        FlexVolumeSource | None,
         Field(
             alias="flexVolume",
             description=(
@@ -4316,7 +4313,7 @@ class Volume(BaseModel):
         ),
     ] = None
     flocker: Annotated[
-        Optional[FlockerVolumeSource],
+        FlockerVolumeSource | None,
         Field(
             description=(
                 "flocker represents a Flocker volume attached to a kubelet's host"
@@ -4327,7 +4324,7 @@ class Volume(BaseModel):
         ),
     ] = None
     gce_persistent_disk: Annotated[
-        Optional[GCEPersistentDiskVolumeSource],
+        GCEPersistentDiskVolumeSource | None,
         Field(
             alias="gcePersistentDisk",
             description=(
@@ -4341,7 +4338,7 @@ class Volume(BaseModel):
         ),
     ] = None
     git_repo: Annotated[
-        Optional[GitRepoVolumeSource],
+        GitRepoVolumeSource | None,
         Field(
             alias="gitRepo",
             description=(
@@ -4353,7 +4350,7 @@ class Volume(BaseModel):
         ),
     ] = None
     glusterfs: Annotated[
-        Optional[GlusterfsVolumeSource],
+        GlusterfsVolumeSource | None,
         Field(
             description=(
                 "glusterfs represents a Glusterfs mount on the host that shares a pod's"
@@ -4364,7 +4361,7 @@ class Volume(BaseModel):
         ),
     ] = None
     host_path: Annotated[
-        Optional[HostPathVolumeSource],
+        HostPathVolumeSource | None,
         Field(
             alias="hostPath",
             description=(
@@ -4377,7 +4374,7 @@ class Volume(BaseModel):
         ),
     ] = None
     image: Annotated[
-        Optional[ImageVolumeSource],
+        ImageVolumeSource | None,
         Field(
             description=(
                 "image represents an OCI object (a container image or artifact) pulled"
@@ -4410,7 +4407,7 @@ class Volume(BaseModel):
         ),
     ] = None
     iscsi: Annotated[
-        Optional[ISCSIVolumeSource],
+        ISCSIVolumeSource | None,
         Field(
             description=(
                 "iscsi represents an ISCSI Disk resource that is attached to a"
@@ -4430,7 +4427,7 @@ class Volume(BaseModel):
         ),
     ]
     nfs: Annotated[
-        Optional[NFSVolumeSource],
+        NFSVolumeSource | None,
         Field(
             description=(
                 "nfs represents an NFS mount on the host that shares a pod's lifetime"
@@ -4439,7 +4436,7 @@ class Volume(BaseModel):
         ),
     ] = None
     persistent_volume_claim: Annotated[
-        Optional[PersistentVolumeClaimVolumeSource],
+        PersistentVolumeClaimVolumeSource | None,
         Field(
             alias="persistentVolumeClaim",
             description=(
@@ -4450,7 +4447,7 @@ class Volume(BaseModel):
         ),
     ] = None
     photon_persistent_disk: Annotated[
-        Optional[PhotonPersistentDiskVolumeSource],
+        PhotonPersistentDiskVolumeSource | None,
         Field(
             alias="photonPersistentDisk",
             description=(
@@ -4462,7 +4459,7 @@ class Volume(BaseModel):
         ),
     ] = None
     portworx_volume: Annotated[
-        Optional[PortworxVolumeSource],
+        PortworxVolumeSource | None,
         Field(
             alias="portworxVolume",
             description=(
@@ -4475,11 +4472,11 @@ class Volume(BaseModel):
         ),
     ] = None
     projected: Annotated[
-        Optional[ProjectedVolumeSource],
+        ProjectedVolumeSource | None,
         Field(description=("projected items for all in one resources secrets, configmaps, and downward API")),
     ] = None
     quobyte: Annotated[
-        Optional[QuobyteVolumeSource],
+        QuobyteVolumeSource | None,
         Field(
             description=(
                 "quobyte represents a Quobyte mount on the host that shares a pod's"
@@ -4489,7 +4486,7 @@ class Volume(BaseModel):
         ),
     ] = None
     rbd: Annotated[
-        Optional[RBDVolumeSource],
+        RBDVolumeSource | None,
         Field(
             description=(
                 "rbd represents a Rados Block Device mount on the host that shares a"
@@ -4500,7 +4497,7 @@ class Volume(BaseModel):
         ),
     ] = None
     scale_io: Annotated[
-        Optional[ScaleIOVolumeSource],
+        ScaleIOVolumeSource | None,
         Field(
             alias="scaleIO",
             description=(
@@ -4511,7 +4508,7 @@ class Volume(BaseModel):
         ),
     ] = None
     secret: Annotated[
-        Optional[SecretVolumeSource],
+        SecretVolumeSource | None,
         Field(
             description=(
                 "secret represents a secret that should populate this volume. More"
@@ -4520,7 +4517,7 @@ class Volume(BaseModel):
         ),
     ] = None
     storageos: Annotated[
-        Optional[StorageOSVolumeSource],
+        StorageOSVolumeSource | None,
         Field(
             description=(
                 "storageOS represents a StorageOS volume attached and mounted on"
@@ -4530,7 +4527,7 @@ class Volume(BaseModel):
         ),
     ] = None
     vsphere_volume: Annotated[
-        Optional[VsphereVirtualDiskVolumeSource],
+        VsphereVirtualDiskVolumeSource | None,
         Field(
             alias="vsphereVolume",
             description=(

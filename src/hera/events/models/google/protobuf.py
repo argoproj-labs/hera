@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from pydantic import Base64Str
 
 from hera.shared._pydantic import BaseModel
 
 
 class Any(BaseModel):
-    type_url: Optional[str] = None
-    value: Optional[str] = None
+    type_url: str | None = None
+    value: Base64Str | None = None
