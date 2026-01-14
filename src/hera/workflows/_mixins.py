@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from typing import (
     Any,
-    Callable,
     Dict,
     List,
     Optional,
     Sequence as SequenceType,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -78,23 +76,11 @@ OneOrMany = Union[T, SequenceType[T]]
 values, and so that our code is more readable. It is used by the 'normalize' validators below."""
 
 
-def normalize_to_list(v: Optional[OneOrMany]) -> Optional[List]:
+def normalize_to_list(v: OneOrMany) -> List:
     """Normalize given value to a list if not None."""
-    if v is None or isinstance(v, list):
+    if isinstance(v, list):
         return v
     return [v]
-
-
-def normalize_to_list_or(*valid_types: Type) -> Callable[[Optional[OneOrMany]], Optional[List]]:
-    """Normalize given value to a list if not None."""
-
-    def normalize_to_list_if_not_valid_type(v: Optional[OneOrMany]) -> Union[List, Any]:
-        """Normalize given value to a list if not None or already a valid type."""
-        if v is None or isinstance(v, (list, *valid_types)):
-            return v
-        return [v]
-
-    return normalize_to_list_if_not_valid_type
 
 
 def convert_to_model_parameters(parameters: List[ModelParameter]) -> List[ModelParameter]:
@@ -237,9 +223,6 @@ class IOMixin(BaseMixin):
 
     inputs: InputsT = None
     outputs: OutputsT = None
-    _normalize_fields = validator("inputs", "outputs", allow_reuse=True)(
-        normalize_to_list_or(ModelInputs, ModelOutputs)
-    )
 
     def get_parameter(self, name: str) -> Parameter:
         """Finds and returns the parameter with the supplied name.
@@ -303,8 +286,7 @@ class IOMixin(BaseMixin):
             return self.inputs
 
         result = ModelInputs()
-        inputs = self.inputs if isinstance(self.inputs, list) else [self.inputs]
-        for value in inputs:
+        for value in normalize_to_list(self.inputs):
             if isinstance(value, dict):
                 for k, v in value.items():
                     value = Parameter(name=k, value=v)
@@ -342,7 +324,7 @@ class IOMixin(BaseMixin):
             return self.outputs
 
         result = ModelOutputs()
-        for value in self.outputs:
+        for value in normalize_to_list(self.outputs):
             if isinstance(value, Parameter):
                 result.parameters = (
                     [value.as_output()] if result.parameters is None else result.parameters + [value.as_output()]
@@ -370,7 +352,6 @@ class EnvMixin(BaseMixin):
 
     env: EnvT = None
     env_from: EnvFromT = None
-    _normalize_fields = validator("env", "env_from", allow_reuse=True)(normalize_to_list)
 
     def _build_env(self) -> Optional[List[EnvVar]]:
         """Processes the `env` field and returns a list of generated `EnvVar` or `None`."""
@@ -378,7 +359,7 @@ class EnvMixin(BaseMixin):
             return None
 
         result: List[EnvVar] = []
-        for e in self.env:  # type: ignore
+        for e in normalize_to_list(self.env):
             if isinstance(e, EnvVar):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnv):
@@ -397,7 +378,7 @@ class EnvMixin(BaseMixin):
             return None
 
         result: List[EnvFromSource] = []
-        for e in self.env_from:  # type: ignore
+        for e in normalize_to_list(self.env_from):
             if isinstance(e, EnvFromSource):
                 result.append(e)
             elif issubclass(e.__class__, _BaseEnvFrom):
@@ -412,7 +393,6 @@ class MetricsMixin(BaseMixin):
     """`MetricsMixin` provides the ability to set metrics on a n object."""
 
     metrics: Optional[MetricsT] = None
-    _normalize_metrics = validator("metrics", allow_reuse=True)(normalize_to_list_or(Metrics, ModelMetrics))
 
     def _build_metrics(self) -> Optional[ModelMetrics]:
         """Processes the `metrics` field and returns the generated `ModelMetrics` or `None`."""
@@ -422,7 +402,7 @@ class MetricsMixin(BaseMixin):
             return ModelMetrics(prometheus=self.metrics._build_metrics())
 
         metrics = []
-        for m in self.metrics:  # type: ignore
+        for m in normalize_to_list(self.metrics):
             if isinstance(m, _BaseMetric):
                 metrics.append(m._build_metric())
             elif isinstance(m, ModelPrometheus):
@@ -537,7 +517,6 @@ class VolumeMixin(BaseMixin):
     """
 
     volumes: Optional[VolumesT] = None
-    _normalize_fields = validator("volumes", allow_reuse=True)(normalize_to_list)
 
     def _build_volumes(self) -> Optional[List[ModelVolume]]:
         """Processes the `volumes` and creates an optional list of generated model `Volume`s."""
@@ -545,7 +524,7 @@ class VolumeMixin(BaseMixin):
             return None
 
         # filter volumes for otherwise we're building extra Argo volumes
-        filtered_volumes = [cast(_BaseVolume, v) for v in self.volumes if not isinstance(v, Volume)]  # type: ignore
+        filtered_volumes = [cast(_BaseVolume, v) for v in normalize_to_list(self.volumes) if not isinstance(v, Volume)]
         # only build volumes if there are any of type `_BaseVolume`, otherwise it must be an autogenerated model
         # already, so kept it as it is
         result = [v._build_volume() if isinstance(v, _BaseVolume) else v for v in filtered_volumes]
@@ -556,7 +535,7 @@ class VolumeMixin(BaseMixin):
         if self.volumes is None:
             return None
 
-        volumes_with_pv_claims = [v for v in self.volumes if isinstance(v, Volume)]  # type: ignore
+        volumes_with_pv_claims = [v for v in normalize_to_list(self.volumes) if isinstance(v, Volume)]
         if not volumes_with_pv_claims:
             return None
         return [v._build_persistent_volume_claim() for v in volumes_with_pv_claims] or None
@@ -596,21 +575,18 @@ class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object (only Tasks, Steps and Workflows use arguments)."""
 
     arguments: ArgumentsT = None
-    _normalize_arguments = validator("arguments", allow_reuse=True)(normalize_to_list_or(ModelArguments))
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""
-        # Reapply the validator in case arguments was assigned to as a dictionary
-        normalized_arguments = normalize_to_list_or(ModelArguments)(self.arguments)
-
-        if normalized_arguments is None:
+        if self.arguments is None:
             return None
-        elif isinstance(normalized_arguments, ModelArguments):
+
+        if isinstance(self.arguments, ModelArguments):
             # Special case as Parameter is a subclass of ModelParameter
             # We need to convert Parameters to ModelParameters
-            if normalized_arguments.parameters:
-                normalized_arguments.parameters = convert_to_model_parameters(normalized_arguments.parameters)
-            return normalized_arguments
+            if self.arguments.parameters:
+                self.arguments.parameters = convert_to_model_parameters(self.arguments.parameters)
+            return self.arguments
 
         from hera.workflows.workflow_template import WorkflowTemplate
 
@@ -639,7 +615,7 @@ class ArgumentsMixin(BaseMixin):
                 result.parameters = (result.parameters or []) + [param_as_argument]
 
         result = ModelArguments()
-        for arg in normalized_arguments:
+        for arg in normalize_to_list(self.arguments):
             if isinstance(arg, dict):
                 for k, v in arg.items():
                     add_argument(k, v, result)
@@ -726,7 +702,7 @@ class EnvIOMixin(EnvMixin, IOMixin):
             return None
 
         params: Optional[List[ModelParameter]] = None
-        for spec in self.env:  # type: ignore
+        for spec in normalize_to_list(self.env):
             if isinstance(spec, Env) and spec.value_from_input is not None:
                 value = (
                     spec.value_from_input.value
