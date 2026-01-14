@@ -594,13 +594,13 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Annotated[List[Union[str, AccessMode]] | None, Field(validate_default=True)] = [
+    access_modes: Annotated[List[str | AccessMode] | None, Field(validate_default=True)] = [
         AccessMode.read_write_once
     ]  # type: ignore
     storage_class_name: Optional[str] = None
 
-    @field_validator("access_modes", mode="before")
-    def _check_access_modes(cls, v):
+    @field_validator("access_modes", mode="after")
+    def _check_access_modes(cls, v: List) -> List[str | AccessMode]:
         if not v:
             return [AccessMode.read_write_once]
 
