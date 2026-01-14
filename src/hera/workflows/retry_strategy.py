@@ -74,7 +74,7 @@ class RetryStrategy(_BaseModel):
         if v is None or isinstance(v, IntOrString):
             return v
 
-        return IntOrString(__root__=v)
+        return IntOrString(root=v)
 
     def build(self) -> _ModelRetryStrategy:
         """Builds the generated `RetryStrategy` representation of the retry strategy."""

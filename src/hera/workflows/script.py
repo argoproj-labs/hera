@@ -49,7 +49,7 @@ from hera.shared._type_util import (
     origin_type_issupertype,
     unwrap_annotation,
 )
-from hera.shared.serialization import serialize
+from hera.shared.serialization import MISSING, serialize
 from hera.workflows._context import _context
 from hera.workflows._meta_mixins import CallableTemplateMixin
 from hera.workflows._mixins import (
@@ -486,7 +486,7 @@ def _get_inputs_from_callable(source: Callable) -> Tuple[List[Parameter], List[A
 
                 artifacts.append(io)
             elif isinstance(io, Parameter):
-                if io.default is not None:
+                if io.default is not None and io.default is not MISSING:
                     raise ValueError(
                         "default cannot be set via the Parameter's default, use a Python default value instead."
                     )

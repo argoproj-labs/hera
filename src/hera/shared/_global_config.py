@@ -170,16 +170,8 @@ class _GlobalConfig:
 
 
 class BaseMixin(BaseModel):
-    def _init_private_attributes(self):
-        """A pydantic private method called after `__init__`.
-
-        Notes:
-        -----
-        In order to inject `__hera_init__` after `__init__` without destroying the autocomplete, we opted for
-        this method. We also tried other ways including creating a metaclass that invokes hera_init after init,
-        but that always broke auto-complete for IDEs like VSCode.
-        """
-        super()._init_private_attributes()  # type: ignore
+    def model_post_init(self, context: Any, /):
+        """A pydantic private method called after `__init__`."""
         self.__hera_init__()
 
     def __hera_init__(self) -> None:

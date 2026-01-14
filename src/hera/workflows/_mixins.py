@@ -16,7 +16,7 @@ from typing import (
     cast,
 )
 
-from pydantic import Field, field_validator, model_validator, validator
+from pydantic import Field, field_validator, model_validator
 
 from hera.shared import BaseMixin, global_config
 from hera.shared._pydantic import PrivateAttr, get_field_annotations, get_fields
@@ -106,7 +106,7 @@ def convert_to_model_parameters(parameters: List[ModelParameter]) -> List[ModelP
     This is needed as `Parameter` is a subclass of `ModelParameter`, so we must convert
     `Parameter` objects to `ModelParameter` when building a Workflow.
     """
-    return [ModelParameter.parse_obj(p.dict()) if isinstance(p, Parameter) else p for p in parameters]
+    return [ModelParameter.model_validate(p.model_dump()) if isinstance(p, Parameter) else p for p in parameters]
 
 
 InputsT = Optional[
@@ -136,13 +136,12 @@ This type enables uses of Hera auto-generated models such as (`hera.workflows.mo
 `hera.workflows.Artifact`),  or lists of the aforementioned objects.
 """
 
-ArgumentsT = Optional[
-    Union[
-        ModelArguments,
-        OneOrMany[Union[Dict[str, Any], Parameter, ModelParameter, Artifact, ModelArtifact]],
-        ModelOutputs,
-    ]
-]
+ArgumentsT = (
+    ModelArguments
+    | OneOrMany[Dict[str, Any] | Parameter | ModelParameter | Artifact | ModelArtifact]
+    | ModelOutputs
+    | None
+)
 """`ArgumentsT` is the main type associated with arguments that can be used on DAG tasks, steps, etc.
 
 This type enables uses of the Hera auto-generated `hera.workflows.models.Arguments` model, Hera managed models such as
@@ -477,7 +476,7 @@ class TemplateMixin(SubNodeMixin, HookMixin, MetricsMixin):
     def _convert_active_deadline_seconds(cls, v) -> Optional[IntOrString]:
         if v is None or isinstance(v, IntOrString):
             return v
-        return IntOrString(__root__=v)
+        return IntOrString(root=v)
 
     def _build_init_containers(self) -> Optional[List[ModelUserContainer]]:
         """Builds the `init_containers` field and optionally returns a list of `UserContainer`."""
@@ -609,7 +608,11 @@ class ArgumentsMixin(BaseMixin):
 
         if normalized_arguments is None:
             return None
-        elif isinstance(normalized_arguments, ModelArguments):
+
+        normalized_arguments = (
+            [self.arguments] if not isinstance(self.arguments, (list, ModelArguments)) else self.arguments
+        )
+        if isinstance(normalized_arguments, ModelArguments):
             # Special case as Parameter is a subclass of ModelParameter
             # We need to convert Parameters to ModelParameters
             if normalized_arguments.parameters:
@@ -704,21 +707,21 @@ class ItemMixin(BaseMixin):
             items = []
             for item in self.with_items:
                 if isinstance(item, Parameter):
-                    items.append(Item(__root__=item.value))
+                    items.append(Item(root=item.value))
                 elif (
                     isinstance(item, str) or isinstance(item, dict) or isinstance(item, float) or isinstance(item, int)
                 ):
-                    items.append(Item(__root__=item))
+                    items.append(Item(root=item))
                 elif isinstance(item, Item):
                     items.append(item)
                 else:
-                    items.append(Item(__root__=serialize(item)))
+                    items.append(Item(root=serialize(item)))
             return items
         elif isinstance(self.with_items, Parameter):
-            return [Item(__root__=self.with_items.value)]
+            return [Item(root=self.with_items.value)]
         elif isinstance(self.with_items, str):
-            return [Item(__root__=self.with_items)]
-        return [Item(__root__=serialize(self.with_items))]
+            return [Item(root=self.with_items)]
+        return [Item(root=serialize(self.with_items))]
 
 
 class EnvIOMixin(EnvMixin, IOMixin):

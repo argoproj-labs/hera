@@ -403,7 +403,7 @@ class WorkflowPythonBuilder:
         if hera_template_class == Steps and template.steps:
             invocator_type = "steps"
             for parallel_steps in template.steps:
-                parallel_steps_list = parallel_steps.__root__
+                parallel_steps_list = parallel_steps.root
 
                 if len(parallel_steps_list) > 1:
                     body.append(
@@ -421,9 +421,7 @@ class WorkflowPythonBuilder:
                                     ),
                                 )
                             ],
-                            body=[
-                                self._build_template_call_expression(step, Step) for step in parallel_steps.__root__
-                            ],
+                            body=[self._build_template_call_expression(step, Step) for step in parallel_steps.root],
                         )
                     )
                 else:

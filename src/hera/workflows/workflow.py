@@ -362,7 +362,7 @@ class Workflow(
 
     def to_dict(self) -> Any:
         """Builds the Workflow as an Argo schema Workflow object and returns it as a dictionary."""
-        return self.build().dict(exclude_none=True, by_alias=True)
+        return self.build().model_dump(exclude_none=True, by_alias=True)
 
     def __eq__(self, other) -> bool:
         """Verifies equality of `self` with the specified `other`."""

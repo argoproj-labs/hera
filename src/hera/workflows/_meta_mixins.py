@@ -221,7 +221,7 @@ class ModelMapperMixin(BaseMixin):
     @classmethod
     def _from_dict(cls, model_dict: Dict, model: Type[BaseModel]) -> ModelMapperMixin:
         """Parse from given model_dict, using the given model type to call its parse_obj."""
-        model_workflow = model.parse_obj(model_dict)
+        model_workflow = model.model_validate(model_dict)
         return cls._from_model(model_workflow)
 
     @classmethod
@@ -383,22 +383,17 @@ class CallableTemplateMixin(BaseMixin):
         parameter_argument_names = self._get_parameter_names(arguments)
         artifact_argument_names = self._get_artifact_names(arguments)
 
-        # when the `source` is set via an `@script` decorator, it does not come in with the `kwargs` so we need to
-        # set it here in order for the following logic to capture it
-        if "source" not in kwargs and hasattr(self, "source"):
-            kwargs["source"] = self.source  # type: ignore
-
-        if "source" in kwargs and "with_param" in kwargs:
+        if "with_param" in kwargs and hasattr(self, "source"):
             arguments += self._get_templated_source_args(
                 parameter_argument_names,
                 artifact_argument_names,
-                kwargs["source"],
+                self.source,  # type: ignore
             )
-        elif "source" in kwargs and "with_items" in kwargs:
+        elif "with_items" in kwargs and hasattr(self, "source"):
             arguments += self._get_templated_arguments_from_items(
                 parameter_argument_names,
                 kwargs["with_items"],
-                kwargs["source"],
+                self.source,  # type: ignore
             )
 
         # it is possible for the user to pass `arguments` via `kwargs` along with `with_param`. The `with_param`

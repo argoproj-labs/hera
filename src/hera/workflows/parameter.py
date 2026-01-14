@@ -6,9 +6,10 @@ Tip:
 
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, cast
 
-from pydantic import field_validator, model_validator
+from pydantic import model_validator
+from typing_extensions import Self
 
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
@@ -38,28 +39,20 @@ class Parameter(_ModelParameter):
             raise ValueError("name cannot be `None` or empty when used")
 
     # `MISSING` is the default value so that `Parameter` serialization understands the difference between a
-    # missing value and a value of `None`, as set by a user. With this, when something sets a value of `None` it is
-    # taken as a proper `None`. By comparison, if a user does not set a value, it is taken as `MISSING` and therefore
-    # not serialized. This happens because the values if turned into an _actual_ `None` by `serialize` and therefore
-    # Pydantic will not include it in the YAML that is passed to Argo
+    # missing value and an explicit value of `None`, as set by a user.
     value: Optional[Any] = MISSING
     default: Optional[Any] = MISSING
 
-    @model_validator(mode="before")
-    @classmethod
-    def _check_value(cls, values: Any) -> Any:
-        if isinstance(values, dict):
-            if values.get("value") is not None and values.get("value_from") is not None:
-                raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
+    @model_validator(mode="after")
+    def _check_self(self) -> Self:
+        self.value = serialize(self.value)
+        self.default = serialize(self.default)
+        if enum_values := self.enum:
+            # We don't need to set "enum" in values to "MISSING" if there are no values
+            # as it's a list of values. The values themselves should be serialized.
+            self.enum = [cast(str, serialize(v)) for v in enum_values]
 
-            values["value"] = serialize(values.get("value", MISSING))
-            values["default"] = serialize(values.get("default", MISSING))
-            if enum_values := values.get("enum", []):
-                # We don't need to set "enum" in values to "MISSING" if there are no values
-                # as it's a list of values. The values themselves should be serialized.
-                values["enum"] = [serialize(v) for v in enum_values]
-
-        return values
+        return self
 
     @classmethod
     def _get_input_attributes(cls):

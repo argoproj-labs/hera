@@ -50,7 +50,7 @@ def _generate_yaml(path: Path) -> bool:
 
 
 def _transform_workflow(obj):
-    w = ModelWorkflow.parse_obj(obj)
+    w = ModelWorkflow.model_validate(obj)
     w.metadata.annotations = {}
     w.metadata.labels = {}
 
@@ -59,7 +59,7 @@ def _transform_workflow(obj):
         for t in w.spec.templates:
             if t.script:
                 t.script.source = InlineScriptConstructor._roundtrip(t.script.source)
-    return w.dict()
+    return w.model_dump()
 
 
 def _transform_workflow_template(obj):
