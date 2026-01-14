@@ -193,7 +193,7 @@ def map_runner_input(
     for field in get_fields(runner_input_class):
         input_model_obj[field] = map_field(field, kwargs)
 
-    return cast(T, runner_input_class.parse_obj(input_model_obj))
+    return cast(T, runner_input_class.model_validate(input_model_obj))
 
 
 def _save_annotated_return_outputs(

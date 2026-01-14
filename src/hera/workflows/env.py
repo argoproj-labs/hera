@@ -159,7 +159,6 @@ class FieldEnv(_BaseEnv):
 
     @field_validator("api_version")
     @classmethod
-    @classmethod
     def _check_api_version(cls, v):
         """Checks whether the `api_version` field is set and uses the global config `api_version` if not."""
         if v is None:

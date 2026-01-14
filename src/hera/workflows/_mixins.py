@@ -5,12 +5,10 @@ from __future__ import annotations
 from typing import (
     Annotated,
     Any,
-    Callable,
     Dict,
     List,
     Optional,
     Sequence as SequenceType,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -94,7 +92,10 @@ def convert_to_model_parameters(parameters: List[ModelParameter]) -> List[ModelP
     This is needed as `Parameter` is a subclass of `ModelParameter`, so we must convert
     `Parameter` objects to `ModelParameter` when building a Workflow.
     """
-    return [ModelParameter.model_validate(p.model_dump()) if isinstance(p, Parameter) else p for p in parameters]
+    return [
+        ModelParameter.model_validate(p.model_dump(), extra="ignore") if isinstance(p, Parameter) else p
+        for p in parameters
+    ]
 
 
 InputsT = Optional[
@@ -580,6 +581,20 @@ class ArgumentsMixin(BaseMixin):
     """`ArgumentsMixin` provides the ability to set the `arguments` field on the inheriting object (only Tasks, Steps and Workflows use arguments)."""
 
     arguments: ArgumentsT = None
+
+    @field_validator("arguments", mode="wrap")
+    def _arguments_wrap(cls, v, handler):
+        """Special case hack for name-clash arguments.
+
+        e.g. `arguments={"name": "Hera"}` should be treated as a `Parameter(name="name", value="Hera")` but
+        it will actually become `Parameter(name="Hera")` without this function check.
+
+        A single dictionary of arguments with values that clash with Parameter will not be assumed to be a Parameter.
+        """
+        if isinstance(v, list) and len(v) == 1 and isinstance(v[0], dict) or isinstance(v, dict):
+            return v
+
+        return handler(v)
 
     def _build_arguments(self) -> Optional[ModelArguments]:
         """Processes the `arguments` field and builds the optional generated `Arguments` to set as arguments."""

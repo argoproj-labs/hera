@@ -8,8 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional, cast
 
-from pydantic import model_validator
-from typing_extensions import Self
+from pydantic import field_validator
 
 from hera.shared.serialization import MISSING, serialize
 from hera.workflows.models import Parameter as _ModelParameter
@@ -43,16 +42,20 @@ class Parameter(_ModelParameter):
     value: Optional[Any] = MISSING
     default: Optional[Any] = MISSING
 
-    @model_validator(mode="after")
-    def _check_self(self) -> Self:
+    @field_validator("enum", mode="before")
+    def _serialize_enum(cls, values: Any):
+        if isinstance(values, list):
+            values = [cast(str, serialize(v)) for v in values]
+
+        return values
+
+    def model_post_init(self, context: Any = None) -> None:
+        """Perform post-init processing."""
+        if self.value_from is not None and self.value != MISSING:
+            raise ValueError("Cannot specify both `value` and `value_from` when instantiating `Parameter`")
+
         self.value = serialize(self.value)
         self.default = serialize(self.default)
-        if enum_values := self.enum:
-            # We don't need to set "enum" in values to "MISSING" if there are no values
-            # as it's a list of values. The values themselves should be serialized.
-            self.enum = [cast(str, serialize(v)) for v in enum_values]
-
-        return self
 
     @classmethod
     def _get_input_attributes(cls):

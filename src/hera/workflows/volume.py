@@ -3,7 +3,7 @@
 import uuid
 import warnings
 from enum import Enum
-from typing import Annotated, Any, List, Optional, Union, cast
+from typing import Annotated, Any, List, Optional, cast
 
 from pydantic import Field, field_validator, model_validator
 
@@ -594,9 +594,7 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     size: Optional[str] = None  # type: ignore
     resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Annotated[List[str | AccessMode] | None, Field(validate_default=True)] = [
-        AccessMode.read_write_once
-    ]  # type: ignore
+    access_modes: Annotated[List[str | AccessMode] | None, Field(validate_default=True)] = [AccessMode.read_write_once]  # type: ignore
     storage_class_name: Optional[str] = None
 
     @field_validator("access_modes", mode="after")

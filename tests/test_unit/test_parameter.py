@@ -2,7 +2,10 @@
 
 import pytest
 
-from hera.workflows.models import Parameter as ModelParameter
+from hera.workflows.models import (
+    Parameter as ModelParameter,
+    ValueFrom,
+)
 from hera.workflows.parameter import Parameter
 
 
@@ -108,3 +111,12 @@ def test_parameter_values_serialization(value, default, enum, expected_built_par
         ).as_input()
         == expected_built_parameter
     )
+
+
+def test_parameter_cannot_specify_both_value_and_value_from():
+    with pytest.raises(ValueError) as e:
+        Parameter(
+            name="test",
+            value=42,
+            value_from=ValueFrom(),
+        )
