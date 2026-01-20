@@ -2,7 +2,9 @@
 
 import json
 import logging
+import os
 import sys
+from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import requests
@@ -18,11 +20,21 @@ assert open_api_spec_url is not None, "Expected the OpenAPI spec URL to be passe
 output_file = sys.argv[2]
 assert output_file is not None, "Expected the output file to be passed as the second argument"
 
-# download the spec
-response = requests.get(open_api_spec_url, timeout=60)
+tmp_file = Path("/tmp/" + os.path.split(open_api_spec_url)[1])
 
-# get the spec into a dictionary
-spec = response.json()
+if tmp_file.exists() and tmp_file.read_text() != "":
+    print(f"Reading local copy from {tmp_file}")
+    spec = json.loads(Path(tmp_file).read_text())
+else:
+    print("Downloading spec")
+    # download the spec
+    response = requests.get(open_api_spec_url, timeout=60)
+    # cache it for next time
+    with open(tmp_file, "w") as f:
+        f.write(response.text)
+
+    # get the spec into a dictionary
+    spec = response.json()
 
 # these are specifications of objects with fields that are marked as required. However, it is possible for the Argo
 # Server to not return anything for those fields. In those cases, Pydantic fails type validation for those objects.
@@ -150,18 +162,23 @@ prefix_len = len("#/definitions/")
 
 # Create "nodes" for the sorter from definition names and any "properties" that reference other definitions
 for definition, metadata in spec["definitions"].items():
-    if "properties" not in metadata:
+    if "properties" not in metadata and "items" not in metadata:
         topo_sorter.add(definition)
         continue
 
     object_references = []
-    for prop, attrs in metadata["properties"].items():
+    for prop, attrs in metadata.get("properties", {}).items():
         if "$ref" in attrs:
             # Skip cycle reference for topological sorter
             reference = attrs["$ref"][prefix_len:]
             if reference == definition:
                 continue
             object_references.append(attrs["$ref"][prefix_len:])
+
+    for key, type_ in metadata.get("items", {}).items():
+        if key == "$ref":
+            object_references.append(type_[prefix_len:])
+
     topo_sorter.add(definition, *object_references)
 
 # Rebuild definitions as a new dictionary to maintain ordering

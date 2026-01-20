@@ -61,19 +61,18 @@ workflows-models: ## Generate the Workflows models portion of Argo Workflows
 	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
-		--snake-case-field \
-		--target-python-version 3.10 \
-		--output src/hera/workflows/models \
-		--output-model-type pydantic.BaseModel \
-		--base-class hera.shared._pydantic.BaseModel \
 		--input-file-type jsonschema \
+		--output src/hera/workflows/models \
+		--target-python-version 3.10 \
+		--target-pydantic-version 2 \
+		--output-model-type pydantic_v2.BaseModel \
+		--base-class hera.shared._pydantic.APIBaseModel \
+		--use-annotated \
+		--use-default-kwarg \
+		--snake-case-field \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
-		--disable-timestamp \
-		--use-annotated \
-		--use-default-kwarg
-	@find src/hera/workflows/models/ -name '*.py' -exec sed -i.bak 's/from pydantic import Field/from hera.shared._pydantic import Field/' {} +
-	@find src/hera/workflows/models/ -name '*.bak' -delete
+		--disable-timestamp
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) workflows
 	@rm $(SPEC_PATH)
 	@$(MAKE) format
@@ -85,19 +84,18 @@ events-models: ## Generate the Events models portion of Argo Workflows
 	@poetry run python scripts/spec.py $(OPENAPI_SPEC_URL) $(SPEC_PATH)
 	@poetry run datamodel-codegen \
 		--input $(SPEC_PATH) \
-		--snake-case-field \
-		--target-python-version 3.10 \
-		--output src/hera/events/models \
-		--output-model-type pydantic.BaseModel \
-		--base-class hera.shared._pydantic.BaseModel \
 		--input-file-type jsonschema \
+		--output src/hera/events/models \
+		--target-python-version 3.10 \
+		--target-pydantic-version 2 \
+		--output-model-type pydantic_v2.BaseModel \
+		--base-class hera.shared._pydantic.APIBaseModel \
+		--use-annotated \
+		--use-default-kwarg \
+		--snake-case-field \
 		--wrap-string-literal \
 		--disable-appending-item-suffix \
-		--disable-timestamp \
-		--use-annotated \
-		--use-default-kwarg
-	@find src/hera/events/models/ -name '*.py' -exec sed -i.bak 's/from pydantic import Field/from hera.shared._pydantic import Field/' {} +
-	@find src/hera/events/models/ -name '*.bak' -delete
+		--disable-timestamp
 	@poetry run python scripts/models.py $(OPENAPI_SPEC_URL) events
 	@rm $(SPEC_PATH)
 	@$(MAKE) format
