@@ -3,7 +3,7 @@
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, cast
 
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
@@ -723,12 +723,9 @@ class Volume(_BaseVolume):
     volume_attributes_class_name: Optional[str] = None
     volume_mode: Optional[str] = None
     volume_name: Optional[str] = None
-
     size: Optional[str] = None
-    resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[Union[str, AccessMode]]] = field(default_factory=lambda: [AccessMode.read_write_once])
-    storage_class_name: Optional[str] = None
+    access_modes: List[str | AccessMode] = field(default_factory=lambda: [AccessMode.read_write_once])
 
     def __post_init__(self):
         if not self.name:
@@ -737,11 +734,11 @@ class Volume(_BaseVolume):
         if not self.access_modes:
             self.access_modes = [AccessMode.read_write_once]
         else:
-            result = []
+            result: List[str | AccessMode] = []
             for mode in self.access_modes:
                 if isinstance(mode, AccessMode):
                     result.append(mode)
-                else:
+                elif isinstance(mode, str):
                     result.append(AccessMode(mode))
 
             self.access_modes = result
