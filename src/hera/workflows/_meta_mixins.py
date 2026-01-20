@@ -150,7 +150,7 @@ def _get_model_attr(model: BaseModel, attrs: List[str]) -> Any:
     return getattr(curr, attrs[-1])
 
 
-class ModelMapperMixin(BaseMixin):
+class ModelMapperMixin:
     """`ModelMapperMixin` allows Hera classes to be mapped to auto-generated Argo classes."""
 
     class ModelMapper:

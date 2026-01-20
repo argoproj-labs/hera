@@ -1,5 +1,6 @@
 """Module that handles types and annotations."""
 
+from copy import deepcopy
 from types import NoneType, UnionType
 from typing import (
     TYPE_CHECKING,
@@ -109,7 +110,7 @@ def construct_io_from_annotation(python_name: str, annotation: Any) -> "Union[Pa
 
     if workflow_annotation := get_workflow_annotation(annotation):
         # Copy so as to not modify the fields themselves
-        io = workflow_annotation.copy()
+        io = deepcopy(workflow_annotation)
     else:
         io = Parameter()
 
