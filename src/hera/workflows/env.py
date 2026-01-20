@@ -7,15 +7,10 @@ from, and you can only prefix the name with something. The `Env` classes can cre
 import hashlib
 import json
 import string
+from dataclasses import dataclass
 from itertools import islice
 from typing import Any, Optional, Union
 
-from hera.shared import global_config
-from hera.shared._pydantic import (
-    BaseModel as _BaseModel,
-    root_validator,
-    validator,
-)
 from hera.workflows.models import (
     ConfigMapKeySelector as _ModelConfigMapKeySelector,
     EnvVar as _ModelEnvVar,
@@ -28,7 +23,8 @@ from hera.workflows.models import (
 from hera.workflows.parameter import Parameter
 
 
-class _BaseEnv(_BaseModel):
+@dataclass(kw_only=True)
+class _BaseEnv:
     """Base environment variable representation."""
 
     name: str
@@ -38,6 +34,7 @@ class _BaseEnv(_BaseModel):
         raise NotImplementedError
 
 
+@dataclass(kw_only=True)
 class Env(_BaseEnv):
     """A variable implementation that can expose a plain `value` or `value from input` as an env variable."""
 
@@ -61,14 +58,10 @@ class Env(_BaseEnv):
         hash_suffix = hashlib.md5(v.encode("utf-8")).hexdigest()
         return f"{legit_prefix}-{hash_suffix}"
 
-    @root_validator(pre=True)
-    @classmethod
-    def _check_values(cls, values):
+    def __post_init__(self):
         """Validates that only one of `value` or `value_from_input` is specified."""
-        if values.get("value") is not None and values.get("value_from_input") is not None:
+        if self.value is not None and self.value_from_input is not None:
             raise ValueError("cannot specify both `value` and `value_from_input`")
-
-        return values
 
     @property
     def param_name(self) -> str:
@@ -90,14 +83,15 @@ class Env(_BaseEnv):
         return _ModelEnvVar(name=self.name, value=self.value)
 
 
+@dataclass(kw_only=True)
 class SecretEnv(_BaseEnv):
     """`SecretEnv` is an environment variable whose value originates from a Kubernetes secret."""
 
-    secret_name: Optional[str] = None
-    """the name of the Kubernetes secret to extract the value from"""
-
     secret_key: str
     """the field key within the secret that points to the value to extract and set as an env variable"""
+
+    secret_name: Optional[str] = None
+    """the name of the Kubernetes secret to extract the value from"""
 
     optional: Optional[bool] = None
     """whether the existence of the secret is optional"""
@@ -114,14 +108,15 @@ class SecretEnv(_BaseEnv):
         )
 
 
+@dataclass(kw_only=True)
 class ConfigMapEnv(_BaseEnv):
     """`ConfigMapEnv` is an environment variable whose value originates from a Kubernetes config map."""
 
-    config_map_name: Optional[str]
-    """the name of the config map to reference in Kubernetes"""
-
     config_map_key: str
     """the name of the field key whole value should be registered as an environment variable"""
+
+    config_map_name: Optional[str]
+    """the name of the config map to reference in Kubernetes"""
 
     optional: Optional[bool] = None
     """whether the existence of the config map is optional"""
@@ -138,6 +133,7 @@ class ConfigMapEnv(_BaseEnv):
         )
 
 
+@dataclass(kw_only=True)
 class FieldEnv(_BaseEnv):
     """`FieldEnv` is an environment variable whose origin is in a field specification.
 
@@ -156,15 +152,7 @@ class FieldEnv(_BaseEnv):
     """the path to the field whose value should be extracted into an environment variable"""
 
     api_version: Optional[str] = None
-    """optionally, an API version specification. This defaults to the Hera global config `api_version`"""
-
-    @validator("api_version")
-    @classmethod
-    def _check_api_version(cls, v):
-        """Checks whether the `api_version` field is set and uses the global config `api_version` if not."""
-        if v is None:
-            return global_config.api_version
-        return v
+    """optionally, an API version specification."""
 
     def build(self) -> _ModelEnvVar:
         """Constructs and returns the Argo environment specification."""
@@ -179,6 +167,7 @@ class FieldEnv(_BaseEnv):
         )
 
 
+@dataclass(kw_only=True)
 class ResourceEnv(_BaseEnv):
     """`ResourceEnv` exposes a resource field as an environment variable.
 
