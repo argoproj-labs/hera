@@ -1,11 +1,10 @@
 """The `hera.workflows.volume` module provides all Argo volume types that can be used via Hera."""
 
 import uuid
-import warnings
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
-from hera.shared._pydantic import root_validator, validator
 from hera.workflows.models import (
     AWSElasticBlockStoreVolumeSource as _ModelAWSElasticBlockStoreVolumeSource,
     AzureDiskVolumeSource as _ModelAzureDiskVolumeSource,
@@ -43,6 +42,17 @@ from hera.workflows.models import (
     VolumeResourceRequirements,
     VsphereVirtualDiskVolumeSource as _ModelVsphereVirtualDiskVolumeSource,
 )
+from hera.workflows.models.io.k8s.api.core.v1 import (
+    DownwardAPIVolumeFile,
+    KeyToPath,
+    LocalObjectReference,
+    PersistentVolumeClaimTemplate,
+    TypedLocalObjectReference,
+    TypedObjectReference,
+    VolumeProjection,
+)
+from hera.workflows.models.io.k8s.apimachinery.pkg.api import resource
+from hera.workflows.models.io.k8s.apimachinery.pkg.apis.meta import v1
 from hera.workflows.validators import validate_storage_units
 
 
@@ -78,17 +88,21 @@ class AccessMode(Enum):
         return str(self.value)
 
 
-class _BaseVolume(_ModelVolumeMount):
+@dataclass(kw_only=True)
+class _BaseVolume:
     """Base volume representation."""
 
-    name: Optional[str] = None  # type: ignore
-    mount_path: Optional[str] = None  # type: ignore
+    name: Optional[str] = None
+    mount_path: Optional[str] = None
+    mount_propagation: Optional[str] = None
+    read_only: Optional[bool] = None
+    recursive_read_only: Optional[str] = None
+    sub_path: Optional[str] = None
+    sub_path_expr: Optional[str] = None
 
-    @validator("name", pre=True)
-    def _check_name(cls, v):
-        if v is None:
-            return str(uuid.uuid4())
-        return v
+    def __post_init__(self):
+        if self.name is None:
+            self.name = str(uuid.uuid4())
 
     def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:
         raise NotImplementedError
@@ -109,8 +123,13 @@ class _BaseVolume(_ModelVolumeMount):
         )
 
 
-class AWSElasticBlockStoreVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSource):
+@dataclass(kw_only=True)
+class AWSElasticBlockStoreVolume(_BaseVolume):
     """Representation of AWS elastic block store volume."""
+
+    volume_id: str
+    fs_type: Optional[str] = None
+    partition: Optional[int] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -122,20 +141,15 @@ class AWSElasticBlockStoreVolume(_BaseVolume, _ModelAWSElasticBlockStoreVolumeSo
         )
 
 
-class AWSElasticBlockStoreVolumeVolume(AWSElasticBlockStoreVolume):
-    """Deprecated: use `AWSElasticBlockStoreVolume`."""
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "`AWSElasticBlockStoreVolumeVolume` is deprecated; use `AWSElasticBlockStoreVolume`.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
-
-class AzureDiskVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
+@dataclass(kw_only=True)
+class AzureDiskVolume(_BaseVolume):
     """Representation of an Azure disk volume."""
+
+    caching_mode: Optional[str] = None
+    disk_name: str
+    disk_uri: str
+    fs_type: Optional[str] = None
+    kind: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -152,20 +166,12 @@ class AzureDiskVolume(_BaseVolume, _ModelAzureDiskVolumeSource):
         )
 
 
-class AzureDiskVolumeVolume(AzureDiskVolume):
-    """Deprecated: use `AzureDiskVolume`."""
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "`AzureDiskVolumeVolume` is deprecated; use `AzureDiskVolume`.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
-
-class AzureFileVolume(_BaseVolume, _ModelAzureFileVolumeSource):
+@dataclass(kw_only=True)
+class AzureFileVolume(_BaseVolume):
     """Representation of an Azure file that can be mounted as a volume."""
+
+    secret_name: str
+    share_name: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -177,20 +183,15 @@ class AzureFileVolume(_BaseVolume, _ModelAzureFileVolumeSource):
         )
 
 
-class AzureFileVolumeVolume(AzureFileVolume):
-    """Deprecated: use `AzureFileVolume`."""
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "`AzureFileVolumeVolume` is deprecated; use `AzureFileVolume`.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
-
-class CephFSVolume(_BaseVolume, _ModelCephFSVolumeSource):
+@dataclass(kw_only=True)
+class CephFSVolume(_BaseVolume):
     """Representation of a Ceph file system volume."""
+
+    monitors: List[str]
+    path: Optional[str] = None
+    secret_file: Optional[str] = None
+    secret_ref: Optional[LocalObjectReference] = None
+    user: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -207,20 +208,13 @@ class CephFSVolume(_BaseVolume, _ModelCephFSVolumeSource):
         )
 
 
-class CephFSVolumeVolume(CephFSVolume):
-    """Deprecated: use `CephFSVolume`."""
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "`CephFSVolumeVolume` is deprecated; use `CephFSVolume`.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
-
-
+@dataclass(kw_only=True)
 class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
     """Representation of a Cinder volume."""
+
+    fs_type: Optional[str] = None
+    secret_ref: Optional[LocalObjectReference] = None
+    volume_id: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -235,8 +229,13 @@ class CinderVolume(_BaseVolume, _ModelCinderVolumeSource):
         )
 
 
-class ConfigMapVolume(_BaseVolume, _ModelConfigMapVolumeSource):  # type: ignore
+@dataclass(kw_only=True)
+class ConfigMapVolume(_BaseVolume):
     """Representation of a config map volume."""
+
+    default_mode: Optional[int] = None
+    items: Optional[List[KeyToPath]] = None
+    optional: Optional[bool] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -248,8 +247,14 @@ class ConfigMapVolume(_BaseVolume, _ModelConfigMapVolumeSource):  # type: ignore
         )
 
 
-class CSIVolume(_BaseVolume, _ModelCSIVolumeSource):
+@dataclass(kw_only=True)
+class CSIVolume(_BaseVolume):
     """Representation of a container service interface volume."""
+
+    driver: str
+    fs_type: Optional[str] = None
+    node_publish_secret_ref: Optional[LocalObjectReference] = None
+    volume_attributes: Optional[Dict[str, str]] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -265,8 +270,12 @@ class CSIVolume(_BaseVolume, _ModelCSIVolumeSource):
         )
 
 
-class DownwardAPIVolume(_BaseVolume, _ModelDownwardAPIVolumeSource):
+@dataclass(kw_only=True)
+class DownwardAPIVolume(_BaseVolume):
     """Representation of a volume passed via the downward API."""
+
+    default_mode: Optional[int] = None
+    items: Optional[List[DownwardAPIVolumeFile]] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -276,8 +285,12 @@ class DownwardAPIVolume(_BaseVolume, _ModelDownwardAPIVolumeSource):
         )
 
 
-class EmptyDirVolume(_BaseVolume, _ModelEmptyDirVolumeSource):
+@dataclass(kw_only=True)
+class EmptyDirVolume(_BaseVolume):
     """Representation of an empty dir volume from K8s."""
+
+    medium: Optional[str] = None
+    size_limit: Optional[resource.Quantity] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -286,8 +299,11 @@ class EmptyDirVolume(_BaseVolume, _ModelEmptyDirVolumeSource):
         )
 
 
-class EphemeralVolume(_BaseVolume, _ModelEphemeralVolumeSource):
+@dataclass(kw_only=True)
+class EphemeralVolume(_BaseVolume):
     """Representation of a volume that uses ephemeral storage shared with the K8s node a pod is scheduled on."""
+
+    volume_claim_template: Optional[PersistentVolumeClaimTemplate] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -296,8 +312,14 @@ class EphemeralVolume(_BaseVolume, _ModelEphemeralVolumeSource):
         )
 
 
-class FCVolume(_BaseVolume, _ModelFCVolumeSource):
+@dataclass(kw_only=True)
+class FCVolume(_BaseVolume):
     """An FV volume representation."""
+
+    fs_type: Optional[str] = None
+    lun: Optional[int] = None
+    target_ww_ns: Optional[List[str]] = None
+    wwids: Optional[List[str]] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -313,8 +335,14 @@ class FCVolume(_BaseVolume, _ModelFCVolumeSource):
         )
 
 
-class FlexVolume(_BaseVolume, _ModelFlexVolumeSource):
+@dataclass(kw_only=True)
+class FlexVolume(_BaseVolume):
     """A Flex volume representation."""
+
+    driver: str
+    fs_type: Optional[str] = None
+    options: Optional[Dict[str, str]] = None
+    secret_ref: Optional[LocalObjectReference] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -330,8 +358,12 @@ class FlexVolume(_BaseVolume, _ModelFlexVolumeSource):
         )
 
 
-class FlockerVolume(_BaseVolume, _ModelFlockerVolumeSource):
+@dataclass(kw_only=True)
+class FlockerVolume(_BaseVolume):
     """A Flocker volume representation."""
+
+    dataset_name: Optional[str] = None
+    dataset_uuid: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -341,12 +373,17 @@ class FlockerVolume(_BaseVolume, _ModelFlockerVolumeSource):
         )
 
 
-class GCEPersistentDiskVolume(_BaseVolume, _ModelGCEPersistentDiskVolumeSource):
+@dataclass(kw_only=True)
+class GCEPersistentDiskVolume(_BaseVolume):
     """A representation of a Google Cloud Compute Enginer persistent disk.
 
     Notes:
         The volume must exist on GCE before a request to mount it to a pod is performed.
     """
+
+    fs_type: Optional[str] = None
+    partition: Optional[int] = None
+    pd_name: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -358,8 +395,13 @@ class GCEPersistentDiskVolume(_BaseVolume, _ModelGCEPersistentDiskVolumeSource):
         )
 
 
-class GitRepoVolume(_BaseVolume, _ModelGitRepoVolumeSource):
+@dataclass(kw_only=True)
+class GitRepoVolume(_BaseVolume):
     """A representation of a Git repo that can be mounted as a volume."""
+
+    directory: Optional[str] = None
+    repository: str
+    revision: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -371,8 +413,12 @@ class GitRepoVolume(_BaseVolume, _ModelGitRepoVolumeSource):
         )
 
 
-class GlusterfsVolume(_BaseVolume, _ModelGlusterfsVolumeSource):
+@dataclass(kw_only=True)
+class GlusterfsVolume(_BaseVolume):
     """A representation for a Gluster filesystem volume."""
+
+    endpoints: str
+    path: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -382,16 +428,32 @@ class GlusterfsVolume(_BaseVolume, _ModelGlusterfsVolumeSource):
         )
 
 
-class HostPathVolume(_BaseVolume, _ModelHostPathVolumeSource):
+@dataclass(kw_only=True)
+class HostPathVolume(_BaseVolume):
     """Representation for a volume that can be mounted from a host path/node location."""
+
+    path: str
+    type: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
         return _ModelVolume(name=self.name, host_path=_ModelHostPathVolumeSource(path=self.path, type=self.type))
 
 
-class ISCSIVolume(_BaseVolume, _ModelISCSIVolumeSource):
+@dataclass(kw_only=True)
+class ISCSIVolume(_BaseVolume):
     """Representation of ISCSI volume."""
+
+    chap_auth_discovery: Optional[bool] = None
+    chap_auth_session: Optional[bool] = None
+    fs_type: Optional[str] = None
+    initiator_name: Optional[str] = None
+    iqn: str
+    iscsi_interface: Optional[str] = None
+    lun: int
+    portals: Optional[List[str]] = None
+    secret_ref: Optional[LocalObjectReference] = None
+    target_portal: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -413,8 +475,12 @@ class ISCSIVolume(_BaseVolume, _ModelISCSIVolumeSource):
         )
 
 
-class NFSVolume(_BaseVolume, _ModelNFSVolumeSource):
+@dataclass(kw_only=True)
+class NFSVolume(_BaseVolume):
     """A network file system volume representation."""
+
+    path: str
+    server: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -423,8 +489,12 @@ class NFSVolume(_BaseVolume, _ModelNFSVolumeSource):
         )
 
 
-class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSource):
+@dataclass(kw_only=True)
+class PhotonPersistentDiskVolume(_BaseVolume):
     """A Photon Persistent Disk representation."""
+
+    fs_type: Optional[str] = None
+    pd_id: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -434,8 +504,12 @@ class PhotonPersistentDiskVolume(_BaseVolume, _ModelPhotonPersistentDiskVolumeSo
         )
 
 
-class PortworxVolume(_BaseVolume, _ModelPortworxVolumeSource):
+@dataclass(kw_only=True)
+class PortworxVolume(_BaseVolume):
     """`PortworxVolume` represents a Portworx volume to mount to a container."""
+
+    fs_type: Optional[str] = None
+    volume_id: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -447,8 +521,12 @@ class PortworxVolume(_BaseVolume, _ModelPortworxVolumeSource):
         )
 
 
-class ProjectedVolume(_BaseVolume, _ModelProjectedVolumeSource):
+@dataclass(kw_only=True)
+class ProjectedVolume(_BaseVolume):
     """`ProjectedVolume` represents a projected volume to mount to a container."""
+
+    default_mode: Optional[int] = None
+    sources: Optional[List[VolumeProjection]] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -457,8 +535,15 @@ class ProjectedVolume(_BaseVolume, _ModelProjectedVolumeSource):
         )
 
 
-class QuobyteVolume(_BaseVolume, _ModelQuobyteVolumeSource):
+@dataclass(kw_only=True)
+class QuobyteVolume(_BaseVolume):
     """`QuobyteVolume` represents a Quobyte volume to mount to a container."""
+
+    group: Optional[str] = None
+    registry: str
+    tenant: Optional[str] = None
+    user: Optional[str] = None
+    volume: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -475,8 +560,17 @@ class QuobyteVolume(_BaseVolume, _ModelQuobyteVolumeSource):
         )
 
 
-class RBDVolume(_BaseVolume, _ModelRBDVolumeSource):
+@dataclass(kw_only=True)
+class RBDVolume(_BaseVolume):
     """An RDB volume representation."""
+
+    fs_type: Optional[str] = None
+    image: str
+    keyring: Optional[str] = None
+    monitors: List[str]
+    pool: Optional[str] = None
+    secret_ref: Optional[LocalObjectReference] = None
+    user: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -495,8 +589,19 @@ class RBDVolume(_BaseVolume, _ModelRBDVolumeSource):
         )
 
 
-class ScaleIOVolume(_BaseVolume, _ModelScaleIOVolumeSource):
+@dataclass(kw_only=True)
+class ScaleIOVolume(_BaseVolume):
     """`ScaleIOVolume` represents a ScaleIO volume to mount to the container."""
+
+    fs_type: Optional[str] = None
+    gateway: str
+    protection_domain: Optional[str] = None
+    secret_ref: LocalObjectReference
+    ssl_enabled: Optional[bool] = None
+    storage_mode: Optional[str] = None
+    storage_pool: Optional[str] = None
+    system: str
+    volume_name: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -517,8 +622,14 @@ class ScaleIOVolume(_BaseVolume, _ModelScaleIOVolumeSource):
         )
 
 
-class SecretVolume(_BaseVolume, _ModelSecretVolumeSource):
+@dataclass(kw_only=True)
+class SecretVolume(_BaseVolume):
     """`SecretVolume` supports mounting a K8s secret as a container volume."""
+
+    default_mode: Optional[int] = None
+    items: Optional[List[KeyToPath]] = None
+    optional: Optional[bool] = None
+    secret_name: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -530,8 +641,14 @@ class SecretVolume(_BaseVolume, _ModelSecretVolumeSource):
         )
 
 
-class StorageOSVolume(_BaseVolume, _ModelStorageOSVolumeSource):
+@dataclass(kw_only=True)
+class StorageOSVolume(_BaseVolume):
     """`StorageOSVolume` represents a Storage OS volume to mount."""
+
+    fs_type: Optional[str] = None
+    secret_ref: Optional[LocalObjectReference] = None
+    volume_name: Optional[str] = None
+    volume_namespace: Optional[str] = None
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -547,8 +664,14 @@ class StorageOSVolume(_BaseVolume, _ModelStorageOSVolumeSource):
         )
 
 
-class VsphereVirtualDiskVolume(_BaseVolume, _ModelVsphereVirtualDiskVolumeSource):
+@dataclass(kw_only=True)
+class VsphereVirtualDiskVolume(_BaseVolume):
     """`VsphereVirtualDiskVolume` represents a vSphere virtual disk volume to mount."""
+
+    fs_type: Optional[str] = None
+    storage_policy_id: Optional[str] = None
+    storage_policy_name: Optional[str] = None
+    volume_path: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -563,12 +686,15 @@ class VsphereVirtualDiskVolume(_BaseVolume, _ModelVsphereVirtualDiskVolumeSource
         )
 
 
-class ExistingVolume(_BaseVolume, _ModelPersistentVolumeClaimVolumeSource):
+@dataclass(kw_only=True)
+class ExistingVolume(_BaseVolume):
     """`ExistingVolume` is a representation of an existing volume in K8s.
 
     The existing volume is mounted based on the supplied claim name. This tells K8s that the specified persistent
     volume claim should be used to mount a volume to a pod.
     """
+
+    claim_name: str
 
     def _build_volume(self) -> _ModelVolume:
         assert self.name
@@ -580,7 +706,8 @@ class ExistingVolume(_BaseVolume, _ModelPersistentVolumeClaimVolumeSource):
         )
 
 
-class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
+@dataclass(kw_only=True)
+class Volume(_BaseVolume):
     """Volume represents a basic, dynamic, volume representation.
 
     This `Volume` cannot only be instantiated to be used for mounting purposes but also for dynamically privisioning
@@ -588,50 +715,49 @@ class Volume(_BaseVolume, _ModelPersistentVolumeClaimSpec):
     submission.
     """
 
-    size: Optional[str] = None  # type: ignore
+    data_source: Optional[TypedLocalObjectReference] = None
+    data_source_ref: Optional[TypedObjectReference] = None
+    resources: Optional[VolumeResourceRequirements] = None
+    selector: Optional[v1.LabelSelector] = None
+    storage_class_name: Optional[str] = None
+    volume_attributes_class_name: Optional[str] = None
+    volume_mode: Optional[str] = None
+    volume_name: Optional[str] = None
+
+    size: Optional[str] = None
     resources: Optional[VolumeResourceRequirements] = None
     metadata: Optional[ObjectMeta] = None
-    access_modes: Optional[List[Union[str, AccessMode]]] = [AccessMode.read_write_once]  # type: ignore
+    access_modes: Optional[List[Union[str, AccessMode]]] = field(default_factory=lambda: [AccessMode.read_write_once])
     storage_class_name: Optional[str] = None
 
-    @validator("access_modes", pre=True, always=True)
-    def _check_access_modes(cls, v):
-        if not v:
-            return [AccessMode.read_write_once]
+    def __post_init__(self):
+        if not self.name:
+            self.name = str(uuid.uuid4())
 
-        result = []
-        for mode in v:
-            if isinstance(mode, AccessMode):
-                result.append(mode)
-            else:
-                result.append(AccessMode(mode))
-        return result
-
-    @validator("name", pre=True, always=True)
-    def _check_name(cls, v):
-        return v or str(uuid.uuid4())
-
-    @root_validator(pre=True)
-    def _merge_reqs(cls, values):
-        if "size" in values and "resources" in values:
-            resources: VolumeResourceRequirements = values.get("resources")
-            if resources.requests is not None:
-                if "storage" in resources.requests:
-                    pass  # take the storage specification in resources
+        if not self.access_modes:
+            self.access_modes = [AccessMode.read_write_once]
+        else:
+            result = []
+            for mode in self.access_modes:
+                if isinstance(mode, AccessMode):
+                    result.append(mode)
                 else:
-                    resources.requests["storage"] = values.get("size")
-            values["resources"] = resources
-        elif "resources" not in values:
-            assert "size" in values, "at least one of `size` or `resources` must be specified"
-            validate_storage_units(cast(str, values.get("size")))
-            values["resources"] = VolumeResourceRequirements(requests={"storage": values.get("size")})
-        elif "resources" in values:
-            resources = cast(VolumeResourceRequirements, values.get("resources"))
-            assert resources.requests is not None, "Resource requests are required"
-            storage = resources.requests.get("storage")
+                    result.append(AccessMode(mode))
+
+            self.access_modes = result
+
+        if self.size and self.resources:
+            if self.resources.requests is not None and "storage" not in self.resources.requests:
+                self.resources.requests["storage"] = resource.Quantity(__root__=self.size)
+        elif self.resources is None:
+            assert self.size, "at least one of `size` or `resources` must be specified"
+            validate_storage_units(self.size)
+            self.resources = VolumeResourceRequirements(requests={"storage": resource.Quantity(__root__=self.size)})
+        else:  # self.resources is not None
+            assert self.resources.requests is not None, "Resource requests are required"
+            storage = self.resources.requests.get("storage")
             assert storage is not None, "At least one of `size` or `resources.requests.storage` must be specified"
             validate_storage_units(cast(str, storage))
-        return values
 
     def _build_persistent_volume_claim(self) -> _ModelPersistentVolumeClaim:
         return _ModelPersistentVolumeClaim(
